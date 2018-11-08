@@ -1,6 +1,8 @@
 package io.kanuka.core;
 
 import io.kanuka.BeanContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -10,11 +12,15 @@ import java.util.Optional;
 
 class DBuilder implements BeanLifeCycle, Builder {
 
+  private static final Logger log = LoggerFactory.getLogger(DBuilder.class);
+
   private final List<BeanLifeCycle> lifeCycleList = new ArrayList<>();
 
   private final Map<String, DContextEntry> beans = new LinkedHashMap<>();
 
   private final String name;
+
+  private final String[] dependsOn;
 
   private final Map<String, BeanContext> children = new LinkedHashMap<>();
 
@@ -25,13 +31,19 @@ class DBuilder implements BeanLifeCycle, Builder {
   /**
    * Create a named context.
    */
-  DBuilder(String name) {
+  DBuilder(String name, String[] dependsOn) {
     this.name = name;
+    this.dependsOn = dependsOn;
   }
 
   @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public String[] getDependsOn() {
+    return dependsOn;
   }
 
   @Override
@@ -41,6 +53,8 @@ class DBuilder implements BeanLifeCycle, Builder {
 
   @Override
   public void postConstruct() {
+    log.debug("firing postConstruct on beans in context:{}", name);
+
     for (BeanLifeCycle lifeCycle : lifeCycleList) {
       lifeCycle.postConstruct();
     }
@@ -63,6 +77,7 @@ class DBuilder implements BeanLifeCycle, Builder {
     }
   }
 
+  @SuppressWarnings("unchecked")
   private <T> T getBean(Class<T> beanClass, String name) {
 
     // look locally first
@@ -145,6 +160,6 @@ class DBuilder implements BeanLifeCycle, Builder {
   }
 
   public BeanContext build() {
-    return new DBeanContext(name, lifeCycleList, beans, children);
+    return new DBeanContext(name, dependsOn, lifeCycleList, beans, children);
   }
 }

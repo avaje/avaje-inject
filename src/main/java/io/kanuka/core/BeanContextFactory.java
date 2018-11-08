@@ -8,9 +8,14 @@ import io.kanuka.BeanContext;
 public interface BeanContextFactory {
 
   /**
-   * Return the name of the bean context this will create.
+   * Return the name of the bean context (module) this will create.
    */
-  String name();
+  String getName();
+
+  /**
+   * Return the names of bean contexts (modules) that this is dependent on (they need to be built before this one).
+   */
+  String[] getDependsOn();
 
   /**
    * Create and return the BeanContext.

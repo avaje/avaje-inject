@@ -2,12 +2,24 @@ package io.kanuka;
 
 import java.util.List;
 
+/**
+ * Holds beans created by dependency injection.
+ * <p>
+ * The beans have singleton scope, support lifecycle methods for postConstruct and
+ * preDestroy and are created (wired) via dependency injection.
+ * </p>
+ */
 public interface BeanContext {
 
   /**
    * Return the name of the bean context.
    */
   String getName();
+
+  /**
+   * Return the names of modules this bean context depends on.
+   */
+  String[] getDependsOn();
 
   /**
    * Return a single bean given the type.

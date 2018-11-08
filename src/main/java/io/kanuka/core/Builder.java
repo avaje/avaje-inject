@@ -5,14 +5,19 @@ import io.kanuka.BeanContext;
 import java.util.Optional;
 
 /**
- * Mutable object used when building the context.
+ * Mutable builder object used when building the context.
  */
 public interface Builder {
 
   /**
-   * Return the name of the context this builder is creating (will be the BeanContext name).
+   * Return the name of the (module) context this builder is creating.
    */
   String getName();
+
+  /**
+   * Return the names of modules that this module depends on.
+   */
+  String[] getDependsOn();
 
   /**
    * Set a parent builder that can provide cross-module dependencies.
@@ -21,6 +26,9 @@ public interface Builder {
 
   /**
    * Add a bean instance to the context.
+   * <p>
+   * Beans are added in an appropriate order to satisfy dependencies.
+   * </p>
    *
    * @param bean           The bean instance that has been created.
    * @param name           The (optional) name of the instance.
