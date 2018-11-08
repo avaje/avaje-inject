@@ -5,7 +5,7 @@ import io.kanuka.BeanContext;
 import java.util.Optional;
 
 /**
- * Mutable builder object used when building the context.
+ * Mutable builder object used when building a bean context.
  */
 public interface Builder {
 
@@ -80,6 +80,5 @@ public interface Builder {
    * Build and return the bean context.
    */
   BeanContext build();
-
 
 }
