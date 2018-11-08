@@ -62,11 +62,12 @@ public class BootContext {
       rootBuilder.addChild(factory.createContext(rootBuilder));
     }
 
-    // entire graph built, fire postConstruct
-    log.debug("postConstruct firing on all beans");
-
     BeanContext beanContext = rootBuilder.build();
+
+    // entire graph built, fire postConstruct
+    log.debug("start - fire postConstruct on all beans");
     beanContext.start();
+
     if (shutdownHook) {
       return new ShutdownAwareBeanContext(beanContext);
     }
@@ -86,7 +87,6 @@ public class BootContext {
 
     @Override
     public void run() {
-      System.out.println("hook fired ... ");
       context.shutdown();
     }
   }
