@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.Set;
 
+/**
+ * Boot and create a bean context with options for shutdown hook
+ */
 public class BootContext {
 
   private static final Logger log = LoggerFactory.getLogger(BootContext.class);
@@ -33,7 +36,7 @@ public class BootContext {
    *     .withNoShutdownHook()
    *     .load()) {
    *
-   *     String makeIt = context.getBean(CoffeeMaker.class) .makeIt();
+   *     String makeIt = context.getBean(CoffeeMaker.class).makeIt();
    *   }
    *
    * }</pre>
@@ -44,7 +47,7 @@ public class BootContext {
   }
 
   /**
-   * Load all the named contexts.
+   * Build and return the bean context.
    */
   public BeanContext load() {
 
