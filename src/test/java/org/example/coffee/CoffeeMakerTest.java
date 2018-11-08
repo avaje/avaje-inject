@@ -27,7 +27,6 @@ public class CoffeeMakerTest {
       .withNoShutdownHook()
       .load()) {
 
-
       String makeIt = context.getBean(CoffeeMaker.class) .makeIt();
       assertThat(makeIt).isEqualTo("done");
     }
