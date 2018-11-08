@@ -3,7 +3,7 @@ package io.kanuka.core;
 /**
  * Lifecycle of beans via <code>@PostConstruct</code> and <code>@PreDestroy</code>.
  */
-public interface BeanLifeCycle {
+public interface BeanLifecycle {
 
   /**
    * Fire post construction.

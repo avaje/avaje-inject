@@ -14,7 +14,7 @@ class DBuilder implements Builder {
 
   private static final Logger log = LoggerFactory.getLogger(DBuilder.class);
 
-  private final List<BeanLifeCycle> lifeCycleList = new ArrayList<>();
+  private final List<BeanLifecycle> lifecycleList = new ArrayList<>();
 
   private final Map<String, DContextEntry> beans = new LinkedHashMap<>();
 
@@ -97,8 +97,8 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public void addLifecycle(BeanLifeCycle wrapper) {
-    lifeCycleList.add(wrapper);
+  public void addLifecycle(BeanLifecycle wrapper) {
+    lifecycleList.add(wrapper);
   }
 
 
@@ -134,6 +134,6 @@ class DBuilder implements Builder {
   }
 
   public BeanContext build() {
-    return new DBeanContext(name, dependsOn, lifeCycleList, beans, children);
+    return new DBeanContext(name, dependsOn, lifecycleList, beans, children);
   }
 }

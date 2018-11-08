@@ -16,7 +16,7 @@ class DBeanContext implements BeanContext {
 
   private final String[] dependsOn;
 
-  private final List<BeanLifeCycle> lifeCycleList;
+  private final List<BeanLifecycle> lifecycleList;
 
   private final Map<String, DContextEntry> beans;
 
@@ -24,10 +24,10 @@ class DBeanContext implements BeanContext {
 
   private boolean closed;
 
-  DBeanContext(String name, String[] dependsOn, List<BeanLifeCycle> lifeCycleList, Map<String, DContextEntry> beans, Map<String, BeanContext> children) {
+  DBeanContext(String name, String[] dependsOn, List<BeanLifecycle> lifecycleList, Map<String, DContextEntry> beans, Map<String, BeanContext> children) {
     this.name = name;
     this.dependsOn = dependsOn;
-    this.lifeCycleList = lifeCycleList;
+    this.lifecycleList = lifecycleList;
     this.beans = beans;
     this.children = children;
   }
@@ -86,7 +86,7 @@ class DBeanContext implements BeanContext {
   public void start() {
     synchronized (this) {
       log.debug("firing postConstruct on beans in context:{}", name);
-      for (BeanLifeCycle bean : lifeCycleList) {
+      for (BeanLifecycle bean : lifecycleList) {
         bean.postConstruct();
       }
       for (BeanContext childContext : children.values()) {
@@ -102,7 +102,7 @@ class DBeanContext implements BeanContext {
         // we only allow one call to preDestroy
         closed = true;
         log.debug("firing preDestroy on beans in context:{}", name);
-        for (BeanLifeCycle bean : lifeCycleList) {
+        for (BeanLifecycle bean : lifecycleList) {
           bean.preDestroy();
         }
         for (BeanContext childContext : children.values()) {

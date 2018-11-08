@@ -39,7 +39,7 @@ public interface Builder {
   /**
    * Add a lifecycle bean.
    */
-  void addLifecycle(BeanLifeCycle lifeCycleBean);
+  void addLifecycle(BeanLifecycle bean);
 
   /**
    * Add a child context.
