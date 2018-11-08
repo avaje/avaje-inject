@@ -1,5 +1,6 @@
 package io.kanuka;
 
+import java.io.Closeable;
 import java.util.List;
 
 /**
@@ -9,7 +10,7 @@ import java.util.List;
  * preDestroy and are created (wired) via dependency injection.
  * </p>
  */
-public interface BeanContext {
+public interface BeanContext extends Closeable {
 
   /**
    * Return the name of the bean context.
@@ -37,4 +38,14 @@ public interface BeanContext {
    * @param interfaceOrAnnotation An interface class or annotation class.
    */
   List<Object> getBeans(Class<?> interfaceOrAnnotation);
+
+  /**
+   * Fire the <code>@PostConstruct</code> methods.
+   */
+  void start();
+
+  /**
+   * Close bean resources by firing <code>@PreDestroy</code> methods.
+   */
+  void close();
 }

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-class DBuilder implements BeanLifeCycle, Builder {
+class DBuilder implements Builder {
 
   private static final Logger log = LoggerFactory.getLogger(DBuilder.class);
 
@@ -49,32 +49,6 @@ class DBuilder implements BeanLifeCycle, Builder {
   @Override
   public void setParent(Builder parent) {
     this.parent = parent;
-  }
-
-  @Override
-  public void postConstruct() {
-    log.debug("firing postConstruct on beans in context:{}", name);
-
-    for (BeanLifeCycle lifeCycle : lifeCycleList) {
-      lifeCycle.postConstruct();
-    }
-    for (BeanContext childContext : children.values()) {
-      if (childContext instanceof BeanLifeCycle) {
-        ((BeanLifeCycle) childContext).postConstruct();
-      }
-    }
-  }
-
-  @Override
-  public void preDestroy() {
-    for (BeanLifeCycle lifeCycle : lifeCycleList) {
-      lifeCycle.preDestroy();
-    }
-    for (BeanContext childContext : children.values()) {
-      if (childContext instanceof BeanLifeCycle) {
-        ((BeanLifeCycle) childContext).preDestroy();
-      }
-    }
   }
 
   @SuppressWarnings("unchecked")

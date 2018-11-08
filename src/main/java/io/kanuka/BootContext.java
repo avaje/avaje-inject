@@ -17,6 +17,32 @@ public class BootContext {
 
   private static final Logger log = LoggerFactory.getLogger(BootContext.class);
 
+  private boolean shutdownHook = true;
+
+  /**
+   * Boot the bean context without registering a shutdown hook.
+   * <p>
+   * The expectation is that the BootContext is closed via code or via using
+   * try with resources.
+   * </p>
+   * <pre>{@code
+   *
+   *   // automatically closed via try with resources
+   *
+   *   try (BeanContext context = new BootContext()
+   *     .withNoShutdownHook()
+   *     .load()) {
+   *
+   *     String makeIt = context.getBean(CoffeeMaker.class) .makeIt();
+   *   }
+   *
+   * }</pre>
+   */
+  public BootContext withNoShutdownHook() {
+    this.shutdownHook = false;
+    return this;
+  }
+
   /**
    * Load all the named contexts.
    */
@@ -38,8 +64,97 @@ public class BootContext {
 
     // entire graph built, fire postConstruct
     log.debug("postConstruct firing on all beans");
-    rootBuilder.postConstruct();
-    return rootBuilder.build();
+
+    BeanContext beanContext = rootBuilder.build();
+    beanContext.start();
+    if (shutdownHook) {
+      return new ShutdownAwareBeanContext(beanContext);
+    }
+    return beanContext;
+  }
+
+  /**
+   * Internal shutdown hook.
+   */
+  private static class Hook extends Thread {
+
+    private final ShutdownAwareBeanContext context;
+
+    Hook(ShutdownAwareBeanContext context) {
+      this.context = context;
+    }
+
+    @Override
+    public void run() {
+      System.out.println("hook fired ... ");
+      context.shutdown();
+    }
+  }
+
+  /**
+   * Proxy that handles shutdown hook registration and de-registration.
+   */
+  private static class ShutdownAwareBeanContext implements BeanContext {
+
+    private final BeanContext context;
+    private final Hook hook;
+    private boolean shutdown;
+
+    ShutdownAwareBeanContext(BeanContext context) {
+      this.context = context;
+      this.hook = new Hook(this);
+      Runtime.getRuntime().addShutdownHook(hook);
+    }
+
+    @Override
+    public String getName() {
+      return context.getName();
+    }
+
+    @Override
+    public String[] getDependsOn() {
+      return context.getDependsOn();
+    }
+
+    @Override
+    public <T> T getBean(Class<T> beanClass) {
+      return context.getBean(beanClass);
+    }
+
+    @Override
+    public <T> T getBean(Class<T> beanClass, String name) {
+      return context.getBean(beanClass, name);
+    }
+
+    @Override
+    public List<Object> getBeans(Class<?> interfaceOrAnnotation) {
+      return context.getBeans(interfaceOrAnnotation);
+    }
+
+    @Override
+    public void start() {
+      context.start();
+    }
+
+    @Override
+    public void close() {
+      synchronized (this) {
+        if (!shutdown) {
+          Runtime.getRuntime().removeShutdownHook(hook);
+        }
+        context.close();
+      }
+    }
+
+    /**
+     * Close via shutdown hook.
+     */
+    void shutdown() {
+      synchronized (this) {
+        shutdown = true;
+        close();
+      }
+    }
   }
 
   /**
@@ -93,7 +208,7 @@ public class BootContext {
       if (!queue.isEmpty()) {
         StringBuilder sb = new StringBuilder();
         for (BeanContextFactory factory : queue) {
-          sb.append("module "+factory.getName()+" has unsatisfied dependencies - ");
+          sb.append("module ").append(factory.getName()).append(" has unsatisfied dependencies - ");
           for (String depModuleName : factory.getDependsOn()) {
             boolean ok = moduleNames.contains(depModuleName);
             String result = (ok) ? "ok" : "UNSATISFIED";
@@ -109,7 +224,7 @@ public class BootContext {
     /**
      * Process the queued factories pushing them when all their (module) dependencies
      * are satisfied.
-     *
+     * <p>
      * This returns the number of factories added so once this returns 0 it is done.
      */
     private int processQueuedFactories() {
@@ -132,7 +247,7 @@ public class BootContext {
      */
     private boolean satisfiedDependencies(BeanContextFactory factory) {
       for (String moduleName : factory.getDependsOn()) {
-        if (!moduleNames.contains(moduleName)){
+        if (!moduleNames.contains(moduleName)) {
           return false;
         }
       }

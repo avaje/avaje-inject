@@ -72,11 +72,6 @@ public interface Builder {
   <T> T get(Class<T> cls, String name);
 
   /**
-   * Fire post construct on all beans in the context.
-   */
-  void postConstruct();
-
-  /**
    * Build and return the bean context.
    */
   BeanContext build();

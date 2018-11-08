@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-class DBeanContext implements BeanContext, BeanLifeCycle {
+class DBeanContext implements BeanContext {
 
   private static final Logger log = LoggerFactory.getLogger(DBeanContext.class);
 
@@ -21,6 +21,8 @@ class DBeanContext implements BeanContext, BeanLifeCycle {
   private final Map<String, DContextEntry> beans;
 
   private final Map<String, BeanContext> children;
+
+  private boolean closed;
 
   DBeanContext(String name, String[] dependsOn, List<BeanLifeCycle> lifeCycleList, Map<String, DContextEntry> beans, Map<String, BeanContext> children) {
     this.name = name;
@@ -81,18 +83,32 @@ class DBeanContext implements BeanContext, BeanLifeCycle {
   }
 
   @Override
-  public void postConstruct() {
-    log.debug("firing postConstruct on beans in context:{}", name);
-    for (BeanLifeCycle bean : lifeCycleList) {
-      bean.postConstruct();
+  public void start() {
+    synchronized (this) {
+      log.debug("firing postConstruct on beans in context:{}", name);
+      for (BeanLifeCycle bean : lifeCycleList) {
+        bean.postConstruct();
+      }
+      for (BeanContext childContext : children.values()) {
+        childContext.start();
+      }
     }
   }
 
   @Override
-  public void preDestroy() {
-    log.debug("firing preDestroy on beans in context:{}", name);
-    for (BeanLifeCycle bean : lifeCycleList) {
-      bean.preDestroy();
+  public void close() {
+    synchronized (this) {
+      if (!closed) {
+        // we only allow one call to preDestroy
+        closed = true;
+        log.debug("firing preDestroy on beans in context:{}", name);
+        for (BeanLifeCycle bean : lifeCycleList) {
+          bean.preDestroy();
+        }
+        for (BeanContext childContext : children.values()) {
+          childContext.close();
+        }
+      }
     }
   }
 }

@@ -1,7 +1,9 @@
 package org.example.coffee;
 
+import io.kanuka.BeanContext;
 import io.kanuka.BootContext;
 import io.kanuka.SystemContext;
+import org.example.coffee.core.DuperPump;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,18 +14,33 @@ public class CoffeeMakerTest {
   public void makeIt_via_SystemContext() {
 
     String makeIt = SystemContext.getBean(CoffeeMaker.class).makeIt();
-
     assertThat(makeIt).isEqualTo("done");
+
+    Pump pump = SystemContext.getBean(Pump.class);
+    assertThat(pump).isInstanceOf(DuperPump.class);
+  }
+
+  @Test
+  public void makeIt_via_BootContext_withNoShutdownHook() {
+
+    try (BeanContext context = new BootContext()
+      .withNoShutdownHook()
+      .load()) {
+
+
+      String makeIt = context.getBean(CoffeeMaker.class) .makeIt();
+      assertThat(makeIt).isEqualTo("done");
+    }
   }
 
   @Test
   public void makeIt_via_BootContext() {
 
-    String makeIt = new BootContext()
-      .load()
-      .getBean(CoffeeMaker.class)
-      .makeIt();
+    try (BeanContext context = new BootContext().load()) {
 
-    assertThat(makeIt).isEqualTo("done");
+      String makeIt = context.getBean(CoffeeMaker.class) .makeIt();
+      assertThat(makeIt).isEqualTo("done");
+    }
+
   }
 }
