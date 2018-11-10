@@ -3,30 +3,37 @@ package org.example.coffee.factory;
 import io.kanuka.Bean;
 import io.kanuka.Factory;
 import org.example.coffee.CoffeeMaker;
-import org.example.coffee.grind.AMusher;
 
 import javax.inject.Inject;
 
+/**
+ * Factory bean (ala Micronaut @Factory or Spring @Configuration)
+ */
 @Factory
-public class Configuration {
+class Configuration {
 
   private final StartConfig startConfig;
 
+  /**
+   * Factory beans can have dependencies.
+   */
   @Inject
-  public Configuration(StartConfig startConfig) {
+  Configuration(StartConfig startConfig) {
     this.startConfig = startConfig;
   }
 
   @Bean
-  public AFact buildA() {
+  AFact buildA() {
 
     String userHome = System.getProperty("user.home");
     return new AFact(userHome);
   }
 
+  /**
+   * Builder method that has dependencies.
+   */
   @Bean
-  public BFact buildB(AFact afact, CoffeeMaker maker, AMusher musher) {
-
+  BFact buildB(AFact afact, CoffeeMaker maker) {
     return new BFact(afact, maker);
   }
 }

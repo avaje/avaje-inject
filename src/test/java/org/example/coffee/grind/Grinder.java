@@ -9,12 +9,14 @@ public class Grinder {
 
   final AMusher aMusher;
 
-  //@Inject
+  /**
+   * Can use field injection (but can't be private)
+   */
+  @Inject
   BMusher bMusher;
 
-  public Grinder(AMusher aMusher, BMusher bMusher) {
+  public Grinder(AMusher aMusher) {
     this.aMusher = aMusher;
-    this.bMusher = bMusher;
   }
 
   @PostConstruct
