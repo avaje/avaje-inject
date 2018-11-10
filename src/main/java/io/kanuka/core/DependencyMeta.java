@@ -11,6 +11,11 @@ public @interface DependencyMeta {
   String type();
 
   /**
+   * The bean factory method (for <code>@Bean</code> annotated methods).
+   */
+  String method() default "";
+
+  /**
    * The interfaces the bean implements.
    */
   String[] provides() default {};

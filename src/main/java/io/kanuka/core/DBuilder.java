@@ -55,7 +55,7 @@ class DBuilder implements Builder {
   }
 
   @SuppressWarnings("unchecked")
-  private <T> T getBean(Class<T> beanClass, String name) {
+  public <T> T getMaybe(Class<T> beanClass, String name) {
 
     // look locally first
     DContextEntry entry = beans.get(beanClass.getCanonicalName());
@@ -66,17 +66,17 @@ class DBuilder implements Builder {
       }
     }
 
-    if (parent != null) {
-      // look in parent context (cross-module dependency)
-      return parent.get(beanClass, name);
-    }
-
     // look in child context
     for (BeanContext childContext : children.values()) {
       T bean = childContext.getBean(beanClass);
       if (bean != null) {
         return bean;
       }
+    }
+
+    if (parent != null) {
+      // look in parent context (cross-module dependency)
+      return parent.getMaybe(beanClass, name);
     }
 
     return null;
@@ -122,7 +122,7 @@ class DBuilder implements Builder {
 
   @Override
   public <T> Optional<T> getOptional(Class<T> cls, String name) {
-    T bean = getBean(cls, name);
+    T bean = getMaybe(cls, name);
     return Optional.ofNullable(bean);
   }
 
@@ -133,7 +133,7 @@ class DBuilder implements Builder {
 
   @Override
   public <T> T get(Class<T> cls, String name) {
-    T bean = getBean(cls, name);
+    T bean = getMaybe(cls, name);
     if (bean == null) {
       throw new IllegalStateException("Injecting null for " + cls.getName() + " name:" + name + " when creating " + currentBean);
     }

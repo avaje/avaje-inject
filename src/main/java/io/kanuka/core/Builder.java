@@ -78,6 +78,11 @@ public interface Builder {
   <T> T get(Class<T> cls, String name);
 
   /**
+   * Get a named dependency allowing it to be null.
+   */
+  <T> T getMaybe(Class<T> cls, String name);
+
+  /**
    * Build and return the bean context.
    */
   BeanContext build();
