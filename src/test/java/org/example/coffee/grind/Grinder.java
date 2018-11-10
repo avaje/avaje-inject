@@ -9,11 +9,12 @@ public class Grinder {
 
   final AMusher aMusher;
 
-  @Inject
+  //@Inject
   BMusher bMusher;
 
-  public Grinder(AMusher aMusher) {
+  public Grinder(AMusher aMusher, BMusher bMusher) {
     this.aMusher = aMusher;
+    this.bMusher = bMusher;
   }
 
   @PostConstruct

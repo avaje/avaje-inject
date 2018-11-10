@@ -27,7 +27,7 @@ public class CoffeeMakerTest {
       .withNoShutdownHook()
       .load()) {
 
-      String makeIt = context.getBean(CoffeeMaker.class) .makeIt();
+      String makeIt = context.getBean(CoffeeMaker.class).makeIt();
       assertThat(makeIt).isEqualTo("done");
     }
   }
@@ -37,8 +37,41 @@ public class CoffeeMakerTest {
 
     try (BeanContext context = new BootContext().load()) {
 
-      String makeIt = context.getBean(CoffeeMaker.class) .makeIt();
+      String makeIt = context.getBean(CoffeeMaker.class).makeIt();
       assertThat(makeIt).isEqualTo("done");
     }
   }
+//
+//  @Test
+//  public void makeIt_with_testDoubles() {
+//
+//    TDPump testDoublePump = new TDPump();
+//
+//    try (BeanContext context = new BootContext()
+//      .addBean(testDoublePump)
+//      .load()) {
+//
+//      String makeIt = context.getBean(CoffeeMaker.class).makeIt();
+//      assertThat(makeIt).isEqualTo("done");
+//
+//      assertThat(testDoublePump.steam).isEqualTo(1);
+//      assertThat(testDoublePump.water).isEqualTo(1);
+//    }
+//  }
+//
+//  class TDPump implements Pump {
+//
+//    int water;
+//    int steam;
+//
+//    @Override
+//    public void pumpWater() {
+//      water++;
+//    }
+//
+//    @Override
+//    public void pumpSteam() {
+//      steam++;
+//    }
+//  }
 }
