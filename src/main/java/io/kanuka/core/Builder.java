@@ -3,6 +3,7 @@ package io.kanuka.core;
 import io.kanuka.BeanContext;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * Mutable builder object used when building a bean context.
@@ -40,6 +41,11 @@ public interface Builder {
    * Add a lifecycle bean.
    */
   void addLifecycle(BeanLifecycle bean);
+
+  /**
+   * Add a field injector.
+   */
+  void addInjector(Consumer<Builder> injector);
 
   /**
    * Add a child context.

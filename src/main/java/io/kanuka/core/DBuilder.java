@@ -9,12 +9,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 class DBuilder implements Builder {
 
   private static final Logger log = LoggerFactory.getLogger(DBuilder.class);
 
   private final List<BeanLifecycle> lifecycleList = new ArrayList<>();
+
+  private final List<Consumer<Builder>> injectors = new ArrayList<>();
 
   private final Map<String, DContextEntry> beans = new LinkedHashMap<>();
 
@@ -101,6 +104,10 @@ class DBuilder implements Builder {
     lifecycleList.add(wrapper);
   }
 
+  @Override
+  public void addInjector(Consumer<Builder> injector) {
+    injectors.add(injector);
+  }
 
   @Override
   public void currentBean(String currentBean) {
@@ -133,7 +140,15 @@ class DBuilder implements Builder {
     return bean;
   }
 
+  private void runInjectors() {
+    log.debug("perform field injection in context:{}", name);
+    for (Consumer<Builder> injector : injectors) {
+      injector.accept(this);
+    }
+  }
+
   public BeanContext build() {
+    runInjectors();
     return new DBeanContext(name, dependsOn, lifecycleList, beans, children);
   }
 }
