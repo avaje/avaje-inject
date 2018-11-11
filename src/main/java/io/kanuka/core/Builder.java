@@ -26,6 +26,12 @@ public interface Builder {
   void setParent(Builder parent);
 
   /**
+   * Return true if the bean should be added. Returning false means the bean is already supplied
+   * to the context (typically a test double bean).
+   */
+  boolean isAddBeanFor(String type);
+
+  /**
    * Add a bean instance to the context.
    * <p>
    * Beans are added in an appropriate order to satisfy dependencies.

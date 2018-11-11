@@ -18,13 +18,13 @@ class DBeanContext implements BeanContext {
 
   private final List<BeanLifecycle> lifecycleList;
 
-  private final Map<String, DContextEntry> beans;
+  private final DBeanMap beans;
 
   private final Map<String, BeanContext> children;
 
   private boolean closed;
 
-  DBeanContext(String name, String[] dependsOn, List<BeanLifecycle> lifecycleList, Map<String, DContextEntry> beans, Map<String, BeanContext> children) {
+  DBeanContext(String name, String[] dependsOn, List<BeanLifecycle> lifecycleList, DBeanMap beans, Map<String, BeanContext> children) {
     this.name = name;
     this.dependsOn = dependsOn;
     this.lifecycleList = lifecycleList;
@@ -50,15 +50,12 @@ class DBeanContext implements BeanContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T getBean(Class<T> beanClass, String name) {
-    DContextEntry entry = beans.get(beanClass.getCanonicalName());
-    if (entry != null) {
-      T bean = (T) entry.get(name);
-      if (bean != null) {
-        return bean;
-      }
+    T bean = beans.getBean(beanClass, name);
+    if (bean != null) {
+      return bean;
     }
     for (BeanContext childContext : children.values()) {
-      T bean = childContext.getBean(beanClass);
+      bean = childContext.getBean(beanClass, name);
       if (bean != null) {
         return bean;
       }
@@ -70,11 +67,7 @@ class DBeanContext implements BeanContext {
   public List<Object> getBeans(Class<?> annCls) {
 
     List<Object> list = new ArrayList<>();
-
-    DContextEntry entry = beans.get(annCls.getCanonicalName());
-    if (entry != null) {
-      entry.addAll(list);
-    }
+    beans.addAll(annCls, list);
     for (BeanContext childContext : children.values()) {
       list.addAll(childContext.getBeans(annCls));
     }

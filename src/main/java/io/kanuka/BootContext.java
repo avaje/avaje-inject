@@ -22,6 +22,8 @@ public class BootContext {
 
   private boolean shutdownHook = true;
 
+  private final List<Object> suppliedBeans = new ArrayList<>();
+
   /**
    * Boot the bean context without registering a shutdown hook.
    * <p>
@@ -47,6 +49,20 @@ public class BootContext {
   }
 
   /**
+   * Supply a bean to the context that will be used instead of any similar bean in the context.
+   * <p>
+   * This is typically expected to be used in tests and the bean supplied is typically a test double
+   * or mock.
+   * </p>
+   *
+   * @param bean The bean used when injecting a dependency for this bean or the interface(s) it implements
+   */
+  public BootContext withBean(Object bean) {
+    suppliedBeans.add(bean);
+    return this;
+  }
+
+  /**
    * Build and return the bean context.
    */
   public BeanContext load() {
@@ -58,7 +74,7 @@ public class BootContext {
     Set<String> moduleNames = factoryOrder.orderFactories();
     log.debug("building context with modules {}", moduleNames);
 
-    Builder rootBuilder = BuilderFactory.newRootBuilder();
+    Builder rootBuilder = BuilderFactory.newRootBuilder(suppliedBeans);
 
     for (BeanContextFactory factory : factoryOrder.factories()) {
       rootBuilder.addChild(factory.createContext(rootBuilder));

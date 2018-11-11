@@ -1,5 +1,7 @@
 package io.kanuka.core;
 
+import java.util.List;
+
 /**
  * Factory for creating Builder instances.
  *
@@ -9,9 +11,11 @@ public class BuilderFactory {
 
   /**
    * Create the root level Builder.
+   *
+   * @param suppliedBeans The list of beans (typically test doubles) supplied when building the context.
    */
-  public static Builder newRootBuilder() {
-    return new DBuilder(null, null);
+  public static Builder newRootBuilder(List<Object> suppliedBeans) {
+    return new DBuilder(suppliedBeans);
   }
 
   /**

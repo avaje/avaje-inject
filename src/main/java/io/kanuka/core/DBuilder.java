@@ -15,28 +15,61 @@ class DBuilder implements Builder {
 
   private static final Logger log = LoggerFactory.getLogger(DBuilder.class);
 
+  /**
+   * List of Lifecycle beans.
+   */
   private final List<BeanLifecycle> lifecycleList = new ArrayList<>();
 
+  /**
+   * List of field injection closures.
+   */
   private final List<Consumer<Builder>> injectors = new ArrayList<>();
 
-  private final Map<String, DContextEntry> beans = new LinkedHashMap<>();
+  /**
+   * The beans created and added to the context during building.
+   */
+  private final DBeanMap beanMap = new DBeanMap();
 
+  /**
+   * Supplied beans (test doubles) given to the context prior to building.
+   */
+  private final DBeanMap suppliedBeanMap;
+
+  /**
+   * The context/module name.
+   */
   private final String name;
 
+  /**
+   * The other modules this context dependsOn (that should be built prior).
+   */
   private final String[] dependsOn;
 
   private final Map<String, BeanContext> children = new LinkedHashMap<>();
 
+  /**
+   * Debug of the current bean being wired - used in injection errors.
+   */
   private String currentBean;
 
   private Builder parent;
 
   /**
-   * Create a named context.
+   * Create a named context for non-root builders.
    */
   DBuilder(String name, String[] dependsOn) {
     this.name = name;
     this.dependsOn = dependsOn;
+    this.suppliedBeanMap = null;
+  }
+
+  /**
+   * Create for the root builder with supplied beans (test doubles).
+   */
+  DBuilder(List<Object> suppliedBeans) {
+    this.name = null;
+    this.dependsOn = null;
+    this.suppliedBeanMap = new DBeanMap(suppliedBeans);
   }
 
   @Override
@@ -54,21 +87,34 @@ class DBuilder implements Builder {
     this.parent = parent;
   }
 
-  @SuppressWarnings("unchecked")
+  @Override
+  public boolean isAddBeanFor(String type) {
+    if (suppliedBeanMap != null) {
+      return suppliedBeanMap.isAddBeanFor(type);
+    }
+    return parent.isAddBeanFor(type);
+  }
+
+  @Override
   public <T> T getMaybe(Class<T> beanClass, String name) {
 
-    // look locally first
-    DContextEntry entry = beans.get(beanClass.getCanonicalName());
-    if (entry != null) {
-      T bean = (T) entry.get(name);
+    T bean;
+    if (suppliedBeanMap != null) {
+      bean = suppliedBeanMap.getBean(beanClass, name);
       if (bean != null) {
         return bean;
       }
     }
 
+    // look locally first
+    bean = beanMap.getBean(beanClass, name);
+    if (bean != null) {
+      return bean;
+    }
+
     // look in child context
     for (BeanContext childContext : children.values()) {
-      T bean = childContext.getBean(beanClass);
+      bean = childContext.getBean(beanClass);
       if (bean != null) {
         return bean;
       }
@@ -89,14 +135,7 @@ class DBuilder implements Builder {
 
   @Override
   public void addBean(Object bean, String name, String... interfaceClass) {
-    DContextEntryBean entryBean = new DContextEntryBean(bean, name);
-    beans.computeIfAbsent(bean.getClass().getCanonicalName(), s -> new DContextEntry()).add(entryBean);
-
-    if (interfaceClass != null) {
-      for (String aClass : interfaceClass) {
-        beans.computeIfAbsent(aClass, s -> new DContextEntry()).add(entryBean);
-      }
-    }
+    beanMap.addBean(bean, name, interfaceClass);
   }
 
   @Override
@@ -117,7 +156,6 @@ class DBuilder implements Builder {
   @Override
   public <T> Optional<T> getOptional(Class<T> cls) {
     return getOptional(cls, null);
-
   }
 
   @Override
@@ -135,7 +173,12 @@ class DBuilder implements Builder {
   public <T> T get(Class<T> cls, String name) {
     T bean = getMaybe(cls, name);
     if (bean == null) {
-      throw new IllegalStateException("Injecting null for " + cls.getName() + " name:" + name + " when creating " + currentBean);
+      String msg = "Injecting null for " + cls.getName();
+      if (name != null) {
+        msg += " name:" + name;
+      }
+      msg += " when creating " + currentBean;
+      throw new IllegalStateException(msg);
     }
     return bean;
   }
@@ -151,6 +194,6 @@ class DBuilder implements Builder {
 
   public BeanContext build() {
     runInjectors();
-    return new DBeanContext(name, dependsOn, lifecycleList, beans, children);
+    return new DBeanContext(name, dependsOn, lifecycleList, beanMap, children);
   }
 }
