@@ -95,6 +95,29 @@ class DBuilder implements Builder {
     return parent.isAddBeanFor(type);
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> List<T> getList(Class<T> interfaceType) {
+
+    List list = new ArrayList<>();
+    if (suppliedBeanMap != null) {
+      suppliedBeanMap.addAll(interfaceType, list);
+      if (!list.isEmpty()) {
+        // not sure if this is correct, supplied so skip
+        return (List<T>) list;
+      }
+    }
+
+    beanMap.addAll(interfaceType, list);
+    for (BeanContext childContext : children.values()) {
+      list.addAll(childContext.getBeans(interfaceType));
+    }
+    if (parent != null) {
+      list.addAll(parent.getList(interfaceType));
+    }
+    return (List<T>)list;
+  }
+
   @Override
   public <T> T getMaybe(Class<T> beanClass, String name) {
 

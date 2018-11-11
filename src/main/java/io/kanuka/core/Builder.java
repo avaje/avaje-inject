@@ -2,6 +2,7 @@ package io.kanuka.core;
 
 import io.kanuka.BeanContext;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -82,6 +83,11 @@ public interface Builder {
    * Get a named dependency.
    */
   <T> T get(Class<T> cls, String name);
+
+  /**
+   * Get a list of dependencies for the interface type .
+   */
+  <T> List<T> getList(Class<T> interfaceType);
 
   /**
    * Get a named dependency allowing it to be null.

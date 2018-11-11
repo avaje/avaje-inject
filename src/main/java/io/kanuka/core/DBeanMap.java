@@ -104,10 +104,12 @@ class DBeanMap {
   /**
    * Add all bean instances matching the given type to the list.
    */
-  void addAll(Class<?> type, List<Object> list) {
-    DContextEntry entry = beans.get(type.getCanonicalName());
-    if (entry != null) {
-      entry.addAll(list);
+  void addAll(Class type, List list) {
+    if (beans != null) {
+      DContextEntry entry = beans.get(type.getCanonicalName());
+      if (entry != null) {
+        entry.addAll(list);
+      }
     }
   }
 
