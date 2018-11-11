@@ -85,7 +85,9 @@ class DBeanContext implements BeanContext {
   @Override
   public void start() {
     synchronized (this) {
-      log.debug("firing postConstruct on beans in context:{}", name);
+      if (name != null) {
+        log.debug("firing postConstruct on beans in context:{}", name);
+      }
       for (BeanLifecycle bean : lifecycleList) {
         bean.postConstruct();
       }
@@ -101,7 +103,9 @@ class DBeanContext implements BeanContext {
       if (!closed) {
         // we only allow one call to preDestroy
         closed = true;
-        log.debug("firing preDestroy on beans in context:{}", name);
+        if (name != null) {
+          log.debug("firing preDestroy on beans in context:{}", name);
+        }
         for (BeanLifecycle bean : lifecycleList) {
           bean.preDestroy();
         }

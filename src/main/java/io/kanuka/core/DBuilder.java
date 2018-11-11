@@ -141,7 +141,9 @@ class DBuilder implements Builder {
   }
 
   private void runInjectors() {
-    log.debug("perform field injection in context:{}", name);
+    if (name != null) {
+      log.debug("perform field injection in context:{}", name);
+    }
     for (Consumer<Builder> injector : injectors) {
       injector.accept(this);
     }

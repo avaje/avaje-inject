@@ -61,14 +61,12 @@ public class BootContext {
     Builder rootBuilder = BuilderFactory.newRootBuilder();
 
     for (BeanContextFactory factory : factoryOrder.factories()) {
-      log.debug("loading context name:{}", factory.getName());
       rootBuilder.addChild(factory.createContext(rootBuilder));
     }
 
     BeanContext beanContext = rootBuilder.build();
 
     // entire graph built, fire postConstruct
-    log.debug("start - fire postConstruct on all beans");
     beanContext.start();
 
     if (shutdownHook) {
