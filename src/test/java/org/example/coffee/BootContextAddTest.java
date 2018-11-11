@@ -12,18 +12,18 @@ public class BootContextAddTest {
   @Test
   public void withBean_expect_testDoublePumpUsed() {
 
-//    TDPump testDoublePump = new TDPump();
-//
-//    try (BeanContext context = new BootContext()
-//      .withBean(testDoublePump)
-//      .load()) {
-//
-//      String makeIt = context.getBean(CoffeeMaker.class).makeIt();
-//      assertThat(makeIt).isEqualTo("done");
-//
-//      assertThat(testDoublePump.steam).isEqualTo(1);
-//      assertThat(testDoublePump.water).isEqualTo(1);
-//    }
+    TDPump testDoublePump = new TDPump();
+
+    try (BeanContext context = new BootContext()
+      .withBean(testDoublePump)
+      .load()) {
+
+      String makeIt = context.getBean(CoffeeMaker.class).makeIt();
+      assertThat(makeIt).isEqualTo("done");
+
+      assertThat(testDoublePump.steam).isEqualTo(1);
+      assertThat(testDoublePump.water).isEqualTo(1);
+    }
   }
 
   /**
