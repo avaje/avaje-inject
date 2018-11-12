@@ -1,5 +1,5 @@
 # kanuka
-Kanuka dependency injection core API
+Kanuka dependency injection - http://kanuka.io
 
 ## Similar to Dagger (https://google.github.io/dagger/)
 
@@ -21,7 +21,7 @@ Kanuka dependency injection core API
   
 ## Plans
 
-- Review integration with properties (like `@Value`) and sticky property reloading
+- Review integration with properties (like Spring `@Value`) and sticky property reloading
 
 
 ## Differences to Micronaut DI (https://docs.micronaut.io/latest/guide/index.html#ioc)
