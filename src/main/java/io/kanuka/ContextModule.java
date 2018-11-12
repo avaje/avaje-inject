@@ -13,7 +13,7 @@ package io.kanuka;
  * </p>
  *
  * <p>
- * This annotation is typically placed on a top level interface in the module.
+ * This annotation is typically placed on a top level interface or package-info in the module.
  * </p>
  *
  * <pre>{@code
@@ -26,6 +26,31 @@ package io.kanuka;
  * public interface FeatureToggle {
  *
  *   boolean isEnabled(String key);
+ * }
+ *
+ * }</pre>
+ *
+ * <h2>dependsOn</h2>
+ * <p>
+ * We specify <code>dependsOn</code> when we have a module that depends on beans that
+ * will be supplied by another module (jar).
+ * </p>
+ * <p>
+ * In the example below we have the "Job System" which depends on the common "Feature Toggle"
+ * module. When wiring the Job system module we expect some beans to be provided by the feature toggle
+ * module (jar).
+ * </p>
+ *
+ * <pre>{@code
+ *
+ * package org.example.jobsystem;
+ *
+ * import io.kanuka.ContextModule;
+ *
+ * @ContextModule(name = "job-system", dependsOn = {"feature-toggle"})
+ * public interface JobSystem {
+ *
+ *   ...
  * }
  *
  * }</pre>

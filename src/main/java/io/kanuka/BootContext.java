@@ -14,7 +14,34 @@ import java.util.ServiceLoader;
 import java.util.Set;
 
 /**
- * Boot and create a bean context with options for shutdown hook
+ * Boot and create a bean context with options for shutdown hook and supplying test doubles.
+ * <p>
+ * We would choose to use BootContext in test code (for component testing) as it gives us
+ * the ability to inject test doubles etc.
+ * </p>
+ *
+ * <pre>{@code
+ *
+ *   @Test
+ *   public void someComponentTest() {
+ *
+ *     MyRedisApi mockRedis = mock(MyRedisApi.class);
+ *     MyDbApi mockDatabase = mock(MyDbApi.class);
+ *
+ *     try (BeanContext context = new BootContext()
+ *       .withBean(mockRedis)
+ *       .withBean(mockDatabase)
+ *       .load()) {
+ *
+ *       // built with test doubles injected ...
+ *       CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+ *       coffeeMaker.makeIt();
+
+ *       assertThat(...
+ *     }
+ *   }
+ *
+ * }</pre>
  */
 public class BootContext {
 
@@ -23,6 +50,21 @@ public class BootContext {
   private boolean shutdownHook = true;
 
   private final List<Object> suppliedBeans = new ArrayList<>();
+
+  /**
+   * Create a BootContext to ultimately load and return a new BeanContext.
+   *
+   * <pre>{@code
+   *
+   *   try (BeanContext context = new BootContext()
+   *     .load()) {
+   *
+   *     String makeIt = context.getBean(CoffeeMaker.class).makeIt();
+   *   }
+   * }</pre>
+   */
+  public BootContext() {
+  }
 
   /**
    * Boot the bean context without registering a shutdown hook.
@@ -54,6 +96,30 @@ public class BootContext {
    * This is typically expected to be used in tests and the bean supplied is typically a test double
    * or mock.
    * </p>
+   *
+   * <pre>{@code
+   *
+   *   @Test
+   *   public void someComponentTest() {
+   *
+   *     MyRedisApi mockRedis = mock(MyRedisApi.class);
+   *     MyDbApi mockDatabase = mock(MyDbApi.class);
+   *
+   *     try (BeanContext context = new BootContext()
+   *       .withBean(mockRedis)
+   *       .withBean(mockDatabase)
+   *       .load()) {
+   *
+   *       // built with test doubles injected ...
+   *       CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+   *       coffeeMaker.makeIt();
+
+   *       assertThat(...
+   *     }
+   *   }
+   *
+   *
+   * }</pre>
    *
    * @param bean The bean used when injecting a dependency for this bean or the interface(s) it implements
    */

@@ -7,6 +7,35 @@ import java.lang.annotation.Target;
 
 /**
  * Marks methods on a <code>@Factory</code> bean that create dependencies.
+ * <p>
+ *   See {@link Factory}.
+ * </p>
+ *
+ * <pre>{@code
+ *
+ * @Factory
+ * class Configuration {
+ *
+ *   private final StartConfig startConfig;
+ *
+ *   @Inject
+ *   Configuration(StartConfig startConfig) {
+ *     this.startConfig = startConfig;
+ *   }
+ *
+ *   @Bean
+ *   Foo buildFoo() {
+ *     ...
+ *     return new Foo(...);
+ *   }
+ *
+ *   @Bean
+ *   Bar buildBar(Foo foo, Bazz bazz) {
+ *     ...
+ *     return new Bar(...);
+ *   }
+ * }
+ * }</pre>
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

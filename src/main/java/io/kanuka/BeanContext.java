@@ -9,43 +9,106 @@ import java.util.List;
  * The beans have singleton scope, support lifecycle methods for postConstruct and
  * preDestroy and are created (wired) via dependency injection.
  * </p>
+ *
+ * <h3>Create a BeanContext</h3>
+ * <p>
+ * We can programmatically create a BeanContext via BootContext.
+ * </p>
+ * <pre>{@code
+ *
+ *   // create a BeanContext ...
+ *
+ *   try (BeanContext context = new BootContext()
+ *     .load()) {
+ *
+ *     CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+ *     coffeeMaker.makeIt()
+ *   }
+ *
+ * }</pre>
+ *
+ * <h3>Implicitly used</h3>
+ * <p>
+ * The BeanContext is implicitly used by SystemContext.  It will be created as needed and
+ * a shutdown hook will close the underlying BeanContext on JVM shutdown.
+ * </p>
+ * <pre>{@code
+ *
+ *   // BeanContext created as needed under the hood
+ *
+ *   CoffeeMaker coffeeMaker = SystemContext.getBean(CoffeeMaker.class);
+ *   coffeeMaker.brew();
+ *
+ * }</pre>
  */
 public interface BeanContext extends Closeable {
 
   /**
-   * Return the name of the bean context.
+   * Return the module name of the bean context.
+   *
+   * @see ContextModule
    */
   String getName();
 
   /**
    * Return the names of modules this bean context depends on.
+   *
+   * @see ContextModule
    */
   String[] getDependsOn();
 
   /**
    * Return a single bean given the type.
+   *
+   * <pre>{@code
+   *
+   *   CoffeeMaker coffeeMaker = beanContext.getBean(CoffeeMaker.class);
+   *   coffeeMaker.brew();
+   *
+   * }</pre>
+   *
+   * @param type an interface or bean type
    */
-  <T> T getBean(Class<T> beanClass);
+  <T> T getBean(Class<T> type);
 
   /**
    * Return a single bean given the type and name.
+   *
+   * <pre>{@code
+   *
+   *   Heater heater = beanContext.getBean(Heater.class, "electric");
+   *   heater.heat();
+   *
+   * }</pre>
+   *
+   * @param type an interface or bean type
+   * @param name the name qualifier of a specific bean
    */
-  <T> T getBean(Class<T> beanClass, String name);
+  <T> T getBean(Class<T> type, String name);
 
   /**
    * Return the list of beans that implement the interface or are marked with the annotation.
+   *
+   * <pre>{@code
+   *
+   *   // e.g. register all controllers with web a framework
+   *   // .. where Controller is an annotation on the beans
+   *
+   *   List<Object> controllers = beanContext.getBeans(Controller.class);
+   *
+   * }</pre>
    *
    * @param interfaceOrAnnotation An interface class or annotation class.
    */
   List<Object> getBeans(Class<?> interfaceOrAnnotation);
 
   /**
-   * Fire the <code>@PostConstruct</code> methods.
+   * Start the context firing any <code>@PostConstruct</code> methods.
    */
   void start();
 
   /**
-   * Close bean resources by firing <code>@PreDestroy</code> methods.
+   * Close the context firing any <code>@PreDestroy</code> methods.
    */
   void close();
 }

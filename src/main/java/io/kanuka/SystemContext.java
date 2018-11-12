@@ -8,6 +8,26 @@ import java.util.List;
  * This will automatically get all the bean contexts and wire them all as necessary. It will use
  * a shutdown hook to fire any <code>@PreDestroy</code> methods on beans.
  * </p>
+ *
+ * <h3>Example: get a bean</h3>
+ * <pre>{@code
+ *
+ *   CoffeeMaker coffeeMaker = SystemContext.getBean(CoffeeMaker.class);
+ *   coffeeMaker.brew();
+ *
+ * }</pre>
+ *
+ * <h3>Example: get all the Controllers</h3>
+ * <pre>{@code
+ *
+ *   // e.g. register all controllers with web a framework
+ *   // .. where Controller is an annotation on the beans
+ *
+ *   List<Object> controllers = SystemContext.getBeans(Controller.class);
+ *
+ *   // register all the controllers ...
+ *
+ * }</pre>
  */
 public class SystemContext {
 
@@ -17,22 +37,54 @@ public class SystemContext {
     return new BootContext().load();
   }
 
+  private SystemContext() {
+    // hide
+  }
+
   /**
    * Return a single bean given the type.
+   *
+   * <pre>{@code
+   *
+   *   CoffeeMaker coffeeMaker = SystemContext.getBean(CoffeeMaker.class);
+   *   coffeeMaker.brew();
+   *
+   * }</pre>
+   *
+   * @param type an interface or bean type
    */
-  public static <T> T getBean(Class<T> cls) {
-    return rootContext.getBean(cls);
+  public static <T> T getBean(Class<T> type) {
+    return rootContext.getBean(type);
   }
 
   /**
    * Return a single bean given the type and name.
+   *
+   * <pre>{@code
+   *
+   *   Heater heater = SystemContext.getBean(Heater.class, "electric");
+   *   heater.heat();
+   *
+   * }</pre>
+   *
+   * @param type an interface or bean type
+   * @param name the name qualifier of a specific bean
    */
-  public static <T> T getBean(Class<T> cls, String name) {
-    return rootContext.getBean(cls, name);
+  public static <T> T getBean(Class<T> type, String name) {
+    return rootContext.getBean(type, name);
   }
 
   /**
    * Return the list of beans that implement the interface or are marked with the annotation.
+   *
+   * <pre>{@code
+   *
+   *   // e.g. register all controllers with web a framework
+   *   // .. where Controller is an annotation on the beans
+   *
+   *   List<Object> controllers = SystemContext.getBeans(Controller.class);
+   *
+   * }</pre>
    *
    * @param interfaceOrAnnotation An interface class or annotation class.
    */
