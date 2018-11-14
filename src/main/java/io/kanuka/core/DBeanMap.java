@@ -91,6 +91,10 @@ class DBeanMap {
   @SuppressWarnings("unchecked")
   <T> T getBean(Class<T> type, String name) {
 
+    if (beans == null) {
+      // no beans in the root suppliedBeanMap
+      return null;
+    }
     DContextEntry entry = beans.get(type.getCanonicalName());
     if (entry != null) {
       T bean = (T) entry.get(name);
