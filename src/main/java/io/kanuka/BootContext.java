@@ -36,7 +36,7 @@ import java.util.Set;
  *       // built with test doubles injected ...
  *       CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
  *       coffeeMaker.makeIt();
-
+ *
  *       assertThat(...
  *     }
  *   }
@@ -113,7 +113,7 @@ public class BootContext {
    *       // built with test doubles injected ...
    *       CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
    *       coffeeMaker.makeIt();
-
+   *
    *       assertThat(...
    *     }
    *   }
@@ -210,8 +210,13 @@ public class BootContext {
     }
 
     @Override
-    public List<Object> getBeans(Class<?> interfaceOrAnnotation) {
-      return context.getBeans(interfaceOrAnnotation);
+    public List<Object> getBeansWithAnnotation(Class<?> annotation) {
+      return context.getBeansWithAnnotation(annotation);
+    }
+
+    @Override
+    public <T> List<T> getBeans(Class<T> interfaceType) {
+      return context.getBeans(interfaceType);
     }
 
     @Override

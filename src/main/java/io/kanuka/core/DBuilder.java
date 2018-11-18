@@ -50,7 +50,7 @@ class DBuilder implements Builder {
   /**
    * Debug of the current bean being wired - used in injection errors.
    */
-  private String currentBean;
+  private Class<?> injectTarget;
 
   private Builder parent;
 
@@ -88,11 +88,17 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public boolean isAddBeanFor(String type) {
+  public boolean isAddBeanFor(Class<?> addForType, Class<?> injectTarget) {
     if (suppliedBeanMap != null) {
-      return suppliedBeanMap.isAddBeanFor(type);
+      return suppliedBeanMap.isAddBeanFor(addForType.getName());
     }
-    return parent.isAddBeanFor(type);
+    this.injectTarget = injectTarget;
+    return parent.isAddBeanFor(addForType);
+  }
+
+  @Override
+  public boolean isAddBeanFor(Class<?> injectTarget) {
+    return isAddBeanFor(injectTarget, injectTarget);
   }
 
   @SuppressWarnings("unchecked")
@@ -110,12 +116,12 @@ class DBuilder implements Builder {
 
     beanMap.addAll(interfaceType, list);
     for (BeanContext childContext : children.values()) {
-      list.addAll(childContext.getBeans(interfaceType));
+      list.addAll(childContext.getBeansWithAnnotation(interfaceType));
     }
     if (parent != null) {
       list.addAll(parent.getList(interfaceType));
     }
-    return (List<T>)list;
+    return (List<T>) list;
   }
 
   @Override
@@ -157,8 +163,8 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public void addBean(Object bean, String name, String... interfaceClass) {
-    beanMap.addBean(bean, name, interfaceClass);
+  public void register(Object bean, String name, Class<?>... types) {
+    beanMap.register(bean, name, types);
   }
 
   @Override
@@ -169,11 +175,6 @@ class DBuilder implements Builder {
   @Override
   public void addInjector(Consumer<Builder> injector) {
     injectors.add(injector);
-  }
-
-  @Override
-  public void currentBean(String currentBean) {
-    this.currentBean = currentBean;
   }
 
   @Override
@@ -200,7 +201,7 @@ class DBuilder implements Builder {
       if (name != null) {
         msg += " name:" + name;
       }
-      msg += " when creating " + currentBean;
+      msg += " when creating " + injectTarget;
       throw new IllegalStateException(msg);
     }
     return bean;

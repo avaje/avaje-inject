@@ -75,21 +75,39 @@ public class SystemContext {
   }
 
   /**
-   * Return the list of beans that implement the interface or are marked with the annotation.
+   * Return the list of beans that have an annotation.
    *
    * <pre>{@code
    *
    *   // e.g. register all controllers with web a framework
    *   // .. where Controller is an annotation on the beans
    *
-   *   List<Object> controllers = SystemContext.getBeans(Controller.class);
+   *   List<Object> controllers = SystemContext.getBeansWithAnnotation(Controller.class);
    *
    * }</pre>
    *
-   * @param interfaceOrAnnotation An interface class or annotation class.
+   * @param annotation An annotation class.
    */
-  public static List<Object> getBeans(Class<?> interfaceOrAnnotation) {
-    return rootContext.getBeans(interfaceOrAnnotation);
+  public static List<Object> getBeansWithAnnotation(Class<?> annotation) {
+    return rootContext.getBeansWithAnnotation(annotation);
+  }
+
+  /**
+   * Return the list of beans that implement the interface.
+   *
+   * <pre>{@code
+   *
+   *   // e.g. register all controllers with web a framework
+   *   // .. where Controller is an annotation on the beans
+   *
+   *   List<MyInterface> controllers = SystemContext.getBeans(MyInterface.class);
+   *
+   * }</pre>
+   *
+   * @param interfaceType An interface class.
+   */
+  public static <T> List<T> getBeans(Class<T> interfaceType) {
+    return rootContext.getBeans(interfaceType);
   }
 
 }

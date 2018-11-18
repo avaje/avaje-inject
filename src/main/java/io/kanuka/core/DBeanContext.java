@@ -64,14 +64,23 @@ class DBeanContext implements BeanContext {
   }
 
   @Override
-  public List<Object> getBeans(Class<?> annCls) {
+  public <T> List<T> getBeans(Class<T> interfaceType) {
+    List<T> list = new ArrayList<>();
+    beans.addAll(interfaceType, list);
+    for (BeanContext childContext : children.values()) {
+      list.addAll(childContext.getBeans(interfaceType));
+    }
+    return list;
+  }
+
+  @Override
+  public List<Object> getBeansWithAnnotation(Class<?> annotation) {
 
     List<Object> list = new ArrayList<>();
-    beans.addAll(annCls, list);
+    beans.addAll(annotation, list);
     for (BeanContext childContext : children.values()) {
-      list.addAll(childContext.getBeans(annCls));
+      list.addAll(childContext.getBeansWithAnnotation(annotation));
     }
-
     return list;
   }
 

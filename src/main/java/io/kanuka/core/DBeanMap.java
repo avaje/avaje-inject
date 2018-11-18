@@ -45,7 +45,7 @@ class DBeanMap {
     Named annotation = suppliedClass.getAnnotation(Named.class);
     String name = (annotation == null) ? null : annotation.value();
 
-    DContextEntryBean entryBean = new DContextEntryBean(bean, name);
+    DContextEntryBean entryBean = DContextEntryBean.of(bean, name);
     beans.computeIfAbsent(suppliedType.getCanonicalName(), s -> new DContextEntry()).add(entryBean);
     for (Class<?> anInterface : suppliedClass.getInterfaces()) {
       beans.computeIfAbsent(anInterface.getCanonicalName(), s -> new DContextEntry()).add(entryBean);
@@ -65,22 +65,14 @@ class DBeanMap {
     }
   }
 
+  void register(Object bean, String name, Class<?>... types) {
 
-  /**
-   * Add bean during normal context building.
-   *
-   * @param bean           The bean that has been created.
-   * @param name           The optional name of the bean that has just been created (via @Named).
-   * @param interfaceClass The interfaces and annotations we associate the bean instance with.
-   */
-  void addBean(Object bean, String name, String... interfaceClass) {
-
-    DContextEntryBean entryBean = new DContextEntryBean(bean, name);
+    DContextEntryBean entryBean = DContextEntryBean.of(bean, name);
     beans.computeIfAbsent(bean.getClass().getCanonicalName(), s -> new DContextEntry()).add(entryBean);
 
-    if (interfaceClass != null) {
-      for (String aClass : interfaceClass) {
-        beans.computeIfAbsent(aClass, s -> new DContextEntry()).add(entryBean);
+    if (types != null) {
+      for (Class<?> type : types) {
+        beans.computeIfAbsent(type.getName(), s -> new DContextEntry()).add(entryBean);
       }
     }
   }

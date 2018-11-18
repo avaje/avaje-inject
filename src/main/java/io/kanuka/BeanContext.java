@@ -87,20 +87,40 @@ public interface BeanContext extends Closeable {
   <T> T getBean(Class<T> type, String name);
 
   /**
-   * Return the list of beans that implement the interface or are marked with the annotation.
+   * Return the list of beans that have an annotation.
    *
    * <pre>{@code
    *
    *   // e.g. register all controllers with web a framework
    *   // .. where Controller is an annotation on the beans
    *
-   *   List<Object> controllers = beanContext.getBeans(Controller.class);
+   *   List<Object> controllers = SystemContext.getBeansWithAnnotation(Controller.class);
    *
    * }</pre>
    *
-   * @param interfaceOrAnnotation An interface class or annotation class.
+   * <p>
+   * The classic use case for this is registering controllers or routes to
+   * web frameworks like Sparkjava, Javlin, Rapidoid etc.
+   *
+   * @param annotation An annotation class.
    */
-  List<Object> getBeans(Class<?> interfaceOrAnnotation);
+  List<Object> getBeansWithAnnotation(Class<?> annotation);
+
+  /**
+   * Return the list of beans that implement the interface.
+   *
+   * <pre>{@code
+   *
+   *   // e.g. register all controllers with web a framework
+   *   // .. where Controller is an annotation on the beans
+   *
+   *   List<MyInterface> controllers = SystemContext.getBeans(MyInterface.class);
+   *
+   * }</pre>
+   *
+   * @param interfaceType An interface class.
+   */
+  <T> List<T> getBeans(Class<T> interfaceType);
 
   /**
    * Start the context firing any <code>@PostConstruct</code> methods.

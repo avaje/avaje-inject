@@ -27,22 +27,37 @@ public interface Builder {
   void setParent(Builder parent);
 
   /**
-   * Return true if the bean should be added. Returning false means the bean is already supplied
-   * to the context (typically a test double bean).
+   * Return true if the bean should be created and registered with the context.
+   * <p/>
+   * Returning false means there has been a (test double) bean already registered and
+   * that we should skip the creation and registration for this bean.
+   *
+   * @param addForType   The interface that the bean implements and provides
+   * @param injectTarget The actual bean type we are looking to create and register
    */
-  boolean isAddBeanFor(String type);
+  boolean isAddBeanFor(Class<?> addForType, Class<?> injectTarget);
 
   /**
-   * Add a bean instance to the context.
+   * Return true if the bean should be created and registered with the context.
+   * <p/>
+   * Returning false means there has been a (test double) bean already registered and
+   * that we should skip the creation and registration for this bean.
+   *
+   * @param injectTarget The actual bean type we are looking to create and register
+   */
+  boolean isAddBeanFor(Class<?> injectTarget);
+
+  /**
+   * Register the bean instance into the context.
    * <p>
    * Beans are added in an appropriate order to satisfy dependencies.
    * </p>
    *
-   * @param bean           The bean instance that has been created.
-   * @param name           The (optional) name of the instance.
-   * @param interfaceClass Interfaces and class level annotations this bean provides or associates to.
+   * @param bean  The bean instance that has been created.
+   * @param name  The (optional) name of the instance.
+   * @param types Interfaces and class level annotations this bean provides or associates to.
    */
-  void addBean(Object bean, String name, String... interfaceClass);
+  void register(Object bean, String name, Class<?>... types);
 
   /**
    * Add a lifecycle bean.
@@ -58,11 +73,6 @@ public interface Builder {
    * Add a child context.
    */
   void addChild(BeanContext context);
-
-  /**
-   * Set the type of the current bean being created (to assist in error messages when injecting dependencies).
-   */
-  void currentBean(String currentBean);
 
   /**
    * Get an optional dependency.
