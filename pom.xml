@@ -4,7 +4,7 @@
 
   <groupId>io.kanuka</groupId>
   <artifactId>kanuka</artifactId>
-  <version>0.6-SNAPSHOT</version>
+  <version>0.7-SNAPSHOT</version>
 
   <parent>
     <groupId>org.avaje</groupId>
@@ -36,7 +36,7 @@
     <dependency>
       <groupId>io.kanuka</groupId>
       <artifactId>kanuka-generator</artifactId>
-      <version>0.5</version>
+      <version>0.7</version>
       <scope>test</scope>
     </dependency>
 
