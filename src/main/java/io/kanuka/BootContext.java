@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -51,6 +52,8 @@ public class BootContext {
 
   private final List<Object> suppliedBeans = new ArrayList<>();
 
+  private final Set<String> modules = new LinkedHashSet<>();
+
   /**
    * Create a BootContext to ultimately load and return a new BeanContext.
    *
@@ -84,9 +87,51 @@ public class BootContext {
    *   }
    *
    * }</pre>
+   *
+   * @return This BootContext
    */
   public BootContext withNoShutdownHook() {
     this.shutdownHook = false;
+    return this;
+  }
+
+  /**
+   * Specify the modules to include in dependency injection.
+   * <p/>
+   * This is effectively a "whitelist" of modules names to include in the injection excluding
+   * any other modules that might otherwise exist in the classpath.
+   * <p/>
+   * We typically want to use this in component testing where we wish to exclude any other
+   * modules that exist on the classpath.
+   *
+   * <pre>{@code
+   *
+   *   @Test
+   *   public void someComponentTest() {
+   *
+   *     EmailServiceApi mockEmailService = mock(EmailServiceApi.class);
+   *
+   *     try (BeanContext context = new BootContext()
+   *       .withBeans(mockEmailService)
+   *       .withModules("coffee")
+   *       .load()) {
+   *
+   *       // built with test doubles injected ...
+   *       CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+   *       coffeeMaker.makeIt();
+   *
+   *       assertThat(...
+   *     }
+   *   }
+   *
+   * }</pre>
+   *
+   *
+   * @param modules The names of modules that we want to include in dependency injection.
+   * @return This BootContext
+   */
+  public BootContext withModules(String... modules) {
+    this.modules.addAll(Arrays.asList(modules));
     return this;
   }
 
@@ -106,8 +151,7 @@ public class BootContext {
    *     MyDbApi mockDatabase = mock(MyDbApi.class);
    *
    *     try (BeanContext context = new BootContext()
-   *       .withBean(mockRedis)
-   *       .withBean(mockDatabase)
+   *       .withBeans(mockRedis, mockDatabase)
    *       .load()) {
    *
    *       // built with test doubles injected ...
@@ -121,10 +165,11 @@ public class BootContext {
    *
    * }</pre>
    *
-   * @param bean The bean used when injecting a dependency for this bean or the interface(s) it implements
+   * @param beans The bean used when injecting a dependency for this bean or the interface(s) it implements
+   * @return This BootContext
    */
-  public BootContext withBean(Object bean) {
-    suppliedBeans.add(bean);
+  public BootContext withBeans(Object... beans) {
+    suppliedBeans.addAll(Arrays.asList(beans));
     return this;
   }
 
@@ -134,7 +179,7 @@ public class BootContext {
   public BeanContext load() {
 
     // sort factories by dependsOn
-    FactoryOrder factoryOrder = new FactoryOrder();
+    FactoryOrder factoryOrder = new FactoryOrder(modules);
     ServiceLoader.load(BeanContextFactory.class).forEach(factoryOrder::add);
 
     Set<String> moduleNames = factoryOrder.orderFactories();
@@ -250,17 +295,33 @@ public class BootContext {
    */
   static class FactoryOrder {
 
+    private final Set<String> includeModules;
+
     private final Set<String> moduleNames = new LinkedHashSet<>();
     private final List<BeanContextFactory> factories = new ArrayList<>();
     private final List<BeanContextFactory> queue = new ArrayList<>();
 
+    FactoryOrder(Set<String> includeModules) {
+      this.includeModules = includeModules;
+    }
+
     void add(BeanContextFactory factory) {
-      String[] dependsOn = factory.getDependsOn();
-      if (dependsOn == null || dependsOn.length == 0) {
-        push(factory);
-      } else {
-        queue.add(factory);
+
+      if (includeModule(factory)) {
+        String[] dependsOn = factory.getDependsOn();
+        if (dependsOn == null || dependsOn.length == 0) {
+          push(factory);
+        } else {
+          queue.add(factory);
+        }
       }
+    }
+
+    /**
+     * Return true of the factory (for the module) should be included.
+     */
+    private boolean includeModule(BeanContextFactory factory) {
+      return includeModules.isEmpty() || includeModules.contains(factory.getName());
     }
 
     private void push(BeanContextFactory factory) {
