@@ -30,8 +30,7 @@ import java.util.Set;
  *     MyDbApi mockDatabase = mock(MyDbApi.class);
  *
  *     try (BeanContext context = new BootContext()
- *       .withBean(mockRedis)
- *       .withBean(mockDatabase)
+ *       .withBeans(mockRedis, mockDatabase)
  *       .load()) {
  *
  *       // built with test doubles injected ...
