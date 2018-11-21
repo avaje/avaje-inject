@@ -1,8 +1,8 @@
 package org.example.coffee;
 
-import io.kanuka.BeanContext;
-import io.kanuka.BootContext;
-import io.kanuka.SystemContext;
+import io.dinject.BeanContext;
+import io.dinject.BootContext;
+import io.dinject.SystemContext;
 import org.example.coffee.core.DuperPump;
 import org.junit.Test;
 

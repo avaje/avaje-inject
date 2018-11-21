@@ -1,8 +1,8 @@
-package io.kanuka;
+package io.dinject;
 
-import io.kanuka.core.BeanContextFactory;
-import io.kanuka.core.Builder;
-import io.kanuka.core.BuilderFactory;
+import io.dinject.core.BeanContextFactory;
+import io.dinject.core.Builder;
+import io.dinject.core.BuilderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

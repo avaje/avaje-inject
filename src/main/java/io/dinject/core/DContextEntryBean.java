@@ -1,4 +1,4 @@
-package io.kanuka.core;
+package io.dinject.core;
 
 import javax.inject.Provider;
 import java.util.Objects;

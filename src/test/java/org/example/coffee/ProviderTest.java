@@ -1,7 +1,7 @@
 package org.example.coffee;
 
-import io.kanuka.BeanContext;
-import io.kanuka.BootContext;
+import io.dinject.BeanContext;
+import io.dinject.BootContext;
 import org.example.coffee.provider.ProvOther;
 import org.example.coffee.provider.ProvOther2;
 import org.junit.Test;

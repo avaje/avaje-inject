@@ -1,4 +1,4 @@
-package io.kanuka;
+package io.dinject;
 
 import java.io.Closeable;
 import java.util.List;

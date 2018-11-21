@@ -1,6 +1,6 @@
-package io.kanuka.core;
+package io.dinject.core;
 
-import io.kanuka.BeanContext;
+import io.dinject.BeanContext;
 
 /**
  * This is the service loader interface defining the bean contexts that can be created.

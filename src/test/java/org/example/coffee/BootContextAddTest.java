@@ -1,7 +1,7 @@
 package org.example.coffee;
 
-import io.kanuka.BeanContext;
-import io.kanuka.BootContext;
+import io.dinject.BeanContext;
+import io.dinject.BootContext;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

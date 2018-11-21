@@ -1,4 +1,4 @@
-package io.kanuka.core;
+package io.dinject.core;
 
 import javax.inject.Named;
 import java.util.LinkedHashMap;

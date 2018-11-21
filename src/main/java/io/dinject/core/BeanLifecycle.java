@@ -1,4 +1,4 @@
-package io.kanuka.core;
+package io.dinject.core;
 
 /**
  * Lifecycle of beans via <code>@PostConstruct</code> and <code>@PreDestroy</code>.

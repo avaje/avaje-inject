@@ -1,7 +1,7 @@
 package org.example.coffee.factory;
 
-import io.kanuka.Bean;
-import io.kanuka.Factory;
+import io.dinject.Bean;
+import io.dinject.Factory;
 import org.example.coffee.CoffeeMaker;
 
 import javax.inject.Inject;

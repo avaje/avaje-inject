@@ -1,4 +1,4 @@
-package io.kanuka;
+package io.dinject;
 
 import java.util.List;
 

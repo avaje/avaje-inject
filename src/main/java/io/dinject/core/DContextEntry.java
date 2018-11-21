@@ -1,4 +1,4 @@
-package io.kanuka.core;
+package io.dinject.core;
 
 import java.util.ArrayList;
 import java.util.List;

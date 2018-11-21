@@ -1,4 +1,4 @@
 /**
  * Kanuka dependency injection API.
  */
-package io.kanuka;
+package io.dinject;
