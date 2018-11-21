@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Factory for creating Builder instances.
  *
- * These Builders are typically used by generated code (Java annotation processing - kanuka-generator).
+ * These Builders are typically used by generated code (Java annotation processing - dinject-generator).
  */
 public class BuilderFactory {
 

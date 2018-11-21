@@ -20,7 +20,7 @@ package io.dinject;
  *
  * package org.example.featuretoggle;
  *
- * import io.kanuka.ContextModule;
+ * import io.dinject.ContextModule;
  *
  * @ContextModule(name = "feature-toggle")
  * public interface FeatureToggle {
@@ -45,7 +45,7 @@ package io.dinject;
  *
  * package org.example.jobsystem;
  *
- * import io.kanuka.ContextModule;
+ * import io.dinject.ContextModule;
  *
  * @ContextModule(name = "job-system", dependsOn = {"feature-toggle"})
  * public interface JobSystem {
