@@ -17,13 +17,24 @@ import java.util.List;
  *
  * }</pre>
  *
- * <h3>Example: get all the Controllers</h3>
+ * <h3>Example: get all the beans implementing an interface</h3>
+ * <pre>{@code
+ *
+ *   // e.g. register all WebRoutes for a web framework
+ *
+ *   List<WebRoute> routes = SystemContext.getBeans(WebRoute.class);
+ *
+ *   // register all the routes ...
+ *
+ * }</pre>
+ *
+ * <h3>Example: get all the beans that have an annotation</h3>
  * <pre>{@code
  *
  *   // e.g. register all controllers with web a framework
  *   // .. where Controller is an annotation on the beans
  *
- *   List<Object> controllers = SystemContext.getBeans(Controller.class);
+ *   List<Object> controllers = SystemContext.getBeansWithAnnotation(Controller.class);
  *
  *   // register all the controllers ...
  *
@@ -97,10 +108,9 @@ public class SystemContext {
    *
    * <pre>{@code
    *
-   *   // e.g. register all controllers with web a framework
-   *   // .. where Controller is an annotation on the beans
+   *   // e.g. register all web routes with web a framework
    *
-   *   List<MyInterface> controllers = SystemContext.getBeans(MyInterface.class);
+   *   List<WebRoute> routes = SystemContext.getBeans(WebRoute.class);
    *
    * }</pre>
    *

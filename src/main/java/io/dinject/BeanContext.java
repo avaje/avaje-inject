@@ -111,10 +111,9 @@ public interface BeanContext extends Closeable {
    *
    * <pre>{@code
    *
-   *   // e.g. register all controllers with web a framework
-   *   // .. where Controller is an annotation on the beans
+   *   // e.g. register all routes for a web framework
    *
-   *   List<MyInterface> controllers = SystemContext.getBeans(MyInterface.class);
+   *   List<WebRoute> routes = SystemContext.getBeans(WebRoute.class);
    *
    * }</pre>
    *
