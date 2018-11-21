@@ -2,8 +2,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>io.kanuka</groupId>
-  <artifactId>kanuka</artifactId>
+  <groupId>io.dinject</groupId>
+  <artifactId>dinject</artifactId>
   <version>0.8-SNAPSHOT</version>
 
   <parent>
@@ -13,7 +13,7 @@
   </parent>
 
   <scm>
-    <developerConnection>scm:git:git@github.com:kanuka/kanuka.git</developerConnection>
+    <developerConnection>scm:git:git@github.com:dinject/dinject.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
@@ -33,12 +33,12 @@
 
     <!-- test dependencies -->
 
-    <dependency>
-      <groupId>io.kanuka</groupId>
-      <artifactId>kanuka-generator</artifactId>
-      <version>0.7</version>
-      <scope>test</scope>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>io.kanuka</groupId>-->
+      <!--<artifactId>kanuka-generator</artifactId>-->
+      <!--<version>0.7</version>-->
+      <!--<scope>test</scope>-->
+    <!--</dependency>-->
 
     <dependency>
       <groupId>org.avaje.composite</groupId>
