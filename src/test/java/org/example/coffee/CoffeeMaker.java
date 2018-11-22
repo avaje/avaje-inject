@@ -5,7 +5,7 @@ import org.example.coffee.grind.Grinder;
 
 import javax.inject.Singleton;
 
-@ContextModule(name = "doo", dependsOn = {"x", "y"})
+//@ContextModule(name = "coffee-maker")
 @Singleton
 public class CoffeeMaker {
 

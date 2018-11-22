@@ -12,11 +12,11 @@ public class InjectListTest {
   @Test
   public void test() {
 
-//    try (BeanContext context = new BootContext().load()) {
-//
-//      CombinedSomei bean = context.getBean(CombinedSomei.class);
-//      String other = bean.lotsOfSomes();
-//      assertThat(other).isEqualTo("a,b");
-//    }
+    try (BeanContext context = new BootContext().load()) {
+
+      CombinedSomei bean = context.getBean(CombinedSomei.class);
+      String other = bean.lotsOfSomes();
+      assertThat(other).isEqualTo("a,b");
+    }
   }
 }

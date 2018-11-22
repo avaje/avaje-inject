@@ -33,12 +33,12 @@
 
     <!-- test dependencies -->
 
-    <!--<dependency>-->
-      <!--<groupId>io.dinject</groupId>-->
-      <!--<artifactId>dinject-generator</artifactId>-->
-      <!--<version>0.8</version>-->
-      <!--<scope>test</scope>-->
-    <!--</dependency>-->
+    <dependency>
+      <groupId>io.dinject</groupId>
+      <artifactId>dinject-generator</artifactId>
+      <version>0.9</version>
+      <scope>test</scope>
+    </dependency>
 
     <dependency>
       <groupId>org.avaje.composite</groupId>
