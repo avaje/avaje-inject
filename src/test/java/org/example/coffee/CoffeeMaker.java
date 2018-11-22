@@ -1,9 +1,11 @@
 package org.example.coffee;
 
+import io.dinject.ContextModule;
 import org.example.coffee.grind.Grinder;
 
 import javax.inject.Singleton;
 
+@ContextModule(name = "doo", dependsOn = {"x", "y"})
 @Singleton
 public class CoffeeMaker {
 
