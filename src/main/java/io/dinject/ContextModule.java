@@ -36,9 +36,8 @@ package io.dinject;
  * will be supplied by another module (jar).
  * </p>
  * <p>
- * In the example below we have the "Job System" which depends on the common "Feature Toggle"
- * module. When wiring the Job system module we expect some beans to be provided by the feature toggle
- * module (jar).
+ * In the example below we have the "Job System" which depends on the common "Feature Toggle" module.
+ * When wiring the Job system module we expect some beans to be provided by the feature toggle module (jar).
  * </p>
  *
  * <pre>{@code
@@ -58,12 +57,49 @@ package io.dinject;
 public @interface ContextModule {
 
   /**
-   * The name of the context.
+   * The name of this context/module.
+   * <p>
+   * Other modules can then depend on this name and when they do they should wire after than module.
+   * </p>
    */
   String name() default "";
 
   /**
-   * The list of dependencies this context depends on.
+   * Additional module features that is provided by this module.
+   * <p>
+   * These names are an addition to the module name and can be used in the <code>dependsOn</code> of other modules.
+   * </p>
+   *
+   * <pre>{@code
+   *
+   * // A module that provides 'email-service' and also 'health-check'.
+   * // ie. it has bean(s) that implement a health check interface
+   * @ContextModule(name="email-service", provides={"health-checks"})
+   *
+   * // provides beans that implement a health check interface
+   * // ... wires after 'email-service'
+   * @ContextModule(name="main", provides={"health-checks"}, dependsOn={"email-service"})
+   *
+   * // wire this after all modules that provide 'health-checks'
+   * @ContextModule(name="health-check-service", dependsOn={"health-checks"})
+   *
+   * }</pre>
+   */
+  String[] provides() default {};
+
+  /**
+   * The list of modules this context depends on.
+   * <p>
+   * Effectively dependsOn specifies the modules that must wire before this module.
+   * </p>
+   * <pre>{@code
+   *
+   * // wire after a module that is called 'email-service'
+   * // ... or any module that provides 'email-service'
+   *
+   * @ContextModule(name="...", dependsOn={"email-service"})
+   *
+   * }</pre>
    */
   String[] dependsOn() default {};
 

@@ -17,6 +17,11 @@ public interface Builder {
   String getName();
 
   /**
+   * Return the names of module features that this module provides.
+   */
+  String[] getProvides();
+
+  /**
    * Return the names of modules that this module depends on.
    */
   String[] getDependsOn();

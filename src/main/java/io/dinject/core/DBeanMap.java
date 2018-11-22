@@ -100,6 +100,7 @@ class DBeanMap {
   /**
    * Add all bean instances matching the given type to the list.
    */
+  @SuppressWarnings("unchecked")
   void addAll(Class type, List list) {
     if (beans != null) {
       DContextEntry entry = beans.get(type.getCanonicalName());

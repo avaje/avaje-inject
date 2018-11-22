@@ -51,6 +51,13 @@ public interface BeanContext extends Closeable {
   String getName();
 
   /**
+   * Return the names of module features this bean context provides.
+   *
+   * @see ContextModule
+   */
+  String[] getProvides();
+
+  /**
    * Return the names of modules this bean context depends on.
    *
    * @see ContextModule

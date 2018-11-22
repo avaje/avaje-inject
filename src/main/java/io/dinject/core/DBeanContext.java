@@ -14,6 +14,8 @@ class DBeanContext implements BeanContext {
 
   private final String name;
 
+  private final String[] provides;
+
   private final String[] dependsOn;
 
   private final List<BeanLifecycle> lifecycleList;
@@ -24,8 +26,9 @@ class DBeanContext implements BeanContext {
 
   private boolean closed;
 
-  DBeanContext(String name, String[] dependsOn, List<BeanLifecycle> lifecycleList, DBeanMap beans, Map<String, BeanContext> children) {
+  DBeanContext(String name, String[] provides, String[] dependsOn, List<BeanLifecycle> lifecycleList, DBeanMap beans, Map<String, BeanContext> children) {
     this.name = name;
+    this.provides = provides;
     this.dependsOn = dependsOn;
     this.lifecycleList = lifecycleList;
     this.beans = beans;
@@ -35,6 +38,11 @@ class DBeanContext implements BeanContext {
   @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public String[] getProvides() {
+    return provides;
   }
 
   @Override

@@ -41,6 +41,11 @@ class DBuilder implements Builder {
   private final String name;
 
   /**
+   * The module features this context provides.
+   */
+  private final String[] provides;
+
+  /**
    * The other modules this context dependsOn (that should be built prior).
    */
   private final String[] dependsOn;
@@ -57,8 +62,9 @@ class DBuilder implements Builder {
   /**
    * Create a named context for non-root builders.
    */
-  DBuilder(String name, String[] dependsOn) {
+  DBuilder(String name, String[] provides, String[] dependsOn) {
     this.name = name;
+    this.provides = provides;
     this.dependsOn = dependsOn;
     this.suppliedBeanMap = null;
   }
@@ -68,6 +74,7 @@ class DBuilder implements Builder {
    */
   DBuilder(List<Object> suppliedBeans) {
     this.name = null;
+    this.provides = null;
     this.dependsOn = null;
     this.suppliedBeanMap = new DBeanMap(suppliedBeans);
   }
@@ -75,6 +82,11 @@ class DBuilder implements Builder {
   @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public String[] getProvides() {
+    return provides;
   }
 
   @Override
@@ -218,6 +230,6 @@ class DBuilder implements Builder {
 
   public BeanContext build() {
     runInjectors();
-    return new DBeanContext(name, dependsOn, lifecycleList, beanMap, children);
+    return new DBeanContext(name, provides, dependsOn, lifecycleList, beanMap, children);
   }
 }

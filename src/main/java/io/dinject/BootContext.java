@@ -8,9 +8,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
 
@@ -51,7 +53,7 @@ public class BootContext {
 
   private final List<Object> suppliedBeans = new ArrayList<>();
 
-  private final Set<String> modules = new LinkedHashSet<>();
+  private final Set<String> includeModules = new LinkedHashSet<>();
 
   /**
    * Create a BootContext to ultimately load and return a new BeanContext.
@@ -130,7 +132,7 @@ public class BootContext {
    * @return This BootContext
    */
   public BootContext withModules(String... modules) {
-    this.modules.addAll(Arrays.asList(modules));
+    this.includeModules.addAll(Arrays.asList(modules));
     return this;
   }
 
@@ -178,7 +180,7 @@ public class BootContext {
   public BeanContext load() {
 
     // sort factories by dependsOn
-    FactoryOrder factoryOrder = new FactoryOrder(modules);
+    FactoryOrder factoryOrder = new FactoryOrder(includeModules);
     ServiceLoader.load(BeanContextFactory.class).forEach(factoryOrder::add);
 
     Set<String> moduleNames = factoryOrder.orderFactories();
@@ -236,6 +238,11 @@ public class BootContext {
     @Override
     public String getName() {
       return context.getName();
+    }
+
+    @Override
+    public String[] getProvides() {
+      return context.getProvides();
     }
 
     @Override
@@ -298,7 +305,9 @@ public class BootContext {
 
     private final Set<String> moduleNames = new LinkedHashSet<>();
     private final List<BeanContextFactory> factories = new ArrayList<>();
-    private final List<BeanContextFactory> queue = new ArrayList<>();
+    private final List<FactoryState> queue = new ArrayList<>();
+
+    private final Map<String,FactoryList> providesMap = new HashMap<>();
 
     FactoryOrder(Set<String> includeModules) {
       this.includeModules = includeModules;
@@ -307,13 +316,24 @@ public class BootContext {
     void add(BeanContextFactory factory) {
 
       if (includeModule(factory)) {
-        String[] dependsOn = factory.getDependsOn();
-        if (dependsOn == null || dependsOn.length == 0) {
-          push(factory);
+        FactoryState wrappedFactory = new FactoryState(factory);
+        providesMap.computeIfAbsent(factory.getName(), s -> new FactoryList()).add(wrappedFactory);
+        if (!isEmpty(factory.getProvides())) {
+          for (String feature : factory.getProvides()) {
+            providesMap.computeIfAbsent(feature, s -> new FactoryList()).add(wrappedFactory);
+          }
+        }
+        if (isEmpty(factory.getDependsOn())) {
+          push(wrappedFactory);
         } else {
-          queue.add(factory);
+          // queue it to process by dependency ordering
+          queue.add(wrappedFactory);
         }
       }
+    }
+
+    private boolean isEmpty(String[] values) {
+      return values == null || values.length == 0;
     }
 
     /**
@@ -323,8 +343,12 @@ public class BootContext {
       return includeModules.isEmpty() || includeModules.contains(factory.getName());
     }
 
-    private void push(BeanContextFactory factory) {
-      factories.add(factory);
+    /**
+     * Push the factory onto the build order (the wiring order for modules).
+     */
+    private void push(FactoryState factory) {
+      factory.setPushed();
+      factories.add(factory.getFactory());
       moduleNames.add(factory.getName());
     }
 
@@ -355,7 +379,7 @@ public class BootContext {
 
       if (!queue.isEmpty()) {
         StringBuilder sb = new StringBuilder();
-        for (BeanContextFactory factory : queue) {
+        for (FactoryState factory : queue) {
           sb.append("module ").append(factory.getName()).append(" has unsatisfied dependencies - ");
           for (String depModuleName : factory.getDependsOn()) {
             boolean ok = moduleNames.contains(depModuleName);
@@ -378,10 +402,11 @@ public class BootContext {
     private int processQueuedFactories() {
 
       int count = 0;
-      Iterator<BeanContextFactory> it = queue.iterator();
+      Iterator<FactoryState> it = queue.iterator();
       while (it.hasNext()) {
-        BeanContextFactory factory = it.next();
+        FactoryState factory = it.next();
         if (satisfiedDependencies(factory)) {
+          // push the factory onto the build order
           it.remove();
           push(factory);
           count++;
@@ -393,9 +418,70 @@ public class BootContext {
     /**
      * Return true if the (module) dependencies are satisfied for this factory.
      */
-    private boolean satisfiedDependencies(BeanContextFactory factory) {
-      for (String moduleName : factory.getDependsOn()) {
-        if (!moduleNames.contains(moduleName)) {
+    private boolean satisfiedDependencies(FactoryState factory) {
+      for (String moduleOrFeature : factory.getDependsOn()) {
+        FactoryList factories = providesMap.get(moduleOrFeature);
+        if (factories == null || !factories.allPushed()) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+
+  /**
+   * Wrapper on Factory holding the pushed state.
+   */
+  private static class FactoryState {
+
+    private final BeanContextFactory factory;
+    private boolean pushed;
+
+    private FactoryState(BeanContextFactory factory) {
+      this.factory = factory;
+    }
+
+    /**
+     * Set when factory is pushed onto the build/wiring order.
+     */
+    void setPushed() {
+      this.pushed = true;
+    }
+
+    boolean isPushed() {
+      return pushed;
+    }
+
+    BeanContextFactory getFactory() {
+      return factory;
+    }
+
+    String getName() {
+      return factory.getName();
+    }
+
+    String[] getDependsOn() {
+      return factory.getDependsOn();
+    }
+  }
+
+  /**
+   * List of factories for a given name or feature.
+   */
+  private static class FactoryList {
+
+    private final List<FactoryState> factories = new ArrayList<>();
+
+    void add(FactoryState factory) {
+      factories.add(factory);
+    }
+
+    /**
+     * Return true if all factories here have been pushed onto the build order.
+     */
+    boolean allPushed() {
+      for (FactoryState factory : factories) {
+        if (!factory.isPushed()) {
           return false;
         }
       }

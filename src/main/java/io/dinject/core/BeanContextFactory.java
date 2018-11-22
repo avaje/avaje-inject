@@ -13,6 +13,11 @@ public interface BeanContextFactory {
   String getName();
 
   /**
+   * Return the name of module features this module provides.
+   */
+  String[] getProvides();
+
+  /**
    * Return the names of bean contexts (modules) that this is dependent on (they need to be built before this one).
    */
   String[] getDependsOn();
