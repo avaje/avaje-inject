@@ -8,6 +8,9 @@ public class BFact {
 
   private final CoffeeMaker maker;
 
+  private int countClose;
+  private int countInit;
+
   public BFact(AFact afact, CoffeeMaker maker) {
     this.afact = afact;
     this.maker = maker;
@@ -18,4 +21,19 @@ public class BFact {
     return afact.a();
   }
 
+  public void init() {
+    countInit++;
+  }
+
+  public void close() {
+    countClose++;
+  }
+
+  int getCountClose() {
+    return countClose;
+  }
+
+  int getCountInit() {
+    return countInit;
+  }
 }
