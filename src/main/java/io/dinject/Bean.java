@@ -40,4 +40,14 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Bean {
+
+  /**
+   * Specify a method to be treated like a <code>@PostConstruct</code>
+   */
+  String initMethod() default "";
+
+  /**
+   * Specify a method to be treated like a <code>@PreDestroy</code>
+   */
+  String destroyMethod() default "";
 }
