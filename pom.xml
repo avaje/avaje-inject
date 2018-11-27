@@ -36,7 +36,7 @@
     <dependency>
       <groupId>io.dinject</groupId>
       <artifactId>dinject-generator</artifactId>
-      <version>0.11</version>
+      <version>0.12-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
 
