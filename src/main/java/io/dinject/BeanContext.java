@@ -94,6 +94,11 @@ public interface BeanContext extends Closeable {
   <T> T getBean(Class<T> type, String name);
 
   /**
+   * Return the wiring candidate bean with name and priority.
+   */
+  <T> BeanEntry<T> candidate(Class<T> type, String name);
+
+  /**
    * Return the list of beans that have an annotation.
    *
    * <pre>{@code

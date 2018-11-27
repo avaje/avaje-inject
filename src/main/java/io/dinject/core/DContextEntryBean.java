@@ -1,5 +1,7 @@
 package io.dinject.core;
 
+import io.dinject.BeanEntry;
+
 import javax.inject.Provider;
 import java.util.Objects;
 
@@ -62,6 +64,20 @@ class DContextEntryBean {
 
   boolean isSecondary() {
     return flag == Flag.SECONDARY;
+  }
+
+  @SuppressWarnings("unchecked")
+  BeanEntry getBeanEntry() {
+    return new BeanEntry(flag, getBean(), name);
+  }
+
+  @SuppressWarnings("unchecked")
+  BeanEntry candidate(String name) {
+    if (name == null || Objects.equals(this.name, name)) {
+      return new BeanEntry(flag, obtainInstance(), name);
+    } else {
+      return null;
+    }
   }
 
   /**

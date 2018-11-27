@@ -1,5 +1,7 @@
 package io.dinject.core;
 
+import io.dinject.BeanEntry;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +13,21 @@ import java.util.List;
 class DContextEntry {
 
   private final List<DContextEntryBean> entries = new ArrayList<>();
+
+  @SuppressWarnings("unchecked")
+  <T> BeanEntry<T> candidate(String name) {
+    if (entries.isEmpty()) {
+      return null;
+    }
+    if (entries.size() == 1) {
+      DContextEntryBean entry = entries.get(0);
+      return entry.candidate(name);
+    }
+
+    EntryMatcher matcher = new EntryMatcher(name);
+    matcher.match(entries);
+    return matcher.candidate();
+  }
 
   /**
    * Get a single bean given the name.
@@ -96,10 +113,23 @@ class DContextEntry {
       if (match == null) {
         return null;
       }
+      checkSecondary();
+      return match.getBean();
+    }
+
+    BeanEntry candidate() {
+      if (match == null) {
+        return null;
+      }
+      checkSecondary();
+      return match.getBeanEntry();
+    }
+
+    private void checkSecondary() {
       if (match.isSecondary() && ignoredSecondaryMatch != null) {
         throw new IllegalStateException("Expecting only 1 bean match but have multiple secondary beans " + match.getBean() + " and " + ignoredSecondaryMatch.getBean());
       }
-      return match.getBean();
     }
+
   }
 }

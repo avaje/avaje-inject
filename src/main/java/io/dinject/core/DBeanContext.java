@@ -1,6 +1,7 @@
 package io.dinject.core;
 
 import io.dinject.BeanContext;
+import io.dinject.BeanEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,20 +56,25 @@ class DBeanContext implements BeanContext {
     return getBean(beanClass, null);
   }
 
+  @Override
+  public <T> BeanEntry<T> candidate(Class<T> type, String name) {
+
+    // sort candiates by priority - Primary, Normal, Secondary
+    EntrySort<T> entrySort = new EntrySort<>();
+
+    entrySort.add(beans.candidate(type, name));
+    for (BeanContext childContext : children.values()) {
+      entrySort.add(childContext.candidate(type, name));
+    }
+    return entrySort.get();
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   public <T> T getBean(Class<T> beanClass, String name) {
-    T bean = beans.getBean(beanClass, name);
-    if (bean != null) {
-      return bean;
-    }
-    for (BeanContext childContext : children.values()) {
-      bean = childContext.getBean(beanClass, name);
-      if (bean != null) {
-        return bean;
-      }
-    }
-    return null;
+
+    BeanEntry<T> candidate = candidate(beanClass, name);
+    return (candidate == null) ? null : candidate.getBean();
   }
 
   @Override
@@ -123,6 +129,51 @@ class DBeanContext implements BeanContext {
           childContext.close();
         }
       }
+    }
+  }
+
+  private static class EntrySort<T> {
+
+    private BeanEntry<T> primary;
+    private int primaryCount;
+    private BeanEntry<T> secondary;
+    private int secondaryCount;
+    private BeanEntry<T> normal;
+    private int normalCount;
+
+    void add(BeanEntry<T> candidate) {
+
+      if (candidate != null) {
+        if (candidate.getPriority() == Flag.PRIMARY) {
+          primary = candidate;
+          primaryCount++;
+        } else if (candidate.getPriority() == Flag.SECONDARY) {
+          secondary = candidate;
+          secondaryCount++;
+        } else {
+          normal = candidate;
+          normalCount++;
+        }
+      }
+    }
+
+    BeanEntry<T> get() {
+      if (primaryCount > 1) {
+        throw new IllegalStateException("Multiple @Primary beans when only expecting one? Last was: " + primary);
+      }
+      if (primaryCount == 1) {
+        return primary;
+      }
+      if (normalCount > 1) {
+        throw new IllegalStateException("Multiple beans when only expecting one? Maybe use @Primary or @Secondary? Last was: " + normal);
+      }
+      if (normalCount == 1) {
+        return normal;
+      }
+      if (secondaryCount > 1) {
+        throw new IllegalStateException("Multiple @Secondary beans when only expecting one? Last was: " + primary);
+      }
+      return secondary;
     }
   }
 }

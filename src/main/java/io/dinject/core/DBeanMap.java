@@ -1,5 +1,7 @@
 package io.dinject.core;
 
+import io.dinject.BeanEntry;
+
 import javax.inject.Named;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -109,6 +111,19 @@ class DBeanMap {
       if (bean != null) {
         return bean;
       }
+    }
+    return null;
+  }
+
+  <T> BeanEntry<T> candidate(Class<T> type, String name) {
+
+    if (beans == null) {
+      // no beans in the root suppliedBeanMap
+      return null;
+    }
+    DContextEntry entry = beans.get(type.getCanonicalName());
+    if (entry != null) {
+      return entry.candidate(name);
     }
     return null;
   }

@@ -261,6 +261,11 @@ public class BootContext {
     }
 
     @Override
+    public <T> BeanEntry<T> candidate(Class<T> type, String name) {
+      return context.candidate(type, name);
+    }
+
+    @Override
     public List<Object> getBeansWithAnnotation(Class<?> annotation) {
       return context.getBeansWithAnnotation(annotation);
     }
