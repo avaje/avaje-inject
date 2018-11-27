@@ -1,8 +1,10 @@
 package org.example.coffee.qualifier;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
-@Blue
+@Named("Blue")
+//@Blue
 @Singleton
 public class BlueStore implements SomeStore {
 
