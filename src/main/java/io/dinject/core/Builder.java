@@ -65,6 +65,16 @@ public interface Builder {
   void register(Object bean, String name, Class<?>... types);
 
   /**
+   * Register the bean as a Primary bean.
+   */
+  void registerPrimary(Object bean, String name, Class<?>... types);
+
+  /**
+   * Register the bean as a secondary bean.
+   */
+  void registerSecondary(Object bean, String name, Class<?>... types);
+
+  /**
    * Add a lifecycle bean.
    */
   void addLifecycle(BeanLifecycle bean);

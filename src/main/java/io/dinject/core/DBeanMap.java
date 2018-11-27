@@ -5,6 +5,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.dinject.core.Flag.NORMAL;
+import static io.dinject.core.Flag.PRIMARY;
+import static io.dinject.core.Flag.SECONDARY;
+
 /**
  * Map of types (class types, interfaces and annotations) to a DContextEntry where the
  * entry holds a list of bean instances for that type.
@@ -45,7 +49,7 @@ class DBeanMap {
     Named annotation = suppliedClass.getAnnotation(Named.class);
     String name = (annotation == null) ? null : annotation.value();
 
-    DContextEntryBean entryBean = DContextEntryBean.of(bean, name);
+    DContextEntryBean entryBean = DContextEntryBean.of(bean, name, PRIMARY);
     beans.computeIfAbsent(suppliedType.getCanonicalName(), s -> new DContextEntry()).add(entryBean);
     for (Class<?> anInterface : suppliedClass.getInterfaces()) {
       beans.computeIfAbsent(anInterface.getCanonicalName(), s -> new DContextEntry()).add(entryBean);
@@ -65,9 +69,21 @@ class DBeanMap {
     }
   }
 
-  void register(Object bean, String name, Class<?>... types) {
+  void registerPrimary(Object bean, String name, Class<?>... types) {
+    registerWith(PRIMARY, bean, name, types);
+  }
 
-    DContextEntryBean entryBean = DContextEntryBean.of(bean, name);
+  void registerSecondary(Object bean, String name, Class<?>... types) {
+    registerWith(SECONDARY, bean, name, types);
+  }
+
+  void register(Object bean, String name, Class<?>... types) {
+    registerWith(NORMAL, bean, name, types);
+  }
+
+  void registerWith(int flag, Object bean, String name, Class<?>... types) {
+
+    DContextEntryBean entryBean = DContextEntryBean.of(bean, name, flag);
     beans.computeIfAbsent(bean.getClass().getCanonicalName(), s -> new DContextEntry()).add(entryBean);
 
     if (types != null) {

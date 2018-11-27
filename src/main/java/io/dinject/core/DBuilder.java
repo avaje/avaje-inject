@@ -180,6 +180,16 @@ class DBuilder implements Builder {
   }
 
   @Override
+  public void registerPrimary(Object bean, String name, Class<?>... types) {
+    beanMap.registerPrimary(bean, name, types);
+  }
+
+  @Override
+  public void registerSecondary(Object bean, String name, Class<?>... types) {
+    beanMap.registerSecondary(bean, name, types);
+  }
+
+  @Override
   public void addLifecycle(BeanLifecycle wrapper) {
     lifecycleList.add(wrapper);
   }
@@ -213,7 +223,11 @@ class DBuilder implements Builder {
       if (name != null) {
         msg += " name:" + name;
       }
-      msg += " when creating " + injectTarget;
+      List<T> beanList = getList(cls);
+      msg += " when creating " + injectTarget + " - potential beans to inject: " + beanList;
+      if (!beanList.isEmpty()) {
+        msg += ". Check @Named or Qualifier being used";
+      }
       throw new IllegalStateException(msg);
     }
     return bean;

@@ -13,22 +13,26 @@ class DContextEntryBean {
    *
    * @param bean The bean itself or provider of the bean
    * @param name The optional name for the bean
+   * @param flag The flag for primary, secondary or normal
    */
-  public static DContextEntryBean of(Object bean, String name) {
+  public static DContextEntryBean of(Object bean, String name, int flag) {
     if (bean instanceof Provider) {
-      return new DContextEntryBean.Prov(bean, name);
+      return new DContextEntryBean.Prov(bean, name, flag);
     } else {
-      return new DContextEntryBean(bean, name);
+      return new DContextEntryBean(bean, name, flag);
     }
   }
 
-  protected final Object source;
+  final Object source;
 
   private final String name;
 
-  private DContextEntryBean(Object source, String name) {
+  private final int flag;
+
+  private DContextEntryBean(Object source, String name, int flag) {
     this.source = source;
     this.name = name;
+    this.flag = flag;
   }
 
   boolean isNameMatch(String name) {
@@ -52,6 +56,14 @@ class DContextEntryBean {
     }
   }
 
+  boolean isPrimary() {
+    return flag == Flag.PRIMARY;
+  }
+
+  boolean isSecondary() {
+    return flag == Flag.SECONDARY;
+  }
+
   /**
    * Provider based entry - get it once.
    */
@@ -59,8 +71,8 @@ class DContextEntryBean {
 
     private Object actualBean;
 
-    private Prov(Object provider, String name) {
-      super(provider, name);
+    private Prov(Object provider, String name, int flag) {
+      super(provider, name, flag);
     }
 
     @Override

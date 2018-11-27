@@ -23,29 +23,10 @@ class DContextEntry {
       DContextEntryBean entry = entries.get(0);
       return entry.getIfMatchWithDefault(name);
     }
-    List<Object> beans = allMatches(name);
-    if (beans.isEmpty()) {
-      return null;
-    }
-    if (beans.size() == 1) {
-      return beans.get(0);
-    } else {
-      throw new IllegalStateException("Expecting only 1 bean match but found " + beans.size() + " beans: " + beans);
-    }
-  }
 
-  /**
-   * Return all the beans that match on the given name.
-   */
-  List<Object> allMatches(String name) {
-    List<Object> beans = new ArrayList<>();
-    for (DContextEntryBean entry : entries) {
-      if (entry.isNameMatch(name)) {
-        beans.add(entry.getBean());
-      }
-    }
-
-    return beans;
+    EntryMatcher matcher = new EntryMatcher(name);
+    matcher.match(entries);
+    return matcher.getBean();
   }
 
   /**
@@ -61,4 +42,64 @@ class DContextEntry {
     entries.add(entryBean);
   }
 
+  static class EntryMatcher {
+
+    private final String name;
+
+    private DContextEntryBean match;
+    private DContextEntryBean ignoredSecondaryMatch;
+
+    EntryMatcher(String name) {
+      this.name = name;
+    }
+
+    void match(List<DContextEntryBean> entries) {
+      for (DContextEntryBean entry : entries) {
+        if (entry.isNameMatch(name)) {
+          checkMatch(entry);
+        }
+      }
+    }
+
+    private void checkMatch(DContextEntryBean entry) {
+      if (match == null) {
+        match = entry;
+        return;
+      }
+      if (match.isSecondary() && !entry.isSecondary()) {
+        // secondary loses
+        match = entry;
+        return;
+      }
+      if (match.isPrimary()) {
+        if (entry.isPrimary()) {
+          throw new IllegalStateException("Expecting only 1 bean match but have multiple primary beans " + match.getBean() + " and " + entry.getBean());
+        }
+        // leave as is, current primary wins
+        return;
+      }
+      if (entry.isSecondary()) {
+        if (match.isSecondary()) {
+          ignoredSecondaryMatch = entry;
+        }
+        return;
+      }
+      if (entry.isPrimary()) {
+        // new primary wins
+        match = entry;
+        return;
+      }
+      throw new IllegalStateException("Expecting only 1 bean match but have multiple matching beans " + match.getBean() + " and " + entry.getBean());
+    }
+
+    Object getBean() {
+      if (match == null) {
+        return null;
+      }
+      if (match.isSecondary() && ignoredSecondaryMatch != null) {
+        throw new IllegalStateException("Expecting only 1 bean match but have multiple secondary beans " + match.getBean() + " and " + ignoredSecondaryMatch.getBean());
+      }
+      return match.getBean();
+    }
+  }
 }
