@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * Entry for a given key (bean class, interface class or annotation class).
- *
+ * <p>
  * This holds a list of managed beans (which might be named).
  */
 class DContextEntry {
@@ -30,7 +30,7 @@ class DContextEntry {
     if (beans.size() == 1) {
       return beans.get(0);
     } else {
-      throw new IllegalStateException("Expecting only 1 bean match but found " + beans.size());
+      throw new IllegalStateException("Expecting only 1 bean match but found " + beans.size() + " beans: " + beans);
     }
   }
 

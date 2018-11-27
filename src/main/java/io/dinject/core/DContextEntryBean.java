@@ -32,7 +32,7 @@ class DContextEntryBean {
   }
 
   boolean isNameMatch(String name) {
-    return name.equals(this.name);
+    return name == null || name.equals(this.name);
   }
 
   Object obtainInstance() {
