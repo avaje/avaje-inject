@@ -1,6 +1,5 @@
 package org.example.coffee.primary;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 @Singleton
@@ -8,7 +7,7 @@ public class UserOfPEmailer {
 
   private final PEmailer emailer;
 
-  public UserOfPEmailer(@Named("prime") PEmailer emailer) {
+  public UserOfPEmailer(PEmailer emailer) {
     this.emailer = emailer;
   }
 
