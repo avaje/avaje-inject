@@ -7,9 +7,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.dinject.core.Flag.NORMAL;
-import static io.dinject.core.Flag.PRIMARY;
-import static io.dinject.core.Flag.SECONDARY;
+import static io.dinject.BeanEntry.NORMAL;
+import static io.dinject.BeanEntry.PRIMARY;
+import static io.dinject.BeanEntry.SECONDARY;
+import static io.dinject.BeanEntry.SUPPLIED;
 
 /**
  * Map of types (class types, interfaces and annotations) to a DContextEntry where the
@@ -51,7 +52,7 @@ class DBeanMap {
     Named annotation = suppliedClass.getAnnotation(Named.class);
     String name = (annotation == null) ? null : annotation.value();
 
-    DContextEntryBean entryBean = DContextEntryBean.of(bean, name, PRIMARY);
+    DContextEntryBean entryBean = DContextEntryBean.of(bean, name, SUPPLIED);
     beans.computeIfAbsent(suppliedType.getCanonicalName(), s -> new DContextEntry()).add(entryBean);
     for (Class<?> anInterface : suppliedClass.getInterfaces()) {
       beans.computeIfAbsent(anInterface.getCanonicalName(), s -> new DContextEntry()).add(entryBean);

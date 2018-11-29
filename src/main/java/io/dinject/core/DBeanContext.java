@@ -69,10 +69,8 @@ class DBeanContext implements BeanContext {
     return entrySort.get();
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> T getBean(Class<T> beanClass, String name) {
-
     BeanEntry<T> candidate = candidate(beanClass, name);
     return (candidate == null) ? null : candidate.getBean();
   }
@@ -132,8 +130,9 @@ class DBeanContext implements BeanContext {
     }
   }
 
-  private static class EntrySort<T> {
+  static class EntrySort<T> {
 
+    private BeanEntry<T> supplied;
     private BeanEntry<T> primary;
     private int primaryCount;
     private BeanEntry<T> secondary;
@@ -141,37 +140,48 @@ class DBeanContext implements BeanContext {
     private BeanEntry<T> normal;
     private int normalCount;
 
-    void add(BeanEntry<T> candidate) {
+    private final List<BeanEntry<T>> all = new ArrayList<>();
 
-      if (candidate != null) {
-        if (candidate.getPriority() == Flag.PRIMARY) {
-          primary = candidate;
-          primaryCount++;
-        } else if (candidate.getPriority() == Flag.SECONDARY) {
-          secondary = candidate;
-          secondaryCount++;
-        } else {
-          normal = candidate;
-          normalCount++;
-        }
+    void add(BeanEntry<T> candidate) {
+      if (candidate == null) {
+        return;
+      }
+      if (candidate.isSupplied()) {
+        // a supplied bean trumps all
+        supplied = candidate;
+        return;
+      }
+      all.add(candidate);
+      if (candidate.isPrimary()) {
+        primary = candidate;
+        primaryCount++;
+      } else if (candidate.isSecondary()) {
+        secondary = candidate;
+        secondaryCount++;
+      } else {
+        normal = candidate;
+        normalCount++;
       }
     }
 
     BeanEntry<T> get() {
+      if (supplied != null) {
+        return supplied;
+      }
       if (primaryCount > 1) {
-        throw new IllegalStateException("Multiple @Primary beans when only expecting one? Last was: " + primary);
+        throw new IllegalStateException("Multiple @Primary beans when only expecting one? Beans: " + all);
       }
       if (primaryCount == 1) {
         return primary;
       }
       if (normalCount > 1) {
-        throw new IllegalStateException("Multiple beans when only expecting one? Maybe use @Primary or @Secondary? Last was: " + normal);
+        throw new IllegalStateException("Multiple beans when only expecting one? Maybe use @Primary or @Secondary? Beans: " + all);
       }
       if (normalCount == 1) {
         return normal;
       }
       if (secondaryCount > 1) {
-        throw new IllegalStateException("Multiple @Secondary beans when only expecting one? Last was: " + primary);
+        throw new IllegalStateException("Multiple @Secondary beans when only expecting one? Beans: " + all);
       }
       return secondary;
     }

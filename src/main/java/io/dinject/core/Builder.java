@@ -1,6 +1,7 @@
 package io.dinject.core;
 
 import io.dinject.BeanContext;
+import io.dinject.BeanEntry;
 
 import java.util.List;
 import java.util.Optional;
@@ -115,9 +116,9 @@ public interface Builder {
   <T> List<T> getList(Class<T> interfaceType);
 
   /**
-   * Get a named dependency allowing it to be null.
+   * Get a candidate dependency allowing it to be null.
    */
-  <T> T getMaybe(Class<T> cls, String name);
+  <T> BeanEntry<T> candidate(Class<T> cls, String name);
 
   /**
    * Build and return the bean context.

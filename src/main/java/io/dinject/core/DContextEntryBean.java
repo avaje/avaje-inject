@@ -59,11 +59,11 @@ class DContextEntryBean {
   }
 
   boolean isPrimary() {
-    return flag == Flag.PRIMARY;
+    return flag == BeanEntry.PRIMARY;
   }
 
   boolean isSecondary() {
-    return flag == Flag.SECONDARY;
+    return flag == BeanEntry.SECONDARY;
   }
 
   @SuppressWarnings("unchecked")

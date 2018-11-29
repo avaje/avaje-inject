@@ -180,7 +180,7 @@ public class BootContext {
   public BeanContext load() {
 
     // sort factories by dependsOn
-    FactoryOrder factoryOrder = new FactoryOrder(includeModules);
+    FactoryOrder factoryOrder = new FactoryOrder(includeModules, !suppliedBeans.isEmpty());
     ServiceLoader.load(BeanContextFactory.class).forEach(factoryOrder::add);
 
     Set<String> moduleNames = factoryOrder.orderFactories();
@@ -307,6 +307,7 @@ public class BootContext {
   static class FactoryOrder {
 
     private final Set<String> includeModules;
+    private final boolean suppliedBeans;
 
     private final Set<String> moduleNames = new LinkedHashSet<>();
     private final List<BeanContextFactory> factories = new ArrayList<>();
@@ -314,8 +315,9 @@ public class BootContext {
 
     private final Map<String,FactoryList> providesMap = new HashMap<>();
 
-    FactoryOrder(Set<String> includeModules) {
+    FactoryOrder(Set<String> includeModules, boolean suppliedBeans) {
       this.includeModules = includeModules;
+      this.suppliedBeans = suppliedBeans;
     }
 
     void add(BeanContextFactory factory) {
@@ -382,7 +384,14 @@ public class BootContext {
         count = processQueuedFactories();
       } while (count > 0);
 
-      if (!queue.isEmpty()) {
+      if (suppliedBeans) {
+        // just push everything left assuming supplied beans
+        // will satisfy the required dependencies
+        for (FactoryState factoryState : queue) {
+          push(factoryState);
+        }
+
+      } else  if (!queue.isEmpty()) {
         StringBuilder sb = new StringBuilder();
         for (FactoryState factory : queue) {
           sb.append("module ").append(factory.getName()).append(" has unsatisfied dependencies - ");

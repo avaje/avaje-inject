@@ -1,6 +1,7 @@
 package io.dinject.core;
 
 import io.dinject.BeanContext;
+import io.dinject.BeanEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,36 +138,31 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public <T> T getMaybe(Class<T> beanClass, String name) {
+  public <T> BeanEntry<T> candidate(Class<T> cls, String name) {
 
-    T bean;
     if (suppliedBeanMap != null) {
-      bean = suppliedBeanMap.getBean(beanClass, name);
-      if (bean != null) {
-        return bean;
+      BeanEntry<T> entry = suppliedBeanMap.candidate(cls, name);
+      if (entry != null) {
+        return entry;
       }
     }
 
-    // look locally first
-    bean = beanMap.getBean(beanClass, name);
-    if (bean != null) {
-      return bean;
-    }
-
-    // look in child context
+    DBeanContext.EntrySort<T> entrySort = new DBeanContext.EntrySort<>();
+    entrySort.add(beanMap.candidate(cls, name));
     for (BeanContext childContext : children.values()) {
-      bean = childContext.getBean(beanClass);
-      if (bean != null) {
-        return bean;
-      }
+      entrySort.add(childContext.candidate(cls, name));
     }
 
     if (parent != null) {
       // look in parent context (cross-module dependency)
-      return parent.getMaybe(beanClass, name);
+      entrySort.add(parent.candidate(cls, name));
     }
+    return entrySort.get();
+  }
 
-    return null;
+  private <T> T getMaybe(Class<T> beanClass, String name) {
+    BeanEntry<T> entry = candidate(beanClass, name);
+    return (entry == null) ? null : entry.getBean();
   }
 
   @Override
