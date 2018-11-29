@@ -55,6 +55,8 @@ public class BootContext {
 
   private final Set<String> includeModules = new LinkedHashSet<>();
 
+  private boolean ignoreMissingModuleDependencies;
+
   /**
    * Create a BootContext to ultimately load and return a new BeanContext.
    *
@@ -115,6 +117,7 @@ public class BootContext {
    *     try (BeanContext context = new BootContext()
    *       .withBeans(mockEmailService)
    *       .withModules("coffee")
+   *       .withIgnoreMissingModuleDependencies()
    *       .load()) {
    *
    *       // built with test doubles injected ...
@@ -127,12 +130,20 @@ public class BootContext {
    *
    * }</pre>
    *
-   *
    * @param modules The names of modules that we want to include in dependency injection.
    * @return This BootContext
    */
   public BootContext withModules(String... modules) {
     this.includeModules.addAll(Arrays.asList(modules));
+    return this;
+  }
+
+  /**
+   * Set this when building a BeanContext (typically for testing) and supplied beans replace module dependencies.
+   * This means we don't need the usual module dependencies as supplied beans are used instead.
+   */
+  public BootContext withIgnoreMissingModuleDependencies() {
+    this.ignoreMissingModuleDependencies = true;
     return this;
   }
 
@@ -180,7 +191,7 @@ public class BootContext {
   public BeanContext load() {
 
     // sort factories by dependsOn
-    FactoryOrder factoryOrder = new FactoryOrder(includeModules, !suppliedBeans.isEmpty());
+    FactoryOrder factoryOrder = new FactoryOrder(includeModules, !suppliedBeans.isEmpty(), ignoreMissingModuleDependencies);
     ServiceLoader.load(BeanContextFactory.class).forEach(factoryOrder::add);
 
     Set<String> moduleNames = factoryOrder.orderFactories();
@@ -308,16 +319,18 @@ public class BootContext {
 
     private final Set<String> includeModules;
     private final boolean suppliedBeans;
+    private final boolean ignoreMissingModuleDependencies;
 
     private final Set<String> moduleNames = new LinkedHashSet<>();
     private final List<BeanContextFactory> factories = new ArrayList<>();
     private final List<FactoryState> queue = new ArrayList<>();
 
-    private final Map<String,FactoryList> providesMap = new HashMap<>();
+    private final Map<String, FactoryList> providesMap = new HashMap<>();
 
-    FactoryOrder(Set<String> includeModules, boolean suppliedBeans) {
+    FactoryOrder(Set<String> includeModules, boolean suppliedBeans, boolean ignoreMissingModuleDependencies) {
       this.includeModules = includeModules;
       this.suppliedBeans = suppliedBeans;
+      this.ignoreMissingModuleDependencies = ignoreMissingModuleDependencies;
     }
 
     void add(BeanContextFactory factory) {
@@ -384,25 +397,26 @@ public class BootContext {
         count = processQueuedFactories();
       } while (count > 0);
 
-      if (suppliedBeans) {
+      if (suppliedBeans || ignoreMissingModuleDependencies) {
         // just push everything left assuming supplied beans
         // will satisfy the required dependencies
         for (FactoryState factoryState : queue) {
           push(factoryState);
         }
 
-      } else  if (!queue.isEmpty()) {
+      } else if (!queue.isEmpty()) {
         StringBuilder sb = new StringBuilder();
         for (FactoryState factory : queue) {
-          sb.append("module ").append(factory.getName()).append(" has unsatisfied dependencies - ");
+          sb.append("Module [").append(factory.getName()).append("] has unsatisfied dependencies on modules:");
           for (String depModuleName : factory.getDependsOn()) {
-            boolean ok = moduleNames.contains(depModuleName);
-            String result = (ok) ? "ok" : "UNSATISFIED";
-            sb.append(String.format("depends on %s - %s", depModuleName, result));
+            if (!moduleNames.contains(depModuleName)) {
+              sb.append(String.format(" [%s]", depModuleName));
+            }
           }
         }
 
-        sb.append("- Modules loaded ok ").append(moduleNames);
+        sb.append(". Modules that were loaded ok are:").append(moduleNames);
+        sb.append(". Consider using BootContext.withIgnoreMissingModuleDependencies() or BootContext.withSuppliedBeans(...)");
         throw new IllegalStateException(sb.toString());
       }
     }

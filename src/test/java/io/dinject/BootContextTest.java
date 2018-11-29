@@ -15,7 +15,7 @@ public class BootContextTest {
   @Test
   public void noDepends() {
 
-    BootContext.FactoryOrder factoryOrder = new BootContext.FactoryOrder(Collections.emptySet(), true);
+    BootContext.FactoryOrder factoryOrder = new BootContext.FactoryOrder(Collections.emptySet(), true, true);
     factoryOrder.add(bc("1", null, null));
     factoryOrder.add(bc("2", null, null));
     factoryOrder.add(bc("3", null, null));
@@ -27,7 +27,7 @@ public class BootContextTest {
   @Test
   public void name_depends() {
 
-    BootContext.FactoryOrder factoryOrder = new BootContext.FactoryOrder(Collections.emptySet(), true);
+    BootContext.FactoryOrder factoryOrder = new BootContext.FactoryOrder(Collections.emptySet(), true, true);
     factoryOrder.add(bc("two", null, "one"));
     factoryOrder.add(bc("one", null, null));
     factoryOrder.orderFactories();
@@ -38,7 +38,7 @@ public class BootContextTest {
   @Test
   public void name_depends4() {
 
-    BootContext.FactoryOrder factoryOrder = new BootContext.FactoryOrder(Collections.emptySet(), true);
+    BootContext.FactoryOrder factoryOrder = new BootContext.FactoryOrder(Collections.emptySet(), true, true);
     factoryOrder.add(bc("1", null, "3"));
     factoryOrder.add(bc("2", null, "4"));
     factoryOrder.add(bc("3", null, "4"));
@@ -52,7 +52,7 @@ public class BootContextTest {
   @Test
   public void nameFeature_depends() {
 
-    BootContext.FactoryOrder factoryOrder = new BootContext.FactoryOrder(Collections.emptySet(), true);
+    BootContext.FactoryOrder factoryOrder = new BootContext.FactoryOrder(Collections.emptySet(), true, true);
     factoryOrder.add(bc("1", "a", "3"));
     factoryOrder.add(bc("2", null, "4,a"));
     factoryOrder.add(bc("3", null, "4"));
@@ -66,7 +66,7 @@ public class BootContextTest {
   @Test
   public void feature_depends() {
 
-    BootContext.FactoryOrder factoryOrder = new BootContext.FactoryOrder(Collections.emptySet(), true);
+    BootContext.FactoryOrder factoryOrder = new BootContext.FactoryOrder(Collections.emptySet(), true, true);
     factoryOrder.add(bc("two", null, "myfeature"));
     factoryOrder.add(bc("one", "myfeature", null));
     factoryOrder.orderFactories();
@@ -77,7 +77,7 @@ public class BootContextTest {
   @Test
   public void feature_depends2() {
 
-    BootContext.FactoryOrder factoryOrder = new BootContext.FactoryOrder(Collections.emptySet(), true);
+    BootContext.FactoryOrder factoryOrder = new BootContext.FactoryOrder(Collections.emptySet(), true, true);
     factoryOrder.add(bc("two", null, "myfeature"));
     factoryOrder.add(bc("one", "myfeature", null));
     factoryOrder.add(bc("three", "myfeature", null));
