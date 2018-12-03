@@ -1,8 +1,9 @@
 package io.dinject.core;
 
+import io.dinject.BeanEntry;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class DContextEntryTest {
 
@@ -10,9 +11,9 @@ public class DContextEntryTest {
   public void get_when_onePrimary() {
 
     DContextEntry entry = new DContextEntry();
-    entry.add(DContextEntryBean.of("P", null, Flag.PRIMARY));
-    entry.add(DContextEntryBean.of("N", null, Flag.NORMAL));
-    entry.add(DContextEntryBean.of("S", null, Flag.SECONDARY));
+    entry.add(DContextEntryBean.of("P", null, BeanEntry.PRIMARY));
+    entry.add(DContextEntryBean.of("N", null, BeanEntry.NORMAL));
+    entry.add(DContextEntryBean.of("S", null, BeanEntry.SECONDARY));
 
     Object bean = entry.get(null);
     assertEquals(bean, "P");
@@ -22,9 +23,9 @@ public class DContextEntryTest {
   public void get_when_twoPrimary() {
 
     DContextEntry entry = new DContextEntry();
-    entry.add(DContextEntryBean.of("P", null, Flag.PRIMARY));
-    entry.add(DContextEntryBean.of("N", null, Flag.NORMAL));
-    entry.add(DContextEntryBean.of("S", null, Flag.PRIMARY));
+    entry.add(DContextEntryBean.of("P", null, BeanEntry.PRIMARY));
+    entry.add(DContextEntryBean.of("N", null, BeanEntry.NORMAL));
+    entry.add(DContextEntryBean.of("S", null, BeanEntry.PRIMARY));
 
     entry.get(null);
   }
@@ -33,8 +34,8 @@ public class DContextEntryTest {
   public void get_when_oneNormal() {
 
     DContextEntry entry = new DContextEntry();
-    entry.add(DContextEntryBean.of("N", null, Flag.NORMAL));
-    entry.add(DContextEntryBean.of("S", null, Flag.SECONDARY));
+    entry.add(DContextEntryBean.of("N", null, BeanEntry.NORMAL));
+    entry.add(DContextEntryBean.of("S", null, BeanEntry.SECONDARY));
 
     Object bean = entry.get(null);
     assertEquals(bean, "N");
@@ -45,9 +46,9 @@ public class DContextEntryTest {
   public void get_when_oneNormal2() {
 
     DContextEntry entry = new DContextEntry();
-    entry.add(DContextEntryBean.of("N", null, Flag.NORMAL));
-    entry.add(DContextEntryBean.of("S1", null, Flag.SECONDARY));
-    entry.add(DContextEntryBean.of("S2", null, Flag.SECONDARY));
+    entry.add(DContextEntryBean.of("N", null, BeanEntry.NORMAL));
+    entry.add(DContextEntryBean.of("S1", null, BeanEntry.SECONDARY));
+    entry.add(DContextEntryBean.of("S2", null, BeanEntry.SECONDARY));
 
     Object bean = entry.get(null);
     assertEquals(bean, "N");
@@ -57,8 +58,8 @@ public class DContextEntryTest {
   public void get_when_multiSecondaryOnly() {
 
     DContextEntry entry = new DContextEntry();
-    entry.add(DContextEntryBean.of("S1", null, Flag.SECONDARY));
-    entry.add(DContextEntryBean.of("S2", null, Flag.SECONDARY));
+    entry.add(DContextEntryBean.of("S1", null, BeanEntry.SECONDARY));
+    entry.add(DContextEntryBean.of("S2", null, BeanEntry.SECONDARY));
 
     entry.get(null);
   }
@@ -68,8 +69,8 @@ public class DContextEntryTest {
   public void get_when_multiSecondary_butNamed() {
 
     DContextEntry entry = new DContextEntry();
-    entry.add(DContextEntryBean.of("S1", "a", Flag.SECONDARY));
-    entry.add(DContextEntryBean.of("S2", "b", Flag.SECONDARY));
+    entry.add(DContextEntryBean.of("S1", "a", BeanEntry.SECONDARY));
+    entry.add(DContextEntryBean.of("S2", "b", BeanEntry.SECONDARY));
 
     Object bean = entry.get("b");
     assertEquals(bean, "S2");
@@ -79,8 +80,8 @@ public class DContextEntryTest {
   public void get_when_multiSecondary_butNamed2() {
 
     DContextEntry entry = new DContextEntry();
-    entry.add(DContextEntryBean.of("S1", null, Flag.SECONDARY));
-    entry.add(DContextEntryBean.of("S2", "b", Flag.SECONDARY));
+    entry.add(DContextEntryBean.of("S1", null, BeanEntry.SECONDARY));
+    entry.add(DContextEntryBean.of("S2", "b", BeanEntry.SECONDARY));
 
     Object bean = entry.get("b");
     assertEquals(bean, "S2");
@@ -90,8 +91,8 @@ public class DContextEntryTest {
   public void get_when_secondary_butNamed() {
 
     DContextEntry entry = new DContextEntry();
-    entry.add(DContextEntryBean.of("S1", null, Flag.PRIMARY));
-    entry.add(DContextEntryBean.of("S2", "b", Flag.SECONDARY));
+    entry.add(DContextEntryBean.of("S1", null, BeanEntry.PRIMARY));
+    entry.add(DContextEntryBean.of("S2", "b", BeanEntry.SECONDARY));
 
     Object bean = entry.get("b");
     assertEquals(bean, "S2");
