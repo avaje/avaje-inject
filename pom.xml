@@ -4,7 +4,7 @@
 
   <groupId>io.dinject</groupId>
   <artifactId>dinject</artifactId>
-  <version>0.15-SNAPSHOT</version>
+  <version>1.1-SNAPSHOT</version>
 
   <parent>
     <groupId>org.avaje</groupId>
@@ -36,7 +36,7 @@
     <dependency>
       <groupId>io.dinject</groupId>
       <artifactId>dinject-generator</artifactId>
-      <version>0.14</version>
+      <version>1.1</version>
       <scope>test</scope>
     </dependency>
 
