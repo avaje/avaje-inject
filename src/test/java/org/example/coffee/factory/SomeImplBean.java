@@ -1,9 +1,11 @@
 package org.example.coffee.factory;
 
+import io.dinject.Secondary;
 import org.example.coffee.factory.other.Something;
 
 import javax.inject.Singleton;
 
+@Secondary
 @Singleton
 public class SomeImplBean implements Something {
 
