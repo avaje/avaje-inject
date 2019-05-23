@@ -59,6 +59,18 @@ class DContextEntry {
     entries.add(entryBean);
   }
 
+  /**
+   * Return true if a supplied bean is one of the entries.
+   */
+  boolean isSupplied() {
+    for (DContextEntryBean entry : entries) {
+      if (entry.isSupplied()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   static class EntryMatcher {
 
     private final String name;

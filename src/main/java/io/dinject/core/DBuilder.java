@@ -34,7 +34,7 @@ class DBuilder implements Builder {
   /**
    * Supplied beans (test doubles) given to the context prior to building.
    */
-  private final DBeanMap suppliedBeanMap;
+  private final boolean hasSuppliedBeans;
 
   /**
    * The context/module name.
@@ -67,17 +67,20 @@ class DBuilder implements Builder {
     this.name = name;
     this.provides = provides;
     this.dependsOn = dependsOn;
-    this.suppliedBeanMap = null;
+    this.hasSuppliedBeans = false;
   }
 
   /**
    * Create for the root builder with supplied beans (test doubles).
    */
-  DBuilder(List<Object> suppliedBeans) {
+  DBuilder(List<SuppliedBean> suppliedBeans) {
     this.name = null;
     this.provides = null;
     this.dependsOn = null;
-    this.suppliedBeanMap = new DBeanMap(suppliedBeans);
+    this.hasSuppliedBeans = (suppliedBeans != null && !suppliedBeans.isEmpty());
+    if (hasSuppliedBeans) {
+      beanMap.add(suppliedBeans);
+    }
   }
 
   @Override
@@ -102,8 +105,11 @@ class DBuilder implements Builder {
 
   @Override
   public boolean isAddBeanFor(Class<?> addForType, Class<?> injectTarget) {
-    if (suppliedBeanMap != null) {
-      return suppliedBeanMap.isAddBeanFor(addForType.getName());
+    if (hasSuppliedBeans) {
+      return !beanMap.isSupplied(addForType.getName());
+    }
+    if (parent == null) {
+      return true;
     }
     this.injectTarget = injectTarget;
     return parent.isAddBeanFor(addForType);
@@ -119,13 +125,6 @@ class DBuilder implements Builder {
   public <T> List<T> getList(Class<T> interfaceType) {
 
     List list = new ArrayList<>();
-    if (suppliedBeanMap != null) {
-      suppliedBeanMap.addAll(interfaceType, list);
-      if (!list.isEmpty()) {
-        // not sure if this is correct, supplied so skip
-        return (List<T>) list;
-      }
-    }
 
     beanMap.addAll(interfaceType, list);
     for (BeanContext childContext : children.values()) {
@@ -139,13 +138,6 @@ class DBuilder implements Builder {
 
   @Override
   public <T> BeanEntry<T> candidate(Class<T> cls, String name) {
-
-    if (suppliedBeanMap != null) {
-      BeanEntry<T> entry = suppliedBeanMap.candidate(cls, name);
-      if (entry != null) {
-        return entry;
-      }
-    }
 
     DBeanContext.EntrySort<T> entrySort = new DBeanContext.EntrySort<>();
     entrySort.add(beanMap.candidate(cls, name));

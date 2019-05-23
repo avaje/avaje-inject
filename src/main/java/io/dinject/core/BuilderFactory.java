@@ -14,7 +14,7 @@ public class BuilderFactory {
    *
    * @param suppliedBeans The list of beans (typically test doubles) supplied when building the context.
    */
-  public static Builder newRootBuilder(List<Object> suppliedBeans) {
+  public static Builder newRootBuilder(List<SuppliedBean> suppliedBeans) {
     return new DBuilder(suppliedBeans);
   }
 

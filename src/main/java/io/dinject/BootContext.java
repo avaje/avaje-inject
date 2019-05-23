@@ -3,6 +3,7 @@ package io.dinject;
 import io.dinject.core.BeanContextFactory;
 import io.dinject.core.Builder;
 import io.dinject.core.BuilderFactory;
+import io.dinject.core.SuppliedBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +52,7 @@ public class BootContext {
 
   private boolean shutdownHook = true;
 
-  private final List<Object> suppliedBeans = new ArrayList<>();
+  private final List<SuppliedBean> suppliedBeans = new ArrayList<>();
 
   private final Set<String> includeModules = new LinkedHashSet<>();
 
@@ -181,7 +182,23 @@ public class BootContext {
    * @return This BootContext
    */
   public BootContext withBeans(Object... beans) {
-    suppliedBeans.addAll(Arrays.asList(beans));
+    for (Object bean : beans) {
+      suppliedBeans.add(new SuppliedBean(suppliedType(bean.getClass()), bean));
+    }
+    return this;
+  }
+
+  /**
+   * Add a supplied bean instance with the given injection type.
+   * <p>
+   * This is typically a test double often created by Mockito or similar.
+   * </p>
+   *
+   * @param type The dependency injection type this bean is target for
+   * @param bean The supplied bean instance to use (typically a test mock)
+   */
+  public BootContext withBean(Class<?> type, Object bean) {
+    suppliedBeans.add(new SuppliedBean(type, bean));
     return this;
   }
 
@@ -212,6 +229,19 @@ public class BootContext {
       return new ShutdownAwareBeanContext(beanContext);
     }
     return beanContext;
+  }
+
+  /**
+   * Return the type that we map the supplied bean to.
+   */
+  private Class<?> suppliedType(Class<?> suppliedClass) {
+    Class<?> suppliedSuper = suppliedClass.getSuperclass();
+    if (Object.class.equals(suppliedSuper)) {
+      return suppliedClass;
+    } else {
+      // prefer to use the super type of the supplied bean (test double)
+      return suppliedSuper;
+    }
   }
 
   /**

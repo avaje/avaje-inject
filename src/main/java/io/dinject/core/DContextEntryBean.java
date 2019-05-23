@@ -66,6 +66,10 @@ class DContextEntryBean {
     return flag == BeanEntry.SECONDARY;
   }
 
+  boolean isSupplied() {
+    return flag == BeanEntry.SUPPLIED;
+  }
+
   @SuppressWarnings("unchecked")
   BeanEntry getBeanEntry() {
     return new BeanEntry(flag, getBean(), name);

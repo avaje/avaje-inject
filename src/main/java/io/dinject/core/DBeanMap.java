@@ -18,57 +18,33 @@ import static io.dinject.BeanEntry.SUPPLIED;
  */
 class DBeanMap {
 
-  private final Map<String, DContextEntry> beans;
-
-  /**
-   * Create for root builder with supplied beans (usually test doubles).
-   * <p>
-   * Supplied beans are typically test doubles (used in testing) that replace the normally
-   * injected bean. For example, a stub for a database API.
-   * </p>
-   */
-  DBeanMap(List<Object> suppliedBeans) {
-    if (suppliedBeans.isEmpty()) {
-      beans = null;
-    } else {
-      beans = new LinkedHashMap<>();
-      for (Object suppliedBean : suppliedBeans) {
-        addSuppliedBean(suppliedBean);
-      }
-    }
-  }
+  private final Map<String, DContextEntry> beans = new LinkedHashMap<>();
 
   /**
    * Create for context builder.
    */
   DBeanMap() {
-    beans = new LinkedHashMap<>();
-  }
-
-  private void addSuppliedBean(Object bean) {
-
-    Class<?> suppliedClass = bean.getClass();
-    Class<?> suppliedType = suppliedType(suppliedClass);
-    Named annotation = suppliedClass.getAnnotation(Named.class);
-    String name = (annotation == null) ? null : annotation.value();
-
-    DContextEntryBean entryBean = DContextEntryBean.of(bean, name, SUPPLIED);
-    beans.computeIfAbsent(suppliedType.getCanonicalName(), s -> new DContextEntry()).add(entryBean);
-    for (Class<?> anInterface : suppliedClass.getInterfaces()) {
-      beans.computeIfAbsent(anInterface.getCanonicalName(), s -> new DContextEntry()).add(entryBean);
-    }
   }
 
   /**
-   * Return the type that we map the supplied bean to.
+   * Add test double supplied beans.
    */
-  private Class<?> suppliedType(Class<?> suppliedClass) {
-    Class<?> suppliedSuper = suppliedClass.getSuperclass();
-    if (Object.class.equals(suppliedSuper)) {
-      return suppliedClass;
-    } else {
-      // prefer to use the super type of the supplied bean (test double)
-      return suppliedSuper;
+  void add(List<SuppliedBean> suppliedBeans) {
+    for (SuppliedBean suppliedBean : suppliedBeans) {
+      addSuppliedBean(suppliedBean);
+    }
+  }
+
+  private void addSuppliedBean(SuppliedBean supplied) {
+
+    Class<?> suppliedType = supplied.getType();
+    Named annotation = suppliedType.getAnnotation(Named.class);
+    String name = (annotation == null) ? null : annotation.value();
+
+    DContextEntryBean entryBean = DContextEntryBean.of(supplied.getBean(), name, SUPPLIED);
+    beans.computeIfAbsent(suppliedType.getCanonicalName(), s -> new DContextEntry()).add(entryBean);
+    for (Class<?> anInterface : suppliedType.getInterfaces()) {
+      beans.computeIfAbsent(anInterface.getCanonicalName(), s -> new DContextEntry()).add(entryBean);
     }
   }
 
@@ -102,10 +78,6 @@ class DBeanMap {
   @SuppressWarnings("unchecked")
   <T> T getBean(Class<T> type, String name) {
 
-    if (beans == null) {
-      // no beans in the root suppliedBeanMap
-      return null;
-    }
     DContextEntry entry = beans.get(type.getCanonicalName());
     if (entry != null) {
       T bean = (T) entry.get(name);
@@ -118,10 +90,6 @@ class DBeanMap {
 
   <T> BeanEntry<T> candidate(Class<T> type, String name) {
 
-    if (beans == null) {
-      // no beans in the root suppliedBeanMap
-      return null;
-    }
     DContextEntry entry = beans.get(type.getCanonicalName());
     if (entry != null) {
       return entry.candidate(name);
@@ -134,25 +102,17 @@ class DBeanMap {
    */
   @SuppressWarnings("unchecked")
   void addAll(Class type, List list) {
-    if (beans != null) {
-      DContextEntry entry = beans.get(type.getCanonicalName());
-      if (entry != null) {
-        entry.addAll(list);
-      }
+    DContextEntry entry = beans.get(type.getCanonicalName());
+    if (entry != null) {
+      entry.addAll(list);
     }
   }
 
   /**
-   * Return true if the bean for the given type should be created.
-   * <p>
-   * Return false indicates the type has a supplied (test double) instance that should be used instead and that
-   * means context building will skip creating this bean.
-   * </p>
+   * Return true if there is a supplied bean for this type.
    */
-  boolean isAddBeanFor(String type) {
-    if (beans == null) {
-      return true;
-    }
-    return !beans.containsKey(type);
+  boolean isSupplied(String type) {
+    DContextEntry entry = beans.get(type);
+    return entry != null && entry.isSupplied();
   }
 }

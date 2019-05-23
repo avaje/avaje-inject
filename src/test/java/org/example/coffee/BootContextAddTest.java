@@ -3,6 +3,7 @@ package org.example.coffee;
 import io.dinject.BeanContext;
 import io.dinject.BootContext;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,6 +59,23 @@ public class BootContextAddTest {
 
       assertThat(testDoublePump.steam).isEqualTo(1);
       assertThat(testDoublePump.water).isEqualTo(1);
+    }
+  }
+
+  @Test
+  public void withMockitoMock_expect_mockUsed() {
+
+    Pump mock = Mockito.mock(Pump.class);
+
+    try (BeanContext context = new BootContext()
+      .withBean(Pump.class, mock)
+      .load()) {
+
+      Pump pump = context.getBean(Pump.class);
+      assertThat(pump).isSameAs(mock);
+
+      CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+      assertThat(coffeeMaker).isNotNull();
     }
   }
 
