@@ -48,6 +48,7 @@ public class SuppliedBean<B> {
    */
   public B getBean() {
     if (bean == null) {
+      // should extract a SPI for this
       bean = Mockito.mock(type);
     }
     if (consumer != null) {

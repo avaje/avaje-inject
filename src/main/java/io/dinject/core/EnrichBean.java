@@ -7,13 +7,13 @@ import java.util.function.Consumer;
 /**
  * Holds Spy setup consumers for dependency injection using Mockito Spy.
  */
-public class SpyConsumer<B> {
+public class EnrichBean<B> {
 
   private final Class<B> type;
 
   private final Consumer<B> consumer;
 
-  public SpyConsumer(Class<B> type, Consumer<B> consumer) {
+  public EnrichBean(Class<B> type, Consumer<B> consumer) {
     this.type = type;
     this.consumer = consumer;
   }
@@ -28,8 +28,9 @@ public class SpyConsumer<B> {
   /**
    * Return the spy enhanced bean instance to use.
    */
-  public B spy(B bean) {
+  public B enrich(B bean) {
 
+    // should extract a SPI for this. Only enrichment is Mockito spy at this point.
     B spy = Mockito.spy(bean);
     if (consumer != null) {
       consumer.accept(spy);

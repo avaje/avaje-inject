@@ -13,10 +13,15 @@ public class BuilderFactory {
    * Create the root level Builder.
    *
    * @param suppliedBeans The list of beans (typically test doubles) supplied when building the context.
-   * @param spyConsumers The list of classes we want to have with mockito spy enhancement
+   * @param enrichBeans   The list of classes we want to have with mockito spy enhancement
    */
-  public static Builder newRootBuilder(List<SuppliedBean> suppliedBeans, List<SpyConsumer> spyConsumers) {
-    return new DBuilder(suppliedBeans, spyConsumers);
+  public static Builder newRootBuilder(List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans) {
+
+    if (suppliedBeans.isEmpty() && enrichBeans.isEmpty()) {
+      // simple case, no mocks or spies
+      return new DBuilder();
+    }
+    return new DBuilderExtn(suppliedBeans, enrichBeans);
   }
 
   /**

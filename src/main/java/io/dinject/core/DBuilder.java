@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,12 +29,7 @@ class DBuilder implements Builder {
   /**
    * The beans created and added to the context during building.
    */
-  private final DBeanMap beanMap = new DBeanMap();
-
-  /**
-   * Supplied beans (test doubles) given to the context prior to building.
-   */
-  private final boolean hasSuppliedBeans;
+  final DBeanMap beanMap = new DBeanMap();
 
   /**
    * The context/module name.
@@ -54,14 +48,12 @@ class DBuilder implements Builder {
 
   private final Map<String, BeanContext> children = new LinkedHashMap<>();
 
-  private final Map<Class<?>, SpyConsumer> spyMap;
-
   /**
    * Debug of the current bean being wired - used in injection errors.
    */
   private Class<?> injectTarget;
 
-  private Builder parent;
+  Builder parent;
 
   /**
    * Create a named context for non-root builders.
@@ -70,29 +62,15 @@ class DBuilder implements Builder {
     this.name = name;
     this.provides = provides;
     this.dependsOn = dependsOn;
-    this.hasSuppliedBeans = false;
-    this.spyMap = null;
   }
 
   /**
-   * Create for the root builder with supplied beans (test doubles).
+   * Create for the root builder.
    */
-  DBuilder(List<SuppliedBean> suppliedBeans, List<SpyConsumer> spyConsumers) {
+  DBuilder() {
     this.name = null;
     this.provides = null;
     this.dependsOn = null;
-    this.hasSuppliedBeans = (suppliedBeans != null && !suppliedBeans.isEmpty());
-    if (hasSuppliedBeans) {
-      beanMap.add(suppliedBeans);
-    }
-    if (spyConsumers == null || spyConsumers.isEmpty()) {
-      spyMap = null;
-    } else {
-      spyMap = new HashMap<>();
-      for (SpyConsumer spy : spyConsumers) {
-        spyMap.put(spy.getType(), spy);
-      }
-    }
   }
 
   @Override
@@ -117,9 +95,6 @@ class DBuilder implements Builder {
 
   @Override
   public boolean isAddBeanFor(Class<?> addForType, Class<?> injectTarget) {
-    if (hasSuppliedBeans) {
-      return !beanMap.isSupplied(addForType.getName());
-    }
     if (parent == null) {
       return true;
     }
@@ -177,10 +152,8 @@ class DBuilder implements Builder {
   @Override
   public void register(Object bean, String name, Class<?>... types) {
     if (parent != null) {
-      // spy consumers only exist on top level builder
-      bean = parent.spy(bean, types);
-    } else {
-      bean = spy(bean, types);
+      // enrichment only exist on top level builder
+      bean = parent.enrich(bean, types);
     }
     beanMap.register(bean, name, types);
   }
@@ -189,25 +162,9 @@ class DBuilder implements Builder {
    * Return the bean to register potentially with spy enhancement.
    */
   @Override
-  public Object spy(Object bean, Class<?>[] types) {
-    if (spyMap != null) {
-      SpyConsumer spyConsumer = spyMap.get(typeOf(bean, types));
-      if (spyConsumer != null) {
-        // enrich/enhance the bean for spying
-        return spyConsumer.spy(bean);
-      }
-    }
+  public Object enrich(Object bean, Class<?>[] types) {
+    // only enriched by DBuilderExtn
     return bean;
-  }
-
-  /**
-   * Return the type to lookup for spy.
-   */
-  private Class<?> typeOf(Object bean, Class<?>... types) {
-    if (types.length > 0) {
-      return types[0];
-    }
-    return bean.getClass();
   }
 
   @Override

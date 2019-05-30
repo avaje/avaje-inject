@@ -126,11 +126,12 @@ public interface Builder {
   BeanContext build();
 
   /**
-   * Return a spy enhanced bean for registration into the context.
+   * Return a potentially enriched bean for registration into the context.
+   * Typically for use with mockito spy.
    *
    * @param bean  The bean with dependencies injected
    * @param types The types this bean registers for
-   * @return Either the bean or the spy enhanced bean to register into the context.
+   * @return Either the bean or the enriched bean to register into the context.
    */
-  Object spy(Object bean, Class<?>[] types);
+  Object enrich(Object bean, Class<?>[] types);
 }

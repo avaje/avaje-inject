@@ -3,7 +3,7 @@ package io.dinject;
 import io.dinject.core.BeanContextFactory;
 import io.dinject.core.Builder;
 import io.dinject.core.BuilderFactory;
-import io.dinject.core.SpyConsumer;
+import io.dinject.core.EnrichBean;
 import io.dinject.core.SuppliedBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +56,7 @@ public class BootContext {
 
   private final List<SuppliedBean> suppliedBeans = new ArrayList<>();
 
-  private final List<SpyConsumer> spyConsumers = new ArrayList<>();
+  private final List<EnrichBean> enrichBeans = new ArrayList<>();
 
   private final Set<String> includeModules = new LinkedHashSet<>();
 
@@ -227,7 +227,7 @@ public class BootContext {
    * Use a mockito spy when injecting this bean type.
    */
   public <D> BootContext withSpy(Class<D> type) {
-    spyConsumers.add(new SpyConsumer<>(type, null));
+    enrichBeans.add(new EnrichBean<>(type, null));
     return this;
   }
 
@@ -235,7 +235,7 @@ public class BootContext {
    * Use a mockito spy when injecting this bean type additionally running setup on the spy instance.
    */
   public <D> BootContext withSpy(Class<D> type, Consumer<D> consumer) {
-    spyConsumers.add(new SpyConsumer<>(type, consumer));
+    enrichBeans.add(new EnrichBean<>(type, consumer));
     return this;
   }
 
@@ -251,7 +251,7 @@ public class BootContext {
     Set<String> moduleNames = factoryOrder.orderFactories();
     log.debug("building context with modules {}", moduleNames);
 
-    Builder rootBuilder = BuilderFactory.newRootBuilder(suppliedBeans, spyConsumers);
+    Builder rootBuilder = BuilderFactory.newRootBuilder(suppliedBeans, enrichBeans);
 
     for (BeanContextFactory factory : factoryOrder.factories()) {
       rootBuilder.addChild(factory.createContext(rootBuilder));
