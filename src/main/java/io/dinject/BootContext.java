@@ -3,6 +3,7 @@ package io.dinject;
 import io.dinject.core.BeanContextFactory;
 import io.dinject.core.Builder;
 import io.dinject.core.BuilderFactory;
+import io.dinject.core.EnrichBean;
 import io.dinject.core.SuppliedBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Boot and create a bean context with options for shutdown hook and supplying test doubles.
@@ -53,6 +55,8 @@ public class BootContext {
   private boolean shutdownHook = true;
 
   private final List<SuppliedBean> suppliedBeans = new ArrayList<>();
+
+  private final List<EnrichBean> enrichBeans = new ArrayList<>();
 
   private final Set<String> includeModules = new LinkedHashSet<>();
 
@@ -149,38 +153,41 @@ public class BootContext {
   }
 
   /**
-   * Supply a bean to the context that will be used instead of any similar bean in the context.
+   * Supply a bean to the context that will be used instead of any
+   * similar bean in the context.
    * <p>
-   * This is typically expected to be used in tests and the bean supplied is typically a test double
-   * or mock.
+   * This is typically expected to be used in tests and the bean
+   * supplied is typically a test double or mock.
    * </p>
    *
    * <pre>{@code
    *
-   *   @Test
-   *   public void someComponentTest() {
+   *   Pump pump = mock(Pump.class);
+   *   Grinder grinder = mock(Grinder.class);
    *
-   *     MyRedisApi mockRedis = mock(MyRedisApi.class);
-   *     MyDbApi mockDatabase = mock(MyDbApi.class);
+   *   try (BeanContext context = new BootContext()
+   *     .withBeans(pump, grinder)
+   *     .load()) {
    *
-   *     try (BeanContext context = new BootContext()
-   *       .withBeans(mockRedis, mockDatabase)
-   *       .load()) {
+   *     CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+   *     coffeeMaker.makeIt();
    *
-   *       // built with test doubles injected ...
-   *       CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
-   *       coffeeMaker.makeIt();
+   *     Pump pump1 = context.getBean(Pump.class);
+   *     Grinder grinder1 = context.getBean(Grinder.class);
    *
-   *       assertThat(...
-   *     }
+   *     assertThat(pump1).isSameAs(pump);
+   *     assertThat(grinder1).isSameAs(grinder);
+   *
+   *     verify(pump).pumpWater();
+   *     verify(grinder).grindBeans();
    *   }
-   *
    *
    * }</pre>
    *
    * @param beans The bean used when injecting a dependency for this bean or the interface(s) it implements
    * @return This BootContext
    */
+  @SuppressWarnings("unchecked")
   public BootContext withBeans(Object... beans) {
     for (Object bean : beans) {
       suppliedBeans.add(new SuppliedBean(suppliedType(bean.getClass()), bean));
@@ -194,11 +201,148 @@ public class BootContext {
    * This is typically a test double often created by Mockito or similar.
    * </p>
    *
+   * <pre>{@code
+   *
+   *   try (BeanContext context = new BootContext()
+   *     .withBean(Pump.class, mock)
+   *     .load()) {
+   *
+   *     Pump pump = context.getBean(Pump.class);
+   *     assertThat(pump).isSameAs(mock);
+   *
+   *     // act
+   *     CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+   *     coffeeMaker.makeIt();
+   *
+   *     verify(pump).pumpSteam();
+   *     verify(pump).pumpWater();
+   *   }
+   *
+   * }</pre>
+   *
    * @param type The dependency injection type this bean is target for
    * @param bean The supplied bean instance to use (typically a test mock)
    */
-  public BootContext withBean(Class<?> type, Object bean) {
-    suppliedBeans.add(new SuppliedBean(type, bean));
+  public <D> BootContext withBean(Class<D> type, D bean) {
+    suppliedBeans.add(new SuppliedBean<>(type, bean));
+    return this;
+  }
+
+  /**
+   * Use a mockito mock when injecting this bean type.
+   *
+   * <pre>{@code
+   *
+   *   try (BeanContext context = new BootContext()
+   *     .withMock(Pump.class)
+   *     .withMock(Grinder.class, grinder -> {
+   *       // setup the mock
+   *       when(grinder.grindBeans()).thenReturn("stub response");
+   *     })
+   *     .load()) {
+   *
+   *
+   *     CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+   *     coffeeMaker.makeIt();
+   *
+   *     // this is a mockito mock
+   *     Grinder grinder = context.getBean(Grinder.class);
+   *     verify(grinder).grindBeans();
+   *   }
+   *
+   * }</pre>
+   */
+  public <D> BootContext withMock(Class<D> type) {
+    return withMock(type, null);
+  }
+
+  /**
+   * Use a mockito mock when injecting this bean type additionally
+   * running setup on the mock instance.
+   *
+   * <pre>{@code
+   *
+   *   try (BeanContext context = new BootContext()
+   *     .withMock(Pump.class)
+   *     .withMock(Grinder.class, grinder -> {
+   *
+   *       // setup the mock
+   *       when(grinder.grindBeans()).thenReturn("stub response");
+   *     })
+   *     .load()) {
+   *
+   *
+   *     CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+   *     coffeeMaker.makeIt();
+   *
+   *     // this is a mockito mock
+   *     Grinder grinder = context.getBean(Grinder.class);
+   *     verify(grinder).grindBeans();
+   *   }
+   *
+   * }</pre>
+   */
+  public <D> BootContext withMock(Class<D> type, Consumer<D> consumer) {
+    suppliedBeans.add(new SuppliedBean<>(type, null, consumer));
+    return this;
+  }
+
+  /**
+   * Use a mockito spy when injecting this bean type.
+   *
+   * <pre>{@code
+   *
+   *   try (BeanContext context = new BootContext()
+   *     .withSpy(Pump.class)
+   *     .load()) {
+   *
+   *     // setup spy here ...
+   *     Pump pump = context.getBean(Pump.class);
+   *     doNothing().when(pump).pumpSteam();
+   *
+   *     // act
+   *     CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+   *     coffeeMaker.makeIt();
+   *
+   *     verify(pump).pumpWater();
+   *     verify(pump).pumpSteam();
+   *   }
+   *
+   * }</pre>
+   */
+  public <D> BootContext withSpy(Class<D> type) {
+    return withSpy(type, null);
+  }
+
+  /**
+   * Use a mockito spy when injecting this bean type additionally
+   * running setup on the spy instance.
+   *
+   * <pre>{@code
+   *
+   *   try (BeanContext context = new BootContext()
+   *     .withSpy(Pump.class, pump -> {
+   *       // setup the spy
+   *       doNothing().when(pump).pumpWater();
+   *     })
+   *     .load()) {
+   *
+   *     // or setup here ...
+   *     Pump pump = context.getBean(Pump.class);
+   *     doNothing().when(pump).pumpSteam();
+   *
+   *     // act
+   *     CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+   *     coffeeMaker.makeIt();
+   *
+   *     verify(pump).pumpWater();
+   *     verify(pump).pumpSteam();
+   *   }
+   *
+   * }</pre>
+   */
+  public <D> BootContext withSpy(Class<D> type, Consumer<D> consumer) {
+    enrichBeans.add(new EnrichBean<>(type, consumer));
     return this;
   }
 
@@ -214,7 +358,7 @@ public class BootContext {
     Set<String> moduleNames = factoryOrder.orderFactories();
     log.debug("building context with modules {}", moduleNames);
 
-    Builder rootBuilder = BuilderFactory.newRootBuilder(suppliedBeans);
+    Builder rootBuilder = BuilderFactory.newRootBuilder(suppliedBeans, enrichBeans);
 
     for (BeanContextFactory factory : factoryOrder.factories()) {
       rootBuilder.addChild(factory.createContext(rootBuilder));

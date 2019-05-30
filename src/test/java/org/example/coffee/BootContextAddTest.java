@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 
 public class BootContextAddTest {
 
@@ -76,6 +77,10 @@ public class BootContextAddTest {
 
       CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
       assertThat(coffeeMaker).isNotNull();
+      coffeeMaker.makeIt();
+
+      verify(pump).pumpSteam();
+      verify(pump).pumpWater();
     }
   }
 

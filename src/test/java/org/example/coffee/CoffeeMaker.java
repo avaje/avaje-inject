@@ -1,6 +1,5 @@
 package org.example.coffee;
 
-import io.dinject.ContextModule;
 import org.example.coffee.grind.Grinder;
 
 import javax.inject.Singleton;
@@ -20,7 +19,7 @@ public class CoffeeMaker {
 
   public String makeIt() {
     System.out.println("making it ...");
-    grinder.grindBeans();
+    System.out.println("grinder:" + grinder.grindBeans());
     pump.pumpWater();
     pump.pumpSteam();
     System.out.println("Done");
