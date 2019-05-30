@@ -9,9 +9,35 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class BootContext_mockitoSpyTest {
+
+  @Test
+  public void withBeans_asMocks() {
+
+    Pump pump = mock(Pump.class);
+    Grinder grinder = mock(Grinder.class);
+
+    try (BeanContext context = new BootContext()
+      .withBeans(pump, grinder)
+      .load()) {
+
+      CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+      coffeeMaker.makeIt();
+
+      Pump pump1 = context.getBean(Pump.class);
+      Grinder grinder1 = context.getBean(Grinder.class);
+
+      assertThat(pump1).isSameAs(pump);
+      assertThat(grinder1).isSameAs(grinder);
+
+      verify(pump).pumpWater();
+      verify(grinder).grindBeans();
+    }
+  }
 
   @Test
   public void withMockitoSpy_noSetup_expect_spyUsed() {
@@ -58,34 +84,41 @@ public class BootContext_mockitoSpyTest {
       })
       .load()) {
 
+      // or setup here ...
       Pump pump = context.getBean(Pump.class);
+      doNothing().when(pump).pumpSteam();
 
+      // act
       CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
-      assertThat(coffeeMaker).isNotNull();
       coffeeMaker.makeIt();
 
       verify(pump).pumpWater();
+      verify(pump).pumpSteam();
     }
   }
 
   @Test
   public void withMockitoMock_expect_mockUsed() {
 
-    AtomicReference<Pump> mock = new AtomicReference<>();
+    AtomicReference<Grinder> mock = new AtomicReference<>();
 
     try (BeanContext context = new BootContext()
-      .withMock(Grinder.class)
-      .withMock(Pump.class, pump -> {
-        // do something interesting to setup the mock
-        mock.set(pump);
+      .withMock(Pump.class)
+      .withMock(Grinder.class, grinder -> {
+        // setup the mock
+        when(grinder.grindBeans()).thenReturn("stub response");
+        mock.set(grinder);
       })
       .load()) {
 
-      Pump pump = context.getBean(Pump.class);
-      assertThat(pump).isSameAs(mock.get());
+      Grinder grinder = context.getBean(Grinder.class);
+      assertThat(grinder).isSameAs(mock.get());
 
       CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
       assertThat(coffeeMaker).isNotNull();
+      coffeeMaker.makeIt();
+
+      verify(grinder).grindBeans();
     }
   }
 
