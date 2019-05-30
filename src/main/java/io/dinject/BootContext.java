@@ -3,6 +3,7 @@ package io.dinject;
 import io.dinject.core.BeanContextFactory;
 import io.dinject.core.Builder;
 import io.dinject.core.BuilderFactory;
+import io.dinject.core.SpyConsumer;
 import io.dinject.core.SuppliedBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Boot and create a bean context with options for shutdown hook and supplying test doubles.
@@ -53,6 +55,8 @@ public class BootContext {
   private boolean shutdownHook = true;
 
   private final List<SuppliedBean> suppliedBeans = new ArrayList<>();
+
+  private final List<SpyConsumer> spyConsumers = new ArrayList<>();
 
   private final Set<String> includeModules = new LinkedHashSet<>();
 
@@ -197,8 +201,41 @@ public class BootContext {
    * @param type The dependency injection type this bean is target for
    * @param bean The supplied bean instance to use (typically a test mock)
    */
-  public BootContext withBean(Class<?> type, Object bean) {
-    suppliedBeans.add(new SuppliedBean(type, bean));
+  public <D> BootContext withBean(Class<D> type, D bean) {
+    suppliedBeans.add(new SuppliedBean<>(type, bean));
+    return this;
+  }
+
+  /**
+   * Use a mockito mock when injecting this bean type.
+   */
+  public <D> BootContext withMock(Class<D> type) {
+    suppliedBeans.add(new SuppliedBean<>(type, null, null));
+    return this;
+  }
+
+  /**
+   * Use a mockito mock when injecting this bean type additionally running setup on the mock instance.
+   */
+  public <D> BootContext withMock(Class<D> type, Consumer<D> consumer) {
+    suppliedBeans.add(new SuppliedBean<>(type, null, consumer));
+    return this;
+  }
+
+
+  /**
+   * Use a mockito spy when injecting this bean type.
+   */
+  public <D> BootContext withSpy(Class<D> type) {
+    spyConsumers.add(new SpyConsumer<>(type, null));
+    return this;
+  }
+
+  /**
+   * Use a mockito spy when injecting this bean type additionally running setup on the spy instance.
+   */
+  public <D> BootContext withSpy(Class<D> type, Consumer<D> consumer) {
+    spyConsumers.add(new SpyConsumer<>(type, consumer));
     return this;
   }
 
@@ -214,7 +251,7 @@ public class BootContext {
     Set<String> moduleNames = factoryOrder.orderFactories();
     log.debug("building context with modules {}", moduleNames);
 
-    Builder rootBuilder = BuilderFactory.newRootBuilder(suppliedBeans);
+    Builder rootBuilder = BuilderFactory.newRootBuilder(suppliedBeans, spyConsumers);
 
     for (BeanContextFactory factory : factoryOrder.factories()) {
       rootBuilder.addChild(factory.createContext(rootBuilder));

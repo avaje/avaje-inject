@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,8 @@ class DBuilder implements Builder {
 
   private final Map<String, BeanContext> children = new LinkedHashMap<>();
 
+  private final Map<Class<?>, SpyConsumer> spyMap;
+
   /**
    * Debug of the current bean being wired - used in injection errors.
    */
@@ -68,18 +71,27 @@ class DBuilder implements Builder {
     this.provides = provides;
     this.dependsOn = dependsOn;
     this.hasSuppliedBeans = false;
+    this.spyMap = null;
   }
 
   /**
    * Create for the root builder with supplied beans (test doubles).
    */
-  DBuilder(List<SuppliedBean> suppliedBeans) {
+  DBuilder(List<SuppliedBean> suppliedBeans, List<SpyConsumer> spyConsumers) {
     this.name = null;
     this.provides = null;
     this.dependsOn = null;
     this.hasSuppliedBeans = (suppliedBeans != null && !suppliedBeans.isEmpty());
     if (hasSuppliedBeans) {
       beanMap.add(suppliedBeans);
+    }
+    if (spyConsumers == null || spyConsumers.isEmpty()) {
+      spyMap = null;
+    } else {
+      spyMap = new HashMap<>();
+      for (SpyConsumer spy : spyConsumers) {
+        spyMap.put(spy.getType(), spy);
+      }
     }
   }
 
@@ -164,7 +176,38 @@ class DBuilder implements Builder {
 
   @Override
   public void register(Object bean, String name, Class<?>... types) {
+    if (parent != null) {
+      // spy consumers only exist on top level builder
+      bean = parent.spy(bean, types);
+    } else {
+      bean = spy(bean, types);
+    }
     beanMap.register(bean, name, types);
+  }
+
+  /**
+   * Return the bean to register potentially with spy enhancement.
+   */
+  @Override
+  public Object spy(Object bean, Class<?>[] types) {
+    if (spyMap != null) {
+      SpyConsumer spyConsumer = spyMap.get(typeOf(bean, types));
+      if (spyConsumer != null) {
+        // enrich/enhance the bean for spying
+        return spyConsumer.spy(bean);
+      }
+    }
+    return bean;
+  }
+
+  /**
+   * Return the type to lookup for spy.
+   */
+  private Class<?> typeOf(Object bean, Class<?>... types) {
+    if (types.length > 0) {
+      return types[0];
+    }
+    return bean.getClass();
   }
 
   @Override

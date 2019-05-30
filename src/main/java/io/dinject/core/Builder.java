@@ -125,4 +125,12 @@ public interface Builder {
    */
   BeanContext build();
 
+  /**
+   * Return a spy enhanced bean for registration into the context.
+   *
+   * @param bean  The bean with dependencies injected
+   * @param types The types this bean registers for
+   * @return Either the bean or the spy enhanced bean to register into the context.
+   */
+  Object spy(Object bean, Class<?>[] types);
 }
