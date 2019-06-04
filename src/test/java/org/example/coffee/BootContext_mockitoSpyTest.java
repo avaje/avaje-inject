@@ -2,7 +2,16 @@ package org.example.coffee;
 
 import io.dinject.BeanContext;
 import io.dinject.BootContext;
+import org.example.coffee.factory.SomeImpl;
+import org.example.coffee.factory.SomeImplBean;
+import org.example.coffee.factory.Unused;
+import org.example.coffee.factory.other.Something;
 import org.example.coffee.grind.Grinder;
+import org.example.coffee.primary.PEmailer;
+import org.example.coffee.primary.UserOfPEmailer;
+import org.example.coffee.secondary.Widget;
+import org.example.coffee.secondary.WidgetSecondary;
+import org.example.coffee.secondary.WidgetUser;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -101,21 +110,62 @@ public class BootContext_mockitoSpyTest {
     }
   }
 
-//  @Test
-//  public void withMockitoSpy_whenPrimary_expect_spyUsed() {
-//
-//    try (BeanContext context = new BootContext()
-//      .withSpy(PEmailer.class) // has a primary
-//      .load()) {
-//
-//      UserOfPEmailer user = context.getBean(UserOfPEmailer.class);
-//      PEmailer emailer = context.getBean(PEmailer.class);
-//
-//      user.email();
-//      verify(emailer).email();
-//    }
-//  }
+  @Test
+  public void withMockitoSpy_whenPrimary_expect_spyUsed() {
 
+    try (BeanContext context = new BootContext()
+      .withSpy(PEmailer.class) // has a primary
+      .load()) {
+
+      UserOfPEmailer user = context.getBean(UserOfPEmailer.class);
+      PEmailer emailer = context.getBean(PEmailer.class);
+
+      user.email();
+      verify(emailer).email();
+    }
+  }
+
+  @Test
+  public void withMockitoSpy_whenOnlySecondary_expect_spyUsed() {
+
+    try (BeanContext context = new BootContext()
+      .withSpy(Widget.class) // only secondary
+      .load()) {
+
+      WidgetUser widgetUser = context.getBean(WidgetUser.class);
+
+      // these are the same (secondary only)
+      Widget widget = context.getBean(Widget.class);
+      WidgetSecondary widgetSecondary = context.getBean(WidgetSecondary.class);
+      assertThat(widget).isSameAs(widgetSecondary);
+
+      String val = widgetUser.wid();
+      assertThat(val).isEqualTo("second");
+      verify(widgetSecondary).wid();
+    }
+  }
+
+  @Test
+  public void withMockitoSpy_whenSecondary_expect_spyUsed() {
+
+    try (BeanContext context = new BootContext()
+      .withSpy(Something.class) // has a secondary and a normal
+      .load()) {
+
+      Unused unused = context.getBean(Unused.class);
+      Something something = context.getBean(Something.class);
+
+      // someImpl has higher precedence than the Secondary
+      SomeImpl someImpl = context.getBean(SomeImpl.class);
+      SomeImplBean someImplBean = context.getBean(SomeImplBean.class);
+      assertThat(something).isSameAs(someImpl);
+      assertThat(someImpl).isNotSameAs(someImplBean);
+
+
+      unused.doSomething();
+      verify(something).doStuff();
+    }
+  }
 
   @Test
   public void withMockitoMock_expect_mockUsed() {

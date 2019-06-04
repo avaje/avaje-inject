@@ -38,20 +38,6 @@ public class DBuilderExtn extends DBuilder {
   }
 
   /**
-   * Register beans with potential enhancement (spy).
-   */
-  @Override
-  public void register(Object bean, String name, Class<?>... types) {
-    String canonicalName = bean.getClass().getCanonicalName();
-    if (parent != null) {
-      throw new IllegalStateException("no");
-    }
-    // this is the top level builder (parent always null)
-    bean = enrich(bean, types);
-    beanMap.register(canonicalName, bean, name, types);
-  }
-
-  /**
    * Potentially enrich the bean prior to registering with context.
    */
   @SuppressWarnings("unchecked")

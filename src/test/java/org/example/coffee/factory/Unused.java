@@ -14,4 +14,8 @@ public class Unused {
   public Unused(Something something) {
     this.something = something;
   }
+
+  public void doSomething() {
+    something.doStuff();
+  }
 }

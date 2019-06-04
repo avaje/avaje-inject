@@ -171,12 +171,20 @@ class DBuilder implements Builder {
   @Override
   public void registerPrimary(Object bean, String name, Class<?>... types) {
     String canonicalName = bean.getClass().getCanonicalName();
+    if (parent != null) {
+      // enrichment only exist on top level builder
+      bean = parent.enrich(bean, types);
+    }
     beanMap.registerPrimary(canonicalName, bean, name, types);
   }
 
   @Override
   public void registerSecondary(Object bean, String name, Class<?>... types) {
     String canonicalName = bean.getClass().getCanonicalName();
+    if (parent != null) {
+      // enrichment only exist on top level builder
+      bean = parent.enrich(bean, types);
+    }
     beanMap.registerSecondary(canonicalName, bean, name, types);
   }
 
