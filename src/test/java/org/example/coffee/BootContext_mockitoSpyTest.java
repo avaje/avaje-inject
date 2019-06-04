@@ -192,22 +192,4 @@ public class BootContext_mockitoSpyTest {
     }
   }
 
-  /**
-   * Our test double that we want to wire.
-   */
-  class TDPump implements Pump {
-
-    int water;
-    int steam;
-
-    @Override
-    public void pumpWater() {
-      water++;
-    }
-
-    @Override
-    public void pumpSteam() {
-      steam++;
-    }
-  }
 }
