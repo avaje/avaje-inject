@@ -252,7 +252,7 @@ public class BootContext {
    *
    * }</pre>
    */
-  public <D> BootContext withMock(Class<D> type) {
+  public BootContext withMock(Class<?> type) {
     return withMock(type, null);
   }
 
@@ -310,7 +310,7 @@ public class BootContext {
    *
    * }</pre>
    */
-  public <D> BootContext withSpy(Class<D> type) {
+  public BootContext withSpy(Class<?> type) {
     return withSpy(type, null);
   }
 
