@@ -48,22 +48,22 @@ class DBeanMap {
     }
   }
 
-  void registerPrimary(Object bean, String name, Class<?>... types) {
-    registerWith(PRIMARY, bean, name, types);
+  void registerPrimary(String canonicalName, Object bean, String name, Class<?>... types) {
+    registerWith(PRIMARY, canonicalName, bean, name, types);
   }
 
-  void registerSecondary(Object bean, String name, Class<?>... types) {
-    registerWith(SECONDARY, bean, name, types);
+  void registerSecondary(String canonicalName, Object bean, String name, Class<?>... types) {
+    registerWith(SECONDARY, canonicalName, bean, name, types);
   }
 
-  void register(Object bean, String name, Class<?>... types) {
-    registerWith(NORMAL, bean, name, types);
+  void register(String canonicalName, Object bean, String name, Class<?>... types) {
+    registerWith(NORMAL, canonicalName, bean, name, types);
   }
 
-  void registerWith(int flag, Object bean, String name, Class<?>... types) {
+  void registerWith(int flag, String canonicalName, Object bean, String name, Class<?>... types) {
 
     DContextEntryBean entryBean = DContextEntryBean.of(bean, name, flag);
-    beans.computeIfAbsent(bean.getClass().getCanonicalName(), s -> new DContextEntry()).add(entryBean);
+    beans.computeIfAbsent(canonicalName, s -> new DContextEntry()).add(entryBean);
 
     if (types != null) {
       for (Class<?> type : types) {

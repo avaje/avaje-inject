@@ -60,6 +60,7 @@ public class BootContext_mockitoSpyTest {
 
     try (BeanContext context = new BootContext()
       .withSpy(Pump.class)
+      .withSpy(Grinder.class)
       .load()) {
 
       // setup after load()
@@ -71,6 +72,9 @@ public class BootContext_mockitoSpyTest {
       coffeeMaker.makeIt();
 
       verify(pump).pumpWater();
+
+      Grinder grinder = context.getBean(Grinder.class);
+      verify(grinder).grindBeans();
     }
   }
 
@@ -96,6 +100,22 @@ public class BootContext_mockitoSpyTest {
       verify(pump).pumpSteam();
     }
   }
+
+//  @Test
+//  public void withMockitoSpy_whenPrimary_expect_spyUsed() {
+//
+//    try (BeanContext context = new BootContext()
+//      .withSpy(PEmailer.class) // has a primary
+//      .load()) {
+//
+//      UserOfPEmailer user = context.getBean(UserOfPEmailer.class);
+//      PEmailer emailer = context.getBean(PEmailer.class);
+//
+//      user.email();
+//      verify(emailer).email();
+//    }
+//  }
+
 
   @Test
   public void withMockitoMock_expect_mockUsed() {
