@@ -149,6 +149,15 @@ class DBuilder implements Builder {
     children.put(child.getName(), child);
   }
 
+  /**
+   * Return the bean to register potentially with spy enhancement.
+   */
+  @Override
+  public Object enrich(Object bean, Class<?>[] types) {
+    // only enriched by DBuilderExtn
+    return bean;
+  }
+
   @Override
   public void register(Object bean, String name, Class<?>... types) {
     String canonicalName = bean.getClass().getCanonicalName();
@@ -157,15 +166,6 @@ class DBuilder implements Builder {
       bean = parent.enrich(bean, types);
     }
     beanMap.register(canonicalName, bean, name, types);
-  }
-
-  /**
-   * Return the bean to register potentially with spy enhancement.
-   */
-  @Override
-  public Object enrich(Object bean, Class<?>[] types) {
-    // only enriched by DBuilderExtn
-    return bean;
   }
 
   @Override
