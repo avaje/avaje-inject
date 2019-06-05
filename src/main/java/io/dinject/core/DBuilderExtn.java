@@ -43,17 +43,26 @@ public class DBuilderExtn extends DBuilder {
   @SuppressWarnings("unchecked")
   @Override
   public Object enrich(Object bean, Class<?>[] types) {
-    EnrichBean enrich = enrichMap.get(typeOf(bean, types));
+    EnrichBean enrich = getEnrich(bean, types);
     return enrich != null ? enrich.enrich(bean) : bean;
   }
 
   /**
-   * Return the type to lookup for enrichment.
+   * Search for EnrichBean on the bean or any of the interface types.
    */
-  private Class<?> typeOf(Object bean, Class<?>... types) {
-    if (types.length > 0) {
-      return types[0];
+  private EnrichBean getEnrich(Object bean, Class<?>[] types) {
+
+    EnrichBean enrich = enrichMap.get(bean.getClass());
+    if (enrich != null) {
+      return enrich;
     }
-    return bean.getClass();
+    for (Class<?> type : types) {
+      enrich = enrichMap.get(type);
+      if (enrich != null) {
+        return enrich;
+      }
+    }
+    return null;
   }
+
 }
