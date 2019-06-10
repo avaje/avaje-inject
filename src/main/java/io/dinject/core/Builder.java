@@ -63,17 +63,17 @@ public interface Builder {
    * @param name  The (optional) name of the instance.
    * @param types Interfaces and class level annotations this bean provides or associates to.
    */
-  void register(Object bean, String name, Class<?>... types);
+  <T> T register(T bean, String name, Class<?>... types);
 
   /**
    * Register the bean as a Primary bean.
    */
-  void registerPrimary(Object bean, String name, Class<?>... types);
+  <T> T registerPrimary(T bean, String name, Class<?>... types);
 
   /**
    * Register the bean as a secondary bean.
    */
-  void registerSecondary(Object bean, String name, Class<?>... types);
+  <T> T registerSecondary(T bean, String name, Class<?>... types);
 
   /**
    * Add a lifecycle bean.
@@ -133,5 +133,5 @@ public interface Builder {
    * @param types The types this bean registers for
    * @return Either the bean or the enriched bean to register into the context.
    */
-  Object enrich(Object bean, Class<?>[] types);
+  <T> T enrich(T bean, Class<?>[] types);
 }

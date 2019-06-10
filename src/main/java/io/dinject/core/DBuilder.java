@@ -153,39 +153,42 @@ class DBuilder implements Builder {
    * Return the bean to register potentially with spy enhancement.
    */
   @Override
-  public Object enrich(Object bean, Class<?>[] types) {
+  public <T> T enrich(T bean, Class<?>[] types) {
     // only enriched by DBuilderExtn
     return bean;
   }
 
   @Override
-  public void register(Object bean, String name, Class<?>... types) {
+  public <T> T register(T bean, String name, Class<?>... types) {
     String canonicalName = bean.getClass().getCanonicalName();
     if (parent != null) {
       // enrichment only exist on top level builder
       bean = parent.enrich(bean, types);
     }
     beanMap.register(canonicalName, bean, name, types);
+    return bean;
   }
 
   @Override
-  public void registerPrimary(Object bean, String name, Class<?>... types) {
+  public <T> T registerPrimary(T bean, String name, Class<?>... types) {
     String canonicalName = bean.getClass().getCanonicalName();
     if (parent != null) {
       // enrichment only exist on top level builder
       bean = parent.enrich(bean, types);
     }
     beanMap.registerPrimary(canonicalName, bean, name, types);
+    return bean;
   }
 
   @Override
-  public void registerSecondary(Object bean, String name, Class<?>... types) {
+  public <T> T registerSecondary(T bean, String name, Class<?>... types) {
     String canonicalName = bean.getClass().getCanonicalName();
     if (parent != null) {
       // enrichment only exist on top level builder
       bean = parent.enrich(bean, types);
     }
     beanMap.registerSecondary(canonicalName, bean, name, types);
+    return bean;
   }
 
   @Override

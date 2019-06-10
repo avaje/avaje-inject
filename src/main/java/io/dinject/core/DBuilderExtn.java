@@ -42,17 +42,18 @@ public class DBuilderExtn extends DBuilder {
    */
   @SuppressWarnings("unchecked")
   @Override
-  public Object enrich(Object bean, Class<?>[] types) {
-    EnrichBean enrich = getEnrich(bean, types);
+  public <T> T enrich(T bean, Class<?>[] types) {
+    EnrichBean<T> enrich = getEnrich(bean, types);
     return enrich != null ? enrich.enrich(bean) : bean;
   }
 
   /**
    * Search for EnrichBean on the bean or any of the interface types.
    */
-  private EnrichBean getEnrich(Object bean, Class<?>[] types) {
+  @SuppressWarnings("unchecked")
+  private <T> EnrichBean getEnrich(T bean, Class<?>[] types) {
 
-    EnrichBean enrich = enrichMap.get(bean.getClass());
+    EnrichBean<T> enrich = enrichMap.get(bean.getClass());
     if (enrich != null) {
       return enrich;
     }
