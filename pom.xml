@@ -4,7 +4,7 @@
 
   <groupId>io.dinject</groupId>
   <artifactId>dinject</artifactId>
-  <version>1.8-SNAPSHOT</version>
+  <version>1.8</version>
 
   <parent>
     <groupId>org.avaje</groupId>
@@ -14,7 +14,7 @@
 
   <scm>
     <developerConnection>scm:git:git@github.com:dinject/dinject.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>dinject-1.8</tag>
   </scm>
 
   <dependencies>
