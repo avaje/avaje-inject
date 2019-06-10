@@ -1,11 +1,20 @@
 package org.example.coffee.grind;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+
+@EqualsAndHashCode
+@ToString
+@Getter
+@Setter
 @Slf4j
 @Singleton
 public class Grinder {
