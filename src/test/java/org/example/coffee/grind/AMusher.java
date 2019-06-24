@@ -24,7 +24,7 @@ public class AMusher implements BeanLifecycle {
     countClose++;
   }
 
-  int getCountInit() {
+  public int getCountInit() {
     return countInit;
   }
 
