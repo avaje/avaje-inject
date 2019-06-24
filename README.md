@@ -1,5 +1,5 @@
 # DInject
-APT based dependency injection for server side developers - http://dinject.io
+APT based dependency injection for server side developers - https://dinject.io
 
 ## Similar to Dagger (https://google.github.io/dagger/)
 
