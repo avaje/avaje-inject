@@ -498,6 +498,7 @@ public class BootContext {
     private final Set<String> moduleNames = new LinkedHashSet<>();
     private final List<BeanContextFactory> factories = new ArrayList<>();
     private final List<FactoryState> queue = new ArrayList<>();
+    private final List<FactoryState> queueNoDependencies = new ArrayList<>();
 
     private final Map<String, FactoryList> providesMap = new HashMap<>();
 
@@ -518,7 +519,13 @@ public class BootContext {
           }
         }
         if (isEmpty(factory.getDependsOn())) {
-          push(wrappedFactory);
+          if (!isEmpty(factory.getProvides())) {
+            // only has 'provides' so we can push this
+            push(wrappedFactory);
+          } else {
+            // hold until after all the 'provides only' modules are added
+            queueNoDependencies.add(wrappedFactory);
+          }
         } else {
           // queue it to process by dependency ordering
           queue.add(wrappedFactory);
@@ -550,6 +557,11 @@ public class BootContext {
      * Order the factories returning the ordered list of module names.
      */
     Set<String> orderFactories() {
+      // push the 'no dependency' modules after the 'provides only' ones
+      // as this is more intuitive for the simple (only provides modules case)
+      for (FactoryState factoryState : queueNoDependencies) {
+        push(factoryState);
+      }
       processQueue();
       return moduleNames;
     }
