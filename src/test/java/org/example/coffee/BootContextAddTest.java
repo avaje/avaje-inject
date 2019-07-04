@@ -10,7 +10,7 @@ import static org.mockito.Mockito.verify;
 
 public class BootContextAddTest {
 
-  @Test
+  @Test(expected = IllegalStateException.class)
   public void withModules_exludingThisOne() {
 
     TDPump testDoublePump = new TDPump();

@@ -356,6 +356,11 @@ public class BootContext {
     ServiceLoader.load(BeanContextFactory.class).forEach(factoryOrder::add);
 
     Set<String> moduleNames = factoryOrder.orderFactories();
+    if (moduleNames.isEmpty()) {
+      throw new IllegalStateException("No modules found suggests using Gradle and IDEA but with a setup issue?" +
+        " Review IntelliJ Settings / Build / Build tools / Gradle - 'Build and run using' value and set that to 'Gradle'. " +
+        " Refer to https://dinject.io/docs/gradle#idea");
+    }
     log.debug("building context with modules {}", moduleNames);
 
     Builder rootBuilder = BuilderFactory.newRootBuilder(suppliedBeans, enrichBeans);
