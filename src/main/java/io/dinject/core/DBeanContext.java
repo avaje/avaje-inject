@@ -5,7 +5,9 @@ import io.dinject.BeanEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Priority;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -76,13 +78,43 @@ class DBeanContext implements BeanContext {
   }
 
   @Override
-  public <T> List<T> getBeans(Class<T> interfaceType) {
+  public <T> List<T> getBeansUnsorted(Class<T> interfaceType) {
     List<T> list = new ArrayList<>();
     beans.addAll(interfaceType, list);
     for (BeanContext childContext : children.values()) {
-      list.addAll(childContext.getBeans(interfaceType));
+      list.addAll(childContext.getBeansUnsorted(interfaceType));
     }
     return list;
+  }
+
+  @Override
+  public <T> List<T> getBeans(Class<T> interfaceType) {
+    List<T> list = getBeansUnsorted(interfaceType);
+    return list.size() > 1 ? sortByPriority(list) : list;
+  }
+
+  @Override
+  public <T> List<T> sortByPriority(List<T> list) {
+    boolean priorityUsed = false;
+    List<SortBean<T>> tempList = new ArrayList<>(list.size());
+    for (T bean : list) {
+      SortBean<T> sortBean = new SortBean<>(bean);
+      tempList.add(sortBean);
+      if (!priorityUsed && sortBean.priorityDefined) {
+        priorityUsed = true;
+      }
+    }
+    if (!priorityUsed) {
+      // nothing with Priority annotation so return original order
+      return list;
+    }
+    Collections.sort(tempList);
+    // unpack into new sorted list
+    List<T> sorted = new ArrayList<>(tempList.size());
+    for (SortBean<T> sortBean : tempList) {
+      sorted.add(sortBean.bean);
+    }
+    return sorted;
   }
 
   @Override
@@ -184,6 +216,36 @@ class DBeanContext implements BeanContext {
         throw new IllegalStateException("Multiple @Secondary beans when only expecting one? Beans: " + all);
       }
       return secondary;
+    }
+  }
+
+  private static class SortBean<T> implements Comparable<SortBean<T>> {
+
+    private final T bean;
+
+    private boolean priorityDefined;
+
+    private final int priority;
+
+    SortBean(T bean) {
+      this.bean = bean;
+      this.priority = initPriority();
+    }
+
+    int initPriority() {
+      final Priority ann = bean.getClass().getAnnotation(Priority.class);
+      if (ann != null) {
+        priorityDefined = true;
+        return ann.value();
+      }
+      // Default priority as per javax.ws.rs.Priorities.USER
+      // User-level filter/interceptor priority
+      return 5000;
+    }
+
+    @Override
+    public int compareTo(SortBean<T> o) {
+      return Integer.compare(priority, o.priority);
     }
   }
 }

@@ -466,6 +466,16 @@ public class BootContext {
     }
 
     @Override
+    public <T> List<T> getBeansUnsorted(Class<T> interfaceType) {
+      return context.getBeansUnsorted(interfaceType);
+    }
+
+    @Override
+    public <T> List<T> sortByPriority(List<T> list) {
+      return context.sortByPriority(list);
+    }
+
+    @Override
     public void start() {
       context.start();
     }
