@@ -26,8 +26,6 @@ public class SystemContextTest {
 
     final List<Somei> beans = SystemContext.getBeansUnsorted(Somei.class);
     assertThat(beans).hasSize(2);
-
-    assertThat(beans.get(0)).isInstanceOf(ASomei.class);
-    assertThat(beans.get(1)).isInstanceOf(BSomei.class);
+    // can't assert bean order
   }
 }
