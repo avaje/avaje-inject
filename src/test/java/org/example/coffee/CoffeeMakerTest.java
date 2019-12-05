@@ -18,6 +18,9 @@ public class CoffeeMakerTest {
 
     Pump pump = SystemContext.getBean(Pump.class);
     assertThat(pump).isInstanceOf(DuperPump.class);
+
+    Pump pump2 = SystemContext.context().getBean(Pump.class);
+    assertThat(pump2).isSameAs(pump);
   }
 
   @Test

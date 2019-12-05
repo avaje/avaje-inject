@@ -53,6 +53,13 @@ public class SystemContext {
   }
 
   /**
+   * Return the underlying BeanContext.
+   */
+  public static BeanContext context() {
+    return rootContext;
+  }
+
+  /**
    * Return a single bean given the type.
    *
    * <pre>{@code
