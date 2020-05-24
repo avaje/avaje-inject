@@ -11,6 +11,11 @@ public @interface DependencyMeta {
   String type();
 
   /**
+   * The qualified name of the dependency being provided.
+   */
+  String name() default "";
+
+  /**
    * The bean factory method (for <code>@Bean</code> annotated methods).
    */
   String method() default "";

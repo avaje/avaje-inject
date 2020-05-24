@@ -56,7 +56,7 @@
     <dependency>
       <groupId>io.dinject</groupId>
       <artifactId>dinject-generator</artifactId>
-      <version>1.15</version>
+      <version>1.17</version>
       <scope>test</scope>
     </dependency>
 

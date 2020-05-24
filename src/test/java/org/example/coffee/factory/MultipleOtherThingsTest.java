@@ -6,15 +6,17 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class OtherThingTest {
+public class MultipleOtherThingsTest {
 
   @Test
   public void test() {
 
     try (BeanContext context = new BootContext().load()) {
-      final TwoOtherThings combined = context.getBean(TwoOtherThings.class);
+      final MultipleOtherThings combined = context.getBean(MultipleOtherThings.class);
       assertEquals("blue", combined.blue());
       assertEquals("red", combined.red());
+//      assertEquals("green", combined.green());
+//      assertEquals("yellow", combined.yellow());
     }
   }
 }
