@@ -8,15 +8,14 @@ public class MultipleOtherThings {
 
   private final Otherthing blue;
   private final Otherthing red;
-//  private final Otherthing green;
-//  private final Otherthing yellow;
+  private final Otherthing green;
+  private final Otherthing yellow;
 
-  MultipleOtherThings(@Named("blue") Otherthing blue, @Named("red") Otherthing red) {
-//    , @Named("green") Otherthing green, @Named("yellow") Otherthing yellow) {
+  MultipleOtherThings(@Named("blue") Otherthing blue, @Named("red") Otherthing red, @Named("green") Otherthing green, @Named("yellow") Otherthing yellow) {
     this.blue = blue;
     this.red = red;
-//    this.green = green;
-//    this.yellow = yellow;
+    this.green = green;
+    this.yellow = yellow;
   }
 
   public String blue() {
@@ -27,11 +26,11 @@ public class MultipleOtherThings {
     return red.doOther();
   }
 
-//  public String green() {
-//    return green.doOther();
-//  }
+  public String green() {
+    return green.doOther();
+  }
 
-//  public String yellow() {
-//    return yellow.doOther();
-//  }
+  public String yellow() {
+    return yellow.doOther();
+  }
 }

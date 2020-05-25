@@ -4,6 +4,8 @@ import io.dinject.Bean;
 import io.dinject.Factory;
 import org.example.coffee.factory.other.Something;
 
+import javax.inject.Named;
+
 @Factory
 public class MyFactory {
 
@@ -16,16 +18,16 @@ public class MyFactory {
   Something buildSomething() {
     return new SomeImpl();
   }
-//
-//  @Bean
-//  @Named("green")
-//  Otherthing greenOther() {
-//    return () -> "green";
-//  }
-//
-//  @Bean
-//  @Named("yellow")
-//  Otherthing yellowOther() {
-//    return () -> "yellow";
-//  }
+
+  @Bean
+  @Named("green")
+  Otherthing greenOther() {
+    return () -> "green";
+  }
+
+  @Bean
+  @Named("yellow")
+  Otherthing yellowOther() {
+    return () -> "yellow";
+  }
 }

@@ -15,8 +15,8 @@ public class MultipleOtherThingsTest {
       final MultipleOtherThings combined = context.getBean(MultipleOtherThings.class);
       assertEquals("blue", combined.blue());
       assertEquals("red", combined.red());
-//      assertEquals("green", combined.green());
-//      assertEquals("yellow", combined.yellow());
+      assertEquals("green", combined.green());
+      assertEquals("yellow", combined.yellow());
     }
   }
 }
