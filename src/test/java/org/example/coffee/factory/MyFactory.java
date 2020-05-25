@@ -9,6 +9,8 @@ import javax.inject.Named;
 @Factory
 public class MyFactory {
 
+  String methods = "";
+
   @Bean
   CFact buildCFact() {
     return new CFact();
@@ -29,5 +31,19 @@ public class MyFactory {
   @Named("yellow")
   Otherthing yellowOther() {
     return () -> "yellow";
+  }
+
+  @Bean
+  void useCFact(CFact cfact) {
+    methods +="|useCFact";
+  }
+
+  @Bean
+  void anotherCFact(CFact cfact) {
+    methods +="|anotherCFact";
+  }
+
+  String methodsCalled(){
+    return methods;
   }
 }
