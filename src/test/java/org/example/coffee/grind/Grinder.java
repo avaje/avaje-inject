@@ -1,5 +1,6 @@
 package org.example.coffee.grind;
 
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +12,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 
+@Data
 @EqualsAndHashCode
 @ToString
 @Getter
