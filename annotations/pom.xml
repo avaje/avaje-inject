@@ -4,12 +4,12 @@
 
   <groupId>io.dinject</groupId>
   <artifactId>dinject-annotations</artifactId>
-  <version>1.20-beta-SNAPSHOT</version>
+  <version>1.20-beta</version>
 
   <parent>
     <groupId>io.dinject</groupId>
     <artifactId>dinject-parent</artifactId>
-    <version>1.20-beta-SNAPSHOT</version>
+    <version>1.20-beta</version>
   </parent>
 
   <dependencies>
