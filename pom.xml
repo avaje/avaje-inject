@@ -6,7 +6,7 @@
 
   <groupId>io.dinject</groupId>
   <artifactId>dinject-parent</artifactId>
-  <version>1.20-beta-SNAPSHOT</version>
+  <version>1.20-beta2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <parent>
