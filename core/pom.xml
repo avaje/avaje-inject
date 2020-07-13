@@ -7,15 +7,10 @@
   <version>1.20-SNAPSHOT</version>
 
   <parent>
-    <groupId>org.avaje</groupId>
-    <artifactId>java8-oss</artifactId>
-    <version>2.1</version>
+    <groupId>io.dinject</groupId>
+    <artifactId>dinject-parent</artifactId>
+    <version>1.20-SNAPSHOT</version>
   </parent>
-
-  <scm>
-    <developerConnection>scm:git:git@github.com:dinject/dinject.git</developerConnection>
-    <tag>HEAD</tag>
-  </scm>
 
   <dependencies>
 
