@@ -1,6 +1,6 @@
 package org.example.coffee.secondary;
 
-import io.dinject.Secondary;
+import io.dinject.annotation.Secondary;
 
 import javax.inject.Singleton;
 

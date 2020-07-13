@@ -1,7 +1,5 @@
 package org.example.coffee.primary;
 
-import io.dinject.Secondary;
-
 import javax.inject.Singleton;
 
 //@Secondary

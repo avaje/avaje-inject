@@ -1,8 +1,8 @@
 package io.dinject.generator;
 
-import io.dinject.Bean;
-import io.dinject.Primary;
-import io.dinject.Secondary;
+import io.dinject.annotation.Bean;
+import io.dinject.annotation.Primary;
+import io.dinject.annotation.Secondary;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

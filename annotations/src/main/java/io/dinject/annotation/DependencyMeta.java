@@ -1,4 +1,4 @@
-package io.dinject.core;
+package io.dinject.annotation;
 
 /**
  * Hold bean dependency meta data intended for internal use by code generation (Java annotation processing).

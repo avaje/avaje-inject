@@ -1,6 +1,6 @@
 package io.dinject.generator;
 
-import io.dinject.Bean;
+import io.dinject.annotation.Bean;
 
 import javax.inject.Named;
 import javax.lang.model.element.Element;

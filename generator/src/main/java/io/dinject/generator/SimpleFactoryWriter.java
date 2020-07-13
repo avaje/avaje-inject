@@ -90,10 +90,10 @@ class SimpleFactoryWriter {
     }
     writer.append(Constants.IMPORT_BEANCONTEXT).eol();
     writer.append(Constants.IMPORT_CONTEXTMODULE).eol();
-    writer.append(Constants.IMPORT_BEANCONTEXTFACTORY).eol();
-    writer.append(Constants.IMPORT_BUILDERFACTORY).eol();
-    writer.append(Constants.IMPORT_BUILDER).eol();
     writer.append(Constants.IMPORT_DEPENDENCYMETA).eol().eol();
+    writer.append(Constants.IMPORT_BEANCONTEXTFACTORY).eol();
+    writer.append(Constants.IMPORT_BUILDER).eol();
+    writer.append(Constants.IMPORT_BUILDERFACTORY).eol();
 
     for (String type : ordering.getImportTypes()) {
       if (Util.notVoid(type)) {
