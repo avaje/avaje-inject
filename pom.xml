@@ -6,7 +6,7 @@
 
   <groupId>io.dinject</groupId>
   <artifactId>dinject-parent</artifactId>
-  <version>1.20-SNAPSHOT</version>
+  <version>1.20-beta-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <parent>
@@ -22,7 +22,7 @@
 
   <modules>
     <module>annotations</module>
-    <module>generator</module> 
+    <module>generator</module>
     <module>core</module>
   </modules>
 </project>
