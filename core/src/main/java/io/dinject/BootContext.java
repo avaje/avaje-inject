@@ -54,8 +54,10 @@ public class BootContext {
 
   private boolean shutdownHook = true;
 
+  @SuppressWarnings("rawtypes")
   private final List<SuppliedBean> suppliedBeans = new ArrayList<>();
 
+  @SuppressWarnings("rawtypes")
   private final List<EnrichBean> enrichBeans = new ArrayList<>();
 
   private final Set<String> includeModules = new LinkedHashSet<>();
@@ -187,7 +189,7 @@ public class BootContext {
    * @param beans The bean used when injecting a dependency for this bean or the interface(s) it implements
    * @return This BootContext
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public BootContext withBeans(Object... beans) {
     for (Object bean : beans) {
       suppliedBeans.add(new SuppliedBean(suppliedType(bean.getClass()), bean));
