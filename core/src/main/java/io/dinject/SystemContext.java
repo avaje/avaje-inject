@@ -42,7 +42,7 @@ import java.util.List;
  */
 public class SystemContext {
 
-  private static BeanContext rootContext = init();
+  private static final BeanContext rootContext = init();
 
   private static BeanContext init() {
     return new BootContext().load();

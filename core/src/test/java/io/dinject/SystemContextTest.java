@@ -5,6 +5,7 @@ import org.example.coffee.list.BSomei;
 import org.example.coffee.list.Somei;
 import org.junit.Test;
 
+import javax.annotation.Priority;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,5 +28,12 @@ public class SystemContextTest {
     final List<Somei> beans = SystemContext.getBeansUnsorted(Somei.class);
     assertThat(beans).hasSize(2);
     // can't assert bean order
+  }
+
+  @Test
+  public void getBeansWithAnnotation() {
+
+    final List<Object> beans = SystemContext.getBeansWithAnnotation(Priority.class);
+    assertThat(beans).hasSize(2);
   }
 }
