@@ -5,6 +5,7 @@ import javax.inject.Qualifier;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 
 class Util {
 
@@ -69,8 +70,16 @@ class Util {
     return listType;
   }
 
-  static boolean isList(String rawType) {
-    return rawType.startsWith("java.util.List<");
+  static String extractSet(String rawType) {
+    String setType = rawType.substring(14, rawType.length() - 1);
+    if (setType.startsWith("? extends")) {
+      return setType.substring(10);
+    }
+    return setType;
+  }
+
+  static UtilType determineType(TypeMirror rawType) {
+    return UtilType.of(rawType.toString());
   }
 
   private static boolean isProvider(String rawType) {

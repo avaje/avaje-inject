@@ -20,27 +20,11 @@ class FieldReader {
 
   String builderGetDependency() {
 
-    TypeMirror type = element.asType();
-    String rawType = type.toString();
-
-    boolean listType = Util.isList(rawType);
-    boolean optionalType = !listType && Util.isOptional(rawType);
-    if (optionalType) {
-      rawType = Util.extractOptionalType(rawType);
-    } else if (listType) {
-      rawType = Util.extractList(rawType);
-    }
+    UtilType beanType = Util.determineType(element.asType());
 
     StringBuilder sb = new StringBuilder();
-    if (listType) {
-      sb.append("b.getList(");
-    } else if (optionalType) {
-      sb.append("b.getOptional(");
-    } else {
-      sb.append("b.get(");
-    }
-
-    sb.append(rawType).append(".class");
+    sb.append("b.").append(beanType.getMethod());
+    sb.append(beanType.rawType()).append(".class");
     if (name != null) {
       sb.append(",\"").append(name).append("\"");
     }

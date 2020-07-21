@@ -228,29 +228,18 @@ class MethodReader {
 
   static class MethodParam {
 
-    private final String rawType;
     private final String named;
-    private final boolean listType;
-    private final boolean optionalType;
+    private final UtilType utilType;
     private final String paramType;
     private final GenericType genericType;
 
     private int providerIndex;
 
     MethodParam(VariableElement param) {
-      TypeMirror type = param.asType();
-      this.rawType = type.toString();
       this.named = Util.getNamed(param);
-      this.listType = Util.isList(rawType);
-      this.optionalType = !listType && Util.isOptional(rawType);
-      if (optionalType) {
-        paramType = Util.extractOptionalType(rawType);
-      } else if (listType) {
-        paramType = Util.extractList(rawType);
-      } else {
-        paramType = rawType;
-      }
-      genericType = GenericType.maybe(paramType);
+      this.utilType = Util.determineType(param.asType());
+      this.paramType = utilType.rawType();
+      this.genericType = GenericType.maybe(paramType);
     }
 
     String builderGetDependency() {
@@ -258,12 +247,8 @@ class MethodReader {
       if (genericType != null) {
         // passed as provider to build method
         sb.append("prov").append(providerIndex).append(".get(");
-      } else if (listType) {
-        sb.append("builder.getList(");
-      } else if (optionalType) {
-        sb.append("builder.getOptional(");
       } else {
-        sb.append("builder.get(");
+        sb.append("builder.").append(utilType.getMethod());
       }
       if (genericType == null) {
         sb.append(Util.shortName(paramType)).append(".class");

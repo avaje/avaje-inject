@@ -22,14 +22,18 @@ public class UtilTest {
 
   @Test
   public void extractList() {
-
     assertEquals("Foo", Util.extractList("List<? extends Foo>"));
     assertEquals("org.foo.Bar", Util.extractList("List<? extends org.foo.Bar>"));
   }
 
   @Test
-  public void addForInterface() {
+  public void extractSet() {
+    assertEquals("Foo", Util.extractSet("Set<? extends Foo>"));
+    assertEquals("org.foo.Bar", Util.extractSet("Set<? extends org.foo.Bar>"));
+  }
 
+  @Test
+  public void addForInterface() {
     assertNull(Util.addForInterface("java.util.List<Some>"));
     assertEquals("Bar", Util.addForInterface("com.foo.Bar"));
   }

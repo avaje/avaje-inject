@@ -5,6 +5,7 @@ import io.dinject.BeanEntry;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -114,6 +115,11 @@ public interface Builder {
    * Get a list of dependencies for the interface type .
    */
   <T> List<T> getList(Class<T> interfaceType);
+
+  /**
+   * Get a set of dependencies for the interface type .
+   */
+  <T> Set<T> getSet(Class<T> interfaceType);
 
   /**
    * Get a candidate dependency allowing it to be null.

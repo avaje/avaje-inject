@@ -7,9 +7,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
 class DBuilder implements Builder {
@@ -105,6 +107,11 @@ class DBuilder implements Builder {
   @Override
   public boolean isAddBeanFor(Class<?> injectTarget) {
     return isAddBeanFor(injectTarget, injectTarget);
+  }
+
+  @Override
+  public <T> Set<T> getSet(Class<T> interfaceType) {
+    return new LinkedHashSet<>(getList(interfaceType));
   }
 
   @SuppressWarnings("unchecked")
