@@ -128,20 +128,20 @@ public class SystemContext {
   }
 
   /**
-   * Return the list of beans that implement the interface without ordering based on <code>@Priority</code>.
+   * Return the list of beans that implement the interface ordering based on <code>@Priority</code>.
    *
    * <pre>{@code
    *
    *   // e.g. register all web routes with web a framework
    *
-   *   List<WebRoute> routes = SystemContext.getBeansUnsorted(WebRoute.class);
+   *   List<WebRoute> routes = SystemContext.getBeansByPriority(WebRoute.class);
    *
    * }</pre>
    *
    * @param interfaceType An interface class.
    */
-  public static <T> List<T> getBeansUnsorted(Class<T> interfaceType) {
-    return rootContext.getBeansUnsorted(interfaceType);
+  public static <T> List<T> getBeansByPriority(Class<T> interfaceType) {
+    return rootContext.getBeansByPriority(interfaceType);
   }
 
 }

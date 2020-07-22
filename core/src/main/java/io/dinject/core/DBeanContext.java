@@ -78,18 +78,18 @@ class DBeanContext implements BeanContext {
   }
 
   @Override
-  public <T> List<T> getBeansUnsorted(Class<T> interfaceType) {
+  public <T> List<T> getBeans(Class<T> interfaceType) {
     List<T> list = new ArrayList<>();
     beans.addAll(interfaceType, list);
     for (BeanContext childContext : children.values()) {
-      list.addAll(childContext.getBeansUnsorted(interfaceType));
+      list.addAll(childContext.getBeans(interfaceType));
     }
     return list;
   }
 
   @Override
-  public <T> List<T> getBeans(Class<T> interfaceType) {
-    List<T> list = getBeansUnsorted(interfaceType);
+  public <T> List<T> getBeansByPriority(Class<T> interfaceType) {
+    List<T> list = getBeans(interfaceType);
     return list.size() > 1 ? sortByPriority(list) : list;
   }
 

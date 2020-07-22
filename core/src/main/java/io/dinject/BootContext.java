@@ -468,8 +468,8 @@ public class BootContext {
     }
 
     @Override
-    public <T> List<T> getBeansUnsorted(Class<T> interfaceType) {
-      return context.getBeansUnsorted(interfaceType);
+    public <T> List<T> getBeansByPriority(Class<T> interfaceType) {
+      return context.getBeansByPriority(interfaceType);
     }
 
     @Override

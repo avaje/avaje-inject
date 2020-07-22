@@ -136,10 +136,10 @@ public interface BeanContext extends Closeable {
   <T> List<T> getBeans(Class<T> interfaceType);
 
   /**
-   * Return the list of beans that implement the interface without
+   * Return the list of beans that implement the interface
    * sorting by priority (ignoring any Priority annotation).
    */
-  <T> List<T> getBeansUnsorted(Class<T> interfaceType);
+  <T> List<T> getBeansByPriority(Class<T> interfaceType);
 
   /**
    * Sort the beans by javax.annotation.Priority annotation.

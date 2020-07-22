@@ -13,9 +13,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SystemContextTest {
 
   @Test
-  public void getBeans_withPriority() {
+  public void getBeansByPriority() {
 
-    final List<Somei> beans = SystemContext.getBeans(Somei.class);
+    final List<Somei> beans = SystemContext.getBeansByPriority(Somei.class);
     assertThat(beans).hasSize(2);
 
     assertThat(beans.get(0)).isInstanceOf(BSomei.class);
@@ -25,7 +25,7 @@ public class SystemContextTest {
   @Test
   public void getBeansUnsorted_withPriority() {
 
-    final List<Somei> beans = SystemContext.getBeansUnsorted(Somei.class);
+    final List<Somei> beans = SystemContext.getBeans(Somei.class);
     assertThat(beans).hasSize(2);
     // can't assert bean order
   }
