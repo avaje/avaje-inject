@@ -34,4 +34,8 @@ public class BuilderFactory {
   public static Builder newBuilder(String name, String[] provides, String[] dependsOn) {
     return new DBuilder(name, provides, dependsOn);
   }
+
+  private BuilderFactory(){
+    // hide
+  }
 }

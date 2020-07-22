@@ -7,12 +7,14 @@ import java.util.Map;
 /**
  * Extended builder that supports supplied beans (mocks) and enriching beans (spy).
  */
-public class DBuilderExtn extends DBuilder {
+class DBuilderExtn extends DBuilder {
 
+  @SuppressWarnings("rawtypes")
   private final Map<Class<?>, EnrichBean> enrichMap = new HashMap<>();
 
   private final boolean hasSuppliedBeans;
 
+  @SuppressWarnings("rawtypes")
   DBuilderExtn(List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans) {
     super();
     this.hasSuppliedBeans = (suppliedBeans != null && !suppliedBeans.isEmpty());
@@ -50,7 +52,7 @@ public class DBuilderExtn extends DBuilder {
   /**
    * Search for EnrichBean on the bean or any of the interface types.
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private <T> EnrichBean getEnrich(T bean, Class<?>[] types) {
 
     EnrichBean<T> enrich = enrichMap.get(bean.getClass());
