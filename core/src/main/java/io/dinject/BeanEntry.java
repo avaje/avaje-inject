@@ -6,7 +6,7 @@ package io.dinject;
 public class BeanEntry<T> {
 
   /**
-   * An explicitly supplied bean. See BootContext.
+   * An explicitly supplied bean. See BeanContextBuilder.
    */
   public static final int SUPPLIED = 2;
 

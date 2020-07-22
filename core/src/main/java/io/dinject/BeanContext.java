@@ -14,14 +14,14 @@ import java.util.List;
  *
  * <h3>Create a BeanContext</h3>
  * <p>
- * We can programmatically create a BeanContext via BootContext.
+ * We can programmatically create a BeanContext via BeanContextBuilder.
  * </p>
  * <pre>{@code
  *
  *   // create a BeanContext ...
  *
- *   try (BeanContext context = new BootContext()
- *     .load()) {
+ *   try (BeanContext context = new BeanContextBuilder()
+ *     .build()) {
  *
  *     CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
  *     coffeeMaker.makeIt()
