@@ -1,7 +1,7 @@
 package org.example.coffee;
 
 import io.dinject.BeanContext;
-import io.dinject.BootContext;
+import io.dinject.BeanContextBuilder;
 import io.dinject.SystemContext;
 import org.example.coffee.core.DuperPump;
 import org.junit.Test;
@@ -26,9 +26,9 @@ public class CoffeeMakerTest {
   @Test
   public void makeIt_via_BootContext_withNoShutdownHook() {
 
-    try (BeanContext context = new BootContext()
+    try (BeanContext context = new BeanContextBuilder()
       .withNoShutdownHook()
-      .load()) {
+      .build()) {
 
       String makeIt = context.getBean(CoffeeMaker.class).makeIt();
       assertThat(makeIt).isEqualTo("done");
@@ -38,7 +38,7 @@ public class CoffeeMakerTest {
   @Test
   public void makeIt_via_BootContext() {
 
-    try (BeanContext context = new BootContext().load()) {
+    try (BeanContext context = new BeanContextBuilder().build()) {
 
       String makeIt = context.getBean(CoffeeMaker.class).makeIt();
       assertThat(makeIt).isEqualTo("done");

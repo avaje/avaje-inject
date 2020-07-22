@@ -1,7 +1,7 @@
 package org.example.coffee;
 
 import io.dinject.BeanContext;
-import io.dinject.BootContext;
+import io.dinject.BeanContextBuilder;
 import org.example.coffee.qualifier.SomeStore;
 import org.example.coffee.secondary.SEmailer;
 import org.example.coffee.secondary.Widget;
@@ -21,7 +21,7 @@ public class ExtensionExampleTest {
     Class cls0 = Widget.class;
     Class<?> cls1 = SEmailer.class;
 
-    BootContext bootContext = new BootContext()
+    BeanContextBuilder bootContext = new BeanContextBuilder()
       .withSpy(cls0)
       .withSpy(cls1)
       .withMock(cls0)

@@ -1,7 +1,7 @@
 package org.example.coffee.factory;
 
 import io.dinject.BeanContext;
-import io.dinject.BootContext;
+import io.dinject.BeanContextBuilder;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,8 +12,8 @@ public class AFactTest {
   public void postConstruct() {
 
     AFact bean;
-    try (BeanContext context = new BootContext()
-      .load()) {
+    try (BeanContext context = new BeanContextBuilder()
+      .build()) {
 
       bean = context.getBean(AFact.class);
 

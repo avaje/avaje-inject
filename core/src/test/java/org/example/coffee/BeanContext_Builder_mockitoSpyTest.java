@@ -1,7 +1,7 @@
 package org.example.coffee;
 
 import io.dinject.BeanContext;
-import io.dinject.BootContext;
+import io.dinject.BeanContextBuilder;
 import org.example.coffee.factory.SomeImpl;
 import org.example.coffee.factory.SomeImplBean;
 import org.example.coffee.factory.Unused;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class BootContext_mockitoSpyTest {
+public class BeanContext_Builder_mockitoSpyTest {
 
   @Test
   public void withBeans_asMocks() {
@@ -30,9 +30,9 @@ public class BootContext_mockitoSpyTest {
     Pump pump = mock(Pump.class);
     Grinder grinder = mock(Grinder.class);
 
-    try (BeanContext context = new BootContext()
+    try (BeanContext context = new BeanContextBuilder()
       .withBeans(pump, grinder)
-      .load()) {
+      .build()) {
 
       CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
       coffeeMaker.makeIt();
@@ -51,9 +51,9 @@ public class BootContext_mockitoSpyTest {
   @Test
   public void withMockitoSpy_noSetup_expect_spyUsed() {
 
-    try (BeanContext context = new BootContext()
+    try (BeanContext context = new BeanContextBuilder()
       .withSpy(Pump.class)
-      .load()) {
+      .build()) {
 
       CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
       assertThat(coffeeMaker).isNotNull();
@@ -67,10 +67,10 @@ public class BootContext_mockitoSpyTest {
   @Test
   public void withMockitoSpy_postLoadSetup_expect_spyUsed() {
 
-    try (BeanContext context = new BootContext()
+    try (BeanContext context = new BeanContextBuilder()
       .withSpy(Pump.class)
       .withSpy(Grinder.class)
-      .load()) {
+      .build()) {
 
       // setup after load()
       Pump pump = context.getBean(Pump.class);
@@ -90,12 +90,12 @@ public class BootContext_mockitoSpyTest {
   @Test
   public void withMockitoSpy_expect_spyUsed() {
 
-    try (BeanContext context = new BootContext()
+    try (BeanContext context = new BeanContextBuilder()
       .withSpy(Pump.class, pump -> {
         // setup the spy
         doNothing().when(pump).pumpWater();
       })
-      .load()) {
+      .build()) {
 
       // or setup here ...
       Pump pump = context.getBean(Pump.class);
@@ -113,9 +113,9 @@ public class BootContext_mockitoSpyTest {
   @Test
   public void withMockitoSpy_whenPrimary_expect_spyUsed() {
 
-    try (BeanContext context = new BootContext()
+    try (BeanContext context = new BeanContextBuilder()
       .withSpy(PEmailer.class) // has a primary
-      .load()) {
+      .build()) {
 
       UserOfPEmailer user = context.getBean(UserOfPEmailer.class);
       PEmailer emailer = context.getBean(PEmailer.class);
@@ -128,9 +128,9 @@ public class BootContext_mockitoSpyTest {
   @Test
   public void withMockitoSpy_whenOnlySecondary_expect_spyUsed() {
 
-    try (BeanContext context = new BootContext()
+    try (BeanContext context = new BeanContextBuilder()
       .withSpy(Widget.class) // only secondary
-      .load()) {
+      .build()) {
 
       WidgetUser widgetUser = context.getBean(WidgetUser.class);
 
@@ -148,9 +148,9 @@ public class BootContext_mockitoSpyTest {
   @Test
   public void withMockitoSpy_whenSecondary_expect_spyUsed() {
 
-    try (BeanContext context = new BootContext()
+    try (BeanContext context = new BeanContextBuilder()
       .withSpy(Something.class) // has a secondary and a normal
-      .load()) {
+      .build()) {
 
       Unused unused = context.getBean(Unused.class);
       Something something = context.getBean(Something.class);
@@ -172,14 +172,14 @@ public class BootContext_mockitoSpyTest {
 
     AtomicReference<Grinder> mock = new AtomicReference<>();
 
-    try (BeanContext context = new BootContext()
+    try (BeanContext context = new BeanContextBuilder()
       .withMock(Pump.class)
       .withMock(Grinder.class, grinder -> {
         // setup the mock
         when(grinder.grindBeans()).thenReturn("stub response");
         mock.set(grinder);
       })
-      .load()) {
+      .build()) {
 
       Grinder grinder = context.getBean(Grinder.class);
       assertThat(grinder).isSameAs(mock.get());

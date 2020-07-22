@@ -1,7 +1,7 @@
 package org.example.coffee.qualifier;
 
 import io.dinject.BeanContext;
-import io.dinject.BootContext;
+import io.dinject.BeanContextBuilder;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -11,7 +11,7 @@ public class StoreManagerWithNamedTest {
   @Test
   public void test() {
 
-    try (BeanContext context = new BootContext().load()) {
+    try (BeanContext context = new BeanContextBuilder().build()) {
       StoreManagerWithNamed manager = context.getBean(StoreManagerWithNamed.class);
       String store = manager.store();
       assertThat(store).isEqualTo("blue");

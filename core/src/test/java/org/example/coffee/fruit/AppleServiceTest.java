@@ -1,7 +1,7 @@
 package org.example.coffee.fruit;
 
 import io.dinject.BeanContext;
-import io.dinject.BootContext;
+import io.dinject.BeanContextBuilder;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,10 +13,10 @@ public class AppleServiceTest {
   @Test
   public void test_spyWithFieldInjection() {
 
-    BootContext bootContext = new BootContext();
+    BeanContextBuilder bootContext = new BeanContextBuilder();
     bootContext.withSpy(AppleService.class);
 
-    try (BeanContext beanContext = bootContext.load()) {
+    try (BeanContext beanContext = bootContext.build()) {
 
       AppleService appleService = beanContext.getBean(AppleService.class);
 
@@ -37,9 +37,9 @@ public class AppleServiceTest {
   @Test
   public void test_whenNoMockOrSpy() {
 
-    BootContext bootContext = new BootContext();
+    BeanContextBuilder bootContext = new BeanContextBuilder();
 
-    try (BeanContext beanContext = bootContext.load()) {
+    try (BeanContext beanContext = bootContext.build()) {
 
       AppleService appleService = beanContext.getBean(AppleService.class);
 

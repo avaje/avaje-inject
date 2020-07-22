@@ -1,26 +1,26 @@
 package org.example.coffee;
 
 import io.dinject.BeanContext;
-import io.dinject.BootContext;
+import io.dinject.BeanContextBuilder;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
-public class BootContextAddTest {
+public class BeanContextBuilderAddTest {
 
   @Test(expected = IllegalStateException.class)
   public void withModules_exludingThisOne() {
 
     TDPump testDoublePump = new TDPump();
 
-    try (BeanContext context = new BootContext()
+    try (BeanContext context = new BeanContextBuilder()
       .withBeans(testDoublePump)
       // our module is "org.example.coffee"
       // so this effectively includes no modules
       .withModules("other")
-      .load()) {
+      .build()) {
 
       CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
       assertThat(coffeeMaker).isNull();
@@ -33,10 +33,10 @@ public class BootContextAddTest {
 
     TDPump testDoublePump = new TDPump();
 
-    try (BeanContext context = new BootContext()
+    try (BeanContext context = new BeanContextBuilder()
       .withBeans(testDoublePump)
       .withModules("org.example.coffee")
-      .load()) {
+      .build()) {
 
       String makeIt = context.getBean(CoffeeMaker.class).makeIt();
       assertThat(makeIt).isEqualTo("done");
@@ -51,9 +51,9 @@ public class BootContextAddTest {
 
     TDPump testDoublePump = new TDPump();
 
-    try (BeanContext context = new BootContext()
+    try (BeanContext context = new BeanContextBuilder()
       .withBeans(testDoublePump)
-      .load()) {
+      .build()) {
 
       String makeIt = context.getBean(CoffeeMaker.class).makeIt();
       assertThat(makeIt).isEqualTo("done");
@@ -68,9 +68,9 @@ public class BootContextAddTest {
 
     Pump mock = Mockito.mock(Pump.class);
 
-    try (BeanContext context = new BootContext()
+    try (BeanContext context = new BeanContextBuilder()
       .withBean(Pump.class, mock)
-      .load()) {
+      .build()) {
 
       Pump pump = context.getBean(Pump.class);
       assertThat(pump).isSameAs(mock);
@@ -87,7 +87,7 @@ public class BootContextAddTest {
   /**
    * Our test double that we want to wire.
    */
-  class TDPump implements Pump {
+  static class TDPump implements Pump {
 
     int water;
     int steam;

@@ -1,7 +1,7 @@
 package org.example.coffee;
 
 import io.dinject.BeanContext;
-import io.dinject.BootContext;
+import io.dinject.BeanContextBuilder;
 import org.example.coffee.factory.BFact;
 import org.junit.Test;
 
@@ -12,8 +12,8 @@ public class FactoryTest {
   @Test
   public void test() {
 
-    try (BeanContext context = new BootContext()
-      .load()) {
+    try (BeanContext context = new BeanContextBuilder()
+      .build()) {
 
       BFact bean = context.getBean(BFact.class);
       String b =  bean.b();

@@ -1,7 +1,7 @@
 package org.example.coffee;
 
 import io.dinject.BeanContext;
-import io.dinject.BootContext;
+import io.dinject.BeanContextBuilder;
 
 import java.util.List;
 
@@ -16,13 +16,10 @@ class ExtensionExample {
   }
 
   BeanContext build() {
-
-    BootContext bootContext = new BootContext();
-
+    BeanContextBuilder bootContext = new BeanContextBuilder();
     withMocks.forEach(bootContext::withMock);
     withSpies.forEach(bootContext::withSpy);
-
-    return bootContext.load();
+    return bootContext.build();
   }
 
 }

@@ -1,7 +1,7 @@
 package org.example.coffee.factory;
 
 import io.dinject.BeanContext;
-import io.dinject.BootContext;
+import io.dinject.BeanContextBuilder;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -10,7 +10,7 @@ public class MyFactoryTest {
 
   @Test
   public void methodsCalled() {
-    try (BeanContext context = new BootContext().load()) {
+    try (BeanContext context = new BeanContextBuilder().build()) {
       final MyFactory myFactory = context.getBean(MyFactory.class);
       assertThat(myFactory.methodsCalled()).contains("|useCFact", "|anotherCFact");
     }

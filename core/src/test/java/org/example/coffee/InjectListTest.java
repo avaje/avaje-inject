@@ -1,7 +1,7 @@
 package org.example.coffee;
 
 import io.dinject.BeanContext;
-import io.dinject.BootContext;
+import io.dinject.BeanContextBuilder;
 import org.example.coffee.list.CombinedSetSomei;
 import org.example.coffee.list.CombinedSomei;
 import org.junit.Test;
@@ -14,7 +14,7 @@ public class InjectListTest {
 
   @Test
   public void test() {
-    try (BeanContext context = new BootContext().load()) {
+    try (BeanContext context = new BeanContextBuilder().build()) {
       CombinedSomei bean = context.getBean(CombinedSomei.class);
       List<String> somes = bean.lotsOfSomes();
       assertThat(somes).containsOnly("a", "b");
@@ -23,7 +23,7 @@ public class InjectListTest {
 
   @Test
   public void test_set() {
-    try (BeanContext context = new BootContext().load()) {
+    try (BeanContext context = new BeanContextBuilder().build()) {
       CombinedSetSomei bean = context.getBean(CombinedSetSomei.class);
       List<String> somes = bean.lotsOfSomes();
       assertThat(somes).containsOnly("a", "b");

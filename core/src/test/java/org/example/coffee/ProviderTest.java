@@ -1,7 +1,7 @@
 package org.example.coffee;
 
 import io.dinject.BeanContext;
-import io.dinject.BootContext;
+import io.dinject.BeanContextBuilder;
 import org.example.coffee.provider.ProvOther;
 import org.example.coffee.provider.ProvOther2;
 import org.junit.Test;
@@ -13,7 +13,7 @@ public class ProviderTest {
   @Test
   public void test() {
 
-    try (BeanContext context = new BootContext().load()) {
+    try (BeanContext context = new BeanContextBuilder().build()) {
 
       ProvOther bean = context.getBean(ProvOther.class);
       String other = bean.other();

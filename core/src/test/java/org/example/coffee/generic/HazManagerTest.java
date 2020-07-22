@@ -1,7 +1,7 @@
 package org.example.coffee.generic;
 
 import io.dinject.BeanContext;
-import io.dinject.BootContext;
+import io.dinject.BeanContextBuilder;
 import io.dinject.SystemContext;
 import org.junit.Test;
 
@@ -23,9 +23,9 @@ public class HazManagerTest {
   @Test
   public void fin_with_mockHaz() {
 
-    try (BeanContext context = new BootContext()
+    try (BeanContext context = new BeanContextBuilder()
       .withMock(HazRepo.class)
-      .load()) {
+      .build()) {
 
       HazManager hazManager = context.getBean(HazManager.class);
       Haz haz = hazManager.find(42L);
@@ -37,11 +37,11 @@ public class HazManagerTest {
   @Test
   public void find_with_stubHazUsingMockito() {
 
-    try (BeanContext context = new BootContext()
+    try (BeanContext context = new BeanContextBuilder()
       .withMock(HazRepo.class, hazRepo -> {
         when(hazRepo.findById(anyLong())).thenReturn(new Haz(-23L));
       })
-      .load()) {
+      .build()) {
 
       HazManager hazManager = context.getBean(HazManager.class);
       Haz haz = hazManager.find(42L);
@@ -55,7 +55,7 @@ public class HazManagerTest {
 
     TDHazRepo testDouble = new TDHazRepo();
 
-    try (BeanContext context = new BootContext()
+    try (BeanContext context = new BeanContextBuilder()
       .withBeans(testDouble)
       .load()) {
 
