@@ -18,12 +18,6 @@
   <dependencies>
 
     <dependency>
-      <groupId>io.dinject</groupId>
-      <artifactId>dinject-annotations</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
       <groupId>javax.inject</groupId>
       <artifactId>javax.inject</artifactId>
       <version>1</version>
@@ -49,20 +43,6 @@
     </dependency>
 
     <!-- test dependencies -->
-
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>1.18.6</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>io.dinject</groupId>
-      <artifactId>dinject-generator</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
 
     <dependency>
       <groupId>org.avaje.composite</groupId>

@@ -15,7 +15,7 @@
 
     <dependency>
       <groupId>io.dinject</groupId>
-      <artifactId>dinject-annotations</artifactId>
+      <artifactId>dinject</artifactId>
       <version>${project.version}</version>
     </dependency>
 
