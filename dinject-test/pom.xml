@@ -8,19 +8,20 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>dinject-test</artifactId>
+  <version>0.1</version>
 
   <dependencies>
 
     <dependency>
       <groupId>io.dinject</groupId>
       <artifactId>dinject</artifactId>
-      <version>${project.version}</version>
+      <version>2.3-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>io.dinject</groupId>
       <artifactId>dinject-generator</artifactId>
-      <version>${project.version}</version>
+      <version>2.3-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
 
