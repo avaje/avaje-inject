@@ -19,7 +19,6 @@
   </scm>
 
   <modules>
-    <module>annotations</module>
     <module>generator</module>
     <module>core</module>
     <module>dinject-test</module>
