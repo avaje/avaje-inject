@@ -19,7 +19,7 @@
   </scm>
 
   <modules>
-    <module>generator</module>
+    <module>dinject-generator</module>
     <module>core</module>
     <module>dinject-test</module>
   </modules>
