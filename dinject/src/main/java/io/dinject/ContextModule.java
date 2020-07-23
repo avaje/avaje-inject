@@ -1,4 +1,4 @@
-package io.dinject.annotation;
+package io.dinject;
 
 /**
  * Used to explicitly name a bean context and optionally specify if it depends on other bean contexts.

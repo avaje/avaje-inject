@@ -1,7 +1,5 @@
 package io.dinject;
 
-import io.dinject.annotation.ContextModule;
-
 import java.io.Closeable;
 import java.util.List;
 

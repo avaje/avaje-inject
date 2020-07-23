@@ -1,8 +1,8 @@
 package io.dinject.generator;
 
-import io.dinject.annotation.ContextModule;
-import io.dinject.annotation.Factory;
-import io.dinject.annotation.DependencyMeta;
+import io.dinject.ContextModule;
+import io.dinject.Factory;
+import io.dinject.core.DependencyMeta;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.FilerException;

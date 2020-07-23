@@ -1,8 +1,8 @@
 package io.dinject.generator;
 
-import io.dinject.annotation.Factory;
-import io.dinject.annotation.Primary;
-import io.dinject.annotation.Secondary;
+import io.dinject.Factory;
+import io.dinject.Primary;
+import io.dinject.Secondary;
 import org.junit.Test;
 
 import javax.inject.Named;

@@ -1,6 +1,6 @@
 package io.dinject.generator;
 
-import io.dinject.annotation.DependencyMeta;
+import io.dinject.core.DependencyMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;

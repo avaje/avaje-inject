@@ -1,4 +1,4 @@
-package io.dinject.annotation;
+package io.dinject;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
