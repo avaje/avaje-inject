@@ -4,7 +4,7 @@
 
   <groupId>io.dinject</groupId>
   <artifactId>dinject-parent</artifactId>
-  <version>2.2-SNAPSHOT</version>
+  <version>2.2</version>
   <packaging>pom</packaging>
 
   <parent>
@@ -15,7 +15,7 @@
 
   <scm>
     <developerConnection>scm:git:git@github.com:dinject/dinject.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>dinject-parent-2.2</tag>
   </scm>
 
   <modules>
