@@ -20,7 +20,7 @@
 
   <modules>
     <module>dinject-generator</module>
-    <module>core</module>
+    <module>dinject</module>
     <module>dinject-test</module>
   </modules>
 </project>
