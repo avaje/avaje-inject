@@ -17,12 +17,16 @@
     <tag>HEAD</tag>
   </scm>
 
+  <properties>
+    <dinject.version>2.3</dinject.version>
+  </properties>
+
   <dependencies>
 
     <dependency>
       <groupId>io.dinject</groupId>
       <artifactId>dinject</artifactId>
-      <version>${project.version}</version>
+      <version>${dinject.version}</version>
     </dependency>
 
     <dependency>
