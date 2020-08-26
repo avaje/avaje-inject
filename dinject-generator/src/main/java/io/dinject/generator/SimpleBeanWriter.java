@@ -13,14 +13,12 @@ import java.util.List;
 class SimpleBeanWriter {
 
   private final BeanReader beanReader;
-
   private final ProcessingContext ctx;
-
+  private final String originName;
+  private final String shortName;
+  private final String packageName;
+  private final String suffix;
   private Append writer;
-
-  private String originName;
-  private String shortName;
-  private String packageName;
 
   SimpleBeanWriter(BeanReader beanReader, ProcessingContext ctx) {
     this.beanReader = beanReader;
@@ -29,27 +27,37 @@ class SimpleBeanWriter {
     this.originName = origin.getQualifiedName().toString();
     this.shortName = origin.getSimpleName().toString();
     this.packageName = Util.packageOf(originName);
+    this.suffix = beanReader.suffix();
   }
 
   private Writer createFileWriter() throws IOException {
-    JavaFileObject jfo = ctx.createWriter(originName + "$di");
+    JavaFileObject jfo = ctx.createWriter(originName + suffix);
     return jfo.openWriter();
   }
 
   void write() throws IOException {
-
     writer = new Append(createFileWriter());
     writePackage();
     writeImports();
     writeClassStart();
-    writeStaticFactoryMethod();
-    writeStaticFactoryBeanMethods();
-
-    writeLifecycleWrapper();
-    writeStaticFactoryBeanLifecycle();
+    if (isRequestScoped()) {
+      writeRequestCreate();
+    } else {
+      writeStaticFactoryMethod();
+      writeStaticFactoryBeanMethods();
+      writeLifecycleWrapper();
+      writeStaticFactoryBeanLifecycle();
+    }
     writeClassEnd();
-
     writer.close();
+  }
+
+  private void writeRequestCreate() {
+    beanReader.writeRequestCreate(writer);
+  }
+
+  private boolean isRequestScoped() {
+    return beanReader.isRequestScoped();
   }
 
   private void writeStaticFactoryBeanMethods() {
@@ -66,7 +74,6 @@ class SimpleBeanWriter {
 
   private void writeFactoryBeanMethod(MethodReader method) {
     writer.append("  public static void build_%s(Builder builder) {", method.getName()).eol();
-
     method.buildAddFor(writer);
     writer.append(method.builderGetFactory()).eol();
     writer.append(method.builderBuildBean()).eol();
@@ -142,7 +149,7 @@ class SimpleBeanWriter {
   private void writeLifecycleWrapper() {
     if (beanReader.isLifecycleWrapperRequired()) {
       writer.append("  private final %s bean;", shortName).eol().eol();
-      writer.append("  public %s$di(%s bean) {", shortName, shortName).eol();
+      writer.append("  public %s%s(%s bean) {", shortName, suffix, shortName).eol();
       writer.append("    this.bean = bean;").eol();
       writer.append("  }").eol().eol();
 
@@ -159,9 +166,16 @@ class SimpleBeanWriter {
     if (ctx.isGeneratedAvailable()) {
       writer.append(Constants.AT_GENERATED).eol();
     }
-    writer.append("public class ").append(shortName).append("$di ");
+    if (beanReader.isRequestScoped()) {
+      writer.append(Constants.AT_SINGLETON).eol();
+    }
+    writer.append("public class ").append(shortName).append(suffix).append(" ");
     if (beanReader.isLifecycleWrapperRequired()) {
       writer.append("implements BeanLifecycle ");
+    }
+    if (beanReader.isRequestScoped()) {
+      writer.append("implements ");
+      beanReader.factoryInterface(writer);
     }
     writer.append(" {").eol().eol();
   }

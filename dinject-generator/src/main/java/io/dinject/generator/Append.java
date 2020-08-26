@@ -9,6 +9,8 @@ import java.io.Writer;
 class Append {
 
   private final Writer writer;
+  private int nameIndex;
+  private boolean comma;
 
   Append(Writer writer) {
     this.writer = writer;
@@ -48,4 +50,21 @@ class Append {
     return append(String.format(format, args));
   }
 
+  void resetNextName() {
+    nameIndex = 0;
+    comma = false;
+  }
+
+  String nextName(String prefix) {
+    return prefix + nameIndex++;
+  }
+
+  void commaAppend(String name) {
+    if (!comma) {
+      comma = true;
+    } else {
+      append(", ");
+    }
+    append(name);
+  }
 }

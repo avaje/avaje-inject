@@ -93,7 +93,6 @@ public class Processor extends AbstractProcessor {
     return false;
   }
 
-
   private void writeBeanHelpers() {
     for (BeanReader beanReader : beanReaders) {
       try {
@@ -152,15 +151,17 @@ public class Processor extends AbstractProcessor {
    * Merge the changed bean meta data into the existing (factory) metaData.
    */
   private void mergeMetaData() {
-
     for (BeanReader beanReader : beanReaders) {
-      String metaKey = beanReader.getMetaKey();
-      MetaData metaData = this.metaData.get(metaKey);
-      if (metaData == null) {
-        addMeta(beanReader);
-
+      if (beanReader.isRequestScoped()) {
+        processingContext.logWarn("skipping request scoped processed bean " + beanReader);
       } else {
-        updateMeta(metaData, beanReader);
+        String metaKey = beanReader.getMetaKey();
+        MetaData metaData = this.metaData.get(metaKey);
+        if (metaData == null) {
+          addMeta(beanReader);
+        } else {
+          updateMeta(metaData, beanReader);
+        }
       }
     }
   }

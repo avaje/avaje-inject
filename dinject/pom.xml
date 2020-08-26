@@ -72,35 +72,6 @@
           </archive>
         </configuration>
       </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>${maven-javadoc-plugin.version}</version>
-        <configuration>
-          <source>${java.version}</source>
-          <doclint>none</doclint>
-          <show>public</show>
-          <linksource>true</linksource>
-          <sourcepath>src/main/java:../annotations/src/main/java</sourcepath>
-          <javadocExecutable>${env.JAVA8_HOME}/bin/javadoc</javadocExecutable>
-          <doclet>org.avaje.doclet.PygmentsDoclet</doclet>
-          <docletArtifact>
-            <groupId>org.avaje</groupId>
-            <artifactId>pygments-doclet</artifactId>
-            <version>1.0.0</version>
-          </docletArtifact>
-        </configuration>
-
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 

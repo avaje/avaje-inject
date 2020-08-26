@@ -23,7 +23,6 @@ class MethodReader {
   private final String shortName;
   private final boolean isVoid;
   private final List<MethodParam> params = new ArrayList<>();
-
   private final List<String> interfaceTypes = new ArrayList<>();
   private final String factoryShortName;
   private final boolean isFactory;
@@ -225,6 +224,32 @@ class MethodReader {
     writer.append("  }").eol().eol();
   }
 
+  /**
+   * Check for request scoped dependency.
+   */
+  void checkRequest(BeanRequestParams requestParams) {
+    for (MethodParam param : params) {
+      param.checkRequest(requestParams);
+    }
+  }
+
+  /**
+   * Generate code for dependency inject for BeanFactory.
+   */
+  void writeRequestDependency(Append writer) {
+    for (MethodParam param : params) {
+      param.writeRequestDependency(writer);
+    }
+  }
+
+  /**
+   * Generate code constructor arguments.
+   */
+  void writeRequestConstructor(Append writer) {
+    for (MethodParam param : params) {
+      param.writeRequestConstructor(writer);
+    }
+  }
 
   static class MethodParam {
 
@@ -232,8 +257,9 @@ class MethodReader {
     private final UtilType utilType;
     private final String paramType;
     private final GenericType genericType;
-
     private int providerIndex;
+    private boolean requestParam;
+    private String requestParamName;
 
     MethodParam(VariableElement param) {
       this.named = Util.getNamed(param);
@@ -284,5 +310,30 @@ class MethodReader {
       genericType.writeShort(writer);
       writer.append("> prov%s", providerIndex);
     }
+
+    void checkRequest(BeanRequestParams requestParams) {
+      requestParam = requestParams.check(paramType);
+      if (requestParam) {
+        requestParamName = requestParams.argumentName(paramType);
+      }
+    }
+
+    void writeRequestDependency(Append writer) {
+      if (!requestParam) {
+        final String shortType = nm(paramType);
+        requestParamName = writer.nextName(shortType.toLowerCase());
+        writer.append("  @Inject").eol();
+        writer.append("  %s %s;", shortType, requestParamName).eol().eol();
+      }
+    }
+
+    void writeRequestConstructor(Append writer) {
+      writer.commaAppend(requestParamName);
+    }
+
+    private String nm(String raw) {
+      return Util.shortName(raw);
+    }
+
   }
 }

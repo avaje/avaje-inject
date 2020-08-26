@@ -35,7 +35,7 @@ public class BeanContextBuilderAddTest {
 
     try (BeanContext context = new BeanContextBuilder()
       .withBeans(testDoublePump)
-      .withModules("org.example.coffee")
+      .withModules("org.example")
       .build()) {
 
       String makeIt = context.getBean(CoffeeMaker.class).makeIt();

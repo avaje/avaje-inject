@@ -51,6 +51,8 @@ class BeanReader {
 
   private final Set<String> importTypes = new TreeSet<>();
 
+  private final BeanRequestParams requestParams;
+
   private MethodReader constructor;
 
   private String registrationTypes;
@@ -69,11 +71,16 @@ class BeanReader {
     this.type = beanType.getQualifiedName().toString();
     this.shortName = beanType.getSimpleName().toString();
     this.context = context;
+    this.requestParams = new BeanRequestParams(type);
     init();
   }
 
-  private void init() {
+  @Override
+  public String toString() {
+    return beanType.toString();
+  }
 
+  private void init() {
     StringBuilder sb = new StringBuilder();
 
     for (TypeMirror anInterface : beanType.getInterfaces()) {
@@ -138,7 +145,6 @@ class BeanReader {
   }
 
   void read(boolean factory) {
-
     for (Element element : beanType.getEnclosedElements()) {
       ElementKind kind = element.getKind();
       switch (kind) {
@@ -156,6 +162,10 @@ class BeanReader {
     constructor = findConstructor();
     if (constructor != null) {
       constructor.addImports(importTypes);
+      constructor.checkRequest(requestParams);
+    }
+    for (FieldReader fields : injectFields) {
+      fields.checkRequest(requestParams);
     }
     for (MethodReader factoryMethod : factoryMethods) {
       factoryMethod.addImports(importTypes);
@@ -173,7 +183,6 @@ class BeanReader {
   }
 
   List<String> getDependsOn() {
-
     List<String> list = new ArrayList<>();
     if (constructor != null) {
       for (MethodReader.MethodParam param : constructor.getParams()) {
@@ -346,6 +355,7 @@ class BeanReader {
     if (Util.notVoid(type)) {
       importTypes.add(type);
     }
+    requestParams.addImports(importTypes);
     return importTypes;
   }
 
@@ -368,6 +378,51 @@ class BeanReader {
 
   void setWrittenToFile() {
     this.writtenToFile = true;
+  }
+
+  /**
+   * Return true if the bean has a dependency which is a request scoped type.
+   * Like Javalin Context, Helidon request and response types.
+   * <p>
+   * If request scoped then generate a BeanFactory instead.
+   */
+  boolean isRequestScoped() {
+    return requestParams.isRequestScoped();
+  }
+
+  String suffix() {
+    return isRequestScoped() ? "$factory" : "$di";
+  }
+
+  /**
+   * Add interface for this as a BeanFactory (request scoped).
+   */
+  void factoryInterface(Append writer) {
+    requestParams.factoryInterface(writer);
+  }
+
+  /**
+   * Generate the BeanFactory dependencies and create method implementation.
+   */
+  void writeRequestCreate(Append writer) {
+    if (constructor != null) {
+      constructor.writeRequestDependency(writer);
+    }
+    for (FieldReader field : injectFields) {
+      field.writeRequestDependency(writer);
+    }
+    requestParams.writeRequestCreate(writer);
+    writer.resetNextName();
+    writer.append("    %s bean = new %s(", shortName, shortName);
+    if (constructor != null) {
+      constructor.writeRequestConstructor(writer);
+    }
+    writer.append(");").eol();
+    for (FieldReader field : injectFields) {
+      field.writeRequestInject(writer);
+    }
+    writer.append("    return bean;").eol();
+    writer.append("  }").eol();
   }
 
 }
