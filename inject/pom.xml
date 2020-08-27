@@ -4,7 +4,7 @@
 
   <groupId>io.avaje</groupId>
   <artifactId>avaje-inject</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.9-SNAPSHOT</version>
 
   <parent>
     <groupId>org.avaje</groupId>

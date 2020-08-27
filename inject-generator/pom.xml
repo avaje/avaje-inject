@@ -4,7 +4,7 @@
 
   <groupId>io.avaje</groupId>
   <artifactId>avaje-inject-generator</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.9-SNAPSHOT</version>
 
   <parent>
     <groupId>org.avaje</groupId>
@@ -18,7 +18,7 @@
   </scm>
 
   <properties>
-    <dinject.version>0.1-SNAPSHOT</dinject.version>
+    <inject.version>0.9-SNAPSHOT</inject.version>
   </properties>
 
   <dependencies>
@@ -26,7 +26,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-inject</artifactId>
-      <version>0.1-SNAPSHOT</version>
+      <version>${inject.version}</version>
     </dependency>
 
     <dependency>
