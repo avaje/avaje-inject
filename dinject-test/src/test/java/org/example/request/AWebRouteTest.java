@@ -1,7 +1,7 @@
 package org.example.request;
 
 
-import io.dinject.SystemContext;
+import io.avaje.inject.SystemContext;
 import io.javalin.http.Context;
 import org.junit.Test;
 import org.mockito.Mockito;

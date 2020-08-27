@@ -1,7 +1,7 @@
 package org.example.coffee.grind;
 
-import io.dinject.BeanContext;
-import io.dinject.BootContext;
+import io.avaje.inject.BeanContext;
+import io.avaje.inject.BootContext;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

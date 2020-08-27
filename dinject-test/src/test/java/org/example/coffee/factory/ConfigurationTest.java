@@ -1,7 +1,7 @@
 package org.example.coffee.factory;
 
-import io.dinject.BeanContext;
-import io.dinject.BeanContextBuilder;
+import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanContextBuilder;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

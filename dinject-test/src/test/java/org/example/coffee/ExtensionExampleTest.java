@@ -1,7 +1,7 @@
 package org.example.coffee;
 
-import io.dinject.BeanContext;
-import io.dinject.BeanContextBuilder;
+import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanContextBuilder;
 import org.example.coffee.qualifier.SomeStore;
 import org.example.coffee.secondary.SEmailer;
 import org.example.coffee.secondary.Widget;

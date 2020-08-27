@@ -1,8 +1,8 @@
 package org.example.coffee;
 
-import io.dinject.BeanContext;
-import io.dinject.BeanContextBuilder;
-import io.dinject.SystemContext;
+import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanContextBuilder;
+import io.avaje.inject.SystemContext;
 import org.example.coffee.core.DuperPump;
 import org.junit.Test;
 

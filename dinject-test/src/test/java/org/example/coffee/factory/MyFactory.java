@@ -1,7 +1,7 @@
 package org.example.coffee.factory;
 
-import io.dinject.Bean;
-import io.dinject.Factory;
+import io.avaje.inject.Bean;
+import io.avaje.inject.Factory;
 import org.example.coffee.factory.other.Something;
 
 import javax.inject.Named;

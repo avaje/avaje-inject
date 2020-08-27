@@ -1,7 +1,7 @@
 package org.example.coffee;
 
-import io.dinject.BeanContext;
-import io.dinject.BeanContextBuilder;
+import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanContextBuilder;
 import org.example.coffee.factory.SomeImpl;
 import org.example.coffee.factory.SomeImplBean;
 import org.example.coffee.factory.Unused;

@@ -1,7 +1,7 @@
 package org.example.request;
 
 
-import io.dinject.SystemContext;
+import io.avaje.inject.SystemContext;
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
 import org.junit.Test;

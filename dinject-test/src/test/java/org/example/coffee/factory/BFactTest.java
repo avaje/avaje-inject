@@ -1,7 +1,7 @@
 package org.example.coffee.factory;
 
-import io.dinject.BeanContext;
-import io.dinject.BootContext;
+import io.avaje.inject.BeanContext;
+import io.avaje.inject.BootContext;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

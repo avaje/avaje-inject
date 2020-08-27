@@ -1,6 +1,6 @@
 package org.example.coffee.factory;
 
-import io.dinject.core.BeanLifecycle;
+import io.avaje.inject.core.BeanLifecycle;
 
 public class AFact implements BeanLifecycle {
 
