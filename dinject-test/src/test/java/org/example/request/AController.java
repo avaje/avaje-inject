@@ -1,7 +1,7 @@
 package org.example.request;
 
 
-import io.dinject.controller.Controller;
+import io.avaje.http.api.Controller;
 import io.javalin.http.Context;
 
 import javax.inject.Inject;

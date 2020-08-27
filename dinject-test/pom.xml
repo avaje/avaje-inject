@@ -15,23 +15,23 @@
   <dependencies>
 
     <dependency>
-      <groupId>io.dinject</groupId>
-      <artifactId>dinject</artifactId>
-      <version>2.3-SNAPSHOT</version>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-inject</artifactId>
+      <version>0.1-SNAPSHOT</version>
     </dependency>
 
     <dependency>
-      <groupId>io.dinject</groupId>
-      <artifactId>dinject-generator</artifactId>
-      <version>2.3-SNAPSHOT</version>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-inject-generator</artifactId>
+      <version>0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
 
     <!-- test dependencies -->
     <dependency>
-      <groupId>io.dinject</groupId>
-      <artifactId>dinject-controller</artifactId>
-      <version>1.21</version>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-http-api</artifactId>
+      <version>0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
 

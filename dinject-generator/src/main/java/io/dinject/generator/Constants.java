@@ -8,8 +8,8 @@ class Constants {
   static final String POSTCONSTRUCT = "javax.annotation.PostConstruct";
   static final String PROVIDER = "javax.inject.Provider";
 
-  static final String PATH = "io.dinject.controller.Path";
-  static final String CONTROLLER = "io.dinject.controller.Controller";
+  static final String PATH = "io.avaje.http.api.Path";
+  static final String CONTROLLER = "io.avaje.http.api.Controller";
 
   static final String AT_SINGLETON = "@Singleton";
   static final String AT_GENERATED = "@Generated(\"io.dinject.generator\")";
