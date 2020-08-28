@@ -4,7 +4,7 @@ import io.avaje.inject.BeanContext;
 import io.avaje.inject.BeanContextBuilder;
 import org.example.coffee.provider.ProvOther;
 import org.example.coffee.provider.ProvOther2;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

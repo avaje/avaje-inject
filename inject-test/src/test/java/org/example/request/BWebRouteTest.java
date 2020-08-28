@@ -4,10 +4,10 @@ package org.example.request;
 import io.avaje.inject.SystemContext;
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 public class BWebRouteTest {

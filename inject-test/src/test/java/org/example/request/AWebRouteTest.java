@@ -3,10 +3,10 @@ package org.example.request;
 
 import io.avaje.inject.SystemContext;
 import io.javalin.http.Context;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 public class AWebRouteTest {

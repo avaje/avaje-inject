@@ -4,7 +4,7 @@ import io.avaje.inject.BeanContext;
 import io.avaje.inject.BeanContextBuilder;
 import org.example.coffee.list.CombinedSetSomei;
 import org.example.coffee.list.CombinedSomei;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 

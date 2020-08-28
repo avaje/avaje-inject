@@ -12,7 +12,7 @@ import org.example.coffee.primary.UserOfPEmailer;
 import org.example.coffee.secondary.Widget;
 import org.example.coffee.secondary.WidgetSecondary;
 import org.example.coffee.secondary.WidgetUser;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
 

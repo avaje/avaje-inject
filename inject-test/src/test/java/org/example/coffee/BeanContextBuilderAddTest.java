@@ -2,29 +2,31 @@ package org.example.coffee;
 
 import io.avaje.inject.BeanContext;
 import io.avaje.inject.BeanContextBuilder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 
 public class BeanContextBuilderAddTest {
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void withModules_exludingThisOne() {
+    assertThrows(IllegalStateException.class, ()-> {
+      TDPump testDoublePump = new TDPump();
 
-    TDPump testDoublePump = new TDPump();
+      try (BeanContext context = new BeanContextBuilder()
+        .withBeans(testDoublePump)
+        // our module is "org.example.coffee"
+        // so this effectively includes no modules
+        .withModules("other")
+        .build()) {
 
-    try (BeanContext context = new BeanContextBuilder()
-      .withBeans(testDoublePump)
-      // our module is "org.example.coffee"
-      // so this effectively includes no modules
-      .withModules("other")
-      .build()) {
-
-      CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
-      assertThat(coffeeMaker).isNull();
-    }
+        CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+        assertThat(coffeeMaker).isNull();
+      }
+    });
   }
 
 

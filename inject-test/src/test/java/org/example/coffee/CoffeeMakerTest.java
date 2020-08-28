@@ -4,7 +4,7 @@ import io.avaje.inject.BeanContext;
 import io.avaje.inject.BeanContextBuilder;
 import io.avaje.inject.SystemContext;
 import org.example.coffee.core.DuperPump;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -3,14 +3,14 @@ package io.avaje.inject.generator;
 import io.avaje.inject.Factory;
 import io.avaje.inject.Primary;
 import io.avaje.inject.Secondary;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
 
 import static io.avaje.inject.generator.IncludeAnnotations.include;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class IncludeAnnotationsTest {
 

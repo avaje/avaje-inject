@@ -5,10 +5,10 @@ import io.avaje.inject.BeanContextBuilder;
 import org.example.coffee.qualifier.SomeStore;
 import org.example.coffee.secondary.SEmailer;
 import org.example.coffee.secondary.Widget;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ExtensionExampleTest {
 

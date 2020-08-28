@@ -3,7 +3,7 @@ package org.example.coffee;
 import io.avaje.inject.BeanContext;
 import io.avaje.inject.BeanContextBuilder;
 import org.example.coffee.factory.BFact;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

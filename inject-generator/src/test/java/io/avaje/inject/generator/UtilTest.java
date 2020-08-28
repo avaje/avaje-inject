@@ -1,9 +1,9 @@
 package io.avaje.inject.generator;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class UtilTest {
 
@@ -18,7 +18,6 @@ public class UtilTest {
 
     assertEquals(Util.commonParent("org.foo.web", "org.foo.service"), "org.foo");
     assertEquals(Util.commonParent("org.foo.web.foo", "org.foo.service.blah"), "org.foo");
-
   }
 
   @Test

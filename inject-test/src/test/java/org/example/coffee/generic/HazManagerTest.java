@@ -3,7 +3,7 @@ package org.example.coffee.generic;
 import io.avaje.inject.BeanContext;
 import io.avaje.inject.BeanContextBuilder;
 import io.avaje.inject.SystemContext;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;

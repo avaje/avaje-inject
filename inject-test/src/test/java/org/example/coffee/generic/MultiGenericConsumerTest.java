@@ -1,7 +1,7 @@
 package org.example.coffee.generic;
 
 import io.avaje.inject.SystemContext;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

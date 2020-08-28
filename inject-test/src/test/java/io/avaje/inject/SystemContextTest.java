@@ -3,7 +3,7 @@ package io.avaje.inject;
 import org.example.coffee.list.ASomei;
 import org.example.coffee.list.BSomei;
 import org.example.coffee.list.Somei;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Priority;
 import java.util.List;

@@ -2,9 +2,9 @@ package org.example.coffee.factory;
 
 import io.avaje.inject.BeanContext;
 import io.avaje.inject.BeanContextBuilder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MultipleOtherThingsTest {
 

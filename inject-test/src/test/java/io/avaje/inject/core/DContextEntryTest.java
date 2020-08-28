@@ -1,9 +1,10 @@
 package io.avaje.inject.core;
 
 import io.avaje.inject.BeanEntry;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DContextEntryTest {
 
@@ -19,15 +20,16 @@ public class DContextEntryTest {
     assertEquals(bean, "P");
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void get_when_twoPrimary() {
+    assertThrows(IllegalStateException.class, ()-> {
+      DContextEntry entry = new DContextEntry();
+      entry.add(DContextEntryBean.of("P", null, BeanEntry.PRIMARY));
+      entry.add(DContextEntryBean.of("N", null, BeanEntry.NORMAL));
+      entry.add(DContextEntryBean.of("S", null, BeanEntry.PRIMARY));
 
-    DContextEntry entry = new DContextEntry();
-    entry.add(DContextEntryBean.of("P", null, BeanEntry.PRIMARY));
-    entry.add(DContextEntryBean.of("N", null, BeanEntry.NORMAL));
-    entry.add(DContextEntryBean.of("S", null, BeanEntry.PRIMARY));
-
-    entry.get(null);
+      entry.get(null);
+    });
   }
 
   @Test
@@ -54,14 +56,15 @@ public class DContextEntryTest {
     assertEquals(bean, "N");
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void get_when_multiSecondaryOnly() {
+    assertThrows(IllegalStateException.class, ()-> {
+      DContextEntry entry = new DContextEntry();
+      entry.add(DContextEntryBean.of("S1", null, BeanEntry.SECONDARY));
+      entry.add(DContextEntryBean.of("S2", null, BeanEntry.SECONDARY));
 
-    DContextEntry entry = new DContextEntry();
-    entry.add(DContextEntryBean.of("S1", null, BeanEntry.SECONDARY));
-    entry.add(DContextEntryBean.of("S2", null, BeanEntry.SECONDARY));
-
-    entry.get(null);
+      entry.get(null);
+    });
   }
 
 
