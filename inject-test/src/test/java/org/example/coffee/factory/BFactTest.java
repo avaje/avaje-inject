@@ -1,7 +1,7 @@
 package org.example.coffee.factory;
 
 import io.avaje.inject.BeanContext;
-import io.avaje.inject.BootContext;
+import io.avaje.inject.BeanContextBuilder;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,7 +12,7 @@ public class BFactTest {
   public void getCountInit() {
 
     BFact bFact;
-    try (BeanContext context = new BootContext().load()) {
+    try (BeanContext context = new BeanContextBuilder().build()) {
 
       bFact = context.getBean(BFact.class);
       assertThat(bFact.getCountInit()).isEqualTo(1);

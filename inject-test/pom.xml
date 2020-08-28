@@ -13,7 +13,7 @@
   </parent>
 
   <properties>
-    <inject.version>0.9-SNAPSHOT</inject.version>
+    <inject.version>0.10-SNAPSHOT</inject.version>
   </properties>
 
   <dependencies>

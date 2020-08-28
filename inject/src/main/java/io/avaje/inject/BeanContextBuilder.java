@@ -349,14 +349,6 @@ public class BeanContextBuilder {
   }
 
   /**
-   * Deprecated migrate to build().
-   */
-  @Deprecated
-  public BeanContext load() {
-    return build();
-  }
-
-  /**
    * Build and return the bean context.
    *
    * @return The BeanContext

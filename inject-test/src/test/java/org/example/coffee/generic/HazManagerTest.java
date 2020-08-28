@@ -57,7 +57,7 @@ public class HazManagerTest {
 
     try (BeanContext context = new BeanContextBuilder()
       .withBeans(testDouble)
-      .load()) {
+      .build()) {
 
       HazManager hazManager = context.getBean(HazManager.class);
 
