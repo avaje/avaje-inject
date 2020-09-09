@@ -1,5 +1,5 @@
-# [DInject](https://dinject.io)
-APT based dependency injection for server side developers - https://dinject.io
+# [avaje-inject](https://avaje.io/inject)
+APT based dependency injection for server side developers - https://avaje.io/inject
 
 ## Similar to Dagger (https://google.github.io/dagger/)
 
@@ -20,4 +20,4 @@ APT based dependency injection for server side developers - https://dinject.io
 
 ## Spring DI
 
-For comparison with Spring DI look at https://dinject.io/docs
+For comparison with Spring DI look at https://avaje.io/inject/#spring
