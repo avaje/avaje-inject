@@ -28,7 +28,7 @@ import java.util.function.Consumer;
  *
  * <pre>{@code
  *
- *   @Test
+ *   ＠Test
  *   public void someComponentTest() {
  *
  *     MyRedisApi mockRedis = mock(MyRedisApi.class);
@@ -116,7 +116,7 @@ public class BeanContextBuilder {
    *
    * <pre>{@code
    *
-   *   @Test
+   *   ＠Test
    *   public void someComponentTest() {
    *
    *     EmailServiceApi mockEmailService = mock(EmailServiceApi.class);

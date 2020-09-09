@@ -22,7 +22,7 @@ package io.avaje.inject;
  *
  * import io.dinject.ContextModule;
  *
- * @ContextModule(name = "feature-toggle")
+ * ＠ContextModule(name = "feature-toggle")
  * public interface FeatureToggle {
  *
  *   boolean isEnabled(String key);
@@ -46,7 +46,7 @@ package io.avaje.inject;
  *
  * import io.dinject.ContextModule;
  *
- * @ContextModule(name = "job-system", dependsOn = {"feature-toggle"})
+ * ＠ContextModule(name = "job-system", dependsOn = {"feature-toggle"})
  * public interface JobSystem {
  *
  *   ...
@@ -74,14 +74,14 @@ public @interface ContextModule {
    *
    * // A module that provides 'email-service' and also 'health-check'.
    * // ie. it has bean(s) that implement a health check interface
-   * @ContextModule(name="email-service", provides={"health-checks"})
+   * ＠ContextModule(name="email-service", provides={"health-checks"})
    *
    * // provides beans that implement a health check interface
    * // ... wires after 'email-service'
-   * @ContextModule(name="main", provides={"health-checks"}, dependsOn={"email-service"})
+   * ＠ContextModule(name="main", provides={"health-checks"}, dependsOn={"email-service"})
    *
    * // wire this after all modules that provide 'health-checks'
-   * @ContextModule(name="health-check-service", dependsOn={"health-checks"})
+   * ＠ContextModule(name="health-check-service", dependsOn={"health-checks"})
    *
    * }</pre>
    */
@@ -97,7 +97,7 @@ public @interface ContextModule {
    * // wire after a module that is called 'email-service'
    * // ... or any module that provides 'email-service'
    *
-   * @ContextModule(name="...", dependsOn={"email-service"})
+   * ＠ContextModule(name="...", dependsOn={"email-service"})
    *
    * }</pre>
    */

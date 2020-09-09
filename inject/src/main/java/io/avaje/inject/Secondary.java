@@ -15,8 +15,8 @@ import java.lang.annotation.Target;
  *
  * <pre>{@code
  *
- * @Secondary
- * @Singleton
+ * ＠Secondary
+ * ＠Singleton
  * class DefaultEmailSender implements EmailSender {
  *
  *   ...
