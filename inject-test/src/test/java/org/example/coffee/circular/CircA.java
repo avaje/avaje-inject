@@ -3,11 +3,16 @@ package org.example.coffee.circular;
 import javax.inject.Singleton;
 
 @Singleton
-public class CircA {
+class CircA {
 
-  private final CircB circB;
+  final CircB circB;
 
-  public CircA(CircB circB) {
+  CircA(CircB circB) {
     this.circB = circB;
+  }
+
+  @Override
+  public String toString() {
+    return "CircA-"+circB;
   }
 }

@@ -4,17 +4,26 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class CircC {
+class CircC {
 
   // to handle circular dependency we need to make one of
   // the dependencies use field injection rather than
   // constructor injection
-//  @Inject
-//  CircA circA;
+  @Inject
+  CircA circA;
 
-  private final CircA circA;
+  String gen() {
+    return "C+"+circA;
+  }
 
-  public CircC(CircA circA) {
-    this.circA = circA;
+//  private final CircA circA;
+//
+//  public CircC(CircA circA) {
+//    this.circA = circA;
+//  }
+
+  @Override
+  public String toString() {
+    return "CircC-Stop";
   }
 }
