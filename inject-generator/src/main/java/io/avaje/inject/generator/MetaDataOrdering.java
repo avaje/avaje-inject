@@ -13,7 +13,8 @@ class MetaDataOrdering {
 
   private static final String CIRC_ERR_MSG =
     "To handle circular dependencies consider using field injection " +
-      "rather than constructor injection on one of the dependencies.";
+      "rather than constructor injection on one of the dependencies. " +
+      "\n See https://avaje.io/inject/#circular";
 
   private final ProcessingContext processingContext;
 
