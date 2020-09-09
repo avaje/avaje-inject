@@ -116,8 +116,12 @@ public class Processor extends AbstractProcessor {
     MetaDataOrdering ordering = new MetaDataOrdering(metaData.values(), processingContext);
     int remaining = ordering.processQueue();
     if (remaining > 0) {
-      processingContext.logWarn("there are " + remaining + " beans with unsatisfied dependencies (assuming external dependencies)");
-      ordering.warnOnDependencies();
+      if (ordering.hasCircularDependencies()) {
+        ordering.errorOnCircularDependencies();
+      } else {
+        processingContext.logWarn("there are " + remaining + " beans with unsatisfied dependencies (assuming external dependencies)");
+        ordering.warnOnDependencies();
+      }
     }
 
     try {

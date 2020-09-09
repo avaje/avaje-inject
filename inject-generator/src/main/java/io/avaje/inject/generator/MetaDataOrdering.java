@@ -11,6 +11,10 @@ import java.util.TreeSet;
 
 class MetaDataOrdering {
 
+  private static final String CIRC_ERR_MSG =
+    "To handle circular dependencies consider using field injection " +
+      "rather than constructor injection on one of the dependencies.";
+
   private final ProcessingContext processingContext;
 
   private final List<MetaData> orderedList = new ArrayList<>();
@@ -18,6 +22,8 @@ class MetaDataOrdering {
   private final List<MetaData> queue = new ArrayList<>();
 
   private final Map<String, ProviderList> providers = new HashMap<>();
+
+  private final List<DependencyLink> circularDependencies = new ArrayList<>();
 
   private String topPackage;
 
@@ -52,14 +58,60 @@ class MetaDataOrdering {
 
     int remaining = queue.size();
     if (remaining != 0) {
+      detectCircularDependency(queue);
       orderedList.addAll(queue);
     }
     return remaining;
   }
 
+  /**
+   * Try to detect circular dependency given the remaining beans
+   * in the queue with unsatisfied dependencies.
+   */
+  private void detectCircularDependency(List<MetaData> remainder) {
+    for (MetaData metaData : remainder) {
+      final List<String> dependsOn = metaData.getDependsOn();
+      if (dependsOn != null) {
+        for (String dependency : dependsOn) {
+          final MetaData provider = findCircularDependency(remainder, dependency);
+          if (provider != null) {
+            circularDependencies.add(new DependencyLink(metaData, provider, dependency));
+          }
+        }
+      }
+    }
+  }
+
+  private MetaData findCircularDependency(List<MetaData> remainder, String dependency) {
+    for (MetaData metaData : remainder) {
+      if (metaData.getType().equals(dependency)) {
+        return metaData;
+      }
+      final List<String> provides = metaData.getProvides();
+      if (provides != null && provides.contains(dependency)) {
+        return metaData;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Log a reasonable compile error for detected circular dependencies.
+   */
+  void errorOnCircularDependencies() {
+    processingContext.logError("Circular dependencies detected with beans %s  %s", circularDependencies, CIRC_ERR_MSG);
+    for (DependencyLink link : circularDependencies) {
+      processingContext.logError("Circular dependency - %s dependsOn %s for %s", link.metaData, link.provider, link.dependency);
+    }
+  }
+
+  /**
+   * Log a warning on unsatisfied dependencies that are expected to be
+   * provided by another module.
+   */
   void warnOnDependencies() {
     for (MetaData m : queue) {
-      processingContext.logWarn("unsatisfied dependencies on %s dependsOn %s", m.getType(), m.getDependsOn());
+      processingContext.logWarn("Unsatisfied dependencies on %s dependsOn %s", m, m.getDependsOn());
     }
   }
 
@@ -133,6 +185,14 @@ class MetaDataOrdering {
     return null;
   }
 
+  /**
+   * Return true if the beans with unsatisfied dependencies seem
+   * to form a circular dependency.
+   */
+  boolean hasCircularDependencies() {
+    return !circularDependencies.isEmpty();
+  }
+
   private static class ProviderList {
 
     private List<MetaData> list = new ArrayList<>();
@@ -148,6 +208,24 @@ class MetaDataOrdering {
         }
       }
       return true;
+    }
+  }
+
+  private static class DependencyLink {
+
+    final MetaData metaData;
+    final MetaData provider;
+    final String dependency;
+
+    DependencyLink(MetaData metaData, MetaData provider, String dependency) {
+      this.metaData = metaData;
+      this.provider = provider;
+      this.dependency = dependency;
+    }
+
+    @Override
+    public String toString() {
+      return metaData.toString();
     }
   }
 }

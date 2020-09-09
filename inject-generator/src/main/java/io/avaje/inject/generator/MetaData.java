@@ -48,6 +48,11 @@ class MetaData {
     this.dependsOn = new ArrayList<>();
   }
 
+  @Override
+  public String toString() {
+    return (name == null) ? type : type + ":" + name;
+  }
+
   private String trimName(String name) {
     return "".equals(name) ? null : name;
   }
