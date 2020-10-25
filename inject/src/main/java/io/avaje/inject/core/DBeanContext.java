@@ -5,7 +5,7 @@ import io.avaje.inject.BeanEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Priority;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -233,10 +233,20 @@ class DBeanContext implements BeanContext {
     }
 
     int initPriority() {
-      final Priority ann = bean.getClass().getAnnotation(Priority.class);
-      if (ann != null) {
-        priorityDefined = true;
-        return ann.value();
+      // Avoid adding hard dependency on javax.annotation-api by using reflection to find @Priority
+      try {
+        Class<? extends Annotation> type = (Class<? extends Annotation>) Class.forName("javax.annotation.Priority");
+        Annotation ann = bean.getClass().getAnnotation(type);
+        if (ann != null) {
+          int priority = (Integer) type.getMethod("value").invoke(ann);
+          priorityDefined = true;
+          return priority;
+        }
+      } catch (ClassNotFoundException ignore) {
+        // @Priority not available, so just use default priority
+      } catch (ReflectiveOperationException | SecurityException | IllegalArgumentException | ExceptionInInitializerError | ClassCastException e) {
+        // If this happens, something has gone very wrong since a non-confirming @Priority was found...
+        throw new UnsupportedOperationException("Problem instantiating @Priority", e);
       }
       // Default priority as per javax.ws.rs.Priorities.USER
       // User-level filter/interceptor priority
