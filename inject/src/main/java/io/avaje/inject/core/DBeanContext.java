@@ -95,10 +95,15 @@ class DBeanContext implements BeanContext {
 
   @Override
   public <T> List<T> sortByPriority(List<T> list) {
+    final Class<? extends Annotation> priorityAnnotation = priorityAnnotation();
+    if (priorityAnnotation == null) {
+      // priority annotation not on the classpath
+      return list;
+    }
     boolean priorityUsed = false;
     List<SortBean<T>> tempList = new ArrayList<>(list.size());
     for (T bean : list) {
-      SortBean<T> sortBean = new SortBean<>(bean);
+      SortBean<T> sortBean = new SortBean<>(bean, priorityAnnotation);
       tempList.add(sortBean);
       if (!priorityUsed && sortBean.priorityDefined) {
         priorityUsed = true;
@@ -115,6 +120,18 @@ class DBeanContext implements BeanContext {
       sorted.add(sortBean.bean);
     }
     return sorted;
+  }
+
+  /**
+   * Return the optional <code>javax.annotation.Priority</code> annotation class or null.
+   */
+  @SuppressWarnings("unchecked")
+  private Class<? extends Annotation> priorityAnnotation() {
+    try {
+      return (Class<? extends Annotation>) Class.forName("javax.annotation.Priority");
+    } catch (ClassNotFoundException e) {
+      return null;
+    }
   }
 
   @Override
@@ -227,24 +244,21 @@ class DBeanContext implements BeanContext {
 
     private final int priority;
 
-    SortBean(T bean) {
+    SortBean(T bean, Class<? extends Annotation> priorityAnnotation) {
       this.bean = bean;
-      this.priority = initPriority();
+      this.priority = initPriority(priorityAnnotation);
     }
 
-    int initPriority() {
-      // Avoid adding hard dependency on javax.annotation-api by using reflection to find @Priority
+    int initPriority(Class<? extends Annotation> priorityAnnotation) {
+      // Avoid adding hard dependency on javax.annotation-api by using reflection
       try {
-        Class<? extends Annotation> type = (Class<? extends Annotation>) Class.forName("javax.annotation.Priority");
-        Annotation ann = bean.getClass().getAnnotation(type);
+        Annotation ann = bean.getClass().getAnnotation(priorityAnnotation);
         if (ann != null) {
-          int priority = (Integer) type.getMethod("value").invoke(ann);
+          int priority = (Integer) priorityAnnotation.getMethod("value").invoke(ann);
           priorityDefined = true;
           return priority;
         }
-      } catch (ClassNotFoundException ignore) {
-        // @Priority not available, so just use default priority
-      } catch (ReflectiveOperationException | SecurityException | IllegalArgumentException | ExceptionInInitializerError | ClassCastException e) {
+      } catch (Exception e) {
         // If this happens, something has gone very wrong since a non-confirming @Priority was found...
         throw new UnsupportedOperationException("Problem instantiating @Priority", e);
       }
