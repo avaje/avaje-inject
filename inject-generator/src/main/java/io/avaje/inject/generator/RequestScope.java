@@ -9,12 +9,14 @@ import java.util.Set;
  */
 class RequestScope {
 
+  private static final String JEX_CONTEXT = "io.avaje.jex.Context";
   private static final String JAVALIN_CONTEXT = "io.javalin.http.Context";
   private static final String HELIDON_REQ = "io.helidon.webserver.ServerRequest";
   private static final String HELIDON_RES = "io.helidon.webserver.ServerResponse";
   private static final Map<String, Handler> TYPES = new HashMap<>();
 
   static {
+    TYPES.put(JEX_CONTEXT, new Jex());
     TYPES.put(JAVALIN_CONTEXT, new Javalin());
     TYPES.put(HELIDON_REQ, new Helidon());
     TYPES.put(HELIDON_RES, new Helidon());
@@ -58,6 +60,33 @@ class RequestScope {
      * Return the argument name based on the parameter type.
      */
     String argumentName(String paramType);
+  }
+
+  /**
+   * Jex support for request scoping/BeanFactory.
+   */
+  private static class Jex implements Handler {
+
+    @Override
+    public void factoryInterface(Append writer, String parentType) {
+      writer.append("BeanFactory<%s, %s>", parentType, "Context");
+    }
+
+    @Override
+    public void addImports(Set<String> importTypes) {
+      importTypes.add(Constants.BEAN_FACTORY);
+      importTypes.add(JEX_CONTEXT);
+    }
+
+    @Override
+    public void writeCreateMethod(Append writer, String parentType) {
+      writer.append("  public %s create(Context context) {", parentType).eol();
+    }
+
+    @Override
+    public String argumentName(String paramType) {
+      return "context";
+    }
   }
 
   /**
