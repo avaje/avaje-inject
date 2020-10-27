@@ -34,7 +34,7 @@ class DBuilderExtn extends DBuilder {
   @Override
   public boolean isAddBeanFor(Class<?> addForType, Class<?> injectTarget) {
     if (hasSuppliedBeans) {
-      return !beanMap.isSupplied(addForType.getName());
+      return !beanMap.isSupplied(addForType.getCanonicalName());
     }
     return true;
   }

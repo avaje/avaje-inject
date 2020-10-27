@@ -36,7 +36,6 @@ class DBeanMap {
   }
 
   private void addSuppliedBean(SuppliedBean supplied) {
-
     Class<?> suppliedType = supplied.getType();
     Named annotation = suppliedType.getAnnotation(Named.class);
     String name = (annotation == null) ? null : annotation.value();
@@ -61,13 +60,11 @@ class DBeanMap {
   }
 
   void registerWith(int flag, String canonicalName, Object bean, String name, Class<?>... types) {
-
     DContextEntryBean entryBean = DContextEntryBean.of(bean, name, flag);
     beans.computeIfAbsent(canonicalName, s -> new DContextEntry()).add(entryBean);
-
     if (types != null) {
       for (Class<?> type : types) {
-        beans.computeIfAbsent(type.getName(), s -> new DContextEntry()).add(entryBean);
+        beans.computeIfAbsent(type.getCanonicalName(), s -> new DContextEntry()).add(entryBean);
       }
     }
   }
@@ -77,7 +74,6 @@ class DBeanMap {
    */
   @SuppressWarnings("unchecked")
   <T> T getBean(Class<T> type, String name) {
-
     DContextEntry entry = beans.get(type.getCanonicalName());
     if (entry != null) {
       T bean = (T) entry.get(name);
@@ -89,7 +85,6 @@ class DBeanMap {
   }
 
   <T> BeanEntry<T> candidate(Class<T> type, String name) {
-
     DContextEntry entry = beans.get(type.getCanonicalName());
     if (entry != null) {
       return entry.candidate(name);
@@ -111,8 +106,8 @@ class DBeanMap {
   /**
    * Return true if there is a supplied bean for this type.
    */
-  boolean isSupplied(String type) {
-    DContextEntry entry = beans.get(type);
+  boolean isSupplied(String canonicalName) {
+    DContextEntry entry = beans.get(canonicalName);
     return entry != null && entry.isSupplied();
   }
 }
