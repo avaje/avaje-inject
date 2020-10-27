@@ -25,6 +25,7 @@ class IncludeAnnotations {
     EXCLUDED_ANNOTATIONS.add(Secondary.class.getName());
     EXCLUDED_ANNOTATIONS.add(Constants.KOTLIN_METADATA);
     EXCLUDED_ANNOTATIONS.add(Constants.PATH);
+    EXCLUDED_ANNOTATIONS.add(Constants.GENERATED_9);
   }
 
   /**
