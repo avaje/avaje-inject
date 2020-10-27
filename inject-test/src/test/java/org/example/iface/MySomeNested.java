@@ -1,4 +1,4 @@
-package io.avaje.inject.core;
+package org.example.iface;
 
 import javax.inject.Singleton;
 

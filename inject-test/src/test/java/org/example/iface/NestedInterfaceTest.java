@@ -1,4 +1,4 @@
-package io.avaje.inject.core;
+package org.example.iface;
 
 import io.avaje.inject.BeanContext;
 import io.avaje.inject.BeanContextBuilder;

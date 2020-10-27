@@ -1,4 +1,4 @@
-package io.avaje.inject.core;
+package org.example.iface;
 
 public class Some {
 
