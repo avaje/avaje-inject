@@ -145,7 +145,7 @@ class ProcessingContext {
 
     // determine the context package (that we put the $diFactory class into)
     PackageElement pkg = elementUtils.getPackageOf(contextElement);
-    logWarn("using package from element " + pkg);
+    logDebug("using package from element " + pkg);
     this.contextPackage = (pkg == null) ? null : pkg.getQualifiedName().toString();
   }
 

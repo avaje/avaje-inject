@@ -157,7 +157,7 @@ public class Processor extends AbstractProcessor {
   private void mergeMetaData() {
     for (BeanReader beanReader : beanReaders) {
       if (beanReader.isRequestScoped()) {
-        processingContext.logWarn("skipping request scoped processed bean " + beanReader);
+        processingContext.logDebug("skipping request scoped processed bean " + beanReader);
       } else {
         String metaKey = beanReader.getMetaKey();
         MetaData metaData = this.metaData.get(metaKey);
@@ -194,7 +194,7 @@ public class Processor extends AbstractProcessor {
   private void readBeanMeta(TypeElement typeElement, boolean factory) {
 
     if (typeElement.getKind() == ElementKind.ANNOTATION_TYPE) {
-      processingContext.logWarn("skipping annotation type " + typeElement);
+      processingContext.logDebug("skipping annotation type " + typeElement);
       return;
     }
     BeanReader beanReader = new BeanReader(typeElement, processingContext);
