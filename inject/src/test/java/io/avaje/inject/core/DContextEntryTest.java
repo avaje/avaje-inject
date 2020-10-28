@@ -16,8 +16,7 @@ public class DContextEntryTest {
     entry.add(DContextEntryBean.of("N", null, BeanEntry.NORMAL));
     entry.add(DContextEntryBean.of("S", null, BeanEntry.SECONDARY));
 
-    Object bean = entry.get(null);
-    assertEquals(bean, "P");
+    assertEquals(entry.candidate(null).getBean(), "P");
   }
 
   @Test
@@ -28,7 +27,7 @@ public class DContextEntryTest {
       entry.add(DContextEntryBean.of("N", null, BeanEntry.NORMAL));
       entry.add(DContextEntryBean.of("S", null, BeanEntry.PRIMARY));
 
-      entry.get(null);
+      entry.candidate(null);
     });
   }
 
@@ -39,8 +38,7 @@ public class DContextEntryTest {
     entry.add(DContextEntryBean.of("N", null, BeanEntry.NORMAL));
     entry.add(DContextEntryBean.of("S", null, BeanEntry.SECONDARY));
 
-    Object bean = entry.get(null);
-    assertEquals(bean, "N");
+    assertEquals(entry.candidate(null).getBean(), "N");
   }
 
 
@@ -52,8 +50,7 @@ public class DContextEntryTest {
     entry.add(DContextEntryBean.of("S1", null, BeanEntry.SECONDARY));
     entry.add(DContextEntryBean.of("S2", null, BeanEntry.SECONDARY));
 
-    Object bean = entry.get(null);
-    assertEquals(bean, "N");
+    assertEquals(entry.candidate(null).getBean(), "N");
   }
 
   @Test
@@ -64,7 +61,7 @@ public class DContextEntryTest {
       entry.add(DContextEntryBean.of("S1", null, BeanEntry.SECONDARY));
       entry.add(DContextEntryBean.of("S2", null, BeanEntry.SECONDARY));
 
-      entry.get(null);
+      entry.candidate(null);
     });
   }
 
@@ -76,8 +73,7 @@ public class DContextEntryTest {
     entry.add(DContextEntryBean.of("S1", "a", BeanEntry.SECONDARY));
     entry.add(DContextEntryBean.of("S2", "b", BeanEntry.SECONDARY));
 
-    Object bean = entry.get("b");
-    assertEquals(bean, "S2");
+    assertEquals(entry.candidate("b").getBean(), "S2");
   }
 
   @Test
@@ -87,8 +83,7 @@ public class DContextEntryTest {
     entry.add(DContextEntryBean.of("S1", null, BeanEntry.SECONDARY));
     entry.add(DContextEntryBean.of("S2", "b", BeanEntry.SECONDARY));
 
-    Object bean = entry.get("b");
-    assertEquals(bean, "S2");
+    assertEquals(entry.candidate("b").getBean(), "S2");
   }
 
   @Test
@@ -98,7 +93,6 @@ public class DContextEntryTest {
     entry.add(DContextEntryBean.of("S1", null, BeanEntry.PRIMARY));
     entry.add(DContextEntryBean.of("S2", "b", BeanEntry.SECONDARY));
 
-    Object bean = entry.get("b");
-    assertEquals(bean, "S2");
+    assertEquals(entry.candidate("b").getBean(), "S2");
   }
 }

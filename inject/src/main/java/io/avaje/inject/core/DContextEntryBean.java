@@ -50,14 +50,6 @@ class DContextEntryBean {
     return obtainInstance();
   }
 
-  Object getIfMatchWithDefault(String name) {
-    if (name == null || Objects.equals(this.name, name)) {
-      return obtainInstance();
-    } else {
-      return null;
-    }
-  }
-
   boolean isPrimary() {
     return flag == BeanEntry.PRIMARY;
   }

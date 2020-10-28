@@ -30,23 +30,6 @@ class DContextEntry {
   }
 
   /**
-   * Get a single bean given the name.
-   */
-  Object get(String name) {
-    if (entries.isEmpty()) {
-      return null;
-    }
-    if (entries.size() == 1) {
-      DContextEntryBean entry = entries.get(0);
-      return entry.getIfMatchWithDefault(name);
-    }
-
-    EntryMatcher matcher = new EntryMatcher(name);
-    matcher.match(entries);
-    return matcher.getBean();
-  }
-
-  /**
    * Add all the managed beans to the given list.
    */
   void addAll(List<Object> appendToList) {
@@ -119,14 +102,6 @@ class DContextEntry {
         return;
       }
       throw new IllegalStateException("Expecting only 1 bean match but have multiple matching beans " + match.getBean() + " and " + entry.getBean());
-    }
-
-    Object getBean() {
-      if (match == null) {
-        return null;
-      }
-      checkSecondary();
-      return match.getBean();
     }
 
     BeanEntry candidate() {

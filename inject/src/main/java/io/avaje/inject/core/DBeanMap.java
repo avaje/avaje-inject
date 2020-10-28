@@ -69,21 +69,6 @@ class DBeanMap {
     }
   }
 
-  /**
-   * Return the bean instance given the class and name.
-   */
-  @SuppressWarnings("unchecked")
-  <T> T getBean(Class<T> type, String name) {
-    DContextEntry entry = beans.get(type.getCanonicalName());
-    if (entry != null) {
-      T bean = (T) entry.get(name);
-      if (bean != null) {
-        return bean;
-      }
-    }
-    return null;
-  }
-
   <T> BeanEntry<T> candidate(Class<T> type, String name) {
     DContextEntry entry = beans.get(type.getCanonicalName());
     if (entry != null) {
