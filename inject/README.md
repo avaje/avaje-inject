@@ -6,9 +6,7 @@ APT based dependency injection for server side developers - https://dinject.io
 ```java
 module org.example {
 
-  requires javax.inject;
-  requires org.slf4j;
-  requires transitive io.avaje.inject;
+  requires io.avaje.inject;
 
   // register org.example._di$Factory from generated sources
   provides io.avaje.inject.core.BeanContextFactory with org.example._di$Factory;
