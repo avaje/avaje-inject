@@ -1,25 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
-  <groupId>io.avaje</groupId>
-  <artifactId>avaje-inject</artifactId>
-  <version>1.5-SNAPSHOT</version>
-
   <parent>
-    <groupId>org.avaje</groupId>
-    <artifactId>java8-oss</artifactId>
-    <version>2.2</version>
+    <groupId>io.avaje</groupId>
+    <artifactId>avaje-inject-parent</artifactId>
+    <version>1.5-SNAPSHOT</version>
   </parent>
 
-  <scm>
-    <developerConnection>scm:git:git@github.com:avaje/avaje-inject.git</developerConnection>
-    <tag>HEAD</tag>
-  </scm>
-
-  <properties>
-    <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
-  </properties>
+  <artifactId>avaje-inject</artifactId>
+  <name>avaje inject</name>
+  <description>avaje dependency injection library</description>
 
   <dependencies>
 
