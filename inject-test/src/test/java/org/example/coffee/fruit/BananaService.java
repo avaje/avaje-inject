@@ -3,6 +3,7 @@ package org.example.coffee.fruit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+@Fruit
 @Singleton
 class BananaService {
 

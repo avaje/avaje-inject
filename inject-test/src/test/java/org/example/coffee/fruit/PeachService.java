@@ -2,6 +2,7 @@ package org.example.coffee.fruit;
 
 import javax.inject.Singleton;
 
+@Fruit
 @Singleton
 class PeachService {
 
