@@ -1,6 +1,7 @@
 module io.avaje.inject.generator {
 
   requires java.compiler;
+  requires javax.inject;
   requires java.annotation;
   requires io.avaje.inject;
 
