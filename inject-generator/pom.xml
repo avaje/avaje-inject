@@ -18,7 +18,7 @@
   </scm>
 
   <properties>
-    <inject.version>1.4-SNAPSHOT</inject.version>
+    <inject.version>1.4</inject.version>
   </properties>
 
   <dependencies>
