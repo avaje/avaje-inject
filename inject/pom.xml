@@ -4,7 +4,7 @@
 
   <groupId>io.avaje</groupId>
   <artifactId>avaje-inject</artifactId>
-  <version>1.4</version>
+  <version>1.5-SNAPSHOT</version>
 
   <parent>
     <groupId>org.avaje</groupId>
@@ -14,7 +14,7 @@
 
   <scm>
     <developerConnection>scm:git:git@github.com:avaje/avaje-inject.git</developerConnection>
-    <tag>avaje-inject-1.4</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <properties>
