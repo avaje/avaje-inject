@@ -87,6 +87,8 @@ class BeanReader {
       String type = Util.unwrapProvider(anInterface.toString());
       if (Constants.isBeanLifecycle(type)) {
         beanLifeCycle = true;
+      } else if (type.indexOf('.') == -1) {
+        context.logWarn("skip when no package on interface " + type);
       } else {
         interfaceTypes.add(type);
         if (!GenericType.isGeneric(type)) {
