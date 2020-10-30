@@ -361,7 +361,7 @@ public class BeanContextBuilder {
     Set<String> moduleNames = factoryOrder.orderFactories();
     if (moduleNames.isEmpty()) {
       throw new IllegalStateException("No modules found. When using java module system we need an explicit provides clause in module-info like:\n\n" +
-        " provides io.avaje.inject.core.BeanContextFactory with org.example._di$Factory;\n\n" +
+        " provides io.avaje.inject.spi.BeanContextFactory with org.example._di$BeanContextFactory;\n\n" +
         " Otherwise perhaps using Gradle and IDEA but with a setup issue?" +
         " Review IntelliJ Settings / Build / Build tools / Gradle - 'Build and run using' value and set that to 'Gradle'. " +
         " Refer to https://dinject.io/docs/gradle#idea");
