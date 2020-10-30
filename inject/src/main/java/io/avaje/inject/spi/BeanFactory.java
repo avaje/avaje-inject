@@ -1,4 +1,4 @@
-package io.avaje.inject.core;
+package io.avaje.inject.spi;
 
 /**
  * Factory for creating a bean given a single request scope argument.

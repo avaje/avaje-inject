@@ -1,10 +1,10 @@
 package io.avaje.inject;
 
-import io.avaje.inject.core.BeanContextFactory;
-import io.avaje.inject.core.Builder;
-import io.avaje.inject.core.BuilderFactory;
-import io.avaje.inject.core.EnrichBean;
-import io.avaje.inject.core.SuppliedBean;
+import io.avaje.inject.spi.BeanContextFactory;
+import io.avaje.inject.spi.Builder;
+import io.avaje.inject.spi.BuilderFactory;
+import io.avaje.inject.spi.EnrichBean;
+import io.avaje.inject.spi.SuppliedBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

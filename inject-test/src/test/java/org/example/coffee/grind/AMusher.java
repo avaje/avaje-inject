@@ -1,6 +1,6 @@
 package org.example.coffee.grind;
 
-import io.avaje.inject.core.BeanLifecycle;
+import io.avaje.inject.spi.BeanLifecycle;
 
 import javax.inject.Singleton;
 

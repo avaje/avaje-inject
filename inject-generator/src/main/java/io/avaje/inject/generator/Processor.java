@@ -2,7 +2,7 @@ package io.avaje.inject.generator;
 
 import io.avaje.inject.ContextModule;
 import io.avaje.inject.Factory;
-import io.avaje.inject.core.DependencyMeta;
+import io.avaje.inject.spi.DependencyMeta;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.FilerException;

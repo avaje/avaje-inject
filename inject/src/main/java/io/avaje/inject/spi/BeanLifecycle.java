@@ -1,4 +1,4 @@
-package io.avaje.inject.core;
+package io.avaje.inject.spi;
 
 /**
  * Lifecycle of beans via <code>@PostConstruct</code> and <code>@PreDestroy</code>.

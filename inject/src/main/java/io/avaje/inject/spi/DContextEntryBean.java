@@ -1,4 +1,4 @@
-package io.avaje.inject.core;
+package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanEntry;
 

@@ -1,6 +1,6 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.core.DependencyMeta;
+import io.avaje.inject.spi.DependencyMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;

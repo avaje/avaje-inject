@@ -1,6 +1,6 @@
 package org.example.request;
 
-import io.avaje.inject.core.BeanFactory2;
+import io.avaje.inject.spi.BeanFactory2;
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
 

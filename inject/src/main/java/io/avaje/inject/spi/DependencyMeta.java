@@ -1,4 +1,4 @@
-package io.avaje.inject.core;
+package io.avaje.inject.spi;
 
 /**
  * Hold bean dependency meta data intended for internal use by code generation (Java annotation processing).

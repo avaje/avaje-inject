@@ -1,6 +1,6 @@
 package org.example.request;
 
-import io.avaje.inject.core.BeanFactory;
+import io.avaje.inject.spi.BeanFactory;
 import io.javalin.http.Context;
 
 import javax.inject.Singleton;
