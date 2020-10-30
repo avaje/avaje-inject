@@ -1,6 +1,18 @@
 # [avaje-inject](https://avaje.io/inject)
 APT based dependency injection for server side developers - https://avaje.io/inject
 
+### Example module use
+
+```java
+module org.example {
+
+  requires io.avaje.inject;
+
+  // register org.example._di$Factory from generated sources
+  provides io.avaje.inject.spi.BeanContextFactory with org.example._di$BeanContextFactory;
+}
+```
+
 ## Similar to Dagger (https://google.github.io/dagger/)
 
 - Uses Java annotation processing for dependency injection

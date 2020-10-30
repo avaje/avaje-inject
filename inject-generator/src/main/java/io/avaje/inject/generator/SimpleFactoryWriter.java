@@ -26,7 +26,7 @@ class SimpleFactoryWriter {
     String pkg = processingContext.getContextPackage();
     this.factoryPackage = (pkg != null) ? pkg : ordering.getTopPackage();
     processingContext.deriveContextName(factoryPackage);
-    this.factoryShortName = "_di$Factory";
+    this.factoryShortName = "_di$BeanContextFactory";
     this.factoryFullName = factoryPackage + "." + factoryShortName;
   }
 

@@ -9,7 +9,7 @@ module org.example {
   requires io.avaje.inject;
 
   // register org.example._di$Factory from generated sources
-  provides io.avaje.inject.spi.BeanContextFactory with org.example._di$Factory;
+  provides io.avaje.inject.spi.BeanContextFactory with org.example._di$BeanContextFactory;
 }
 ```
 
