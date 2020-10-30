@@ -12,8 +12,13 @@ public class AController {
   @Inject
   AService service;
 
-  @Inject
   Context context;
+
+  @Inject
+  AController withContext(Context context) {
+    this.context = context;
+    return this;
+  }
 
   public String get() {
     return "hi " + context.toString() + service.hi();

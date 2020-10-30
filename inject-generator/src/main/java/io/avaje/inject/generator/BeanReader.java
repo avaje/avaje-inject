@@ -45,6 +45,8 @@ class BeanReader {
 
   private final List<FieldReader> injectFields = new ArrayList<>();
 
+  private final List<MethodReader> injectMethods = new ArrayList<>();
+
   private final List<String> interfaceTypes = new ArrayList<>();
 
   private String addForType;
@@ -146,6 +148,10 @@ class BeanReader {
     return injectFields;
   }
 
+  List<MethodReader> getInjectMethods() {
+    return injectMethods;
+  }
+
   void read(boolean factory) {
     for (Element element : beanType.getEnclosedElements()) {
       ElementKind kind = element.getKind();
@@ -168,6 +174,10 @@ class BeanReader {
     }
     for (FieldReader fields : injectFields) {
       fields.checkRequest(requestParams);
+    }
+    for (MethodReader methods : injectMethods) {
+      methods.addImports(importTypes);
+      methods.checkRequest(requestParams);
     }
     for (MethodReader factoryMethod : factoryMethods) {
       factoryMethod.addImports(importTypes);
@@ -245,6 +255,15 @@ class BeanReader {
       }
     }
 
+    Inject inject = element.getAnnotation(Inject.class);
+    if (inject != null) {
+      MethodReader methodReader = new MethodReader(context, methodElement, beanType);
+      methodReader.read();
+      if (!methodReader.getParams().isEmpty()) {
+        injectMethods.add(methodReader);
+      }
+    }
+
     if (context.isPostConstructAvailable()) {
       PostConstruct pcMarker = element.getAnnotation(PostConstruct.class);
       if (pcMarker != null) {
@@ -307,6 +326,10 @@ class BeanReader {
 
   boolean isFieldInjectionRequired() {
     return !injectFields.isEmpty();
+  }
+
+  boolean isMethodInjectionRequired() {
+    return !injectMethods.isEmpty();
   }
 
   void buildAddFor(Append writer) {
@@ -413,6 +436,9 @@ class BeanReader {
     for (FieldReader field : injectFields) {
       field.writeRequestDependency(writer);
     }
+    for (MethodReader method : injectMethods) {
+      method.writeRequestDependency(writer);
+    }
     requestParams.writeRequestCreate(writer);
     writer.resetNextName();
     writer.append("    %s bean = new %s(", shortName, shortName);
@@ -422,6 +448,11 @@ class BeanReader {
     writer.append(");").eol();
     for (FieldReader field : injectFields) {
       field.writeRequestInject(writer);
+    }
+    for (MethodReader method : injectMethods) {
+        writer.append("    bean.%s(", method.getName());
+        method.writeRequestConstructor(writer);
+        writer.append(");").eol();
     }
     writer.append("    return bean;").eol();
     writer.append("  }").eol();

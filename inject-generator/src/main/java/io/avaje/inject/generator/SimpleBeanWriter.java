@@ -97,7 +97,13 @@ class SimpleBeanWriter {
         param.addProviderParam(writer, providerIndex++);
       }
     }
-
+    for (MethodReader methodReader : beanReader.getInjectMethods()) {
+      for (MethodReader.MethodParam param : methodReader.getParams()) {
+        if (param.isGenericType()) {
+          param.addProviderParam(writer, providerIndex++);
+        }
+      }
+    }
     writer.append(") {").eol();
 
     beanReader.buildAddFor(writer);
@@ -109,7 +115,7 @@ class SimpleBeanWriter {
       if (i > 0) {
         writer.append(",");
       }
-      writer.append(params.get(i).builderGetDependency());
+      writer.append(params.get(i).builderGetDependency("builder"));
     }
     writer.append(");").eol();
 
@@ -117,12 +123,23 @@ class SimpleBeanWriter {
     if (beanReader.isLifecycleRequired()) {
       beanReader.buildAddLifecycle(writer);
     }
-    if (beanReader.isFieldInjectionRequired()) {
+    if (beanReader.isFieldInjectionRequired() || beanReader.isMethodInjectionRequired()) {
       writer.append("      builder.addInjector(b -> {").eol();
       for (FieldReader fieldReader : beanReader.getInjectFields()) {
         String fieldName = fieldReader.getFieldName();
         String getDependency = fieldReader.builderGetDependency();
         writer.append("        $bean.%s = %s;", fieldName, getDependency).eol();
+      }
+      for (MethodReader methodReader : beanReader.getInjectMethods()) {
+        writer.append("        $bean.%s(", methodReader.getName());
+        List<MethodReader.MethodParam> methodParams = methodReader.getParams();
+        for (int i = 0; i < methodParams.size(); i++) {
+          if (i > 0) {
+            writer.append(",");
+          }
+          writer.append(methodParams.get(i).builderGetDependency("b"));
+        }
+        writer.append(");").eol();
       }
       writer.append("      });").eol();
     }
