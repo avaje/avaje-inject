@@ -13,16 +13,16 @@ import java.util.List;
 class SimpleBeanWriter {
 
   private final BeanReader beanReader;
-  private final ProcessingContext ctx;
+  private final ProcessingContext context;
   private final String originName;
   private final String shortName;
   private final String packageName;
   private final String suffix;
   private Append writer;
 
-  SimpleBeanWriter(BeanReader beanReader, ProcessingContext ctx) {
+  SimpleBeanWriter(BeanReader beanReader, ProcessingContext context) {
     this.beanReader = beanReader;
-    this.ctx = ctx;
+    this.context = context;
     TypeElement origin = beanReader.getBeanType();
     this.originName = origin.getQualifiedName().toString();
     this.shortName = origin.getSimpleName().toString();
@@ -31,7 +31,7 @@ class SimpleBeanWriter {
   }
 
   private Writer createFileWriter() throws IOException {
-    JavaFileObject jfo = ctx.createWriter(originName + suffix);
+    JavaFileObject jfo = context.createWriter(originName + suffix);
     return jfo.openWriter();
   }
 
@@ -86,7 +86,7 @@ class SimpleBeanWriter {
 
     MethodReader constructor = beanReader.getConstructor();
     if (constructor == null) {
-      ctx.logError(beanReader.getBeanType(), "Unable to determine constructor to use?");
+      context.logError(beanReader.getBeanType(), "Unable to determine constructor to use?");
       return;
     }
 
@@ -163,7 +163,7 @@ class SimpleBeanWriter {
   }
 
   private void writeClassStart() {
-    if (ctx.isGeneratedAvailable()) {
+    if (context.isGeneratedAvailable()) {
       writer.append(Constants.AT_GENERATED).eol();
     }
     if (beanReader.isRequestScoped()) {

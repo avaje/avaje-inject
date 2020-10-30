@@ -15,7 +15,7 @@ import java.util.Set;
 
 class MethodReader {
 
-  private final ProcessingContext processingContext;
+  private final ProcessingContext context;
   private final ExecutableElement element;
   private final String factoryType;
   private final TypeMirror returnType;
@@ -32,13 +32,13 @@ class MethodReader {
   private String addForType;
   private boolean beanLifeCycle;
 
-  MethodReader(ProcessingContext processingContext, ExecutableElement element, TypeElement beanType) {
-    this(processingContext, element, beanType, null, null);
+  MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType) {
+    this(context, element, beanType, null, null);
   }
 
-  MethodReader(ProcessingContext processingContext, ExecutableElement element, TypeElement beanType, Bean bean, Named named) {
+  MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType, Bean bean, Named named) {
     this.isFactory = bean != null;
-    this.processingContext = processingContext;
+    this.context = context;
     this.element = element;
     this.returnType = element.getReturnType();
     this.returnTypeRaw = returnType.toString();
@@ -53,7 +53,7 @@ class MethodReader {
   }
 
   private void initInterfaces() {
-    Element element = processingContext.asElement(returnType);
+    Element element = context.asElement(returnType);
     if (element instanceof TypeElement) {
       TypeElement te = (TypeElement) element;
       if (te.getKind() == ElementKind.INTERFACE) {

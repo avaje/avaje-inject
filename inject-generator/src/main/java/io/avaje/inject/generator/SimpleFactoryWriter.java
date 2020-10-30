@@ -11,7 +11,7 @@ import java.io.Writer;
 class SimpleFactoryWriter {
 
   private final MetaDataOrdering ordering;
-  private final ProcessingContext processingContext;
+  private final ProcessingContext context;
 
   private final String factoryPackage;
   private final String factoryShortName;
@@ -19,13 +19,13 @@ class SimpleFactoryWriter {
 
   private Append writer;
 
-  SimpleFactoryWriter(MetaDataOrdering ordering, ProcessingContext processingContext) {
+  SimpleFactoryWriter(MetaDataOrdering ordering, ProcessingContext context) {
     this.ordering = ordering;
-    this.processingContext = processingContext;
+    this.context = context;
 
-    String pkg = processingContext.getContextPackage();
+    String pkg = context.getContextPackage();
     this.factoryPackage = (pkg != null) ? pkg : ordering.getTopPackage();
-    processingContext.deriveContextName(factoryPackage);
+    context.deriveContextName(factoryPackage);
     this.factoryShortName = "_di$BeanContextFactory";
     this.factoryFullName = factoryPackage + "." + factoryShortName;
   }
@@ -48,7 +48,7 @@ class SimpleFactoryWriter {
   private void writeServicesFile() {
 
     try {
-      FileObject jfo = processingContext.createMetaInfWriter();
+      FileObject jfo = context.createMetaInfWriter();
       if (jfo != null) {
         Writer writer = jfo.openWriter();
         writer.write(factoryFullName);
@@ -57,7 +57,7 @@ class SimpleFactoryWriter {
 
     } catch (IOException e) {
       e.printStackTrace();
-      processingContext.logError("Failed to write services file " + e.getMessage());
+      context.logError("Failed to write services file " + e.getMessage());
     }
   }
 
@@ -84,7 +84,7 @@ class SimpleFactoryWriter {
 
     writer.append("package %s;", factoryPackage).eol().eol();
 
-    final String generated = processingContext.getGeneratedAnnotation();
+    final String generated = context.getGeneratedAnnotation();
     if (generated != null) {
       writer.append("import %s;", generated).eol();
     }
@@ -105,13 +105,13 @@ class SimpleFactoryWriter {
 
   private void writeStartClass() {
 
-    processingContext.buildAtContextModule(writer);
+    context.buildAtContextModule(writer);
 
     writer.append("public class %s implements BeanContextFactory {", factoryShortName).eol().eol();
     writer.append("  private final Builder builder;").eol().eol();
 
     writer.append("  public %s() {", factoryShortName).eol();
-    processingContext.buildNewBuilder(writer);
+    context.buildNewBuilder(writer);
     writer.append("  }").eol().eol();
 
     writer.append("  @Override").eol();
@@ -135,7 +135,7 @@ class SimpleFactoryWriter {
   }
 
   private Writer createFileWriter() throws IOException {
-    JavaFileObject jfo = processingContext.createWriter(factoryFullName);
+    JavaFileObject jfo = context.createWriter(factoryFullName);
     return jfo.openWriter();
   }
 }

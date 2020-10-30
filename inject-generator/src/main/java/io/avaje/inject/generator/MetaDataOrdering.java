@@ -16,7 +16,7 @@ class MetaDataOrdering {
       "rather than constructor injection on one of the dependencies. " +
       "\n See https://avaje.io/inject/#circular";
 
-  private final ProcessingContext processingContext;
+  private final ProcessingContext context;
 
   private final List<MetaData> orderedList = new ArrayList<>();
 
@@ -28,8 +28,8 @@ class MetaDataOrdering {
 
   private String topPackage;
 
-  MetaDataOrdering(Collection<MetaData> values, ProcessingContext processingContext) {
-    this.processingContext = processingContext;
+  MetaDataOrdering(Collection<MetaData> values, ProcessingContext context) {
+    this.context = context;
 
     for (MetaData metaData : values) {
       if (metaData.noDepends()) {
@@ -100,9 +100,9 @@ class MetaDataOrdering {
    * Log a reasonable compile error for detected circular dependencies.
    */
   void errorOnCircularDependencies() {
-    processingContext.logError("Circular dependencies detected with beans %s  %s", circularDependencies, CIRC_ERR_MSG);
+    context.logError("Circular dependencies detected with beans %s  %s", circularDependencies, CIRC_ERR_MSG);
     for (DependencyLink link : circularDependencies) {
-      processingContext.logError("Circular dependency - %s dependsOn %s for %s", link.metaData, link.provider, link.dependency);
+      context.logError("Circular dependency - %s dependsOn %s for %s", link.metaData, link.provider, link.dependency);
     }
   }
 
@@ -112,7 +112,7 @@ class MetaDataOrdering {
    */
   void warnOnDependencies() {
     for (MetaData m : queue) {
-      processingContext.logWarn("Unsatisfied dependencies on %s dependsOn %s", m, m.getDependsOn());
+      context.logWarn("Unsatisfied dependencies on %s dependsOn %s", m, m.getDependsOn());
     }
   }
 

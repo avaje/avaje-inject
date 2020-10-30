@@ -28,7 +28,7 @@ import java.util.Set;
 
 public class Processor extends AbstractProcessor {
 
-  private ProcessingContext processingContext;
+  private ProcessingContext context;
 
   private Elements elementUtils;
 
@@ -51,7 +51,7 @@ public class Processor extends AbstractProcessor {
   @Override
   public synchronized void init(ProcessingEnvironment processingEnv) {
     super.init(processingEnv);
-    this.processingContext = new ProcessingContext(processingEnv);
+    this.context = new ProcessingContext(processingEnv);
     this.elementUtils = processingEnv.getElementUtils();
   }
 
@@ -97,40 +97,40 @@ public class Processor extends AbstractProcessor {
     for (BeanReader beanReader : beanReaders) {
       try {
         if (!beanReader.isWrittenToFile()) {
-          SimpleBeanWriter writer = new SimpleBeanWriter(beanReader, processingContext);
+          SimpleBeanWriter writer = new SimpleBeanWriter(beanReader, context);
           writer.write();
           beanReader.setWrittenToFile();
         }
       } catch (FilerException e) {
-        processingContext.logWarn("FilerException to write $di class " + beanReader.getBeanType() + " " + e.getMessage());
+        context.logWarn("FilerException to write $di class " + beanReader.getBeanType() + " " + e.getMessage());
 
       } catch (IOException e) {
         e.printStackTrace();
-        processingContext.logError(beanReader.getBeanType(), "Failed to write $di class");
+        context.logError(beanReader.getBeanType(), "Failed to write $di class");
       }
     }
   }
 
   private void writeBeanFactory() {
 
-    MetaDataOrdering ordering = new MetaDataOrdering(metaData.values(), processingContext);
+    MetaDataOrdering ordering = new MetaDataOrdering(metaData.values(), context);
     int remaining = ordering.processQueue();
     if (remaining > 0) {
       if (ordering.hasCircularDependencies()) {
         ordering.errorOnCircularDependencies();
       } else {
-        processingContext.logWarn("there are " + remaining + " beans with unsatisfied dependencies (assuming external dependencies)");
+        context.logWarn("there are " + remaining + " beans with unsatisfied dependencies (assuming external dependencies)");
         ordering.warnOnDependencies();
       }
     }
 
     try {
-      SimpleFactoryWriter factoryWriter = new SimpleFactoryWriter(ordering, processingContext);
+      SimpleFactoryWriter factoryWriter = new SimpleFactoryWriter(ordering, context);
       factoryWriter.write();
     } catch (FilerException e) {
-      processingContext.logWarn("FilerException trying to write factory " + e.getMessage());
+      context.logWarn("FilerException trying to write factory " + e.getMessage());
     } catch (IOException e) {
-      processingContext.logError("Failed to write factory " + e.getMessage());
+      context.logError("Failed to write factory " + e.getMessage());
     }
   }
 
@@ -140,12 +140,12 @@ public class Processor extends AbstractProcessor {
   private void readChangedBeans(Set<? extends Element> beans, boolean factory) {
     for (Element element : beans) {
       if (!(element instanceof TypeElement)) {
-        processingContext.logError("unexpected type [" + element + "]");
+        context.logError("unexpected type [" + element + "]");
       } else {
         if (readBeans.add(element.toString())) {
           readBeanMeta((TypeElement) element, factory);
         } else {
-          processingContext.logDebug("skipping already processed bean " + element);
+          context.logDebug("skipping already processed bean " + element);
         }
       }
     }
@@ -157,7 +157,7 @@ public class Processor extends AbstractProcessor {
   private void mergeMetaData() {
     for (BeanReader beanReader : beanReaders) {
       if (beanReader.isRequestScoped()) {
-        processingContext.logDebug("skipping request scoped processed bean " + beanReader);
+        context.logDebug("skipping request scoped processed bean " + beanReader);
       } else {
         String metaKey = beanReader.getMetaKey();
         MetaData metaData = this.metaData.get(metaKey);
@@ -194,10 +194,10 @@ public class Processor extends AbstractProcessor {
   private void readBeanMeta(TypeElement typeElement, boolean factory) {
 
     if (typeElement.getKind() == ElementKind.ANNOTATION_TYPE) {
-      processingContext.logDebug("skipping annotation type " + typeElement);
+      context.logDebug("skipping annotation type " + typeElement);
       return;
     }
-    BeanReader beanReader = new BeanReader(typeElement, processingContext);
+    BeanReader beanReader = new BeanReader(typeElement, context);
     beanReader.read(factory);
     beanReaders.add(beanReader);
   }
@@ -207,7 +207,7 @@ public class Processor extends AbstractProcessor {
    */
   private void readModule(RoundEnvironment roundEnv) {
 
-    String factory = processingContext.loadMetaInfServices();
+    String factory = context.loadMetaInfServices();
     if (factory != null) {
       TypeElement factoryType = elementUtils.getTypeElement(factory);
       if (factoryType != null) {
@@ -222,7 +222,7 @@ public class Processor extends AbstractProcessor {
         Element element = iterator.next();
         ContextModule annotation = element.getAnnotation(ContextModule.class);
         if (annotation != null) {
-          processingContext.setContextDetails(annotation.name(), annotation.provides(), annotation.dependsOn(), element);
+          context.setContextDetails(annotation.name(), annotation.provides(), annotation.dependsOn(), element);
         }
       }
     }
@@ -236,7 +236,7 @@ public class Processor extends AbstractProcessor {
   private void readFactory(TypeElement factoryType) {
 
     ContextModule module = factoryType.getAnnotation(ContextModule.class);
-    processingContext.setContextDetails(module.name(), module.provides(), module.dependsOn(), factoryType);
+    context.setContextDetails(module.name(), module.provides(), module.dependsOn(), factoryType);
 
     List<? extends Element> elements = factoryType.getEnclosedElements();
     if (elements != null) {
@@ -249,7 +249,7 @@ public class Processor extends AbstractProcessor {
             // read a build method - DependencyMeta
             DependencyMeta meta = element.getAnnotation(DependencyMeta.class);
             if (meta == null) {
-              processingContext.logError("Missing @DependencyMeta on method " + simpleName.toString());
+              context.logError("Missing @DependencyMeta on method " + simpleName.toString());
             } else {
               final MetaData metaData = new MetaData(meta);
               this.metaData.put(metaData.getKey(), metaData);
