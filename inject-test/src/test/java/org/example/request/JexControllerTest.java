@@ -17,10 +17,12 @@ class JexControllerTest {
     assertNull(SystemContext.getBean(JexController.class));
 
     final JexController$factory factory = SystemContext.getBean(JexController$factory.class);
-    final JexController jexController = factory.create(Mockito.mock(Context.class));
+    final Context context = Mockito.mock(Context.class);
+    final JexController jexController = factory.create(context);
 
     assertNotNull(jexController);
     assertSame(factory.service0, jexController.service);
     assertSame(jexController.service, SystemContext.getBean(AService.class));
+    assertSame(jexController.context, context);
   }
 }
