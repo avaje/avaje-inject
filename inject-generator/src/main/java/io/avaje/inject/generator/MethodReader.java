@@ -125,7 +125,7 @@ class MethodReader {
       if (i > 0) {
         sb.append(",");
       }
-      sb.append(params.get(i).builderGetDependency());
+      sb.append(params.get(i).builderGetDependency("builder"));
     }
     sb.append(");");
     return sb.toString();
@@ -268,13 +268,13 @@ class MethodReader {
       this.genericType = GenericType.maybe(paramType);
     }
 
-    String builderGetDependency() {
+    String builderGetDependency(String builderName) {
       StringBuilder sb = new StringBuilder();
       if (genericType != null) {
         // passed as provider to build method
         sb.append("prov").append(providerIndex).append(".get(");
       } else {
-        sb.append("builder.").append(utilType.getMethod());
+        sb.append(builderName).append(".").append(utilType.getMethod());
       }
       if (genericType == null) {
         sb.append(Util.shortName(paramType)).append(".class");

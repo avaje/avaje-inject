@@ -12,8 +12,13 @@ public class JexController {
   @Inject
   AService service;
 
-  @Inject
   Context context;
+
+  @Inject
+  JexController withContext(Context context) {
+    this.context = context;
+    return this;
+  }
 
   public String get() {
     return "hi " + context.toString() + service.hi();
