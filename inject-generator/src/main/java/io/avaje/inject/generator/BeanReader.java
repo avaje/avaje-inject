@@ -264,14 +264,12 @@ class BeanReader {
       }
     }
 
-    if (context.isPostConstructAvailable()) {
-      if (hasAnnotationWithName(element, "PostConstruct")) {
-        postConstructMethod = element;
-      }
+    if (hasAnnotationWithName(element, "PostConstruct")) {
+      postConstructMethod = element;
+    }
 
-      if (hasAnnotationWithName(element, "PreDestroy")) {
-        preDestroyMethod = element;
-      }
+    if (hasAnnotationWithName(element, "PreDestroy")) {
+      preDestroyMethod = element;
     }
   }
 

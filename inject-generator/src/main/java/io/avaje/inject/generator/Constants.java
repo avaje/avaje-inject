@@ -5,7 +5,6 @@ class Constants {
   static final String KOTLIN_METADATA = "kotlin.Metadata";
   static final String GENERATED_9 = "javax.annotation.processing.Generated";
 
-  static final String POSTCONSTRUCT = "javax.annotation.PostConstruct";
   static final String PROVIDER = "javax.inject.Provider";
 
   static final String PATH = "io.avaje.http.api.Path";

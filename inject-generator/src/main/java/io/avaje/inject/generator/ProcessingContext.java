@@ -60,10 +60,6 @@ class ProcessingContext {
     return null != elementUtils.getTypeElement(canonicalName);
   }
 
-  boolean isPostConstructAvailable() {
-    return isTypeAvailable(Constants.POSTCONSTRUCT);
-  }
-
   boolean isGeneratedAvailable() {
     return generatedAnnotation != null;
   }
