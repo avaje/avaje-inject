@@ -4,8 +4,6 @@ import io.avaje.inject.Bean;
 import io.avaje.inject.Primary;
 import io.avaje.inject.Secondary;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Qualifier;
@@ -71,7 +69,7 @@ class BeanReader {
   BeanReader(TypeElement beanType, ProcessingContext context) {
     this.beanType = beanType;
     this.type = beanType.getQualifiedName().toString();
-    this.shortName = beanType.getSimpleName().toString();
+    this.shortName = shortName(beanType);
     this.context = context;
     this.requestParams = new BeanRequestParams(type);
     init();
@@ -267,16 +265,33 @@ class BeanReader {
     }
 
     if (context.isPostConstructAvailable()) {
-      PostConstruct pcMarker = element.getAnnotation(PostConstruct.class);
-      if (pcMarker != null) {
+      if (hasAnnotationWithName(element, "PostConstruct")) {
         postConstructMethod = element;
       }
 
-      PreDestroy pdMarker = element.getAnnotation(PreDestroy.class);
-      if (pdMarker != null) {
+      if (hasAnnotationWithName(element, "PreDestroy")) {
         preDestroyMethod = element;
       }
     }
+  }
+
+  /**
+   * Return true if the element has an annotation with the matching short name.
+   */
+  private boolean hasAnnotationWithName(Element element, String matchShortName) {
+    for (AnnotationMirror mirror : element.getAnnotationMirrors()) {
+      if (matchShortName.equals(shortName(mirror.getAnnotationType().asElement()))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Return the short name of the element.
+   */
+  private String shortName(Element element) {
+    return element.getSimpleName().toString();
   }
 
   private void addFactoryMethod(ExecutableElement methodElement, Bean bean) {
