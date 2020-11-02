@@ -246,7 +246,7 @@ class DBeanContext implements BeanContext {
     int initPriority(Class<? extends Annotation> priorityAnnotation) {
       // Avoid adding hard dependency on javax.annotation-api by using reflection
       try {
-        Annotation ann = bean.getClass().getAnnotation(priorityAnnotation);
+        Annotation ann = bean.getClass().getDeclaredAnnotation(priorityAnnotation);
         if (ann != null) {
           int priority = (Integer) priorityAnnotation.getMethod("value").invoke(ann);
           priorityDefined = true;
