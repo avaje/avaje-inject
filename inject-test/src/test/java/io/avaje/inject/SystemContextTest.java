@@ -6,6 +6,7 @@ import org.example.coffee.list.BSomei;
 import org.example.coffee.list.Somei;
 import org.junit.jupiter.api.Test;
 
+import javax.annotation.Priority;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,6 +17,16 @@ public class SystemContextTest {
   public void getBeansByPriority() {
 
     final List<Somei> beans = SystemContext.getBeansByPriority(Somei.class);
+    assertThat(beans).hasSize(2);
+
+    assertThat(beans.get(0)).isInstanceOf(BSomei.class);
+    assertThat(beans.get(1)).isInstanceOf(ASomei.class);
+  }
+
+  @Test
+  public void getBeansByPriority_withAnnotation() {
+
+    final List<Somei> beans = SystemContext.context().getBeansByPriority(Somei.class, Priority.class);
     assertThat(beans).hasSize(2);
 
     assertThat(beans.get(0)).isInstanceOf(BSomei.class);

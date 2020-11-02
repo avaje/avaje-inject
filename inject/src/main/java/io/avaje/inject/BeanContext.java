@@ -1,6 +1,7 @@
 package io.avaje.inject;
 
 import java.io.Closeable;
+import java.lang.annotation.Annotation;
 import java.util.List;
 
 /**
@@ -134,10 +135,20 @@ public interface BeanContext extends Closeable {
   <T> List<T> getBeans(Class<T> interfaceType);
 
   /**
-   * Return the list of beans that implement the interface
-   * sorting by priority (ignoring any Priority annotation).
+   * Return the list of beans that implement the interface sorting by priority.
    */
   <T> List<T> getBeansByPriority(Class<T> interfaceType);
+
+  /**
+   * Return the beans that implement the interface sorting by the priority annotation used.
+   * <p>
+   * The priority annotation will typically be either <code>javax.annotation.Priority</code>
+   * or <code>jakarta.annotation.Priority</code>.
+   *
+   * @param interfaceType The interface type of the beans to return
+   * @param priority      The priority annotation used to sort the beans
+   */
+  <T> List<T> getBeansByPriority(Class<T> interfaceType, Class<? extends Annotation> priority);
 
   /**
    * Sort the beans by javax.annotation.Priority annotation.
@@ -146,6 +157,18 @@ public interface BeanContext extends Closeable {
    * @return A new list of beans sorted by priority
    */
   <T> List<T> sortByPriority(List<T> list);
+
+  /**
+   * Sort the beans using the given Priority annotation.
+   * <p>
+   * The priority annotation will typically be either <code>javax.annotation.Priority</code>
+   * or <code>jakarta.annotation.Priority</code>.
+   *
+   * @param list     The beans to sort by priority
+   * @param priority The priority annotation used to sort the beans
+   * @return A new list of beans sorted by priority
+   */
+  <T> List<T> sortByPriority(List<T> list, final Class<? extends Annotation> priority);
 
   /**
    * Start the context firing any <code>@PostConstruct</code> methods.

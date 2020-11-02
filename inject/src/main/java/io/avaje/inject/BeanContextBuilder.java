@@ -8,6 +8,7 @@ import io.avaje.inject.spi.SuppliedBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -472,8 +473,18 @@ public class BeanContextBuilder {
     }
 
     @Override
+    public <T> List<T> getBeansByPriority(Class<T> interfaceType, Class<? extends Annotation> priority) {
+      return context.getBeansByPriority(interfaceType, priority);
+    }
+
+    @Override
     public <T> List<T> sortByPriority(List<T> list) {
       return context.sortByPriority(list);
+    }
+
+    @Override
+    public <T> List<T> sortByPriority(List<T> list, Class<? extends Annotation> priority) {
+      return context.sortByPriority(list, priority);
     }
 
     @Override
