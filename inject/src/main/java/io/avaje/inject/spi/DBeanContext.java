@@ -89,13 +89,22 @@ class DBeanContext implements BeanContext {
 
   @Override
   public <T> List<T> getBeansByPriority(Class<T> interfaceType) {
+    return getBeansByPriority(interfaceType, priorityAnnotation());
+  }
+
+  @Override
+  public <T> List<T> getBeansByPriority(Class<T> interfaceType, Class<? extends Annotation> priorityAnnotation) {
     List<T> list = getBeans(interfaceType);
-    return list.size() > 1 ? sortByPriority(list) : list;
+    return list.size() > 1 ? sortByPriority(list, priorityAnnotation) : list;
   }
 
   @Override
   public <T> List<T> sortByPriority(List<T> list) {
-    final Class<? extends Annotation> priorityAnnotation = priorityAnnotation();
+    return sortByPriority(list, priorityAnnotation());
+  }
+
+  @Override
+  public <T> List<T> sortByPriority(List<T> list, final Class<? extends Annotation> priorityAnnotation) {
     if (priorityAnnotation == null) {
       // priority annotation not on the classpath
       return list;
