@@ -96,7 +96,7 @@ class SimpleFactoryWriter {
     writer.append(Constants.IMPORT_BUILDERFACTORY).eol();
 
     for (String type : ordering.getImportTypes()) {
-      if (Util.notVoid(type)) {
+      if (Util.validImportType(type)) {
         writer.append("import %s;", type).eol();
       }
     }

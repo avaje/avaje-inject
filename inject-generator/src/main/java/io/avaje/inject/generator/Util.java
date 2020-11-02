@@ -13,8 +13,8 @@ class Util {
     return "void".equalsIgnoreCase(type);
   }
 
-  static boolean notVoid(String type) {
-    return !isVoid(type);
+  static boolean validImportType(String type) {
+    return type.indexOf('.') > 0;
   }
 
   static String classOfMethod(String method) {

@@ -115,6 +115,8 @@ class BeanReader {
       String annType = annotationType.toString();
       if (qualifier != null) {
         this.name = Util.shortName(annType);
+      } else if (annType.indexOf('.') == -1) {
+        context.logWarn("skip when no package on annotation " + annType);
       } else {
         if (IncludeAnnotations.include(annType)) {
           importTypes.add(annType);
@@ -377,7 +379,7 @@ class BeanReader {
       importTypes.add(generated);
     }
     importTypes.add(Constants.BUILDER);
-    if (Util.notVoid(type)) {
+    if (Util.validImportType(type)) {
       importTypes.add(type);
     }
     requestParams.addImports(importTypes);
@@ -386,7 +388,7 @@ class BeanReader {
 
   void writeImports(Append writer) {
     for (String importType : importTypes()) {
-      if (Util.notVoid(importType)) {
+      if (Util.validImportType(importType)) {
         writer.append("import %s;", importType).eol();
       }
     }

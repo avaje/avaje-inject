@@ -3,7 +3,9 @@ package io.avaje.inject.generator;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UtilTest {
 
@@ -38,4 +40,16 @@ public class UtilTest {
     assertEquals("Bar", Util.addForInterface("com.foo.Bar"));
   }
 
+  @Test
+  public void validImportType() {
+    assertTrue(Util.validImportType("my.Foo"));
+    assertTrue(Util.validImportType("other.pack.Foo"));
+  }
+
+  @Test
+  public void validImportType_not() {
+    assertFalse(Util.validImportType("void"));
+    assertFalse(Util.validImportType("Foo"));
+    assertFalse(Util.validImportType("NoPackage"));
+  }
 }
