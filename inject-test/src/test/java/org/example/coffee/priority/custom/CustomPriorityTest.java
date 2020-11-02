@@ -1,4 +1,4 @@
-package org.example.coffee.priority;
+package org.example.coffee.priority.custom;
 
 import io.avaje.inject.BeanContext;
 import io.avaje.inject.SystemContext;
@@ -19,7 +19,7 @@ public class CustomPriorityTest {
 
     assertThat(sorted.get(0)).isInstanceOf(COtheri.class);
     assertThat(sorted.get(1)).isInstanceOf(BOtheri.class);
-    assertThat(sorted.get(1)).isInstanceOf(AOtheri.class);
+    assertThat(sorted.get(2)).isInstanceOf(AOtheri.class);
 
   }
 }
