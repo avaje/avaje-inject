@@ -9,6 +9,6 @@ public class A2Somei implements Somei {
 
   @Override
   public String some() {
-    return "a";
+    return "a2";
   }
 }

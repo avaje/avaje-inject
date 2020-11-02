@@ -17,7 +17,7 @@ public class InjectListTest {
     try (BeanContext context = new BeanContextBuilder().build()) {
       CombinedSomei bean = context.getBean(CombinedSomei.class);
       List<String> somes = bean.lotsOfSomes();
-      assertThat(somes).containsOnly("a", "b");
+      assertThat(somes).containsOnly("a", "b", "a2");
     }
   }
 
@@ -26,7 +26,7 @@ public class InjectListTest {
     try (BeanContext context = new BeanContextBuilder().build()) {
       CombinedSetSomei bean = context.getBean(CombinedSetSomei.class);
       List<String> somes = bean.lotsOfSomes();
-      assertThat(somes).containsOnly("a", "b");
+      assertThat(somes).containsOnly("a", "b", "a2");
     }
   }
 }

@@ -10,6 +10,6 @@ public class CBasei implements BaseIface {
 
   @Override
   public String other() {
-    return "a";
+    return "c";
   }
 }
