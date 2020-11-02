@@ -2,10 +2,10 @@ package org.example.coffee.factory;
 
 import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
+import io.avaje.inject.PostConstruct;
+import io.avaje.inject.PreDestroy;
 import org.example.coffee.CoffeeMaker;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 /**
@@ -40,7 +40,6 @@ class Configuration {
   BFact buildB(AFact afact, CoffeeMaker maker) {
     return new BFact(afact, maker);
   }
-
 
   @PostConstruct
   void initFactory() {
