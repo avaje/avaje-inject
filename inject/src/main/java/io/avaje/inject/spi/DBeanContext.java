@@ -2,6 +2,7 @@ package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanContext;
 import io.avaje.inject.BeanEntry;
+import io.avaje.inject.Priority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +90,7 @@ class DBeanContext implements BeanContext {
 
   @Override
   public <T> List<T> getBeansByPriority(Class<T> interfaceType) {
-    return getBeansByPriority(interfaceType, priorityAnnotation());
+    return getBeansByPriority(interfaceType, Priority.class);
   }
 
   @Override
@@ -100,7 +101,7 @@ class DBeanContext implements BeanContext {
 
   @Override
   public <T> List<T> sortByPriority(List<T> list) {
-    return sortByPriority(list, priorityAnnotation());
+    return sortByPriority(list, Priority.class);
   }
 
   @Override
@@ -129,18 +130,6 @@ class DBeanContext implements BeanContext {
       sorted.add(sortBean.bean);
     }
     return sorted;
-  }
-
-  /**
-   * Return the optional <code>javax.annotation.Priority</code> annotation class or null.
-   */
-  @SuppressWarnings("unchecked")
-  private Class<? extends Annotation> priorityAnnotation() {
-    try {
-      return (Class<? extends Annotation>) Class.forName("javax.annotation.Priority");
-    } catch (ClassNotFoundException e) {
-      return null;
-    }
   }
 
   @Override

@@ -1,6 +1,7 @@
 package io.avaje.inject;
 
 import org.example.coffee.fruit.Fruit;
+import org.example.coffee.list.A2Somei;
 import org.example.coffee.list.ASomei;
 import org.example.coffee.list.BSomei;
 import org.example.coffee.list.Somei;
@@ -16,28 +17,30 @@ public class SystemContextTest {
   @Test
   public void getBeansByPriority() {
 
-    final List<Somei> beans = SystemContext.getBeansByPriority(Somei.class);
-    assertThat(beans).hasSize(2);
+    final List<Somei> beans = SystemContext.context().getBeansByPriority(Somei.class, Priority.class);
+    assertThat(beans).hasSize(3);
 
     assertThat(beans.get(0)).isInstanceOf(BSomei.class);
     assertThat(beans.get(1)).isInstanceOf(ASomei.class);
+    assertThat(beans.get(2)).isInstanceOf(A2Somei.class);
   }
 
   @Test
   public void getBeansByPriority_withAnnotation() {
 
     final List<Somei> beans = SystemContext.context().getBeansByPriority(Somei.class, Priority.class);
-    assertThat(beans).hasSize(2);
+    assertThat(beans).hasSize(3);
 
     assertThat(beans.get(0)).isInstanceOf(BSomei.class);
     assertThat(beans.get(1)).isInstanceOf(ASomei.class);
+    assertThat(beans.get(2)).isInstanceOf(A2Somei.class);
   }
 
   @Test
   public void getBeansUnsorted_withPriority() {
 
     final List<Somei> beans = SystemContext.getBeans(Somei.class);
-    assertThat(beans).hasSize(2);
+    assertThat(beans).hasSize(3);
     // can't assert bean order
   }
 

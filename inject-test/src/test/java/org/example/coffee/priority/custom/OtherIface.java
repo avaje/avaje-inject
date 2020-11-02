@@ -1,4 +1,4 @@
-package org.example.coffee.priority;
+package org.example.coffee.priority.custom;
 
 public interface OtherIface {
 
