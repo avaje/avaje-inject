@@ -106,10 +106,6 @@ class DBeanContext implements BeanContext {
 
   @Override
   public <T> List<T> sortByPriority(List<T> list, final Class<? extends Annotation> priorityAnnotation) {
-    if (priorityAnnotation == null) {
-      // priority annotation not on the classpath
-      return list;
-    }
     boolean priorityUsed = false;
     List<SortBean<T>> tempList = new ArrayList<>(list.size());
     for (T bean : list) {
