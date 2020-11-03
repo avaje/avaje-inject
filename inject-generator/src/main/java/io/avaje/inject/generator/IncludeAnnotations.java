@@ -6,7 +6,7 @@ import java.util.Set;
 class IncludeAnnotations {
 
   private static final String[] EXCLUDED_PREFIX = {"javax.annotation.", "javax.inject.", "jakarta.annotation.", "jakarta.inject.", "io.avaje.inject.", "lombok."};
-  private static final String[] EXCLUDED_SUFFIX = {".PostConstruct", ".PreDestory"};
+  private static final String[] EXCLUDED_SUFFIX = {".PostConstruct", ".PreDestroy"};
 
   /**
    * Annotations that we don't bother registering lists for.
