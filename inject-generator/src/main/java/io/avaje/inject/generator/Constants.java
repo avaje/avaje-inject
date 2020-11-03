@@ -3,8 +3,6 @@ package io.avaje.inject.generator;
 class Constants {
 
   static final String KOTLIN_METADATA = "kotlin.Metadata";
-  static final String GENERATED_9 = "javax.annotation.processing.Generated";
-  static final String GENERATED_LOCAL = "io.avaje.inject.spi.Generated";
 
   static final String PROVIDER = "javax.inject.Provider";
   static final String SINGLETON = "javax.inject.Singleton";
@@ -20,6 +18,7 @@ class Constants {
   static final String BEANCONTEXT = "io.avaje.inject.BeanContext;";
   static final String CONTEXTMODULE = "io.avaje.inject.ContextModule;";
 
+  static final String GENERATED = "io.avaje.inject.spi.Generated";
   static final String BEAN_FACTORY = "io.avaje.inject.spi.BeanFactory";
   static final String BEAN_FACTORY2 = "io.avaje.inject.spi.BeanFactory2";
   static final String BEAN_LIFECYCLE = "io.avaje.inject.spi.BeanLifecycle";

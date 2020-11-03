@@ -194,9 +194,7 @@ class SimpleBeanWriter {
     } else {
       writer.append(CODE_COMMENT, shortName).eol();
     }
-    if (context.isGeneratedAvailable()) {
-      writer.append(Constants.AT_GENERATED).eol();
-    }
+    writer.append(Constants.AT_GENERATED).eol();
     if (beanReader.isRequestScoped()) {
       writer.append(Constants.AT_SINGLETON).eol();
     }
