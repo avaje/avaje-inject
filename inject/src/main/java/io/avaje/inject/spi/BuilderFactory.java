@@ -35,7 +35,7 @@ public class BuilderFactory {
     return new DBuilder(name, provides, dependsOn);
   }
 
-  private BuilderFactory(){
+  private BuilderFactory() {
     // hide
   }
 }
