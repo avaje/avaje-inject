@@ -15,7 +15,7 @@ import java.util.Set;
 
 class MethodReader {
 
-  private static final String CODE_COMMENT_LIFECYCLE ="  /**\n   * Lifecycle wrapper for %s.\n   */";
+  private static final String CODE_COMMENT_LIFECYCLE = "  /**\n   * Lifecycle wrapper for %s.\n   */";
   private static final String CODE_COMMENT_BUILD_FACTORYBEAN = "  /**\n   * Create and register %s via factory bean method %s#%s().\n   */";
 
   private final ProcessingContext context;

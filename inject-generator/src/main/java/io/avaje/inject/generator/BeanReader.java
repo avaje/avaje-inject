@@ -462,9 +462,9 @@ class BeanReader {
       field.writeRequestInject(writer);
     }
     for (MethodReader method : injectMethods) {
-        writer.append("    bean.%s(", method.getName());
-        method.writeRequestConstructor(writer);
-        writer.append(");").eol();
+      writer.append("    bean.%s(", method.getName());
+      method.writeRequestConstructor(writer);
+      writer.append(");").eol();
     }
     writer.append("    return bean;").eol();
     writer.append("  }").eol();

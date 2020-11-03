@@ -14,7 +14,7 @@ class SimpleBeanWriter {
 
   private static final String CODE_COMMENT = "/**\n * Generated source - dependency injection builder for %s.\n */";
   private static final String CODE_COMMENT_FACTORY = "/**\n * Generated source - dependency injection factory for request scoped %s.\n */";
-  private static final String CODE_COMMENT_LIFECYCLE ="  /**\n   * Lifecycle wrapper for %s.\n   */";
+  private static final String CODE_COMMENT_LIFECYCLE = "  /**\n   * Lifecycle wrapper for %s.\n   */";
   private static final String CODE_COMMENT_BUILD = "  /**\n   * Create and register %s.\n   */";
 
   private final BeanReader beanReader;

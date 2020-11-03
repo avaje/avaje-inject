@@ -4,7 +4,6 @@ import javax.annotation.processing.Filer;
 import javax.annotation.processing.FilerException;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.type.TypeMirror;
@@ -81,7 +80,7 @@ class ProcessingContext {
         }
       }
 
-    } catch (FileNotFoundException | NoSuchFileException e ) {
+    } catch (FileNotFoundException | NoSuchFileException e) {
       // logDebug("no services file yet");
 
     } catch (FilerException e) {
