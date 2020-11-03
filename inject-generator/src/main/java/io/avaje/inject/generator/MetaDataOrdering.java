@@ -196,7 +196,7 @@ class MetaDataOrdering {
 
   private static class ProviderList {
 
-    private List<MetaData> list = new ArrayList<>();
+    private final List<MetaData> list = new ArrayList<>();
 
     void add(MetaData beanMeta) {
       list.add(beanMeta);

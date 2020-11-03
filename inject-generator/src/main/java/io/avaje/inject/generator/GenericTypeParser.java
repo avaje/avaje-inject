@@ -8,7 +8,7 @@ class GenericTypeParser {
 
   private StringBuilder buf = new StringBuilder();
 
-  private Stack<GenericType> stack = new Stack<>();
+  private final Stack<GenericType> stack = new Stack<>();
 
   GenericTypeParser(String raw) {
     this.raw = raw;

@@ -365,7 +365,7 @@ public class BeanContextBuilder {
         " provides io.avaje.inject.spi.BeanContextFactory with org.example._di$BeanContextFactory;\n\n" +
         " Otherwise perhaps using Gradle and IDEA but with a setup issue?" +
         " Review IntelliJ Settings / Build / Build tools / Gradle - 'Build and run using' value and set that to 'Gradle'. " +
-        " Refer to https://dinject.io/docs/gradle#idea");
+        " Refer to https://avaje.io/inject#gradle");
     }
     log.debug("building context with modules {}", moduleNames);
     Builder rootBuilder = BuilderFactory.newRootBuilder(suppliedBeans, enrichBeans);

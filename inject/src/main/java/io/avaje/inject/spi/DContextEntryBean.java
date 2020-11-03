@@ -62,12 +62,12 @@ class DContextEntryBean {
     return flag == BeanEntry.SUPPLIED;
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   BeanEntry getBeanEntry() {
     return new BeanEntry(flag, getBean(), name);
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   BeanEntry candidate(String name) {
     if (name == null || Objects.equals(this.name, name)) {
       return new BeanEntry(flag, obtainInstance(), name);
@@ -91,7 +91,7 @@ class DContextEntryBean {
     Object obtainInstance() {
       // its a provider, get it once
       if (actualBean == null) {
-        actualBean = ((Provider) source).get();
+        actualBean = ((Provider<?>) source).get();
       }
       return actualBean;
     }

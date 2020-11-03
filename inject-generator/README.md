@@ -1,2 +1,2 @@
-# dinject-generator
-Java annotation processor for DInject dependency injection
+# avaje inject generator
+Java annotation processor for Avaje dependency injection

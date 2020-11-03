@@ -58,10 +58,6 @@ class Util {
     return rawType.substring(19, rawType.length() - 1);
   }
 
-  static boolean isOptional(String rawType) {
-    return rawType.startsWith("java.util.Optional<");
-  }
-
   static String extractList(String rawType) {
     String listType = rawType.substring(15, rawType.length() - 1);
     if (listType.startsWith("? extends")) {

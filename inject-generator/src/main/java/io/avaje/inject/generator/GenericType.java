@@ -11,7 +11,7 @@ class GenericType {
 
   private String mainType;
 
-  private List<GenericType> params = new ArrayList<>();
+  private final List<GenericType> params = new ArrayList<>();
 
   /**
    * Return true if this is a generic type.

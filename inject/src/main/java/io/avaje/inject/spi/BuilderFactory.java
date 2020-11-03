@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Factory for creating Builder instances.
  * <p>
- * These Builders are typically used by generated code (Java annotation processing - dinject-generator).
+ * These Builders are typically used by generated code (Java annotation processing - avaje-inject-generator).
  */
 public class BuilderFactory {
 
@@ -15,8 +15,8 @@ public class BuilderFactory {
    * @param suppliedBeans The list of beans (typically test doubles) supplied when building the context.
    * @param enrichBeans   The list of classes we want to have with mockito spy enhancement
    */
+  @SuppressWarnings("rawtypes")
   public static Builder newRootBuilder(List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans) {
-
     if (suppliedBeans.isEmpty() && enrichBeans.isEmpty()) {
       // simple case, no mocks or spies
       return new DBuilder();

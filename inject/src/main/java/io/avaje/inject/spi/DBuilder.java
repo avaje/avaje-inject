@@ -114,12 +114,10 @@ class DBuilder implements Builder {
     return new LinkedHashSet<>(getList(interfaceType));
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public <T> List<T> getList(Class<T> interfaceType) {
-
     List list = new ArrayList<>();
-
     beanMap.addAll(interfaceType, list);
     for (BeanContext childContext : children.values()) {
       list.addAll(childContext.getBeansWithAnnotation(interfaceType));
