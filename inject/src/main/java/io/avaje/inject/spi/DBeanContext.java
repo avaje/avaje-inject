@@ -106,10 +106,6 @@ class DBeanContext implements BeanContext {
 
   @Override
   public <T> List<T> sortByPriority(List<T> list, final Class<? extends Annotation> priorityAnnotation) {
-    if (priorityAnnotation == null) {
-      // priority annotation not on the classpath
-      return list;
-    }
     boolean priorityUsed = false;
     List<SortBean<T>> tempList = new ArrayList<>(list.size());
     for (T bean : list) {
@@ -250,7 +246,7 @@ class DBeanContext implements BeanContext {
     int initPriority(Class<? extends Annotation> priorityAnnotation) {
       // Avoid adding hard dependency on javax.annotation-api by using reflection
       try {
-        Annotation ann = bean.getClass().getAnnotation(priorityAnnotation);
+        Annotation ann = bean.getClass().getDeclaredAnnotation(priorityAnnotation);
         if (ann != null) {
           int priority = (Integer) priorityAnnotation.getMethod("value").invoke(ann);
           priorityDefined = true;
