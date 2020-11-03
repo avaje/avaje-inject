@@ -151,6 +151,10 @@ class ProcessingContext {
     }
   }
 
+  String contextName() {
+    return contextName;
+  }
+
   String getContextPackage() {
     return contextPackage;
   }

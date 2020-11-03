@@ -12,6 +12,11 @@ import java.util.List;
  */
 class SimpleBeanWriter {
 
+  private static final String CODE_COMMENT = "/**\n * Generated source - dependency injection builder for %s.\n */";
+  private static final String CODE_COMMENT_FACTORY = "/**\n * Generated source - dependency injection factory for request scoped %s.\n */";
+  private static final String CODE_COMMENT_LIFECYCLE ="  /**\n   * Lifecycle wrapper for %s.\n   */";
+  private static final String CODE_COMMENT_BUILD = "  /**\n   * Create and register %s.\n   */";
+
   private final BeanReader beanReader;
   private final ProcessingContext context;
   private final String originName;
@@ -73,6 +78,7 @@ class SimpleBeanWriter {
   }
 
   private void writeFactoryBeanMethod(MethodReader method) {
+    method.commentBuildMethod(writer);
     writer.append("  public static void build_%s(Builder builder) {", method.getName()).eol();
     method.buildAddFor(writer);
     writer.append(method.builderGetFactory()).eol();
@@ -91,6 +97,7 @@ class SimpleBeanWriter {
     }
 
     int providerIndex = 0;
+    writer.append(CODE_COMMENT_BUILD, shortName).eol();
     writer.append("  public static void build(Builder builder");
     for (MethodReader.MethodParam param : constructor.getParams()) {
       if (param.isGenericType()) {
@@ -125,6 +132,7 @@ class SimpleBeanWriter {
     }
     if (beanReader.isFieldInjectionRequired() || beanReader.isMethodInjectionRequired()) {
       writer.append("      builder.addInjector(b -> {").eol();
+      writer.append("        // field and method injection").eol();
       for (FieldReader fieldReader : beanReader.getInjectFields()) {
         String fieldName = fieldReader.getFieldName();
         String getDependency = fieldReader.builderGetDependency();
@@ -166,6 +174,7 @@ class SimpleBeanWriter {
   private void writeLifecycleWrapper() {
     if (beanReader.isLifecycleWrapperRequired()) {
       writer.append("  private final %s bean;", shortName).eol().eol();
+      writer.append(CODE_COMMENT_LIFECYCLE, shortName).eol();
       writer.append("  public %s%s(%s bean) {", shortName, suffix, shortName).eol();
       writer.append("    this.bean = bean;").eol();
       writer.append("  }").eol().eol();
@@ -180,6 +189,11 @@ class SimpleBeanWriter {
   }
 
   private void writeClassStart() {
+    if (beanReader.isRequestScoped()) {
+      writer.append(CODE_COMMENT_FACTORY, shortName).eol();
+    } else {
+      writer.append(CODE_COMMENT, shortName).eol();
+    }
     if (context.isGeneratedAvailable()) {
       writer.append(Constants.AT_GENERATED).eol();
     }

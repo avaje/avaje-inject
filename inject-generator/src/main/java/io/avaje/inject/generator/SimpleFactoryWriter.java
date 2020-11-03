@@ -10,6 +10,39 @@ import java.io.Writer;
  */
 class SimpleFactoryWriter {
 
+  private static final String CODE_COMMENT_FACTORY =
+    "/**\n" +
+    " * Generated source - Creates the BeanContext for the %s module.\n" +
+    " * \n" +
+    " * With JPMS Java module system this generated class should be explicitly\n" +
+    " * registered in module-info via a <code>provides</code> clause like:\n" +
+    " * \n" +
+    " * <pre>{@code\n" +
+    " * \n" +
+    " *   module example {\n" +
+    " *     requires io.avaje.inject;\n" +
+    " *     \n" +
+    " *     provides io.avaje.inject.spi.BeanContextFactory with %s._di$BeanContextFactory;\n" +
+    " *     \n" +
+    " *   }\n" +
+    " * \n" +
+    " * }</pre>\n" +
+    " */";
+
+  private static final String CODE_COMMENT_CREATE_CONTEXT =
+    "  /**\n" +
+      "   * Create and return the BeanContext.\n" +
+      "   * <p>\n" +
+      "   * Creates all the beans in order based on constuctor dependencies.\n" +
+      "   * The beans are registered into the builder along with callbacks for\n" +
+      "   * field injection, method injection and lifecycle support.\n" +
+      "   * <p>\n" +
+      "   * Ultimately the builder returns the BeanContext containing the beans.\n" +
+      "   *\n" +
+      "   * @param parent The parent context for multi-module wiring\n" +
+      "   * @return The BeanContext containing the beans\n" +
+      "   */";
+
   private final MetaDataOrdering ordering;
   private final ProcessingContext context;
 
@@ -69,9 +102,12 @@ class SimpleFactoryWriter {
 
   private void writeCreateMethod() {
 
+    writer.append(CODE_COMMENT_CREATE_CONTEXT).eol();
     writer.append("  @Override").eol();
     writer.append("  public BeanContext createContext(Builder parent) {").eol();
     writer.append("    builder.setParent(parent);").eol();
+    writer.append("    // create beans in order based on constructor dependencies").eol();
+    writer.append("    // i.e. \"provides\" followed by \"dependsOn\"").eol();
     for (MetaData metaData : ordering.getOrdered()) {
       writer.append("    build_%s();", metaData.getBuildName()).eol();
     }
@@ -105,6 +141,7 @@ class SimpleFactoryWriter {
 
   private void writeStartClass() {
 
+    writer.append(CODE_COMMENT_FACTORY, context.contextName(), factoryPackage).eol();
     context.buildAtContextModule(writer);
 
     writer.append("public class %s implements BeanContextFactory {", factoryShortName).eol().eol();
@@ -138,4 +175,5 @@ class SimpleFactoryWriter {
     JavaFileObject jfo = context.createWriter(factoryFullName);
     return jfo.openWriter();
   }
+
 }
