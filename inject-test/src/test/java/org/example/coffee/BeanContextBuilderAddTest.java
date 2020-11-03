@@ -13,7 +13,7 @@ public class BeanContextBuilderAddTest {
 
   @Test
   public void withModules_exludingThisOne() {
-    assertThrows(IllegalStateException.class, ()-> {
+    assertThrows(IllegalStateException.class, () -> {
       TDPump testDoublePump = new TDPump();
 
       try (BeanContext context = new BeanContextBuilder()

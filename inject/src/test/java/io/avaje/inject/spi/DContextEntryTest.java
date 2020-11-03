@@ -1,8 +1,6 @@
 package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanEntry;
-import io.avaje.inject.spi.DContextEntry;
-import io.avaje.inject.spi.DContextEntryBean;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

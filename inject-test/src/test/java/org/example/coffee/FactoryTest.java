@@ -16,7 +16,7 @@ public class FactoryTest {
       .build()) {
 
       BFact bean = context.getBean(BFact.class);
-      String b =  bean.b();
+      String b = bean.b();
       assertThat(b).isNotNull();
     }
 

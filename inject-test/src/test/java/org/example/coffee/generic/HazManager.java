@@ -7,9 +7,9 @@ import javax.inject.Singleton;
  * Has a Dependency via generic interface.
  */
 @Singleton
-public class HazManager  {
+public class HazManager {
 
-  private final Repository<Haz,Long> hazRepo;
+  private final Repository<Haz, Long> hazRepo;
 
   @Inject
   public HazManager(Repository<Haz, Long> hazRepo) {

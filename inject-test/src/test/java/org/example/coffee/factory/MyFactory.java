@@ -35,15 +35,15 @@ public class MyFactory {
 
   @Bean
   void useCFact(CFact cfact) {
-    methods +="|useCFact";
+    methods += "|useCFact";
   }
 
   @Bean
   void anotherCFact(CFact cfact) {
-    methods +="|anotherCFact";
+    methods += "|anotherCFact";
   }
 
-  String methodsCalled(){
+  String methodsCalled() {
     return methods;
   }
 }

@@ -16,6 +16,6 @@ class BananaService {
   }
 
   String ban(String hello) {
-    return hello+" banana "+peachService.poke();
+    return hello + " banana " + peachService.poke();
   }
 }
