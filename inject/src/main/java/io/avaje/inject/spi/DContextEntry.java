@@ -104,6 +104,7 @@ class DContextEntry {
       throw new IllegalStateException("Expecting only 1 bean match but have multiple matching beans " + match.getBean() + " and " + entry.getBean());
     }
 
+    @SuppressWarnings("rawtypes")
     BeanEntry candidate() {
       if (match == null) {
         return null;

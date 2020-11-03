@@ -20,7 +20,7 @@ package io.avaje.inject;
  *
  * package org.example.featuretoggle;
  *
- * import io.dinject.ContextModule;
+ * import io.avaje.inject.ContextModule;
  *
  * ＠ContextModule(name = "feature-toggle")
  * public interface FeatureToggle {
@@ -44,7 +44,7 @@ package io.avaje.inject;
  *
  * package org.example.jobsystem;
  *
- * import io.dinject.ContextModule;
+ * import io.avaje.inject.ContextModule;
  *
  * ＠ContextModule(name = "job-system", dependsOn = {"feature-toggle"})
  * public interface JobSystem {

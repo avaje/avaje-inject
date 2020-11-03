@@ -35,11 +35,11 @@ public class Processor extends AbstractProcessor {
   /**
    * Map to merge the existing meta data with partially compiled code. Keyed by type and qualifier/name.
    */
-  private Map<String, MetaData> metaData = new LinkedHashMap<>();
+  private final Map<String, MetaData> metaData = new LinkedHashMap<>();
 
-  private List<BeanReader> beanReaders = new ArrayList<>();
+  private final List<BeanReader> beanReaders = new ArrayList<>();
 
-  private Set<String> readBeans = new HashSet<>();
+  private final Set<String> readBeans = new HashSet<>();
 
   public Processor() {
   }

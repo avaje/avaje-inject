@@ -29,12 +29,14 @@ class DBeanMap {
   /**
    * Add test double supplied beans.
    */
+  @SuppressWarnings("rawtypes")
   void add(List<SuppliedBean> suppliedBeans) {
     for (SuppliedBean suppliedBean : suppliedBeans) {
       addSuppliedBean(suppliedBean);
     }
   }
 
+  @SuppressWarnings("rawtypes")
   private void addSuppliedBean(SuppliedBean supplied) {
     Class<?> suppliedType = supplied.getType();
     Named annotation = suppliedType.getAnnotation(Named.class);
@@ -80,7 +82,7 @@ class DBeanMap {
   /**
    * Add all bean instances matching the given type to the list.
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   void addAll(Class type, List list) {
     DContextEntry entry = beans.get(type.getCanonicalName());
     if (entry != null) {

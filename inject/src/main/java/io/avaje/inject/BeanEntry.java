@@ -32,7 +32,7 @@ public class BeanEntry<T> {
   private final String name;
 
   /**
-   * Construct with priorty, name and the bean.
+   * Construct with priority, name and the bean.
    */
   public BeanEntry(int priority, T bean, String name) {
     this.priority = priority;

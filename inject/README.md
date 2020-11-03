@@ -1,5 +1,5 @@
 # Avaje Inject
-APT based dependency injection for server side developers - https://dinject.io
+APT based dependency injection for server side developers - https://avaje.io/inject
 
 ### Example module use
 
@@ -33,17 +33,17 @@ module org.example {
 
 ## Differences to Micronaut DI (https://docs.micronaut.io/latest/guide/index.html#ioc)
 
-- DInject generates source code rather that bytecode
-- DInject generates construction order at compile time
-- DInject is aiming to be a `Library only` (so a DI library and that's it without any dependencies)
-- DInject is expected to stay a lot smaller with minimal dependencies
-- DInject is expected to be a lot faster (due to the pre-ordering of construction in generated code)
+- Generates source code rather that bytecode
+- Generates construction order at compile time
+- Aiming to be a `Library only` (so a DI library and that's it without any dependencies)
+- Expected to stay a lot smaller with minimal dependencies
+- Expected to be faster due to the pre-ordering of construction in generated code
 
 ## Differences to Spring DI (https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/core.html)
 
-- DInject only has Singleton scope
-- DInject doesn't yet have support for something like `@Value`
-- DInject provides similar DI features but with code generation via APT
+- Avaje inject only has Singleton scope
+- Avaje inject doesn't support `@Value` (use avaje config)
+- Avaje inject provides similar DI features but with code generation via APT
   and hence much lower startup time and much lower cost (so better suited to micro-services).
 - No use of reflection or scanning even for multi-module dependency injection
 
