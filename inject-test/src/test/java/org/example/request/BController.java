@@ -6,7 +6,7 @@ import io.helidon.webserver.ServerResponse;
 
 /**
  * Controller with request scoped dependencies (request and response).
- *
+ * <p>
  * The request scoped dependencies are automatically detected and a
  * BeanFactory2 implementation is generated instead of singleton di.
  */

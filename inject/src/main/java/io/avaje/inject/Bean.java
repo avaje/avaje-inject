@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * Marks methods on a <code>@Factory</code> bean that create dependencies.
  * <p>
- *   See {@link Factory}.
+ * See {@link Factory}.
  * </p>
  *
  * <pre>{@code

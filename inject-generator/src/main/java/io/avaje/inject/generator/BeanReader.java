@@ -387,10 +387,7 @@ class BeanReader {
     if (isLifecycleWrapperRequired()) {
       importTypes.add(Constants.BEAN_LIFECYCLE);
     }
-    final String generated = context.getGeneratedAnnotation();
-    if (generated != null) {
-      importTypes.add(generated);
-    }
+    importTypes.add(Constants.GENERATED);
     importTypes.add(Constants.BUILDER);
     if (Util.validImportType(type)) {
       importTypes.add(type);
@@ -465,9 +462,9 @@ class BeanReader {
       field.writeRequestInject(writer);
     }
     for (MethodReader method : injectMethods) {
-        writer.append("    bean.%s(", method.getName());
-        method.writeRequestConstructor(writer);
-        writer.append(");").eol();
+      writer.append("    bean.%s(", method.getName());
+      method.writeRequestConstructor(writer);
+      writer.append(");").eol();
     }
     writer.append("    return bean;").eol();
     writer.append("  }").eol();

@@ -13,7 +13,7 @@ class CircC {
   CircA circA;
 
   String gen() {
-    return "C+"+circA;
+    return "C+" + circA;
   }
 
 //  private final CircA circA;

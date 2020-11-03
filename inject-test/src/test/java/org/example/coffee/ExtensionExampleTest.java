@@ -15,7 +15,7 @@ public class ExtensionExampleTest {
   @Test
   public void checkForCompilerWarningsOnly_notATestThatRuns() {
 
-    ExtensionExample extensionExample =  new ExtensionExample(asList(Widget.class, SEmailer.class), asList(SomeStore.class));
+    ExtensionExample extensionExample = new ExtensionExample(asList(Widget.class, SEmailer.class), asList(SomeStore.class));
     BeanContext context = extensionExample.build();
 
     Class cls0 = Widget.class;

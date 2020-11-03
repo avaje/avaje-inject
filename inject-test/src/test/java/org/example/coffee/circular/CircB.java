@@ -13,6 +13,6 @@ class CircB {
 
   @Override
   public String toString() {
-    return "CircB-"+circC;
+    return "CircB-" + circC;
   }
 }

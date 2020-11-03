@@ -32,7 +32,8 @@ public class Processor extends AbstractProcessor {
 
   private Elements elementUtils;
 
-  /** Map to merge the existing meta data with partially compiled code. Keyed by type and qualifier/name.
+  /**
+   * Map to merge the existing meta data with partially compiled code. Keyed by type and qualifier/name.
    */
   private Map<String, MetaData> metaData = new LinkedHashMap<>();
 

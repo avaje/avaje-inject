@@ -4,7 +4,6 @@ import javax.annotation.processing.Filer;
 import javax.annotation.processing.FilerException;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.type.TypeMirror;
@@ -22,24 +21,16 @@ import java.nio.file.NoSuchFileException;
 
 class ProcessingContext {
 
-
   private final ProcessingEnvironment processingEnv;
-
   private final Messager messager;
-
   private final Filer filer;
   private final Elements elementUtils;
   private final Types typeUtils;
-  private final String generatedAnnotation;
 
   private String contextName;
-
   private String[] contextProvides;
-
   private String[] contextDependsOn;
-
   private String contextPackage;
-
   private String metaInfServicesLine;
 
   ProcessingContext(ProcessingEnvironment processingEnv) {
@@ -48,24 +39,6 @@ class ProcessingContext {
     this.filer = processingEnv.getFiler();
     this.elementUtils = processingEnv.getElementUtils();
     this.typeUtils = processingEnv.getTypeUtils();
-    boolean jdk8 = processingEnv.getSourceVersion().compareTo(SourceVersion.RELEASE_8) <= 0;
-    this.generatedAnnotation = generatedAnnotation(jdk8);
-  }
-
-  private String generatedAnnotation(boolean jdk8) {
-    return jdk8 ? Constants.GENERATED_LOCAL : isTypeAvailable(Constants.GENERATED_9) ? Constants.GENERATED_9 : Constants.GENERATED_LOCAL;
-  }
-
-  private boolean isTypeAvailable(String canonicalName) {
-    return null != elementUtils.getTypeElement(canonicalName);
-  }
-
-  boolean isGeneratedAvailable() {
-    return generatedAnnotation != null;
-  }
-
-  String getGeneratedAnnotation() {
-    return generatedAnnotation;
   }
 
   /**
@@ -107,7 +80,7 @@ class ProcessingContext {
         }
       }
 
-    } catch (FileNotFoundException | NoSuchFileException e ) {
+    } catch (FileNotFoundException | NoSuchFileException e) {
       // logDebug("no services file yet");
 
     } catch (FilerException e) {
@@ -173,9 +146,7 @@ class ProcessingContext {
   }
 
   void buildAtContextModule(Append writer) {
-    if (isGeneratedAvailable()) {
-      writer.append(Constants.AT_GENERATED).eol();
-    }
+    writer.append(Constants.AT_GENERATED).eol();
     writer.append("@ContextModule(name=\"%s\"", contextName);
     if (!isEmpty(contextProvides)) {
       writer.append(", provides=");

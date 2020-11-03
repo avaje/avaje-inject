@@ -47,7 +47,6 @@ class SimpleFactoryWriter {
 
   private final MetaDataOrdering ordering;
   private final ProcessingContext context;
-
   private final String factoryPackage;
   private final String factoryShortName;
   private final String factoryFullName;
@@ -66,7 +65,6 @@ class SimpleFactoryWriter {
   }
 
   void write() throws IOException {
-
     writer = new Append(createFileWriter());
     writePackage();
     writeStartClass();
@@ -81,7 +79,6 @@ class SimpleFactoryWriter {
   }
 
   private void writeServicesFile() {
-
     try {
       FileObject jfo = context.createMetaInfWriter();
       if (jfo != null) {
@@ -103,7 +100,6 @@ class SimpleFactoryWriter {
   }
 
   private void writeCreateMethod() {
-
     writer.append(CODE_COMMENT_CREATE_CONTEXT).eol();
     writer.append("  @Override").eol();
     writer.append("  public BeanContext createContext(Builder parent) {").eol();
@@ -133,10 +129,7 @@ class SimpleFactoryWriter {
 
   private Set<String> factoryImportTypes() {
     Set<String> importTypes = new TreeSet<>();
-    final String generated = context.getGeneratedAnnotation();
-    if (generated != null) {
-      importTypes.add(generated);
-    }
+    importTypes.add(Constants.GENERATED);
     importTypes.add(Constants.BEANCONTEXT);
     importTypes.add(Constants.CONTEXTMODULE);
     importTypes.add(Constants.DEPENDENCYMETA);
@@ -147,7 +140,6 @@ class SimpleFactoryWriter {
   }
 
   private void writeStartClass() {
-
     writer.append(CODE_COMMENT_FACTORY, context.contextName(), factoryPackage).eol();
     context.buildAtContextModule(writer);
 

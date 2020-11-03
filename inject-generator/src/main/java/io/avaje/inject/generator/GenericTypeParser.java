@@ -28,9 +28,15 @@ class GenericTypeParser {
 
   private void processChar(char ch) {
     switch (ch) {
-      case '<': startParam(); break;
-      case '>': endParam(); break;
-      case ',': nextParam(); break;
+      case '<':
+        startParam();
+        break;
+      case '>':
+        endParam();
+        break;
+      case ',':
+        nextParam();
+        break;
       default:
         buf.append(ch);
     }

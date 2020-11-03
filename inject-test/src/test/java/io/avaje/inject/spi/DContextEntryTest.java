@@ -21,7 +21,7 @@ public class DContextEntryTest {
 
   @Test
   public void get_when_twoPrimary() {
-    assertThrows(IllegalStateException.class, ()-> {
+    assertThrows(IllegalStateException.class, () -> {
       DContextEntry entry = new DContextEntry();
       entry.add(DContextEntryBean.of("P", null, BeanEntry.PRIMARY));
       entry.add(DContextEntryBean.of("N", null, BeanEntry.NORMAL));
@@ -55,7 +55,7 @@ public class DContextEntryTest {
 
   @Test
   public void get_when_multiSecondaryOnly() {
-    assertThrows(IllegalStateException.class, ()-> {
+    assertThrows(IllegalStateException.class, () -> {
       DContextEntry entry = new DContextEntry();
       entry.add(DContextEntryBean.of("S1", null, BeanEntry.SECONDARY));
       entry.add(DContextEntryBean.of("S2", null, BeanEntry.SECONDARY));
