@@ -4,6 +4,7 @@ class Constants {
 
   static final String KOTLIN_METADATA = "kotlin.Metadata";
   static final String GENERATED_9 = "javax.annotation.processing.Generated";
+  static final String GENERATED_LOCAL = "io.avaje.inject.spi.Generated";
 
   static final String PROVIDER = "javax.inject.Provider";
 

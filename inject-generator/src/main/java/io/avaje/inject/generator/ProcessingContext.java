@@ -53,7 +53,7 @@ class ProcessingContext {
   }
 
   private String generatedAnnotation(boolean jdk8) {
-    return jdk8 ? null : isTypeAvailable(Constants.GENERATED_9) ? Constants.GENERATED_9 : null;
+    return jdk8 ? Constants.GENERATED_LOCAL : isTypeAvailable(Constants.GENERATED_9) ? Constants.GENERATED_9 : Constants.GENERATED_LOCAL;
   }
 
   private boolean isTypeAvailable(String canonicalName) {
