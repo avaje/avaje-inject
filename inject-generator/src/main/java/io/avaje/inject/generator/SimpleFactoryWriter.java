@@ -4,6 +4,8 @@ import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Write the source code for the factory.
@@ -12,22 +14,22 @@ class SimpleFactoryWriter {
 
   private static final String CODE_COMMENT_FACTORY =
     "/**\n" +
-    " * Generated source - Creates the BeanContext for the %s module.\n" +
-    " * \n" +
-    " * With JPMS Java module system this generated class should be explicitly\n" +
-    " * registered in module-info via a <code>provides</code> clause like:\n" +
-    " * \n" +
-    " * <pre>{@code\n" +
-    " * \n" +
-    " *   module example {\n" +
-    " *     requires io.avaje.inject;\n" +
-    " *     \n" +
-    " *     provides io.avaje.inject.spi.BeanContextFactory with %s._di$BeanContextFactory;\n" +
-    " *     \n" +
-    " *   }\n" +
-    " * \n" +
-    " * }</pre>\n" +
-    " */";
+      " * Generated source - Creates the BeanContext for the %s module.\n" +
+      " * \n" +
+      " * With JPMS Java module system this generated class should be explicitly\n" +
+      " * registered in module-info via a <code>provides</code> clause like:\n" +
+      " * \n" +
+      " * <pre>{@code\n" +
+      " * \n" +
+      " *   module example {\n" +
+      " *     requires io.avaje.inject;\n" +
+      " *     \n" +
+      " *     provides io.avaje.inject.spi.BeanContextFactory with %s._di$BeanContextFactory;\n" +
+      " *     \n" +
+      " *   }\n" +
+      " * \n" +
+      " * }</pre>\n" +
+      " */";
 
   private static final String CODE_COMMENT_CREATE_CONTEXT =
     "  /**\n" +
@@ -117,26 +119,31 @@ class SimpleFactoryWriter {
   }
 
   private void writePackage() {
-
     writer.append("package %s;", factoryPackage).eol().eol();
-
-    final String generated = context.getGeneratedAnnotation();
-    if (generated != null) {
-      writer.append("import %s;", generated).eol();
+    for (String type : factoryImportTypes()) {
+      writer.append("import %s;", type).eol();
     }
-    writer.append(Constants.IMPORT_BEANCONTEXT).eol();
-    writer.append(Constants.IMPORT_CONTEXTMODULE).eol();
-    writer.append(Constants.IMPORT_DEPENDENCYMETA).eol().eol();
-    writer.append(Constants.IMPORT_BEANCONTEXTFACTORY).eol();
-    writer.append(Constants.IMPORT_BUILDER).eol();
-    writer.append(Constants.IMPORT_BUILDERFACTORY).eol();
-
     for (String type : ordering.getImportTypes()) {
       if (Util.validImportType(type)) {
         writer.append("import %s;", type).eol();
       }
     }
     writer.eol();
+  }
+
+  private Set<String> factoryImportTypes() {
+    Set<String> importTypes = new TreeSet<>();
+    final String generated = context.getGeneratedAnnotation();
+    if (generated != null) {
+      importTypes.add(generated);
+    }
+    importTypes.add(Constants.BEANCONTEXT);
+    importTypes.add(Constants.CONTEXTMODULE);
+    importTypes.add(Constants.DEPENDENCYMETA);
+    importTypes.add(Constants.BEANCONTEXTFACTORY);
+    importTypes.add(Constants.BUILDER);
+    importTypes.add(Constants.BUILDERFACTORY);
+    return importTypes;
   }
 
   private void writeStartClass() {
