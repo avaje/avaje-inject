@@ -82,7 +82,7 @@ public interface Builder {
   void addLifecycle(BeanLifecycle bean);
 
   /**
-   * Add a field injector.
+   * Add field and method injection.
    */
   void addInjector(Consumer<Builder> injector);
 

@@ -15,9 +15,13 @@ import java.util.Set;
 
 class MethodReader {
 
+  private static final String CODE_COMMENT_LIFECYCLE ="  /**\n   * Lifecycle wrapper for %s.\n   */";
+  private static final String CODE_COMMENT_BUILD_FACTORYBEAN = "  /**\n   * Create and register %s via factory bean method %s#%s().\n   */";
+
   private final ProcessingContext context;
   private final ExecutableElement element;
   private final String factoryType;
+  private final String methodName;
   private final TypeMirror returnType;
   private final String returnTypeRaw;
   private final String shortName;
@@ -40,6 +44,7 @@ class MethodReader {
     this.isFactory = bean != null;
     this.context = context;
     this.element = element;
+    this.methodName = element.getSimpleName().toString();
     this.returnType = element.getReturnType();
     this.returnTypeRaw = returnType.toString();
     this.shortName = Util.shortName(returnTypeRaw);
@@ -50,6 +55,10 @@ class MethodReader {
     this.destroyMethod = (bean == null) ? null : bean.destroyMethod();
     this.name = (named == null) ? null : named.value();
     initInterfaces();
+  }
+
+  String getName() {
+    return methodName;
   }
 
   private void initInterfaces() {
@@ -84,9 +93,6 @@ class MethodReader {
     return params;
   }
 
-  String getName() {
-    return element.getSimpleName().toString();
-  }
 
   MetaData createMeta() {
 
@@ -112,15 +118,12 @@ class MethodReader {
   }
 
   String builderBuildBean() {
-
-    String methodName = element.getSimpleName().toString();
     StringBuilder sb = new StringBuilder();
     if (isVoid) {
       sb.append(String.format("      factory.%s(", methodName));
     } else {
       sb.append(String.format("      %s bean = factory.%s(", Util.shortName(returnTypeRaw), methodName));
     }
-
     for (int i = 0; i < params.size(); i++) {
       if (i > 0) {
         sb.append(",");
@@ -135,7 +138,7 @@ class MethodReader {
     if (!isVoid) {
       writer.append("      ");
       if (beanLifeCycle || hasLifecycleMethods()) {
-        writer.append("      %s $bean = ", shortName);
+        writer.append("%s $bean = ", shortName);
       }
       writer.append("builder.register(bean, ");
       if (name == null) {
@@ -197,7 +200,7 @@ class MethodReader {
     if (!hasLifecycleMethods()) {
       return;
     }
-
+    writer.append(CODE_COMMENT_LIFECYCLE, shortName).eol();
     writer.append("  static class %s$lifecycle implements BeanLifecycle {", shortName).eol().eol();
     writer.append("    final %s bean;", shortName).eol().eol();
     writer.append("    %s$lifecycle(%s bean) {", shortName, shortName).eol();
@@ -249,6 +252,10 @@ class MethodReader {
     for (MethodParam param : params) {
       param.writeRequestConstructor(writer);
     }
+  }
+
+  public void commentBuildMethod(Append writer) {
+    writer.append(CODE_COMMENT_BUILD_FACTORYBEAN, shortName, factoryShortName, methodName).eol();
   }
 
   static class MethodParam {

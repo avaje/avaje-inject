@@ -194,7 +194,7 @@ class MetaData {
   }
 
   private void appendProvides(StringBuilder sb, String attribute, List<String> types) {
-    sb.append(",").append(attribute).append("={");
+    sb.append(", ").append(attribute).append("={");
     for (int i = 0; i < types.size(); i++) {
       if (i > 0) {
         sb.append(",");
