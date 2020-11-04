@@ -25,7 +25,6 @@ class Constants {
   static final String BUILDER = "io.avaje.inject.spi.Builder";
   static final String DEPENDENCYMETA = "io.avaje.inject.spi.DependencyMeta;";
   static final String BEANCONTEXTFACTORY = "io.avaje.inject.spi.BeanContextFactory;";
-  static final String BUILDERFACTORY = "io.avaje.inject.spi.BuilderFactory;";
 
   static boolean isBeanLifecycle(String type) {
     return BEAN_LIFECYCLE.equals(type);

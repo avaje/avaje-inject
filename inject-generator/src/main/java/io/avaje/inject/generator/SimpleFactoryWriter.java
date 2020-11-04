@@ -135,7 +135,6 @@ class SimpleFactoryWriter {
     importTypes.add(Constants.DEPENDENCYMETA);
     importTypes.add(Constants.BEANCONTEXTFACTORY);
     importTypes.add(Constants.BUILDER);
-    importTypes.add(Constants.BUILDERFACTORY);
     return importTypes;
   }
 
