@@ -150,8 +150,9 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public void addChild(BeanContext child) {
-    children.put(child.getName(), child);
+  public void addChild(BeanContextFactory factory) {
+    final BeanContext context = factory.createContext(this);
+    children.put(context.getName(), context);
   }
 
   /**

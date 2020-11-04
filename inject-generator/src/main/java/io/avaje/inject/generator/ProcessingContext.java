@@ -137,7 +137,7 @@ class ProcessingContext {
   }
 
   void buildNewBuilder(Append writer) {
-    writer.append("    this.builder = BuilderFactory.newBuilder(\"%s\"", contextName);
+    writer.append("    this.builder = Builder.newBuilder(\"%s\"", contextName);
     writer.append(", ");
     buildStringArray(writer, contextProvides, true);
     writer.append(", ");

@@ -2,7 +2,6 @@ package io.avaje.inject;
 
 import io.avaje.inject.spi.BeanContextFactory;
 import io.avaje.inject.spi.Builder;
-import io.avaje.inject.spi.BuilderFactory;
 import io.avaje.inject.spi.EnrichBean;
 import io.avaje.inject.spi.SuppliedBean;
 import org.slf4j.Logger;
@@ -368,9 +367,9 @@ public class BeanContextBuilder {
         " Refer to https://avaje.io/inject#gradle");
     }
     log.debug("building context with modules {}", moduleNames);
-    Builder rootBuilder = BuilderFactory.newRootBuilder(suppliedBeans, enrichBeans);
+    Builder rootBuilder = Builder.newRootBuilder(suppliedBeans, enrichBeans);
     for (BeanContextFactory factory : factoryOrder.factories()) {
-      rootBuilder.addChild(factory.createContext(rootBuilder));
+      rootBuilder.addChild(factory);
     }
 
     BeanContext beanContext = rootBuilder.build();

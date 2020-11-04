@@ -14,6 +14,32 @@ import java.util.function.Consumer;
 public interface Builder {
 
   /**
+   * Create the root level Builder.
+   *
+   * @param suppliedBeans The list of beans (typically test doubles) supplied when building the context.
+   * @param enrichBeans   The list of classes we want to have with mockito spy enhancement
+   */
+  @SuppressWarnings("rawtypes")
+  static Builder newRootBuilder(List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans) {
+    if (suppliedBeans.isEmpty() && enrichBeans.isEmpty()) {
+      // simple case, no mocks or spies
+      return new DBuilder();
+    }
+    return new DBuilderExtn(suppliedBeans, enrichBeans);
+  }
+
+  /**
+   * Create a Builder for the named context (module).
+   *
+   * @param name      the name of the module / bean context
+   * @param provides  the module features this module provides
+   * @param dependsOn the names of modules this module is depends on.
+   */
+  static Builder newBuilder(String name, String[] provides, String[] dependsOn) {
+    return new DBuilder(name, provides, dependsOn);
+  }
+
+  /**
    * Return the name of the (module) context this builder is creating.
    */
   String getName();
@@ -89,7 +115,7 @@ public interface Builder {
   /**
    * Add a child context.
    */
-  void addChild(BeanContext context);
+  void addChild(BeanContextFactory factory);
 
   /**
    * Get an optional dependency.
@@ -127,11 +153,6 @@ public interface Builder {
   <T> BeanEntry<T> candidate(Class<T> cls, String name);
 
   /**
-   * Build and return the bean context.
-   */
-  BeanContext build();
-
-  /**
    * Return a potentially enriched bean for registration into the context.
    * Typically for use with mockito spy.
    *
@@ -140,4 +161,9 @@ public interface Builder {
    * @return Either the bean or the enriched bean to register into the context.
    */
   <T> T enrich(T bean, Class<?>[] types);
+
+  /**
+   * Build and return the bean context.
+   */
+  BeanContext build();
 }
