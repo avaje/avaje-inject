@@ -24,7 +24,7 @@ class SimpleFactoryWriter {
       " *   module example {\n" +
       " *     requires io.avaje.inject;\n" +
       " *     \n" +
-      " *     provides io.avaje.inject.spi.BeanContextFactory with %s._di$BeanContextFactory;\n" +
+      " *     provides io.avaje.inject.spi.BeanContextFactory with %s._DI$BeanContextFactory;\n" +
       " *     \n" +
       " *   }\n" +
       " * \n" +
@@ -60,7 +60,7 @@ class SimpleFactoryWriter {
     String pkg = context.getContextPackage();
     this.factoryPackage = (pkg != null) ? pkg : ordering.getTopPackage();
     context.deriveContextName(factoryPackage);
-    this.factoryShortName = "_di$BeanContextFactory";
+    this.factoryShortName = "_DI$BeanContextFactory";
     this.factoryFullName = factoryPackage + "." + factoryShortName;
   }
 
