@@ -130,13 +130,11 @@ class DBuilder implements Builder {
 
   @Override
   public <T> BeanEntry<T> candidate(Class<T> cls, String name) {
-
     DBeanContext.EntrySort<T> entrySort = new DBeanContext.EntrySort<>();
     entrySort.add(beanMap.candidate(cls, name));
     for (BeanContext childContext : children.values()) {
       entrySort.add(childContext.candidate(cls, name));
     }
-
     if (parent != null) {
       // look in parent context (cross-module dependency)
       entrySort.add(parent.candidate(cls, name));

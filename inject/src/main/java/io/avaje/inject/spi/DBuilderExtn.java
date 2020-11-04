@@ -54,7 +54,6 @@ class DBuilderExtn extends DBuilder {
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
   private <T> EnrichBean getEnrich(T bean, Class<?>[] types) {
-
     EnrichBean<T> enrich = enrichMap.get(bean.getClass());
     if (enrich != null) {
       return enrich;

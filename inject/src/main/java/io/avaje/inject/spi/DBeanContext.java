@@ -61,10 +61,8 @@ class DBeanContext implements BeanContext {
 
   @Override
   public <T> BeanEntry<T> candidate(Class<T> type, String name) {
-
-    // sort candiates by priority - Primary, Normal, Secondary
+    // sort candidates by priority - Primary, Normal, Secondary
     EntrySort<T> entrySort = new EntrySort<>();
-
     entrySort.add(beans.candidate(type, name));
     for (BeanContext childContext : children.values()) {
       entrySort.add(childContext.candidate(type, name));
@@ -130,7 +128,6 @@ class DBeanContext implements BeanContext {
 
   @Override
   public List<Object> getBeansWithAnnotation(Class<?> annotation) {
-
     List<Object> list = new ArrayList<>();
     beans.addAll(annotation, list);
     for (BeanContext childContext : children.values()) {

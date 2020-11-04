@@ -29,7 +29,6 @@ public class EnrichBean<B> {
    * Return the spy enhanced bean instance to use.
    */
   public B enrich(B bean) {
-
     // should extract a SPI for this. Only enrichment is Mockito spy at this point.
     B spy = Mockito.spy(bean);
     if (consumer != null) {
