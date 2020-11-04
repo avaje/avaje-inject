@@ -21,7 +21,7 @@ public class ExtensionExampleTest {
     Class cls0 = Widget.class;
     Class<?> cls1 = SEmailer.class;
 
-    BeanContextBuilder bootContext = new BeanContextBuilder()
+    BeanContextBuilder bootContext = BeanContext.newBuilder()
       .withSpy(cls0)
       .withSpy(cls1)
       .withMock(cls0)

@@ -13,10 +13,10 @@ public class AppleServiceTest {
   @Test
   public void test_spyWithFieldInjection() {
 
-    BeanContextBuilder bootContext = new BeanContextBuilder();
-    bootContext.withSpy(AppleService.class);
+    BeanContextBuilder contextBuilder = BeanContext.newBuilder();
+    contextBuilder.withSpy(AppleService.class);
 
-    try (BeanContext beanContext = bootContext.build()) {
+    try (BeanContext beanContext = contextBuilder.build()) {
 
       AppleService appleService = beanContext.getBean(AppleService.class);
 
@@ -37,9 +37,7 @@ public class AppleServiceTest {
   @Test
   public void test_whenNoMockOrSpy() {
 
-    BeanContextBuilder bootContext = new BeanContextBuilder();
-
-    try (BeanContext beanContext = bootContext.build()) {
+    try (BeanContext beanContext = BeanContext.newBuilder().build()) {
 
       AppleService appleService = beanContext.getBean(AppleService.class);
 

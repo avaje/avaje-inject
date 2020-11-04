@@ -1,7 +1,6 @@
 package org.example.iface;
 
 import io.avaje.inject.BeanContext;
-import io.avaje.inject.BeanContextBuilder;
 import io.avaje.inject.SystemContext;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +22,7 @@ public class NestedInterfaceTest {
   @Test
   void test_provided() {
 
-    try (BeanContext context = new BeanContextBuilder()
+    try (BeanContext context = BeanContext.newBuilder()
       .withMock(Some.Nested.class, nested -> when(nested.doNested()).thenReturn("myMock"))
       .build()) {
 

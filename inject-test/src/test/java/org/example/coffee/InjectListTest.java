@@ -1,7 +1,6 @@
 package org.example.coffee;
 
 import io.avaje.inject.BeanContext;
-import io.avaje.inject.BeanContextBuilder;
 import org.example.coffee.list.CombinedSetSomei;
 import org.example.coffee.list.CombinedSomei;
 import org.junit.jupiter.api.Test;
@@ -14,7 +13,7 @@ public class InjectListTest {
 
   @Test
   public void test() {
-    try (BeanContext context = new BeanContextBuilder().build()) {
+    try (BeanContext context = BeanContext.newBuilder().build()) {
       CombinedSomei bean = context.getBean(CombinedSomei.class);
       List<String> somes = bean.lotsOfSomes();
       assertThat(somes).containsOnly("a", "b", "a2");
@@ -23,7 +22,7 @@ public class InjectListTest {
 
   @Test
   public void test_set() {
-    try (BeanContext context = new BeanContextBuilder().build()) {
+    try (BeanContext context = BeanContext.newBuilder().build()) {
       CombinedSetSomei bean = context.getBean(CombinedSetSomei.class);
       List<String> somes = bean.lotsOfSomes();
       assertThat(somes).containsOnly("a", "b", "a2");

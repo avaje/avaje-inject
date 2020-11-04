@@ -1,7 +1,6 @@
 package org.example.coffee.generic;
 
 import io.avaje.inject.BeanContext;
-import io.avaje.inject.BeanContextBuilder;
 import io.avaje.inject.SystemContext;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +22,7 @@ public class HazManagerTest {
   @Test
   public void fin_with_mockHaz() {
 
-    try (BeanContext context = new BeanContextBuilder()
+    try (BeanContext context = BeanContext.newBuilder()
       .withMock(HazRepo.class)
       .build()) {
 
@@ -37,7 +36,7 @@ public class HazManagerTest {
   @Test
   public void find_with_stubHazUsingMockito() {
 
-    try (BeanContext context = new BeanContextBuilder()
+    try (BeanContext context = BeanContext.newBuilder()
       .withMock(HazRepo.class, hazRepo -> {
         when(hazRepo.findById(anyLong())).thenReturn(new Haz(-23L));
       })
@@ -55,7 +54,7 @@ public class HazManagerTest {
 
     TDHazRepo testDouble = new TDHazRepo();
 
-    try (BeanContext context = new BeanContextBuilder()
+    try (BeanContext context = BeanContext.newBuilder()
       .withBeans(testDouble)
       .build()) {
 
@@ -78,7 +77,7 @@ public class HazManagerTest {
   /**
    * Test double for HazRepo - nice when we want interesting test behaviour.
    */
-  class TDHazRepo extends HazRepo {
+  static class TDHazRepo extends HazRepo {
 
     long id = 64L;
 
