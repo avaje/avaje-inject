@@ -11,10 +11,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 class DBeanContext implements BeanContext {
 
   private static final Logger log = LoggerFactory.getLogger(DBeanContext.class);
+
+  private final ReentrantLock lock = new ReentrantLock();
 
   private final String name;
 
@@ -138,7 +141,8 @@ class DBeanContext implements BeanContext {
 
   @Override
   public void start() {
-    synchronized (this) {
+    lock.lock();
+    try {
       if (name != null) {
         log.debug("firing postConstruct on beans in context:{}", name);
       }
@@ -148,12 +152,15 @@ class DBeanContext implements BeanContext {
       for (BeanContext childContext : children.values()) {
         childContext.start();
       }
+    } finally {
+      lock.unlock();
     }
   }
 
   @Override
   public void close() {
-    synchronized (this) {
+    lock.lock();
+    try {
       if (!closed) {
         // we only allow one call to preDestroy
         closed = true;
@@ -167,6 +174,8 @@ class DBeanContext implements BeanContext {
           childContext.close();
         }
       }
+    } finally {
+      lock.unlock();
     }
   }
 

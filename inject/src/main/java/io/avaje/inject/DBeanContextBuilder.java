@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 /**
@@ -163,6 +164,7 @@ class DBeanContextBuilder implements BeanContextBuilder {
    */
   private static class ShutdownAwareBeanContext implements BeanContext {
 
+    private final ReentrantLock lock = new ReentrantLock();
     private final BeanContext context;
     private final Hook hook;
     private boolean shutdown;
@@ -240,11 +242,14 @@ class DBeanContextBuilder implements BeanContextBuilder {
 
     @Override
     public void close() {
-      synchronized (this) {
+      lock.lock();
+      try {
         if (!shutdown) {
           Runtime.getRuntime().removeShutdownHook(hook);
         }
         context.close();
+      } finally {
+        lock.unlock();
       }
     }
 
@@ -252,9 +257,12 @@ class DBeanContextBuilder implements BeanContextBuilder {
      * Close via shutdown hook.
      */
     void shutdown() {
-      synchronized (this) {
+      lock.lock();
+      try {
         shutdown = true;
         close();
+      } finally {
+        lock.unlock();
       }
     }
   }
