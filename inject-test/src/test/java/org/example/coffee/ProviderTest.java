@@ -1,7 +1,6 @@
 package org.example.coffee;
 
 import io.avaje.inject.BeanContext;
-import io.avaje.inject.BeanContextBuilder;
 import org.example.coffee.provider.ProvOther;
 import org.example.coffee.provider.ProvOther2;
 import org.junit.jupiter.api.Test;
@@ -13,7 +12,7 @@ public class ProviderTest {
   @Test
   public void test() {
 
-    try (BeanContext context = new BeanContextBuilder().build()) {
+    try (BeanContext context = BeanContext.newBuilder().build()) {
 
       ProvOther bean = context.getBean(ProvOther.class);
       String other = bean.other();

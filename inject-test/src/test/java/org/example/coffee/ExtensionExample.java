@@ -16,7 +16,7 @@ class ExtensionExample {
   }
 
   BeanContext build() {
-    BeanContextBuilder bootContext = new BeanContextBuilder();
+    BeanContextBuilder bootContext = BeanContext.newBuilder();
     withMocks.forEach(bootContext::withMock);
     withSpies.forEach(bootContext::withSpy);
     return bootContext.build();

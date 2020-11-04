@@ -1,7 +1,6 @@
 package org.example.coffee.factory;
 
 import io.avaje.inject.BeanContext;
-import io.avaje.inject.BeanContextBuilder;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,8 +11,7 @@ public class BFactTest {
   public void getCountInit() {
 
     BFact bFact;
-    try (BeanContext context = new BeanContextBuilder().build()) {
-
+    try (BeanContext context = BeanContext.newBuilder().build()) {
       bFact = context.getBean(BFact.class);
       assertThat(bFact.getCountInit()).isEqualTo(1);
       assertThat(bFact.getCountClose()).isEqualTo(0);

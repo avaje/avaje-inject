@@ -45,6 +45,39 @@ import java.util.List;
 public interface BeanContext extends Closeable {
 
   /**
+   * Build a bean context with options for shutdown hook and supplying test doubles.
+   * <p>
+   * We would choose to use BeanContextBuilder in test code (for component testing)
+   * as it gives us the ability to inject test doubles, mocks, spy's etc.
+   * </p>
+   *
+   * <pre>{@code
+   *
+   *   ＠Test
+   *   public void someComponentTest() {
+   *
+   *     MyRedisApi mockRedis = mock(MyRedisApi.class);
+   *     MyDbApi mockDatabase = mock(MyDbApi.class);
+   *
+   *     try (BeanContext context = BeanContext.newBuilder()
+   *       .withBeans(mockRedis, mockDatabase)
+   *       .build()) {
+   *
+   *       // built with test doubles injected ...
+   *       CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+   *       coffeeMaker.makeIt();
+   *
+   *       assertThat(...
+   *     }
+   *   }
+   *
+   * }</pre>
+   */
+  static BeanContextBuilder newBuilder() {
+    return new DBeanContextBuilder();
+  }
+
+  /**
    * Return the module name of the bean context.
    *
    * @see ContextModule

@@ -45,7 +45,7 @@ public class SystemContext {
   private static final BeanContext rootContext = init();
 
   private static BeanContext init() {
-    return new BeanContextBuilder().build();
+    return BeanContext.newBuilder().build();
   }
 
   private SystemContext() {
