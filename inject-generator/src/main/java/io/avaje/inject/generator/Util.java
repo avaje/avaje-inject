@@ -9,6 +9,10 @@ import javax.lang.model.type.TypeMirror;
 
 class Util {
 
+  private static final String PROVIDER_PREFIX = "javax.inject.Provider<";
+
+  private static final int PROVIDER_LENGTH = PROVIDER_PREFIX.length();
+
   static boolean isVoid(String type) {
     return "void".equalsIgnoreCase(type);
   }
@@ -79,11 +83,11 @@ class Util {
   }
 
   private static boolean isProvider(String rawType) {
-    return rawType.startsWith("javax.inject.Provider<");
+    return rawType.startsWith(PROVIDER_PREFIX);
   }
 
   private static String extractProviderType(String rawType) {
-    return rawType.substring(22, rawType.length() - 1);
+    return rawType.substring(PROVIDER_LENGTH, rawType.length() - 1);
   }
 
   /**
