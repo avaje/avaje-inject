@@ -134,7 +134,6 @@ public interface BeanContextBuilder {
    * @param beans The bean used when injecting a dependency for this bean or the interface(s) it implements
    * @return This BeanContextBuilder
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
   BeanContextBuilder withBeans(Object... beans);
 
   /**

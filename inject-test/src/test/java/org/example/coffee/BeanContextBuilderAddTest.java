@@ -20,6 +20,7 @@ public class BeanContextBuilderAddTest {
         // our module is "org.example.coffee"
         // so this effectively includes no modules
         .withModules("other")
+        .withIgnoreMissingModuleDependencies()
         .build()) {
 
         CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
