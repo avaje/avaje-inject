@@ -6,7 +6,7 @@ import io.avaje.inject.PostConstruct;
 import io.avaje.inject.PreDestroy;
 import org.example.coffee.CoffeeMaker;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * Factory bean (ala Micronaut @Factory or Spring @Configuration)

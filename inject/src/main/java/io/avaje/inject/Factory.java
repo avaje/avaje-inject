@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * often use environment variables and system properties into account when building the bean.
  * </p>
  * <p>
- * Relative to <code>javax.inject.Provider</code> Factory and Bean provide a more flexible
+ * Relative to <code>jakarta.inject.Provider</code> Factory and Bean provide a more flexible
  * approach that allows dependencies on the method (as method parameters) as well as multiple
  * methods on the single factory bean. The expectation is that we tend to use Factory and Bean
  * rather than Provider.

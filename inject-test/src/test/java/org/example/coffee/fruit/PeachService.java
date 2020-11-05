@@ -1,6 +1,6 @@
 package org.example.coffee.fruit;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Fruit
 @Singleton

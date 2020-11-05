@@ -4,9 +4,9 @@ class Constants {
 
   static final String KOTLIN_METADATA = "kotlin.Metadata";
 
-  static final String PROVIDER = "javax.inject.Provider";
-  static final String SINGLETON = "javax.inject.Singleton";
-  static final String INJECT = "javax.inject.Inject";
+  static final String PROVIDER = "jakarta.inject.Provider";
+  static final String SINGLETON = "jakarta.inject.Singleton";
+  static final String INJECT = "jakarta.inject.Inject";
 
   static final String PATH = "io.avaje.http.api.Path";
   static final String CONTROLLER = "io.avaje.http.api.Controller";
