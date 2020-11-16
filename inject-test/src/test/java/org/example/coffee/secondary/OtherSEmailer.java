@@ -1,6 +1,6 @@
 package org.example.coffee.secondary;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class OtherSEmailer implements SEmailer {

@@ -4,9 +4,9 @@ import io.avaje.inject.Bean;
 import io.avaje.inject.Primary;
 import io.avaje.inject.Secondary;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Qualifier;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Qualifier;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;

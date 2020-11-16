@@ -3,7 +3,7 @@ package org.example.request;
 import io.avaje.inject.spi.BeanFactory;
 import io.javalin.http.Context;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 /**
  * Simulate approx a Javalin web route with request scoped context.

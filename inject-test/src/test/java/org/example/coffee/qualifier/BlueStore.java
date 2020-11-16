@@ -1,6 +1,6 @@
 package org.example.coffee.qualifier;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Blue
 @Singleton
