@@ -1,6 +1,6 @@
 package org.example.coffee.primary;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 //@Secondary
 @Singleton

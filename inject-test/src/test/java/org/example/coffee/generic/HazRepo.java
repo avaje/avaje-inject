@@ -1,6 +1,6 @@
 package org.example.coffee.generic;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 /**
  * Implementation of a generic interface.

@@ -4,7 +4,7 @@ package org.example.request;
 import io.avaje.http.api.Controller;
 import io.avaje.jex.Context;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 @Controller
 public class JexController {

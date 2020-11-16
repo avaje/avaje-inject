@@ -4,7 +4,7 @@ import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
 import org.example.coffee.factory.other.Something;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 @Factory
 public class MyFactory {
