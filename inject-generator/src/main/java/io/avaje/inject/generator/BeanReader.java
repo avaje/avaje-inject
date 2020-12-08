@@ -339,12 +339,8 @@ class BeanReader {
     return metaData;
   }
 
-  boolean isFieldInjectionRequired() {
-    return !injectFields.isEmpty();
-  }
-
-  boolean isMethodInjectionRequired() {
-    return !injectMethods.isEmpty();
+  boolean isExtraInjectionRequired() {
+    return !injectFields.isEmpty() || !injectMethods.isEmpty();
   }
 
   void buildAddFor(Append writer) {
@@ -356,12 +352,10 @@ class BeanReader {
   }
 
   void buildRegister(Append writer) {
-
     writer.append("      ");
-    if (isFieldInjectionRequired() || isLifecycleRequired()) {
+    if (isExtraInjectionRequired() || isLifecycleRequired()) {
       writer.append("%s $bean = ", shortName);
     }
-
     String flags = primary ? "Primary" : secondary ? "Secondary" : "";
     writer.append("builder.register%s(bean, ", flags);
     if (name == null) {
