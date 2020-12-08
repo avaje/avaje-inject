@@ -130,7 +130,7 @@ class SimpleBeanWriter {
     if (beanReader.isLifecycleRequired()) {
       beanReader.buildAddLifecycle(writer);
     }
-    if (beanReader.isFieldInjectionRequired() || beanReader.isMethodInjectionRequired()) {
+    if (beanReader.isExtraInjectionRequired()) {
       writer.append("      builder.addInjector(b -> {").eol();
       writer.append("        // field and method injection").eol();
       for (FieldReader fieldReader : beanReader.getInjectFields()) {

@@ -34,6 +34,7 @@ public class IncludeAnnotationsTest {
   @Test
   public void exclude_di_annotations() {
     assertFalse(include("javax.annotation.Generated"));
+    assertFalse(include("foo.Generated"));
     assertFalse(include(Singleton.class.getName()));
     assertFalse(include(Named.class.getName()));
     assertFalse(include(Factory.class.getName()));
