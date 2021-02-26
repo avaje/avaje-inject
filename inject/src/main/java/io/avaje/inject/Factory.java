@@ -20,23 +20,23 @@ import java.lang.annotation.Target;
  *
  * <pre>{@code
  *
- * ＠Factory
+ * @Factory
  * class Configuration {
  *
  *   private final StartConfig startConfig;
  *
- *   ＠Inject
+ *   @Inject
  *   Configuration(StartConfig startConfig) {
  *     this.startConfig = startConfig;
  *   }
  *
- *   ＠Bean
+ *   @Bean
  *   Foo buildFoo() {
  *     ...
  *     return new Foo(...);
  *   }
  *
- *   ＠Bean
+ *   @Bean
  *   Bar buildBar(Foo foo, Bazz bazz) {
  *     ...
  *     return new Bar(...);

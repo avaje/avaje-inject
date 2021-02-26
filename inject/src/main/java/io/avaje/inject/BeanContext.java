@@ -53,7 +53,7 @@ public interface BeanContext extends Closeable {
    *
    * <pre>{@code
    *
-   *   ＠Test
+   *   @Test
    *   public void someComponentTest() {
    *
    *     MyRedisApi mockRedis = mock(MyRedisApi.class);

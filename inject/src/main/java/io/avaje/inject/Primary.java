@@ -11,8 +11,8 @@ import java.lang.annotation.Target;
  *
  * <pre>{@code
  *
- * ＠Primary
- * ＠Singleton
+ * @Primary
+ * @Singleton
  * class PreferredEmailSender implements EmailSender {
  *
  *   ...
