@@ -6,8 +6,19 @@ import javax.inject.Singleton;
 public class MFooUser {
 
   private final MFoo mf;
+  private final boolean usePublicConstructor;
 
-  public MFooUser(MFoo mf) {
+  MFooUser(MFoo mf) {
     this.mf = mf;
+    this.usePublicConstructor = true;
+  }
+
+  private MFooUser(MFoo mf, boolean dummy) {
+    this.mf = mf;
+    this.usePublicConstructor = true;
+  }
+
+  public boolean isUsePublicConstructor() {
+    return usePublicConstructor;
   }
 }

@@ -3,11 +3,7 @@ package io.avaje.inject.generator;
 import io.avaje.inject.Bean;
 
 import javax.inject.Named;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.List;
@@ -256,6 +252,14 @@ class MethodReader {
 
   public void commentBuildMethod(Append writer) {
     writer.append(CODE_COMMENT_BUILD_FACTORYBEAN, shortName, factoryShortName, methodName).eol();
+  }
+
+  public boolean isPublic() {
+    return element.getModifiers().contains(Modifier.PUBLIC);
+  }
+
+  public boolean isNotPrivate() {
+    return !element.getModifiers().contains(Modifier.PRIVATE);
   }
 
   static class MethodParam {

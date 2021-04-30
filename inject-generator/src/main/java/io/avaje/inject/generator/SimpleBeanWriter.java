@@ -92,7 +92,7 @@ class SimpleBeanWriter {
 
     MethodReader constructor = beanReader.getConstructor();
     if (constructor == null) {
-      context.logError(beanReader.getBeanType(), "Unable to determine constructor to use?");
+      context.logError(beanReader.getBeanType(), "Unable to determine constructor to use for %s? Add explicit @Inject to one of the constructors.", beanReader.getBeanType());
       return;
     }
 

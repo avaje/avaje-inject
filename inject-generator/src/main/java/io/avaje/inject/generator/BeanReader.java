@@ -191,6 +191,17 @@ class BeanReader {
     if (otherConstructors.size() == 1) {
       return otherConstructors.get(0);
     }
+    // check if there is only one public constructor
+    List<MethodReader> allPublic = new ArrayList<>();
+    for (MethodReader ctor : otherConstructors) {
+      if (ctor.isPublic()) {
+        allPublic.add(ctor);
+      }
+    }
+    if (allPublic.size() == 1) {
+      // fallback to the single public constructor
+      return allPublic.get(0);
+    }
     return null;
   }
 
@@ -234,7 +245,9 @@ class BeanReader {
     if (inject != null) {
       injectConstructor = methodReader;
     } else {
-      otherConstructors.add(methodReader);
+      if (methodReader.isNotPrivate()) {
+        otherConstructors.add(methodReader);
+      }
     }
   }
 
