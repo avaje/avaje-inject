@@ -113,7 +113,6 @@ public class Processor extends AbstractProcessor {
   }
 
   private void writeBeanFactory() {
-
     MetaDataOrdering ordering = new MetaDataOrdering(metaData.values(), context);
     int remaining = ordering.processQueue();
     if (remaining > 0) {

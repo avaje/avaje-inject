@@ -16,6 +16,10 @@ class MetaDataOrdering {
       "rather than constructor injection on one of the dependencies. " +
       "\n See https://avaje.io/inject/#circular";
 
+  private static final String UNSAT_ERR_MSG =
+    "Missing @Singleton on the dependency? Maybe check use of javax.inject " +
+      "(used with avaje-inject 3.x) versus jakarta.inject (used with avaje-inject 4.x)";
+
   private final ProcessingContext context;
 
   private final List<MetaData> orderedList = new ArrayList<>();
@@ -25,6 +29,8 @@ class MetaDataOrdering {
   private final Map<String, ProviderList> providers = new HashMap<>();
 
   private final List<DependencyLink> circularDependencies = new ArrayList<>();
+
+  private final List<String> missingDependencies = new ArrayList<>();
 
   private String topPackage;
 
@@ -59,6 +65,7 @@ class MetaDataOrdering {
 
     int remaining = queue.size();
     if (remaining != 0) {
+      missingDependencies();
       detectCircularDependency(queue);
       orderedList.addAll(queue);
     }
@@ -100,9 +107,26 @@ class MetaDataOrdering {
    * Log a reasonable compile error for detected circular dependencies.
    */
   void errorOnCircularDependencies() {
-    context.logError("Circular dependencies detected with beans %s  %s", circularDependencies, CIRC_ERR_MSG);
-    for (DependencyLink link : circularDependencies) {
-      context.logError("Circular dependency - %s dependsOn %s for %s", link.metaData, link.provider, link.dependency);
+    if (!missingDependencies.isEmpty()) {
+      context.logError("Unsatisfied dependencies %s  %s", missingDependencies, UNSAT_ERR_MSG);
+    } else {
+      context.logError("Circular dependencies detected with beans %s  %s", circularDependencies, CIRC_ERR_MSG);
+      for (DependencyLink link : circularDependencies) {
+        context.logError("Circular dependency - %s dependsOn %s for %s", link.metaData, link.provider, link.dependency);
+      }
+    }
+  }
+
+  /**
+   * Build list of specific dependencies that are missing.
+   */
+  void missingDependencies() {
+    for (MetaData m : queue) {
+      for (String dependency : m.getDependsOn()) {
+        if (providers.get(dependency) == null) {
+          missingDependencies.add(dependency + " dependency missing for " + m);
+        }
+      }
     }
   }
 
