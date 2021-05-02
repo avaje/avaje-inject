@@ -165,15 +165,17 @@ class MetaDataOrdering {
   }
 
   private boolean allDependenciesWired(MetaData queuedMeta) {
-
     for (String dependency : queuedMeta.getDependsOn()) {
-      ProviderList providerList = providers.get(dependency);
-      if (providerList == null) {
-        // missing dependencies - leave to end
-        return false;
-      } else {
-        if (!providerList.isAllWired()) {
+      if (!Util.isProvider(dependency)) {
+        // check non-provider dependency is satisfied
+        ProviderList providerList = providers.get(dependency);
+        if (providerList == null) {
+          // dependency not yet satisfied
           return false;
+        } else {
+          if (!providerList.isAllWired()) {
+            return false;
+          }
         }
       }
     }

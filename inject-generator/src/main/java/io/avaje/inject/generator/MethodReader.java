@@ -281,7 +281,7 @@ class MethodReader {
 
     String builderGetDependency(String builderName) {
       StringBuilder sb = new StringBuilder();
-      if (genericType != null) {
+      if (isGenericParam()) {
         // passed as provider to build method
         sb.append("prov").append(providerIndex).append(".get(");
       } else {
@@ -289,6 +289,8 @@ class MethodReader {
       }
       if (genericType == null) {
         sb.append(Util.shortName(paramType)).append(".class");
+      } else if (isProvider()) {
+        sb.append(providerParam()).append(".class");
       }
       if (named != null) {
         sb.append(",\"").append(named).append("\"");
@@ -297,8 +299,20 @@ class MethodReader {
       return sb.toString();
     }
 
+    private String providerParam() {
+      return Util.shortName(Util.unwrapProvider(paramType));
+    }
+
+    boolean isProvider() {
+      return Util.isProvider(paramType);
+    }
+
     boolean isGenericType() {
       return genericType != null;
+    }
+
+    boolean isGenericParam() {
+      return isGenericType() && !isProvider();
     }
 
     String getDependsOn() {

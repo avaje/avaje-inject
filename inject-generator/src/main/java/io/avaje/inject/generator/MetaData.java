@@ -169,7 +169,7 @@ class MetaData {
     }
 
     for (String depend : dependsOn) {
-      if (GenericType.isGeneric(depend)) {
+      if (GenericType.isGeneric(depend) && !Util.isProvider(depend)) {
         // provide implementation of generic interface as a parameter to the build method
         final MetaData providerMeta = findProviderOf(depend, ordering);
         String prov = (providerMeta == null) ? "UnknownProvider" : Util.shortName(providerMeta.type);

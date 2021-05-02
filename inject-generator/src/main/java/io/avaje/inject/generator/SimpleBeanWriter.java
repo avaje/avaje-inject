@@ -100,13 +100,13 @@ class SimpleBeanWriter {
     writer.append(CODE_COMMENT_BUILD, shortName).eol();
     writer.append("  public static void build(Builder builder");
     for (MethodReader.MethodParam param : constructor.getParams()) {
-      if (param.isGenericType()) {
+      if (param.isGenericParam()) {
         param.addProviderParam(writer, providerIndex++);
       }
     }
     for (MethodReader methodReader : beanReader.getInjectMethods()) {
       for (MethodReader.MethodParam param : methodReader.getParams()) {
-        if (param.isGenericType()) {
+        if (param.isGenericParam()) {
           param.addProviderParam(writer, providerIndex++);
         }
       }
@@ -143,7 +143,7 @@ class SimpleBeanWriter {
         List<MethodReader.MethodParam> methodParams = methodReader.getParams();
         for (int i = 0; i < methodParams.size(); i++) {
           if (i > 0) {
-            writer.append(",");
+            writer.append(" ,");
           }
           writer.append(methodParams.get(i).builderGetDependency("b"));
         }

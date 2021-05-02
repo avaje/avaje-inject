@@ -3,6 +3,7 @@ package io.avaje.inject.spi;
 import io.avaje.inject.BeanContext;
 import io.avaje.inject.BeanEntry;
 
+import javax.inject.Provider;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -126,6 +127,16 @@ public interface Builder {
    * Get an optional named dependency.
    */
   <T> Optional<T> getOptional(Class<T> cls, String name);
+
+  /**
+   * Return Provider of T given the type.
+   */
+  <T> Provider<T> getProvider(Class<T> cls);
+
+  /**
+   * Return Provider of T given the type and name.
+   */
+  <T> Provider<T> getProvider(Class<T> cls, String name);
 
   /**
    * Get a dependency.

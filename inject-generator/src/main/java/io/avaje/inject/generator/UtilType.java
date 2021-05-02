@@ -6,6 +6,7 @@ class UtilType {
     LIST,
     SET,
     OPTIONAL,
+    PROVIDER,
     OTHER
   }
 
@@ -24,6 +25,8 @@ class UtilType {
       return new UtilType(Type.SET, rawType);
     } else if (rawType.startsWith("java.util.Optional<")) {
       return new UtilType(Type.OPTIONAL, rawType);
+    } else if (Util.isProvider(rawType)) {
+      return new UtilType(Type.PROVIDER, rawType);
     } else {
       return new UtilType(Type.OTHER, rawType);
     }
@@ -37,8 +40,9 @@ class UtilType {
         return Util.extractList(rawType);
       case OPTIONAL:
         return Util.extractOptionalType(rawType);
+      default:
+        return rawType;
     }
-    return rawType;
   }
 
   String getMethod() {
@@ -49,6 +53,8 @@ class UtilType {
         return "getList(";
       case OPTIONAL:
         return "getOptional(";
+      case PROVIDER:
+        return "getProvider(";
     }
     return "get(";
   }

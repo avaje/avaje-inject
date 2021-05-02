@@ -5,6 +5,7 @@ import io.avaje.inject.BeanEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Provider;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -214,6 +215,18 @@ class DBuilder implements Builder {
   public <T> Optional<T> getOptional(Class<T> cls, String name) {
     T bean = getMaybe(cls, name);
     return Optional.ofNullable(bean);
+  }
+
+  @Override
+  public <T> Provider<T> getProvider(Class<T> cls) {
+    return getProvider(cls, null);
+  }
+
+  @Override
+  public <T> Provider<T> getProvider(Class<T> cls, String name) {
+    ProviderPromise<T> promise = new ProviderPromise<>(cls, name);
+    injectors.add(promise);
+    return promise;
   }
 
   @Override

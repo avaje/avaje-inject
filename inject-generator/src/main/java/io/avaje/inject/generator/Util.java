@@ -82,7 +82,7 @@ class Util {
     return UtilType.of(rawType.toString());
   }
 
-  private static boolean isProvider(String rawType) {
+  static boolean isProvider(String rawType) {
     return rawType.startsWith(PROVIDER_PREFIX);
   }
 
