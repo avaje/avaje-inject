@@ -1,13 +1,6 @@
 package io.avaje.inject.generator;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 class MetaDataOrdering {
 
@@ -30,7 +23,8 @@ class MetaDataOrdering {
 
   private final List<DependencyLink> circularDependencies = new ArrayList<>();
 
-  private final List<String> missingDependencies = new ArrayList<>();
+  private final Set<String> missingDependencyTypes = new LinkedHashSet<>();
+  private final List<String> missingDependencyMsg = new ArrayList<>();
 
   private String topPackage;
 
@@ -66,7 +60,6 @@ class MetaDataOrdering {
     int remaining = queue.size();
     if (remaining != 0) {
       missingDependencies();
-      detectCircularDependency(queue);
       orderedList.addAll(queue);
     }
     return remaining;
@@ -77,16 +70,21 @@ class MetaDataOrdering {
    * in the queue with unsatisfied dependencies.
    */
   private void detectCircularDependency(List<MetaData> remainder) {
+    final List<DependencyLink> dependencyLinks = new ArrayList<>();
     for (MetaData metaData : remainder) {
       final List<String> dependsOn = metaData.getDependsOn();
       if (dependsOn != null) {
         for (String dependency : dependsOn) {
           final MetaData provider = findCircularDependency(remainder, dependency);
           if (provider != null) {
-            circularDependencies.add(new DependencyLink(metaData, provider, dependency));
+            dependencyLinks.add(new DependencyLink(metaData, provider, dependency));
           }
         }
       }
+    }
+    if (dependencyLinks.size() > 1) {
+      // need minimum of 2 to form circular dependency
+      circularDependencies.addAll(dependencyLinks);
     }
   }
 
@@ -106,14 +104,10 @@ class MetaDataOrdering {
   /**
    * Log a reasonable compile error for detected circular dependencies.
    */
-  void errorOnCircularDependencies() {
-    if (!missingDependencies.isEmpty()) {
-      context.logError("Unsatisfied dependencies %s  %s", missingDependencies, UNSAT_ERR_MSG);
-    } else {
-      context.logError("Circular dependencies detected with beans %s  %s", circularDependencies, CIRC_ERR_MSG);
-      for (DependencyLink link : circularDependencies) {
-        context.logError("Circular dependency - %s dependsOn %s for %s", link.metaData, link.provider, link.dependency);
-      }
+  private void errorOnCircularDependencies() {
+    context.logError("Circular dependencies detected with beans %s  %s", circularDependencies, CIRC_ERR_MSG);
+    for (DependencyLink link : circularDependencies) {
+      context.logError("Circular dependency - %s dependsOn %s for %s", link.metaData, link.provider, link.dependency);
     }
   }
 
@@ -124,19 +118,39 @@ class MetaDataOrdering {
     for (MetaData m : queue) {
       for (String dependency : m.getDependsOn()) {
         if (providers.get(dependency) == null) {
-          missingDependencies.add(dependency + " dependency missing for " + m);
+          missingDependencyTypes.add(dependency);
+          missingDependencyMsg.add(dependency + " dependency missing for " + m);
         }
       }
+    }
+    if (missingDependencyTypes.isEmpty()) {
+      // only look for circular dependencies if there are no missing dependencies
+      detectCircularDependency(queue);
     }
   }
 
   /**
-   * Log a warning on unsatisfied dependencies that are expected to be
-   * provided by another module.
+   * Log a warning on unsatisfied dependencies that are expected to be provided by another module.
    */
-  void warnOnDependencies() {
-    for (MetaData m : queue) {
-      context.logWarn("Unsatisfied dependencies on %s dependsOn %s", m, m.getDependsOn());
+  private void warnOnDependencies() {
+    if (missingDependencyTypes.isEmpty()) {
+      context.logWarn("There are " + queue.size() + " beans with unsatisfied dependencies (assuming external dependencies)");
+      for (MetaData m : queue) {
+        context.logWarn("Unsatisfied dependencies on %s dependsOn %s", m, m.getDependsOn());
+      }
+    } else {
+      context.logWarn("Dependencies %s are not provided - missing @Singleton (or external dependencies)", missingDependencyTypes);
+      for (String msg : missingDependencyMsg) {
+        context.logWarn(msg);
+      }
+    }
+  }
+
+  void logWarnings() {
+    if (hasCircularDependencies()) {
+      errorOnCircularDependencies();
+    } else {
+      warnOnDependencies();
     }
   }
 
@@ -198,7 +212,6 @@ class MetaDataOrdering {
    * Return the MetaData for the bean that provides the (generic interface) dependency.
    */
   MetaData findProviderOf(String depend) {
-
     for (MetaData metaData : orderedList) {
       List<String> provides = metaData.getProvides();
       if (provides != null) {
@@ -216,7 +229,7 @@ class MetaDataOrdering {
    * Return true if the beans with unsatisfied dependencies seem
    * to form a circular dependency.
    */
-  boolean hasCircularDependencies() {
+  private boolean hasCircularDependencies() {
     return !circularDependencies.isEmpty();
   }
 

@@ -116,12 +116,7 @@ public class Processor extends AbstractProcessor {
     MetaDataOrdering ordering = new MetaDataOrdering(metaData.values(), context);
     int remaining = ordering.processQueue();
     if (remaining > 0) {
-      if (ordering.hasCircularDependencies()) {
-        ordering.errorOnCircularDependencies();
-      } else {
-        context.logWarn("there are " + remaining + " beans with unsatisfied dependencies (assuming external dependencies)");
-        ordering.warnOnDependencies();
-      }
+      ordering.logWarnings();
     }
 
     try {
@@ -249,7 +244,7 @@ public class Processor extends AbstractProcessor {
             // read a build method - DependencyMeta
             DependencyMeta meta = element.getAnnotation(DependencyMeta.class);
             if (meta == null) {
-              context.logError("Missing @DependencyMeta on method " + simpleName.toString());
+              context.logError("Missing @DependencyMeta on method " + simpleName);
             } else {
               final MetaData metaData = new MetaData(meta);
               this.metaData.put(metaData.getKey(), metaData);
