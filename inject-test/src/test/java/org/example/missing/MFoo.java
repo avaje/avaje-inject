@@ -1,6 +1,6 @@
 package org.example.missing;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton // improve error when @Singleton missing
 public class MFoo {
