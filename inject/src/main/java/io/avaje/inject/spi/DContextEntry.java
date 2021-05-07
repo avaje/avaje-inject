@@ -45,9 +45,9 @@ class DContextEntry {
   /**
    * Return true if a supplied bean is one of the entries.
    */
-  boolean isSupplied() {
+  boolean isSupplied(String qualifierName) {
     for (DContextEntryBean entry : entries) {
-      if (entry.isSupplied()) {
+      if (entry.isSupplied(qualifierName)) {
         return true;
       }
     }

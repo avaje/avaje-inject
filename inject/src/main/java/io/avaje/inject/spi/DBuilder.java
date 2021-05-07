@@ -56,6 +56,11 @@ class DBuilder implements Builder {
    */
   private Class<?> injectTarget;
 
+  /**
+   * Flag set when we are running post construct injection.
+   */
+  private boolean runningPostConstruct;
+
   Builder parent;
 
   /**
@@ -98,16 +103,26 @@ class DBuilder implements Builder {
 
   @Override
   public boolean isAddBeanFor(Class<?> addForType, Class<?> injectTarget) {
+    return isAddBeanFor(null, addForType, injectTarget);
+  }
+
+  @Override
+  public boolean isAddBeanFor(String name, Class<?> addForType, Class<?> injectTarget) {
     if (parent == null) {
       return true;
     }
     this.injectTarget = injectTarget;
-    return parent.isAddBeanFor(addForType);
+    return parent.isAddBeanFor(name, addForType, injectTarget);
   }
 
   @Override
   public boolean isAddBeanFor(Class<?> injectTarget) {
     return isAddBeanFor(injectTarget, injectTarget);
+  }
+
+  @Override
+  public boolean isAddBeanFor(String name, Class<?> injectTarget) {
+    return isAddBeanFor(name, injectTarget, injectTarget);
   }
 
   @Override
@@ -224,6 +239,9 @@ class DBuilder implements Builder {
 
   @Override
   public <T> Provider<T> getProvider(Class<T> cls, String name) {
+    if (runningPostConstruct) {
+      return new ProviderWrapper<>(get(cls, name));
+    }
     ProviderPromise<T> promise = new ProviderPromise<>(cls, name);
     injectors.add(promise);
     return promise;
@@ -256,6 +274,7 @@ class DBuilder implements Builder {
     if (name != null) {
       log.debug("perform field injection in context:{}", name);
     }
+    runningPostConstruct = true;
     for (Consumer<Builder> injector : injectors) {
       injector.accept(this);
     }

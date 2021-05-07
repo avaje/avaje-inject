@@ -169,6 +169,15 @@ public interface BeanContextBuilder {
   <D> BeanContextBuilder withBean(Class<D> type, D bean);
 
   /**
+   * Add a supplied bean instance with the given name and injection type.
+   *
+   * @param name The name qualifier
+   * @param type The dependency injection type this bean is target for
+   * @param bean The supplied bean instance to use (typically a test mock)
+   */
+  <D> BeanContextBuilder withBean(String name, Class<D> type, D bean);
+
+  /**
    * Use a mockito mock when injecting this bean type.
    *
    * <pre>{@code

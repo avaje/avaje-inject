@@ -63,7 +63,7 @@ public interface Builder {
   /**
    * Return true if the bean should be created and registered with the context.
    * <p/>
-   * Returning false means there has been a (test double) bean already registered and
+   * Returning false means there has been a supplied bean already registered and
    * that we should skip the creation and registration for this bean.
    *
    * @param addForType   The interface that the bean implements and provides
@@ -74,12 +74,35 @@ public interface Builder {
   /**
    * Return true if the bean should be created and registered with the context.
    * <p/>
-   * Returning false means there has been a (test double) bean already registered and
+   * Returning false means there has been a supplied bean already registered and
+   * that we should skip the creation and registration for this bean.
+   *
+   * @param name         The qualifier name
+   * @param addForType   The interface that the bean implements and provides
+   * @param injectTarget The actual bean type we are looking to create and register
+   */
+  boolean isAddBeanFor(String name, Class<?> addForType, Class<?> injectTarget);
+
+  /**
+   * Return true if the bean should be created and registered with the context.
+   * <p/>
+   * Returning false means there has been a supplied bean already registered and
    * that we should skip the creation and registration for this bean.
    *
    * @param injectTarget The actual bean type we are looking to create and register
    */
   boolean isAddBeanFor(Class<?> injectTarget);
+
+  /**
+   * Return true if the bean should be created and registered with the context.
+   * <p/>
+   * Returning false means there has been a supplied bean already registered and
+   * that we should skip the creation and registration for this bean.
+   *
+   * @param name         The qualifier name
+   * @param injectTarget The actual bean type we are looking to create and register
+   */
+  boolean isAddBeanFor(String name, Class<?> injectTarget);
 
   /**
    * Register the bean instance into the context.

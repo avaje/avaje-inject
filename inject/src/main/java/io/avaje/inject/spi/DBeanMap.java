@@ -39,10 +39,7 @@ class DBeanMap {
   @SuppressWarnings("rawtypes")
   private void addSuppliedBean(SuppliedBean supplied) {
     Class<?> suppliedType = supplied.getType();
-    Named annotation = suppliedType.getAnnotation(Named.class);
-    String name = (annotation == null) ? null : annotation.value();
-
-    DContextEntryBean entryBean = DContextEntryBean.of(supplied.getBean(), name, SUPPLIED);
+    DContextEntryBean entryBean = DContextEntryBean.of(supplied.getBean(), supplied.name(), SUPPLIED);
     beans.computeIfAbsent(suppliedType.getCanonicalName(), s -> new DContextEntry()).add(entryBean);
     for (Class<?> anInterface : suppliedType.getInterfaces()) {
       beans.computeIfAbsent(anInterface.getCanonicalName(), s -> new DContextEntry()).add(entryBean);
@@ -93,8 +90,8 @@ class DBeanMap {
   /**
    * Return true if there is a supplied bean for this type.
    */
-  boolean isSupplied(String canonicalName) {
+  boolean isSupplied(String canonicalName, String qualifierName) {
     DContextEntry entry = beans.get(canonicalName);
-    return entry != null && entry.isSupplied();
+    return entry != null && entry.isSupplied(qualifierName);
   }
 }

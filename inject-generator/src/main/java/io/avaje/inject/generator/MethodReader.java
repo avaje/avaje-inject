@@ -177,8 +177,10 @@ class MethodReader {
   }
 
   void buildAddFor(Append writer) {
-
     writer.append("    if (builder.isAddBeanFor(");
+    if (name != null) {
+      writer.append("\"%s\", ", name);
+    }
     if (addForType != null) {
       writer.append(addForType).append(".class, ");
     }

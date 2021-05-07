@@ -67,14 +67,19 @@ class DBeanContextBuilder implements BeanContextBuilder {
   @SuppressWarnings({"unchecked", "rawtypes"})
   public BeanContextBuilder withBeans(Object... beans) {
     for (Object bean : beans) {
-      suppliedBeans.add(new SuppliedBean(suppliedType(bean.getClass()), bean));
+      suppliedBeans.add(new SuppliedBean(null, suppliedType(bean.getClass()), bean));
     }
     return this;
   }
 
   @Override
-  public <D> DBeanContextBuilder withBean(Class<D> type, D bean) {
-    suppliedBeans.add(new SuppliedBean<>(type, bean));
+  public <D> BeanContextBuilder withBean(Class<D> type, D bean) {
+    return withBean(null, type, bean);
+  }
+
+  @Override
+  public <D> BeanContextBuilder withBean(String name, Class<D> type, D bean) {
+    suppliedBeans.add(new SuppliedBean<>(name, type, bean));
     return this;
   }
 
@@ -85,7 +90,7 @@ class DBeanContextBuilder implements BeanContextBuilder {
 
   @Override
   public <D> DBeanContextBuilder withMock(Class<D> type, Consumer<D> consumer) {
-    suppliedBeans.add(new SuppliedBean<>(type, null, consumer));
+    suppliedBeans.add(new SuppliedBean<>(null, type, null, consumer));
     return this;
   }
 

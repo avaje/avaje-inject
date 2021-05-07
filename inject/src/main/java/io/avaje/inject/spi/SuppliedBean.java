@@ -2,6 +2,7 @@ package io.avaje.inject.spi;
 
 import org.mockito.Mockito;
 
+import javax.inject.Named;
 import java.util.function.Consumer;
 
 /**
@@ -14,6 +15,8 @@ import java.util.function.Consumer;
  */
 public class SuppliedBean<B> {
 
+  private final String name;
+
   private final Class<B> type;
 
   private final Consumer<B> consumer;
@@ -23,14 +26,15 @@ public class SuppliedBean<B> {
   /**
    * Create with a given target type and bean instance.
    */
-  public SuppliedBean(Class<B> type, B bean) {
-    this(type, bean, null);
+  public SuppliedBean(String name, Class<B> type, B bean) {
+    this(name, type, bean, null);
   }
 
   /**
    * Create with a consumer to setup the mock.
    */
-  public SuppliedBean(Class<B> type, B bean, Consumer<B> consumer) {
+  public SuppliedBean(String name, Class<B> type, B bean, Consumer<B> consumer) {
+    this.name = name;
     this.type = type;
     this.bean = bean;
     this.consumer = consumer;
@@ -55,5 +59,16 @@ public class SuppliedBean<B> {
       consumer.accept(bean);
     }
     return bean;
+  }
+
+  /**
+   * Return the qualifier name of the supplied bean.
+   */
+  public String name() {
+    if (name != null) {
+      return name;
+    }
+    Named annotation = type.getAnnotation(Named.class);
+    return (annotation == null) ? null : annotation.value();
   }
 }

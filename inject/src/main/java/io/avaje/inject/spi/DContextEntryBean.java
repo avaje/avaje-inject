@@ -58,8 +58,8 @@ class DContextEntryBean {
     return flag == BeanEntry.SECONDARY;
   }
 
-  boolean isSupplied() {
-    return flag == BeanEntry.SUPPLIED;
+  boolean isSupplied(String qualifierName) {
+    return flag == BeanEntry.SUPPLIED && (qualifierName == null || qualifierName.equals(this.name));
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
