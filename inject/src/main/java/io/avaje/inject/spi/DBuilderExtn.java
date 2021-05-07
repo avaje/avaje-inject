@@ -28,13 +28,18 @@ class DBuilderExtn extends DBuilder {
     }
   }
 
+  @Override
+  public boolean isAddBeanFor(Class<?> addForType, Class<?> injectTarget) {
+    return isAddBeanFor(null, addForType, injectTarget);
+  }
+
   /**
    * Checking for supplied beans (mocks).
    */
   @Override
-  public boolean isAddBeanFor(Class<?> addForType, Class<?> injectTarget) {
+  public boolean isAddBeanFor(String qualifierName, Class<?> addForType, Class<?> injectTarget) {
     if (hasSuppliedBeans) {
-      return !beanMap.isSupplied(addForType.getCanonicalName());
+      return !beanMap.isSupplied(addForType.getCanonicalName(), qualifierName);
     }
     return true;
   }

@@ -103,16 +103,26 @@ class DBuilder implements Builder {
 
   @Override
   public boolean isAddBeanFor(Class<?> addForType, Class<?> injectTarget) {
+    return isAddBeanFor(null, addForType, injectTarget);
+  }
+
+  @Override
+  public boolean isAddBeanFor(String name, Class<?> addForType, Class<?> injectTarget) {
     if (parent == null) {
       return true;
     }
     this.injectTarget = injectTarget;
-    return parent.isAddBeanFor(addForType);
+    return parent.isAddBeanFor(name, addForType, injectTarget);
   }
 
   @Override
   public boolean isAddBeanFor(Class<?> injectTarget) {
     return isAddBeanFor(injectTarget, injectTarget);
+  }
+
+  @Override
+  public boolean isAddBeanFor(String name, Class<?> injectTarget) {
+    return isAddBeanFor(name, injectTarget, injectTarget);
   }
 
   @Override
