@@ -23,12 +23,16 @@ class FieldReader {
   String builderGetDependency() {
     StringBuilder sb = new StringBuilder();
     sb.append("b.").append(type.getMethod());
-    sb.append(type.rawType()).append(".class");
+    sb.append(getFieldType()).append(".class");
     if (name != null) {
       sb.append(",\"").append(name).append("\"");
     }
     sb.append(")");
     return sb.toString();
+  }
+
+  private String getFieldType() {
+    return Util.unwrapProvider(type.rawType());
   }
 
   /**

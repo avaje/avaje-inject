@@ -56,6 +56,11 @@ class DBuilder implements Builder {
    */
   private Class<?> injectTarget;
 
+  /**
+   * Flag set when we are running post construct injection.
+   */
+  private boolean runningPostConstruct;
+
   Builder parent;
 
   /**
@@ -224,6 +229,9 @@ class DBuilder implements Builder {
 
   @Override
   public <T> Provider<T> getProvider(Class<T> cls, String name) {
+    if (runningPostConstruct) {
+      return new ProviderWrapper<>(get(cls, name));
+    }
     ProviderPromise<T> promise = new ProviderPromise<>(cls, name);
     injectors.add(promise);
     return promise;
@@ -256,6 +264,7 @@ class DBuilder implements Builder {
     if (name != null) {
       log.debug("perform field injection in context:{}", name);
     }
+    runningPostConstruct = true;
     for (Consumer<Builder> injector : injectors) {
       injector.accept(this);
     }
