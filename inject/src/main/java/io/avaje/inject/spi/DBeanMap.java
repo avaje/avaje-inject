@@ -2,9 +2,7 @@ package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanEntry;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.avaje.inject.BeanEntry.*;
 
@@ -15,6 +13,8 @@ import static io.avaje.inject.BeanEntry.*;
 class DBeanMap {
 
   private final Map<String, DContextEntry> beans = new LinkedHashMap<>();
+
+  private NextBean nextBean;
 
   /**
    * Create for context builder.
@@ -42,21 +42,21 @@ class DBeanMap {
     }
   }
 
-  void registerPrimary(Object bean, String name, Class<?>... types) {
-    registerWith(PRIMARY, bean, name, types);
+  void registerPrimary(Object bean) {
+    registerWith(PRIMARY, bean);
   }
 
-  void registerSecondary(Object bean, String name, Class<?>... types) {
-    registerWith(SECONDARY, bean, name, types);
+  void registerSecondary(Object bean) {
+    registerWith(SECONDARY, bean);
   }
 
-  void register(Object bean, String name, Class<?>... types) {
-    registerWith(NORMAL, bean, name, types);
+  void register(Object bean) {
+    registerWith(NORMAL, bean);
   }
 
-  void registerWith(int flag, Object bean, String name, Class<?>... types) {
-    DContextEntryBean entryBean = DContextEntryBean.of(bean, name, flag);
-    for (Class<?> type : types) {
+  void registerWith(int flag, Object bean) {
+    DContextEntryBean entryBean = DContextEntryBean.of(bean, nextBean.name, flag);
+    for (Class<?> type : nextBean.types) {
       beans.computeIfAbsent(type.getCanonicalName(), s -> new DContextEntry()).add(entryBean);
     }
   }
@@ -100,5 +100,29 @@ class DBeanMap {
   private boolean isSuppliedType(String qualifierName, Class<?> type) {
     DContextEntry entry = beans.get(type.getCanonicalName());
     return entry != null && entry.isSupplied(qualifierName);
+  }
+
+  /**
+   * Store the qualifier name and type for the next bean to register.
+   */
+  void nextBean(String name, Class<?>[] types) {
+    nextBean = new NextBean(name, types);
+  }
+
+  /**
+   * Return the types of the bean being processed/registered.
+   */
+  Class<?>[] types() {
+    return nextBean.types;
+  }
+
+  private static class NextBean {
+    final String name;
+    final Class<?>[] types;
+
+    NextBean(String name, Class<?>[] types) {
+      this.name = name;
+      this.types = types;
+    }
   }
 }

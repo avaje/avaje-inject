@@ -83,25 +83,20 @@ public interface Builder {
 
   /**
    * Register the bean instance into the context.
-   * <p>
-   * Beans are added in an appropriate order to satisfy dependencies.
-   * </p>
    *
-   * @param bean  The bean instance that has been created.
-   * @param name  The (optional) name of the instance.
-   * @param types Interfaces and class level annotations this bean provides or associates to.
+   * @param bean The bean instance that has been created.
    */
-  <T> T register(T bean, String name, Class<?>... types);
+  <T> T register(T bean);
 
   /**
    * Register the bean as a Primary bean.
    */
-  <T> T registerPrimary(T bean, String name, Class<?>... types);
+  <T> T registerPrimary(T bean);
 
   /**
    * Register the bean as a secondary bean.
    */
-  <T> T registerSecondary(T bean, String name, Class<?>... types);
+  <T> T registerSecondary(T bean);
 
   /**
    * Add a lifecycle bean.

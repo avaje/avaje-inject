@@ -125,17 +125,7 @@ class MethodReader {
       if (beanLifeCycle || hasLifecycleMethods()) {
         writer.append("%s $bean = ", shortName);
       }
-      writer.append("builder.register(bean, ");
-      if (name == null) {
-        writer.append("null, ");
-      } else {
-        writer.append("\"%s\", ", name);
-      }
-      if (typeReader != null) {
-        writer.append(typeReader.getTypesRegister());
-      }
-      writer.append(");").eol();
-
+      writer.append("builder.register(bean);").eol();
       if (beanLifeCycle) {
         writer.append("      builder.addLifecycle($bean);").eol();
       } else if (hasLifecycleMethods()) {

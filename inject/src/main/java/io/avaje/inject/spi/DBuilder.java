@@ -108,6 +108,7 @@ class DBuilder implements Builder {
 
   @Override
   public boolean isAddBeanFor(String name, Class<?>... types) {
+    beanMap.nextBean(name, types);
     if (parent == null) {
       return true;
     }
@@ -173,32 +174,32 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public <T> T register(T bean, String name, Class<?>... types) {
+  public <T> T register(T bean) {
     if (parent != null) {
       // enrichment only exist on top level builder
-      bean = parent.enrich(bean, types);
+      bean = parent.enrich(bean, beanMap.types());
     }
-    beanMap.register(bean, name, types);
+    beanMap.register(bean);
     return bean;
   }
 
   @Override
-  public <T> T registerPrimary(T bean, String name, Class<?>... types) {
+  public <T> T registerPrimary(T bean) {
     if (parent != null) {
       // enrichment only exist on top level builder
-      bean = parent.enrich(bean, types);
+      bean = parent.enrich(bean, beanMap.types());
     }
-    beanMap.registerPrimary(bean, name, types);
+    beanMap.registerPrimary(bean);
     return bean;
   }
 
   @Override
-  public <T> T registerSecondary(T bean, String name, Class<?>... types) {
+  public <T> T registerSecondary(T bean) {
     if (parent != null) {
       // enrichment only exist on top level builder
-      bean = parent.enrich(bean, types);
+      bean = parent.enrich(bean, beanMap.types());
     }
-    beanMap.registerSecondary(bean, name, types);
+    beanMap.registerSecondary(bean);
     return bean;
   }
 

@@ -295,14 +295,7 @@ class BeanReader {
       writer.append("%s $bean = ", shortName);
     }
     String flags = primary ? "Primary" : secondary ? "Secondary" : "";
-    writer.append("builder.register%s(bean, ", flags);
-    if (name == null) {
-      writer.append("null, ");
-    } else {
-      writer.append("\"%s\", ", name);
-    }
-    // add interfaces and annotations
-    writer.append(typeReader.getTypesRegister()).append(");").eol();
+    writer.append("builder.register%s(bean);", flags).eol();
   }
 
   void buildAddLifecycle(Append writer) {
