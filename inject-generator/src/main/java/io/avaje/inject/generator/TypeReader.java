@@ -16,8 +16,6 @@ class TypeReader {
   private final TypeInterfaceReader interfaceReader;
   private final TypeAnnotationReader annotationReader;
   private boolean beanLifeCycle;
-  private String ifaceForType;
-  private String typesAddFor;
   private String typesRegister;
 
   TypeReader(TypeElement beanType, ProcessingContext context, Set<String> importTypes) {
@@ -41,10 +39,6 @@ class TypeReader {
     return beanLifeCycle;
   }
 
-  String getTypesAddFor() {
-    return typesAddFor;
-  }
-
   String getTypesRegister() {
     return typesRegister;
   }
@@ -57,7 +51,6 @@ class TypeReader {
     extendsReader.process();
     interfaceReader.process();
     beanLifeCycle = interfaceReader.isBeanLifeCycle();
-    ifaceForType = interfaceReader.getIfaceForType();
     if (forBean) {
       annotationReader.process();
     }
@@ -86,19 +79,6 @@ class TypeReader {
       appender.add(annotationReader.getAnnotationTypes());
     }
     this.typesRegister = appender.asString();
-    this.typesAddFor = initTypesFor();
-  }
-
-  private String initTypesFor() {
-    StringBuilder buffer = new StringBuilder();
-    if (ifaceForType != null) {
-      buffer.append(", ").append(ifaceForType).append(".class");
-    } else {
-      for (String type : extendsReader.getExtendsTypes()) {
-        buffer.append(", ").append(Util.shortName(type)).append(".class");
-      }
-    }
-    return buffer.toString();
   }
 
   void addImports(Set<String> importTypes) {

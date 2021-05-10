@@ -15,7 +15,6 @@ class TypeInterfaceReader {
   private final ProcessingContext context;
   private final List<String> interfaceTypes = new ArrayList<>();
   private boolean beanLifeCycle;
-  private String ifaceForType;
 
   /**
    * Create for bean type.
@@ -33,10 +32,6 @@ class TypeInterfaceReader {
     return beanLifeCycle;
   }
 
-  String getIfaceForType() {
-    return ifaceForType;
-  }
-
   void process() {
     if (beanType == null) {
       return;
@@ -52,13 +47,6 @@ class TypeInterfaceReader {
         context.logWarn("skip when no package on interface " + type);
       } else {
         interfaceTypes.add(type);
-      }
-    }
-    if (interfaceTypes.size() == 1) {
-      String ifaceType = interfaceTypes.get(0);
-      if (!GenericType.isGeneric(ifaceType)) {
-        // only register for non-generic interfaces for the moment
-        ifaceForType = Util.addForInterface(ifaceType);
       }
     }
   }

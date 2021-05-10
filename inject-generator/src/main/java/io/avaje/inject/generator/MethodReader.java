@@ -1,7 +1,6 @@
 package io.avaje.inject.generator;
 
 import io.avaje.inject.Bean;
-
 import jakarta.inject.Named;
 
 import javax.lang.model.element.*;
@@ -15,12 +14,9 @@ class MethodReader {
   private static final String CODE_COMMENT_LIFECYCLE = "  /**\n   * Lifecycle wrapper for %s.\n   */";
   private static final String CODE_COMMENT_BUILD_FACTORYBEAN = "  /**\n   * Create and register %s via factory bean method %s#%s().\n   */";
 
-  private final ProcessingContext context;
   private final ExecutableElement element;
   private final String factoryType;
   private final String methodName;
-  private final TypeMirror returnType;
-  private final TypeElement returnElement;
   private final String returnTypeRaw;
   private final String shortName;
   private final boolean isVoid;
@@ -39,10 +35,9 @@ class MethodReader {
 
   MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType, Bean bean, Named named) {
     this.isFactory = bean != null;
-    this.context = context;
     this.element = element;
     this.methodName = element.getSimpleName().toString();
-    this.returnType = element.getReturnType();
+    TypeMirror returnType = element.getReturnType();
     this.returnTypeRaw = returnType.toString();
     this.shortName = Util.shortName(returnTypeRaw);
     this.factoryType = beanType.getQualifiedName().toString();
@@ -51,7 +46,7 @@ class MethodReader {
     this.initMethod = (bean == null) ? null : bean.initMethod();
     this.destroyMethod = (bean == null) ? null : bean.destroyMethod();
     this.name = (named == null) ? null : named.value();
-    this.returnElement = baseTypeElement(context.asElement(returnType));
+    TypeElement returnElement = baseTypeElement(context.asElement(returnType));
     if (returnElement == null) {
       this.typeReader = null;
     } else {
