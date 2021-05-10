@@ -102,27 +102,21 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public boolean isAddBeanFor(Class<?> addForType, Class<?> injectTarget) {
-    return isAddBeanFor(null, addForType, injectTarget);
+  public boolean isAddBeanFor(Class<?>... types) {
+    return isAddBeanFor(null, types);
   }
 
   @Override
-  public boolean isAddBeanFor(String name, Class<?> addForType, Class<?> injectTarget) {
+  public boolean isAddBeanFor(String name, Class<?>... types) {
     if (parent == null) {
       return true;
     }
-    this.injectTarget = injectTarget;
-    return parent.isAddBeanFor(name, addForType, injectTarget);
+    this.injectTarget = firstOf(types);
+    return parent.isAddBeanFor(name, types);
   }
 
-  @Override
-  public boolean isAddBeanFor(Class<?> injectTarget) {
-    return isAddBeanFor(injectTarget, injectTarget);
-  }
-
-  @Override
-  public boolean isAddBeanFor(String name, Class<?> injectTarget) {
-    return isAddBeanFor(name, injectTarget, injectTarget);
+  private Class<?> firstOf(Class<?>[] types) {
+    return types != null && types.length > 0 ? types[0] : null;
   }
 
   @Override
@@ -180,34 +174,31 @@ class DBuilder implements Builder {
 
   @Override
   public <T> T register(T bean, String name, Class<?>... types) {
-    String canonicalName = bean.getClass().getCanonicalName();
     if (parent != null) {
       // enrichment only exist on top level builder
       bean = parent.enrich(bean, types);
     }
-    beanMap.register(canonicalName, bean, name, types);
+    beanMap.register(bean, name, types);
     return bean;
   }
 
   @Override
   public <T> T registerPrimary(T bean, String name, Class<?>... types) {
-    String canonicalName = bean.getClass().getCanonicalName();
     if (parent != null) {
       // enrichment only exist on top level builder
       bean = parent.enrich(bean, types);
     }
-    beanMap.registerPrimary(canonicalName, bean, name, types);
+    beanMap.registerPrimary(bean, name, types);
     return bean;
   }
 
   @Override
   public <T> T registerSecondary(T bean, String name, Class<?>... types) {
-    String canonicalName = bean.getClass().getCanonicalName();
     if (parent != null) {
       // enrichment only exist on top level builder
       bean = parent.enrich(bean, types);
     }
-    beanMap.registerSecondary(canonicalName, bean, name, types);
+    beanMap.registerSecondary(bean, name, types);
     return bean;
   }
 

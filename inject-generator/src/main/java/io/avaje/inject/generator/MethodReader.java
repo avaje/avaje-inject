@@ -3,6 +3,7 @@ package io.avaje.inject.generator;
 import io.avaje.inject.Bean;
 
 import jakarta.inject.Named;
+
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
@@ -19,17 +20,17 @@ class MethodReader {
   private final String factoryType;
   private final String methodName;
   private final TypeMirror returnType;
+  private final TypeElement returnElement;
   private final String returnTypeRaw;
   private final String shortName;
   private final boolean isVoid;
   private final List<MethodParam> params = new ArrayList<>();
-  private final List<String> interfaceTypes = new ArrayList<>();
   private final String factoryShortName;
   private final boolean isFactory;
   private final String initMethod;
   private final String destroyMethod;
   private final String name;
-  private String addForType;
+  private final TypeReader typeReader;
   private boolean beanLifeCycle;
 
   MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType) {
@@ -50,32 +51,18 @@ class MethodReader {
     this.initMethod = (bean == null) ? null : bean.initMethod();
     this.destroyMethod = (bean == null) ? null : bean.destroyMethod();
     this.name = (named == null) ? null : named.value();
-    initInterfaces();
-  }
-
-  String getName() {
-    return methodName;
-  }
-
-  private void initInterfaces() {
-    Element element = context.asElement(returnType);
-    if (element instanceof TypeElement) {
-      TypeElement te = (TypeElement) element;
-      if (te.getKind() == ElementKind.INTERFACE) {
-        interfaceTypes.add(te.getQualifiedName().toString());
-      }
-      for (TypeMirror anInterface : te.getInterfaces()) {
-        if (Constants.isBeanLifecycle(anInterface.toString())) {
-          // directly implements BeanLifecycle
-          beanLifeCycle = true;
-        } else {
-          interfaceTypes.add(anInterface.toString());
-        }
-      }
-      if (interfaceTypes.size() == 1) {
-        addForType = interfaceTypes.get(0);
-      }
+    this.returnElement = baseTypeElement(context.asElement(returnType));
+    if (returnElement == null) {
+      this.typeReader = null;
+    } else {
+      this.typeReader = new TypeReader(returnElement, context);
+      typeReader.process();
+      beanLifeCycle = typeReader.isBeanLifeCycle();
     }
+  }
+
+  TypeElement baseTypeElement(Element element) {
+    return element instanceof TypeElement ? (TypeElement) element : null;
   }
 
   void read() {
@@ -85,13 +72,15 @@ class MethodReader {
     }
   }
 
+  String getName() {
+    return methodName;
+  }
+
   List<MethodParam> getParams() {
     return params;
   }
 
-
   MetaData createMeta() {
-
     MetaData metaData = new MetaData(returnTypeRaw, name);
     metaData.setMethod(fullBuildMethod());
 
@@ -138,12 +127,12 @@ class MethodReader {
       }
       writer.append("builder.register(bean, ");
       if (name == null) {
-        writer.append("null");
+        writer.append("null, ");
       } else {
-        writer.append("\"%s\"", name);
+        writer.append("\"%s\", ", name);
       }
-      for (String anInterface : interfaceTypes) {
-        writer.append(", ").append(Util.shortName(anInterface)).append(".class");
+      if (typeReader != null) {
+        writer.append(typeReader.getTypesRegister());
       }
       writer.append(");").eol();
 
@@ -173,22 +162,24 @@ class MethodReader {
     if (beanLifeCycle || hasLifecycleMethods()) {
       importTypes.add(Constants.BEAN_LIFECYCLE);
     }
-    importTypes.addAll(interfaceTypes);
+    if (typeReader != null) {
+      typeReader.addImports(importTypes);
+    }
   }
 
   void buildAddFor(Append writer) {
     writer.append("    if (builder.isAddBeanFor(");
-    if (name != null) {
-      writer.append("\"%s\", ", name);
-    }
-    if (addForType != null) {
-      writer.append(addForType).append(".class, ");
-    }
     if (isVoid) {
-      writer.append("Void.class)) {").eol();
+      writer.append("Void.class");
     } else {
-      writer.append(shortName).append(".class)) {").eol();
+      if (name != null) {
+        writer.append("\"%s\", ", name);
+      }
+      if (typeReader != null) {
+        writer.append(typeReader.getTypesRegister());
+      }
     }
+    writer.append(")) {").eol();
   }
 
   /**

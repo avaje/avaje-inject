@@ -101,6 +101,14 @@ class DContextEntry {
         match = entry;
         return;
       }
+      // try to resolve match using qualifier name (including null)
+      if (match.isNameEqual(name) && !entry.isNameEqual(name)) {
+        ignoredSecondaryMatch = entry;
+        return;
+      } else if (!match.isNameEqual(name) && entry.isNameEqual(name)) {
+        match = entry;
+        return;
+      }
       throw new IllegalStateException("Expecting only 1 bean match but have multiple matching beans " + match.getBean() + " and " + entry.getBean());
     }
 

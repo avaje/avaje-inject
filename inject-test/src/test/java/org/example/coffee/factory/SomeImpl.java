@@ -5,8 +5,8 @@ import org.example.coffee.factory.other.Something;
 public class SomeImpl implements Something {
 
   @Override
-  public void doStuff() {
-
+  public String doStuff() {
+    return "SomeImpl";
   }
 
   @Override

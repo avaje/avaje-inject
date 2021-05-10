@@ -133,14 +133,15 @@ public class BeanContext_Builder_mockitoSpyTest {
 
       WidgetUser widgetUser = context.getBean(WidgetUser.class);
 
-      // these are the same (secondary only)
-      Widget widget = context.getBean(Widget.class);
-      WidgetSecondary widgetSecondary = context.getBean(WidgetSecondary.class);
-      assertThat(widget).isSameAs(widgetSecondary);
-
       String val = widgetUser.wid();
       assertThat(val).isEqualTo("second");
-      verify(widgetSecondary).wid();
+      Widget widget = context.getBean(Widget.class);
+      verify(widget).wid();
+
+      // these are the same (secondary only)
+      WidgetSecondary widgetSecondary = context.getBean(WidgetSecondary.class);
+      //assertThat(widget).isSameAs(widgetSecondary);
+      assertThat(widgetSecondary).isNull();
     }
   }
 
@@ -153,16 +154,18 @@ public class BeanContext_Builder_mockitoSpyTest {
 
       Unused unused = context.getBean(Unused.class);
       Something something = context.getBean(Something.class);
+      String result = unused.doSomething();
+      verify(something).doStuff();
 
       // someImpl has higher precedence than the Secondary
+      assertThat(result).isEqualTo("SomeImpl");
+
       SomeImpl someImpl = context.getBean(SomeImpl.class);
       SomeImplBean someImplBean = context.getBean(SomeImplBean.class);
-      assertThat(something).isSameAs(someImpl);
-      assertThat(someImpl).isNotSameAs(someImplBean);
-
-
-      unused.doSomething();
-      verify(something).doStuff();
+      assertThat(someImpl).isNull();
+      assertThat(someImplBean).isNull();
+      //assertThat(something).isSameAs(someImpl);
+      //assertThat(someImpl).isNotSameAs(someImplBean);
     }
   }
 

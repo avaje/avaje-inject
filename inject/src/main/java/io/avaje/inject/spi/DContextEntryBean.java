@@ -26,19 +26,27 @@ class DContextEntryBean {
   }
 
   final Object source;
-
   private final String name;
-
   private final int flag;
 
   private DContextEntryBean(Object source, String name, int flag) {
     this.source = source;
-    this.name = name;
+    this.name = name == null ? null : name.toLowerCase();
     this.flag = flag;
   }
 
-  boolean isNameMatch(String name) {
-    return name == null || name.equals(this.name);
+  /**
+   * Return true if qualifierName is null or matched.
+   */
+  boolean isNameMatch(String qualifierName) {
+    return qualifierName == null || qualifierName.equals(name);
+  }
+
+  /**
+   * Return true if qualifierName is matched including null.
+   */
+  boolean isNameEqual(String qualifierName) {
+    return Objects.equals(qualifierName, name);
   }
 
   Object obtainInstance() {
@@ -59,7 +67,7 @@ class DContextEntryBean {
   }
 
   boolean isSupplied(String qualifierName) {
-    return flag == BeanEntry.SUPPLIED && (qualifierName == null || qualifierName.equals(this.name));
+    return flag == BeanEntry.SUPPLIED && (qualifierName == null || qualifierName.equals(name));
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -68,9 +76,9 @@ class DContextEntryBean {
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  BeanEntry candidate(String name) {
-    if (name == null || Objects.equals(this.name, name)) {
-      return new BeanEntry(flag, obtainInstance(), name);
+  BeanEntry candidate(String qualifierName) {
+    if (qualifierName == null || Objects.equals(name, qualifierName)) {
+      return new BeanEntry(flag, obtainInstance(), qualifierName);
     } else {
       return null;
     }

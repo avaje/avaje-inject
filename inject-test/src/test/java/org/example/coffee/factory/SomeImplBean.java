@@ -10,8 +10,8 @@ import jakarta.inject.Singleton;
 public class SomeImplBean implements Something {
 
   @Override
-  public void doStuff() {
-
+  public String doStuff() {
+    return "SomeImplBean";
   }
 
   @Override

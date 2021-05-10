@@ -2,15 +2,11 @@ package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanEntry;
 
-import jakarta.inject.Named;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.avaje.inject.BeanEntry.NORMAL;
-import static io.avaje.inject.BeanEntry.PRIMARY;
-import static io.avaje.inject.BeanEntry.SECONDARY;
-import static io.avaje.inject.BeanEntry.SUPPLIED;
+import static io.avaje.inject.BeanEntry.*;
 
 /**
  * Map of types (class types, interfaces and annotations) to a DContextEntry where the
@@ -46,31 +42,31 @@ class DBeanMap {
     }
   }
 
-  void registerPrimary(String canonicalName, Object bean, String name, Class<?>... types) {
-    registerWith(PRIMARY, canonicalName, bean, name, types);
+  void registerPrimary(Object bean, String name, Class<?>... types) {
+    registerWith(PRIMARY, bean, name, types);
   }
 
-  void registerSecondary(String canonicalName, Object bean, String name, Class<?>... types) {
-    registerWith(SECONDARY, canonicalName, bean, name, types);
+  void registerSecondary(Object bean, String name, Class<?>... types) {
+    registerWith(SECONDARY, bean, name, types);
   }
 
-  void register(String canonicalName, Object bean, String name, Class<?>... types) {
-    registerWith(NORMAL, canonicalName, bean, name, types);
+  void register(Object bean, String name, Class<?>... types) {
+    registerWith(NORMAL, bean, name, types);
   }
 
-  void registerWith(int flag, String canonicalName, Object bean, String name, Class<?>... types) {
+  void registerWith(int flag, Object bean, String name, Class<?>... types) {
     DContextEntryBean entryBean = DContextEntryBean.of(bean, name, flag);
-    beans.computeIfAbsent(canonicalName, s -> new DContextEntry()).add(entryBean);
-    if (types != null) {
-      for (Class<?> type : types) {
-        beans.computeIfAbsent(type.getCanonicalName(), s -> new DContextEntry()).add(entryBean);
-      }
+    for (Class<?> type : types) {
+      beans.computeIfAbsent(type.getCanonicalName(), s -> new DContextEntry()).add(entryBean);
     }
   }
 
   <T> BeanEntry<T> candidate(Class<T> type, String name) {
     DContextEntry entry = beans.get(type.getCanonicalName());
     if (entry != null) {
+      if (name != null) {
+        name = name.toLowerCase();
+      }
       return entry.candidate(name);
     }
     return null;
@@ -88,10 +84,21 @@ class DBeanMap {
   }
 
   /**
-   * Return true if there is a supplied bean for this type.
+   * Return true if there is a supplied bean for the name and types.
    */
-  boolean isSupplied(String canonicalName, String qualifierName) {
-    DContextEntry entry = beans.get(canonicalName);
+  boolean isSupplied(String qualifierName, Class<?>... types) {
+    if (types != null) {
+      for (Class<?> type : types) {
+        if (isSuppliedType(qualifierName, type)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  private boolean isSuppliedType(String qualifierName, Class<?> type) {
+    DContextEntry entry = beans.get(type.getCanonicalName());
     return entry != null && entry.isSupplied(qualifierName);
   }
 }

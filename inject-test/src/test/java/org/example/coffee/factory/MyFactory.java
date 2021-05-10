@@ -5,6 +5,7 @@ import io.avaje.inject.Factory;
 import org.example.coffee.factory.other.Something;
 
 import jakarta.inject.Named;
+import org.example.coffee.parent.DesEngi;
 
 @Factory
 public class MyFactory {
@@ -43,7 +44,33 @@ public class MyFactory {
     methods += "|anotherCFact";
   }
 
+  @Bean
+  @Named("BuildDesi1")
+  DesEngi buildEngi() {
+    methods += "|buildEngi1";
+    return new DesEngi(){
+      @Override
+      public String ignite() {
+        return "buildEngi1";
+      }
+    };
+  }
+
+  @Bean
+  @Named("BuildDesi2")
+  DesEngi buildEngi2() {
+    methods += "|buildEngi2";
+    return new MyEngi();
+  }
+
   String methodsCalled() {
     return methods;
+  }
+
+  private class MyEngi extends DesEngi {
+    @Override
+    public String ignite() {
+      return "MyEngi";
+    }
   }
 }

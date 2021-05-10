@@ -3,22 +3,11 @@ package io.avaje.inject.generator;
 import io.avaje.inject.Bean;
 import io.avaje.inject.Primary;
 import io.avaje.inject.Secondary;
-
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import jakarta.inject.Qualifier;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+
+import javax.lang.model.element.*;
+import java.util.*;
 
 class BeanReader {
 
@@ -32,30 +21,19 @@ class BeanReader {
   private String name;
 
   private MethodReader injectConstructor;
-
   private final List<MethodReader> otherConstructors = new ArrayList<>();
-
   private final List<MethodReader> factoryMethods = new ArrayList<>();
 
   private Element postConstructMethod;
-
   private Element preDestroyMethod;
 
   private final List<FieldReader> injectFields = new ArrayList<>();
-
   private final List<MethodReader> injectMethods = new ArrayList<>();
-
-  private final List<String> interfaceTypes = new ArrayList<>();
-
-  private String addForType;
-
   private final Set<String> importTypes = new TreeSet<>();
-
   private final BeanRequestParams requestParams;
 
+  private final TypeReader typeReader;
   private MethodReader constructor;
-
-  private String registrationTypes;
 
   private boolean writtenToFile;
 
@@ -72,6 +50,7 @@ class BeanReader {
     this.shortName = shortName(beanType);
     this.context = context;
     this.requestParams = new BeanRequestParams(type);
+    this.typeReader = new TypeReader(beanType, context, importTypes);
     init();
   }
 
@@ -81,55 +60,11 @@ class BeanReader {
   }
 
   private void init() {
-    StringBuilder sb = new StringBuilder();
-
-    for (TypeMirror anInterface : beanType.getInterfaces()) {
-      String type = Util.unwrapProvider(anInterface.toString());
-      if (Constants.isBeanLifecycle(type)) {
-        beanLifeCycle = true;
-      } else if (type.indexOf('.') == -1) {
-        context.logWarn("skip when no package on interface " + type);
-      } else {
-        interfaceTypes.add(type);
-        if (!GenericType.isGeneric(type)) {
-          importTypes.add(type);
-          sb.append(", ").append(Util.shortName(type)).append(".class");
-        }
-      }
-    }
-    if (interfaceTypes.size() == 1) {
-      String ifaceType = interfaceTypes.get(0);
-      if (!GenericType.isGeneric(ifaceType)) {
-        // only register for non-generic interfaces for the moment
-        addForType = Util.addForInterface(ifaceType);
-      }
-    }
-
-    // get class level annotations (that are not Named and Singleton)
-    for (AnnotationMirror annotationMirror : beanType.getAnnotationMirrors()) {
-
-      DeclaredType annotationType = annotationMirror.getAnnotationType();
-      Qualifier qualifier = annotationType.asElement().getAnnotation(Qualifier.class);
-      String annType = annotationType.toString();
-      if (qualifier != null) {
-        this.name = Util.shortName(annType);
-      } else if (annType.indexOf('.') == -1) {
-        context.logWarn("skip when no package on annotation " + annType);
-      } else {
-        if (IncludeAnnotations.include(annType)) {
-          importTypes.add(annType);
-          sb.append(", ").append(Util.shortName(annType)).append(".class");
-        }
-      }
-    }
-    Named named = beanType.getAnnotation(Named.class);
-    if (named != null) {
-      this.name = named.value();
-    }
-
+    typeReader.process();
+    beanLifeCycle = typeReader.isBeanLifeCycle();
+    name = typeReader.getName();
     primary = (beanType.getAnnotation(Primary.class) != null);
     secondary = !primary && (beanType.getAnnotation(Secondary.class) != null);
-    registrationTypes = sb.toString();
   }
 
   TypeElement getBeanType() {
@@ -220,18 +155,7 @@ class BeanReader {
   }
 
   List<String> getInterfaces() {
-    return interfaceTypes;
-  }
-
-  /**
-   * Return all the interfaces and annotations associated with this bean.
-   * <p>
-   * The bean is made a 'member' of the list of beans that implement the interface or have the
-   * annotation.
-   * </p>
-   */
-  String getInterfacesAndAnnotations() {
-    return registrationTypes;
+    return typeReader.getInterfaces();
   }
 
   private void readConstructor(Element element) {
@@ -361,10 +285,8 @@ class BeanReader {
     if (name != null) {
       writer.append("\"%s\", ", name);
     }
-    if (addForType != null) {
-      writer.append(addForType).append(".class, ");
-    }
-    writer.append(shortName).append(".class)) {").eol();
+    writer.append(typeReader.getTypesRegister());
+    writer.append(")) {").eol();
   }
 
   void buildRegister(Append writer) {
@@ -375,12 +297,12 @@ class BeanReader {
     String flags = primary ? "Primary" : secondary ? "Secondary" : "";
     writer.append("builder.register%s(bean, ", flags);
     if (name == null) {
-      writer.append("null");
+      writer.append("null, ");
     } else {
-      writer.append("\"%s\"", name);
+      writer.append("\"%s\", ", name);
     }
     // add interfaces and annotations
-    writer.append(getInterfacesAndAnnotations()).append(");").eol();
+    writer.append(typeReader.getTypesRegister()).append(");").eol();
   }
 
   void buildAddLifecycle(Append writer) {

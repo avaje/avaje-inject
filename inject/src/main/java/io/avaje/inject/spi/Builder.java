@@ -2,8 +2,8 @@ package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanContext;
 import io.avaje.inject.BeanEntry;
-
 import jakarta.inject.Provider;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -66,10 +66,10 @@ public interface Builder {
    * Returning false means there has been a supplied bean already registered and
    * that we should skip the creation and registration for this bean.
    *
-   * @param addForType   The interface that the bean implements and provides
-   * @param injectTarget The actual bean type we are looking to create and register
+   * @param name  The qualifier name
+   * @param types The types that the bean implements and provides
    */
-  boolean isAddBeanFor(Class<?> addForType, Class<?> injectTarget);
+  boolean isAddBeanFor(String name, Class<?>... types);
 
   /**
    * Return true if the bean should be created and registered with the context.
@@ -77,32 +77,9 @@ public interface Builder {
    * Returning false means there has been a supplied bean already registered and
    * that we should skip the creation and registration for this bean.
    *
-   * @param name         The qualifier name
-   * @param addForType   The interface that the bean implements and provides
-   * @param injectTarget The actual bean type we are looking to create and register
+   * @param types The types that the bean implements and provides
    */
-  boolean isAddBeanFor(String name, Class<?> addForType, Class<?> injectTarget);
-
-  /**
-   * Return true if the bean should be created and registered with the context.
-   * <p/>
-   * Returning false means there has been a supplied bean already registered and
-   * that we should skip the creation and registration for this bean.
-   *
-   * @param injectTarget The actual bean type we are looking to create and register
-   */
-  boolean isAddBeanFor(Class<?> injectTarget);
-
-  /**
-   * Return true if the bean should be created and registered with the context.
-   * <p/>
-   * Returning false means there has been a supplied bean already registered and
-   * that we should skip the creation and registration for this bean.
-   *
-   * @param name         The qualifier name
-   * @param injectTarget The actual bean type we are looking to create and register
-   */
-  boolean isAddBeanFor(String name, Class<?> injectTarget);
+  boolean isAddBeanFor(Class<?>... types);
 
   /**
    * Register the bean instance into the context.

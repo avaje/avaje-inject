@@ -15,7 +15,7 @@ public class Unused {
     this.something = something;
   }
 
-  public void doSomething() {
-    something.doStuff();
+  public String doSomething() {
+    return something.doStuff();
   }
 }
