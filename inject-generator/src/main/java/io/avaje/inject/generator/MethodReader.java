@@ -176,7 +176,7 @@ class MethodReader {
     if (isVoid) {
       writer.append("Void.class");
     } else {
-      if (name != null) {
+      if (name != null && !name.isEmpty()) {
         writer.append("\"%s\", ", name);
       }
       if (typeReader != null) {
