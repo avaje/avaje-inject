@@ -42,19 +42,7 @@ class DBeanMap {
     }
   }
 
-  void registerPrimary(Object bean) {
-    registerWith(PRIMARY, bean);
-  }
-
-  void registerSecondary(Object bean) {
-    registerWith(SECONDARY, bean);
-  }
-
-  void register(Object bean) {
-    registerWith(NORMAL, bean);
-  }
-
-  void registerWith(int flag, Object bean) {
+  void register(int flag, Object bean) {
     DContextEntryBean entryBean = DContextEntryBean.of(bean, nextBean.name, flag);
     for (Class<?> type : nextBean.types) {
       beans.computeIfAbsent(type.getCanonicalName(), s -> new DContextEntry()).add(entryBean);

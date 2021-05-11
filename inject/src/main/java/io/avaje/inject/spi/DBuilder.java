@@ -175,31 +175,25 @@ class DBuilder implements Builder {
 
   @Override
   public <T> T register(T bean) {
-    if (parent != null) {
-      // enrichment only exist on top level builder
-      bean = parent.enrich(bean, beanMap.types());
-    }
-    beanMap.register(bean);
-    return bean;
+    return register(BeanEntry.NORMAL, bean);
   }
 
   @Override
   public <T> T registerPrimary(T bean) {
-    if (parent != null) {
-      // enrichment only exist on top level builder
-      bean = parent.enrich(bean, beanMap.types());
-    }
-    beanMap.registerPrimary(bean);
-    return bean;
+    return register(BeanEntry.PRIMARY, bean);
   }
 
   @Override
   public <T> T registerSecondary(T bean) {
+    return register(BeanEntry.SECONDARY, bean);
+  }
+
+  private <T> T register(int flag, T bean) {
     if (parent != null) {
       // enrichment only exist on top level builder
       bean = parent.enrich(bean, beanMap.types());
     }
-    beanMap.registerSecondary(bean);
+    beanMap.register(flag, bean);
     return bean;
   }
 
