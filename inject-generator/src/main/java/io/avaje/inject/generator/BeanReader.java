@@ -283,7 +283,7 @@ class BeanReader {
 
   void buildAddFor(Append writer) {
     writer.append("    if (builder.isAddBeanFor(");
-    if (name != null) {
+    if (name != null && !name.isEmpty()) {
       writer.append("\"%s\", ", name);
     }
     writer.append(typeReader.getTypesRegister());
