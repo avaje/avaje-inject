@@ -108,6 +108,7 @@ class BeanReader {
       constructor.checkRequest(requestParams);
     }
     for (FieldReader fields : injectFields) {
+      fields.addImports(importTypes);
       fields.checkRequest(requestParams);
     }
     for (MethodReader methods : injectMethods) {

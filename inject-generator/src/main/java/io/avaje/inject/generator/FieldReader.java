@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import javax.lang.model.element.Element;
+import java.util.Set;
 
 class FieldReader {
 
@@ -8,6 +9,7 @@ class FieldReader {
   private final String name;
   private final UtilType type;
   private final boolean nullable;
+  private final String fieldType;
   private boolean requestParam;
   private String requestParamName;
 
@@ -16,25 +18,26 @@ class FieldReader {
     this.name = Util.getNamed(element);
     this.nullable = Util.isNullable(element);
     this.type = Util.determineType(element.asType());
+    this.fieldType = Util.unwrapProvider(type.rawType());
   }
 
   String getFieldName() {
     return element.getSimpleName().toString();
   }
 
+  void addImports(Set<String> importTypes) {
+    importTypes.add(fieldType);
+  }
+
   String builderGetDependency() {
     StringBuilder sb = new StringBuilder();
     sb.append("b.").append(type.getMethod(nullable));
-    sb.append(getFieldType()).append(".class");
+    sb.append(nm(fieldType)).append(".class");
     if (name != null) {
       sb.append(",\"").append(name).append("\"");
     }
     sb.append(")");
     return sb.toString();
-  }
-
-  private String getFieldType() {
-    return Util.unwrapProvider(type.rawType());
   }
 
   /**
@@ -53,7 +56,7 @@ class FieldReader {
   void writeRequestDependency(Append writer) {
     if (!requestParam) {
       // just add as field dependency
-      requestParamName = writer.nextName(getFieldName().toLowerCase());//"dep");
+      requestParamName = writer.nextName(getFieldName().toLowerCase());
       final String shortType = nm(type.rawType());
       writer.append("  @Inject").eol();
       writer.append("  %s %s;", shortType, requestParamName).eol().eol();
