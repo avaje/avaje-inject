@@ -7,12 +7,14 @@ class FieldReader {
   private final Element element;
   private final String name;
   private final UtilType type;
+  private final boolean nullable;
   private boolean requestParam;
   private String requestParamName;
 
   FieldReader(Element element) {
     this.element = element;
     this.name = Util.getNamed(element);
+    this.nullable = Util.isNullable(element);
     this.type = Util.determineType(element.asType());
   }
 
@@ -22,7 +24,7 @@ class FieldReader {
 
   String builderGetDependency() {
     StringBuilder sb = new StringBuilder();
-    sb.append("b.").append(type.getMethod());
+    sb.append("b.").append(type.getMethod(nullable));
     sb.append(getFieldType()).append(".class");
     if (name != null) {
       sb.append(",\"").append(name).append("\"");

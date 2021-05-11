@@ -124,6 +124,16 @@ public interface Builder {
   <T> Optional<T> getOptional(Class<T> cls, String name);
 
   /**
+   * Get an optional dependency potentially returning null.
+   */
+  <T> T getNullable(Class<T> cls);
+
+  /**
+   * Get an optional named dependency potentially returning null.
+   */
+  <T> T getNullable(Class<T> cls, String name);
+
+  /**
    * Return Provider of T given the type.
    */
   <T> Provider<T> getProvider(Class<T> cls);

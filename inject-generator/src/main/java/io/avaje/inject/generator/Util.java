@@ -10,7 +10,8 @@ import javax.lang.model.type.TypeMirror;
 class Util {
 
   private static final String PROVIDER_PREFIX = "jakarta.inject.Provider<";
-
+  private static final String OPTIONAL_PREFIX = "java.util.Optional<";
+  private static final String NULLABLE = "Nullable";
   private static final int PROVIDER_LENGTH = PROVIDER_PREFIX.length();
 
   static boolean isVoid(String type) {
@@ -56,6 +57,10 @@ class Util {
     } else {
       return fullType.substring(p + 1);
     }
+  }
+
+  static boolean isOptional(String rawType) {
+    return rawType.startsWith(OPTIONAL_PREFIX);
   }
 
   static String extractOptionalType(String rawType) {
@@ -130,6 +135,18 @@ class Util {
       }
     }
     return null;
+  }
+
+  /**
+   * Return true if the element has a Nullable annotation.
+   */
+  public static boolean isNullable(Element p) {
+    for (AnnotationMirror mirror : p.getAnnotationMirrors()) {
+      if (NULLABLE.equals(shortName(mirror.getAnnotationType().toString()))) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public static String addForInterface(String interfaceType) {

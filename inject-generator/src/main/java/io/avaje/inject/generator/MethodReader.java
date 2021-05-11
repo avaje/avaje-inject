@@ -28,6 +28,7 @@ class MethodReader {
   private final String name;
   private final TypeReader typeReader;
   private boolean beanLifeCycle;
+  private boolean optionalType;
 
   MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType) {
     this(context, element, beanType, null, null);
@@ -37,8 +38,15 @@ class MethodReader {
     this.isFactory = bean != null;
     this.element = element;
     this.methodName = element.getSimpleName().toString();
-    TypeMirror returnType = element.getReturnType();
-    this.returnTypeRaw = returnType.toString();
+    TypeMirror returnMirror = element.getReturnType();
+    String raw = returnMirror.toString();
+    if (Util.isOptional(raw)) {
+      optionalType = true;
+      returnTypeRaw = Util.extractOptionalType(raw);
+    } else {
+      optionalType = false;
+      returnTypeRaw = raw;
+    }
     this.shortName = Util.shortName(returnTypeRaw);
     this.factoryType = beanType.getQualifiedName().toString();
     this.factoryShortName = Util.shortName(factoryType);
@@ -46,7 +54,7 @@ class MethodReader {
     this.initMethod = (bean == null) ? null : bean.initMethod();
     this.destroyMethod = (bean == null) ? null : bean.destroyMethod();
     this.name = (named == null) ? null : named.value();
-    TypeElement returnElement = baseTypeElement(context.asElement(returnType));
+    TypeElement returnElement = context.element(returnTypeRaw);
     if (returnElement == null) {
       this.typeReader = null;
     } else {
@@ -54,10 +62,6 @@ class MethodReader {
       typeReader.process();
       beanLifeCycle = typeReader.isBeanLifeCycle();
     }
-  }
-
-  TypeElement baseTypeElement(Element element) {
-    return element instanceof TypeElement ? (TypeElement) element : null;
   }
 
   void read() {
@@ -99,14 +103,18 @@ class MethodReader {
 
   String builderBuildBean() {
     StringBuilder sb = new StringBuilder();
+    sb.append("      ");
     if (isVoid) {
-      sb.append(String.format("      factory.%s(", methodName));
+      sb.append(String.format("factory.%s(", methodName));
     } else {
-      sb.append(String.format("      %s bean = factory.%s(", Util.shortName(returnTypeRaw), methodName));
+      String beanType = optionalType ? String.format("Optional<%s>", shortName) : shortName;
+      String beanName = optionalType ? "optionalBean" : "bean";
+      sb.append(beanType);
+      sb.append(String.format(" %s = factory.%s(", beanName, methodName));
     }
     for (int i = 0; i < params.size(); i++) {
       if (i > 0) {
-        sb.append(",");
+        sb.append(", ");
       }
       sb.append(params.get(i).builderGetDependency("builder"));
     }
@@ -116,15 +124,23 @@ class MethodReader {
 
   void builderBuildAddBean(Append writer) {
     if (!isVoid) {
-      writer.append("      ");
+      String indent = optionalType ? "        " : "      ";
+      if (optionalType) {
+        writer.append("      if (optionalBean.isPresent()) {").eol();
+        writer.append("        %s bean = optionalBean.get();", shortName).eol();
+      }
+      writer.append(indent);
       if (beanLifeCycle || hasLifecycleMethods()) {
         writer.append("%s $bean = ", shortName);
       }
       writer.append("builder.register(bean);").eol();
       if (beanLifeCycle) {
-        writer.append("      builder.addLifecycle($bean);").eol();
+        writer.append(indent).append("builder.addLifecycle($bean);").eol();
       } else if (hasLifecycleMethods()) {
-        writer.append("      builder.addLifecycle(new %s$lifecycle($bean));", shortName).eol();
+        writer.append(indent).append("builder.addLifecycle(new %s$lifecycle($bean));", shortName).eol();
+      }
+      if (optionalType) {
+        writer.append("      }").eol();
       }
     }
   }
@@ -146,6 +162,9 @@ class MethodReader {
     }
     if (beanLifeCycle || hasLifecycleMethods()) {
       importTypes.add(Constants.BEAN_LIFECYCLE);
+    }
+    if (optionalType) {
+      importTypes.add(Constants.OPTIONAL);
     }
     if (typeReader != null) {
       typeReader.addImports(importTypes);
@@ -246,12 +265,14 @@ class MethodReader {
     private final UtilType utilType;
     private final String paramType;
     private final GenericType genericType;
+    private final boolean nullable;
     private int providerIndex;
     private boolean requestParam;
     private String requestParamName;
 
     MethodParam(VariableElement param) {
       this.named = Util.getNamed(param);
+      this.nullable = Util.isNullable(param);
       this.utilType = Util.determineType(param.asType());
       this.paramType = utilType.rawType();
       this.genericType = GenericType.maybe(paramType);
@@ -263,7 +284,7 @@ class MethodReader {
         // passed as provider to build method
         sb.append("prov").append(providerIndex).append(".get(");
       } else {
-        sb.append(builderName).append(".").append(utilType.getMethod());
+        sb.append(builderName).append(".").append(utilType.getMethod(nullable));
       }
       if (genericType == null) {
         sb.append(Util.shortName(paramType)).append(".class");

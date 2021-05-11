@@ -45,7 +45,7 @@ class UtilType {
     }
   }
 
-  String getMethod() {
+  String getMethod(boolean nullable) {
     switch (type) {
       case SET:
         return "getSet(";
@@ -56,7 +56,7 @@ class UtilType {
       case PROVIDER:
         return "getProvider(";
     }
-    return "get(";
+    return nullable ? "getNullable(" : "get(";
   }
 
 }

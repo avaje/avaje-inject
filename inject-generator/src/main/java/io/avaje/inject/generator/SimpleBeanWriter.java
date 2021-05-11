@@ -120,7 +120,7 @@ class SimpleBeanWriter {
     List<MethodReader.MethodParam> params = constructor.getParams();
     for (int i = 0; i < params.size(); i++) {
       if (i > 0) {
-        writer.append(",");
+        writer.append(", ");
       }
       writer.append(params.get(i).builderGetDependency("builder"));
     }
@@ -143,7 +143,7 @@ class SimpleBeanWriter {
         List<MethodReader.MethodParam> methodParams = methodReader.getParams();
         for (int i = 0; i < methodParams.size(); i++) {
           if (i > 0) {
-            writer.append(" ,");
+            writer.append(", ");
           }
           writer.append(methodParams.get(i).builderGetDependency("b"));
         }

@@ -2,6 +2,7 @@ package io.avaje.inject.generator;
 
 class Constants {
 
+  static final String OPTIONAL = "java.util.Optional";
   static final String KOTLIN_METADATA = "kotlin.Metadata";
 
   static final String PROVIDER = "jakarta.inject.Provider";

@@ -225,6 +225,16 @@ class DBuilder implements Builder {
   }
 
   @Override
+  public <T> T getNullable(Class<T> cls) {
+    return getNullable(cls, null);
+  }
+
+  @Override
+  public <T> T getNullable(Class<T> cls, String name) {
+    return getMaybe(cls, name);
+  }
+
+  @Override
   public <T> Provider<T> getProvider(Class<T> cls) {
     return getProvider(cls, null);
   }
