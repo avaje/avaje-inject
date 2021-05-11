@@ -2,7 +2,7 @@ package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanContext;
 import io.avaje.inject.BeanEntry;
-import jakarta.inject.Provider;
+import javax.inject.Provider;
 
 import java.util.List;
 import java.util.Optional;

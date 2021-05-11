@@ -2,8 +2,8 @@ package org.example.coffee.provider;
 
 import org.example.coffee.grind.Grinder;
 
-import jakarta.inject.Provider;
-import jakarta.inject.Singleton;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 
 @Singleton
 public class AProvProvider implements Provider<AProv> {

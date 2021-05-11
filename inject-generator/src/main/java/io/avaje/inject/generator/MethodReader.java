@@ -1,7 +1,7 @@
 package io.avaje.inject.generator;
 
 import io.avaje.inject.Bean;
-import jakarta.inject.Named;
+import javax.inject.Named;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;

@@ -1,6 +1,6 @@
 package io.avaje.inject.generator;
 
-import jakarta.inject.Qualifier;
+import javax.inject.Qualifier;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;

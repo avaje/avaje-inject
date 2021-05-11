@@ -5,8 +5,8 @@ import io.avaje.inject.Primary;
 import io.avaje.inject.Secondary;
 import org.junit.jupiter.api.Test;
 
-import jakarta.inject.Named;
-import jakarta.inject.Singleton;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 import static io.avaje.inject.generator.IncludeAnnotations.include;
 import static org.junit.jupiter.api.Assertions.assertFalse;

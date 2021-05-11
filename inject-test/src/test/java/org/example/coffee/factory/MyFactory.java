@@ -4,7 +4,7 @@ import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
 import org.example.coffee.factory.other.Something;
 
-import jakarta.inject.Named;
+import javax.inject.Named;
 import org.example.coffee.parent.DesEngi;
 
 @Factory

@@ -1,6 +1,6 @@
 package org.example.missing;
 
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 
 /**
  * Has only 1 public constructor so that is chosen for injection.

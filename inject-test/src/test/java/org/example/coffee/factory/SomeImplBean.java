@@ -3,7 +3,7 @@ package org.example.coffee.factory;
 import io.avaje.inject.Secondary;
 import org.example.coffee.factory.other.Something;
 
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 
 @Secondary
 @Singleton

@@ -1,7 +1,7 @@
 package org.example.optional;
 
-import jakarta.inject.Named;
-import jakarta.inject.Singleton;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import org.jetbrains.annotations.Nullable;
 
 /**

@@ -1,7 +1,7 @@
 package org.example.coffee.core;
 
 import javax.annotation.PreDestroy;
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 
 @Singleton
 public class Steamer {

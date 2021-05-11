@@ -1,6 +1,6 @@
 package org.example.coffee.parent;
 
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 import org.example.coffee.parent.sub.PetEngi;
 
 /**

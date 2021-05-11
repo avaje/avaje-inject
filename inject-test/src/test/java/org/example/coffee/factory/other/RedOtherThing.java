@@ -2,8 +2,8 @@ package org.example.coffee.factory.other;
 
 import org.example.coffee.factory.Otherthing;
 
-import jakarta.inject.Named;
-import jakarta.inject.Singleton;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 @Singleton
 @Named("red")

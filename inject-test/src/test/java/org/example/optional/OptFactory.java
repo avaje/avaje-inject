@@ -2,7 +2,7 @@ package org.example.optional;
 
 import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
-import jakarta.inject.Named;
+import javax.inject.Named;
 
 import java.util.Optional;
 

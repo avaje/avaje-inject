@@ -3,8 +3,8 @@ package io.avaje.inject.generator;
 import io.avaje.inject.Bean;
 import io.avaje.inject.Primary;
 import io.avaje.inject.Secondary;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import javax.lang.model.element.*;
 import java.util.*;

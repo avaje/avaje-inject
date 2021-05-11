@@ -1,7 +1,7 @@
 package io.avaje.inject.generator;
 
-import jakarta.inject.Named;
-import jakarta.inject.Qualifier;
+import javax.inject.Named;
+import javax.inject.Qualifier;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
@@ -9,7 +9,7 @@ import javax.lang.model.type.TypeMirror;
 
 class Util {
 
-  private static final String PROVIDER_PREFIX = "jakarta.inject.Provider<";
+  private static final String PROVIDER_PREFIX = "javax.inject.Provider<";
   private static final String OPTIONAL_PREFIX = "java.util.Optional<";
   private static final String NULLABLE = "Nullable";
   private static final int PROVIDER_LENGTH = PROVIDER_PREFIX.length();

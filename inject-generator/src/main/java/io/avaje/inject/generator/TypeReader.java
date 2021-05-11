@@ -1,6 +1,6 @@
 package io.avaje.inject.generator;
 
-import jakarta.inject.Named;
+import javax.inject.Named;
 
 import javax.lang.model.element.TypeElement;
 import java.util.LinkedHashSet;

@@ -2,7 +2,7 @@ package org.example.coffee.core;
 
 import org.example.coffee.Pump;
 
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 
 @Singleton
 public class DuperPump implements Pump {

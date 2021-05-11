@@ -1,6 +1,6 @@
 package io.avaje.inject.spi;
 
-import jakarta.inject.Provider;
+import javax.inject.Provider;
 
 /**
  * Just wrap a bean.

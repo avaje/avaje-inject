@@ -1,6 +1,6 @@
 package org.example.missing;
 
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 
 @Singleton
 public class MFooUserMore {

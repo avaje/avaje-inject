@@ -2,7 +2,7 @@ package org.example.coffee.generic;
 
 import org.example.coffee.grind.AMusher;
 
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 
 /**
  * Has multiple dependencies that are generic interface.

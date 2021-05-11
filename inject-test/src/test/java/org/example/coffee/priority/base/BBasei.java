@@ -2,7 +2,7 @@ package org.example.coffee.priority.base;
 
 import io.avaje.inject.Priority;
 
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 
 @Singleton
 @Priority(7)

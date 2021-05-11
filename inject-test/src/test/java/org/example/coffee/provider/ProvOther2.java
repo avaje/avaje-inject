@@ -1,6 +1,6 @@
 package org.example.coffee.provider;
 
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 
 @Singleton
 public class ProvOther2 {

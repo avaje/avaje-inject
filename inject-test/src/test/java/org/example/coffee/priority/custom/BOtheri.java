@@ -1,6 +1,6 @@
 package org.example.coffee.priority.custom;
 
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 
 @Singleton
 @CustomPriority(7)

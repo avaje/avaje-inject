@@ -1,6 +1,6 @@
 package org.example.coffee.generic;
 
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 
 @Singleton
 public class SomeGenericString implements SomeGeneric<String> {

@@ -2,7 +2,7 @@ package org.example.coffee.grind;
 
 import io.avaje.inject.spi.BeanLifecycle;
 
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 
 @Singleton
 public class AMusher implements BeanLifecycle {

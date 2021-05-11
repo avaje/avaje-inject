@@ -5,7 +5,7 @@ import io.avaje.inject.BeanEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.inject.Provider;
+import javax.inject.Provider;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;

@@ -1,6 +1,6 @@
 package org.example.coffee.circular;
 
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 
 @Singleton
 class CircA {

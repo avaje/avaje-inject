@@ -1,7 +1,7 @@
 package org.example.coffee.factory;
 
-import jakarta.inject.Named;
-import jakarta.inject.Singleton;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 @Singleton
 public class MultipleOtherThings {

@@ -2,7 +2,7 @@ package io.avaje.inject.spi;
 
 import org.mockito.Mockito;
 
-import jakarta.inject.Named;
+import javax.inject.Named;
 import java.util.function.Consumer;
 
 /**

@@ -1,6 +1,6 @@
 package org.example.iface;
 
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 
 @Singleton
 public class MySomeNested implements Some.Nested {

@@ -2,7 +2,7 @@ package org.example.coffee.primary;
 
 import io.avaje.inject.Primary;
 
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 
 @Primary
 @Singleton
