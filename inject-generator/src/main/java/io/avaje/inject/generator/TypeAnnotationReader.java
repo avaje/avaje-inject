@@ -41,7 +41,7 @@ class TypeAnnotationReader {
       Qualifier qualifier = annotationType.asElement().getAnnotation(Qualifier.class);
       String annType = annotationType.toString();
       if (qualifier != null) {
-        qualifierName = Util.shortName(annType);
+        qualifierName = Util.shortName(annType).toLowerCase();
       } else if (annType.indexOf('.') == -1) {
         context.logWarn("skip when no package on annotation " + annType);
       } else {

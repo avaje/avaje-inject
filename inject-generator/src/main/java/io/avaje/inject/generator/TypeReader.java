@@ -60,7 +60,7 @@ class TypeReader {
   String getName() {
     Named named = beanType.getAnnotation(Named.class);
     if (named != null) {
-      return named.value();
+      return named.value().toLowerCase();
     }
     if (annotationReader.hasQualifierName()) {
       return annotationReader.getQualifierName();

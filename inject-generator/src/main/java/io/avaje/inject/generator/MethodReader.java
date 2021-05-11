@@ -53,7 +53,7 @@ class MethodReader {
     this.isVoid = Util.isVoid(returnTypeRaw);
     this.initMethod = (bean == null) ? null : bean.initMethod();
     this.destroyMethod = (bean == null) ? null : bean.destroyMethod();
-    this.name = (named == null) ? null : named.value();
+    this.name = (named == null) ? null : named.value().toLowerCase();
     TypeElement returnElement = context.element(returnTypeRaw);
     if (returnElement == null) {
       this.typeReader = null;

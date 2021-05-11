@@ -41,7 +41,7 @@ class TypeExtendsReader {
       String baseName = baseType.getSimpleName().toString();
       String superName = superElement.getSimpleName().toString();
       if (baseName.endsWith(superName)) {
-        qualifierName = baseName.substring(0, baseName.length() - superName.length());
+        qualifierName = baseName.substring(0, baseName.length() - superName.length()).toLowerCase();
       }
       addSuperType(superElement);
     }
