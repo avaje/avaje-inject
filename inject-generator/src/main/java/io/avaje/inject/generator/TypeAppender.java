@@ -16,20 +16,25 @@ class TypeAppender {
     this.importTypes = importTypes;
   }
 
-  boolean isEmpty() {
-    return count == 0;
+  void add(String type) {
+    addType(type);
   }
 
   void add(List<String> types) {
     for (String type : types) {
       if (!GenericType.isGeneric(type)) {
-        importTypes.add(type);
-        if (count++ > 0) {
+        if (count > 0) {
           sb.append(", ");
         }
-        sb.append(Util.shortName(type)).append(".class");
+        addType(type);
       }
     }
+  }
+
+  private void addType(String type) {
+    count++;
+    importTypes.add(type);
+    sb.append(Util.shortName(type)).append(".class");
   }
 
   String asString() {

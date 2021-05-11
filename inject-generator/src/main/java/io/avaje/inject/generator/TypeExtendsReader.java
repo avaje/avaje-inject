@@ -17,10 +17,15 @@ class TypeExtendsReader {
    * The implied qualifier name based on naming convention.
    */
   private String qualifierName;
+  private String baseTypeRaw;
 
   TypeExtendsReader(TypeElement baseType, ProcessingContext context) {
     this.baseType = baseType;
     this.context = context;
+  }
+
+  String getBaseType() {
+    return baseTypeRaw;
   }
 
   List<String> getExtendsTypes() {
@@ -34,6 +39,7 @@ class TypeExtendsReader {
   void process() {
     String base = Util.unwrapProvider(baseType.getQualifiedName().toString());
     if (!GenericType.isGeneric(base)) {
+      baseTypeRaw = base;
       extendsTypes.add(base);
     }
     TypeElement superElement = superOf(baseType);

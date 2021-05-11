@@ -13,6 +13,11 @@ public class MyFactory {
   String methods = "";
 
   @Bean
+  DFact buildDFact() {
+    return new DFact();
+  }
+
+  @Bean
   CFact buildCFact() {
     return new CFact();
   }

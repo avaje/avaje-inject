@@ -70,10 +70,16 @@ class TypeReader {
 
   private void initRegistrationTypes() {
     TypeAppender appender = new TypeAppender(importTypes);
-    appender.add(interfaceReader.getInterfaceTypes());
-    if (appender.isEmpty()) {
+    List<String> interfaceTypes = interfaceReader.getInterfaceTypes();
+    if (interfaceTypes.isEmpty()) {
       // only register extends type if no interfaces implemented
       appender.add(extendsReader.getExtendsTypes());
+    } else {
+      String baseType = extendsReader.getBaseType();
+      if (!interfaceTypes.contains(baseType)) {
+        appender.add(baseType);
+      }
+      appender.add(interfaceTypes);
     }
     if (forBean) {
       appender.add(annotationReader.getAnnotationTypes());
