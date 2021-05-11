@@ -2,6 +2,7 @@ package io.avaje.inject.generator;
 
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -51,5 +52,10 @@ public class UtilTest {
     assertFalse(Util.validImportType("void"));
     assertFalse(Util.validImportType("Foo"));
     assertFalse(Util.validImportType("NoPackage"));
+  }
+
+  @Test
+  void shortMethod() {
+    assertThat(Util.shortMethod("foo.bar.processMe")).isEqualTo("bar.processMe");
   }
 }

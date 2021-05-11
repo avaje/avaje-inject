@@ -61,10 +61,11 @@ class MetaData {
     if (Util.isVoid(type)) {
       return "void_" + Util.trimMethod(method);
     } else {
+      String trimType = Util.trimMethod(type);
       if (name != null) {
-        return shortType + "_" + name;
+        return trimType + "_" + name;
       } else {
-        return shortType;
+        return trimType;
       }
     }
   }
