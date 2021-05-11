@@ -140,8 +140,7 @@ public class BeanContext_Builder_mockitoSpyTest {
 
       // these are the same (secondary only)
       WidgetSecondary widgetSecondary = context.getBean(WidgetSecondary.class);
-      //assertThat(widget).isSameAs(widgetSecondary);
-      assertThat(widgetSecondary).isNull();
+      assertThat(widget).isSameAs(widgetSecondary);
     }
   }
 
@@ -161,11 +160,9 @@ public class BeanContext_Builder_mockitoSpyTest {
       assertThat(result).isEqualTo("SomeImpl");
 
       SomeImpl someImpl = context.getBean(SomeImpl.class);
-      SomeImplBean someImplBean = context.getBean(SomeImplBean.class);
       assertThat(someImpl).isNull();
-      assertThat(someImplBean).isNull();
-      //assertThat(something).isSameAs(someImpl);
-      //assertThat(someImpl).isNotSameAs(someImplBean);
+      SomeImplBean someImplBean = context.getBean(SomeImplBean.class);
+      assertThat(something).isNotSameAs(someImplBean);
     }
   }
 

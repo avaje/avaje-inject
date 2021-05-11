@@ -125,13 +125,13 @@ class Util {
   public static String getNamed(Element p) {
     Named named = p.getAnnotation(Named.class);
     if (named != null) {
-      return named.value();
+      return named.value().toLowerCase();
     }
     for (AnnotationMirror annotationMirror : p.getAnnotationMirrors()) {
       DeclaredType annotationType = annotationMirror.getAnnotationType();
       Qualifier qualifier = annotationType.asElement().getAnnotation(Qualifier.class);
       if (qualifier != null) {
-        return Util.shortName(annotationType.toString());
+        return Util.shortName(annotationType.toString()).toLowerCase();
       }
     }
     return null;

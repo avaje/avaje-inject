@@ -25,4 +25,13 @@ public class MyFactoryTest {
     DesEngi buildDesi2 = SystemContext.getBean(DesEngi.class, "BuildDesi2");
     assertThat(buildDesi2.ignite()).isEqualTo("MyEngi");
   }
+
+  @Test
+  public void factoryMethod_objectInterface() {
+    DFact dfact = SystemContext.getBean(DFact.class);
+    assertThat(dfact).isNotNull();
+
+    IDFact idfact = SystemContext.getBean(IDFact.class);
+    assertThat(idfact).isSameAs(dfact);
+  }
 }
