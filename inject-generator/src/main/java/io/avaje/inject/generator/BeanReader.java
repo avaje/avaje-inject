@@ -195,8 +195,8 @@ class BeanReader {
     Inject inject = element.getAnnotation(Inject.class);
     if (inject != null) {
       MethodReader methodReader = new MethodReader(context, methodElement, beanType);
-      methodReader.read();
-      if (!methodReader.getParams().isEmpty()) {
+      if (methodReader.isNotPrivate()) {
+        methodReader.read();
         injectMethods.add(methodReader);
       }
     }

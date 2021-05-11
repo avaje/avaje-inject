@@ -18,4 +18,10 @@ class MethodInjectProviderTest {
     AProv beanDirect = SystemContext.getBean(AProv.class);
     assertThat(aProv).isSameAs(beanDirect);
   }
+
+  @Test
+  void emptyMethodInjection() {
+    MethodInjectProvider bean = SystemContext.getBean(MethodInjectProvider.class);
+    assertThat(bean.isEmptyMethodInjection()).isTrue();
+  }
 }
