@@ -1,7 +1,5 @@
 package io.avaje.inject.spi;
 
-import io.avaje.inject.BeanContext;
-
 /**
  * This is the service loader interface defining the bean contexts that can be created.
  */
@@ -23,7 +21,7 @@ public interface BeanContextFactory {
   String[] getDependsOn();
 
   /**
-   * Create and return the BeanContext.
+   * Build all the beans.
    */
-  void createContext(Builder parent);
+  void build(Builder builder);
 }

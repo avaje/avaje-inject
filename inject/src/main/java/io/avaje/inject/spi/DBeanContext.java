@@ -17,40 +17,14 @@ class DBeanContext implements BeanContext {
   private static final Logger log = LoggerFactory.getLogger(DBeanContext.class);
 
   private final ReentrantLock lock = new ReentrantLock();
-
-  private final String name;
-
-  private final String[] provides;
-
-  private final String[] dependsOn;
-
   private final List<BeanLifecycle> lifecycleList;
-
   private final DBeanMap beans;
 
   private boolean closed;
 
-  DBeanContext(String name, String[] provides, String[] dependsOn, List<BeanLifecycle> lifecycleList, DBeanMap beans) {//}, Map<String, BeanContext> children) {
-    this.name = name;
-    this.provides = provides;
-    this.dependsOn = dependsOn;
+  DBeanContext(List<BeanLifecycle> lifecycleList, DBeanMap beans) {
     this.lifecycleList = lifecycleList;
     this.beans = beans;
-  }
-
-  @Override
-  public String getName() {
-    return name;
-  }
-
-  @Override
-  public String[] getProvides() {
-    return provides;
-  }
-
-  @Override
-  public String[] getDependsOn() {
-    return dependsOn;
   }
 
   @Override
@@ -130,9 +104,7 @@ class DBeanContext implements BeanContext {
   public void start() {
     lock.lock();
     try {
-      if (name != null) {
-        log.debug("firing postConstruct on beans in context:{}", name);
-      }
+      log.trace("firing postConstruct");
       for (BeanLifecycle bean : lifecycleList) {
         bean.postConstruct();
       }
@@ -148,9 +120,7 @@ class DBeanContext implements BeanContext {
       if (!closed) {
         // we only allow one call to preDestroy
         closed = true;
-        if (name != null) {
-          log.debug("firing preDestroy on beans in context:{}", name);
-        }
+        log.trace("firing preDestroy");
         for (BeanLifecycle bean : lifecycleList) {
           bean.preDestroy();
         }

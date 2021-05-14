@@ -102,7 +102,7 @@ class SimpleFactoryWriter {
   private void writeCreateMethod() {
     writer.append(CODE_COMMENT_CREATE_CONTEXT).eol();
     writer.append("  @Override").eol();
-    writer.append("  public void createContext(Builder builder) {").eol();
+    writer.append("  public void build(Builder builder) {").eol();
     writer.append("    this.builder = builder;").eol();
     writer.append("    // create beans in order based on constructor dependencies").eol();
     writer.append("    // i.e. \"provides\" followed by \"dependsOn\"").eol();

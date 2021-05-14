@@ -148,7 +148,7 @@ class ProcessingContext {
     writer.append(";").eol();
     writer.append("    this.dependsOn = ", contextDependsOn);
     buildStringArray(writer, contextDependsOn, true);
-    writer.append(";").eol().eol();
+    writer.append(";").eol();
   }
 
   void buildAtContextModule(Append writer) {

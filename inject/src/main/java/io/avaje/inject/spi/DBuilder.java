@@ -2,22 +2,12 @@ package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanContext;
 import io.avaje.inject.BeanEntry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.inject.Provider;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+
+import java.util.*;
 import java.util.function.Consumer;
 
 class DBuilder implements Builder {
-
-  private static final Logger log = LoggerFactory.getLogger(DBuilder.class);
 
   /**
    * List of Lifecycle beans.
@@ -35,21 +25,6 @@ class DBuilder implements Builder {
   final DBeanMap beanMap = new DBeanMap();
 
   /**
-   * The context/module name.
-   */
-  private final String name;
-
-  /**
-   * The module features this context provides.
-   */
-  private final String[] provides;
-
-  /**
-   * The other modules this context dependsOn (that should be built prior).
-   */
-  private final String[] dependsOn;
-
-  /**
    * Debug of the current bean being wired - used in injection errors.
    */
   private Class<?> injectTarget;
@@ -59,49 +34,20 @@ class DBuilder implements Builder {
    */
   private boolean runningPostConstruct;
 
-  /**
-   * Create for the root builder.
-   */
-  DBuilder() {
-    this.name = null;
-    this.provides = null;
-    this.dependsOn = null;
-  }
-
-  @Override
-  public String getName() {
-    return name;
-  }
-
-  @Override
-  public String[] getProvides() {
-    return provides;
-  }
-
-  @Override
-  public String[] getDependsOn() {
-    return dependsOn;
-  }
-
-  @Override
-  public void setParent(Builder parent) {
-    //this.parent = parent;
-  }
-
   @Override
   public boolean isAddBeanFor(Class<?>... types) {
     return isAddBeanFor(null, types);
-  }
-
-  protected void next(String name, Class<?>... types) {
-    injectTarget = firstOf(types);
-    beanMap.nextBean(name, types);
   }
 
   @Override
   public boolean isAddBeanFor(String name, Class<?>... types) {
     next(name, types);
     return true;
+  }
+
+  protected void next(String name, Class<?>... types) {
+    injectTarget = firstOf(types);
+    beanMap.nextBean(name, types);
   }
 
   private Class<?> firstOf(Class<?>[] types) {
@@ -131,11 +77,6 @@ class DBuilder implements Builder {
   private <T> T getMaybe(Class<T> beanClass, String name) {
     BeanEntry<T> entry = candidate(beanClass, name);
     return (entry == null) ? null : entry.getBean();
-  }
-
-  @Override
-  public void addChild(BeanContextFactory factory) {
-    factory.createContext(this);
   }
 
   /**
@@ -238,9 +179,6 @@ class DBuilder implements Builder {
   }
 
   private void runInjectors() {
-    if (name != null) {
-      log.debug("perform field injection in context:{}", name);
-    }
     runningPostConstruct = true;
     for (Consumer<Builder> injector : injectors) {
       injector.accept(this);
@@ -249,6 +187,6 @@ class DBuilder implements Builder {
 
   public BeanContext build() {
     runInjectors();
-    return new DBeanContext(name, provides, dependsOn, lifecycleList, beanMap);
+    return new DBeanContext(lifecycleList, beanMap);
   }
 }

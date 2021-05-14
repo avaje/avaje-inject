@@ -128,7 +128,7 @@ public class BeanContextBuilderTest {
     }
 
     @Override
-    public void createContext(Builder parent) {
+    public void build(Builder parent) {
 
     }
   }
