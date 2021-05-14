@@ -25,5 +25,5 @@ public interface BeanContextFactory {
   /**
    * Create and return the BeanContext.
    */
-  BeanContext createContext(Builder parent);
+  void createContext(Builder parent);
 }

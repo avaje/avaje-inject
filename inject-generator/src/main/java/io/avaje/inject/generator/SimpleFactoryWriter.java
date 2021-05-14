@@ -102,14 +102,13 @@ class SimpleFactoryWriter {
   private void writeCreateMethod() {
     writer.append(CODE_COMMENT_CREATE_CONTEXT).eol();
     writer.append("  @Override").eol();
-    writer.append("  public BeanContext createContext(Builder parent) {").eol();
-    writer.append("    builder.setParent(parent);").eol();
+    writer.append("  public void createContext(Builder builder) {").eol();
+    writer.append("    this.builder = builder;").eol();
     writer.append("    // create beans in order based on constructor dependencies").eol();
     writer.append("    // i.e. \"provides\" followed by \"dependsOn\"").eol();
     for (MetaData metaData : ordering.getOrdered()) {
       writer.append("    build_%s();", metaData.getBuildName()).eol();
     }
-    writer.append("    return builder.build();").eol();
     writer.append("  }").eol();
     writer.eol();
   }
@@ -143,7 +142,10 @@ class SimpleFactoryWriter {
     context.buildAtContextModule(writer);
 
     writer.append("public class %s implements BeanContextFactory {", factoryShortName).eol().eol();
-    writer.append("  private final Builder builder;").eol().eol();
+    writer.append("  private final String name;").eol();
+    writer.append("  private final String[] provides;").eol();
+    writer.append("  private final String[] dependsOn;").eol();
+    writer.append("  private Builder builder;").eol().eol();
 
     writer.append("  public %s() {", factoryShortName).eol();
     context.buildNewBuilder(writer);
@@ -151,17 +153,17 @@ class SimpleFactoryWriter {
 
     writer.append("  @Override").eol();
     writer.append("  public String getName() {").eol();
-    writer.append("    return builder.getName();").eol();
+    writer.append("    return name;").eol();
     writer.append("  }").eol().eol();
 
     writer.append("  @Override").eol();
     writer.append("  public String[] getProvides() {").eol();
-    writer.append("    return builder.getProvides();").eol();
+    writer.append("    return provides;").eol();
     writer.append("  }").eol().eol();
 
     writer.append("  @Override").eol();
     writer.append("  public String[] getDependsOn() {").eol();
-    writer.append("    return builder.getDependsOn();").eol();
+    writer.append("    return dependsOn;").eol();
     writer.append("  }").eol().eol();
   }
 

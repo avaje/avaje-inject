@@ -122,7 +122,7 @@ class DBeanContextBuilder implements BeanContextBuilder {
     log.debug("building context with modules {}", moduleNames);
     Builder rootBuilder = Builder.newRootBuilder(suppliedBeans, enrichBeans);
     for (BeanContextFactory factory : factoryOrder.factories()) {
-      rootBuilder.addChild(factory);
+      factory.createContext(rootBuilder);
     }
 
     BeanContext beanContext = rootBuilder.build();

@@ -30,17 +30,6 @@ public interface Builder {
   }
 
   /**
-   * Create a Builder for the named context (module).
-   *
-   * @param name      the name of the module / bean context
-   * @param provides  the module features this module provides
-   * @param dependsOn the names of modules this module is depends on.
-   */
-  static Builder newBuilder(String name, String[] provides, String[] dependsOn) {
-    return new DBuilder(name, provides, dependsOn);
-  }
-
-  /**
    * Return the name of the (module) context this builder is creating.
    */
   String getName();

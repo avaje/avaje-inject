@@ -49,8 +49,6 @@ class DBuilder implements Builder {
    */
   private final String[] dependsOn;
 
-  private final Map<String, BeanContext> children = new LinkedHashMap<>();
-
   /**
    * Debug of the current bean being wired - used in injection errors.
    */
@@ -60,17 +58,6 @@ class DBuilder implements Builder {
    * Flag set when we are running post construct injection.
    */
   private boolean runningPostConstruct;
-
-  Builder parent;
-
-  /**
-   * Create a named context for non-root builders.
-   */
-  DBuilder(String name, String[] provides, String[] dependsOn) {
-    this.name = name;
-    this.provides = provides;
-    this.dependsOn = dependsOn;
-  }
 
   /**
    * Create for the root builder.
@@ -98,7 +85,7 @@ class DBuilder implements Builder {
 
   @Override
   public void setParent(Builder parent) {
-    this.parent = parent;
+    //this.parent = parent;
   }
 
   @Override
@@ -106,14 +93,15 @@ class DBuilder implements Builder {
     return isAddBeanFor(null, types);
   }
 
+  protected void next(String name, Class<?>... types) {
+    injectTarget = firstOf(types);
+    beanMap.nextBean(name, types);
+  }
+
   @Override
   public boolean isAddBeanFor(String name, Class<?>... types) {
-    beanMap.nextBean(name, types);
-    if (parent == null) {
-      return true;
-    }
-    this.injectTarget = firstOf(types);
-    return parent.isAddBeanFor(name, types);
+    next(name, types);
+    return true;
   }
 
   private Class<?> firstOf(Class<?>[] types) {
@@ -130,12 +118,6 @@ class DBuilder implements Builder {
   public <T> List<T> getList(Class<T> interfaceType) {
     List list = new ArrayList<>();
     beanMap.addAll(interfaceType, list);
-    for (BeanContext childContext : children.values()) {
-      list.addAll(childContext.getBeansWithAnnotation(interfaceType));
-    }
-    if (parent != null) {
-      list.addAll(parent.getList(interfaceType));
-    }
     return (List<T>) list;
   }
 
@@ -143,13 +125,6 @@ class DBuilder implements Builder {
   public <T> BeanEntry<T> candidate(Class<T> cls, String name) {
     DBeanContext.EntrySort<T> entrySort = new DBeanContext.EntrySort<>();
     entrySort.add(beanMap.candidate(cls, name));
-    for (BeanContext childContext : children.values()) {
-      entrySort.add(childContext.candidate(cls, name));
-    }
-    if (parent != null) {
-      // look in parent context (cross-module dependency)
-      entrySort.add(parent.candidate(cls, name));
-    }
     return entrySort.get();
   }
 
@@ -160,8 +135,7 @@ class DBuilder implements Builder {
 
   @Override
   public void addChild(BeanContextFactory factory) {
-    final BeanContext context = factory.createContext(this);
-    children.put(context.getName(), context);
+    factory.createContext(this);
   }
 
   /**
@@ -189,10 +163,7 @@ class DBuilder implements Builder {
   }
 
   private <T> T register(int flag, T bean) {
-    if (parent != null) {
-      // enrichment only exist on top level builder
-      bean = parent.enrich(bean, beanMap.types());
-    }
+    bean = enrich(bean, beanMap.types());
     beanMap.register(flag, bean);
     return bean;
   }
@@ -278,6 +249,6 @@ class DBuilder implements Builder {
 
   public BeanContext build() {
     runInjectors();
-    return new DBeanContext(name, provides, dependsOn, lifecycleList, beanMap, children);
+    return new DBeanContext(name, provides, dependsOn, lifecycleList, beanMap);
   }
 }
