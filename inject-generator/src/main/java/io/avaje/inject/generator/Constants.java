@@ -16,16 +16,16 @@ class Constants {
   static final String AT_GENERATED = "@Generated(\"io.avaje.inject.generator\")";
   static final String META_INF_FACTORY = "META-INF/services/io.avaje.inject.spi.BeanContextFactory";
 
-  static final String BEANCONTEXT = "io.avaje.inject.BeanContext;";
-  static final String CONTEXTMODULE = "io.avaje.inject.ContextModule;";
+  static final String BEANCONTEXT = "io.avaje.inject.BeanContext";
+  static final String CONTEXTMODULE = "io.avaje.inject.ContextModule";
 
   static final String GENERATED = "io.avaje.inject.spi.Generated";
   static final String BEAN_FACTORY = "io.avaje.inject.spi.BeanFactory";
   static final String BEAN_FACTORY2 = "io.avaje.inject.spi.BeanFactory2";
   static final String BEAN_LIFECYCLE = "io.avaje.inject.spi.BeanLifecycle";
   static final String BUILDER = "io.avaje.inject.spi.Builder";
-  static final String DEPENDENCYMETA = "io.avaje.inject.spi.DependencyMeta;";
-  static final String BEANCONTEXTFACTORY = "io.avaje.inject.spi.BeanContextFactory;";
+  static final String DEPENDENCYMETA = "io.avaje.inject.spi.DependencyMeta";
+  static final String BEANCONTEXTFACTORY = "io.avaje.inject.spi.BeanContextFactory";
 
   static boolean isBeanLifecycle(String type) {
     return BEAN_LIFECYCLE.equals(type);
