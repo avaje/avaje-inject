@@ -193,8 +193,8 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
     }
 
     @Override
-    public List<Object> getBeansWithAnnotation(Class<?> annotation) {
-      return context.getBeansWithAnnotation(annotation);
+    public List<Object> listByAnnotation(Class<?> annotation) {
+      return context.listByAnnotation(annotation);
     }
 
     @Override

@@ -92,7 +92,7 @@ class DBeanScope implements BeanScope {
   }
 
   @Override
-  public List<Object> getBeansWithAnnotation(Class<?> annotation) {
+  public List<Object> listByAnnotation(Class<?> annotation) {
     return beans.all(annotation);
   }
 

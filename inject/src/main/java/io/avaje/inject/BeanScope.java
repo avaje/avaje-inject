@@ -136,7 +136,7 @@ public interface BeanScope extends Closeable {
    *   // e.g. register all controllers with web a framework
    *   // .. where Controller is an annotation on the beans
    *
-   *   List<Object> controllers = SystemContext.getBeansWithAnnotation(Controller.class);
+   *   List<Object> controllers = ApplicationScope.listByAnnotation(Controller.class);
    *
    * }</pre>
    *
@@ -146,7 +146,15 @@ public interface BeanScope extends Closeable {
    *
    * @param annotation An annotation class.
    */
-  List<Object> getBeansWithAnnotation(Class<?> annotation);
+  List<Object> listByAnnotation(Class<?> annotation);
+
+  /**
+   * Deprecated - migrate to listByAnnotation()
+   */
+  @Deprecated
+  default List<Object> getBeansWithAnnotation(Class<?> annotation) {
+    return listByAnnotation(annotation);
+  }
 
   /**
    * Return the list of beans that implement the interface.
@@ -155,7 +163,7 @@ public interface BeanScope extends Closeable {
    *
    *   // e.g. register all routes for a web framework
    *
-   *   List<WebRoute> routes = SystemContext.getBeans(WebRoute.class);
+   *   List<WebRoute> routes = ApplicationScope.list(WebRoute.class);
    *
    * }</pre>
    *

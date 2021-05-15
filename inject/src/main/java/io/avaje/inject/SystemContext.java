@@ -51,11 +51,11 @@ public class SystemContext {
   }
 
   /**
-   * Deprecated - removing support for this method.
+   * Deprecated - migrate to ApplicationScope.listByAnnotation(annotation).
    */
   @Deprecated
   public static List<Object> getBeansWithAnnotation(Class<?> annotation) {
-    return ApplicationScope.scope().getBeansWithAnnotation(annotation);
+    return ApplicationScope.listByAnnotation(annotation);
   }
 
   /**

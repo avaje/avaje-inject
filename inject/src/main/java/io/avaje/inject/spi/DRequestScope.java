@@ -91,13 +91,12 @@ class DRequestScope implements RequestScope {
 
   @Override
   public <T> List<T> getList(Class<T> interfaceType) {
-    return beanScope.getBeans(interfaceType);
+    return beanScope.list(interfaceType);
   }
 
   @Override
   public <T> Set<T> getSet(Class<T> interfaceType) {
-    //TODO Refactor this
-    return new LinkedHashSet<>(beanScope.getBeans(interfaceType));
+    return new LinkedHashSet<>(beanScope.list(interfaceType));
   }
 
   @Override
