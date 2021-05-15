@@ -48,13 +48,13 @@ class DBeanScope implements BeanScope {
 
   @Override
   public <T> T get(Class<T> beanClass, String name) {
-    BeanEntry<T> candidate = beans.candidate(beanClass, name);
-    return (candidate == null) ? null : candidate.getBean();
+    return beans.get(beanClass, name);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public <T> List<T> list(Class<T> interfaceType) {
-    return (List<T>)beans.all(interfaceType);
+    return (List<T>) beans.all(interfaceType);
   }
 
   @Override

@@ -49,15 +49,16 @@ class DBeanMap {
     }
   }
 
-  <T> BeanEntry<T> candidate(Class<T> type, String name) {
+  @SuppressWarnings("unchecked")
+  <T> T get(Class<T> type, String name) {
     DContextEntry entry = beans.get(type.getCanonicalName());
-    if (entry != null) {
-      if (name != null) {
-        name = name.toLowerCase();
-      }
-      return entry.candidate(name);
+    if (entry == null) {
+      return null;
     }
-    return null;
+    if (name != null) {
+      name = name.toLowerCase();
+    }
+    return (T) entry.get(name);
   }
 
   /**

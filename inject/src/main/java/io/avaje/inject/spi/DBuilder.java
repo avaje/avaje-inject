@@ -86,8 +86,7 @@ class DBuilder implements Builder {
   }
 
   private <T> T getMaybe(Class<T> beanClass, String name) {
-    BeanEntry<T> entry = beanMap.candidate(beanClass, name);
-    return (entry == null) ? null : entry.getBean();
+    return beanMap.get(beanClass, name);
   }
 
   /**

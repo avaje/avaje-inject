@@ -49,13 +49,8 @@ class DContextEntryBean {
     return Objects.equals(qualifierName, name);
   }
 
-  Object obtainInstance() {
-    // its a plain bean, just return it
-    return source;
-  }
-
   Object getBean() {
-    return obtainInstance();
+    return source;
   }
 
   boolean isPrimary() {
@@ -71,14 +66,9 @@ class DContextEntryBean {
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  BeanEntry getBeanEntry() {
-    return new BeanEntry(flag, getBean(), name);
-  }
-
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  BeanEntry candidate(String qualifierName) {
+  Object candidate(String qualifierName) {
     if (qualifierName == null || Objects.equals(name, qualifierName)) {
-      return new BeanEntry(flag, obtainInstance(), qualifierName);
+      return getBean();
     } else {
       return null;
     }
@@ -96,7 +86,7 @@ class DContextEntryBean {
     }
 
     @Override
-    Object obtainInstance() {
+    Object getBean() {
       // its a provider, get it once
       if (actualBean == null) {
         actualBean = ((Provider<?>) source).get();
