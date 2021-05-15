@@ -87,15 +87,8 @@ class DBuilder implements Builder {
     return (List<T>) list;
   }
 
-  @Override
-  public <T> BeanEntry<T> candidate(Class<T> cls, String name) {
-    DBeanScope.EntrySort<T> entrySort = new DBeanScope.EntrySort<>();
-    entrySort.add(beanMap.candidate(cls, name));
-    return entrySort.get();
-  }
-
   private <T> T getMaybe(Class<T> beanClass, String name) {
-    BeanEntry<T> entry = candidate(beanClass, name);
+    BeanEntry<T> entry = beanMap.candidate(beanClass, name);
     return (entry == null) ? null : entry.getBean();
   }
 

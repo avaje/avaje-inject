@@ -146,11 +146,6 @@ public interface Builder {
   <T> Set<T> getSet(Class<T> interfaceType);
 
   /**
-   * Get a candidate dependency allowing it to be null.
-   */
-  <T> BeanEntry<T> candidate(Class<T> cls, String name);
-
-  /**
    * Return a potentially enriched bean for registration into the context.
    * Typically for use with mockito spy.
    *

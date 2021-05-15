@@ -47,16 +47,8 @@ class DBeanScope implements BeanScope {
   }
 
   @Override
-  public <T> BeanEntry<T> candidate(Class<T> type, String name) {
-    // sort candidates by priority - Primary, Normal, Secondary
-    EntrySort<T> entrySort = new EntrySort<>();
-    entrySort.add(beans.candidate(type, name));
-    return entrySort.get();
-  }
-
-  @Override
   public <T> T get(Class<T> beanClass, String name) {
-    BeanEntry<T> candidate = candidate(beanClass, name);
+    BeanEntry<T> candidate = beans.candidate(beanClass, name);
     return (candidate == null) ? null : candidate.getBean();
   }
 
@@ -74,7 +66,7 @@ class DBeanScope implements BeanScope {
 
   @Override
   public <T> List<T> listByPriority(Class<T> interfaceType, Class<? extends Annotation> priorityAnnotation) {
-    List<T> list = getBeans(interfaceType);
+    List<T> list = list(interfaceType);
     return list.size() > 1 ? sortByPriority(list, priorityAnnotation) : list;
   }
 
@@ -141,63 +133,6 @@ class DBeanScope implements BeanScope {
       }
     } finally {
       lock.unlock();
-    }
-  }
-
-  static class EntrySort<T> {
-
-    private BeanEntry<T> supplied;
-    private BeanEntry<T> primary;
-    private int primaryCount;
-    private BeanEntry<T> secondary;
-    private int secondaryCount;
-    private BeanEntry<T> normal;
-    private int normalCount;
-
-    private final List<BeanEntry<T>> all = new ArrayList<>();
-
-    void add(BeanEntry<T> candidate) {
-      if (candidate == null) {
-        return;
-      }
-      if (candidate.isSupplied()) {
-        // a supplied bean trumps all
-        supplied = candidate;
-        return;
-      }
-      all.add(candidate);
-      if (candidate.isPrimary()) {
-        primary = candidate;
-        primaryCount++;
-      } else if (candidate.isSecondary()) {
-        secondary = candidate;
-        secondaryCount++;
-      } else {
-        normal = candidate;
-        normalCount++;
-      }
-    }
-
-    BeanEntry<T> get() {
-      if (supplied != null) {
-        return supplied;
-      }
-      if (primaryCount > 1) {
-        throw new IllegalStateException("Multiple @Primary beans when only expecting one? Beans: " + all);
-      }
-      if (primaryCount == 1) {
-        return primary;
-      }
-      if (normalCount > 1) {
-        throw new IllegalStateException("Multiple beans when only expecting one? Maybe use @Primary or @Secondary? Beans: " + all);
-      }
-      if (normalCount == 1) {
-        return normal;
-      }
-      if (secondaryCount > 1) {
-        throw new IllegalStateException("Multiple @Secondary beans when only expecting one? Beans: " + all);
-      }
-      return secondary;
     }
   }
 

@@ -129,11 +129,6 @@ public interface BeanScope extends Closeable {
   }
 
   /**
-   * Return the wiring candidate bean with name and priority.
-   */
-  <T> BeanEntry<T> candidate(Class<T> type, String name);
-
-  /**
    * Return the list of beans that have an annotation.
    *
    * <pre>{@code
