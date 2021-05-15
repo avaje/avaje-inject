@@ -21,44 +21,13 @@ public interface Builder {
    * @param enrichBeans   The list of classes we want to have with mockito spy enhancement
    */
   @SuppressWarnings("rawtypes")
-  static Builder newRootBuilder(List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans) {
+  static Builder newBuilder(List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans) {
     if (suppliedBeans.isEmpty() && enrichBeans.isEmpty()) {
       // simple case, no mocks or spies
       return new DBuilder();
     }
     return new DBuilderExtn(suppliedBeans, enrichBeans);
   }
-
-  /**
-   * Create a Builder for the named context (module).
-   *
-   * @param name      the name of the module / bean context
-   * @param provides  the module features this module provides
-   * @param dependsOn the names of modules this module is depends on.
-   */
-  static Builder newBuilder(String name, String[] provides, String[] dependsOn) {
-    return new DBuilder(name, provides, dependsOn);
-  }
-
-  /**
-   * Return the name of the (module) context this builder is creating.
-   */
-  String getName();
-
-  /**
-   * Return the names of module features that this module provides.
-   */
-  String[] getProvides();
-
-  /**
-   * Return the names of modules that this module depends on.
-   */
-  String[] getDependsOn();
-
-  /**
-   * Set a parent builder that can provide cross-module dependencies.
-   */
-  void setParent(Builder parent);
 
   /**
    * Return true if the bean should be created and registered with the context.
@@ -107,11 +76,6 @@ public interface Builder {
    * Add field and method injection.
    */
   void addInjector(Consumer<Builder> injector);
-
-  /**
-   * Add a child context.
-   */
-  void addChild(BeanContextFactory factory);
 
   /**
    * Get an optional dependency.

@@ -8,15 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
@@ -120,12 +112,12 @@ class DBeanContextBuilder implements BeanContextBuilder {
         " Refer to https://avaje.io/inject#gradle");
     }
     log.debug("building context with modules {}", moduleNames);
-    Builder rootBuilder = Builder.newRootBuilder(suppliedBeans, enrichBeans);
+    Builder builder = Builder.newBuilder(suppliedBeans, enrichBeans);
     for (BeanContextFactory factory : factoryOrder.factories()) {
-      rootBuilder.addChild(factory);
+      factory.build(builder);
     }
 
-    BeanContext beanContext = rootBuilder.build();
+    BeanContext beanContext = builder.build();
     // entire graph built, fire postConstruct
     beanContext.start();
     if (shutdownHook) {
@@ -178,21 +170,6 @@ class DBeanContextBuilder implements BeanContextBuilder {
       this.context = context;
       this.hook = new Hook(this);
       Runtime.getRuntime().addShutdownHook(hook);
-    }
-
-    @Override
-    public String getName() {
-      return context.getName();
-    }
-
-    @Override
-    public String[] getProvides() {
-      return context.getProvides();
-    }
-
-    @Override
-    public String[] getDependsOn() {
-      return context.getDependsOn();
     }
 
     @Override

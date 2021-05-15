@@ -10,7 +10,6 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 class DBeanContext implements BeanContext {
@@ -18,43 +17,14 @@ class DBeanContext implements BeanContext {
   private static final Logger log = LoggerFactory.getLogger(DBeanContext.class);
 
   private final ReentrantLock lock = new ReentrantLock();
-
-  private final String name;
-
-  private final String[] provides;
-
-  private final String[] dependsOn;
-
   private final List<BeanLifecycle> lifecycleList;
-
   private final DBeanMap beans;
-
-  private final Map<String, BeanContext> children;
 
   private boolean closed;
 
-  DBeanContext(String name, String[] provides, String[] dependsOn, List<BeanLifecycle> lifecycleList, DBeanMap beans, Map<String, BeanContext> children) {
-    this.name = name;
-    this.provides = provides;
-    this.dependsOn = dependsOn;
+  DBeanContext(List<BeanLifecycle> lifecycleList, DBeanMap beans) {
     this.lifecycleList = lifecycleList;
     this.beans = beans;
-    this.children = children;
-  }
-
-  @Override
-  public String getName() {
-    return name;
-  }
-
-  @Override
-  public String[] getProvides() {
-    return provides;
-  }
-
-  @Override
-  public String[] getDependsOn() {
-    return dependsOn;
   }
 
   @Override
@@ -67,9 +37,6 @@ class DBeanContext implements BeanContext {
     // sort candidates by priority - Primary, Normal, Secondary
     EntrySort<T> entrySort = new EntrySort<>();
     entrySort.add(beans.candidate(type, name));
-    for (BeanContext childContext : children.values()) {
-      entrySort.add(childContext.candidate(type, name));
-    }
     return entrySort.get();
   }
 
@@ -83,9 +50,6 @@ class DBeanContext implements BeanContext {
   public <T> List<T> getBeans(Class<T> interfaceType) {
     List<T> list = new ArrayList<>();
     beans.addAll(interfaceType, list);
-    for (BeanContext childContext : children.values()) {
-      list.addAll(childContext.getBeans(interfaceType));
-    }
     return list;
   }
 
@@ -133,9 +97,6 @@ class DBeanContext implements BeanContext {
   public List<Object> getBeansWithAnnotation(Class<?> annotation) {
     List<Object> list = new ArrayList<>();
     beans.addAll(annotation, list);
-    for (BeanContext childContext : children.values()) {
-      list.addAll(childContext.getBeansWithAnnotation(annotation));
-    }
     return list;
   }
 
@@ -143,14 +104,9 @@ class DBeanContext implements BeanContext {
   public void start() {
     lock.lock();
     try {
-      if (name != null) {
-        log.debug("firing postConstruct on beans in context:{}", name);
-      }
+      log.trace("firing postConstruct");
       for (BeanLifecycle bean : lifecycleList) {
         bean.postConstruct();
-      }
-      for (BeanContext childContext : children.values()) {
-        childContext.start();
       }
     } finally {
       lock.unlock();
@@ -164,14 +120,9 @@ class DBeanContext implements BeanContext {
       if (!closed) {
         // we only allow one call to preDestroy
         closed = true;
-        if (name != null) {
-          log.debug("firing preDestroy on beans in context:{}", name);
-        }
+        log.trace("firing preDestroy");
         for (BeanLifecycle bean : lifecycleList) {
           bean.preDestroy();
-        }
-        for (BeanContext childContext : children.values()) {
-          childContext.close();
         }
       }
     } finally {

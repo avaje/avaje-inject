@@ -142,12 +142,13 @@ class ProcessingContext {
   }
 
   void buildNewBuilder(Append writer) {
-    writer.append("    this.builder = Builder.newBuilder(\"%s\"", contextName);
-    writer.append(", ");
+    writer.append("    this.name = \"%s\";", contextName).eol();
+    writer.append("    this.provides = ", contextProvides);
     buildStringArray(writer, contextProvides, true);
-    writer.append(", ");
+    writer.append(";").eol();
+    writer.append("    this.dependsOn = ", contextDependsOn);
     buildStringArray(writer, contextDependsOn, true);
-    writer.append(");").eol();
+    writer.append(";").eol();
   }
 
   void buildAtContextModule(Append writer) {
