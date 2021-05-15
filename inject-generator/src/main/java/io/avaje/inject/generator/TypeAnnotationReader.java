@@ -17,6 +17,7 @@ class TypeAnnotationReader {
   private final ProcessingContext context;
   private final List<String> annotationTypes = new ArrayList<>();
   private String qualifierName;
+  private boolean requestScopeBean;
 
   TypeAnnotationReader(TypeElement beanType, ProcessingContext context) {
     this.beanType = beanType;
@@ -35,6 +36,10 @@ class TypeAnnotationReader {
     return qualifierName;
   }
 
+  boolean isRequestScopeBean() {
+    return requestScopeBean;
+  }
+
   void process() {
     for (AnnotationMirror annotationMirror : beanType.getAnnotationMirrors()) {
       DeclaredType annotationType = annotationMirror.getAnnotationType();
@@ -45,7 +50,9 @@ class TypeAnnotationReader {
       } else if (annType.indexOf('.') == -1) {
         context.logWarn("skip when no package on annotation " + annType);
       } else {
-        if (IncludeAnnotations.include(annType)) {
+        if (Constants.REQUEST.equals(annType)) {
+          requestScopeBean = true;
+        } else if (IncludeAnnotations.include(annType)) {
           annotationTypes.add(annType);
         }
       }

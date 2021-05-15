@@ -15,6 +15,7 @@ class TypeReader {
   private final TypeExtendsReader extendsReader;
   private final TypeInterfaceReader interfaceReader;
   private final TypeAnnotationReader annotationReader;
+  private final ProcessingContext context;
   private boolean beanLifeCycle;
   private String typesRegister;
 
@@ -27,6 +28,7 @@ class TypeReader {
   }
 
   private TypeReader(boolean forBean, TypeElement beanType, ProcessingContext context, Set<String> importTypes) {
+    this.context = context;
     this.forBean = forBean;
     this.beanType = beanType;
     this.importTypes = importTypes;
@@ -47,6 +49,14 @@ class TypeReader {
     return interfaceReader.getInterfaceTypes();
   }
 
+  boolean isClosable() {
+    return interfaceReader.isCloseable();
+  }
+
+  boolean isRequestScopeBean() {
+    return annotationReader.isRequestScopeBean();
+  }
+
   void process() {
     extendsReader.process();
     interfaceReader.process();
@@ -65,11 +75,32 @@ class TypeReader {
     if (annotationReader.hasQualifierName()) {
       return annotationReader.getQualifierName();
     }
-    return extendsReader.getQualifierName();
+    String derivedName = extendsReader.getQualifierName();
+    if (derivedName != null) {
+      context.logWarn("Extends derived name " + derivedName + " for " + beanType);
+      return derivedName;
+    }
+    derivedName = interfaceReader.getQualifierName();
+    if (derivedName != null) {
+      context.logWarn("Interface Derived name " + derivedName + " for " + beanType);
+      return derivedName;
+    }
+    return derivedName;
   }
 
   private void initRegistrationTypes() {
     TypeAppender appender = new TypeAppender(importTypes);
+    if (isRequestScopeBean()) {
+      List<String> interfaceTypes = interfaceReader.getInterfaceTypes();
+      interfaceTypes.remove(extendsReader.getBaseType());
+      if (interfaceTypes.isEmpty()) {
+        this.typesRegister = null;
+      } else {
+        appender.add(interfaceTypes);
+        this.typesRegister = appender.asString();
+      }
+      return;
+    }
     List<String> interfaceTypes = interfaceReader.getInterfaceTypes();
     if (interfaceTypes.isEmpty()) {
       // only register extends type if no interfaces implemented

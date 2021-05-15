@@ -16,6 +16,7 @@ class SimpleBeanWriter {
   private static final String CODE_COMMENT_FACTORY = "/**\n * Generated source - dependency injection factory for request scoped %s.\n */";
   private static final String CODE_COMMENT_LIFECYCLE = "  /**\n   * Lifecycle wrapper for %s.\n   */";
   private static final String CODE_COMMENT_BUILD = "  /**\n   * Create and register %s.\n   */";
+  private static final String CODE_COMMENT_BUILD_RSB = "  /**\n   * Register provider for request scoped %s.\n   */";
 
   private final BeanReader beanReader;
   private final ProcessingContext context;
@@ -24,6 +25,7 @@ class SimpleBeanWriter {
   private final String packageName;
   private final String suffix;
   private Append writer;
+  private String indent = "     ";
 
   SimpleBeanWriter(BeanReader beanReader, ProcessingContext context) {
     this.beanReader = beanReader;
@@ -45,7 +47,7 @@ class SimpleBeanWriter {
     writePackage();
     writeImports();
     writeClassStart();
-    if (isRequestScoped()) {
+    if (isRequestScopedController()) {
       writeRequestCreate();
     } else {
       writeStaticFactoryMethod();
@@ -61,8 +63,8 @@ class SimpleBeanWriter {
     beanReader.writeRequestCreate(writer);
   }
 
-  private boolean isRequestScoped() {
-    return beanReader.isRequestScoped();
+  private boolean isRequestScopedController() {
+    return beanReader.isRequestScopedController();
   }
 
   private void writeStaticFactoryBeanMethods() {
@@ -89,15 +91,52 @@ class SimpleBeanWriter {
   }
 
   private void writeStaticFactoryMethod() {
-
     MethodReader constructor = beanReader.getConstructor();
     if (constructor == null) {
       context.logError(beanReader.getBeanType(), "Unable to determine constructor to use for %s? Add explicit @Inject to one of the constructors.", beanReader.getBeanType());
       return;
     }
+    writeBuildMethodStart(constructor);
+    if (beanReader.isRequestScopedBean()) {
+      writeReqScopeBean(constructor);
+    } else {
+      writeAddFor(constructor);
+    }
+    writer.append("  }").eol().eol();
+  }
 
+  private void writeReqScopeBean(MethodReader constructor) {
+    indent = indent + "  ";
+    beanReader.buildReq(writer);
+    writeCreateBean(constructor, "scope");
+    if (beanReader.isExtraInjectionRequired()) {
+      writeExtraInjection();
+    }
+    beanReader.writePostConstruct(writer);
+    beanReader.writePreDestroy(writer);
+    beanReader.buildReqEnd(writer);
+  }
+
+  private void writeAddFor(MethodReader constructor) {
+    beanReader.buildAddFor(writer);
+    writeCreateBean(constructor, "builder");
+    beanReader.buildRegister(writer);
+    if (beanReader.isLifecycleRequired()) {
+      beanReader.buildAddLifecycle(writer);
+    }
+    if (beanReader.isExtraInjectionRequired()) {
+      writeExtraInjection();
+    }
+    writer.append("    }").eol();
+  }
+
+  private void writeBuildMethodStart(MethodReader constructor) {
     int providerIndex = 0;
-    writer.append(CODE_COMMENT_BUILD, shortName).eol();
+    if (beanReader.isRequestScopedBean()) {
+      writer.append(CODE_COMMENT_BUILD_RSB, shortName).eol();
+    } else {
+      writer.append(CODE_COMMENT_BUILD, shortName).eol();
+    }
     writer.append("  public static void build(Builder builder");
     for (MethodReader.MethodParam param : constructor.getParams()) {
       if (param.isGenericParam()) {
@@ -112,47 +151,47 @@ class SimpleBeanWriter {
       }
     }
     writer.append(") {").eol();
+  }
 
-    beanReader.buildAddFor(writer);
-    writer.append("      %s bean = new %s(", shortName, shortName);
-
+  private void writeCreateBean(MethodReader constructor, String builderName) {
+    writer.append("%s %s bean = new %s(", indent, shortName, shortName);
     // add constructor dependencies
-    List<MethodReader.MethodParam> params = constructor.getParams();
-    for (int i = 0; i < params.size(); i++) {
+    writeMethodParams(builderName, constructor);
+  }
+
+  private void writeExtraInjection() {
+    String builderRef = "b";
+    String beanRef = "$bean";
+    if (beanReader.isRequestScopedBean()) {
+      builderRef = "scope";
+      beanRef = "bean";
+    } else {
+      writer.append("      builder.addInjector(b -> {").eol();
+    }
+    writer.append("        // field and method injection").eol();
+    for (FieldReader fieldReader : beanReader.getInjectFields()) {
+      String fieldName = fieldReader.getFieldName();
+      String getDependency = fieldReader.builderGetDependency(builderRef);
+      writer.append("        %s.%s = %s;", beanRef, fieldName, getDependency).eol();
+    }
+    for (MethodReader methodReader : beanReader.getInjectMethods()) {
+      writer.append("        %s.%s(", beanRef, methodReader.getName());
+      writeMethodParams(builderRef, methodReader);
+    }
+    if (!beanReader.isRequestScopedBean()) {
+      writer.append("      });").eol();
+    }
+  }
+
+  private void writeMethodParams(String builderRef, MethodReader methodReader) {
+    List<MethodReader.MethodParam> methodParams = methodReader.getParams();
+    for (int i = 0; i < methodParams.size(); i++) {
       if (i > 0) {
         writer.append(", ");
       }
-      writer.append(params.get(i).builderGetDependency("builder"));
+      writer.append(methodParams.get(i).builderGetDependency(builderRef));
     }
     writer.append(");").eol();
-
-    beanReader.buildRegister(writer);
-    if (beanReader.isLifecycleRequired()) {
-      beanReader.buildAddLifecycle(writer);
-    }
-    if (beanReader.isExtraInjectionRequired()) {
-      writer.append("      builder.addInjector(b -> {").eol();
-      writer.append("        // field and method injection").eol();
-      for (FieldReader fieldReader : beanReader.getInjectFields()) {
-        String fieldName = fieldReader.getFieldName();
-        String getDependency = fieldReader.builderGetDependency();
-        writer.append("        $bean.%s = %s;", fieldName, getDependency).eol();
-      }
-      for (MethodReader methodReader : beanReader.getInjectMethods()) {
-        writer.append("        $bean.%s(", methodReader.getName());
-        List<MethodReader.MethodParam> methodParams = methodReader.getParams();
-        for (int i = 0; i < methodParams.size(); i++) {
-          if (i > 0) {
-            writer.append(", ");
-          }
-          writer.append(methodParams.get(i).builderGetDependency("b"));
-        }
-        writer.append(");").eol();
-      }
-      writer.append("      });").eol();
-    }
-    writer.append("    }").eol();
-    writer.append("  }").eol().eol();
   }
 
   private void writeImports() {
@@ -189,20 +228,20 @@ class SimpleBeanWriter {
   }
 
   private void writeClassStart() {
-    if (beanReader.isRequestScoped()) {
+    if (beanReader.isRequestScopedController()) {
       writer.append(CODE_COMMENT_FACTORY, shortName).eol();
     } else {
       writer.append(CODE_COMMENT, shortName).eol();
     }
     writer.append(Constants.AT_GENERATED).eol();
-    if (beanReader.isRequestScoped()) {
+    if (beanReader.isRequestScopedController()) {
       writer.append(Constants.AT_SINGLETON).eol();
     }
     writer.append("public class ").append(shortName).append(suffix).append(" ");
     if (beanReader.isLifecycleWrapperRequired()) {
       writer.append("implements BeanLifecycle ");
     }
-    if (beanReader.isRequestScoped()) {
+    if (beanReader.isRequestScopedController()) {
       writer.append("implements ");
       beanReader.factoryInterface(writer);
     }

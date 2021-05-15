@@ -43,6 +43,7 @@ class BeanReader {
   private boolean beanLifeCycle;
   private boolean primary;
   private boolean secondary;
+  private boolean requestScopedBean;
 
   BeanReader(TypeElement beanType, ProcessingContext context) {
     this.beanType = beanType;
@@ -62,6 +63,7 @@ class BeanReader {
   private void init() {
     typeReader.process();
     beanLifeCycle = typeReader.isBeanLifeCycle();
+    requestScopedBean = typeReader.isRequestScopeBean();
     name = typeReader.getName();
     primary = (beanType.getAnnotation(Primary.class) != null);
     secondary = !primary && (beanType.getAnnotation(Secondary.class) != null);
@@ -117,6 +119,10 @@ class BeanReader {
     }
     for (MethodReader factoryMethod : factoryMethods) {
       factoryMethod.addImports(importTypes);
+    }
+    if (requestScopedBean) {
+      importTypes.add(Constants.REQUESTSCOPEPROVIDER);
+      importTypes.add(Constants.REQUESTSCOPE);
     }
   }
 
@@ -256,7 +262,7 @@ class BeanReader {
    * Return true if lifecycle via annotated methods is required.
    */
   boolean isLifecycleWrapperRequired() {
-    return postConstructMethod != null || preDestroyMethod != null;
+    return !requestScopedBean && (postConstructMethod != null || preDestroyMethod != null);
   }
 
   List<MetaData> createFactoryMethodMeta() {
@@ -349,12 +355,16 @@ class BeanReader {
    * <p>
    * If request scoped then generate a BeanFactory instead.
    */
-  boolean isRequestScoped() {
-    return requestParams.isRequestScoped();
+  boolean isRequestScopedController() {
+    return requestParams.isRequestScopedController();
+  }
+
+  boolean isRequestScopedBean() {
+    return requestScopedBean;
   }
 
   String suffix() {
-    return isRequestScoped() ? "$factory" : "$di";
+    return isRequestScopedController() ? "$factory" : "$di";
   }
 
   /**
@@ -396,4 +406,39 @@ class BeanReader {
     writer.append("  }").eol();
   }
 
+  void buildReq(Append writer) {
+    writer.append("    builder.requestScope(%s.class, new RequestScopeProvider<%s>() {", shortName, shortName).eol();
+    writer.append("      @Override").eol();
+    writer.append("      public %s provide(RequestScope scope) {", shortName).eol();
+  }
+
+  void buildReqEnd(Append writer) {
+    writer.append("        return bean;").eol();
+    writer.append("      }").eol();
+    writer.append("    }");
+
+    final String ifaceTypes = typeReader.getTypesRegister();
+    if (ifaceTypes != null) {
+      if (name != null && !name.isEmpty()) {
+        writer.append(", \"%s\"", name);
+        writer.append(", ");
+        writer.append(ifaceTypes);
+      }
+    }
+    writer.append(");").eol();
+  }
+
+  void writePostConstruct(Append writer) {
+    if (postConstructMethod != null) {
+      writer.append("        bean.%s();", postConstructMethod.getSimpleName()).eol();
+    }
+  }
+
+  void writePreDestroy(Append writer) {
+    if (preDestroyMethod != null) {
+      writer.append("        scope.addClosable(bean::%s);", preDestroyMethod.getSimpleName()).eol();
+    } else if (typeReader.isClosable()) {
+      writer.append("        scope.addClosable(bean);").eol();
+    }
+  }
 }

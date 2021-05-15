@@ -144,4 +144,12 @@ public class SystemContext {
     return rootContext.getBeansByPriority(interfaceType);
   }
 
+  /**
+   * Start building a RequestScope.
+   *
+   * @return The request scope builder
+   */
+  public static RequestScopeBuilder newRequestScope() {
+    return rootContext.newRequestScope();
+  }
 }
