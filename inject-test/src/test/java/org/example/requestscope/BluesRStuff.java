@@ -1,7 +1,7 @@
 package org.example.requestscope;
 
 import io.avaje.inject.Request;
-import jakarta.inject.Named;
+import javax.inject.Named;
 
 //@Named("blues")
 // "blues" is derived qualifier name based on short name relative to interface short name

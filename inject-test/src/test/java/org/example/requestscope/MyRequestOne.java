@@ -1,7 +1,7 @@
 package org.example.requestscope;
 
 import io.avaje.inject.Request;
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 import org.example.request.AService;
 
 import javax.annotation.PostConstruct;

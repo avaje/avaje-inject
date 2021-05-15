@@ -1,7 +1,7 @@
 package org.example.requestscope;
 
 import io.avaje.inject.Request;
-import jakarta.inject.Named;
+import javax.inject.Named;
 
 @Named("reds")
 @Request

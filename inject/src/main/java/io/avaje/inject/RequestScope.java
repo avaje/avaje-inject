@@ -1,6 +1,6 @@
 package io.avaje.inject;
 
-import jakarta.inject.Provider;
+import javax.inject.Provider;
 
 import java.io.Closeable;
 import java.util.List;
