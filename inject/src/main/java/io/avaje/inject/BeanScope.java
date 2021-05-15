@@ -221,11 +221,6 @@ public interface BeanScope extends Closeable {
   <T> RequestScopeMatch<T> requestProvider(Class<T> type, String name);
 
   /**
-   * Start the context firing any <code>@PostConstruct</code> methods.
-   */
-  void start();
-
-  /**
    * Close the context firing any <code>@PreDestroy</code> methods.
    */
   void close();

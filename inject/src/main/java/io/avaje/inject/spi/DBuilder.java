@@ -197,6 +197,6 @@ class DBuilder implements Builder {
 
   public BeanScope build() {
     runInjectors();
-    return new DBeanScope(lifecycleList, beanMap, reqScopeProviders);
+    return new DBeanScope(lifecycleList, beanMap, reqScopeProviders).start();
   }
 }

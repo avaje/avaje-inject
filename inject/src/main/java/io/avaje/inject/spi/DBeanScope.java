@@ -96,8 +96,7 @@ class DBeanScope implements BeanScope {
     return beans.all(annotation);
   }
 
-  @Override
-  public void start() {
+  DBeanScope start() {
     lock.lock();
     try {
       log.trace("firing postConstruct");
@@ -107,6 +106,7 @@ class DBeanScope implements BeanScope {
     } finally {
       lock.unlock();
     }
+    return this;
   }
 
   @Override

@@ -118,8 +118,6 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
     }
 
     BeanScope beanScope = builder.build();
-    // entire graph built, fire postConstruct
-    beanScope.start();
     if (shutdownHook) {
       return new ShutdownAwareBeanScope(beanScope);
     }
@@ -162,59 +160,54 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
   private static class ShutdownAwareBeanScope implements BeanScope {
 
     private final ReentrantLock lock = new ReentrantLock();
-    private final BeanScope context;
+    private final BeanScope beanScope;
     private final Hook hook;
     private boolean shutdown;
 
-    ShutdownAwareBeanScope(BeanScope context) {
-      this.context = context;
+    ShutdownAwareBeanScope(BeanScope beanScope) {
+      this.beanScope = beanScope;
       this.hook = new Hook(this);
       Runtime.getRuntime().addShutdownHook(hook);
     }
 
     @Override
     public RequestScopeBuilder newRequestScope() {
-      return context.newRequestScope();
+      return beanScope.newRequestScope();
     }
 
     @Override
     public <T> RequestScopeMatch<T> requestProvider(Class<T> type, String name) {
-      return context.requestProvider(type, name);
+      return beanScope.requestProvider(type, name);
     }
 
     @Override
     public <T> T get(Class<T> beanClass) {
-      return context.get(beanClass);
+      return beanScope.get(beanClass);
     }
 
     @Override
     public <T> T get(Class<T> beanClass, String name) {
-      return context.get(beanClass, name);
+      return beanScope.get(beanClass, name);
     }
 
     @Override
     public List<Object> listByAnnotation(Class<?> annotation) {
-      return context.listByAnnotation(annotation);
+      return beanScope.listByAnnotation(annotation);
     }
 
     @Override
     public <T> List<T> list(Class<T> interfaceType) {
-      return context.list(interfaceType);
+      return beanScope.list(interfaceType);
     }
 
     @Override
     public <T> List<T> listByPriority(Class<T> interfaceType) {
-      return context.listByPriority(interfaceType);
+      return beanScope.listByPriority(interfaceType);
     }
 
     @Override
     public <T> List<T> listByPriority(Class<T> interfaceType, Class<? extends Annotation> priority) {
-      return context.listByPriority(interfaceType, priority);
-    }
-
-    @Override
-    public void start() {
-      context.start();
+      return beanScope.listByPriority(interfaceType, priority);
     }
 
     @Override
@@ -224,7 +217,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
         if (!shutdown) {
           Runtime.getRuntime().removeShutdownHook(hook);
         }
-        context.close();
+        beanScope.close();
       } finally {
         lock.unlock();
       }
