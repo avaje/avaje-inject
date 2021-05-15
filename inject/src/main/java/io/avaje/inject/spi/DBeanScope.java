@@ -68,13 +68,7 @@ class DBeanScope implements BeanScope {
     return list.size() > 1 ? sortByPriority(list, priorityAnnotation) : list;
   }
 
-  @Override
-  public <T> List<T> sortByPriority(List<T> list) {
-    return sortByPriority(list, Priority.class);
-  }
-
-  @Override
-  public <T> List<T> sortByPriority(List<T> list, final Class<? extends Annotation> priorityAnnotation) {
+  private  <T> List<T> sortByPriority(List<T> list, final Class<? extends Annotation> priorityAnnotation) {
     boolean priorityUsed = false;
     List<SortBean<T>> tempList = new ArrayList<>(list.size());
     for (T bean : list) {

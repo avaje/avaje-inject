@@ -88,7 +88,7 @@ public interface BeanScope extends Closeable {
    *
    * <pre>{@code
    *
-   *   CoffeeMaker coffeeMaker = beanContext.getBean(CoffeeMaker.class);
+   *   CoffeeMaker coffeeMaker = beanScope.get(CoffeeMaker.class);
    *   coffeeMaker.brew();
    *
    * }</pre>
@@ -110,7 +110,7 @@ public interface BeanScope extends Closeable {
    *
    * <pre>{@code
    *
-   *   Heater heater = beanContext.getBean(Heater.class, "electric");
+   *   Heater heater = beanScope.get(Heater.class, "electric");
    *   heater.heat();
    *
    * }</pre>
@@ -202,26 +202,6 @@ public interface BeanScope extends Closeable {
   default <T> List<T> getBeansByPriority(Class<T> interfaceType, Class<? extends Annotation> priority) {
     return listByPriority(interfaceType, priority);
   }
-
-  /**
-   * Sort the beans by javax.annotation.Priority annotation.
-   *
-   * @param list The beans to sort by priority
-   * @return A new list of beans sorted by priority
-   */
-  <T> List<T> sortByPriority(List<T> list);
-
-  /**
-   * Sort the beans using the given Priority annotation.
-   * <p>
-   * The priority annotation will typically be either <code>javax.annotation.Priority</code>
-   * or <code>jakarta.annotation.Priority</code>.
-   *
-   * @param list     The beans to sort by priority
-   * @param priority The priority annotation used to sort the beans
-   * @return A new list of beans sorted by priority
-   */
-  <T> List<T> sortByPriority(List<T> list, final Class<? extends Annotation> priority);
 
   /**
    * Return a request scoped provided for the specific type and name.

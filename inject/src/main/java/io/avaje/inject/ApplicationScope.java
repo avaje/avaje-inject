@@ -60,7 +60,7 @@ public class ApplicationScope {
    * @param type an interface or bean type
    */
   public static <T> T get(Class<T> type) {
-    return rootContext.getBean(type);
+    return rootContext.get(type);
   }
 
   /**
@@ -68,7 +68,7 @@ public class ApplicationScope {
    *
    * <pre>{@code
    *
-   *   Heater heater = ApplicationScope.getBean(Heater.class, "electric");
+   *   Heater heater = ApplicationScope.get(Heater.class, "electric");
    *   heater.heat();
    *
    * }</pre>
@@ -77,7 +77,7 @@ public class ApplicationScope {
    * @param name the name qualifier of a specific bean
    */
   public static <T> T get(Class<T> type, String name) {
-    return rootContext.getBean(type, name);
+    return rootContext.get(type, name);
   }
 
 
@@ -95,7 +95,7 @@ public class ApplicationScope {
    * @param interfaceType An interface class.
    */
   public static <T> List<T> list(Class<T> interfaceType) {
-    return rootContext.getBeans(interfaceType);
+    return rootContext.list(interfaceType);
   }
 
   /**
@@ -112,7 +112,7 @@ public class ApplicationScope {
    * @param interfaceType An interface class.
    */
   public static <T> List<T> listByPriority(Class<T> interfaceType) {
-    return rootContext.getBeansByPriority(interfaceType);
+    return rootContext.listByPriority(interfaceType);
   }
 
   /**

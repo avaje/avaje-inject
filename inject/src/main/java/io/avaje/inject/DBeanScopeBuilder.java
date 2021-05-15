@@ -213,16 +213,6 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
     }
 
     @Override
-    public <T> List<T> sortByPriority(List<T> list) {
-      return context.sortByPriority(list);
-    }
-
-    @Override
-    public <T> List<T> sortByPriority(List<T> list, Class<? extends Annotation> priority) {
-      return context.sortByPriority(list, priority);
-    }
-
-    @Override
     public void start() {
       context.start();
     }
