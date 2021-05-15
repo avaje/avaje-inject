@@ -173,6 +173,16 @@ class DBeanContextBuilder implements BeanContextBuilder {
     }
 
     @Override
+    public RequestScopeBuilder newRequestScope() {
+      return context.newRequestScope();
+    }
+
+    @Override
+    public <T> RequestScopeMatch<T> requestProvider(Class<T> type, String name) {
+      return context.requestProvider(type, name);
+    }
+
+    @Override
     public <T> T getBean(Class<T> beanClass) {
       return context.getBean(beanClass);
     }

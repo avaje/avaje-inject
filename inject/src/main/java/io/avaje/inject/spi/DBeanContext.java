@@ -1,8 +1,6 @@
 package io.avaje.inject.spi;
 
-import io.avaje.inject.BeanContext;
-import io.avaje.inject.BeanEntry;
-import io.avaje.inject.Priority;
+import io.avaje.inject.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +8,10 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static io.avaje.inject.spi.KeyUtil.key;
 
 class DBeanContext implements BeanContext {
 
@@ -19,12 +20,25 @@ class DBeanContext implements BeanContext {
   private final ReentrantLock lock = new ReentrantLock();
   private final List<BeanLifecycle> lifecycleList;
   private final DBeanMap beans;
+  private final Map<String, RequestScopeMatch<?>> reqScopeProviders;
 
   private boolean closed;
 
-  DBeanContext(List<BeanLifecycle> lifecycleList, DBeanMap beans) {
+  DBeanContext(List<BeanLifecycle> lifecycleList, DBeanMap beans, Map<String, RequestScopeMatch<?>> reqScopeProviders) {
     this.lifecycleList = lifecycleList;
     this.beans = beans;
+    this.reqScopeProviders = reqScopeProviders;
+  }
+
+  @Override
+  public RequestScopeBuilder newRequestScope() {
+    return new DRequestScopeBuilder(this);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> RequestScopeMatch<T> requestProvider(Class<T> type, String name) {
+    return (RequestScopeMatch<T>) reqScopeProviders.get(key(type, name));
   }
 
   @Override

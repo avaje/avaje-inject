@@ -9,8 +9,8 @@ import java.util.Set;
 class TypeAppender {
 
   private final Set<String> importTypes;
+  private final StringBuilder sb = new StringBuilder();
   private int count;
-  private StringBuilder sb = new StringBuilder();
 
   TypeAppender(Set<String> importTypes) {
     this.importTypes = importTypes;

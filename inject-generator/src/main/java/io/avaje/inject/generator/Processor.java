@@ -2,6 +2,7 @@ package io.avaje.inject.generator;
 
 import io.avaje.inject.ContextModule;
 import io.avaje.inject.Factory;
+import io.avaje.inject.Request;
 import io.avaje.inject.spi.DependencyMeta;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -78,11 +79,13 @@ public class Processor extends AbstractProcessor {
 
     Set<? extends Element> factoryBeans = roundEnv.getElementsAnnotatedWith(Factory.class);
     Set<? extends Element> beans = roundEnv.getElementsAnnotatedWith(Singleton.class);
+    Set<? extends Element> requestBeans = roundEnv.getElementsAnnotatedWith(Request.class);
 
     readModule(roundEnv);
     readChangedBeans(factoryBeans, true);
     readChangedBeans(beans, false);
     readChangedBeans(controllers, false);
+    readChangedBeans(requestBeans, false);
 
     mergeMetaData();
 
@@ -151,7 +154,7 @@ public class Processor extends AbstractProcessor {
    */
   private void mergeMetaData() {
     for (BeanReader beanReader : beanReaders) {
-      if (beanReader.isRequestScoped()) {
+      if (beanReader.isRequestScopedController()) {
         context.logDebug("skipping request scoped processed bean " + beanReader);
       } else {
         String metaKey = beanReader.getMetaKey();

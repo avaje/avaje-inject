@@ -14,7 +14,10 @@ class TypeInterfaceReader {
   private final TypeElement beanType;
   private final ProcessingContext context;
   private final List<String> interfaceTypes = new ArrayList<>();
+  private final String beanSimpleName;
   private boolean beanLifeCycle;
+  private boolean closeable;
+  private String qualifierName;
 
   /**
    * Create for bean type.
@@ -22,6 +25,7 @@ class TypeInterfaceReader {
   TypeInterfaceReader(TypeElement beanType, ProcessingContext context) {
     this.beanType = beanType;
     this.context = context;
+    this.beanSimpleName = beanType.getSimpleName().toString();
   }
 
   List<String> getInterfaceTypes() {
@@ -30,6 +34,14 @@ class TypeInterfaceReader {
 
   boolean isBeanLifeCycle() {
     return beanLifeCycle;
+  }
+
+  boolean isCloseable() {
+    return closeable;
+  }
+
+  String getQualifierName() {
+    return qualifierName;
   }
 
   void process() {
@@ -45,7 +57,14 @@ class TypeInterfaceReader {
         beanLifeCycle = true;
       } else if (type.indexOf('.') == -1) {
         context.logWarn("skip when no package on interface " + type);
+      } else if (Constants.IO_CLOSEABLE.equals(type)) {
+        closeable = true;
       } else {
+        final String iShortName = Util.shortName(type);
+        if (beanSimpleName.endsWith(iShortName)) {
+          // derived qualifier name based on prefix to interface short name
+          qualifierName = beanSimpleName.substring(0, beanSimpleName.length() - iShortName.length()).toLowerCase();
+        }
         interfaceTypes.add(type);
       }
     }

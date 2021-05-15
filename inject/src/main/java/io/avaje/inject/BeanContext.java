@@ -78,6 +78,12 @@ public interface BeanContext extends Closeable {
   }
 
   /**
+   * Create a RequestScope via builder where we provide extra instances
+   * that can be used/included in wiring request scoped beans.
+   */
+  RequestScopeBuilder newRequestScope();
+
+  /**
    * Return a single bean given the type.
    *
    * <pre>{@code
@@ -181,6 +187,15 @@ public interface BeanContext extends Closeable {
    * @return A new list of beans sorted by priority
    */
   <T> List<T> sortByPriority(List<T> list, final Class<? extends Annotation> priority);
+
+  /**
+   * Return a request scoped provided for the specific type and name.
+   *
+   * @param type The type of the request scoped bean
+   * @param name The optional qualifier name
+   * @return The request scope provider or null
+   */
+  <T> RequestScopeMatch<T> requestProvider(Class<T> type, String name);
 
   /**
    * Start the context firing any <code>@PostConstruct</code> methods.

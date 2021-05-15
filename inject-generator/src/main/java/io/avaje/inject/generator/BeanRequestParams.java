@@ -31,7 +31,7 @@ class BeanRequestParams {
   /**
    * Return true if the bean has request scoped dependencies.
    */
-  boolean isRequestScoped() {
+  boolean isRequestScopedController() {
     return reqScopeHandler != null;
   }
 
