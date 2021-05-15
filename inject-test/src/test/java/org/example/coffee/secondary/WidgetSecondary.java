@@ -1,7 +1,6 @@
 package org.example.coffee.secondary;
 
 import io.avaje.inject.Secondary;
-
 import jakarta.inject.Singleton;
 
 @Singleton

@@ -1,7 +1,7 @@
 package org.example.iface;
 
+import io.avaje.inject.ApplicationScope;
 import io.avaje.inject.BeanContext;
-import io.avaje.inject.SystemContext;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,8 +12,7 @@ public class NestedInterfaceTest {
 
   @Test
   void test() {
-    final BeanContext context = SystemContext.context();
-    final Some.Nested nestedInterface = context.getBean(Some.Nested.class);
+    final Some.Nested nestedInterface = ApplicationScope.get(Some.Nested.class);
 
     assertNotNull(nestedInterface);
     assertEquals("MySomeNested", nestedInterface.doNested());

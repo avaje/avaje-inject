@@ -2,7 +2,6 @@ package org.example.request;
 
 import io.avaje.inject.spi.BeanFactory;
 import io.javalin.http.Context;
-
 import jakarta.inject.Singleton;
 
 /**

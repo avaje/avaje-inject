@@ -1,6 +1,6 @@
 package org.example.coffee.parent;
 
-import io.avaje.inject.SystemContext;
+import io.avaje.inject.ApplicationScope;
 import org.example.coffee.parent.sub.Engi;
 import org.example.coffee.parent.sub.PetEngi;
 import org.junit.jupiter.api.Test;
@@ -11,9 +11,9 @@ class ConcreteEngiTest {
 
   @Test
   void getBean_usingSuperClassTypeAndName() {
-    LightPetEngi lightByType = SystemContext.getBean(LightPetEngi.class);
-    PetEngi lightByName = SystemContext.getBean(PetEngi.class, "Lite");
-    Engi engiByName = SystemContext.getBean(Engi.class, "Lite");
+    LightPetEngi lightByType = ApplicationScope.get(LightPetEngi.class);
+    PetEngi lightByName = ApplicationScope.get(PetEngi.class, "Lite");
+    Engi engiByName = ApplicationScope.get(Engi.class, "Lite");
 
     assertThat(lightByType.ignite()).isEqualTo("lightPetEngi");
     assertThat(lightByName).isSameAs(lightByType);
@@ -22,15 +22,15 @@ class ConcreteEngiTest {
 
   @Test
   void getBean_usingSuperClassTypeAndName_other() {
-    Engi engi = SystemContext.getBean(Engi.class, "Des");
+    Engi engi = ApplicationScope.get(Engi.class, "Des");
     assertThat(engi.ignite()).isEqualTo("desEngi");
-    //DesEngi desEngi = SystemContext.getBean(DesEngi.class);
+    //DesEngi desEngi = ApplicationScope.get(DesEngi.class);
     //assertThat(desEngi).isSameAs(engi);
   }
 
   @Test
   void getBean_usingSuperClassTypeAndName_NoImpliedName() {
-    NoImpliedNameEngi engi = SystemContext.getBean(NoImpliedNameEngi.class);
+    NoImpliedNameEngi engi = ApplicationScope.get(NoImpliedNameEngi.class);
     assertThat(engi.ignite()).isEqualTo("NoImpliedNameEngi");
   }
 }

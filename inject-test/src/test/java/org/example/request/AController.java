@@ -3,7 +3,6 @@ package org.example.request;
 
 import io.avaje.http.api.Controller;
 import io.javalin.http.Context;
-
 import jakarta.inject.Inject;
 
 @Controller

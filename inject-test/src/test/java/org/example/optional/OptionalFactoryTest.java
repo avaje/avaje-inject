@@ -1,6 +1,6 @@
 package org.example.optional;
 
-import io.avaje.inject.SystemContext;
+import io.avaje.inject.ApplicationScope;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -9,7 +9,7 @@ class OptionalFactoryTest {
 
   @Test
   void injectOptional_viaConstructor() {
-    AllQue allQue = SystemContext.getBean(AllQue.class);
+    AllQue allQue = ApplicationScope.get(AllQue.class);
     assertThat(allQue.whichSet()).isEqualTo("f:Optional[frodo]s:Optional[sam]b:Optional.empty");
 
     String msg = allQue.frodoPush("hello");
@@ -18,31 +18,31 @@ class OptionalFactoryTest {
 
   @Test
   void injectOptional_viaField() {
-    AllQue2 allQue = SystemContext.getBean(AllQue2.class);
+    AllQue2 allQue = ApplicationScope.get(AllQue2.class);
     assertThat(allQue.whichSet()).isEqualTo("f:frodos:Optional[sam]b:Optional.empty");
   }
 
   @Test
   void injectOptional_viaMethod() {
-    AllQue3 allQueViaMethodInjection = SystemContext.getBean(AllQue3.class);
+    AllQue3 allQueViaMethodInjection = ApplicationScope.get(AllQue3.class);
     assertThat(allQueViaMethodInjection.whichSet()).isEqualTo("f:frodos:samb:null");
   }
 
   @Test
   void injectNullable_viaMethod() {
-    AllQue4 allQue = SystemContext.getBean(AllQue4.class);
+    AllQue4 allQue = ApplicationScope.get(AllQue4.class);
     assertThat(allQue.whichSet()).isEqualTo("f:frodos:samb:null");
   }
 
   @Test
   void injectNullable_viaConstructor() {
-    AllQue5 allQue = SystemContext.getBean(AllQue5.class);
+    AllQue5 allQue = ApplicationScope.get(AllQue5.class);
     assertThat(allQue.whichSet()).isEqualTo("f:frodos:samb:null");
   }
 
   @Test
   void injectNullable_viaField() {
-    AllQue6 allQue = SystemContext.getBean(AllQue6.class);
+    AllQue6 allQue = ApplicationScope.get(AllQue6.class);
     assertThat(allQue.whichSet()).isEqualTo("f:frodos:samb:null");
   }
 

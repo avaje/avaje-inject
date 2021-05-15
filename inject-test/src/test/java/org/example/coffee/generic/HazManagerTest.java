@@ -1,7 +1,7 @@
 package org.example.coffee.generic;
 
+import io.avaje.inject.ApplicationScope;
 import io.avaje.inject.BeanContext;
-import io.avaje.inject.SystemContext;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,7 +13,7 @@ public class HazManagerTest {
   @Test
   public void find_when_allWired() {
 
-    HazManager hazManager = SystemContext.getBean(HazManager.class);
+    HazManager hazManager = ApplicationScope.get(HazManager.class);
     Haz haz = hazManager.find(42L);
 
     assertThat(haz.id).isEqualTo(42L);

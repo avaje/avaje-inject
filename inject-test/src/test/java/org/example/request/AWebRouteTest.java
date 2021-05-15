@@ -1,7 +1,7 @@
 package org.example.request;
 
 
-import io.avaje.inject.SystemContext;
+import io.avaje.inject.ApplicationScope;
 import io.javalin.http.Context;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -14,7 +14,7 @@ public class AWebRouteTest {
   @Test
   public void test() {
 
-    final AWebRoute route = SystemContext.getBean(AWebRoute.class);
+    final AWebRoute route = ApplicationScope.get(AWebRoute.class);
 
     Context ctx = Mockito.mock(Context.class);
     when(ctx.toString()).thenReturn("a");

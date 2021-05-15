@@ -1,7 +1,7 @@
 package org.example.requestscope;
 
+import io.avaje.inject.ApplicationScope;
 import io.avaje.inject.RequestScope;
-import io.avaje.inject.SystemContext;
 import org.example.request.AService;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +13,7 @@ class RequestScopedBeanTest {
   void preDestroy() {
 
     MyRequestPreDestroy bean;
-    try (RequestScope requestScope = SystemContext.newRequestScope()
+    try (RequestScope requestScope = ApplicationScope.newRequestScope()
       .build()) {
       bean = requestScope.get(MyRequestPreDestroy.class);
       assertThat(bean.isFiredPreDestroy()).isFalse();
@@ -27,7 +27,7 @@ class RequestScopedBeanTest {
     MyReqThing myReqThing = new MyReqThing();
 
     MyRequestOne myRequestOne;
-    try (RequestScope requestScope = SystemContext.newRequestScope()
+    try (RequestScope requestScope = ApplicationScope.newRequestScope()
       .withBean(ReqThing.class, myReqThing)
       .build()) {
 
@@ -61,7 +61,7 @@ class RequestScopedBeanTest {
     RPump redPump = new RPumpF("red");
     RPump bluePump = new RPumpF("blue");
 
-    try (RequestScope requestScope = SystemContext.newRequestScope()
+    try (RequestScope requestScope = ApplicationScope.newRequestScope()
       .withBean("red", RPump.class, redPump)
       .withBean("blue", RPump.class, bluePump)
       .build()) {

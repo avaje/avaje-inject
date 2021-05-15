@@ -1,7 +1,7 @@
 package org.example.request;
 
 
-import io.avaje.inject.SystemContext;
+import io.avaje.inject.ApplicationScope;
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ public class BWebRouteTest {
   @Test
   public void test() {
 
-    final BWebRoute route = SystemContext.getBean(BWebRoute.class);
+    final BWebRoute route = ApplicationScope.get(BWebRoute.class);
 
     ServerRequest req = mockReq("a");
     ServerResponse res = mockRes("x");
