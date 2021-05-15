@@ -61,14 +61,12 @@ class DBeanMap {
   }
 
   /**
-   * Add all bean instances matching the given type to the list.
+   * Return all bean instances matching the given type.
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  void addAll(Class type, List list) {
+  @SuppressWarnings("rawtypes")
+  List<Object> all(Class type) {
     DContextEntry entry = beans.get(type.getCanonicalName());
-    if (entry != null) {
-      entry.addAll(list);
-    }
+    return entry != null ? entry.all() : Collections.emptyList();
   }
 
   /**

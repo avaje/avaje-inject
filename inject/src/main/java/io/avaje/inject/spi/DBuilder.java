@@ -79,12 +79,10 @@ class DBuilder implements Builder {
     return new LinkedHashSet<>(getList(interfaceType));
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
+  @SuppressWarnings({"unchecked"})
   @Override
   public <T> List<T> getList(Class<T> interfaceType) {
-    List list = new ArrayList<>();
-    beanMap.addAll(interfaceType, list);
-    return (List<T>) list;
+    return (List<T>) beanMap.all(interfaceType);
   }
 
   private <T> T getMaybe(Class<T> beanClass, String name) {

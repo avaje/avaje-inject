@@ -54,9 +54,7 @@ class DBeanScope implements BeanScope {
 
   @Override
   public <T> List<T> list(Class<T> interfaceType) {
-    List<T> list = new ArrayList<>();
-    beans.addAll(interfaceType, list);
-    return list;
+    return (List<T>)beans.all(interfaceType);
   }
 
   @Override
@@ -101,9 +99,7 @@ class DBeanScope implements BeanScope {
 
   @Override
   public List<Object> getBeansWithAnnotation(Class<?> annotation) {
-    List<Object> list = new ArrayList<>();
-    beans.addAll(annotation, list);
-    return list;
+    return beans.all(annotation);
   }
 
   @Override

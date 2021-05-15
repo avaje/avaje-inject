@@ -30,12 +30,14 @@ class DContextEntry {
   }
 
   /**
-   * Add all the managed beans to the given list.
+   * Return all the beans.
    */
-  void addAll(List<Object> appendToList) {
+  List<Object> all() {
+    List<Object> list = new ArrayList<>(entries.size());
     for (DContextEntryBean entry : entries) {
-      appendToList.add(entry.getBean());
+      list.add(entry.getBean());
     }
+    return list;
   }
 
   void add(DContextEntryBean entryBean) {
