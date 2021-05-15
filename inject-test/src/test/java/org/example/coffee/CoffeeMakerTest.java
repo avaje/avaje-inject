@@ -1,5 +1,6 @@
 package org.example.coffee;
 
+import io.avaje.inject.ApplicationScope;
 import io.avaje.inject.BeanContext;
 import io.avaje.inject.SystemContext;
 import org.example.coffee.core.DuperPump;
@@ -12,10 +13,10 @@ public class CoffeeMakerTest {
   @Test
   public void makeIt_via_SystemContext() {
 
-    String makeIt = SystemContext.getBean(CoffeeMaker.class).makeIt();
+    String makeIt = ApplicationScope.get(CoffeeMaker.class).makeIt();
     assertThat(makeIt).isEqualTo("done");
 
-    Pump pump = SystemContext.getBean(Pump.class);
+    Pump pump = ApplicationScope.get(Pump.class);
     assertThat(pump).isInstanceOf(DuperPump.class);
 
     Pump pump2 = SystemContext.context().getBean(Pump.class);

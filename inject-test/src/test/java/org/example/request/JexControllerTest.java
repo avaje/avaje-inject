@@ -1,28 +1,26 @@
 package org.example.request;
 
-import io.avaje.inject.SystemContext;
+import io.avaje.inject.ApplicationScope;
 import io.avaje.jex.Context;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 
 class JexControllerTest {
 
   @Test
   void uses_factory_taking_context() {
 
-    assertNull(SystemContext.getBean(JexController.class));
+    assertNull(ApplicationScope.get(JexController.class));
 
-    final JexController$factory factory = SystemContext.getBean(JexController$factory.class);
+    final JexController$factory factory = ApplicationScope.get(JexController$factory.class);
     final Context context = Mockito.mock(Context.class);
     final JexController jexController = factory.create(context);
 
     assertNotNull(jexController);
     assertSame(factory.service0, jexController.service);
-    assertSame(jexController.service, SystemContext.getBean(AService.class));
+    assertSame(jexController.service, ApplicationScope.get(AService.class));
     assertSame(jexController.context, context);
   }
 }

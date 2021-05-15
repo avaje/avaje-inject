@@ -32,7 +32,7 @@ public class SystemContextTest {
   @Test
   public void getBeansByPriority_withAnnotation() {
 
-    final List<Somei> beans = SystemContext.context().getBeansByPriority(Somei.class, Priority.class);
+    final List<Somei> beans = ApplicationScope.scope().getBeansByPriority(Somei.class, Priority.class);
     assertThat(beans).hasSize(3);
 
     assertThat(beans.get(0)).isInstanceOf(BSomei.class);
@@ -43,7 +43,7 @@ public class SystemContextTest {
   @Test
   public void getBeansUnsorted_withPriority() {
 
-    final List<Somei> beans = SystemContext.getBeans(Somei.class);
+    final List<Somei> beans = ApplicationScope.list(Somei.class);
     assertThat(beans).hasSize(3);
     // can't assert bean order
   }

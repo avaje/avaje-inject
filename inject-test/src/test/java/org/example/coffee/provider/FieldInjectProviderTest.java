@@ -1,6 +1,6 @@
 package org.example.coffee.provider;
 
-import io.avaje.inject.SystemContext;
+import io.avaje.inject.ApplicationScope;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -10,12 +10,12 @@ class FieldInjectProviderTest {
   @Test
   void test() {
 
-    FieldInjectProvider bean = SystemContext.getBean(FieldInjectProvider.class);
+    FieldInjectProvider bean = ApplicationScope.get(FieldInjectProvider.class);
     AProv aProv = bean.testGet();
 
     assertThat(aProv).isNotNull();
 
-    AProv beanDirect = SystemContext.getBean(AProv.class);
+    AProv beanDirect = ApplicationScope.get(AProv.class);
     assertThat(aProv).isSameAs(beanDirect);
   }
 }

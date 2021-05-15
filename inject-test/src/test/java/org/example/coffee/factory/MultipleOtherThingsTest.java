@@ -1,7 +1,7 @@
 package org.example.coffee.factory;
 
+import io.avaje.inject.ApplicationScope;
 import io.avaje.inject.BeanContext;
-import io.avaje.inject.SystemContext;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,8 +22,8 @@ class MultipleOtherThingsTest {
 
   @Test
   void named_case_insensitive() {
-    Otherthing yellow0 = SystemContext.getBean(Otherthing.class, "yellow");
-    Otherthing yellow1 = SystemContext.getBean(Otherthing.class, "Yellow");
+    Otherthing yellow0 = ApplicationScope.get(Otherthing.class, "yellow");
+    Otherthing yellow1 = ApplicationScope.get(Otherthing.class, "Yellow");
 
     assertThat(yellow0.doOther()).isEqualTo("yellow");
     assertThat(yellow1).isSameAs(yellow0);

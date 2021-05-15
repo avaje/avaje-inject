@@ -1,7 +1,7 @@
 package org.example.coffee.factory;
 
+import io.avaje.inject.ApplicationScope;
 import io.avaje.inject.BeanContext;
-import io.avaje.inject.SystemContext;
 import org.example.coffee.parent.DesEngi;
 import org.junit.jupiter.api.Test;
 
@@ -19,19 +19,19 @@ public class MyFactoryTest {
 
   @Test
   public void factoryMethod_createsConcreteImplementation() {
-    DesEngi buildDesi = SystemContext.getBean(DesEngi.class, "BuildDesi1");
+    DesEngi buildDesi = ApplicationScope.get(DesEngi.class, "BuildDesi1");
     assertThat(buildDesi.ignite()).isEqualTo("buildEngi1");
 
-    DesEngi buildDesi2 = SystemContext.getBean(DesEngi.class, "BuildDesi2");
+    DesEngi buildDesi2 = ApplicationScope.get(DesEngi.class, "BuildDesi2");
     assertThat(buildDesi2.ignite()).isEqualTo("MyEngi");
   }
 
   @Test
   public void factoryMethod_objectInterface() {
-    DFact dfact = SystemContext.getBean(DFact.class);
+    DFact dfact = ApplicationScope.get(DFact.class);
     assertThat(dfact).isNotNull();
 
-    IDFact idfact = SystemContext.getBean(IDFact.class);
+    IDFact idfact = ApplicationScope.get(IDFact.class);
     assertThat(idfact).isSameAs(dfact);
   }
 }
