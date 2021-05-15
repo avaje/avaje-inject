@@ -1,7 +1,7 @@
 package org.example.coffee;
 
-import io.avaje.inject.BeanContext;
-import io.avaje.inject.BeanContextBuilder;
+import io.avaje.inject.BeanScope;
+import io.avaje.inject.BeanScopeBuilder;
 
 import java.util.List;
 
@@ -15,8 +15,8 @@ class ExtensionExample {
     this.withSpies = withSpies;
   }
 
-  BeanContext build() {
-    BeanContextBuilder bootContext = BeanContext.newBuilder();
+  BeanScope build() {
+    BeanScopeBuilder bootContext = BeanScope.newBuilder();
     withMocks.forEach(bootContext::withMock);
     withSpies.forEach(bootContext::withSpy);
     return bootContext.build();

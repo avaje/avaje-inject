@@ -1,6 +1,6 @@
 package io.avaje.inject.spi;
 
-import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanScope;
 import io.avaje.inject.RequestScope;
 import io.avaje.inject.RequestScopeMatch;
 import javax.inject.Provider;
@@ -20,11 +20,11 @@ class DRequestScope implements RequestScope {
 
   private static final Logger log = LoggerFactory.getLogger(RequestScope.class);
 
-  private final BeanContext beanScope;
+  private final BeanScope beanScope;
   private final ConcurrentHashMap<String, Object> supplied;
   private final List<Closeable> closeables = new ArrayList<>();
 
-  DRequestScope(BeanContext beanScope, ConcurrentHashMap<String, Object> supplied) {
+  DRequestScope(BeanScope beanScope, ConcurrentHashMap<String, Object> supplied) {
     this.beanScope = beanScope;
     this.supplied = supplied;
   }

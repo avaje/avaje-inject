@@ -49,26 +49,25 @@ class DBeanMap {
     }
   }
 
-  <T> BeanEntry<T> candidate(Class<T> type, String name) {
+  @SuppressWarnings("unchecked")
+  <T> T get(Class<T> type, String name) {
     DContextEntry entry = beans.get(type.getCanonicalName());
-    if (entry != null) {
-      if (name != null) {
-        name = name.toLowerCase();
-      }
-      return entry.candidate(name);
+    if (entry == null) {
+      return null;
     }
-    return null;
+    if (name != null) {
+      name = name.toLowerCase();
+    }
+    return (T) entry.get(name);
   }
 
   /**
-   * Add all bean instances matching the given type to the list.
+   * Return all bean instances matching the given type.
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  void addAll(Class type, List list) {
+  @SuppressWarnings("rawtypes")
+  List<Object> all(Class type) {
     DContextEntry entry = beans.get(type.getCanonicalName());
-    if (entry != null) {
-      entry.addAll(list);
-    }
+    return entry != null ? entry.all() : Collections.emptyList();
   }
 
   /**

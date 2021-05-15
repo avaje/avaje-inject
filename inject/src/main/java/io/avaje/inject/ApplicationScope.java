@@ -30,10 +30,10 @@ import java.util.List;
  */
 public class ApplicationScope {
 
-  private static final BeanContext rootContext = init();
+  private static final BeanScope rootContext = init();
 
-  private static BeanContext init() {
-    return BeanContext.newBuilder().build();
+  private static BeanScope init() {
+    return BeanScope.newBuilder().build();
   }
 
   private ApplicationScope() {
@@ -43,7 +43,7 @@ public class ApplicationScope {
   /**
    * Return the underlying BeanContext.
    */
-  public static BeanContext scope() {
+  public static BeanScope scope() {
     return rootContext;
   }
 

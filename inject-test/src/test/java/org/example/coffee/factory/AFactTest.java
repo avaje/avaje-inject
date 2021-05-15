@@ -1,6 +1,6 @@
 package org.example.coffee.factory;
 
-import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanScope;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -11,7 +11,7 @@ public class AFactTest {
   public void postConstruct() {
 
     AFact bean;
-    try (BeanContext context = BeanContext.newBuilder().build()) {
+    try (BeanScope context = BeanScope.newBuilder().build()) {
       bean = context.getBean(AFact.class);
 
       assertThat(bean.getCountConstruct()).isEqualTo(1);

@@ -13,9 +13,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static io.avaje.inject.spi.KeyUtil.key;
 
-class DBeanContext implements BeanContext {
+class DBeanScope implements BeanScope {
 
-  private static final Logger log = LoggerFactory.getLogger(DBeanContext.class);
+  private static final Logger log = LoggerFactory.getLogger(DBeanScope.class);
 
   private final ReentrantLock lock = new ReentrantLock();
   private final List<BeanLifecycle> lifecycleList;
@@ -24,7 +24,7 @@ class DBeanContext implements BeanContext {
 
   private boolean closed;
 
-  DBeanContext(List<BeanLifecycle> lifecycleList, DBeanMap beans, Map<String, RequestScopeMatch<?>> reqScopeProviders) {
+  DBeanScope(List<BeanLifecycle> lifecycleList, DBeanMap beans, Map<String, RequestScopeMatch<?>> reqScopeProviders) {
     this.lifecycleList = lifecycleList;
     this.beans = beans;
     this.reqScopeProviders = reqScopeProviders;
@@ -42,39 +42,29 @@ class DBeanContext implements BeanContext {
   }
 
   @Override
-  public <T> T getBean(Class<T> beanClass) {
-    return getBean(beanClass, null);
+  public <T> T get(Class<T> beanClass) {
+    return get(beanClass, null);
   }
 
   @Override
-  public <T> BeanEntry<T> candidate(Class<T> type, String name) {
-    // sort candidates by priority - Primary, Normal, Secondary
-    EntrySort<T> entrySort = new EntrySort<>();
-    entrySort.add(beans.candidate(type, name));
-    return entrySort.get();
+  public <T> T get(Class<T> beanClass, String name) {
+    return beans.get(beanClass, name);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> List<T> list(Class<T> interfaceType) {
+    return (List<T>) beans.all(interfaceType);
   }
 
   @Override
-  public <T> T getBean(Class<T> beanClass, String name) {
-    BeanEntry<T> candidate = candidate(beanClass, name);
-    return (candidate == null) ? null : candidate.getBean();
+  public <T> List<T> listByPriority(Class<T> interfaceType) {
+    return listByPriority(interfaceType, Priority.class);
   }
 
   @Override
-  public <T> List<T> getBeans(Class<T> interfaceType) {
-    List<T> list = new ArrayList<>();
-    beans.addAll(interfaceType, list);
-    return list;
-  }
-
-  @Override
-  public <T> List<T> getBeansByPriority(Class<T> interfaceType) {
-    return getBeansByPriority(interfaceType, Priority.class);
-  }
-
-  @Override
-  public <T> List<T> getBeansByPriority(Class<T> interfaceType, Class<? extends Annotation> priorityAnnotation) {
-    List<T> list = getBeans(interfaceType);
+  public <T> List<T> listByPriority(Class<T> interfaceType, Class<? extends Annotation> priorityAnnotation) {
+    List<T> list = list(interfaceType);
     return list.size() > 1 ? sortByPriority(list, priorityAnnotation) : list;
   }
 
@@ -109,9 +99,7 @@ class DBeanContext implements BeanContext {
 
   @Override
   public List<Object> getBeansWithAnnotation(Class<?> annotation) {
-    List<Object> list = new ArrayList<>();
-    beans.addAll(annotation, list);
-    return list;
+    return beans.all(annotation);
   }
 
   @Override
@@ -141,63 +129,6 @@ class DBeanContext implements BeanContext {
       }
     } finally {
       lock.unlock();
-    }
-  }
-
-  static class EntrySort<T> {
-
-    private BeanEntry<T> supplied;
-    private BeanEntry<T> primary;
-    private int primaryCount;
-    private BeanEntry<T> secondary;
-    private int secondaryCount;
-    private BeanEntry<T> normal;
-    private int normalCount;
-
-    private final List<BeanEntry<T>> all = new ArrayList<>();
-
-    void add(BeanEntry<T> candidate) {
-      if (candidate == null) {
-        return;
-      }
-      if (candidate.isSupplied()) {
-        // a supplied bean trumps all
-        supplied = candidate;
-        return;
-      }
-      all.add(candidate);
-      if (candidate.isPrimary()) {
-        primary = candidate;
-        primaryCount++;
-      } else if (candidate.isSecondary()) {
-        secondary = candidate;
-        secondaryCount++;
-      } else {
-        normal = candidate;
-        normalCount++;
-      }
-    }
-
-    BeanEntry<T> get() {
-      if (supplied != null) {
-        return supplied;
-      }
-      if (primaryCount > 1) {
-        throw new IllegalStateException("Multiple @Primary beans when only expecting one? Beans: " + all);
-      }
-      if (primaryCount == 1) {
-        return primary;
-      }
-      if (normalCount > 1) {
-        throw new IllegalStateException("Multiple beans when only expecting one? Maybe use @Primary or @Secondary? Beans: " + all);
-      }
-      if (normalCount == 1) {
-        return normal;
-      }
-      if (secondaryCount > 1) {
-        throw new IllegalStateException("Multiple @Secondary beans when only expecting one? Beans: " + all);
-      }
-      return secondary;
     }
   }
 

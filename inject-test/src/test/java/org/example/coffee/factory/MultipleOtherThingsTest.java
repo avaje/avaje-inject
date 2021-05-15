@@ -1,7 +1,7 @@
 package org.example.coffee.factory;
 
 import io.avaje.inject.ApplicationScope;
-import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanScope;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -11,7 +11,7 @@ class MultipleOtherThingsTest {
 
   @Test
   void test() {
-    try (BeanContext context = BeanContext.newBuilder().build()) {
+    try (BeanScope context = BeanScope.newBuilder().build()) {
       final MultipleOtherThings combined = context.getBean(MultipleOtherThings.class);
       assertEquals("blue", combined.blue());
       assertEquals("red", combined.red());

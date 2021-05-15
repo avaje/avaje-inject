@@ -1,6 +1,6 @@
 package org.example.coffee.qualifier;
 
-import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanScope;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -9,7 +9,7 @@ class StoreManagerWithSetterQualifierTest {
 
   @Test
   void redStore() {
-    try (BeanContext context = BeanContext.newBuilder().build()) {
+    try (BeanScope context = BeanScope.newBuilder().build()) {
       StoreManagerWithSetterQualifier manager = context.getBean(StoreManagerWithSetterQualifier.class);
       assertThat(manager.blueStore()).isEqualTo("blue");
       assertThat(manager.greenStore()).isEqualTo("green");
@@ -18,7 +18,7 @@ class StoreManagerWithSetterQualifierTest {
 
   @Test
   void namedTestDouble() {
-    try (BeanContext context = BeanContext.newBuilder()
+    try (BeanScope context = BeanScope.newBuilder()
       .withBean("Blue", SomeStore.class, () -> "TD Blue")
       .withBean("Green", SomeStore.class, () -> "TD Green")
       .build()) {
@@ -31,7 +31,7 @@ class StoreManagerWithSetterQualifierTest {
 
   @Test
   void namedTestDouble_expect_otherNamedStillWired() {
-    try (BeanContext context = BeanContext.newBuilder()
+    try (BeanScope context = BeanScope.newBuilder()
       .withBean("Blue", SomeStore.class, () -> "TD Blue Only")
       // with GreenStore still wired
       .build()) {

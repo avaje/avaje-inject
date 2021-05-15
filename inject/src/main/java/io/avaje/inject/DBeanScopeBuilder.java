@@ -15,9 +15,9 @@ import java.util.function.Consumer;
 /**
  * Build a bean context with options for shutdown hook and supplying test doubles.
  */
-class DBeanContextBuilder implements BeanContextBuilder {
+class DBeanScopeBuilder implements BeanScopeBuilder {
 
-  private static final Logger log = LoggerFactory.getLogger(DBeanContextBuilder.class);
+  private static final Logger log = LoggerFactory.getLogger(DBeanScopeBuilder.class);
 
   private boolean shutdownHook = true;
 
@@ -34,30 +34,30 @@ class DBeanContextBuilder implements BeanContextBuilder {
   /**
    * Create a BeanContextBuilder to ultimately load and return a new BeanContext.
    */
-  DBeanContextBuilder() {
+  DBeanScopeBuilder() {
   }
 
   @Override
-  public BeanContextBuilder withNoShutdownHook() {
+  public BeanScopeBuilder withNoShutdownHook() {
     this.shutdownHook = false;
     return this;
   }
 
   @Override
-  public BeanContextBuilder withModules(String... modules) {
+  public BeanScopeBuilder withModules(String... modules) {
     this.includeModules.addAll(Arrays.asList(modules));
     return this;
   }
 
   @Override
-  public BeanContextBuilder withIgnoreMissingModuleDependencies() {
+  public BeanScopeBuilder withIgnoreMissingModuleDependencies() {
     this.ignoreMissingModuleDependencies = true;
     return this;
   }
 
   @Override
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public BeanContextBuilder withBeans(Object... beans) {
+  public BeanScopeBuilder withBeans(Object... beans) {
     for (Object bean : beans) {
       suppliedBeans.add(new SuppliedBean(null, suppliedType(bean.getClass()), bean));
     }
@@ -65,40 +65,40 @@ class DBeanContextBuilder implements BeanContextBuilder {
   }
 
   @Override
-  public <D> BeanContextBuilder withBean(Class<D> type, D bean) {
+  public <D> BeanScopeBuilder withBean(Class<D> type, D bean) {
     return withBean(null, type, bean);
   }
 
   @Override
-  public <D> BeanContextBuilder withBean(String name, Class<D> type, D bean) {
+  public <D> BeanScopeBuilder withBean(String name, Class<D> type, D bean) {
     suppliedBeans.add(new SuppliedBean<>(name, type, bean));
     return this;
   }
 
   @Override
-  public BeanContextBuilder withMock(Class<?> type) {
+  public BeanScopeBuilder withMock(Class<?> type) {
     return withMock(type, null);
   }
 
   @Override
-  public <D> DBeanContextBuilder withMock(Class<D> type, Consumer<D> consumer) {
+  public <D> DBeanScopeBuilder withMock(Class<D> type, Consumer<D> consumer) {
     suppliedBeans.add(new SuppliedBean<>(null, type, null, consumer));
     return this;
   }
 
   @Override
-  public BeanContextBuilder withSpy(Class<?> type) {
+  public BeanScopeBuilder withSpy(Class<?> type) {
     return withSpy(type, null);
   }
 
   @Override
-  public <D> DBeanContextBuilder withSpy(Class<D> type, Consumer<D> consumer) {
+  public <D> DBeanScopeBuilder withSpy(Class<D> type, Consumer<D> consumer) {
     enrichBeans.add(new EnrichBean<>(type, consumer));
     return this;
   }
 
   @Override
-  public BeanContext build() {
+  public BeanScope build() {
     // sort factories by dependsOn
     FactoryOrder factoryOrder = new FactoryOrder(includeModules, !suppliedBeans.isEmpty(), ignoreMissingModuleDependencies);
     ServiceLoader.load(BeanContextFactory.class).forEach(factoryOrder::add);
@@ -117,13 +117,13 @@ class DBeanContextBuilder implements BeanContextBuilder {
       factory.build(builder);
     }
 
-    BeanContext beanContext = builder.build();
+    BeanScope beanScope = builder.build();
     // entire graph built, fire postConstruct
-    beanContext.start();
+    beanScope.start();
     if (shutdownHook) {
-      return new ShutdownAwareBeanContext(beanContext);
+      return new ShutdownAwareBeanScope(beanScope);
     }
-    return beanContext;
+    return beanScope;
   }
 
   /**
@@ -144,9 +144,9 @@ class DBeanContextBuilder implements BeanContextBuilder {
    */
   private static class Hook extends Thread {
 
-    private final ShutdownAwareBeanContext context;
+    private final ShutdownAwareBeanScope context;
 
-    Hook(ShutdownAwareBeanContext context) {
+    Hook(ShutdownAwareBeanScope context) {
       this.context = context;
     }
 
@@ -159,14 +159,14 @@ class DBeanContextBuilder implements BeanContextBuilder {
   /**
    * Proxy that handles shutdown hook registration and de-registration.
    */
-  private static class ShutdownAwareBeanContext implements BeanContext {
+  private static class ShutdownAwareBeanScope implements BeanScope {
 
     private final ReentrantLock lock = new ReentrantLock();
-    private final BeanContext context;
+    private final BeanScope context;
     private final Hook hook;
     private boolean shutdown;
 
-    ShutdownAwareBeanContext(BeanContext context) {
+    ShutdownAwareBeanScope(BeanScope context) {
       this.context = context;
       this.hook = new Hook(this);
       Runtime.getRuntime().addShutdownHook(hook);
@@ -183,18 +183,13 @@ class DBeanContextBuilder implements BeanContextBuilder {
     }
 
     @Override
-    public <T> T getBean(Class<T> beanClass) {
-      return context.getBean(beanClass);
+    public <T> T get(Class<T> beanClass) {
+      return context.get(beanClass);
     }
 
     @Override
-    public <T> T getBean(Class<T> beanClass, String name) {
-      return context.getBean(beanClass, name);
-    }
-
-    @Override
-    public <T> BeanEntry<T> candidate(Class<T> type, String name) {
-      return context.candidate(type, name);
+    public <T> T get(Class<T> beanClass, String name) {
+      return context.get(beanClass, name);
     }
 
     @Override
@@ -203,18 +198,18 @@ class DBeanContextBuilder implements BeanContextBuilder {
     }
 
     @Override
-    public <T> List<T> getBeans(Class<T> interfaceType) {
-      return context.getBeans(interfaceType);
+    public <T> List<T> list(Class<T> interfaceType) {
+      return context.list(interfaceType);
     }
 
     @Override
-    public <T> List<T> getBeansByPriority(Class<T> interfaceType) {
-      return context.getBeansByPriority(interfaceType);
+    public <T> List<T> listByPriority(Class<T> interfaceType) {
+      return context.listByPriority(interfaceType);
     }
 
     @Override
-    public <T> List<T> getBeansByPriority(Class<T> interfaceType, Class<? extends Annotation> priority) {
-      return context.getBeansByPriority(interfaceType, priority);
+    public <T> List<T> listByPriority(Class<T> interfaceType, Class<? extends Annotation> priority) {
+      return context.listByPriority(interfaceType, priority);
     }
 
     @Override

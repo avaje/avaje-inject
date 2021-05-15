@@ -1,6 +1,6 @@
 package io.avaje.inject.spi;
 
-import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanScope;
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.RequestScopeMatch;
 import io.avaje.inject.RequestScopeProvider;
@@ -79,24 +79,14 @@ class DBuilder implements Builder {
     return new LinkedHashSet<>(getList(interfaceType));
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
+  @SuppressWarnings({"unchecked"})
   @Override
   public <T> List<T> getList(Class<T> interfaceType) {
-    List list = new ArrayList<>();
-    beanMap.addAll(interfaceType, list);
-    return (List<T>) list;
-  }
-
-  @Override
-  public <T> BeanEntry<T> candidate(Class<T> cls, String name) {
-    DBeanContext.EntrySort<T> entrySort = new DBeanContext.EntrySort<>();
-    entrySort.add(beanMap.candidate(cls, name));
-    return entrySort.get();
+    return (List<T>) beanMap.all(interfaceType);
   }
 
   private <T> T getMaybe(Class<T> beanClass, String name) {
-    BeanEntry<T> entry = candidate(beanClass, name);
-    return (entry == null) ? null : entry.getBean();
+    return beanMap.get(beanClass, name);
   }
 
   /**
@@ -205,8 +195,8 @@ class DBuilder implements Builder {
     }
   }
 
-  public BeanContext build() {
+  public BeanScope build() {
     runInjectors();
-    return new DBeanContext(lifecycleList, beanMap, reqScopeProviders);
+    return new DBeanScope(lifecycleList, beanMap, reqScopeProviders);
   }
 }

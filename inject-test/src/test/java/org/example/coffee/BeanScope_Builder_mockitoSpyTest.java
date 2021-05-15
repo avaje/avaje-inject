@@ -1,6 +1,6 @@
 package org.example.coffee;
 
-import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanScope;
 import org.example.coffee.factory.SomeImpl;
 import org.example.coffee.factory.SomeImplBean;
 import org.example.coffee.factory.Unused;
@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-public class BeanContext_Builder_mockitoSpyTest {
+public class BeanScope_Builder_mockitoSpyTest {
 
   @Test
   public void withBeans_asMocks() {
@@ -26,7 +26,7 @@ public class BeanContext_Builder_mockitoSpyTest {
     Pump pump = mock(Pump.class);
     Grinder grinder = mock(Grinder.class);
 
-    try (BeanContext context = BeanContext.newBuilder()
+    try (BeanScope context = BeanScope.newBuilder()
       .withBeans(pump, grinder)
       .build()) {
 
@@ -47,7 +47,7 @@ public class BeanContext_Builder_mockitoSpyTest {
   @Test
   public void withMockitoSpy_noSetup_expect_spyUsed() {
 
-    try (BeanContext context = BeanContext.newBuilder()
+    try (BeanScope context = BeanScope.newBuilder()
       .withSpy(Pump.class)
       .build()) {
 
@@ -63,7 +63,7 @@ public class BeanContext_Builder_mockitoSpyTest {
   @Test
   public void withMockitoSpy_postLoadSetup_expect_spyUsed() {
 
-    try (BeanContext context = BeanContext.newBuilder()
+    try (BeanScope context = BeanScope.newBuilder()
       .withSpy(Pump.class)
       .withSpy(Grinder.class)
       .build()) {
@@ -86,7 +86,7 @@ public class BeanContext_Builder_mockitoSpyTest {
   @Test
   public void withMockitoSpy_expect_spyUsed() {
 
-    try (BeanContext context = BeanContext.newBuilder()
+    try (BeanScope context = BeanScope.newBuilder()
       .withSpy(Pump.class, pump -> {
         // setup the spy
         doNothing().when(pump).pumpWater();
@@ -109,7 +109,7 @@ public class BeanContext_Builder_mockitoSpyTest {
   @Test
   public void withMockitoSpy_whenPrimary_expect_spyUsed() {
 
-    try (BeanContext context = BeanContext.newBuilder()
+    try (BeanScope context = BeanScope.newBuilder()
       .withSpy(PEmailer.class) // has a primary
       .build()) {
 
@@ -124,7 +124,7 @@ public class BeanContext_Builder_mockitoSpyTest {
   @Test
   public void withMockitoSpy_whenOnlySecondary_expect_spyUsed() {
 
-    try (BeanContext context = BeanContext.newBuilder()
+    try (BeanScope context = BeanScope.newBuilder()
       .withSpy(Widget.class) // only secondary
       .build()) {
 
@@ -144,7 +144,7 @@ public class BeanContext_Builder_mockitoSpyTest {
   @Test
   public void withMockitoSpy_whenSecondary_expect_spyUsed() {
 
-    try (BeanContext context = BeanContext.newBuilder()
+    try (BeanScope context = BeanScope.newBuilder()
       .withSpy(Something.class) // has a secondary and a normal
       .build()) {
 
@@ -168,7 +168,7 @@ public class BeanContext_Builder_mockitoSpyTest {
 
     AtomicReference<Grinder> mock = new AtomicReference<>();
 
-    try (BeanContext context = BeanContext.newBuilder()
+    try (BeanScope context = BeanScope.newBuilder()
       .withMock(Pump.class)
       .withMock(Grinder.class, grinder -> {
         // setup the mock

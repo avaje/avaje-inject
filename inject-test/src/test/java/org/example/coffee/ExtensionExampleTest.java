@@ -1,7 +1,7 @@
 package org.example.coffee;
 
-import io.avaje.inject.BeanContext;
-import io.avaje.inject.BeanContextBuilder;
+import io.avaje.inject.BeanScope;
+import io.avaje.inject.BeanScopeBuilder;
 import org.example.coffee.qualifier.SomeStore;
 import org.example.coffee.secondary.SEmailer;
 import org.example.coffee.secondary.Widget;
@@ -16,12 +16,12 @@ public class ExtensionExampleTest {
   public void checkForCompilerWarningsOnly_notATestThatRuns() {
 
     ExtensionExample extensionExample = new ExtensionExample(asList(Widget.class, SEmailer.class), asList(SomeStore.class));
-    BeanContext context = extensionExample.build();
+    BeanScope context = extensionExample.build();
 
     Class cls0 = Widget.class;
     Class<?> cls1 = SEmailer.class;
 
-    BeanContextBuilder bootContext = BeanContext.newBuilder()
+    BeanScopeBuilder bootContext = BeanScope.newBuilder()
       .withSpy(cls0)
       .withSpy(cls1)
       .withMock(cls0)

@@ -1,7 +1,7 @@
 package org.example.coffee.fruit;
 
-import io.avaje.inject.BeanContext;
-import io.avaje.inject.BeanContextBuilder;
+import io.avaje.inject.BeanScope;
+import io.avaje.inject.BeanScopeBuilder;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,12 +13,12 @@ public class AppleServiceTest {
   @Test
   public void test_spyWithFieldInjection() {
 
-    BeanContextBuilder contextBuilder = BeanContext.newBuilder();
+    BeanScopeBuilder contextBuilder = BeanScope.newBuilder();
     contextBuilder.withSpy(AppleService.class);
 
-    try (BeanContext beanContext = contextBuilder.build()) {
+    try (BeanScope beanScope = contextBuilder.build()) {
 
-      AppleService appleService = beanContext.getBean(AppleService.class);
+      AppleService appleService = beanScope.getBean(AppleService.class);
 
       doNothing()
         .when(appleService)
@@ -37,9 +37,9 @@ public class AppleServiceTest {
   @Test
   public void test_whenNoMockOrSpy() {
 
-    try (BeanContext beanContext = BeanContext.newBuilder().build()) {
+    try (BeanScope beanScope = BeanScope.newBuilder().build()) {
 
-      AppleService appleService = beanContext.getBean(AppleService.class);
+      AppleService appleService = beanScope.getBean(AppleService.class);
 
       assertThat(appleService.bananaService).isNotNull();
       assertThat(appleService.peachService).isNotNull();

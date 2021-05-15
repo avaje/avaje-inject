@@ -1,7 +1,5 @@
 package io.avaje.inject.spi;
 
-import io.avaje.inject.BeanEntry;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,34 +10,28 @@ import java.util.List;
  */
 class DContextEntry {
 
-  private final List<DContextEntryBean> entries = new ArrayList<>();
-
-  @SuppressWarnings("unchecked")
-  <T> BeanEntry<T> candidate(String name) {
-    if (entries.isEmpty()) {
-      return null;
-    }
-    if (entries.size() == 1) {
-      DContextEntryBean entry = entries.get(0);
-      return entry.candidate(name);
-    }
-
-    EntryMatcher matcher = new EntryMatcher(name);
-    matcher.match(entries);
-    return matcher.candidate();
-  }
-
-  /**
-   * Add all the managed beans to the given list.
-   */
-  void addAll(List<Object> appendToList) {
-    for (DContextEntryBean entry : entries) {
-      appendToList.add(entry.getBean());
-    }
-  }
+  private final List<DContextEntryBean> entries = new ArrayList<>(5);
 
   void add(DContextEntryBean entryBean) {
     entries.add(entryBean);
+  }
+
+  Object get(String name) {
+    if (entries.size() == 1) {
+      return entries.get(0).candidate(name);
+    }
+    return new EntryMatcher(name).match(entries);
+  }
+
+  /**
+   * Return all the beans.
+   */
+  List<Object> all() {
+    List<Object> list = new ArrayList<>(entries.size());
+    for (DContextEntryBean entry : entries) {
+      list.add(entry.getBean());
+    }
+    return list;
   }
 
   /**
@@ -65,12 +57,13 @@ class DContextEntry {
       this.name = name;
     }
 
-    void match(List<DContextEntryBean> entries) {
+    Object match(List<DContextEntryBean> entries) {
       for (DContextEntryBean entry : entries) {
         if (entry.isNameMatch(name)) {
           checkMatch(entry);
         }
       }
+      return candidate();
     }
 
     private void checkMatch(DContextEntryBean entry) {
@@ -112,13 +105,12 @@ class DContextEntry {
       throw new IllegalStateException("Expecting only 1 bean match but have multiple matching beans " + match.getBean() + " and " + entry.getBean());
     }
 
-    @SuppressWarnings("rawtypes")
-    BeanEntry candidate() {
+    private Object candidate() {
       if (match == null) {
         return null;
       }
       checkSecondary();
-      return match.getBeanEntry();
+      return match.getBean();
     }
 
     private void checkSecondary() {

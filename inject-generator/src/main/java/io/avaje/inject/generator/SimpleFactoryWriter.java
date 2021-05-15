@@ -14,7 +14,7 @@ class SimpleFactoryWriter {
 
   private static final String CODE_COMMENT_FACTORY =
     "/**\n" +
-      " * Generated source - Creates the BeanContext for the %s module.\n" +
+      " * Generated source - Creates the BeanScope for the %s module.\n" +
       " * \n" +
       " * With JPMS Java module system this generated class should be explicitly\n" +
       " * registered in module-info via a <code>provides</code> clause like:\n" +
@@ -33,16 +33,12 @@ class SimpleFactoryWriter {
 
   private static final String CODE_COMMENT_CREATE_CONTEXT =
     "  /**\n" +
-      "   * Create and return the BeanContext.\n" +
+      "   * Create the beans.\n" +
       "   * <p>\n" +
       "   * Creates all the beans in order based on constuctor dependencies.\n" +
       "   * The beans are registered into the builder along with callbacks for\n" +
       "   * field injection, method injection and lifecycle support.\n" +
       "   * <p>\n" +
-      "   * Ultimately the builder returns the BeanContext containing the beans.\n" +
-      "   *\n" +
-      "   * @param parent The parent context for multi-module wiring\n" +
-      "   * @return The BeanContext containing the beans\n" +
       "   */";
 
   private final MetaDataOrdering ordering;
