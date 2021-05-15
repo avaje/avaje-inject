@@ -116,12 +116,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
     for (BeanContextFactory factory : factoryOrder.factories()) {
       factory.build(builder);
     }
-
-    BeanScope beanScope = builder.build();
-    if (shutdownHook) {
-      return new ShutdownAwareBeanScope(beanScope);
-    }
-    return beanScope;
+    return builder.build(shutdownHook);
   }
 
   /**
@@ -134,106 +129,6 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
     } else {
       // prefer to use the super type of the supplied bean (test double)
       return suppliedSuper;
-    }
-  }
-
-  /**
-   * Internal shutdown hook.
-   */
-  private static class Hook extends Thread {
-
-    private final ShutdownAwareBeanScope context;
-
-    Hook(ShutdownAwareBeanScope context) {
-      this.context = context;
-    }
-
-    @Override
-    public void run() {
-      context.shutdown();
-    }
-  }
-
-  /**
-   * Proxy that handles shutdown hook registration and de-registration.
-   */
-  private static class ShutdownAwareBeanScope implements BeanScope {
-
-    private final ReentrantLock lock = new ReentrantLock();
-    private final BeanScope beanScope;
-    private final Hook hook;
-    private boolean shutdown;
-
-    ShutdownAwareBeanScope(BeanScope beanScope) {
-      this.beanScope = beanScope;
-      this.hook = new Hook(this);
-      Runtime.getRuntime().addShutdownHook(hook);
-    }
-
-    @Override
-    public RequestScopeBuilder newRequestScope() {
-      return beanScope.newRequestScope();
-    }
-
-    @Override
-    public <T> RequestScopeMatch<T> requestProvider(Class<T> type, String name) {
-      return beanScope.requestProvider(type, name);
-    }
-
-    @Override
-    public <T> T get(Class<T> beanClass) {
-      return beanScope.get(beanClass);
-    }
-
-    @Override
-    public <T> T get(Class<T> beanClass, String name) {
-      return beanScope.get(beanClass, name);
-    }
-
-    @Override
-    public List<Object> listByAnnotation(Class<?> annotation) {
-      return beanScope.listByAnnotation(annotation);
-    }
-
-    @Override
-    public <T> List<T> list(Class<T> interfaceType) {
-      return beanScope.list(interfaceType);
-    }
-
-    @Override
-    public <T> List<T> listByPriority(Class<T> interfaceType) {
-      return beanScope.listByPriority(interfaceType);
-    }
-
-    @Override
-    public <T> List<T> listByPriority(Class<T> interfaceType, Class<? extends Annotation> priority) {
-      return beanScope.listByPriority(interfaceType, priority);
-    }
-
-    @Override
-    public void close() {
-      lock.lock();
-      try {
-        if (!shutdown) {
-          Runtime.getRuntime().removeShutdownHook(hook);
-        }
-        beanScope.close();
-      } finally {
-        lock.unlock();
-      }
-    }
-
-    /**
-     * Close via shutdown hook.
-     */
-    void shutdown() {
-      lock.lock();
-      try {
-        shutdown = true;
-        close();
-      } finally {
-        lock.unlock();
-      }
     }
   }
 

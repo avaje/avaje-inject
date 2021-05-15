@@ -195,8 +195,8 @@ class DBuilder implements Builder {
     }
   }
 
-  public BeanScope build() {
+  public BeanScope build(boolean withShutdownHook) {
     runInjectors();
-    return new DBeanScope(lifecycleList, beanMap, reqScopeProviders).start();
+    return new DBeanScope(withShutdownHook, lifecycleList, beanMap, reqScopeProviders).start();
   }
 }
