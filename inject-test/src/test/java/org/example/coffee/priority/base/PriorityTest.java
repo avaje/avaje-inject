@@ -1,6 +1,6 @@
 package org.example.coffee.priority.base;
 
-import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanScope;
 import io.avaje.inject.SystemContext;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +12,7 @@ public class PriorityTest {
 
   @Test
   void getBeansByPriority() {
-    final BeanContext context = SystemContext.context();
+    final BeanScope context = SystemContext.context();
 
     final List<BaseIface> beans = context.getBeansByPriority(BaseIface.class);
     assertExpectedOrder(beans);
@@ -20,7 +20,7 @@ public class PriorityTest {
 
   @Test
   void sortByPriority() {
-    final BeanContext context = SystemContext.context();
+    final BeanScope context = SystemContext.context();
 
     final List<BaseIface> beans = context.getBeans(BaseIface.class);
     final List<BaseIface> sorted = context.sortByPriority(beans);

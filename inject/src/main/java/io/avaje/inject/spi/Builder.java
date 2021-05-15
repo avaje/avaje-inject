@@ -1,6 +1,6 @@
 package io.avaje.inject.spi;
 
-import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanScope;
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.RequestScopeProvider;
 import jakarta.inject.Provider;
@@ -163,5 +163,5 @@ public interface Builder {
   /**
    * Build and return the bean context.
    */
-  BeanContext build();
+  BeanScope build();
 }

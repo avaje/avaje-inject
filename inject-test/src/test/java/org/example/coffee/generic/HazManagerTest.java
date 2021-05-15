@@ -1,7 +1,7 @@
 package org.example.coffee.generic;
 
 import io.avaje.inject.ApplicationScope;
-import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanScope;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,7 +22,7 @@ public class HazManagerTest {
   @Test
   public void fin_with_mockHaz() {
 
-    try (BeanContext context = BeanContext.newBuilder()
+    try (BeanScope context = BeanScope.newBuilder()
       .withMock(HazRepo.class)
       .build()) {
 
@@ -36,7 +36,7 @@ public class HazManagerTest {
   @Test
   public void find_with_stubHazUsingMockito() {
 
-    try (BeanContext context = BeanContext.newBuilder()
+    try (BeanScope context = BeanScope.newBuilder()
       .withMock(HazRepo.class, hazRepo -> {
         when(hazRepo.findById(anyLong())).thenReturn(new Haz(-23L));
       })
@@ -54,7 +54,7 @@ public class HazManagerTest {
 
     TDHazRepo testDouble = new TDHazRepo();
 
-    try (BeanContext context = BeanContext.newBuilder()
+    try (BeanScope context = BeanScope.newBuilder()
       .withBeans(testDouble)
       .build()) {
 

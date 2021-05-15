@@ -1,6 +1,6 @@
 package org.example.coffee.circular;
 
-import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanScope;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -9,7 +9,7 @@ class CircularDependencyTest {
 
   @Test
   void wire() {
-    try (BeanContext context = BeanContext.newBuilder().build()) {
+    try (BeanScope context = BeanScope.newBuilder().build()) {
       assertThat(context.getBean(CircA.class)).isNotNull();
       assertThat(context.getBean(CircB.class)).isNotNull();
       assertThat(context.getBean(CircC.class)).isNotNull();

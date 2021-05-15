@@ -1,6 +1,6 @@
 package io.avaje.inject.spi;
 
-import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanScope;
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.RequestScopeMatch;
 import io.avaje.inject.RequestScopeProvider;
@@ -89,7 +89,7 @@ class DBuilder implements Builder {
 
   @Override
   public <T> BeanEntry<T> candidate(Class<T> cls, String name) {
-    DBeanContext.EntrySort<T> entrySort = new DBeanContext.EntrySort<>();
+    DBeanScope.EntrySort<T> entrySort = new DBeanScope.EntrySort<>();
     entrySort.add(beanMap.candidate(cls, name));
     return entrySort.get();
   }
@@ -205,8 +205,8 @@ class DBuilder implements Builder {
     }
   }
 
-  public BeanContext build() {
+  public BeanScope build() {
     runInjectors();
-    return new DBeanContext(lifecycleList, beanMap, reqScopeProviders);
+    return new DBeanScope(lifecycleList, beanMap, reqScopeProviders);
   }
 }

@@ -1,6 +1,6 @@
 package org.example.coffee;
 
-import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanScope;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -8,14 +8,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 
-public class BeanContextBuilderAddTest {
+public class BeanScopeBuilderAddTest {
 
   @Test
   public void withModules_exludingThisOne() {
     assertThrows(IllegalStateException.class, () -> {
       TDPump testDoublePump = new TDPump();
 
-      try (BeanContext context = BeanContext.newBuilder()
+      try (BeanScope context = BeanScope.newBuilder()
         .withBeans(testDoublePump)
         // our module is "org.example.coffee"
         // so this effectively includes no modules
@@ -35,7 +35,7 @@ public class BeanContextBuilderAddTest {
 
     TDPump testDoublePump = new TDPump();
 
-    try (BeanContext context = BeanContext.newBuilder()
+    try (BeanScope context = BeanScope.newBuilder()
       .withBeans(testDoublePump)
       .withModules("org.example")
       .build()) {
@@ -53,7 +53,7 @@ public class BeanContextBuilderAddTest {
 
     TDPump testDoublePump = new TDPump();
 
-    try (BeanContext context = BeanContext.newBuilder()
+    try (BeanScope context = BeanScope.newBuilder()
       .withBeans(testDoublePump)
       .build()) {
 
@@ -70,7 +70,7 @@ public class BeanContextBuilderAddTest {
 
     Pump mock = Mockito.mock(Pump.class);
 
-    try (BeanContext context = BeanContext.newBuilder()
+    try (BeanScope context = BeanScope.newBuilder()
       .withBean(Pump.class, mock)
       .build()) {
 

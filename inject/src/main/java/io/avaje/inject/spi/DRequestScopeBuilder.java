@@ -1,6 +1,6 @@
 package io.avaje.inject.spi;
 
-import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanScope;
 import io.avaje.inject.RequestScope;
 import io.avaje.inject.RequestScopeBuilder;
 
@@ -15,9 +15,9 @@ class DRequestScopeBuilder implements RequestScopeBuilder {
 
   private final ConcurrentHashMap<String, Object> supplied = new ConcurrentHashMap<>();
 
-  private final BeanContext beanScope;
+  private final BeanScope beanScope;
 
-  DRequestScopeBuilder(BeanContext beanScope) {
+  DRequestScopeBuilder(BeanScope beanScope) {
     this.beanScope = beanScope;
   }
 

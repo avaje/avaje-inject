@@ -1,7 +1,7 @@
 package org.example.iface;
 
 import io.avaje.inject.ApplicationScope;
-import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanScope;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,7 +21,7 @@ public class NestedInterfaceTest {
   @Test
   void test_provided() {
 
-    try (BeanContext context = BeanContext.newBuilder()
+    try (BeanScope context = BeanScope.newBuilder()
       .withMock(Some.Nested.class, nested -> when(nested.doNested()).thenReturn("myMock"))
       .build()) {
 

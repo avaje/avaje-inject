@@ -11,15 +11,15 @@ import java.util.List;
  * preDestroy and are created (wired) via dependency injection.
  * </p>
  *
- * <h3>Create a BeanContext</h3>
+ * <h3>Create a BeanScope</h3>
  * <p>
- * We can programmatically create a BeanContext via BeanContextBuilder.
+ * We can programmatically create a BeanScope via BeanScopeBuilder.
  * </p>
  * <pre>{@code
  *
- *   // create a BeanContext ...
+ *   // create a BeanScope ...
  *
- *   try (BeanContext context = new BeanContextBuilder()
+ *   try (BeanScope scope = BeanScope.newBuilder()
  *     .build()) {
  *
  *     CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
@@ -30,24 +30,24 @@ import java.util.List;
  *
  * <h3>Implicitly used</h3>
  * <p>
- * The BeanContext is implicitly used by SystemContext.  It will be created as needed and
- * a shutdown hook will close the underlying BeanContext on JVM shutdown.
+ * The BeanScope is implicitly used by ApplicationScope.  It will be created as needed and
+ * a shutdown hook will close the underlying BeanScope on JVM shutdown.
  * </p>
  * <pre>{@code
  *
- *   // BeanContext created as needed under the hood
+ *   // BeanScope created as needed under the hood
  *
- *   CoffeeMaker coffeeMaker = SystemContext.getBean(CoffeeMaker.class);
+ *   CoffeeMaker coffeeMaker = ApplicationScope.get(CoffeeMaker.class);
  *   coffeeMaker.brew();
  *
  * }</pre>
  */
-public interface BeanContext extends Closeable {
+public interface BeanScope extends Closeable {
 
   /**
    * Build a bean context with options for shutdown hook and supplying test doubles.
    * <p>
-   * We would choose to use BeanContextBuilder in test code (for component testing)
+   * We would choose to use BeanScopeBuilder in test code (for component testing)
    * as it gives us the ability to inject test doubles, mocks, spy's etc.
    * </p>
    *
@@ -59,7 +59,7 @@ public interface BeanContext extends Closeable {
    *     MyRedisApi mockRedis = mock(MyRedisApi.class);
    *     MyDbApi mockDatabase = mock(MyDbApi.class);
    *
-   *     try (BeanContext context = BeanContext.newBuilder()
+   *     try (BeanScope context = BeanScope.newBuilder()
    *       .withBeans(mockRedis, mockDatabase)
    *       .build()) {
    *
@@ -73,8 +73,8 @@ public interface BeanContext extends Closeable {
    *
    * }</pre>
    */
-  static BeanContextBuilder newBuilder() {
-    return new DBeanContextBuilder();
+  static BeanScopeBuilder newBuilder() {
+    return new DBeanScopeBuilder();
   }
 
   /**
@@ -95,7 +95,15 @@ public interface BeanContext extends Closeable {
    *
    * @param type an interface or bean type
    */
-  <T> T getBean(Class<T> type);
+  <T> T get(Class<T> type);
+
+  /**
+   * Deprecated - migrate to get(type)
+   */
+  @Deprecated
+  default <T> T getBean(Class<T> type) {
+    return get(type);
+  }
 
   /**
    * Return a single bean given the type and name.
@@ -110,7 +118,15 @@ public interface BeanContext extends Closeable {
    * @param type an interface or bean type
    * @param name the name qualifier of a specific bean
    */
-  <T> T getBean(Class<T> type, String name);
+  <T> T get(Class<T> type, String name);
+
+  /**
+   * Deprecated - migrate to get(type, name).
+   */
+  @Deprecated
+  default <T> T getBean(Class<T> type, String name) {
+    return get(type, name);
+  }
 
   /**
    * Return the wiring candidate bean with name and priority.
@@ -150,12 +166,28 @@ public interface BeanContext extends Closeable {
    *
    * @param interfaceType An interface class.
    */
-  <T> List<T> getBeans(Class<T> interfaceType);
+  <T> List<T> list(Class<T> interfaceType);
+
+  /**
+   * Deprecated - migrate to list(interfaceType).
+   */
+  @Deprecated
+  default <T> List<T> getBeans(Class<T> interfaceType) {
+    return list(interfaceType);
+  }
 
   /**
    * Return the list of beans that implement the interface sorting by priority.
    */
-  <T> List<T> getBeansByPriority(Class<T> interfaceType);
+  <T> List<T> listByPriority(Class<T> interfaceType);
+
+  /**
+   * Deprecated - migrate to listByPriority(interfaceType).
+   */
+  @Deprecated
+  default <T> List<T> getBeansByPriority(Class<T> interfaceType) {
+    return listByPriority(interfaceType);
+  }
 
   /**
    * Return the beans that implement the interface sorting by the priority annotation used.
@@ -166,7 +198,15 @@ public interface BeanContext extends Closeable {
    * @param interfaceType The interface type of the beans to return
    * @param priority      The priority annotation used to sort the beans
    */
-  <T> List<T> getBeansByPriority(Class<T> interfaceType, Class<? extends Annotation> priority);
+  <T> List<T> listByPriority(Class<T> interfaceType, Class<? extends Annotation> priority);
+
+  /**
+   * Deprecated - migrate to listByPriority().
+   */
+  @Deprecated
+  default <T> List<T> getBeansByPriority(Class<T> interfaceType, Class<? extends Annotation> priority) {
+    return listByPriority(interfaceType, priority);
+  }
 
   /**
    * Sort the beans by javax.annotation.Priority annotation.

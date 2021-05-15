@@ -13,9 +13,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static io.avaje.inject.spi.KeyUtil.key;
 
-class DBeanContext implements BeanContext {
+class DBeanScope implements BeanScope {
 
-  private static final Logger log = LoggerFactory.getLogger(DBeanContext.class);
+  private static final Logger log = LoggerFactory.getLogger(DBeanScope.class);
 
   private final ReentrantLock lock = new ReentrantLock();
   private final List<BeanLifecycle> lifecycleList;
@@ -24,7 +24,7 @@ class DBeanContext implements BeanContext {
 
   private boolean closed;
 
-  DBeanContext(List<BeanLifecycle> lifecycleList, DBeanMap beans, Map<String, RequestScopeMatch<?>> reqScopeProviders) {
+  DBeanScope(List<BeanLifecycle> lifecycleList, DBeanMap beans, Map<String, RequestScopeMatch<?>> reqScopeProviders) {
     this.lifecycleList = lifecycleList;
     this.beans = beans;
     this.reqScopeProviders = reqScopeProviders;
@@ -42,8 +42,8 @@ class DBeanContext implements BeanContext {
   }
 
   @Override
-  public <T> T getBean(Class<T> beanClass) {
-    return getBean(beanClass, null);
+  public <T> T get(Class<T> beanClass) {
+    return get(beanClass, null);
   }
 
   @Override
@@ -55,25 +55,25 @@ class DBeanContext implements BeanContext {
   }
 
   @Override
-  public <T> T getBean(Class<T> beanClass, String name) {
+  public <T> T get(Class<T> beanClass, String name) {
     BeanEntry<T> candidate = candidate(beanClass, name);
     return (candidate == null) ? null : candidate.getBean();
   }
 
   @Override
-  public <T> List<T> getBeans(Class<T> interfaceType) {
+  public <T> List<T> list(Class<T> interfaceType) {
     List<T> list = new ArrayList<>();
     beans.addAll(interfaceType, list);
     return list;
   }
 
   @Override
-  public <T> List<T> getBeansByPriority(Class<T> interfaceType) {
-    return getBeansByPriority(interfaceType, Priority.class);
+  public <T> List<T> listByPriority(Class<T> interfaceType) {
+    return listByPriority(interfaceType, Priority.class);
   }
 
   @Override
-  public <T> List<T> getBeansByPriority(Class<T> interfaceType, Class<? extends Annotation> priorityAnnotation) {
+  public <T> List<T> listByPriority(Class<T> interfaceType, Class<? extends Annotation> priorityAnnotation) {
     List<T> list = getBeans(interfaceType);
     return list.size() > 1 ? sortByPriority(list, priorityAnnotation) : list;
   }

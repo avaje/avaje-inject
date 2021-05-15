@@ -1,7 +1,7 @@
 package org.example.coffee.factory;
 
 import io.avaje.inject.ApplicationScope;
-import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanScope;
 import org.example.coffee.parent.DesEngi;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +11,7 @@ public class MyFactoryTest {
 
   @Test
   public void methodsCalled() {
-    try (BeanContext context = BeanContext.newBuilder().build()) {
+    try (BeanScope context = BeanScope.newBuilder().build()) {
       final MyFactory myFactory = context.getBean(MyFactory.class);
       assertThat(myFactory.methodsCalled()).contains("|useCFact", "|anotherCFact", "|buildEngi");
     }

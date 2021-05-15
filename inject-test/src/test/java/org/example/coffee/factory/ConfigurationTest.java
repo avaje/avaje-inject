@@ -1,6 +1,6 @@
 package org.example.coffee.factory;
 
-import io.avaje.inject.BeanContext;
+import io.avaje.inject.BeanScope;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,7 +11,7 @@ public class ConfigurationTest {
   public void getCountInit() {
 
     Configuration configuration;
-    try (BeanContext context = BeanContext.newBuilder().build()) {
+    try (BeanScope context = BeanScope.newBuilder().build()) {
       configuration = context.getBean(Configuration.class);
       assertEquals(configuration.getCountInit(), 1);
       assertEquals(configuration.getCountClose(), 0);

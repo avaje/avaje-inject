@@ -20,7 +20,7 @@ class Constants {
   static final String META_INF_FACTORY = "META-INF/services/io.avaje.inject.spi.BeanContextFactory";
 
   static final String REQUESTSCOPE = "io.avaje.inject.RequestScope";
-  static final String BEANCONTEXT = "io.avaje.inject.BeanContext";
+  static final String BEANCONTEXT = "io.avaje.inject.BeanScope";
   static final String CONTEXTMODULE = "io.avaje.inject.ContextModule";
 
   static final String GENERATED = "io.avaje.inject.spi.Generated";

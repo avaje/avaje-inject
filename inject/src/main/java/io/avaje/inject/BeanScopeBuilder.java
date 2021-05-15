@@ -17,7 +17,7 @@ import java.util.function.Consumer;
  *     MyRedisApi mockRedis = mock(MyRedisApi.class);
  *     MyDbApi mockDatabase = mock(MyDbApi.class);
  *
- *     try (BeanContext context = BeanContext.newBuilder()
+ *     try (BeanScope context = BeanScope.newBuilder()
  *       .withBeans(mockRedis, mockDatabase)
  *       .build()) {
  *
@@ -31,7 +31,7 @@ import java.util.function.Consumer;
  *
  * }</pre>
  */
-public interface BeanContextBuilder {
+public interface BeanScopeBuilder {
 
   /**
    * Create the bean context without registering a shutdown hook.
@@ -43,7 +43,7 @@ public interface BeanContextBuilder {
    *
    *   // automatically closed via try with resources
    *
-   *   try (BeanContext context = BeanContext.newBuilder()
+   *   try (BeanScope context = BeanScope.newBuilder()
    *     .withNoShutdownHook()
    *     .build()) {
    *
@@ -52,9 +52,9 @@ public interface BeanContextBuilder {
    *
    * }</pre>
    *
-   * @return This BeanContextBuilder
+   * @return This BeanScopeBuilder
    */
-  BeanContextBuilder withNoShutdownHook();
+  BeanScopeBuilder withNoShutdownHook();
 
   /**
    * Specify the modules to include in dependency injection.
@@ -72,7 +72,7 @@ public interface BeanContextBuilder {
    *
    *     EmailServiceApi mockEmailService = mock(EmailServiceApi.class);
    *
-   *     try (BeanContext context = BeanContext.newBuilder()
+   *     try (BeanScope context = BeanScope.newBuilder()
    *       .withBeans(mockEmailService)
    *       .withModules("coffee")
    *       .withIgnoreMissingModuleDependencies()
@@ -91,13 +91,13 @@ public interface BeanContextBuilder {
    * @param modules The names of modules that we want to include in dependency injection.
    * @return This BeanContextBuilder
    */
-  BeanContextBuilder withModules(String... modules);
+  BeanScopeBuilder withModules(String... modules);
 
   /**
    * Set this when building a BeanContext (typically for testing) and supplied beans replace module dependencies.
    * This means we don't need the usual module dependencies as supplied beans are used instead.
    */
-  BeanContextBuilder withIgnoreMissingModuleDependencies();
+  BeanScopeBuilder withIgnoreMissingModuleDependencies();
 
   /**
    * Supply a bean to the context that will be used instead of any
@@ -112,7 +112,7 @@ public interface BeanContextBuilder {
    *   Pump pump = mock(Pump.class);
    *   Grinder grinder = mock(Grinder.class);
    *
-   *   try (BeanContext context = BeanContext.newBuilder()
+   *   try (BeanScope context = BeanScope.newBuilder()
    *     .withBeans(pump, grinder)
    *     .build()) {
    *
@@ -134,7 +134,7 @@ public interface BeanContextBuilder {
    * @param beans The bean used when injecting a dependency for this bean or the interface(s) it implements
    * @return This BeanContextBuilder
    */
-  BeanContextBuilder withBeans(Object... beans);
+  BeanScopeBuilder withBeans(Object... beans);
 
   /**
    * Add a supplied bean instance with the given injection type.
@@ -146,7 +146,7 @@ public interface BeanContextBuilder {
    *
    *   Pump mockPump = ...
    *
-   *   try (BeanContext context = BeanContext.newBuilder()
+   *   try (BeanScope context = BeanScope.newBuilder()
    *     .withBean(Pump.class, mockPump)
    *     .build()) {
    *
@@ -166,7 +166,7 @@ public interface BeanContextBuilder {
    * @param type The dependency injection type this bean is target for
    * @param bean The supplied bean instance to use (typically a test mock)
    */
-  <D> BeanContextBuilder withBean(Class<D> type, D bean);
+  <D> BeanScopeBuilder withBean(Class<D> type, D bean);
 
   /**
    * Add a supplied bean instance with the given name and injection type.
@@ -175,14 +175,14 @@ public interface BeanContextBuilder {
    * @param type The dependency injection type this bean is target for
    * @param bean The supplied bean instance to use (typically a test mock)
    */
-  <D> BeanContextBuilder withBean(String name, Class<D> type, D bean);
+  <D> BeanScopeBuilder withBean(String name, Class<D> type, D bean);
 
   /**
    * Use a mockito mock when injecting this bean type.
    *
    * <pre>{@code
    *
-   *   try (BeanContext context = BeanContext.newBuilder()
+   *   try (BeanScope context = BeanScope.newBuilder()
    *     .withMock(Pump.class)
    *     .withMock(Grinder.class, grinder -> {
    *       // setup the mock
@@ -201,7 +201,7 @@ public interface BeanContextBuilder {
    *
    * }</pre>
    */
-  BeanContextBuilder withMock(Class<?> type);
+  BeanScopeBuilder withMock(Class<?> type);
 
   /**
    * Use a mockito mock when injecting this bean type additionally
@@ -209,7 +209,7 @@ public interface BeanContextBuilder {
    *
    * <pre>{@code
    *
-   *   try (BeanContext context = BeanContext.newBuilder()
+   *   try (BeanScope context = BeanScope.newBuilder()
    *     .withMock(Pump.class)
    *     .withMock(Grinder.class, grinder -> {
    *
@@ -229,14 +229,14 @@ public interface BeanContextBuilder {
    *
    * }</pre>
    */
-  <D> BeanContextBuilder withMock(Class<D> type, Consumer<D> consumer);
+  <D> BeanScopeBuilder withMock(Class<D> type, Consumer<D> consumer);
 
   /**
    * Use a mockito spy when injecting this bean type.
    *
    * <pre>{@code
    *
-   *   try (BeanContext context = BeanContext.newBuilder()
+   *   try (BeanScope context = BeanScope.newBuilder()
    *     .withSpy(Pump.class)
    *     .build()) {
    *
@@ -254,7 +254,7 @@ public interface BeanContextBuilder {
    *
    * }</pre>
    */
-  BeanContextBuilder withSpy(Class<?> type);
+  BeanScopeBuilder withSpy(Class<?> type);
 
   /**
    * Use a mockito spy when injecting this bean type additionally
@@ -262,7 +262,7 @@ public interface BeanContextBuilder {
    *
    * <pre>{@code
    *
-   *   try (BeanContext context = BeanContext.newBuilder()
+   *   try (BeanScope context = BeanScope.newBuilder()
    *     .withSpy(Pump.class, pump -> {
    *       // setup the spy
    *       doNothing().when(pump).pumpWater();
@@ -283,12 +283,12 @@ public interface BeanContextBuilder {
    *
    * }</pre>
    */
-  <D> BeanContextBuilder withSpy(Class<D> type, Consumer<D> consumer);
+  <D> BeanScopeBuilder withSpy(Class<D> type, Consumer<D> consumer);
 
   /**
    * Build and return the bean context.
    *
    * @return The BeanContext
    */
-  BeanContext build();
+  BeanScope build();
 }
