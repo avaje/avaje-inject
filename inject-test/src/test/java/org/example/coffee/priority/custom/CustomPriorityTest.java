@@ -1,7 +1,7 @@
 package org.example.coffee.priority.custom;
 
+import io.avaje.inject.ApplicationScope;
 import io.avaje.inject.BeanScope;
-import io.avaje.inject.SystemContext;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -12,10 +12,9 @@ public class CustomPriorityTest {
 
   @Test
   void test() {
-    final BeanScope context = SystemContext.context();
+    final BeanScope context = ApplicationScope.scope();
 
-    final List<OtherIface> beans = context.getBeans(OtherIface.class);
-    final List<OtherIface> sorted = context.sortByPriority(beans, CustomPriority.class);
+    final List<OtherIface> sorted = context.listByPriority(OtherIface.class, CustomPriority.class);
 
     assertThat(sorted.get(0)).isInstanceOf(COtheri.class);
     assertThat(sorted.get(1)).isInstanceOf(BOtheri.class);

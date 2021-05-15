@@ -158,5 +158,5 @@ public interface Builder {
   /**
    * Build and return the bean context.
    */
-  BeanScope build();
+  BeanScope build(boolean withShutdownHook);
 }

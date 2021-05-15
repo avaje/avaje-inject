@@ -88,7 +88,7 @@ public interface BeanScope extends Closeable {
    *
    * <pre>{@code
    *
-   *   CoffeeMaker coffeeMaker = beanContext.getBean(CoffeeMaker.class);
+   *   CoffeeMaker coffeeMaker = beanScope.get(CoffeeMaker.class);
    *   coffeeMaker.brew();
    *
    * }</pre>
@@ -110,7 +110,7 @@ public interface BeanScope extends Closeable {
    *
    * <pre>{@code
    *
-   *   Heater heater = beanContext.getBean(Heater.class, "electric");
+   *   Heater heater = beanScope.get(Heater.class, "electric");
    *   heater.heat();
    *
    * }</pre>
@@ -136,7 +136,7 @@ public interface BeanScope extends Closeable {
    *   // e.g. register all controllers with web a framework
    *   // .. where Controller is an annotation on the beans
    *
-   *   List<Object> controllers = SystemContext.getBeansWithAnnotation(Controller.class);
+   *   List<Object> controllers = ApplicationScope.listByAnnotation(Controller.class);
    *
    * }</pre>
    *
@@ -146,7 +146,15 @@ public interface BeanScope extends Closeable {
    *
    * @param annotation An annotation class.
    */
-  List<Object> getBeansWithAnnotation(Class<?> annotation);
+  List<Object> listByAnnotation(Class<?> annotation);
+
+  /**
+   * Deprecated - migrate to listByAnnotation()
+   */
+  @Deprecated
+  default List<Object> getBeansWithAnnotation(Class<?> annotation) {
+    return listByAnnotation(annotation);
+  }
 
   /**
    * Return the list of beans that implement the interface.
@@ -155,7 +163,7 @@ public interface BeanScope extends Closeable {
    *
    *   // e.g. register all routes for a web framework
    *
-   *   List<WebRoute> routes = SystemContext.getBeans(WebRoute.class);
+   *   List<WebRoute> routes = ApplicationScope.list(WebRoute.class);
    *
    * }</pre>
    *
@@ -204,26 +212,6 @@ public interface BeanScope extends Closeable {
   }
 
   /**
-   * Sort the beans by javax.annotation.Priority annotation.
-   *
-   * @param list The beans to sort by priority
-   * @return A new list of beans sorted by priority
-   */
-  <T> List<T> sortByPriority(List<T> list);
-
-  /**
-   * Sort the beans using the given Priority annotation.
-   * <p>
-   * The priority annotation will typically be either <code>javax.annotation.Priority</code>
-   * or <code>jakarta.annotation.Priority</code>.
-   *
-   * @param list     The beans to sort by priority
-   * @param priority The priority annotation used to sort the beans
-   * @return A new list of beans sorted by priority
-   */
-  <T> List<T> sortByPriority(List<T> list, final Class<? extends Annotation> priority);
-
-  /**
    * Return a request scoped provided for the specific type and name.
    *
    * @param type The type of the request scoped bean
@@ -231,11 +219,6 @@ public interface BeanScope extends Closeable {
    * @return The request scope provider or null
    */
   <T> RequestScopeMatch<T> requestProvider(Class<T> type, String name);
-
-  /**
-   * Start the context firing any <code>@PostConstruct</code> methods.
-   */
-  void start();
 
   /**
    * Close the context firing any <code>@PreDestroy</code> methods.

@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class ApplicationScope {
 
-  private static final BeanScope rootContext = init();
+  private static final BeanScope appScope = init();
 
   private static BeanScope init() {
     return BeanScope.newBuilder().build();
@@ -44,7 +44,7 @@ public class ApplicationScope {
    * Return the underlying BeanContext.
    */
   public static BeanScope scope() {
-    return rootContext;
+    return appScope;
   }
 
   /**
@@ -60,7 +60,7 @@ public class ApplicationScope {
    * @param type an interface or bean type
    */
   public static <T> T get(Class<T> type) {
-    return rootContext.getBean(type);
+    return appScope.get(type);
   }
 
   /**
@@ -68,7 +68,7 @@ public class ApplicationScope {
    *
    * <pre>{@code
    *
-   *   Heater heater = ApplicationScope.getBean(Heater.class, "electric");
+   *   Heater heater = ApplicationScope.get(Heater.class, "electric");
    *   heater.heat();
    *
    * }</pre>
@@ -77,7 +77,7 @@ public class ApplicationScope {
    * @param name the name qualifier of a specific bean
    */
   public static <T> T get(Class<T> type, String name) {
-    return rootContext.getBean(type, name);
+    return appScope.get(type, name);
   }
 
 
@@ -95,7 +95,7 @@ public class ApplicationScope {
    * @param interfaceType An interface class.
    */
   public static <T> List<T> list(Class<T> interfaceType) {
-    return rootContext.getBeans(interfaceType);
+    return appScope.list(interfaceType);
   }
 
   /**
@@ -112,7 +112,29 @@ public class ApplicationScope {
    * @param interfaceType An interface class.
    */
   public static <T> List<T> listByPriority(Class<T> interfaceType) {
-    return rootContext.getBeansByPriority(interfaceType);
+    return appScope.listByPriority(interfaceType);
+  }
+
+  /**
+   * Return the list of beans that have an annotation.
+   *
+   * <pre>{@code
+   *
+   *   // e.g. register all controllers with web a framework
+   *   // .. where Controller is an annotation on the beans
+   *
+   *   List<Object> controllers = ApplicationScope.listByAnnotation(Controller.class);
+   *
+   * }</pre>
+   *
+   * <p>
+   * The classic use case for this is registering controllers or routes to
+   * web frameworks like Sparkjava, Javlin, Rapidoid etc.
+   *
+   * @param annotation An annotation class.
+   */
+  public static List<Object> listByAnnotation(Class<?> annotation) {
+    return appScope.listByAnnotation(annotation);
   }
 
   /**
@@ -121,6 +143,6 @@ public class ApplicationScope {
    * @return The request scope builder
    */
   public static RequestScopeBuilder newRequestScope() {
-    return rootContext.newRequestScope();
+    return appScope.newRequestScope();
   }
 }

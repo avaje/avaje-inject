@@ -21,13 +21,20 @@ class DBeanScope implements BeanScope {
   private final List<BeanLifecycle> lifecycleList;
   private final DBeanMap beans;
   private final Map<String, RequestScopeMatch<?>> reqScopeProviders;
-
+  private final ShutdownHook shutdownHook;
+  private boolean shutdown;
   private boolean closed;
 
-  DBeanScope(List<BeanLifecycle> lifecycleList, DBeanMap beans, Map<String, RequestScopeMatch<?>> reqScopeProviders) {
+  DBeanScope(boolean withShutdownHook, List<BeanLifecycle> lifecycleList, DBeanMap beans, Map<String, RequestScopeMatch<?>> reqScopeProviders) {
     this.lifecycleList = lifecycleList;
     this.beans = beans;
     this.reqScopeProviders = reqScopeProviders;
+    if (withShutdownHook) {
+      this.shutdownHook = new ShutdownHook(this);
+      Runtime.getRuntime().addShutdownHook(shutdownHook);
+    } else {
+      this.shutdownHook = null;
+    }
   }
 
   @Override
@@ -68,13 +75,7 @@ class DBeanScope implements BeanScope {
     return list.size() > 1 ? sortByPriority(list, priorityAnnotation) : list;
   }
 
-  @Override
-  public <T> List<T> sortByPriority(List<T> list) {
-    return sortByPriority(list, Priority.class);
-  }
-
-  @Override
-  public <T> List<T> sortByPriority(List<T> list, final Class<? extends Annotation> priorityAnnotation) {
+  private <T> List<T> sortByPriority(List<T> list, final Class<? extends Annotation> priorityAnnotation) {
     boolean priorityUsed = false;
     List<SortBean<T>> tempList = new ArrayList<>(list.size());
     for (T bean : list) {
@@ -98,12 +99,11 @@ class DBeanScope implements BeanScope {
   }
 
   @Override
-  public List<Object> getBeansWithAnnotation(Class<?> annotation) {
+  public List<Object> listByAnnotation(Class<?> annotation) {
     return beans.all(annotation);
   }
 
-  @Override
-  public void start() {
+  DBeanScope start() {
     lock.lock();
     try {
       log.trace("firing postConstruct");
@@ -113,12 +113,16 @@ class DBeanScope implements BeanScope {
     } finally {
       lock.unlock();
     }
+    return this;
   }
 
   @Override
   public void close() {
     lock.lock();
     try {
+      if (shutdownHook != null && !shutdown) {
+        Runtime.getRuntime().removeShutdownHook(shutdownHook);
+      }
       if (!closed) {
         // we only allow one call to preDestroy
         closed = true;
@@ -131,6 +135,30 @@ class DBeanScope implements BeanScope {
       lock.unlock();
     }
   }
+
+  private void shutdown() {
+    lock.lock();
+    try {
+      shutdown = true;
+      close();
+    } finally {
+      lock.unlock();
+    }
+  }
+
+  private static class ShutdownHook extends Thread {
+    private final DBeanScope scope;
+
+    ShutdownHook(DBeanScope scope) {
+      this.scope = scope;
+    }
+
+    @Override
+    public void run() {
+      scope.shutdown();
+    }
+  }
+
 
   private static class SortBean<T> implements Comparable<SortBean<T>> {
 
