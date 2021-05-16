@@ -1,11 +1,11 @@
 package org.example.coffee.grind;
 
-import io.avaje.inject.spi.BeanLifecycle;
-
+import io.avaje.inject.PostConstruct;
+import io.avaje.inject.PreDestroy;
 import jakarta.inject.Singleton;
 
 @Singleton
-public class AMusher implements BeanLifecycle {
+public class AMusher {
 
   private int countInit;
   private int countClose;
@@ -14,12 +14,12 @@ public class AMusher implements BeanLifecycle {
     return "amush";
   }
 
-  @Override
+  @PostConstruct
   public void postConstruct() {
     countInit++;
   }
 
-  @Override
+  @PreDestroy
   public void preDestroy() {
     countClose++;
   }

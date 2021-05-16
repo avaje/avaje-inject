@@ -4,6 +4,8 @@ import io.avaje.inject.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,15 +20,17 @@ class DBeanScope implements BeanScope {
   private static final Logger log = LoggerFactory.getLogger(DBeanScope.class);
 
   private final ReentrantLock lock = new ReentrantLock();
-  private final List<BeanLifecycle> lifecycleList;
+  private final List<Runnable> postConstruct;
+  private final List<Closeable> preDestroy;
   private final DBeanMap beans;
   private final Map<String, RequestScopeMatch<?>> reqScopeProviders;
   private final ShutdownHook shutdownHook;
   private boolean shutdown;
   private boolean closed;
 
-  DBeanScope(boolean withShutdownHook, List<BeanLifecycle> lifecycleList, DBeanMap beans, Map<String, RequestScopeMatch<?>> reqScopeProviders) {
-    this.lifecycleList = lifecycleList;
+  DBeanScope(boolean withShutdownHook, List<Closeable> preDestroy, List<Runnable> postConstruct, DBeanMap beans, Map<String, RequestScopeMatch<?>> reqScopeProviders) {
+    this.preDestroy = preDestroy;
+    this.postConstruct = postConstruct;
     this.beans = beans;
     this.reqScopeProviders = reqScopeProviders;
     if (withShutdownHook) {
@@ -107,8 +111,8 @@ class DBeanScope implements BeanScope {
     lock.lock();
     try {
       log.trace("firing postConstruct");
-      for (BeanLifecycle bean : lifecycleList) {
-        bean.postConstruct();
+      for (Runnable invoke : postConstruct) {
+        invoke.run();
       }
     } finally {
       lock.unlock();
@@ -127,8 +131,12 @@ class DBeanScope implements BeanScope {
         // we only allow one call to preDestroy
         closed = true;
         log.trace("firing preDestroy");
-        for (BeanLifecycle bean : lifecycleList) {
-          bean.preDestroy();
+        for (Closeable closeable : preDestroy) {
+          try {
+            closeable.close();
+          } catch (IOException e) {
+            log.error("Error during PreDestroy lifecycle method", e);
+          }
         }
       }
     } finally {

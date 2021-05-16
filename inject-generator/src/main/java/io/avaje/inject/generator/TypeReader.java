@@ -16,7 +16,6 @@ class TypeReader {
   private final TypeInterfaceReader interfaceReader;
   private final TypeAnnotationReader annotationReader;
   private final ProcessingContext context;
-  private boolean beanLifeCycle;
   private String typesRegister;
 
   TypeReader(TypeElement beanType, ProcessingContext context, Set<String> importTypes) {
@@ -35,10 +34,6 @@ class TypeReader {
     this.extendsReader = new TypeExtendsReader(beanType, context);
     this.interfaceReader = new TypeInterfaceReader(beanType, context);
     this.annotationReader = new TypeAnnotationReader(beanType, context);
-  }
-
-  boolean isBeanLifeCycle() {
-    return beanLifeCycle;
   }
 
   String getTypesRegister() {
@@ -60,7 +55,6 @@ class TypeReader {
   void process() {
     extendsReader.process();
     interfaceReader.process();
-    beanLifeCycle = interfaceReader.isBeanLifeCycle();
     if (forBean) {
       annotationReader.process();
     }

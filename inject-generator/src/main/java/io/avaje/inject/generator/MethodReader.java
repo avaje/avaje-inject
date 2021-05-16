@@ -27,7 +27,6 @@ class MethodReader {
   private final String destroyMethod;
   private final String name;
   private final TypeReader typeReader;
-  private boolean beanLifeCycle;
   private boolean optionalType;
 
   MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType) {
@@ -51,16 +50,20 @@ class MethodReader {
     this.factoryType = beanType.getQualifiedName().toString();
     this.factoryShortName = Util.shortName(factoryType);
     this.isVoid = Util.isVoid(returnTypeRaw);
-    this.initMethod = (bean == null) ? null : bean.initMethod();
-    this.destroyMethod = (bean == null) ? null : bean.destroyMethod();
+    String initMethod = (bean == null) ? null : bean.initMethod();
+    String destroyMethod = (bean == null) ? null : bean.destroyMethod();
     this.name = (named == null) ? null : named.value().toLowerCase();
     TypeElement returnElement = context.element(returnTypeRaw);
     if (returnElement == null) {
       this.typeReader = null;
+      this.initMethod = initMethod;
+      this.destroyMethod = destroyMethod;
     } else {
       this.typeReader = new TypeReader(returnElement, context);
       typeReader.process();
-      beanLifeCycle = typeReader.isBeanLifeCycle();
+      MethodLifecycleReader lifecycleReader = new MethodLifecycleReader(returnElement, initMethod, destroyMethod);
+      this.initMethod = lifecycleReader.initMethod();
+      this.destroyMethod = lifecycleReader.destroyMethod();
     }
   }
 
@@ -130,14 +133,15 @@ class MethodReader {
         writer.append("        %s bean = optionalBean.get();", shortName).eol();
       }
       writer.append(indent);
-      if (beanLifeCycle || hasLifecycleMethods()) {
+      if (hasLifecycleMethods()) {
         writer.append("%s $bean = ", shortName);
       }
       writer.append("builder.register(bean);").eol();
-      if (beanLifeCycle) {
-        writer.append(indent).append("builder.addLifecycle($bean);").eol();
-      } else if (hasLifecycleMethods()) {
-        writer.append(indent).append("builder.addLifecycle(new %s$lifecycle($bean));", shortName).eol();
+      if (notEmpty(initMethod)) {
+        writer.append(indent).append("builder.addPostConstruct($bean::%s);", initMethod).eol();
+      }
+      if (notEmpty(destroyMethod)) {
+        writer.append(indent).append("builder.addPreDestroy($bean::%s);", destroyMethod).eol();
       }
       if (optionalType) {
         writer.append("      }").eol();
@@ -160,9 +164,6 @@ class MethodReader {
     if (isFactory) {
       importTypes.add(returnTypeRaw);
     }
-    if (beanLifeCycle || hasLifecycleMethods()) {
-      importTypes.add(Constants.BEAN_LIFECYCLE);
-    }
     if (optionalType) {
       importTypes.add(Constants.OPTIONAL);
     }
@@ -184,40 +185,6 @@ class MethodReader {
       }
     }
     writer.append(")) {").eol();
-  }
-
-  /**
-   * Add a $lifecycle class for factory method bean that has initMethod or destroyMethod.
-   */
-  void buildLifecycleClass(Append writer) {
-    if (!hasLifecycleMethods()) {
-      return;
-    }
-    writer.append(CODE_COMMENT_LIFECYCLE, shortName).eol();
-    writer.append("  static class %s$lifecycle implements BeanLifecycle {", shortName).eol().eol();
-    writer.append("    final %s bean;", shortName).eol().eol();
-    writer.append("    %s$lifecycle(%s bean) {", shortName, shortName).eol();
-    writer.append("      this.bean = bean;").eol();
-    writer.append("    }").eol().eol();
-
-    writer.append("    @Override").eol();
-    writer.append("    public void postConstruct() {").eol();
-    if (notEmpty(initMethod)) {
-      writer.append("      bean.%s();", initMethod).eol();
-    } else {
-      writer.append("      // do nothing ").eol();
-    }
-    writer.append("    }").eol().eol();
-
-    writer.append("    @Override").eol();
-    writer.append("    public void preDestroy() {").eol();
-    if (notEmpty(destroyMethod)) {
-      writer.append("      bean.%s();", destroyMethod).eol();
-    } else {
-      writer.append("      // do nothing ").eol();
-    }
-    writer.append("    }").eol();
-    writer.append("  }").eol().eol();
   }
 
   /**
