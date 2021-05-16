@@ -71,12 +71,10 @@ class TypeReader {
     }
     String derivedName = extendsReader.getQualifierName();
     if (derivedName != null) {
-      context.logWarn("Extends derived name " + derivedName + " for " + beanType);
       return derivedName;
     }
     derivedName = interfaceReader.getQualifierName();
     if (derivedName != null) {
-      context.logWarn("Interface Derived name " + derivedName + " for " + beanType);
       return derivedName;
     }
     return derivedName;
