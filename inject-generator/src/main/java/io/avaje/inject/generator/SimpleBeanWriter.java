@@ -52,8 +52,6 @@ class SimpleBeanWriter {
     } else {
       writeStaticFactoryMethod();
       writeStaticFactoryBeanMethods();
-      writeLifecycleWrapper();
-      writeStaticFactoryBeanLifecycle();
     }
     writeClassEnd();
     writer.close();
@@ -70,12 +68,6 @@ class SimpleBeanWriter {
   private void writeStaticFactoryBeanMethods() {
     for (MethodReader factoryMethod : beanReader.getFactoryMethods()) {
       writeFactoryBeanMethod(factoryMethod);
-    }
-  }
-
-  private void writeStaticFactoryBeanLifecycle() {
-    for (MethodReader factoryMethod : beanReader.getFactoryMethods()) {
-      factoryMethod.buildLifecycleClass(writer);
     }
   }
 
@@ -121,9 +113,7 @@ class SimpleBeanWriter {
     beanReader.buildAddFor(writer);
     writeCreateBean(constructor, "builder");
     beanReader.buildRegister(writer);
-    if (beanReader.isLifecycleRequired()) {
-      beanReader.buildAddLifecycle(writer);
-    }
+    beanReader.addLifecycleCallbacks(writer);
     if (beanReader.isExtraInjectionRequired()) {
       writeExtraInjection();
     }
@@ -210,19 +200,6 @@ class SimpleBeanWriter {
     writer.append("  }").eol().eol();
   }
 
-  private void writeLifecycleWrapper() {
-    if (beanReader.isLifecycleWrapperRequired()) {
-      writer.append("  private final %s bean;", shortName).eol().eol();
-      writer.append(CODE_COMMENT_LIFECYCLE, shortName).eol();
-      writer.append("  public %s%s(%s bean) {", shortName, suffix, shortName).eol();
-      writer.append("    this.bean = bean;").eol();
-      writer.append("  }").eol().eol();
-
-      lifecycleMethod("postConstruct", beanReader.getPostConstructMethod());
-      lifecycleMethod("preDestroy", beanReader.getPreDestroyMethod());
-    }
-  }
-
   private void writeClassEnd() {
     writer.append("}").eol();
   }
@@ -238,9 +215,6 @@ class SimpleBeanWriter {
       writer.append(Constants.AT_SINGLETON).eol();
     }
     writer.append("public class ").append(shortName).append(suffix).append(" ");
-    if (beanReader.isLifecycleWrapperRequired()) {
-      writer.append("implements BeanLifecycle ");
-    }
     if (beanReader.isRequestScopedController()) {
       writer.append("implements ");
       beanReader.factoryInterface(writer);

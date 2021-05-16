@@ -31,16 +31,9 @@ class BeanReader {
   private final List<MethodReader> injectMethods = new ArrayList<>();
   private final Set<String> importTypes = new TreeSet<>();
   private final BeanRequestParams requestParams;
-
   private final TypeReader typeReader;
   private MethodReader constructor;
-
   private boolean writtenToFile;
-
-  /**
-   * Set to true when the bean directly implements BeanLifecycle.
-   */
-  private boolean beanLifeCycle;
   private boolean primary;
   private boolean secondary;
   private boolean requestScopedBean;
@@ -62,7 +55,6 @@ class BeanReader {
 
   private void init() {
     typeReader.process();
-    beanLifeCycle = typeReader.isBeanLifeCycle();
     requestScopedBean = typeReader.isRequestScopeBean();
     name = typeReader.getName();
     primary = (beanType.getAnnotation(Primary.class) != null);
@@ -166,12 +158,10 @@ class BeanReader {
   }
 
   private void readConstructor(Element element) {
-
     ExecutableElement ex = (ExecutableElement) element;
 
     MethodReader methodReader = new MethodReader(context, ex, beanType);
     methodReader.read();
-
     Inject inject = element.getAnnotation(Inject.class);
     if (inject != null) {
       injectConstructor = methodReader;
@@ -190,7 +180,6 @@ class BeanReader {
   }
 
   private void readMethod(Element element, boolean factory) {
-
     ExecutableElement methodElement = (ExecutableElement) element;
     if (factory) {
       Bean bean = element.getAnnotation(Bean.class);
@@ -198,7 +187,6 @@ class BeanReader {
         addFactoryMethod(methodElement, bean);
       }
     }
-
     Inject inject = element.getAnnotation(Inject.class);
     if (inject != null) {
       MethodReader methodReader = new MethodReader(context, methodElement, beanType);
@@ -207,26 +195,12 @@ class BeanReader {
         injectMethods.add(methodReader);
       }
     }
-
-    if (hasAnnotationWithName(element, "PostConstruct")) {
+    if (AnnotationUtil.hasAnnotationWithName(element, "PostConstruct")) {
       postConstructMethod = element;
     }
-
-    if (hasAnnotationWithName(element, "PreDestroy")) {
+    if (AnnotationUtil.hasAnnotationWithName(element, "PreDestroy")) {
       preDestroyMethod = element;
     }
-  }
-
-  /**
-   * Return true if the element has an annotation with the matching short name.
-   */
-  private boolean hasAnnotationWithName(Element element, String matchShortName) {
-    for (AnnotationMirror mirror : element.getAnnotationMirrors()) {
-      if (matchShortName.equals(shortName(mirror.getAnnotationType().asElement()))) {
-        return true;
-      }
-    }
-    return false;
   }
 
   /**
@@ -254,14 +228,10 @@ class BeanReader {
     return type;
   }
 
-  boolean isLifecycleRequired() {
-    return beanLifeCycle || isLifecycleWrapperRequired();
-  }
-
   /**
    * Return true if lifecycle via annotated methods is required.
    */
-  boolean isLifecycleWrapperRequired() {
+  boolean hasLifecycleMethods() {
     return !requestScopedBean && (postConstructMethod != null || preDestroyMethod != null);
   }
 
@@ -298,27 +268,25 @@ class BeanReader {
 
   void buildRegister(Append writer) {
     writer.append("      ");
-    if (isExtraInjectionRequired() || isLifecycleRequired()) {
+    if (isExtraInjectionRequired() || hasLifecycleMethods()) {
       writer.append("%s $bean = ", shortName);
     }
     String flags = primary ? "Primary" : secondary ? "Secondary" : "";
     writer.append("builder.register%s(bean);", flags).eol();
   }
 
-  void buildAddLifecycle(Append writer) {
-    writer.append("      builder.addLifecycle(");
-    if (beanLifeCycle) {
-      writer.append("$bean");
-    } else {
-      writer.append("new %s$di($bean)", shortName);
+  void addLifecycleCallbacks(Append writer) {
+    if (postConstructMethod != null) {
+      writer.append("      builder.addPostConstruct($bean::%s);", postConstructMethod.getSimpleName()).eol();
     }
-    writer.append(");").eol();
+    if (preDestroyMethod != null) {
+      writer.append("      builder.addPreDestroy($bean::%s);", preDestroyMethod.getSimpleName()).eol();
+    } else if (typeReader.isClosable()) {
+      writer.append("      builder.addPreDestroy(bean);").eol();
+    }
   }
 
   private Set<String> importTypes() {
-    if (isLifecycleWrapperRequired()) {
-      importTypes.add(Constants.BEAN_LIFECYCLE);
-    }
     importTypes.add(Constants.GENERATED);
     importTypes.add(Constants.BUILDER);
     if (Util.validImportType(type)) {

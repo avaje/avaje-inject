@@ -15,7 +15,6 @@ class TypeInterfaceReader {
   private final ProcessingContext context;
   private final List<String> interfaceTypes = new ArrayList<>();
   private final String beanSimpleName;
-  private boolean beanLifeCycle;
   private boolean closeable;
   private String qualifierName;
 
@@ -30,10 +29,6 @@ class TypeInterfaceReader {
 
   List<String> getInterfaceTypes() {
     return interfaceTypes;
-  }
-
-  boolean isBeanLifeCycle() {
-    return beanLifeCycle;
   }
 
   boolean isCloseable() {
@@ -53,9 +48,7 @@ class TypeInterfaceReader {
     }
     for (TypeMirror anInterface : beanType.getInterfaces()) {
       String type = Util.unwrapProvider(anInterface.toString());
-      if (Constants.isBeanLifecycle(type)) {
-        beanLifeCycle = true;
-      } else if (type.indexOf('.') == -1) {
+      if (type.indexOf('.') == -1) {
         context.logWarn("skip when no package on interface " + type);
       } else if (Constants.IO_CLOSEABLE.equals(type)) {
         closeable = true;

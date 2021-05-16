@@ -6,15 +6,17 @@ import io.avaje.inject.RequestScopeMatch;
 import io.avaje.inject.RequestScopeProvider;
 import javax.inject.Provider;
 
+import java.io.Closeable;
 import java.util.*;
 import java.util.function.Consumer;
 
 class DBuilder implements Builder {
 
   /**
-   * List of Lifecycle beans.
+   * List of Lifecycle methods.
    */
-  private final List<BeanLifecycle> lifecycleList = new ArrayList<>();
+  private final List<Runnable> postConstruct = new ArrayList<>();
+  private final List<Closeable> preDestroy = new ArrayList<>();
 
   /**
    * List of field injection closures.
@@ -120,8 +122,13 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public void addLifecycle(BeanLifecycle wrapper) {
-    lifecycleList.add(wrapper);
+  public void addPostConstruct(Runnable invoke) {
+    postConstruct.add(invoke);
+  }
+
+  @Override
+  public void addPreDestroy(Closeable invoke) {
+    preDestroy.add(invoke);
   }
 
   @Override
@@ -197,6 +204,6 @@ class DBuilder implements Builder {
 
   public BeanScope build(boolean withShutdownHook) {
     runInjectors();
-    return new DBeanScope(withShutdownHook, lifecycleList, beanMap, reqScopeProviders).start();
+    return new DBeanScope(withShutdownHook, preDestroy, postConstruct, beanMap, reqScopeProviders).start();
   }
 }

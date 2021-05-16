@@ -1,10 +1,10 @@
 package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanScope;
-import io.avaje.inject.BeanEntry;
 import io.avaje.inject.RequestScopeProvider;
 import javax.inject.Provider;
 
+import java.io.Closeable;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -86,9 +86,14 @@ public interface Builder {
   <T> T registerSecondary(T bean);
 
   /**
-   * Add a lifecycle bean.
+   * Add lifecycle PostConstruct method.
    */
-  void addLifecycle(BeanLifecycle bean);
+  void addPostConstruct(Runnable runnable);
+
+  /**
+   * Add lifecycle PreDestroy method.
+   */
+  void addPreDestroy(Closeable closeable);
 
   /**
    * Add field and method injection.

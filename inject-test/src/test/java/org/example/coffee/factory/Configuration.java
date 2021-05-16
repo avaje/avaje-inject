@@ -28,7 +28,6 @@ class Configuration {
 
   @Bean
   AFact buildA() {
-
     String userHome = System.getProperty("user.home");
     return new AFact(userHome);
   }

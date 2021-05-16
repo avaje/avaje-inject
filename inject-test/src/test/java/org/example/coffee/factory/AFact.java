@@ -1,9 +1,9 @@
 package org.example.coffee.factory;
 
-import io.avaje.inject.spi.BeanLifecycle;
+import io.avaje.inject.PostConstruct;
+import io.avaje.inject.PreDestroy;
 
-public class AFact implements BeanLifecycle {
-
+public class AFact {
 
   private final String userHome;
 
@@ -18,12 +18,12 @@ public class AFact implements BeanLifecycle {
     return userHome;
   }
 
-  @Override
+  @PostConstruct
   public void postConstruct() {
     countConstruct++;
   }
 
-  @Override
+  @PreDestroy
   public void preDestroy() {
     countDestroy++;
   }

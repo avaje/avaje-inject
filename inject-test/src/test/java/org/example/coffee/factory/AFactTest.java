@@ -12,7 +12,7 @@ public class AFactTest {
 
     AFact bean;
     try (BeanScope context = BeanScope.newBuilder().build()) {
-      bean = context.getBean(AFact.class);
+      bean = context.get(AFact.class);
 
       assertThat(bean.getCountConstruct()).isEqualTo(1);
       assertThat(bean.getCountDestroy()).isEqualTo(0);
