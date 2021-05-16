@@ -143,12 +143,12 @@ public interface Builder {
   /**
    * Get a list of dependencies for the interface type .
    */
-  <T> List<T> getList(Class<T> interfaceType);
+  <T> List<T> list(Class<T> interfaceType);
 
   /**
    * Get a set of dependencies for the interface type .
    */
-  <T> Set<T> getSet(Class<T> interfaceType);
+  <T> Set<T> set(Class<T> interfaceType);
 
   /**
    * Return a potentially enriched bean for registration into the context.

@@ -52,7 +52,7 @@ public class ApplicationScope {
    *
    * <pre>{@code
    *
-   *   CoffeeMaker coffeeMaker = ApplicationScope.getBean(CoffeeMaker.class);
+   *   CoffeeMaker coffeeMaker = ApplicationScope.get(CoffeeMaker.class);
    *   coffeeMaker.brew();
    *
    * }</pre>
@@ -129,7 +129,7 @@ public class ApplicationScope {
    *
    * <p>
    * The classic use case for this is registering controllers or routes to
-   * web frameworks like Sparkjava, Javlin, Rapidoid etc.
+   * web frameworks like Sparkjava, Javalin, Rapidoid etc.
    *
    * @param annotation An annotation class.
    */

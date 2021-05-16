@@ -77,13 +77,13 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public <T> Set<T> getSet(Class<T> interfaceType) {
-    return new LinkedHashSet<>(getList(interfaceType));
+  public <T> Set<T> set(Class<T> interfaceType) {
+    return new LinkedHashSet<>(list(interfaceType));
   }
 
   @SuppressWarnings({"unchecked"})
   @Override
-  public <T> List<T> getList(Class<T> interfaceType) {
+  public <T> List<T> list(Class<T> interfaceType) {
     return (List<T>) beanMap.all(interfaceType);
   }
 
@@ -185,7 +185,7 @@ class DBuilder implements Builder {
       if (name != null) {
         msg += " name:" + name;
       }
-      List<T> beanList = getList(cls);
+      List<T> beanList = list(cls);
       msg += " when creating " + injectTarget + " - potential beans to inject: " + beanList;
       if (!beanList.isEmpty()) {
         msg += ". Check @Named or Qualifier being used";

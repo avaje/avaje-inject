@@ -48,9 +48,9 @@ class UtilType {
   String getMethod(boolean nullable) {
     switch (type) {
       case SET:
-        return "getSet(";
+        return "set(";
       case LIST:
-        return "getList(";
+        return "list(";
       case OPTIONAL:
         return "getOptional(";
       case PROVIDER:

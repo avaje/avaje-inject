@@ -39,14 +39,18 @@ class DRequestScope implements RequestScope {
     }
     RequestScopeMatch<T> reqMatch = beanScope.requestProvider(type, name);
     if (reqMatch != null) {
-      // creating a new request scoped bean
-      Object createdBean = reqMatch.provider().provide(this);
-      for (String matchKey : reqMatch.keys()) {
-        supplied.put(matchKey, createdBean);
-      }
-      return (T) createdBean;
+      return createRequestScopeBean(reqMatch);
     }
-    return beanScope.getBean(type, name);
+    return beanScope.get(type, name);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <T> T createRequestScopeBean(RequestScopeMatch<T> reqMatch) {
+    Object createdBean = reqMatch.provider().provide(this);
+    for (String matchKey : reqMatch.keys()) {
+      supplied.put(matchKey, createdBean);
+    }
+    return (T) createdBean;
   }
 
   @Override
@@ -90,12 +94,12 @@ class DRequestScope implements RequestScope {
   }
 
   @Override
-  public <T> List<T> getList(Class<T> interfaceType) {
+  public <T> List<T> list(Class<T> interfaceType) {
     return beanScope.list(interfaceType);
   }
 
   @Override
-  public <T> Set<T> getSet(Class<T> interfaceType) {
+  public <T> Set<T> set(Class<T> interfaceType) {
     return new LinkedHashSet<>(beanScope.list(interfaceType));
   }
 
