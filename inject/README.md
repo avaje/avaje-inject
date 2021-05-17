@@ -4,12 +4,14 @@ APT based dependency injection for server side developers - https://avaje.io/inj
 ### Example module use
 
 ```java
+import io.avaje.inject.spi.BeanScopeFactory;
+
 module org.example {
 
-  requires io.avaje.inject;
+    requires io.avaje.inject;
 
-  // register org.example._DI$BeanContextFactory from generated sources
-  provides io.avaje.inject.spi.BeanContextFactory with org.example._DI$BeanContextFactory;
+    // register org.example._DI$BeanScopeFactory from generated sources
+    provides io.avaje.inject.spi.BeanScopeFactory with org.example._DI$BeanScopeFactory;
 }
 ```
 

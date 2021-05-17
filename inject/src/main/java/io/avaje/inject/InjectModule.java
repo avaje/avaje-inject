@@ -1,14 +1,14 @@
 package io.avaje.inject;
 
 /**
- * Used to explicitly name a bean context and optionally specify if it depends on other bean contexts.
+ * Used to explicitly name a bean scope and optionally specify if it depends on other bean scopes.
  * <p>
  * If this annotation is not present then the name will be derived as the "top level package name"
  * e.g. "org.example.featuretoggle"
  * </p>
  *
  * <p>
- * Typically there is a single bean context per Jar (module). In that sense the name is the "module name" and
+ * Typically there is a single bean scope per Jar (module). In that sense the name is the "module name" and
  * the dependsOn specifies the names of modules that this depends on (provide beans that are used to wire this module).
  * </p>
  *
@@ -54,7 +54,7 @@ package io.avaje.inject;
  *
  * }</pre>
  */
-public @interface ContextModule {
+public @interface InjectModule {
 
   /**
    * The name of this context/module.

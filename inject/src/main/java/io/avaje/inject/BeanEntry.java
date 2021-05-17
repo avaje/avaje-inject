@@ -6,7 +6,7 @@ package io.avaje.inject;
 public class BeanEntry<T> {
 
   /**
-   * An explicitly supplied bean. See BeanContextBuilder.
+   * An explicitly supplied bean. See BeanScopeBuilder.
    */
   public static final int SUPPLIED = 2;
 
