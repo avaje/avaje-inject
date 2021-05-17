@@ -2,6 +2,7 @@ package io.avaje.inject.generator;
 
 import javax.inject.Named;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -15,23 +16,21 @@ class TypeReader {
   private final TypeExtendsReader extendsReader;
   private final TypeInterfaceReader interfaceReader;
   private final TypeAnnotationReader annotationReader;
-  private final ProcessingContext context;
   private String typesRegister;
 
-  TypeReader(TypeElement beanType, ProcessingContext context, Set<String> importTypes) {
-    this(true, beanType, context, importTypes);
+  TypeReader(TypeElement beanType, ProcessingContext context, Set<String> importTypes, boolean factory) {
+    this(true, beanType, context, importTypes, factory);
   }
 
   TypeReader(TypeElement returnElement, ProcessingContext context) {
-    this(false, returnElement, context, new LinkedHashSet<>());
+    this(false, returnElement, context, new LinkedHashSet<>(), false);
   }
 
-  private TypeReader(boolean forBean, TypeElement beanType, ProcessingContext context, Set<String> importTypes) {
-    this.context = context;
+  private TypeReader(boolean forBean, TypeElement beanType, ProcessingContext context, Set<String> importTypes, boolean factory) {
     this.forBean = forBean;
     this.beanType = beanType;
     this.importTypes = importTypes;
-    this.extendsReader = new TypeExtendsReader(beanType, context);
+    this.extendsReader = new TypeExtendsReader(beanType, context, factory);
     this.interfaceReader = new TypeInterfaceReader(beanType, context);
     this.annotationReader = new TypeAnnotationReader(beanType, context);
   }
@@ -53,7 +52,7 @@ class TypeReader {
   }
 
   void process() {
-    extendsReader.process();
+    extendsReader.process(forBean);
     interfaceReader.process();
     if (forBean) {
       annotationReader.process();
@@ -112,5 +111,29 @@ class TypeReader {
 
   void addImports(Set<String> importTypes) {
     importTypes.addAll(this.importTypes);
+  }
+
+  List<FieldReader> getInjectFields() {
+    return extendsReader.getInjectFields();
+  }
+
+  List<MethodReader> getInjectMethods() {
+    return extendsReader.getInjectMethods();
+  }
+
+  List<MethodReader> getFactoryMethods() {
+    return extendsReader.getFactoryMethods();
+  }
+
+  Element getPostConstructMethod() {
+    return extendsReader.getPostConstructMethod();
+  }
+
+  Element getPreDestroyMethod() {
+    return extendsReader.getPreDestroyMethod();
+  }
+
+  MethodReader getConstructor() {
+    return extendsReader.getConstructor();
   }
 }

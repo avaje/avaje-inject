@@ -67,11 +67,12 @@ class MethodReader {
     }
   }
 
-  void read() {
+  MethodReader read() {
     List<? extends VariableElement> ps = element.getParameters();
     for (VariableElement p : ps) {
       params.add(new MethodParam(p));
     }
+    return this;
   }
 
   String getName() {

@@ -1,6 +1,5 @@
 package io.avaje.inject.generator;
 
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
@@ -14,7 +13,6 @@ class SimpleBeanWriter {
 
   private static final String CODE_COMMENT = "/**\n * Generated source - dependency injection builder for %s.\n */";
   private static final String CODE_COMMENT_FACTORY = "/**\n * Generated source - dependency injection factory for request scoped %s.\n */";
-  private static final String CODE_COMMENT_LIFECYCLE = "  /**\n   * Lifecycle wrapper for %s.\n   */";
   private static final String CODE_COMMENT_BUILD = "  /**\n   * Create and register %s.\n   */";
   private static final String CODE_COMMENT_BUILD_RSB = "  /**\n   * Register provider for request scoped %s.\n   */";
 
@@ -159,17 +157,25 @@ class SimpleBeanWriter {
       writer.append("      builder.addInjector(b -> {").eol();
     }
     writer.append("        // field and method injection").eol();
+    injectFields(builderRef, beanRef);
+    injectMethods(builderRef, beanRef);
+    if (!beanReader.isRequestScopedBean()) {
+      writer.append("      });").eol();
+    }
+  }
+
+  private void injectFields(String builderRef, String beanRef) {
     for (FieldReader fieldReader : beanReader.getInjectFields()) {
       String fieldName = fieldReader.getFieldName();
       String getDependency = fieldReader.builderGetDependency(builderRef);
       writer.append("        %s.%s = %s;", beanRef, fieldName, getDependency).eol();
     }
+  }
+
+  private void injectMethods(String builderRef, String beanRef) {
     for (MethodReader methodReader : beanReader.getInjectMethods()) {
       writer.append("        %s.%s(", beanRef, methodReader.getName());
       writeMethodParams(builderRef, methodReader);
-    }
-    if (!beanReader.isRequestScopedBean()) {
-      writer.append("      });").eol();
     }
   }
 
@@ -186,18 +192,6 @@ class SimpleBeanWriter {
 
   private void writeImports() {
     beanReader.writeImports(writer);
-  }
-
-  private void lifecycleMethod(String method, Element methodElement) {
-    writer.append("  @Override").eol();
-    writer.append("  public void %s() {", method).eol();
-    if (methodElement == null) {
-      writer.append("    // do nothing for %s", method).eol();
-    } else {
-      String methodName = methodElement.getSimpleName().toString();
-      writer.append("    bean.%s();", methodName).eol();
-    }
-    writer.append("  }").eol().eol();
   }
 
   private void writeClassEnd() {
