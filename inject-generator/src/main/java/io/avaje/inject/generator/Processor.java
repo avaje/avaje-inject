@@ -195,8 +195,8 @@ public class Processor extends AbstractProcessor {
       context.logDebug("skipping annotation type " + typeElement);
       return;
     }
-    BeanReader beanReader = new BeanReader(typeElement, context);
-    beanReader.read(factory);
+    BeanReader beanReader = new BeanReader(typeElement, context, factory);
+    beanReader.read();
     beanReaders.add(beanReader);
   }
 

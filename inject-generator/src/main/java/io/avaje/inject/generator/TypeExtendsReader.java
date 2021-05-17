@@ -1,5 +1,6 @@
 package io.avaje.inject.generator;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,15 +14,18 @@ class TypeExtendsReader {
   private final TypeElement baseType;
   private final ProcessingContext context;
   private final List<String> extendsTypes = new ArrayList<>();
+  private final TypeExtendsInjection extendsInjection;
+
   /**
    * The implied qualifier name based on naming convention.
    */
   private String qualifierName;
   private String baseTypeRaw;
 
-  TypeExtendsReader(TypeElement baseType, ProcessingContext context) {
+  TypeExtendsReader(TypeElement baseType, ProcessingContext context, boolean factory) {
     this.baseType = baseType;
     this.context = context;
+    this.extendsInjection = new TypeExtendsInjection(baseType, context, factory);
   }
 
   String getBaseType() {
@@ -36,11 +40,14 @@ class TypeExtendsReader {
     return qualifierName;
   }
 
-  void process() {
+  void process(boolean forBean) {
     String base = Util.unwrapProvider(baseType.getQualifiedName().toString());
     if (!GenericType.isGeneric(base)) {
       baseTypeRaw = base;
       extendsTypes.add(base);
+      if (forBean) {
+        extendsInjection.read(baseType);
+      }
     }
     TypeElement superElement = superOf(baseType);
     if (superElement != null) {
@@ -59,6 +66,7 @@ class TypeExtendsReader {
       String type = Util.unwrapProvider(fullName);
       if (!GenericType.isGeneric(type)) {
         extendsTypes.add(type);
+        extendsInjection.read(element);
         addSuperType(superOf(element));
       }
     }
@@ -66,5 +74,29 @@ class TypeExtendsReader {
 
   private TypeElement superOf(TypeElement element) {
     return (TypeElement) context.asElement(element.getSuperclass());
+  }
+
+  List<FieldReader> getInjectFields() {
+    return extendsInjection.getInjectFields();
+  }
+
+  List<MethodReader> getInjectMethods() {
+    return extendsInjection.getInjectMethods();
+  }
+
+  List<MethodReader> getFactoryMethods() {
+    return extendsInjection.getFactoryMethods();
+  }
+
+  Element getPostConstructMethod() {
+    return extendsInjection.getPostConstructMethod();
+  }
+
+  Element getPreDestroyMethod() {
+    return extendsInjection.getPreDestroyMethod();
+  }
+
+  MethodReader getConstructor() {
+    return extendsInjection.getConstructor();
   }
 }

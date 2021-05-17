@@ -1,51 +1,53 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.Bean;
 import io.avaje.inject.Primary;
 import io.avaje.inject.Secondary;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
 
-import javax.lang.model.element.*;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 import java.util.*;
 
 class BeanReader {
 
   private final TypeElement beanType;
-
-  private final ProcessingContext context;
-
   private final String shortName;
-
   private final String type;
-  private String name;
+  private final String name;
 
-  private MethodReader injectConstructor;
-  private final List<MethodReader> otherConstructors = new ArrayList<>();
-  private final List<MethodReader> factoryMethods = new ArrayList<>();
+  private final MethodReader constructor;
+  private final List<FieldReader> injectFields;
+  private final List<MethodReader> injectMethods;
+  private final List<MethodReader> factoryMethods;
+  private final Element postConstructMethod;
+  private final Element preDestroyMethod;
 
-  private Element postConstructMethod;
-  private Element preDestroyMethod;
-
-  private final List<FieldReader> injectFields = new ArrayList<>();
-  private final List<MethodReader> injectMethods = new ArrayList<>();
   private final Set<String> importTypes = new TreeSet<>();
   private final BeanRequestParams requestParams;
   private final TypeReader typeReader;
-  private MethodReader constructor;
-  private boolean writtenToFile;
-  private boolean primary;
-  private boolean secondary;
-  private boolean requestScopedBean;
+  private final boolean primary;
+  private final boolean secondary;
+  private final boolean requestScopedBean;
 
-  BeanReader(TypeElement beanType, ProcessingContext context) {
+  private boolean writtenToFile;
+
+  BeanReader(TypeElement beanType, ProcessingContext context, boolean factory) {
     this.beanType = beanType;
     this.type = beanType.getQualifiedName().toString();
     this.shortName = shortName(beanType);
-    this.context = context;
+    this.primary = (beanType.getAnnotation(Primary.class) != null);
+    this.secondary = !primary && (beanType.getAnnotation(Secondary.class) != null);
     this.requestParams = new BeanRequestParams(type);
-    this.typeReader = new TypeReader(beanType, context, importTypes);
-    init();
+    this.typeReader = new TypeReader(beanType, context, importTypes, factory);
+
+    typeReader.process();
+    this.requestScopedBean = typeReader.isRequestScopeBean();
+    this.name = typeReader.getName();
+    this.injectMethods = typeReader.getInjectMethods();
+    this.injectFields = typeReader.getInjectFields();
+    this.factoryMethods = typeReader.getFactoryMethods();
+    this.postConstructMethod = typeReader.getPostConstructMethod();
+    this.preDestroyMethod = typeReader.getPreDestroyMethod();
+    this.constructor = typeReader.getConstructor();
   }
 
   @Override
@@ -53,50 +55,11 @@ class BeanReader {
     return beanType.toString();
   }
 
-  private void init() {
-    typeReader.process();
-    requestScopedBean = typeReader.isRequestScopeBean();
-    name = typeReader.getName();
-    primary = (beanType.getAnnotation(Primary.class) != null);
-    secondary = !primary && (beanType.getAnnotation(Secondary.class) != null);
-  }
-
   TypeElement getBeanType() {
     return beanType;
   }
 
-  Element getPostConstructMethod() {
-    return postConstructMethod;
-  }
-
-  Element getPreDestroyMethod() {
-    return preDestroyMethod;
-  }
-
-  List<FieldReader> getInjectFields() {
-    return injectFields;
-  }
-
-  List<MethodReader> getInjectMethods() {
-    return injectMethods;
-  }
-
-  void read(boolean factory) {
-    for (Element element : beanType.getEnclosedElements()) {
-      ElementKind kind = element.getKind();
-      switch (kind) {
-        case CONSTRUCTOR:
-          readConstructor(element);
-          break;
-        case FIELD:
-          readField(element);
-          break;
-        case METHOD:
-          readMethod(element, factory);
-          break;
-      }
-    }
-    constructor = findConstructor();
+  void read() {
     if (constructor != null) {
       constructor.addImports(importTypes);
       constructor.checkRequest(requestParams);
@@ -118,27 +81,6 @@ class BeanReader {
     }
   }
 
-  private MethodReader findConstructor() {
-    if (injectConstructor != null) {
-      return injectConstructor;
-    }
-    if (otherConstructors.size() == 1) {
-      return otherConstructors.get(0);
-    }
-    // check if there is only one public constructor
-    List<MethodReader> allPublic = new ArrayList<>();
-    for (MethodReader ctor : otherConstructors) {
-      if (ctor.isPublic()) {
-        allPublic.add(ctor);
-      }
-    }
-    if (allPublic.size() == 1) {
-      // fallback to the single public constructor
-      return allPublic.get(0);
-    }
-    return null;
-  }
-
   List<String> getDependsOn() {
     List<String> list = new ArrayList<>();
     if (constructor != null) {
@@ -157,52 +99,6 @@ class BeanReader {
     return typeReader.getInterfaces();
   }
 
-  private void readConstructor(Element element) {
-    ExecutableElement ex = (ExecutableElement) element;
-
-    MethodReader methodReader = new MethodReader(context, ex, beanType);
-    methodReader.read();
-    Inject inject = element.getAnnotation(Inject.class);
-    if (inject != null) {
-      injectConstructor = methodReader;
-    } else {
-      if (methodReader.isNotPrivate()) {
-        otherConstructors.add(methodReader);
-      }
-    }
-  }
-
-  private void readField(Element element) {
-    Inject inject = element.getAnnotation(Inject.class);
-    if (inject != null) {
-      injectFields.add(new FieldReader(element));
-    }
-  }
-
-  private void readMethod(Element element, boolean factory) {
-    ExecutableElement methodElement = (ExecutableElement) element;
-    if (factory) {
-      Bean bean = element.getAnnotation(Bean.class);
-      if (bean != null) {
-        addFactoryMethod(methodElement, bean);
-      }
-    }
-    Inject inject = element.getAnnotation(Inject.class);
-    if (inject != null) {
-      MethodReader methodReader = new MethodReader(context, methodElement, beanType);
-      if (methodReader.isNotPrivate()) {
-        methodReader.read();
-        injectMethods.add(methodReader);
-      }
-    }
-    if (AnnotationUtil.hasAnnotationWithName(element, "PostConstruct")) {
-      postConstructMethod = element;
-    }
-    if (AnnotationUtil.hasAnnotationWithName(element, "PreDestroy")) {
-      preDestroyMethod = element;
-    }
-  }
-
   /**
    * Return the short name of the element.
    */
@@ -210,18 +106,10 @@ class BeanReader {
     return element.getSimpleName().toString();
   }
 
-  private void addFactoryMethod(ExecutableElement methodElement, Bean bean) {
-    // Not yet reading Qualifier annotations, Named only at this stage
-    Named named = methodElement.getAnnotation(Named.class);
-    MethodReader methodReader = new MethodReader(context, methodElement, beanType, bean, named);
-    methodReader.read();
-    factoryMethods.add(methodReader);
-  }
-
   /**
    * Return the key for meta data (type and name)
    */
-  public String getMetaKey() {
+  String getMetaKey() {
     if (name != null) {
       return type + ":" + name;
     }
@@ -239,7 +127,6 @@ class BeanReader {
     if (factoryMethods.isEmpty()) {
       return Collections.emptyList();
     }
-
     List<MetaData> metaList = new ArrayList<>(factoryMethods.size());
     for (MethodReader factoryMethod : factoryMethods) {
       metaList.add(factoryMethod.createMeta());
@@ -408,5 +295,13 @@ class BeanReader {
     } else if (typeReader.isClosable()) {
       writer.append("        scope.addClosable(bean);").eol();
     }
+  }
+
+  List<FieldReader> getInjectFields() {
+    return typeReader.getInjectFields();
+  }
+
+  List<MethodReader> getInjectMethods() {
+    return typeReader.getInjectMethods();
   }
 }
