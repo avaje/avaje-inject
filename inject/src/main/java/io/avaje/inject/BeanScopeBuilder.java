@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 /**
  * Build a bean context with options for shutdown hook and supplying test doubles.
  * <p>
- * We would choose to use BeanContextBuilder in test code (for component testing) as it gives us
+ * We would choose to use BeanScopeBuilder in test code (for component testing) as it gives us
  * the ability to inject test doubles, mocks, spy's etc.
  * </p>
  *
@@ -36,7 +36,7 @@ public interface BeanScopeBuilder {
   /**
    * Create the bean context without registering a shutdown hook.
    * <p>
-   * The expectation is that the BeanContextBuilder is closed via code or via using
+   * The expectation is that the BeanScopeBuilder is closed via code or via using
    * try with resources.
    * </p>
    * <pre>{@code
@@ -89,12 +89,12 @@ public interface BeanScopeBuilder {
    * }</pre>
    *
    * @param modules The names of modules that we want to include in dependency injection.
-   * @return This BeanContextBuilder
+   * @return This BeanScopeBuilder
    */
   BeanScopeBuilder withModules(String... modules);
 
   /**
-   * Set this when building a BeanContext (typically for testing) and supplied beans replace module dependencies.
+   * Set this when building a BeanScope (typically for testing) and supplied beans replace module dependencies.
    * This means we don't need the usual module dependencies as supplied beans are used instead.
    */
   BeanScopeBuilder withIgnoreMissingModuleDependencies();
@@ -132,7 +132,7 @@ public interface BeanScopeBuilder {
    * }</pre>
    *
    * @param beans The bean used when injecting a dependency for this bean or the interface(s) it implements
-   * @return This BeanContextBuilder
+   * @return This BeanScopeBuilder
    */
   BeanScopeBuilder withBeans(Object... beans);
 
@@ -288,7 +288,7 @@ public interface BeanScopeBuilder {
   /**
    * Build and return the bean context.
    *
-   * @return The BeanContext
+   * @return The BeanScope
    */
   BeanScope build();
 }

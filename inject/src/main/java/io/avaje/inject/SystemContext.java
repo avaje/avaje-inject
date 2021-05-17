@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Deprecated - migrate to ApplicationScope.
  * <p>
- * Provides a global system wide BeanContext that contains all the bean contexts in the classpath.
+ * Provides a global system wide BeanScope that contains all the bean contexts in the classpath.
  * <p>
  * This will automatically get all the bean contexts and wire them all as necessary. It will use
  * a shutdown hook to fire any <code>@PreDestroy</code> methods on beans.

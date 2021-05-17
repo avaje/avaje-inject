@@ -32,7 +32,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
   private boolean ignoreMissingModuleDependencies;
 
   /**
-   * Create a BeanContextBuilder to ultimately load and return a new BeanContext.
+   * Create a BeanScopeBuilder to ultimately load and return a new BeanScope.
    */
   DBeanScopeBuilder() {
   }
@@ -248,7 +248,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
         }
 
         sb.append(". Modules that were loaded ok are:").append(moduleNames);
-        sb.append(". Consider using BeanContextBuilder.withIgnoreMissingModuleDependencies() or BeanContextBuilder.withSuppliedBeans(...)");
+        sb.append(". Consider using BeanScopeBuilder.withIgnoreMissingModuleDependencies() or BeanScopeBuilder.withSuppliedBeans(...)");
         throw new IllegalStateException(sb.toString());
       }
     }
