@@ -1,6 +1,6 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.ContextModule;
+import io.avaje.inject.InjectModule;
 import io.avaje.inject.Factory;
 import io.avaje.inject.Request;
 import io.avaje.inject.spi.DependencyMeta;
@@ -61,7 +61,7 @@ public class Processor extends AbstractProcessor {
   public Set<String> getSupportedAnnotationTypes() {
 
     Set<String> annotations = new LinkedHashSet<>();
-    annotations.add(ContextModule.class.getCanonicalName());
+    annotations.add(InjectModule.class.getCanonicalName());
     annotations.add(Factory.class.getCanonicalName());
     annotations.add(Singleton.class.getCanonicalName());
     annotations.add(Constants.CONTROLLER);
@@ -197,7 +197,7 @@ public class Processor extends AbstractProcessor {
   }
 
   /**
-   * Read the existing meta data from ContextModule (if found) and the factory bean (if exists).
+   * Read the existing meta data from InjectModule (if found) and the factory bean (if exists).
    */
   private void readModule(RoundEnvironment roundEnv) {
     String factory = context.loadMetaInfServices();
@@ -208,12 +208,12 @@ public class Processor extends AbstractProcessor {
       }
     }
 
-    Set<? extends Element> elementsAnnotatedWith = roundEnv.getElementsAnnotatedWith(ContextModule.class);
+    Set<? extends Element> elementsAnnotatedWith = roundEnv.getElementsAnnotatedWith(InjectModule.class);
     if (!elementsAnnotatedWith.isEmpty()) {
       Iterator<? extends Element> iterator = elementsAnnotatedWith.iterator();
       if (iterator.hasNext()) {
         Element element = iterator.next();
-        ContextModule annotation = element.getAnnotation(ContextModule.class);
+        InjectModule annotation = element.getAnnotation(InjectModule.class);
         if (annotation != null) {
           context.setContextDetails(annotation.name(), annotation.provides(), annotation.dependsOn(), element);
         }
@@ -227,7 +227,7 @@ public class Processor extends AbstractProcessor {
    * which holds the information we need (to regenerate the factory with any changes).
    */
   private void readFactory(TypeElement factoryType) {
-    ContextModule module = factoryType.getAnnotation(ContextModule.class);
+    InjectModule module = factoryType.getAnnotation(InjectModule.class);
     context.setContextDetails(module.name(), module.provides(), module.dependsOn(), factoryType);
 
     List<? extends Element> elements = factoryType.getEnclosedElements();

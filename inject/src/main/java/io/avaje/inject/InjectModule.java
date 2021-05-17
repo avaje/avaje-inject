@@ -54,7 +54,7 @@ package io.avaje.inject;
  *
  * }</pre>
  */
-public @interface ContextModule {
+public @interface InjectModule {
 
   /**
    * The name of this context/module.

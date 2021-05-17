@@ -151,9 +151,9 @@ class ProcessingContext {
     writer.append(";").eol();
   }
 
-  void buildAtContextModule(Append writer) {
+  void buildAtInjectModule(Append writer) {
     writer.append(Constants.AT_GENERATED).eol();
-    writer.append("@ContextModule(name=\"%s\"", contextName);
+    writer.append("@InjectModule(name=\"%s\"", contextName);
     if (!isEmpty(contextProvides)) {
       writer.append(", provides=");
       buildStringArray(writer, contextProvides, false);

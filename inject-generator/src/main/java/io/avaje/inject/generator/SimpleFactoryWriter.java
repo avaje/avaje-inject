@@ -126,7 +126,7 @@ class SimpleFactoryWriter {
     Set<String> importTypes = new TreeSet<>();
     importTypes.add(Constants.GENERATED);
     importTypes.add(Constants.BEANCONTEXT);
-    importTypes.add(Constants.CONTEXTMODULE);
+    importTypes.add(Constants.INJECTMODULE);
     importTypes.add(Constants.DEPENDENCYMETA);
     importTypes.add(Constants.BEANSCOPEFACTORY);
     importTypes.add(Constants.BUILDER);
@@ -135,7 +135,7 @@ class SimpleFactoryWriter {
 
   private void writeStartClass() {
     writer.append(CODE_COMMENT_FACTORY, context.contextName(), factoryPackage).eol();
-    context.buildAtContextModule(writer);
+    context.buildAtInjectModule(writer);
 
     writer.append("public class %s implements BeanScopeFactory {", factoryShortName).eol().eol();
     writer.append("  private final String name;").eol();
