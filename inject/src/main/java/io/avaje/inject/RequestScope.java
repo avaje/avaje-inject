@@ -70,7 +70,7 @@ public interface RequestScope extends Closeable {
   void addClosable(Closeable closeable);
 
   /**
-   * Close the context firing any <code>@PreDestroy</code> methods.
+   * Close the scope firing any <code>@PreDestroy</code> methods.
    */
   void close();
 

@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * the intended interface.
  * <p>
  * This can use be used when we have a 'default' implementation that would only be used when
- * no other implementation is available in the context to inject.
+ * no other implementation is available in the scope to inject.
  * </p>
  *
  * <pre>{@code
