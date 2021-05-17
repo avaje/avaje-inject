@@ -1,12 +1,12 @@
 package io.avaje.inject.spi;
 
 /**
- * This is the service loader interface defining the bean contexts that can be created.
+ * This is the service loader interface defining the bean scope.
  */
 public interface BeanContextFactory {
 
   /**
-   * Return the name of the bean context (module) this will create.
+   * Return the name of the bean scope (module) this will create.
    */
   String getName();
 
@@ -16,7 +16,7 @@ public interface BeanContextFactory {
   String[] getProvides();
 
   /**
-   * Return the names of bean contexts (modules) that this is dependent on (they need to be built before this one).
+   * Return the names of bean scopes (modules) that this is dependent on (they need to be built before this one).
    */
   String[] getDependsOn();
 

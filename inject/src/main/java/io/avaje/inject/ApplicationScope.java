@@ -3,9 +3,9 @@ package io.avaje.inject;
 import java.util.List;
 
 /**
- * Provides a global system wide BeanScope that contains all the bean contexts in the classpath.
+ * Provides a global system wide BeanScope that contains all the beans.
  * <p>
- * This will automatically get all the bean contexts and wire them all as necessary. It will use
+ * This will automatically get all the beans and wire them all as necessary. It will use
  * a shutdown hook to fire any <code>@PreDestroy</code> methods on beans.
  * </p>
  *
@@ -139,6 +139,35 @@ public class ApplicationScope {
 
   /**
    * Start building a RequestScope.
+   *
+   * <pre>{@code
+   *
+   *   try (RequestScope requestScope = ApplicationScope.newRequestScope()
+   *       // supply some instances
+   *       .withBean(HttpRequest.class, request)
+   *       .withBean(HttpResponse.class, response)
+   *       .build()) {
+   *
+   *       MyController controller = requestScope.get(MyController.class);
+   *       controller.process();
+   *
+   *   }
+   *
+   *   ...
+   *
+   *   // define request scoped beans
+   *   @Request
+   *   MyController {
+   *
+   *     // can depend on supplied instances, singletons and other request scope beans
+   *     @Inject
+   *     MyController(HttpRequest request, HttpResponse response, MyService myService) {
+   *       ...
+   *     }
+   *
+   *   }
+   *
+   * }</pre>
    *
    * @return The request scope builder
    */

@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 /**
- * Mutable builder object used when building a bean context.
+ * Mutable builder object used when building a bean scope.
  */
 public interface Builder {
 
@@ -161,7 +161,7 @@ public interface Builder {
   <T> T enrich(T bean, Class<?>[] types);
 
   /**
-   * Build and return the bean context.
+   * Build and return the bean scope.
    */
   BeanScope build(boolean withShutdownHook);
 }

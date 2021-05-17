@@ -3,7 +3,7 @@ package io.avaje.inject;
 import java.util.function.Consumer;
 
 /**
- * Build a bean context with options for shutdown hook and supplying test doubles.
+ * Build a bean scope with options for shutdown hook and supplying test doubles.
  * <p>
  * We would choose to use BeanScopeBuilder in test code (for component testing) as it gives us
  * the ability to inject test doubles, mocks, spy's etc.
@@ -34,7 +34,7 @@ import java.util.function.Consumer;
 public interface BeanScopeBuilder {
 
   /**
-   * Create the bean context without registering a shutdown hook.
+   * Create the bean scope without registering a shutdown hook.
    * <p>
    * The expectation is that the BeanScopeBuilder is closed via code or via using
    * try with resources.
@@ -286,7 +286,7 @@ public interface BeanScopeBuilder {
   <D> BeanScopeBuilder withSpy(Class<D> type, Consumer<D> consumer);
 
   /**
-   * Build and return the bean context.
+   * Build and return the bean scope.
    *
    * @return The BeanScope
    */

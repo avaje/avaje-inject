@@ -45,7 +45,7 @@ import java.util.List;
 public interface BeanScope extends Closeable {
 
   /**
-   * Build a bean context with options for shutdown hook and supplying test doubles.
+   * Build a bean scope with options for shutdown hook and supplying test doubles.
    * <p>
    * We would choose to use BeanScopeBuilder in test code (for component testing)
    * as it gives us the ability to inject test doubles, mocks, spy's etc.
@@ -70,7 +70,6 @@ public interface BeanScope extends Closeable {
    *       assertThat(...
    *     }
    *   }
-   *
    * }</pre>
    */
   static BeanScopeBuilder newBuilder() {
@@ -80,6 +79,34 @@ public interface BeanScope extends Closeable {
   /**
    * Create a RequestScope via builder where we provide extra instances
    * that can be used/included in wiring request scoped beans.
+   *
+   * <pre>{@code
+   *
+   *   try (RequestScope requestScope = beanScope.newRequestScope()
+   *       // supply some instances
+   *       .withBean(HttpRequest.class, request)
+   *       .withBean(HttpResponse.class, response)
+   *       .build()) {
+   *
+   *       MyController controller = requestScope.get(MyController.class);
+   *       controller.process();
+   *   }
+   *
+   *   ...
+   *
+   *   // define request scoped beans
+   *   @Request
+   *   MyController {
+   *
+   *     // can depend on supplied instances, singletons and other request scope beans
+   *     @Inject
+   *     MyController(HttpRequest request, HttpResponse response, MyService myService) {
+   *       ...
+   *     }
+   *
+   *   }
+   *
+   * }</pre>
    */
   RequestScopeBuilder newRequestScope();
 

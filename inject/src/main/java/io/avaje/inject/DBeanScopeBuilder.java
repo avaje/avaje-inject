@@ -7,13 +7,11 @@ import io.avaje.inject.spi.SuppliedBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.annotation.Annotation;
 import java.util.*;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 /**
- * Build a bean context with options for shutdown hook and supplying test doubles.
+ * Build a bean scope with options for shutdown hook and supplying test doubles.
  */
 class DBeanScopeBuilder implements BeanScopeBuilder {
 
