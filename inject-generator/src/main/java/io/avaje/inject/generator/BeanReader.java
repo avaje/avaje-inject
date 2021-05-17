@@ -36,11 +36,11 @@ class BeanReader {
     this.shortName = shortName(beanType);
     this.primary = (beanType.getAnnotation(Primary.class) != null);
     this.secondary = !primary && (beanType.getAnnotation(Secondary.class) != null);
-    this.requestParams = new BeanRequestParams(type);
     this.typeReader = new TypeReader(beanType, context, importTypes, factory);
 
     typeReader.process();
     this.requestScopedBean = typeReader.isRequestScopeBean();
+    this.requestParams = new BeanRequestParams(type, requestScopedBean);
     this.name = typeReader.getName();
     this.injectMethods = typeReader.getInjectMethods();
     this.injectFields = typeReader.getInjectFields();

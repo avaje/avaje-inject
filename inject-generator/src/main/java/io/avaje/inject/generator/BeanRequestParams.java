@@ -8,17 +8,23 @@ import java.util.Set;
 class BeanRequestParams {
 
   private final String parentType;
+  private final boolean requestScopedBean;
 
   private RequestScope.Handler reqScopeHandler;
 
-  BeanRequestParams(String parentType) {
+  BeanRequestParams(String parentType, boolean requestScopedBean) {
     this.parentType = parentType;
+    this.requestScopedBean = requestScopedBean;
   }
 
   /**
    * Return true if this type is a request scoped type (e.g. Javalin Context).
    */
   boolean check(String paramType) {
+    if (requestScopedBean) {
+      // Beans that are @Request don't get the reqScopeHandler factory generated
+      return false;
+    }
     if (paramType != null && RequestScope.check(paramType)) {
       if (reqScopeHandler == null) {
         reqScopeHandler = RequestScope.handler(paramType);
