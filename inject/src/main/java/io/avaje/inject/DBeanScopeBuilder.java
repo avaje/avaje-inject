@@ -1,6 +1,6 @@
 package io.avaje.inject;
 
-import io.avaje.inject.spi.BeanContextFactory;
+import io.avaje.inject.spi.BeanScopeFactory;
 import io.avaje.inject.spi.Builder;
 import io.avaje.inject.spi.EnrichBean;
 import io.avaje.inject.spi.SuppliedBean;
@@ -99,7 +99,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
   public BeanScope build() {
     // sort factories by dependsOn
     FactoryOrder factoryOrder = new FactoryOrder(includeModules, !suppliedBeans.isEmpty(), ignoreMissingModuleDependencies);
-    ServiceLoader.load(BeanContextFactory.class).forEach(factoryOrder::add);
+    ServiceLoader.load(BeanScopeFactory.class).forEach(factoryOrder::add);
 
     Set<String> moduleNames = factoryOrder.orderFactories();
     if (moduleNames.isEmpty()) {
@@ -111,7 +111,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
     }
     log.debug("building context with modules {}", moduleNames);
     Builder builder = Builder.newBuilder(suppliedBeans, enrichBeans);
-    for (BeanContextFactory factory : factoryOrder.factories()) {
+    for (BeanScopeFactory factory : factoryOrder.factories()) {
       factory.build(builder);
     }
     return builder.build(shutdownHook);
@@ -140,7 +140,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
     private final boolean ignoreMissingModuleDependencies;
 
     private final Set<String> moduleNames = new LinkedHashSet<>();
-    private final List<BeanContextFactory> factories = new ArrayList<>();
+    private final List<BeanScopeFactory> factories = new ArrayList<>();
     private final List<FactoryState> queue = new ArrayList<>();
     private final List<FactoryState> queueNoDependencies = new ArrayList<>();
 
@@ -152,7 +152,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
       this.ignoreMissingModuleDependencies = ignoreMissingModuleDependencies;
     }
 
-    void add(BeanContextFactory factory) {
+    void add(BeanScopeFactory factory) {
 
       if (includeModule(factory)) {
         FactoryState wrappedFactory = new FactoryState(factory);
@@ -184,7 +184,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
     /**
      * Return true of the factory (for the module) should be included.
      */
-    private boolean includeModule(BeanContextFactory factory) {
+    private boolean includeModule(BeanScopeFactory factory) {
       return includeModules.isEmpty() || includeModules.contains(factory.getName());
     }
 
@@ -213,7 +213,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
     /**
      * Return the list of factories in the order they should be built.
      */
-    List<BeanContextFactory> factories() {
+    List<BeanScopeFactory> factories() {
       return factories;
     }
 
@@ -292,10 +292,10 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
    */
   private static class FactoryState {
 
-    private final BeanContextFactory factory;
+    private final BeanScopeFactory factory;
     private boolean pushed;
 
-    private FactoryState(BeanContextFactory factory) {
+    private FactoryState(BeanScopeFactory factory) {
       this.factory = factory;
     }
 
@@ -310,7 +310,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
       return pushed;
     }
 
-    BeanContextFactory getFactory() {
+    BeanScopeFactory getFactory() {
       return factory;
     }
 

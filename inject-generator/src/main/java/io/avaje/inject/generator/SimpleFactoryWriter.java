@@ -24,7 +24,7 @@ class SimpleFactoryWriter {
       " *   module example {\n" +
       " *     requires io.avaje.inject;\n" +
       " *     \n" +
-      " *     provides io.avaje.inject.spi.BeanContextFactory with %s._DI$BeanContextFactory;\n" +
+      " *     provides io.avaje.inject.spi.BeanScopeFactory with %s._DI$BeanScopeFactory;\n" +
       " *     \n" +
       " *   }\n" +
       " * \n" +
@@ -56,7 +56,7 @@ class SimpleFactoryWriter {
     String pkg = context.getContextPackage();
     this.factoryPackage = (pkg != null) ? pkg : ordering.getTopPackage();
     context.deriveContextName(factoryPackage);
-    this.factoryShortName = "_DI$BeanContextFactory";
+    this.factoryShortName = "_DI$BeanScopeFactory";
     this.factoryFullName = factoryPackage + "." + factoryShortName;
   }
 
@@ -128,7 +128,7 @@ class SimpleFactoryWriter {
     importTypes.add(Constants.BEANCONTEXT);
     importTypes.add(Constants.CONTEXTMODULE);
     importTypes.add(Constants.DEPENDENCYMETA);
-    importTypes.add(Constants.BEANCONTEXTFACTORY);
+    importTypes.add(Constants.BEANSCOPEFACTORY);
     importTypes.add(Constants.BUILDER);
     return importTypes;
   }
@@ -137,7 +137,7 @@ class SimpleFactoryWriter {
     writer.append(CODE_COMMENT_FACTORY, context.contextName(), factoryPackage).eol();
     context.buildAtContextModule(writer);
 
-    writer.append("public class %s implements BeanContextFactory {", factoryShortName).eol().eol();
+    writer.append("public class %s implements BeanScopeFactory {", factoryShortName).eol().eol();
     writer.append("  private final String name;").eol();
     writer.append("  private final String[] provides;").eol();
     writer.append("  private final String[] dependsOn;").eol();

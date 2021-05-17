@@ -17,7 +17,7 @@ class Constants {
 
   static final String AT_SINGLETON = "@Singleton";
   static final String AT_GENERATED = "@Generated(\"io.avaje.inject.generator\")";
-  static final String META_INF_FACTORY = "META-INF/services/io.avaje.inject.spi.BeanContextFactory";
+  static final String META_INF_FACTORY = "META-INF/services/io.avaje.inject.spi.BeanScopeFactory";
 
   static final String REQUESTSCOPE = "io.avaje.inject.RequestScope";
   static final String BEANCONTEXT = "io.avaje.inject.BeanScope";
@@ -28,5 +28,5 @@ class Constants {
   static final String BEAN_FACTORY2 = "io.avaje.inject.spi.BeanFactory2";
   static final String BUILDER = "io.avaje.inject.spi.Builder";
   static final String DEPENDENCYMETA = "io.avaje.inject.spi.DependencyMeta";
-  static final String BEANCONTEXTFACTORY = "io.avaje.inject.spi.BeanContextFactory";
+  static final String BEANSCOPEFACTORY = "io.avaje.inject.spi.BeanScopeFactory";
 }

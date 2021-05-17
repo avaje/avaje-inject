@@ -1,6 +1,6 @@
 package io.avaje.inject;
 
-import io.avaje.inject.spi.BeanContextFactory;
+import io.avaje.inject.spi.BeanScopeFactory;
 import io.avaje.inject.spi.Builder;
 import org.junit.jupiter.api.Test;
 
@@ -86,27 +86,27 @@ public class BeanScopeBuilderTest {
     assertThat(names(factoryOrder.factories())).containsExactly("one", "three", "two");
   }
 
-  private List<String> names(List<BeanContextFactory> factories) {
+  private List<String> names(List<BeanScopeFactory> factories) {
     return factories.stream()
-      .map(BeanContextFactory::getName)
+      .map(BeanScopeFactory::getName)
       .collect(Collectors.toList());
   }
 
-  private TDBeanContext bc(String name, String provides, String dependsOn) {
-    return new TDBeanContext(name, split(provides), split(dependsOn));
+  private TDBeanScope bc(String name, String provides, String dependsOn) {
+    return new TDBeanScope(name, split(provides), split(dependsOn));
   }
 
   private String[] split(String val) {
     return val == null ? null : val.split(",");
   }
 
-  private static class TDBeanContext implements BeanContextFactory {
+  private static class TDBeanScope implements BeanScopeFactory {
 
     final String name;
     final String[] provides;
     final String[] dependsOn;
 
-    private TDBeanContext(String name, String[] provides, String[] dependsOn) {
+    private TDBeanScope(String name, String[] provides, String[] dependsOn) {
       this.name = name;
       this.provides = provides;
       this.dependsOn = dependsOn;
