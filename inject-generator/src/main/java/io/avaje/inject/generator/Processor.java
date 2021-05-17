@@ -93,7 +93,6 @@ public class Processor extends AbstractProcessor {
     if (roundEnv.processingOver()) {
       writeBeanFactory();
     }
-
     return false;
   }
 
@@ -190,7 +189,6 @@ public class Processor extends AbstractProcessor {
    * Read the dependency injection meta data for the given bean.
    */
   private void readBeanMeta(TypeElement typeElement, boolean factory) {
-
     if (typeElement.getKind() == ElementKind.ANNOTATION_TYPE) {
       context.logDebug("skipping annotation type " + typeElement);
       return;
@@ -202,7 +200,6 @@ public class Processor extends AbstractProcessor {
    * Read the existing meta data from ContextModule (if found) and the factory bean (if exists).
    */
   private void readModule(RoundEnvironment roundEnv) {
-
     String factory = context.loadMetaInfServices();
     if (factory != null) {
       TypeElement factoryType = elementUtils.getTypeElement(factory);
@@ -230,28 +227,29 @@ public class Processor extends AbstractProcessor {
    * which holds the information we need (to regenerate the factory with any changes).
    */
   private void readFactory(TypeElement factoryType) {
-
     ContextModule module = factoryType.getAnnotation(ContextModule.class);
     context.setContextDetails(module.name(), module.provides(), module.dependsOn(), factoryType);
 
     List<? extends Element> elements = factoryType.getEnclosedElements();
     if (elements != null) {
       for (Element element : elements) {
-        ElementKind kind = element.getKind();
-        if (ElementKind.METHOD == kind) {
-
-          Name simpleName = element.getSimpleName();
-          if (simpleName.toString().startsWith("build")) {
-            // read a build method - DependencyMeta
-            DependencyMeta meta = element.getAnnotation(DependencyMeta.class);
-            if (meta == null) {
-              context.logError("Missing @DependencyMeta on method " + simpleName);
-            } else {
-              final MetaData metaData = new MetaData(meta);
-              this.metaData.put(metaData.getKey(), metaData);
-            }
-          }
+        if (ElementKind.METHOD == element.getKind()) {
+          readBuildMethodDependencyMeta(element);
         }
+      }
+    }
+  }
+
+  private void readBuildMethodDependencyMeta(Element element) {
+    Name simpleName = element.getSimpleName();
+    if (simpleName.toString().startsWith("build")) {
+      // read a build method - DependencyMeta
+      DependencyMeta meta = element.getAnnotation(DependencyMeta.class);
+      if (meta == null) {
+        context.logError("Missing @DependencyMeta on method " + simpleName);
+      } else {
+        final MetaData metaData = new MetaData(meta);
+        this.metaData.put(metaData.getKey(), metaData);
       }
     }
   }
