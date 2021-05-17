@@ -17,12 +17,12 @@ import java.util.function.Consumer;
  *     MyRedisApi mockRedis = mock(MyRedisApi.class);
  *     MyDbApi mockDatabase = mock(MyDbApi.class);
  *
- *     try (BeanScope context = BeanScope.newBuilder()
+ *     try (BeanScope scope = BeanScope.newBuilder()
  *       .withBeans(mockRedis, mockDatabase)
  *       .build()) {
  *
  *       // built with test doubles injected ...
- *       CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+ *       CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
  *       coffeeMaker.makeIt();
  *
  *       assertThat(...
@@ -43,11 +43,11 @@ public interface BeanScopeBuilder {
    *
    *   // automatically closed via try with resources
    *
-   *   try (BeanScope context = BeanScope.newBuilder()
+   *   try (BeanScope scope = BeanScope.newBuilder()
    *     .withNoShutdownHook()
    *     .build()) {
    *
-   *     String makeIt = context.getBean(CoffeeMaker.class).makeIt();
+   *     String makeIt = scope.get(CoffeeMaker.class).makeIt();
    *   }
    *
    * }</pre>
@@ -72,14 +72,14 @@ public interface BeanScopeBuilder {
    *
    *     EmailServiceApi mockEmailService = mock(EmailServiceApi.class);
    *
-   *     try (BeanScope context = BeanScope.newBuilder()
+   *     try (BeanScope scope = BeanScope.newBuilder()
    *       .withBeans(mockEmailService)
    *       .withModules("coffee")
    *       .withIgnoreMissingModuleDependencies()
    *       .build()) {
    *
    *       // built with test doubles injected ...
-   *       CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+   *       CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
    *       coffeeMaker.makeIt();
    *
    *       assertThat(...
@@ -100,8 +100,8 @@ public interface BeanScopeBuilder {
   BeanScopeBuilder withIgnoreMissingModuleDependencies();
 
   /**
-   * Supply a bean to the context that will be used instead of any
-   * similar bean in the context.
+   * Supply a bean to the scope that will be used instead of any
+   * similar bean in the scope.
    * <p>
    * This is typically expected to be used in tests and the bean
    * supplied is typically a test double or mock.
@@ -112,15 +112,15 @@ public interface BeanScopeBuilder {
    *   Pump pump = mock(Pump.class);
    *   Grinder grinder = mock(Grinder.class);
    *
-   *   try (BeanScope context = BeanScope.newBuilder()
+   *   try (BeanScope scope = BeanScope.newBuilder()
    *     .withBeans(pump, grinder)
    *     .build()) {
    *
-   *     CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+   *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
    *     coffeeMaker.makeIt();
    *
-   *     Pump pump1 = context.getBean(Pump.class);
-   *     Grinder grinder1 = context.getBean(Grinder.class);
+   *     Pump pump1 = scope.get(Pump.class);
+   *     Grinder grinder1 = scope.get(Grinder.class);
    *
    *     assertThat(pump1).isSameAs(pump);
    *     assertThat(grinder1).isSameAs(grinder);
@@ -146,15 +146,15 @@ public interface BeanScopeBuilder {
    *
    *   Pump mockPump = ...
    *
-   *   try (BeanScope context = BeanScope.newBuilder()
+   *   try (BeanScope scope = BeanScope.newBuilder()
    *     .withBean(Pump.class, mockPump)
    *     .build()) {
    *
-   *     Pump pump = context.getBean(Pump.class);
+   *     Pump pump = scope.get(Pump.class);
    *     assertThat(pump).isSameAs(mock);
    *
    *     // act
-   *     CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+   *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
    *     coffeeMaker.makeIt();
    *
    *     verify(pump).pumpSteam();
@@ -182,7 +182,7 @@ public interface BeanScopeBuilder {
    *
    * <pre>{@code
    *
-   *   try (BeanScope context = BeanScope.newBuilder()
+   *   try (BeanScope scope = BeanScope.newBuilder()
    *     .withMock(Pump.class)
    *     .withMock(Grinder.class, grinder -> {
    *       // setup the mock
@@ -191,11 +191,11 @@ public interface BeanScopeBuilder {
    *     .build()) {
    *
    *
-   *     CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+   *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
    *     coffeeMaker.makeIt();
    *
    *     // this is a mockito mock
-   *     Grinder grinder = context.getBean(Grinder.class);
+   *     Grinder grinder = scope.get(Grinder.class);
    *     verify(grinder).grindBeans();
    *   }
    *
@@ -209,7 +209,7 @@ public interface BeanScopeBuilder {
    *
    * <pre>{@code
    *
-   *   try (BeanScope context = BeanScope.newBuilder()
+   *   try (BeanScope scope = BeanScope.newBuilder()
    *     .withMock(Pump.class)
    *     .withMock(Grinder.class, grinder -> {
    *
@@ -219,11 +219,11 @@ public interface BeanScopeBuilder {
    *     .build()) {
    *
    *
-   *     CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+   *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
    *     coffeeMaker.makeIt();
    *
    *     // this is a mockito mock
-   *     Grinder grinder = context.getBean(Grinder.class);
+   *     Grinder grinder = scope.get(Grinder.class);
    *     verify(grinder).grindBeans();
    *   }
    *
@@ -236,16 +236,16 @@ public interface BeanScopeBuilder {
    *
    * <pre>{@code
    *
-   *   try (BeanScope context = BeanScope.newBuilder()
+   *   try (BeanScope scope = BeanScope.newBuilder()
    *     .withSpy(Pump.class)
    *     .build()) {
    *
    *     // setup spy here ...
-   *     Pump pump = context.getBean(Pump.class);
+   *     Pump pump = scope.get(Pump.class);
    *     doNothing().when(pump).pumpSteam();
    *
    *     // act
-   *     CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+   *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
    *     coffeeMaker.makeIt();
    *
    *     verify(pump).pumpWater();
@@ -262,7 +262,7 @@ public interface BeanScopeBuilder {
    *
    * <pre>{@code
    *
-   *   try (BeanScope context = BeanScope.newBuilder()
+   *   try (BeanScope scope = BeanScope.newBuilder()
    *     .withSpy(Pump.class, pump -> {
    *       // setup the spy
    *       doNothing().when(pump).pumpWater();
@@ -270,11 +270,11 @@ public interface BeanScopeBuilder {
    *     .build()) {
    *
    *     // or setup here ...
-   *     Pump pump = context.getBean(Pump.class);
+   *     Pump pump = scope.get(Pump.class);
    *     doNothing().when(pump).pumpSteam();
    *
    *     // act
-   *     CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+   *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
    *     coffeeMaker.makeIt();
    *
    *     verify(pump).pumpWater();

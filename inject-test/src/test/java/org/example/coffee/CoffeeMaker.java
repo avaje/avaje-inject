@@ -4,7 +4,7 @@ import org.example.coffee.grind.Grinder;
 
 import jakarta.inject.Singleton;
 
-//@ContextModule(name = "coffee-maker")
+//@InjectModule(name = "coffee-maker")
 @Singleton
 public class CoffeeMaker {
 

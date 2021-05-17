@@ -29,7 +29,7 @@ class DBuilder implements Builder {
   private final Map<String, RequestScopeMatch<?>> reqScopeProviders = new HashMap<>();
 
   /**
-   * The beans created and added to the context during building.
+   * The beans created and added to the scope during building.
    */
   final DBeanMap beanMap = new DBeanMap();
 

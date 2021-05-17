@@ -1,7 +1,7 @@
 package io.avaje.inject;
 
 /**
- * A bean entry in the context with priority and optional name.
+ * A bean entry with priority and optional name.
  */
 public class BeanEntry<T> {
 

@@ -59,12 +59,12 @@ public interface BeanScope extends Closeable {
    *     MyRedisApi mockRedis = mock(MyRedisApi.class);
    *     MyDbApi mockDatabase = mock(MyDbApi.class);
    *
-   *     try (BeanScope context = BeanScope.newBuilder()
+   *     try (BeanScope scope = BeanScope.newBuilder()
    *       .withBeans(mockRedis, mockDatabase)
    *       .build()) {
    *
    *       // built with test doubles injected ...
-   *       CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+   *       CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
    *       coffeeMaker.makeIt();
    *
    *       assertThat(...
@@ -248,7 +248,7 @@ public interface BeanScope extends Closeable {
   <T> RequestScopeMatch<T> requestProvider(Class<T> type, String name);
 
   /**
-   * Close the context firing any <code>@PreDestroy</code> methods.
+   * Close the scope firing any <code>@PreDestroy</code> methods.
    */
   void close();
 }

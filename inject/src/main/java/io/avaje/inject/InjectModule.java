@@ -20,9 +20,9 @@ package io.avaje.inject;
  *
  * package org.example.featuretoggle;
  *
- * import io.avaje.inject.ContextModule;
+ * import io.avaje.inject.InjectModule;
  *
- * @ContextModule(name = "feature-toggle")
+ * @InjectModule(name = "feature-toggle")
  * public interface FeatureToggle {
  *
  *   boolean isEnabled(String key);
@@ -44,9 +44,9 @@ package io.avaje.inject;
  *
  * package org.example.jobsystem;
  *
- * import io.avaje.inject.ContextModule;
+ * import io.avaje.inject.InjectModule;
  *
- * @ContextModule(name = "job-system", dependsOn = {"feature-toggle"})
+ * @InjectModule(name = "job-system", dependsOn = {"feature-toggle"})
  * public interface JobSystem {
  *
  *   ...
@@ -74,21 +74,21 @@ public @interface InjectModule {
    *
    * // A module that provides 'email-service' and also 'health-check'.
    * // ie. it has bean(s) that implement a health check interface
-   * @ContextModule(name="email-service", provides={"health-checks"})
+   * @InjectModule(name="email-service", provides={"health-checks"})
    *
    * // provides beans that implement a health check interface
    * // ... wires after 'email-service'
-   * @ContextModule(name="main", provides={"health-checks"}, dependsOn={"email-service"})
+   * @InjectModule(name="main", provides={"health-checks"}, dependsOn={"email-service"})
    *
    * // wire this after all modules that provide 'health-checks'
-   * @ContextModule(name="health-check-service", dependsOn={"health-checks"})
+   * @InjectModule(name="health-check-service", dependsOn={"health-checks"})
    *
    * }</pre>
    */
   String[] provides() default {};
 
   /**
-   * The list of modules this context depends on.
+   * The list of modules this scope depends on.
    * <p>
    * Effectively dependsOn specifies the modules that must wire before this module.
    * </p>
@@ -97,7 +97,7 @@ public @interface InjectModule {
    * // wire after a module that is called 'email-service'
    * // ... or any module that provides 'email-service'
    *
-   * @ContextModule(name="...", dependsOn={"email-service"})
+   * @InjectModule(name="...", dependsOn={"email-service"})
    *
    * }</pre>
    */

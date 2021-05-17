@@ -16,9 +16,6 @@ class DBeanMap {
 
   private NextBean nextBean;
 
-  /**
-   * Create for context builder.
-   */
   DBeanMap() {
   }
 
