@@ -59,7 +59,7 @@ class BeanReader {
     return beanType;
   }
 
-  void read() {
+  BeanReader read() {
     if (constructor != null) {
       constructor.addImports(importTypes);
       constructor.checkRequest(requestParams);
@@ -79,6 +79,7 @@ class BeanReader {
       importTypes.add(Constants.REQUESTSCOPEPROVIDER);
       importTypes.add(Constants.REQUESTSCOPE);
     }
+    return this;
   }
 
   List<String> getDependsOn() {

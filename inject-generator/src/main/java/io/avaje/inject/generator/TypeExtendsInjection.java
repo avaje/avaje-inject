@@ -64,8 +64,7 @@ class TypeExtendsInjection {
     }
 
     ExecutableElement ex = (ExecutableElement) element;
-    MethodReader methodReader = new MethodReader(context, ex, baseType);
-    methodReader.read();
+    MethodReader methodReader = new MethodReader(context, ex, baseType).read();
     Inject inject = element.getAnnotation(Inject.class);
     if (inject != null) {
       injectConstructor = methodReader;
@@ -88,9 +87,8 @@ class TypeExtendsInjection {
     final String methodKey = methodElement.getSimpleName().toString();
     if (inject != null && !notInjectMethods.contains(methodKey)) {
       if (!injectMethods.containsKey(methodKey)) {
-        MethodReader methodReader = new MethodReader(context, methodElement, type);
+        MethodReader methodReader = new MethodReader(context, methodElement, type).read();
         if (methodReader.isNotPrivate()) {
-          methodReader.read();
           injectMethods.put(methodKey, methodReader);
         }
       }
@@ -108,9 +106,7 @@ class TypeExtendsInjection {
   private void addFactoryMethod(ExecutableElement methodElement, Bean bean) {
     // Not yet reading Qualifier annotations, Named only at this stage
     Named named = methodElement.getAnnotation(Named.class);
-    MethodReader methodReader = new MethodReader(context, methodElement, baseType, bean, named);
-    methodReader.read();
-    factoryMethods.add(methodReader);
+    factoryMethods.add(new MethodReader(context, methodElement, baseType, bean, named).read());
   }
 
   List<FieldReader> getInjectFields() {
