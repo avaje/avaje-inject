@@ -242,7 +242,7 @@ public class Processor extends AbstractProcessor {
 
   private void readBuildMethodDependencyMeta(Element element) {
     Name simpleName = element.getSimpleName();
-    if (simpleName.toString().startsWith("build")) {
+    if (simpleName.toString().startsWith("build_")) {
       // read a build method - DependencyMeta
       DependencyMeta meta = element.getAnnotation(DependencyMeta.class);
       if (meta == null) {
