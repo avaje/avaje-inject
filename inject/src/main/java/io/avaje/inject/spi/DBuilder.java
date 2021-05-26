@@ -1,12 +1,11 @@
 package io.avaje.inject.spi;
 
-import io.avaje.inject.BeanScope;
 import io.avaje.inject.BeanEntry;
+import io.avaje.inject.BeanScope;
 import io.avaje.inject.RequestScopeMatch;
 import io.avaje.inject.RequestScopeProvider;
 import jakarta.inject.Provider;
 
-import java.io.Closeable;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -16,7 +15,7 @@ class DBuilder implements Builder {
    * List of Lifecycle methods.
    */
   private final List<Runnable> postConstruct = new ArrayList<>();
-  private final List<Closeable> preDestroy = new ArrayList<>();
+  private final List<AutoCloseable> preDestroy = new ArrayList<>();
 
   /**
    * List of field injection closures.
@@ -126,7 +125,7 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public void addPreDestroy(Closeable invoke) {
+  public void addPreDestroy(AutoCloseable invoke) {
     preDestroy.add(invoke);
   }
 

@@ -143,6 +143,8 @@ class MethodReader {
       }
       if (notEmpty(destroyMethod)) {
         writer.append(indent).append("builder.addPreDestroy($bean::%s);", destroyMethod).eol();
+      } else if (typeReader.isClosable()) {
+        writer.append(indent).append("builder.addPreDestroy($bean::close);", destroyMethod).eol();
       }
       if (optionalType) {
         writer.append("      }").eol();
@@ -151,7 +153,7 @@ class MethodReader {
   }
 
   private boolean hasLifecycleMethods() {
-    return notEmpty(initMethod) || notEmpty(destroyMethod);
+    return notEmpty(initMethod) || notEmpty(destroyMethod) || typeReader.isClosable();
   }
 
   private boolean notEmpty(String value) {
