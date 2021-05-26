@@ -9,6 +9,7 @@ import java.util.*;
 
 class BeanReader {
 
+  private final ProcessingContext context;
   private final TypeElement beanType;
   private final String shortName;
   private final String type;
@@ -32,6 +33,7 @@ class BeanReader {
 
   BeanReader(TypeElement beanType, ProcessingContext context, boolean factory) {
     this.beanType = beanType;
+    this.context = context;
     this.type = beanType.getQualifiedName().toString();
     this.shortName = shortName(beanType);
     this.primary = (beanType.getAnnotation(Primary.class) != null);
@@ -40,7 +42,7 @@ class BeanReader {
 
     typeReader.process();
     this.requestScopedBean = typeReader.isRequestScopeBean();
-    this.requestParams = new BeanRequestParams(type, requestScopedBean);
+    this.requestParams = new BeanRequestParams(context, type, requestScopedBean);
     this.name = typeReader.getName();
     this.injectMethods = typeReader.getInjectMethods();
     this.injectFields = typeReader.getInjectFields();
@@ -146,6 +148,9 @@ class BeanReader {
   }
 
   void buildAddFor(Append writer) {
+    if (requestParams.isRequestParam()) {
+      context.logError(beanType, "@Singleton %s is not allowed to have a @Request scope dependency %s", shortName, requestParams.getRequestParamType());
+    }
     writer.append("    if (builder.isAddBeanFor(");
     if (name != null && !name.isEmpty()) {
       writer.append("\"%s\", ", name);

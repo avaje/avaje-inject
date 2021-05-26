@@ -153,11 +153,8 @@ public class Processor extends AbstractProcessor {
    */
   private void mergeMetaData() {
     for (BeanReader beanReader : beanReaders) {
-      if (beanReader.isRequestScopedController()) {
-        context.logDebug("skipping request scoped processed bean " + beanReader);
-      } else {
-        String metaKey = beanReader.getMetaKey();
-        MetaData metaData = this.metaData.get(metaKey);
+      if (!beanReader.isRequestScopedController()) {
+        MetaData metaData = this.metaData.get(beanReader.getMetaKey());
         if (metaData == null) {
           addMeta(beanReader);
         } else {

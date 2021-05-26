@@ -16,7 +16,7 @@ class MetaDataOrdering {
   private final ProcessingContext context;
 
   private final List<MetaData> orderedList = new ArrayList<>();
-
+  private final List<MetaData> requestScope = new ArrayList<>();
   private final List<MetaData> queue = new ArrayList<>();
 
   private final Map<String, ProviderList> providers = new HashMap<>();
@@ -32,7 +32,11 @@ class MetaDataOrdering {
     this.context = context;
 
     for (MetaData metaData : values) {
-      if (metaData.noDepends()) {
+      if (metaData.isRequestScope()) {
+        // request scoped expected to have externally provided dependencies
+        requestScope.add(metaData);
+        metaData.setWired();
+      } else if (metaData.noDepends()) {
         orderedList.add(metaData);
         metaData.setWired();
       } else {
@@ -46,12 +50,10 @@ class MetaDataOrdering {
         providers.computeIfAbsent(provide, s -> new ProviderList()).add(metaData);
       }
     }
-
     // order no dependency list by ... name asc (order does not matter but for consistency)
   }
 
   int processQueue() {
-
     int count;
     do {
       count = processQueueRound();
@@ -159,11 +161,8 @@ class MetaDataOrdering {
   }
 
   private int processQueueRound() {
-
     // loop queue looking for entry that has all provides marked as included
-
     int count = 0;
-
     Iterator<MetaData> iterator = queue.iterator();
     while (iterator.hasNext()) {
       MetaData queuedMeta = iterator.next();
@@ -174,7 +173,6 @@ class MetaDataOrdering {
         count++;
       }
     }
-
     return count;
   }
 
@@ -200,9 +198,16 @@ class MetaDataOrdering {
     return orderedList;
   }
 
+  List<MetaData> getRequestScope() {
+    return requestScope;
+  }
+
   Set<String> getImportTypes() {
     Set<String> importTypes = new TreeSet<>();
     for (MetaData metaData : orderedList) {
+      metaData.addImportTypes(importTypes);
+    }
+    for (MetaData metaData : requestScope) {
       metaData.addImportTypes(importTypes);
     }
     return importTypes;
