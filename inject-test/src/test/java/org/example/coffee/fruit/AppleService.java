@@ -4,7 +4,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 @Singleton
-class AppleService {
+public class AppleService {
 
   @Inject
   BananaService bananaService;
@@ -24,5 +24,9 @@ class AppleService {
     System.out.println("apple> a: " + a + " b:" + b + " c:" + c);
     bananaService.banana(a, b, c);
     peachService.peach(a, b, c);
+  }
+
+  public void passIt(String arg) {
+    peachService.callIt(arg);
   }
 }

@@ -25,4 +25,8 @@ public class CoffeeMaker {
     System.out.println("Done");
     return "done";
   }
+
+  public String prepare() {
+    return "prepare: " + grinder.grindBeans();
+  }
 }

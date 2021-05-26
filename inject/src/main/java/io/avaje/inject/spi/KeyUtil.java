@@ -5,6 +5,10 @@ package io.avaje.inject.spi;
  */
 class KeyUtil {
 
+  static String lower(String name) {
+    return name == null ? null : name.toLowerCase();
+  }
+
   static String key(Class<?> type, String name) {
     return name == null ? type.getCanonicalName() : type.getCanonicalName() + "|" + name;
   }

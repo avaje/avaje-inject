@@ -32,8 +32,7 @@ class DRequestScope implements RequestScope {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T getNullable(Class<T> type, String name) {
-    String key = key(type, name);
-    Object suppliedBean = supplied.get(key);
+    Object suppliedBean = supplied.get(key(type, name));
     if (suppliedBean != null) {
       return (T) suppliedBean;
     }

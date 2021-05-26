@@ -204,6 +204,23 @@ public interface BeanScopeBuilder {
   BeanScopeBuilder withMock(Class<?> type);
 
   /**
+   * Register as a Mockito mock with a qualifier name.
+   *
+   * <pre>{@code
+   *
+   *   try (BeanScope scope = BeanScope.newBuilder()
+   *     .withMock(Store.class, "red")
+   *     .withMock(Store.class, "blue")
+   *     .build()) {
+   *
+   *     ...
+   *   }
+   *
+   * }</pre>
+   */
+  BeanScopeBuilder withMock(Class<?> type, String name);
+
+  /**
    * Use a mockito mock when injecting this bean type additionally
    * running setup on the mock instance.
    *
@@ -255,6 +272,23 @@ public interface BeanScopeBuilder {
    * }</pre>
    */
   BeanScopeBuilder withSpy(Class<?> type);
+
+  /**
+   * Register a Mockito spy with a qualifier name.
+   *
+   * <pre>{@code
+   *
+   *   try (BeanScope scope = BeanScope.newBuilder()
+   *     .withSpy(Store.class, "red")
+   *     .withSpy(Store.class, "blue")
+   *     .build()) {
+   *
+   *     ...
+   *   }
+   *
+   * }</pre>
+   */
+  BeanScopeBuilder withSpy(Class<?> type, String name);
 
   /**
    * Use a mockito spy when injecting this bean type additionally

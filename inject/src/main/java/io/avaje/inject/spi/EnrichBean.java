@@ -10,19 +10,13 @@ import java.util.function.Consumer;
 public class EnrichBean<B> {
 
   private final Class<B> type;
-
+  private final String name;
   private final Consumer<B> consumer;
 
-  public EnrichBean(Class<B> type, Consumer<B> consumer) {
+  public EnrichBean(Class<B> type, String name, Consumer<B> consumer) {
     this.type = type;
+    this.name = KeyUtil.lower(name);
     this.consumer = consumer;
-  }
-
-  /**
-   * Return the dependency injection target type.
-   */
-  public Class<B> getType() {
-    return type;
   }
 
   /**
@@ -35,5 +29,12 @@ public class EnrichBean<B> {
       consumer.accept(spy);
     }
     return spy;
+  }
+
+  /**
+   * Return the key for this enriched bean.
+   */
+  public String key() {
+    return KeyUtil.key(type, name);
   }
 }

@@ -10,7 +10,7 @@ import java.util.Map;
 class DBuilderExtn extends DBuilder {
 
   @SuppressWarnings("rawtypes")
-  private final Map<Class<?>, EnrichBean> enrichMap = new HashMap<>();
+  private final Map<String, EnrichBean> enrichMap = new HashMap<>();
 
   private final boolean hasSuppliedBeans;
 
@@ -23,7 +23,7 @@ class DBuilderExtn extends DBuilder {
     }
     if (enrichBeans != null && !enrichBeans.isEmpty()) {
       for (EnrichBean spy : enrichBeans) {
-        enrichMap.put(spy.getType(), spy);
+        enrichMap.put(spy.key(), spy);
       }
     }
   }
@@ -40,29 +40,29 @@ class DBuilderExtn extends DBuilder {
   /**
    * Potentially enrich the bean prior to registering with context.
    */
-  @SuppressWarnings("unchecked")
   @Override
-  public <T> T enrich(T bean, Class<?>[] types) {
-    EnrichBean<T> enrich = getEnrich(bean, types);
-    return enrich != null ? enrich.enrich(bean) : bean;
-  }
-
-  /**
-   * Search for EnrichBean on the bean or any of the interface types.
-   */
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  private <T> EnrichBean getEnrich(T bean, Class<?>[] types) {
-    EnrichBean<T> enrich = enrichMap.get(bean.getClass());
+  protected  <T> T enrich(T bean, DBeanMap.NextBean next) {
+    EnrichBean<T> enrich = enrichLookup(bean.getClass(), next.name);
     if (enrich != null) {
-      return enrich;
+      return enrich.enrich(bean);
     }
-    for (Class<?> type : types) {
-      enrich = enrichMap.get(type);
+    for (Class<?> type : next.types) {
+      enrich = enrichLookup(type, next.name);
       if (enrich != null) {
-        return enrich;
+        return enrich.enrich(bean);
       }
     }
-    return null;
+    // no enrichment for this bean
+    return bean;
+  }
+
+  @SuppressWarnings({"unchecked"})
+  private <T> EnrichBean<T> enrichLookup(Class<?> type, String name) {
+    EnrichBean<T> enrich = enrichMap.get(KeyUtil.key(type, null));
+    if (enrich == null && name != null) {
+      enrich = enrichMap.get(KeyUtil.key(type, name));
+    }
+    return enrich;
   }
 
 }
