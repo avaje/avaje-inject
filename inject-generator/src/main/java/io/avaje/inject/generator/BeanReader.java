@@ -121,7 +121,7 @@ class BeanReader {
    * Return true if lifecycle via annotated methods is required.
    */
   boolean hasLifecycleMethods() {
-    return !requestScopedBean && (postConstructMethod != null || preDestroyMethod != null);
+    return !requestScopedBean && (postConstructMethod != null || preDestroyMethod != null || typeReader.isClosable());
   }
 
   List<MetaData> createFactoryMethodMeta() {
@@ -170,7 +170,7 @@ class BeanReader {
     if (preDestroyMethod != null) {
       writer.append("      builder.addPreDestroy($bean::%s);", preDestroyMethod.getSimpleName()).eol();
     } else if (typeReader.isClosable()) {
-      writer.append("      builder.addPreDestroy(bean);").eol();
+      writer.append("      builder.addPreDestroy($bean);").eol();
     }
   }
 

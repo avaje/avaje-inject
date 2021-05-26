@@ -4,7 +4,6 @@ import io.avaje.inject.BeanScope;
 import io.avaje.inject.RequestScopeProvider;
 import javax.inject.Provider;
 
-import java.io.Closeable;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -93,7 +92,7 @@ public interface Builder {
   /**
    * Add lifecycle PreDestroy method.
    */
-  void addPreDestroy(Closeable closeable);
+  void addPreDestroy(AutoCloseable closeable);
 
   /**
    * Add field and method injection.

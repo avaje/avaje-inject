@@ -7,6 +7,9 @@ import org.example.coffee.factory.other.Something;
 import javax.inject.Named;
 import org.example.coffee.parent.DesEngi;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 @Factory
 public class MyFactory {
 
@@ -68,6 +71,16 @@ public class MyFactory {
     return new MyEngi();
   }
 
+  @Bean
+  MyAutoClose buildAutoClose() {
+    return new MyAutoClose();
+  }
+
+  @Bean
+  MyClose buildMyCloseable() {
+    return new MyClose();
+  }
+
   String methodsCalled() {
     return methods;
   }
@@ -76,6 +89,34 @@ public class MyFactory {
     @Override
     public String ignite() {
       return "MyEngi";
+    }
+  }
+
+  public static class MyAutoClose implements AutoCloseable {
+
+    boolean closed;
+
+    public boolean isClosed() {
+      return closed;
+    }
+
+    @Override
+    public void close() throws Exception {
+      closed = true;
+    }
+  }
+
+  public static class MyClose implements Closeable {
+
+    boolean closed;
+
+    public boolean isClosed() {
+      return closed;
+    }
+
+    @Override
+    public void close() throws IOException {
+      closed = true;
     }
   }
 }

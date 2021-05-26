@@ -18,6 +18,19 @@ public class MyFactoryTest {
   }
 
   @Test
+  public void closableBeans_expect_closedViaPreDestroy() {
+
+    final MyFactory.MyClose myClose;
+    final MyFactory.MyAutoClose myAutoClose;
+    try (BeanScope context = BeanScope.newBuilder().build()) {
+      myClose = context.get(MyFactory.MyClose.class);
+      myAutoClose = context.get(MyFactory.MyAutoClose.class);
+    }
+    assertThat(myClose.isClosed()).isTrue();
+    assertThat(myAutoClose.isClosed()).isTrue();
+  }
+
+  @Test
   public void factoryMethod_createsConcreteImplementation() {
     DesEngi buildDesi = ApplicationScope.get(DesEngi.class, "BuildDesi1");
     assertThat(buildDesi.ignite()).isEqualTo("buildEngi1");

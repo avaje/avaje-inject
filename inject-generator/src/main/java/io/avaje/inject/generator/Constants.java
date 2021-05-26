@@ -3,6 +3,7 @@ package io.avaje.inject.generator;
 class Constants {
 
   static final String IO_CLOSEABLE = "java.io.Closeable";
+  static final String AUTO_CLOSEABLE = "java.lang.AutoCloseable";
   static final String OPTIONAL = "java.util.Optional";
   static final String KOTLIN_METADATA = "kotlin.Metadata";
 

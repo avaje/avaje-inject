@@ -50,7 +50,7 @@ class TypeInterfaceReader {
       String type = Util.unwrapProvider(anInterface.toString());
       if (type.indexOf('.') == -1) {
         context.logWarn("skip when no package on interface " + type);
-      } else if (Constants.IO_CLOSEABLE.equals(type)) {
+      } else if (Constants.AUTO_CLOSEABLE.equals(type) || Constants.IO_CLOSEABLE.equals(type)) {
         closeable = true;
       } else {
         final String iShortName = Util.shortName(type);
