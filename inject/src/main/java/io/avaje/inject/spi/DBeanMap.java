@@ -52,10 +52,7 @@ class DBeanMap {
     if (entry == null) {
       return null;
     }
-    if (name != null) {
-      name = name.toLowerCase();
-    }
-    return (T) entry.get(name);
+    return (T) entry.get(KeyUtil.lower(name));
   }
 
   /**
@@ -96,11 +93,11 @@ class DBeanMap {
   /**
    * Return the types of the bean being processed/registered.
    */
-  Class<?>[] types() {
-    return nextBean.types;
+  NextBean next() {
+    return nextBean;
   }
 
-  private static class NextBean {
+  static class NextBean {
     final String name;
     final Class<?>[] types;
 

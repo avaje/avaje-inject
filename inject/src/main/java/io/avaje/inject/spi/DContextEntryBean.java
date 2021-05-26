@@ -31,7 +31,7 @@ class DContextEntryBean {
 
   private DContextEntryBean(Object source, String name, int flag) {
     this.source = source;
-    this.name = name == null ? null : name.toLowerCase();
+    this.name = KeyUtil.lower(name);
     this.flag = flag;
   }
 

@@ -94,8 +94,7 @@ class DBuilder implements Builder {
   /**
    * Return the bean to register potentially with spy enhancement.
    */
-  @Override
-  public <T> T enrich(T bean, Class<?>[] types) {
+  protected <T> T enrich(T bean, DBeanMap.NextBean next) {
     // only enriched by DBuilderExtn
     return bean;
   }
@@ -116,7 +115,7 @@ class DBuilder implements Builder {
   }
 
   private <T> T register(int flag, T bean) {
-    bean = enrich(bean, beanMap.types());
+    bean = enrich(bean, beanMap.next());
     beanMap.register(flag, bean);
     return bean;
   }
