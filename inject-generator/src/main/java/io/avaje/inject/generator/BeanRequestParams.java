@@ -1,5 +1,8 @@
 package io.avaje.inject.generator;
 
+import io.avaje.inject.Request;
+
+import javax.lang.model.element.TypeElement;
 import java.util.Set;
 
 /**
@@ -7,14 +10,25 @@ import java.util.Set;
  */
 class BeanRequestParams {
 
+  private final ProcessingContext context;
   private final String parentType;
   private final boolean requestScopedBean;
 
   private RequestScope.Handler reqScopeHandler;
+  private String requestParamType;
 
-  BeanRequestParams(String parentType, boolean requestScopedBean) {
+  BeanRequestParams(ProcessingContext context, String parentType, boolean requestScopedBean) {
+    this.context = context;
     this.parentType = parentType;
     this.requestScopedBean = requestScopedBean;
+  }
+
+  boolean isRequestParam() {
+    return requestParamType != null;
+  }
+
+  String getRequestParamType() {
+    return requestParamType;
   }
 
   /**
@@ -30,6 +44,14 @@ class BeanRequestParams {
         reqScopeHandler = RequestScope.handler(paramType);
       }
       return true;
+    }
+    if (paramType != null && requestParamType == null) {
+      final TypeElement element = context.element(paramType);
+      if (element != null) {
+        if (element.getAnnotation(Request.class) != null) {
+          requestParamType = paramType;
+        }
+      }
     }
     return false;
   }

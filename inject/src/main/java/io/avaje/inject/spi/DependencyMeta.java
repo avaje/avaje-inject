@@ -6,6 +6,11 @@ package io.avaje.inject.spi;
 public @interface DependencyMeta {
 
   /**
+   * Request scope
+   */
+  boolean requestScope() default false;
+
+  /**
    * The bean type.
    */
   String type();

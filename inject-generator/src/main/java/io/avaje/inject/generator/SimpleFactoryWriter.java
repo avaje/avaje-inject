@@ -4,6 +4,7 @@ import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -93,6 +94,9 @@ class SimpleFactoryWriter {
     for (MetaData metaData : ordering.getOrdered()) {
       writer.append(metaData.buildMethod(ordering)).eol();
     }
+    for (MetaData metaData : ordering.getRequestScope()) {
+      writer.append(metaData.buildMethod(ordering)).eol();
+    }
   }
 
   private void writeCreateMethod() {
@@ -104,6 +108,14 @@ class SimpleFactoryWriter {
     writer.append("    // i.e. \"provides\" followed by \"dependsOn\"").eol();
     for (MetaData metaData : ordering.getOrdered()) {
       writer.append("    build_%s();", metaData.getBuildName()).eol();
+    }
+    final List<MetaData> requestScope = ordering.getRequestScope();
+    if (!requestScope.isEmpty()) {
+      writer.eol();
+      writer.append("    // request scope providers").eol();
+      for (MetaData metaData : requestScope) {
+        writer.append("    build_%s();", metaData.getBuildName()).eol();
+      }
     }
     writer.append("  }").eol();
     writer.eol();
