@@ -2,9 +2,9 @@ package io.avaje.inject.test;
 
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.BeanScopeBuilder;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import jakarta.inject.Qualifier;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Qualifier;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;

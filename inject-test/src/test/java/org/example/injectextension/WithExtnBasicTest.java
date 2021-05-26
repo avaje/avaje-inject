@@ -1,7 +1,7 @@
 package org.example.injectextension;
 
 import io.avaje.inject.test.InjectExtension;
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 import org.example.coffee.CoffeeMaker;
 import org.example.coffee.Pump;
 import org.example.coffee.grind.Grinder;

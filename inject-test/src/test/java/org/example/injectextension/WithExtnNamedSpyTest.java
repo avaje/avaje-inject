@@ -2,8 +2,8 @@ package org.example.injectextension;
 
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.test.InjectExtension;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.example.coffee.qualifier.Blue;
 import org.example.coffee.qualifier.SomeStore;
 import org.example.coffee.qualifier.StoreManagerWithSetterQualifier;
