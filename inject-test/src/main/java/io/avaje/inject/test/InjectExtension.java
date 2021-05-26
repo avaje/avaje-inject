@@ -15,7 +15,7 @@ import java.util.List;
  * <p>
  * Supports injection for fields annotated with <code>@Mock, @Spy, @Captor, @Inject</code>.
  */
-public class InjectExtension implements BeforeEachCallback, AfterEachCallback {//}, ParameterResolver {
+public class InjectExtension implements BeforeEachCallback, AfterEachCallback {
 
   private final static Namespace INJECT_NS = Namespace.create("io.avaje.inject");
 
@@ -63,33 +63,4 @@ public class InjectExtension implements BeforeEachCallback, AfterEachCallback {/
     }
   }
 
-//  @Override
-//  public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext context) throws ParameterResolutionException {
-//    return parameterContext.isAnnotated(Inject.class);
-//  }
-//
-//  @Override
-//  public Object resolveParameter(ParameterContext parameterContext, ExtensionContext context) throws ParameterResolutionException {
-//    final Parameter parameter = parameterContext.getParameter();
-//    final Inject inject = parameter.getAnnotation(Inject.class);
-//    if (inject == null) {
-//      throw new IllegalStateException("Expected @Inject? on parameter " + parameter.getName());
-//    }
-//    final String name = qualifierName(parameter);
-//    final BeanScope beanScope = (BeanScope) context.getStore(INJECT_NS).get(BEAN_SCOPE);
-//    return beanScope.get(parameter.getType(), name);
-//  }
-//
-//  private String qualifierName(Parameter parameter) {
-//    final Named named = parameter.getAnnotation(Named.class);
-//    if (named != null) {
-//      return named.value().toLowerCase();
-//    }
-//    for (Annotation annotation : parameter.getAnnotations()) {
-//      if (annotation.annotationType().equals(Qualifier.class)) {
-//        return annotation.annotationType().getSimpleName().toLowerCase();
-//      }
-//    }
-//    return null;
-//  }
 }
