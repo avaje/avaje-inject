@@ -159,6 +159,6 @@ class Util {
   public static String trimMethod(String method) {
     return shortMethod(method)
       .replace('.', '_')
-      .replace("$di", "");
+      .replace(Constants.DI, "");
   }
 }

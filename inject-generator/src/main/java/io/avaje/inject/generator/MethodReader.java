@@ -11,7 +11,6 @@ import java.util.Set;
 
 class MethodReader {
 
-  private static final String CODE_COMMENT_LIFECYCLE = "  /**\n   * Lifecycle wrapper for %s.\n   */";
   private static final String CODE_COMMENT_BUILD_FACTORYBEAN = "  /**\n   * Create and register %s via factory bean method %s#%s().\n   */";
 
   private final ExecutableElement element;
@@ -27,7 +26,7 @@ class MethodReader {
   private final String destroyMethod;
   private final String name;
   private final TypeReader typeReader;
-  private boolean optionalType;
+  private final boolean optionalType;
 
   MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType) {
     this(context, element, beanType, null, null);
@@ -98,7 +97,7 @@ class MethodReader {
   }
 
   private String fullBuildMethod() {
-    return factoryType + "$di.build_" + element.getSimpleName().toString();
+    return factoryType + Constants.DI + ".build_" + element.getSimpleName().toString();
   }
 
   String builderGetFactory() {

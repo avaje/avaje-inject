@@ -14,7 +14,7 @@ class JexControllerTest {
 
     assertNull(ApplicationScope.get(JexController.class));
 
-    final JexController$factory factory = ApplicationScope.get(JexController$factory.class);
+    final JexController$Factory factory = ApplicationScope.get(JexController$Factory.class);
     final Context context = Mockito.mock(Context.class);
     final JexController jexController = factory.create(context);
 
