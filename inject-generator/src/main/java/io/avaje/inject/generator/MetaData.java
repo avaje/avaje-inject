@@ -140,7 +140,7 @@ class MetaData {
       importTypes.add(Util.classOfMethod(method));
 
     } else {
-      importTypes.add(type + "$di");
+      importTypes.add(type + Constants.DI);
     }
     if (provides != null) {
       for (String provide : provides) {
@@ -176,7 +176,7 @@ class MetaData {
     if (hasMethod()) {
       sb.append("    ").append(Util.shortMethod(method)).append("(builder");
     } else {
-      sb.append("    ").append(shortType).append("$di.build(builder");
+      sb.append("    ").append(shortType).append(Constants.DI).append(".build(builder");
     }
 
     for (String depend : dependsOn) {

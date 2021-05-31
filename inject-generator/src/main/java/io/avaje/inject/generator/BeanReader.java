@@ -225,7 +225,7 @@ class BeanReader {
   }
 
   String suffix() {
-    return isRequestScopedController() ? "$factory" : "$di";
+    return isRequestScopedController() ? Constants.FACTORY : Constants.DI;
   }
 
   /**

@@ -105,11 +105,11 @@ public class Processor extends AbstractProcessor {
           beanReader.setWrittenToFile();
         }
       } catch (FilerException e) {
-        context.logWarn("FilerException to write $di class " + beanReader.getBeanType() + " " + e.getMessage());
+        context.logWarn("FilerException to write $DI class " + beanReader.getBeanType() + " " + e.getMessage());
 
       } catch (IOException e) {
         e.printStackTrace();
-        context.logError(beanReader.getBeanType(), "Failed to write $di class");
+        context.logError(beanReader.getBeanType(), "Failed to write $DI class");
       }
     }
   }

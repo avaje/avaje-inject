@@ -113,7 +113,7 @@ class ProcessingContext {
     this.contextProvides = provides;
     this.contextDependsOn = dependsOn;
 
-    // determine the context package (that we put the $diFactory class into)
+    // determine the context package (that we put the DI Factory class into)
     PackageElement pkg = elementUtils.getPackageOf(contextElement);
     logDebug("using package from element " + pkg);
     this.contextPackage = (pkg == null) ? null : pkg.getQualifiedName().toString();

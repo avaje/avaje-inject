@@ -65,7 +65,7 @@
       <groupId>io.avaje</groupId>
       <artifactId>avaje-http-api</artifactId>
       <version>0.1</version>
-      <scope>provided</scope>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
