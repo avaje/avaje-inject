@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.avaje</groupId>
     <artifactId>avaje-inject-parent</artifactId>
-    <version>6.0.RC4</version>
+    <version>6.0</version>
   </parent>
 
   <artifactId>avaje-inject-generator</artifactId>
@@ -16,7 +16,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-inject</artifactId>
-      <version>6.0.RC4</version>
+      <version>6.0</version>
     </dependency>
 
     <!-- test dependencies -->
