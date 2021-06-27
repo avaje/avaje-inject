@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.avaje</groupId>
     <artifactId>avaje-inject-parent</artifactId>
-    <version>5.0</version>
+    <version>5.1</version>
   </parent>
 
   <artifactId>avaje-inject-test</artifactId>
