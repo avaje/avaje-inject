@@ -19,6 +19,9 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.Reader;
 import java.nio.file.NoSuchFileException;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 class ProcessingContext {
 
@@ -31,6 +34,7 @@ class ProcessingContext {
   private String contextName;
   private String[] contextProvides;
   private String[] contextDependsOn;
+  private Set<String> contextRequires = new LinkedHashSet<>();
   private String contextPackage;
   private String metaInfServicesLine;
 
@@ -119,6 +123,14 @@ class ProcessingContext {
     this.contextPackage = (pkg == null) ? null : pkg.getQualifiedName().toString();
   }
 
+  void setContextRequires(List<String> contextRequires) {
+    this.contextRequires.addAll(contextRequires);
+  }
+
+  Set<String> contextRequires() {
+    return contextRequires;
+  }
+
   void deriveContextName(String factoryPackage) {
     if (contextName == null) {
       contextName = factoryPackage;
@@ -135,6 +147,14 @@ class ProcessingContext {
 
   TypeElement element(String rawType) {
     return elementUtils.getTypeElement(rawType);
+  }
+
+  TypeElement elementMaybe(String rawType) {
+    if (rawType == null) {
+      return null;
+    } else {
+      return elementUtils.getTypeElement(rawType);
+    }
   }
 
   Element asElement(TypeMirror returnType) {
@@ -162,6 +182,17 @@ class ProcessingContext {
       writer.append(", dependsOn=");
       buildStringArray(writer, contextDependsOn, false);
     }
+    if (!contextRequires.isEmpty()) {
+      writer.append(", requires={");
+      int c = 0;
+      for (String value : contextRequires) {
+        if (c++ > 0) {
+          writer.append(",");
+        }
+        writer.append(value).append(".class");
+      }
+      writer.append("}");
+    }
     writer.append(")").eol();
   }
 
@@ -170,7 +201,6 @@ class ProcessingContext {
   }
 
   private void buildStringArray(Append writer, String[] values, boolean asArray) {
-
     if (isEmpty(values)) {
       writer.append("null");
     } else {

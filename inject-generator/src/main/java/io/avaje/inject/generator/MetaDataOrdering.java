@@ -1,5 +1,6 @@
 package io.avaje.inject.generator;
 
+import javax.lang.model.element.TypeElement;
 import java.util.*;
 
 class MetaDataOrdering {
@@ -8,10 +9,6 @@ class MetaDataOrdering {
     "To handle circular dependencies consider using field injection " +
       "rather than constructor injection on one of the dependencies. " +
       "\n See https://avaje.io/inject/#circular";
-
-  private static final String UNSAT_ERR_MSG =
-    "Missing @Singleton on the dependency? Maybe check use of javax.inject " +
-      "(used with avaje-inject 3.x) versus jakarta.inject (used with avaje-inject 4.x)";
 
   private final ProcessingContext context;
 
@@ -24,13 +21,11 @@ class MetaDataOrdering {
   private final List<DependencyLink> circularDependencies = new ArrayList<>();
 
   private final Set<String> missingDependencyTypes = new LinkedHashSet<>();
-  private final List<String> missingDependencyMsg = new ArrayList<>();
 
   private String topPackage;
 
   MetaDataOrdering(Collection<MetaData> values, ProcessingContext context) {
     this.context = context;
-
     for (MetaData metaData : values) {
       if (metaData.isRequestScope()) {
         // request scoped expected to have externally provided dependencies
@@ -43,14 +38,22 @@ class MetaDataOrdering {
         queue.add(metaData);
       }
       topPackage = Util.commonParent(topPackage, metaData.getTopPackage());
-
       // register into map keyed by provider
       providers.computeIfAbsent(metaData.getType(), s -> new ProviderList()).add(metaData);
       for (String provide : metaData.getProvides()) {
         providers.computeIfAbsent(provide, s -> new ProviderList()).add(metaData);
       }
     }
-    // order no dependency list by ... name asc (order does not matter but for consistency)
+    externallyRequiredDependencies(context);
+  }
+
+  /**
+   * These if defined are expected to be required at wiring time probably via another module.
+   */
+  private void externallyRequiredDependencies(ProcessingContext context) {
+    for (String requireType : context.contextRequires()) {
+      providers.computeIfAbsent(requireType, s -> new ProviderList());
+    }
   }
 
   int processQueue() {
@@ -120,8 +123,9 @@ class MetaDataOrdering {
     for (MetaData m : queue) {
       for (String dependency : m.getDependsOn()) {
         if (providers.get(dependency) == null) {
+          TypeElement element = context.elementMaybe(m.getType());
+          context.logError(element, "No dependency provided for " + dependency);
           missingDependencyTypes.add(dependency);
-          missingDependencyMsg.add(dependency + " dependency missing for " + m);
         }
       }
     }
@@ -141,10 +145,7 @@ class MetaDataOrdering {
         context.logWarn("Unsatisfied dependencies on %s dependsOn %s", m, m.getDependsOn());
       }
     } else {
-      context.logWarn("Dependencies %s are not provided - missing @Singleton (or external dependencies)", missingDependencyTypes);
-      for (String msg : missingDependencyMsg) {
-        context.logWarn(msg);
-      }
+      context.logError("Dependencies %s are not provided - missing @Singleton or @Factory/@Bean or specify external dependency via @InjectModule requires attribute", missingDependencyTypes);
     }
   }
 
