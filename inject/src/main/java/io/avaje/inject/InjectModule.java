@@ -103,4 +103,9 @@ public @interface InjectModule {
    */
   String[] dependsOn() default {};
 
+  /**
+   * The dependencies that are provided externally and required when wiring this module.
+   */
+  Class<?>[] requires() default {};
+
 }

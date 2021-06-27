@@ -5,8 +5,11 @@ import javax.inject.Singleton;
 @Singleton // improve error when @Singleton missing
 public class MFoo {
 
-  //@Inject
-  //MFooUserMore more;
+//  final Object more;
+//
+//  public MFoo(Object more) {
+//    this.more = more;
+//  }
 
   public String mf() {
     return "mf";

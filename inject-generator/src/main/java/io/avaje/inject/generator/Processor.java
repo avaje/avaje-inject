@@ -11,10 +11,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.inject.Singleton;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.Name;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.lang.model.util.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,6 +25,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class Processor extends AbstractProcessor {
+
+  private static final String INJECT_MODULE = "io.avaje.inject.InjectModule";
 
   private ProcessingContext context;
 
@@ -213,9 +212,31 @@ public class Processor extends AbstractProcessor {
         InjectModule annotation = element.getAnnotation(InjectModule.class);
         if (annotation != null) {
           context.setContextDetails(annotation.name(), annotation.provides(), annotation.dependsOn(), element);
+          context.setContextRequires(readRequires(element));
         }
       }
     }
+  }
+
+  /**
+   * Read the list of required class names.
+   */
+  private List<String> readRequires(Element element) {
+    List<String> requiresList = new ArrayList<>();
+    for (AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
+      if (INJECT_MODULE.equals(annotationMirror.getAnnotationType().toString())) {
+        for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : annotationMirror.getElementValues().entrySet()) {
+          if (entry.getKey().toString().startsWith("requires")) {
+            for (Object requiresType : (List<?>) entry.getValue().getValue()) {
+              String fullName = requiresType.toString();
+              fullName = fullName.substring(0, fullName.length() - 6);
+              requiresList.add(fullName);
+            }
+          }
+        }
+      }
+    }
+    return requiresList;
   }
 
 
@@ -226,6 +247,7 @@ public class Processor extends AbstractProcessor {
   private void readFactory(TypeElement factoryType) {
     InjectModule module = factoryType.getAnnotation(InjectModule.class);
     context.setContextDetails(module.name(), module.provides(), module.dependsOn(), factoryType);
+    context.setContextRequires(readRequires(factoryType));
 
     List<? extends Element> elements = factoryType.getEnclosedElements();
     if (elements != null) {
