@@ -41,12 +41,6 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  public BeanScopeBuilder withNoShutdownHook() {
-    this.shutdownHook = false;
-    return this;
-  }
-
-  @Override
   public BeanScopeBuilder withShutdownHook(boolean shutdownHook) {
     this.shutdownHook = shutdownHook;
     return this;

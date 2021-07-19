@@ -34,12 +34,6 @@ import java.util.function.Consumer;
 public interface BeanScopeBuilder {
 
   /**
-   * Deprecated - migrate to {@link #withShutdownHook(boolean)}
-   */
-  @Deprecated
-  BeanScopeBuilder withNoShutdownHook();
-
-  /**
    * Create the bean scope registering a shutdown hook (defaults to false, no shutdown hook).
    * <p>
    * The expectation is that the BeanScopeBuilder is closed via code or via using
