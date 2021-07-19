@@ -15,21 +15,18 @@ class ScopeInfo {
   private final Map<String, MetaData> metaData = new LinkedHashMap<>();
   private final List<BeanReader> beanReaders = new ArrayList<>();
   private final Set<String> readBeans = new HashSet<>();
-  private final Set<String> requires = new LinkedHashSet<>();
   private final ProcessingContext context;
+  private final Set<String> requires = new LinkedHashSet<>();
+  private final Set<String> provides = new LinkedHashSet<>();
   private String name;
-  private String[] contextProvides;
-  private String[] contextDependsOn;
   private String contextPackage;
 
   ScopeInfo(ProcessingContext context) {
     this.context = context;
   }
 
-  void details(String name, String[] provides, String[] dependsOn, Element contextElement) {
+  void details(String name, Element contextElement) {
     this.name = ScopeUtil.name(name);
-    this.contextProvides = provides;
-    this.contextDependsOn = dependsOn;
     // determine the context package (that we put the DI Factory class into)
     PackageElement pkg = context.getPackageOf(contextElement);
     context.logDebug("using package from element " + pkg);
@@ -37,7 +34,7 @@ class ScopeInfo {
   }
 
   String moduleShortName(String factoryPackage) {
-    if (name == null) {
+    if (name == null || name.isEmpty()) {
       name = ScopeUtil.name(factoryPackage);
     }
     return name + "Module";
@@ -51,12 +48,20 @@ class ScopeInfo {
     return contextPackage;
   }
 
+  public void provides(List<String> provides) {
+    this.provides.addAll(provides);
+  }
+
   void requires(List<String> contextRequires) {
     this.requires.addAll(contextRequires);
   }
 
   Set<String> requires() {
     return requires;
+  }
+
+  Set<String> provides() {
+    return provides;
   }
 
   void writeBeanHelpers() {
@@ -169,61 +174,51 @@ class ScopeInfo {
     }
   }
 
-  void buildNewBuilder(Append writer) {
-    writer.append("    this.name = \"%s\";", name).eol();
-    writer.append("    this.provides = ");
-    buildStringArray(writer, contextProvides, true);
-    writer.append(";").eol();
-    writer.append("    this.dependsOn = ");
-    buildStringArray(writer, contextDependsOn, true);
-    writer.append(";").eol();
-  }
-
   void buildAtInjectModule(Append writer) {
     writer.append(Constants.AT_GENERATED).eol();
-    writer.append("@InjectModule(name=\"%s\"", name);
-    if (!isEmpty(contextProvides)) {
-      writer.append(", provides=");
-      buildStringArray(writer, contextProvides, false);
-    }
-    if (!isEmpty(contextDependsOn)) {
-      writer.append(", dependsOn=");
-      buildStringArray(writer, contextDependsOn, false);
+    writer.append("@InjectModule(");
+    if (!provides.isEmpty()) {
+      attributeClasses(writer, "provides", provides);
     }
     if (!requires.isEmpty()) {
-      writer.append(", requires={");
-      int c = 0;
-      for (String value : requires) {
-        if (c++ > 0) {
-          writer.append(",");
-        }
-        writer.append(value).append(".class");
-      }
-      writer.append("}");
+      attributeClasses(writer, "requires", requires);
     }
     writer.append(")").eol();
   }
 
-  private boolean isEmpty(String[] strings) {
-    return strings == null || strings.length == 0;
+  private void attributeClasses(Append writer, String prefix, Set<String> classNames) {
+    writer.append(", %s={", prefix);
+    int c = 0;
+    for (String value : classNames) {
+      if (c++ > 0) {
+        writer.append(",");
+      }
+      writer.append(value).append(".class");
+    }
+    writer.append("}");
   }
 
-  private void buildStringArray(Append writer, String[] values, boolean asArray) {
-    if (isEmpty(values)) {
-      writer.append("null");
-    } else {
-      if (asArray) {
-        writer.append("new String[]");
-      }
-      writer.append("{");
+  private void buildClassArray(Append writer, Set<String> values) {
+    writer.append("new Class<?>[]");
+    writer.append("{");
+    if (!values.isEmpty()) {
       int c = 0;
       for (String value : values) {
         if (c++ > 0) {
           writer.append(",");
         }
-        writer.append("\"").append(value).append("\"");
+        writer.append(value).append(".class");
       }
-      writer.append("}");
     }
+    writer.append("}");
+  }
+
+  void buildFields(Append writer) {
+    writer.append("  private final Class<?>[] provides = ");
+    buildClassArray(writer, provides);
+    writer.append(";").eol();
+    writer.append("  private final Class<?>[] requires = ");
+    buildClassArray(writer, requires);
+    writer.append(";").eol();
   }
 }

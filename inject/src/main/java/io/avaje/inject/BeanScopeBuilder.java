@@ -1,5 +1,7 @@
 package io.avaje.inject;
 
+import io.avaje.inject.spi.Module;
+
 import java.util.function.Consumer;
 
 /**
@@ -91,7 +93,7 @@ public interface BeanScopeBuilder {
    * @param modules The names of modules that we want to include in dependency injection.
    * @return This BeanScopeBuilder
    */
-  BeanScopeBuilder withModules(String... modules);
+  BeanScopeBuilder withModules(Module... modules);
 
   /**
    * Set this when building a BeanScope (typically for testing) and supplied beans replace module dependencies.

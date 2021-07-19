@@ -6,19 +6,14 @@ package io.avaje.inject.spi;
 public interface Module {
 
   /**
-   * Return the name of the bean scope (module) this will create.
+   * Return the types this module needs to be provided externally or via other modules.
    */
-  String getName();
+  Class<?>[] requires();
 
   /**
-   * Return the name of module features this module provides.
+   * Return the set of types this module explicitly provides to other modules.
    */
-  String[] getProvides();
-
-  /**
-   * Return the names of bean scopes (modules) that this is dependent on (they need to be built before this one).
-   */
-  String[] getDependsOn();
+  Class<?>[] provides();
 
   /**
    * Build all the beans.

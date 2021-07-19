@@ -97,8 +97,9 @@ public class Processor extends AbstractProcessor {
         Element element = iterator.next();
         InjectModule annotation = element.getAnnotation(InjectModule.class);
         if (annotation != null) {
-          scopeInfo.details(annotation.name(), annotation.provides(), annotation.dependsOn(), element);
+          scopeInfo.details(annotation.name(), element);
           scopeInfo.requires(ScopeUtil.readRequires(element));
+          scopeInfo.provides(ScopeUtil.readProvides(element));
         }
       }
     }
@@ -110,8 +111,9 @@ public class Processor extends AbstractProcessor {
    */
   private void readFactory(TypeElement factoryType) {
     InjectModule module = factoryType.getAnnotation(InjectModule.class);
-    scopeInfo.details(module.name(), module.provides(), module.dependsOn(), factoryType);
+    scopeInfo.details(module.name(), factoryType);
     scopeInfo.requires(ScopeUtil.readRequires(factoryType));
+    scopeInfo.provides(ScopeUtil.readProvides(factoryType));
 
     List<? extends Element> elements = factoryType.getEnclosedElements();
     if (elements != null) {

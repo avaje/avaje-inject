@@ -150,28 +150,18 @@ class SimpleFactoryWriter {
     scopeInfo.buildAtInjectModule(writer);
 
     writer.append("public class %s implements Module {", factoryShortName).eol().eol();
-    writer.append("  private final String name;").eol();
-    writer.append("  private final String[] provides;").eol();
-    writer.append("  private final String[] dependsOn;").eol();
+    scopeInfo.buildFields(writer);
+
     writer.append("  private Builder builder;").eol().eol();
 
-    writer.append("  public %s() {", factoryShortName).eol();
-    scopeInfo.buildNewBuilder(writer);
-    writer.append("  }").eol().eol();
-
     writer.append("  @Override").eol();
-    writer.append("  public String getName() {").eol();
-    writer.append("    return name;").eol();
-    writer.append("  }").eol().eol();
-
-    writer.append("  @Override").eol();
-    writer.append("  public String[] getProvides() {").eol();
+    writer.append("  public Class<?>[] provides() {").eol();
     writer.append("    return provides;").eol();
     writer.append("  }").eol().eol();
 
     writer.append("  @Override").eol();
-    writer.append("  public String[] getDependsOn() {").eol();
-    writer.append("    return dependsOn;").eol();
+    writer.append("  public Class<?>[] requires() {").eol();
+    writer.append("    return requires;").eol();
     writer.append("  }").eol().eol();
   }
 

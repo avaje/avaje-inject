@@ -1,6 +1,8 @@
 package org.example.coffee;
 
 import io.avaje.inject.BeanScope;
+import io.avaje.inject.spi.Builder;
+import io.avaje.inject.spi.Module;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -19,7 +21,7 @@ public class BeanScopeBuilderAddTest {
         .withBeans(testDoublePump)
         // our module is "org.example.coffee"
         // so this effectively includes no modules
-        .withModules("other")
+        .withModules(new SillyModule())
         .withIgnoreMissingModuleDependencies()
         .build()) {
 
@@ -29,24 +31,41 @@ public class BeanScopeBuilderAddTest {
     });
   }
 
+  static class SillyModule implements Module {
 
-  @Test
-  public void withModules_includeThisOne() {
+    @Override
+    public Class<?>[] requires() {
+      return new Class[0];
+    }
 
-    TDPump testDoublePump = new TDPump();
+    @Override
+    public Class<?>[] provides() {
+      return new Class[0];
+    }
 
-    try (BeanScope context = BeanScope.newBuilder()
-      .withBeans(testDoublePump)
-      .withModules("Example")
-      .build()) {
-
-      String makeIt = context.get(CoffeeMaker.class).makeIt();
-      assertThat(makeIt).isEqualTo("done");
-
-      assertThat(testDoublePump.steam).isEqualTo(1);
-      assertThat(testDoublePump.water).isEqualTo(1);
+    @Override
+    public void build(Builder builder) {
+      // do nothing
     }
   }
+
+//  @Test
+//  public void withModules_includeThisOne() {
+//
+//    TDPump testDoublePump = new TDPump();
+//
+//    try (BeanScope context = BeanScope.newBuilder()
+//      .withBeans(testDoublePump)
+//      .withModules(new org.example.ExampleModule())
+//      .build()) {
+//
+//      String makeIt = context.get(CoffeeMaker.class).makeIt();
+//      assertThat(makeIt).isEqualTo("done");
+//
+//      assertThat(testDoublePump.steam).isEqualTo(1);
+//      assertThat(testDoublePump.water).isEqualTo(1);
+//    }
+//  }
 
   @Test
   public void withBean_expect_testDoublePumpUsed() {
