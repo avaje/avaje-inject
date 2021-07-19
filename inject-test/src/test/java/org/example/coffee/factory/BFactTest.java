@@ -12,7 +12,7 @@ public class BFactTest {
 
     BFact bFact;
     try (BeanScope context = BeanScope.newBuilder().build()) {
-      bFact = context.getBean(BFact.class);
+      bFact = context.get(BFact.class);
       assertThat(bFact.getCountInit()).isEqualTo(1);
       assertThat(bFact.getCountClose()).isEqualTo(0);
     }

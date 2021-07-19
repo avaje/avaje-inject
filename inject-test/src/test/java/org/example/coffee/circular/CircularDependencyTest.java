@@ -10,13 +10,13 @@ class CircularDependencyTest {
   @Test
   void wire() {
     try (BeanScope context = BeanScope.newBuilder().build()) {
-      assertThat(context.getBean(CircA.class)).isNotNull();
-      assertThat(context.getBean(CircB.class)).isNotNull();
-      assertThat(context.getBean(CircC.class)).isNotNull();
+      assertThat(context.get(CircA.class)).isNotNull();
+      assertThat(context.get(CircB.class)).isNotNull();
+      assertThat(context.get(CircC.class)).isNotNull();
 
-      final CircA circA = context.getBean(CircA.class);
-      final CircB circB = context.getBean(CircB.class);
-      final CircC circC = context.getBean(CircC.class);
+      final CircA circA = context.get(CircA.class);
+      final CircB circB = context.get(CircB.class);
+      final CircC circC = context.get(CircC.class);
       assertThat(circC.gen()).isEqualTo("C+CircA-CircB-CircC-Stop");
 
       assertThat(circC.circA).isSameAs(circA);

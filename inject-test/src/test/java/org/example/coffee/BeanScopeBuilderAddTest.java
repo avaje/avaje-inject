@@ -23,7 +23,7 @@ public class BeanScopeBuilderAddTest {
         .withIgnoreMissingModuleDependencies()
         .build()) {
 
-        CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+        CoffeeMaker coffeeMaker = context.get(CoffeeMaker.class);
         assertThat(coffeeMaker).isNull();
       }
     });
@@ -40,7 +40,7 @@ public class BeanScopeBuilderAddTest {
       .withModules("org.example")
       .build()) {
 
-      String makeIt = context.getBean(CoffeeMaker.class).makeIt();
+      String makeIt = context.get(CoffeeMaker.class).makeIt();
       assertThat(makeIt).isEqualTo("done");
 
       assertThat(testDoublePump.steam).isEqualTo(1);
@@ -57,7 +57,7 @@ public class BeanScopeBuilderAddTest {
       .withBeans(testDoublePump)
       .build()) {
 
-      String makeIt = context.getBean(CoffeeMaker.class).makeIt();
+      String makeIt = context.get(CoffeeMaker.class).makeIt();
       assertThat(makeIt).isEqualTo("done");
 
       assertThat(testDoublePump.steam).isEqualTo(1);
@@ -74,10 +74,10 @@ public class BeanScopeBuilderAddTest {
       .withBean(Pump.class, mock)
       .build()) {
 
-      Pump pump = context.getBean(Pump.class);
+      Pump pump = context.get(Pump.class);
       assertThat(pump).isSameAs(mock);
 
-      CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+      CoffeeMaker coffeeMaker = context.get(CoffeeMaker.class);
       assertThat(coffeeMaker).isNotNull();
       coffeeMaker.makeIt();
 

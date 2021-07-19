@@ -26,7 +26,7 @@ public class HazManagerTest {
       .withMock(HazRepo.class)
       .build()) {
 
-      HazManager hazManager = context.getBean(HazManager.class);
+      HazManager hazManager = context.get(HazManager.class);
       Haz haz = hazManager.find(42L);
 
       assertThat(haz).isNull();
@@ -42,7 +42,7 @@ public class HazManagerTest {
       })
       .build()) {
 
-      HazManager hazManager = context.getBean(HazManager.class);
+      HazManager hazManager = context.get(HazManager.class);
       Haz haz = hazManager.find(42L);
 
       assertThat(haz.id).isEqualTo(-23L);
@@ -58,7 +58,7 @@ public class HazManagerTest {
       .withBeans(testDouble)
       .build()) {
 
-      HazManager hazManager = context.getBean(HazManager.class);
+      HazManager hazManager = context.get(HazManager.class);
 
       Haz haz = hazManager.find(42L);
       assertThat(haz.id).isEqualTo(64L);

@@ -12,7 +12,7 @@ public class ConfigurationTest {
 
     Configuration configuration;
     try (BeanScope context = BeanScope.newBuilder().build()) {
-      configuration = context.getBean(Configuration.class);
+      configuration = context.get(Configuration.class);
       assertEquals(configuration.getCountInit(), 1);
       assertEquals(configuration.getCountClose(), 0);
     }

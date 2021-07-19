@@ -10,7 +10,7 @@ class StoreManagerWithSetterQualifierTest {
   @Test
   void redStore() {
     try (BeanScope context = BeanScope.newBuilder().build()) {
-      StoreManagerWithSetterQualifier manager = context.getBean(StoreManagerWithSetterQualifier.class);
+      StoreManagerWithSetterQualifier manager = context.get(StoreManagerWithSetterQualifier.class);
       assertThat(manager.blueStore()).isEqualTo("blue");
       assertThat(manager.greenStore()).isEqualTo("green");
     }
@@ -23,7 +23,7 @@ class StoreManagerWithSetterQualifierTest {
       .withBean("Green", SomeStore.class, () -> "TD Green")
       .build()) {
 
-      StoreManagerWithSetterQualifier manager = context.getBean(StoreManagerWithSetterQualifier.class);
+      StoreManagerWithSetterQualifier manager = context.get(StoreManagerWithSetterQualifier.class);
       assertThat(manager.blueStore()).isEqualTo("TD Blue");
       assertThat(manager.greenStore()).isEqualTo("TD Green");
     }
@@ -36,7 +36,7 @@ class StoreManagerWithSetterQualifierTest {
       // with GreenStore still wired
       .build()) {
 
-      StoreManagerWithSetterQualifier manager = context.getBean(StoreManagerWithSetterQualifier.class);
+      StoreManagerWithSetterQualifier manager = context.get(StoreManagerWithSetterQualifier.class);
       assertThat(manager.blueStore()).isEqualTo("TD Blue Only");
       assertThat(manager.greenStore()).isEqualTo("green");
     }

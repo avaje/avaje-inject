@@ -36,7 +36,7 @@ public class CoffeeMakerTest {
   public void makeIt_via_BootContext() {
 
     try (BeanScope context = BeanScope.newBuilder().build()) {
-      String makeIt = context.getBean(CoffeeMaker.class).makeIt();
+      String makeIt = context.get(CoffeeMaker.class).makeIt();
       assertThat(makeIt).isEqualTo("done");
     }
   }

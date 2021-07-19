@@ -12,7 +12,7 @@ public class MyFactoryTest {
   @Test
   public void methodsCalled() {
     try (BeanScope context = BeanScope.newBuilder().build()) {
-      final MyFactory myFactory = context.getBean(MyFactory.class);
+      final MyFactory myFactory = context.get(MyFactory.class);
       assertThat(myFactory.methodsCalled()).contains("|useCFact", "|anotherCFact", "|buildEngi");
     }
   }

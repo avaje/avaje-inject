@@ -12,7 +12,7 @@ public class AMusherTest {
 
     AMusher aMusher;
     try (BeanScope context = BeanScope.newBuilder().build()) {
-      aMusher = context.getBean(AMusher.class);
+      aMusher = context.get(AMusher.class);
       assertEquals(aMusher.getCountInit(), 1);
       assertEquals(aMusher.getCountClose(), 0);
     }

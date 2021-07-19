@@ -11,7 +11,7 @@ public class StoreManagerWithNamedTest {
   public void test() {
 
     try (BeanScope context = BeanScope.newBuilder().build()) {
-      StoreManagerWithNamed manager = context.getBean(StoreManagerWithNamed.class);
+      StoreManagerWithNamed manager = context.get(StoreManagerWithNamed.class);
       String store = manager.store();
       assertThat(store).isEqualTo("blue");
     }

@@ -22,23 +22,9 @@ import java.util.List;
  *   try (BeanScope scope = BeanScope.newBuilder()
  *     .build()) {
  *
- *     CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+ *     CoffeeMaker coffeeMaker = context.get(CoffeeMaker.class);
  *     coffeeMaker.makeIt()
  *   }
- *
- * }</pre>
- *
- * <h3>Implicitly used</h3>
- * <p>
- * The BeanScope is implicitly used by ApplicationScope.  It will be created as needed and
- * a shutdown hook will close the underlying BeanScope on JVM shutdown.
- * </p>
- * <pre>{@code
- *
- *   // BeanScope created as needed under the hood
- *
- *   CoffeeMaker coffeeMaker = ApplicationScope.get(CoffeeMaker.class);
- *   coffeeMaker.brew();
  *
  * }</pre>
  */
@@ -91,14 +77,6 @@ public interface BeanScope extends Closeable {
   <T> T get(Class<T> type);
 
   /**
-   * Deprecated - migrate to get(type)
-   */
-  @Deprecated
-  default <T> T getBean(Class<T> type) {
-    return get(type);
-  }
-
-  /**
    * Return a single bean given the type and name.
    *
    * <pre>{@code
@@ -112,14 +90,6 @@ public interface BeanScope extends Closeable {
    * @param name the name qualifier of a specific bean
    */
   <T> T get(Class<T> type, String name);
-
-  /**
-   * Deprecated - migrate to get(type, name).
-   */
-  @Deprecated
-  default <T> T getBean(Class<T> type, String name) {
-    return get(type, name);
-  }
 
   /**
    * Return the list of beans that have an annotation.
@@ -142,14 +112,6 @@ public interface BeanScope extends Closeable {
   List<Object> listByAnnotation(Class<?> annotation);
 
   /**
-   * Deprecated - migrate to listByAnnotation()
-   */
-  @Deprecated
-  default List<Object> getBeansWithAnnotation(Class<?> annotation) {
-    return listByAnnotation(annotation);
-  }
-
-  /**
    * Return the list of beans that implement the interface.
    *
    * <pre>{@code
@@ -165,25 +127,9 @@ public interface BeanScope extends Closeable {
   <T> List<T> list(Class<T> interfaceType);
 
   /**
-   * Deprecated - migrate to list(interfaceType).
-   */
-  @Deprecated
-  default <T> List<T> getBeans(Class<T> interfaceType) {
-    return list(interfaceType);
-  }
-
-  /**
    * Return the list of beans that implement the interface sorting by priority.
    */
   <T> List<T> listByPriority(Class<T> interfaceType);
-
-  /**
-   * Deprecated - migrate to listByPriority(interfaceType).
-   */
-  @Deprecated
-  default <T> List<T> getBeansByPriority(Class<T> interfaceType) {
-    return listByPriority(interfaceType);
-  }
 
   /**
    * Return the beans that implement the interface sorting by the priority annotation used.
@@ -195,14 +141,6 @@ public interface BeanScope extends Closeable {
    * @param priority      The priority annotation used to sort the beans
    */
   <T> List<T> listByPriority(Class<T> interfaceType, Class<? extends Annotation> priority);
-
-  /**
-   * Deprecated - migrate to listByPriority().
-   */
-  @Deprecated
-  default <T> List<T> getBeansByPriority(Class<T> interfaceType, Class<? extends Annotation> priority) {
-    return listByPriority(interfaceType, priority);
-  }
 
   /**
    * Close the scope firing any <code>@PreDestroy</code> methods.
