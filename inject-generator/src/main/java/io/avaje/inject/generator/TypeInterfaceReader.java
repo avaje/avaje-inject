@@ -46,20 +46,33 @@ class TypeInterfaceReader {
     if (beanType.getKind() == ElementKind.INTERFACE) {
       interfaceTypes.add(beanType.getQualifiedName().toString());
     }
-    for (TypeMirror anInterface : beanType.getInterfaces()) {
-      String type = Util.unwrapProvider(anInterface.toString());
-      if (type.indexOf('.') == -1) {
-        context.logWarn("skip when no package on interface " + type);
-      } else if (Constants.AUTO_CLOSEABLE.equals(type) || Constants.IO_CLOSEABLE.equals(type)) {
+    readInterfaces(beanType);
+  }
+
+  private void readInterfaces(TypeElement type) {
+    for (TypeMirror anInterface : type.getInterfaces()) {
+      String rawType = Util.unwrapProvider(anInterface.toString());
+      if (rawType.indexOf('.') == -1) {
+        context.logWarn("skip when no package on interface " + rawType);
+      } else if (Constants.AUTO_CLOSEABLE.equals(rawType) || Constants.IO_CLOSEABLE.equals(rawType)) {
         closeable = true;
       } else {
-        final String iShortName = Util.shortName(type);
+        final String iShortName = Util.shortName(rawType);
         if (beanSimpleName.endsWith(iShortName)) {
           // derived qualifier name based on prefix to interface short name
           qualifierName = beanSimpleName.substring(0, beanSimpleName.length() - iShortName.length()).toLowerCase();
         }
-        interfaceTypes.add(type);
+        interfaceTypes.add(rawType);
+        readExtendedInterfaces(rawType);
       }
     }
   }
+
+  private void readExtendedInterfaces(String type) {
+    final TypeElement element = context.element(type);
+    if (element != null) {
+      readInterfaces(element);
+    }
+  }
+
 }
