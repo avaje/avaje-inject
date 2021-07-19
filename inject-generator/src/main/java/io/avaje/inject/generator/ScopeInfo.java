@@ -27,7 +27,7 @@ class ScopeInfo {
   }
 
   void details(String name, String[] provides, String[] dependsOn, Element contextElement) {
-    this.name = name;
+    this.name = ScopeUtil.name(name);
     this.contextProvides = provides;
     this.contextDependsOn = dependsOn;
     // determine the context package (that we put the DI Factory class into)
@@ -36,10 +36,11 @@ class ScopeInfo {
     this.contextPackage = (pkg == null) ? null : pkg.getQualifiedName().toString();
   }
 
-  void deriveName(String factoryPackage) {
+  String moduleShortName(String factoryPackage) {
     if (name == null) {
-      name = factoryPackage;
+      name = ScopeUtil.name(factoryPackage);
     }
+    return name + "Module";
   }
 
   String name() {

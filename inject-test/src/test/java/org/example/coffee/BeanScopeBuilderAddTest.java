@@ -37,7 +37,7 @@ public class BeanScopeBuilderAddTest {
 
     try (BeanScope context = BeanScope.newBuilder()
       .withBeans(testDoublePump)
-      .withModules("org.example")
+      .withModules("Example")
       .build()) {
 
       String makeIt = context.get(CoffeeMaker.class).makeIt();

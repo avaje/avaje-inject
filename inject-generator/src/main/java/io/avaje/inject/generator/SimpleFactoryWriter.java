@@ -57,8 +57,7 @@ class SimpleFactoryWriter {
     this.scopeInfo = scopeInfo;
     String pkg = scopeInfo.contextPackage();
     this.factoryPackage = (pkg != null) ? pkg : ordering.getTopPackage();
-    scopeInfo.deriveName(factoryPackage);
-    this.factoryShortName = "_DI$BeanScopeFactory";
+    this.factoryShortName = scopeInfo.moduleShortName(factoryPackage);
     this.factoryFullName = factoryPackage + "." + factoryShortName;
   }
 
