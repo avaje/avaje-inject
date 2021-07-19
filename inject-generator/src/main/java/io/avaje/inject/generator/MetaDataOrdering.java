@@ -11,21 +11,19 @@ class MetaDataOrdering {
       "\n See https://avaje.io/inject/#circular";
 
   private final ProcessingContext context;
-
+  private final ScopeInfo scopeInfo;
   private final List<MetaData> orderedList = new ArrayList<>();
   private final List<MetaData> requestScope = new ArrayList<>();
   private final List<MetaData> queue = new ArrayList<>();
-
   private final Map<String, ProviderList> providers = new HashMap<>();
-
   private final List<DependencyLink> circularDependencies = new ArrayList<>();
-
   private final Set<String> missingDependencyTypes = new LinkedHashSet<>();
 
   private String topPackage;
 
-  MetaDataOrdering(Collection<MetaData> values, ProcessingContext context) {
+  MetaDataOrdering(Collection<MetaData> values, ProcessingContext context, ScopeInfo scopeInfo) {
     this.context = context;
+    this.scopeInfo = scopeInfo;
     for (MetaData metaData : values) {
       if (metaData.isRequestScope()) {
         // request scoped expected to have externally provided dependencies
@@ -44,14 +42,14 @@ class MetaDataOrdering {
         providers.computeIfAbsent(provide, s -> new ProviderList()).add(metaData);
       }
     }
-    externallyRequiredDependencies(context);
+    externallyRequiredDependencies();
   }
 
   /**
    * These if defined are expected to be required at wiring time probably via another module.
    */
-  private void externallyRequiredDependencies(ProcessingContext context) {
-    for (String requireType : context.contextRequires()) {
+  private void externallyRequiredDependencies() {
+    for (String requireType : scopeInfo.requires()) {
       providers.computeIfAbsent(requireType, s -> new ProviderList());
     }
   }

@@ -47,16 +47,17 @@ class SimpleFactoryWriter {
   private final String factoryPackage;
   private final String factoryShortName;
   private final String factoryFullName;
+  private final ScopeInfo scopeInfo;
 
   private Append writer;
 
-  SimpleFactoryWriter(MetaDataOrdering ordering, ProcessingContext context) {
+  SimpleFactoryWriter(MetaDataOrdering ordering, ProcessingContext context, ScopeInfo scopeInfo) {
     this.ordering = ordering;
     this.context = context;
-
-    String pkg = context.getContextPackage();
+    this.scopeInfo = scopeInfo;
+    String pkg = scopeInfo.contextPackage();
     this.factoryPackage = (pkg != null) ? pkg : ordering.getTopPackage();
-    context.deriveContextName(factoryPackage);
+    scopeInfo.deriveName(factoryPackage);
     this.factoryShortName = "_DI$BeanScopeFactory";
     this.factoryFullName = factoryPackage + "." + factoryShortName;
   }
@@ -146,8 +147,8 @@ class SimpleFactoryWriter {
   }
 
   private void writeStartClass() {
-    writer.append(CODE_COMMENT_FACTORY, context.contextName(), factoryPackage).eol();
-    context.buildAtInjectModule(writer);
+    writer.append(CODE_COMMENT_FACTORY, scopeInfo.name(), factoryPackage).eol();
+    scopeInfo.buildAtInjectModule(writer);
 
     writer.append("public class %s implements BeanScopeFactory {", factoryShortName).eol().eol();
     writer.append("  private final String name;").eol();
@@ -156,7 +157,7 @@ class SimpleFactoryWriter {
     writer.append("  private Builder builder;").eol().eol();
 
     writer.append("  public %s() {", factoryShortName).eol();
-    context.buildNewBuilder(writer);
+    scopeInfo.buildNewBuilder(writer);
     writer.append("  }").eol().eol();
 
     writer.append("  @Override").eol();
