@@ -1,6 +1,7 @@
 package io.avaje.inject.spi;
 
-import io.avaje.inject.*;
+import io.avaje.inject.BeanScope;
+import io.avaje.inject.Priority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,10 +9,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
-
-import static io.avaje.inject.spi.KeyUtil.key;
 
 class DBeanScope implements BeanScope {
 

@@ -1,6 +1,5 @@
 package io.avaje.inject;
 
-import java.io.Closeable;
 import java.lang.annotation.Annotation;
 import java.util.List;
 
@@ -28,7 +27,7 @@ import java.util.List;
  *
  * }</pre>
  */
-public interface BeanScope extends Closeable {
+public interface BeanScope extends AutoCloseable {
 
   /**
    * Build a bean scope with options for shutdown hook and supplying test doubles.
