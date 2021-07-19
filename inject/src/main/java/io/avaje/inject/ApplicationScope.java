@@ -33,7 +33,7 @@ public class ApplicationScope {
   private static final BeanScope appScope = init();
 
   private static BeanScope init() {
-    return BeanScope.newBuilder().build();
+    return BeanScope.newBuilder().withShutdownHook(true).build();
   }
 
   private ApplicationScope() {

@@ -17,7 +17,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
 
   private static final Logger log = LoggerFactory.getLogger(DBeanScopeBuilder.class);
 
-  private boolean shutdownHook = true;
+  private boolean shutdownHook = false;
 
   @SuppressWarnings("rawtypes")
   private final List<SuppliedBean> suppliedBeans = new ArrayList<>();
@@ -38,6 +38,12 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
   @Override
   public BeanScopeBuilder withNoShutdownHook() {
     this.shutdownHook = false;
+    return this;
+  }
+
+  @Override
+  public BeanScopeBuilder withShutdownHook(boolean shutdownHook) {
+    this.shutdownHook = shutdownHook;
     return this;
   }
 

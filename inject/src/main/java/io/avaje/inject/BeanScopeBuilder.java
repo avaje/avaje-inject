@@ -34,7 +34,13 @@ import java.util.function.Consumer;
 public interface BeanScopeBuilder {
 
   /**
-   * Create the bean scope without registering a shutdown hook.
+   * Deprecated - migrate to {@link #withShutdownHook(boolean)}
+   */
+  @Deprecated
+  BeanScopeBuilder withNoShutdownHook();
+
+  /**
+   * Create the bean scope registering a shutdown hook (defaults to false, no shutdown hook).
    * <p>
    * The expectation is that the BeanScopeBuilder is closed via code or via using
    * try with resources.
@@ -44,7 +50,7 @@ public interface BeanScopeBuilder {
    *   // automatically closed via try with resources
    *
    *   try (BeanScope scope = BeanScope.newBuilder()
-   *     .withNoShutdownHook()
+   *     .withShutdownHook(true)
    *     .build()) {
    *
    *     String makeIt = scope.get(CoffeeMaker.class).makeIt();
@@ -54,7 +60,7 @@ public interface BeanScopeBuilder {
    *
    * @return This BeanScopeBuilder
    */
-  BeanScopeBuilder withNoShutdownHook();
+  BeanScopeBuilder withShutdownHook(boolean shutdownHook);
 
   /**
    * Specify the modules to include in dependency injection.

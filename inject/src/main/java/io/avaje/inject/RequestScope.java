@@ -65,7 +65,7 @@ public interface RequestScope extends Closeable {
   /**
    * Register a closable with the request scope.
    * <p>
-   * All closable's registered here are closed at the end of the request scope.
+   * All closeables registered here are closed at the end of the request scope.
    */
   void addClosable(Closeable closeable);
 
