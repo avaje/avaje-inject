@@ -1,6 +1,6 @@
 package io.avaje.inject;
 
-import io.avaje.inject.spi.BeanScopeFactory;
+import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.Builder;
 import org.junit.jupiter.api.Test;
 
@@ -86,9 +86,9 @@ public class BeanScopeBuilderTest {
     assertThat(names(factoryOrder.factories())).containsExactly("one", "three", "two");
   }
 
-  private List<String> names(List<BeanScopeFactory> factories) {
+  private List<String> names(List<Module> factories) {
     return factories.stream()
-      .map(BeanScopeFactory::getName)
+      .map(Module::getName)
       .collect(Collectors.toList());
   }
 
@@ -100,7 +100,7 @@ public class BeanScopeBuilderTest {
     return val == null ? null : val.split(",");
   }
 
-  private static class TDBeanScope implements BeanScopeFactory {
+  private static class TDBeanScope implements Module {
 
     final String name;
     final String[] provides;

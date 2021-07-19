@@ -3,7 +3,7 @@ package io.avaje.inject.spi;
 /**
  * This is the service loader interface defining the bean scope.
  */
-public interface BeanScopeFactory {
+public interface Module {
 
   /**
    * Return the name of the bean scope (module) this will create.

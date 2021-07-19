@@ -1,6 +1,6 @@
 package io.avaje.inject;
 
-import io.avaje.inject.spi.BeanScopeFactory;
+import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.Builder;
 import io.avaje.inject.spi.EnrichBean;
 import io.avaje.inject.spi.SuppliedBean;
@@ -120,7 +120,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   public BeanScope build() {
     // sort factories by dependsOn
     FactoryOrder factoryOrder = new FactoryOrder(includeModules, !suppliedBeans.isEmpty(), ignoreMissingModuleDependencies);
-    ServiceLoader.load(BeanScopeFactory.class).forEach(factoryOrder::add);
+    ServiceLoader.load(Module.class).forEach(factoryOrder::add);
 
     Set<String> moduleNames = factoryOrder.orderFactories();
     if (moduleNames.isEmpty()) {
@@ -132,7 +132,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
     log.debug("building with modules {}", moduleNames);
     Builder builder = Builder.newBuilder(suppliedBeans, enrichBeans);
-    for (BeanScopeFactory factory : factoryOrder.factories()) {
+    for (Module factory : factoryOrder.factories()) {
       factory.build(builder);
     }
     return builder.build(shutdownHook);
@@ -161,7 +161,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     private final boolean ignoreMissingModuleDependencies;
 
     private final Set<String> moduleNames = new LinkedHashSet<>();
-    private final List<BeanScopeFactory> factories = new ArrayList<>();
+    private final List<Module> factories = new ArrayList<>();
     private final List<FactoryState> queue = new ArrayList<>();
     private final List<FactoryState> queueNoDependencies = new ArrayList<>();
 
@@ -173,7 +173,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       this.ignoreMissingModuleDependencies = ignoreMissingModuleDependencies;
     }
 
-    void add(BeanScopeFactory factory) {
+    void add(Module factory) {
 
       if (includeModule(factory)) {
         FactoryState wrappedFactory = new FactoryState(factory);
@@ -205,7 +205,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     /**
      * Return true of the factory (for the module) should be included.
      */
-    private boolean includeModule(BeanScopeFactory factory) {
+    private boolean includeModule(Module factory) {
       return includeModules.isEmpty() || includeModules.contains(factory.getName());
     }
 
@@ -234,7 +234,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     /**
      * Return the list of factories in the order they should be built.
      */
-    List<BeanScopeFactory> factories() {
+    List<Module> factories() {
       return factories;
     }
 
@@ -313,10 +313,10 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
    */
   private static class FactoryState {
 
-    private final BeanScopeFactory factory;
+    private final Module factory;
     private boolean pushed;
 
-    private FactoryState(BeanScopeFactory factory) {
+    private FactoryState(Module factory) {
       this.factory = factory;
     }
 
@@ -331,7 +331,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       return pushed;
     }
 
-    BeanScopeFactory getFactory() {
+    Module getFactory() {
       return factory;
     }
 

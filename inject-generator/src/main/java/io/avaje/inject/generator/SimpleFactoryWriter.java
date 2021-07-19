@@ -25,7 +25,7 @@ class SimpleFactoryWriter {
       " *   module example {\n" +
       " *     requires io.avaje.inject;\n" +
       " *     \n" +
-      " *     provides io.avaje.inject.spi.BeanScopeFactory with %s._DI$BeanScopeFactory;\n" +
+      " *     provides io.avaje.inject.spi.Module with %s.%s;\n" +
       " *     \n" +
       " *   }\n" +
       " * \n" +
@@ -140,16 +140,16 @@ class SimpleFactoryWriter {
     importTypes.add(Constants.BEANCONTEXT);
     importTypes.add(Constants.INJECTMODULE);
     importTypes.add(Constants.DEPENDENCYMETA);
-    importTypes.add(Constants.BEANSCOPEFACTORY);
+    importTypes.add(Constants.MODULE);
     importTypes.add(Constants.BUILDER);
     return importTypes;
   }
 
   private void writeStartClass() {
-    writer.append(CODE_COMMENT_FACTORY, scopeInfo.name(), factoryPackage).eol();
+    writer.append(CODE_COMMENT_FACTORY, scopeInfo.name(), factoryPackage, factoryShortName).eol();
     scopeInfo.buildAtInjectModule(writer);
 
-    writer.append("public class %s implements BeanScopeFactory {", factoryShortName).eol().eol();
+    writer.append("public class %s implements Module {", factoryShortName).eol().eol();
     writer.append("  private final String name;").eol();
     writer.append("  private final String[] provides;").eol();
     writer.append("  private final String[] dependsOn;").eol();
