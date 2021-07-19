@@ -21,33 +21,20 @@ class DBeanScope implements BeanScope {
   private final List<Runnable> postConstruct;
   private final List<AutoCloseable> preDestroy;
   private final DBeanMap beans;
-  private final Map<String, RequestScopeMatch<?>> reqScopeProviders;
   private final ShutdownHook shutdownHook;
   private boolean shutdown;
   private boolean closed;
 
-  DBeanScope(boolean withShutdownHook, List<AutoCloseable> preDestroy, List<Runnable> postConstruct, DBeanMap beans, Map<String, RequestScopeMatch<?>> reqScopeProviders) {
+  DBeanScope(boolean withShutdownHook, List<AutoCloseable> preDestroy, List<Runnable> postConstruct, DBeanMap beans) {
     this.preDestroy = preDestroy;
     this.postConstruct = postConstruct;
     this.beans = beans;
-    this.reqScopeProviders = reqScopeProviders;
     if (withShutdownHook) {
       this.shutdownHook = new ShutdownHook(this);
       Runtime.getRuntime().addShutdownHook(shutdownHook);
     } else {
       this.shutdownHook = null;
     }
-  }
-
-  @Override
-  public RequestScopeBuilder newRequestScope() {
-    return new DRequestScopeBuilder(this);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public <T> RequestScopeMatch<T> requestProvider(Class<T> type, String name) {
-    return (RequestScopeMatch<T>) reqScopeProviders.get(key(type, name));
   }
 
   @Override
@@ -164,7 +151,6 @@ class DBeanScope implements BeanScope {
       scope.shutdown();
     }
   }
-
 
   private static class SortBean<T> implements Comparable<SortBean<T>> {
 

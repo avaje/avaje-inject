@@ -148,9 +148,6 @@ class BeanReader {
   }
 
   void buildAddFor(Append writer) {
-    if (requestParams.isRequestParam()) {
-      context.logError(beanType, "@Singleton %s is not allowed to have a @Request scope dependency %s", shortName, requestParams.getRequestParamType());
-    }
     writer.append("    if (builder.isAddBeanFor(");
     if (name != null && !name.isEmpty()) {
       writer.append("\"%s\", ", name);

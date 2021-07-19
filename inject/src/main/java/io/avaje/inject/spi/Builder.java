@@ -1,7 +1,6 @@
 package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanScope;
-import io.avaje.inject.RequestScopeProvider;
 import jakarta.inject.Provider;
 
 import java.util.List;
@@ -49,23 +48,6 @@ public interface Builder {
    * @param types The types that the bean implements and provides
    */
   boolean isAddBeanFor(Class<?>... types);
-
-  /**
-   * Register a request scoped bean provider.
-   *
-   * @param type     The type of the bean being provided
-   * @param provider The provider
-   */
-  <T> void requestScope(Class<T> type, RequestScopeProvider<T> provider);
-
-  /**
-   * Register a request scoped bean provider.
-   *
-   * @param name     The qualifier name of the bean being provided
-   * @param type     The type of the bean being provided
-   * @param provider The provider
-   */
-  <T> void requestScope(Class<T> type, RequestScopeProvider<T> provider, String name, Class<?>... interfaceTypes);
 
   /**
    * Register the bean instance into the context.

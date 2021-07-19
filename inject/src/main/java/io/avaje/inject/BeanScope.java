@@ -77,40 +77,6 @@ public interface BeanScope extends Closeable {
   }
 
   /**
-   * Create a RequestScope via builder where we provide extra instances
-   * that can be used/included in wiring request scoped beans.
-   *
-   * <pre>{@code
-   *
-   *   try (RequestScope requestScope = beanScope.newRequestScope()
-   *       // supply some instances
-   *       .withBean(HttpRequest.class, request)
-   *       .withBean(HttpResponse.class, response)
-   *       .build()) {
-   *
-   *       MyController controller = requestScope.get(MyController.class);
-   *       controller.process();
-   *   }
-   *
-   *   ...
-   *
-   *   // define request scoped beans
-   *   @Request
-   *   MyController {
-   *
-   *     // can depend on supplied instances, singletons and other request scope beans
-   *     @Inject
-   *     MyController(HttpRequest request, HttpResponse response, MyService myService) {
-   *       ...
-   *     }
-   *
-   *   }
-   *
-   * }</pre>
-   */
-  RequestScopeBuilder newRequestScope();
-
-  /**
    * Return a single bean given the type.
    *
    * <pre>{@code
@@ -237,15 +203,6 @@ public interface BeanScope extends Closeable {
   default <T> List<T> getBeansByPriority(Class<T> interfaceType, Class<? extends Annotation> priority) {
     return listByPriority(interfaceType, priority);
   }
-
-  /**
-   * Return a request scoped provided for the specific type and name.
-   *
-   * @param type The type of the request scoped bean
-   * @param name The optional qualifier name
-   * @return The request scope provider or null
-   */
-  <T> RequestScopeMatch<T> requestProvider(Class<T> type, String name);
 
   /**
    * Close the scope firing any <code>@PreDestroy</code> methods.

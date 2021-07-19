@@ -2,8 +2,6 @@ package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
-import io.avaje.inject.RequestScopeMatch;
-import io.avaje.inject.RequestScopeProvider;
 import jakarta.inject.Provider;
 
 import java.util.*;
@@ -21,11 +19,6 @@ class DBuilder implements Builder {
    * List of field injection closures.
    */
   private final List<Consumer<Builder>> injectors = new ArrayList<>();
-
-  /**
-   * Map of request scope providers and their associated keys.
-   */
-  private final Map<String, RequestScopeMatch<?>> reqScopeProviders = new HashMap<>();
 
   /**
    * The beans created and added to the scope during building.
@@ -56,19 +49,6 @@ class DBuilder implements Builder {
   protected void next(String name, Class<?>... types) {
     injectTarget = firstOf(types);
     beanMap.nextBean(name, types);
-  }
-
-  @Override
-  public <T> void requestScope(Class<T> type, RequestScopeProvider<T> provider) {
-    requestScope(type, provider, null, null);
-  }
-
-  @Override
-  public <T> void requestScope(Class<T> type, RequestScopeProvider<T> provider, String name, Class<?>... types) {
-    final DRequestScopeMatch<T> match = DRequestScopeMatch.of(provider, type, name, types);
-    for (String key : match.keys()) {
-      reqScopeProviders.put(key, match);
-    }
   }
 
   private Class<?> firstOf(Class<?>[] types) {
@@ -202,6 +182,6 @@ class DBuilder implements Builder {
 
   public BeanScope build(boolean withShutdownHook) {
     runInjectors();
-    return new DBeanScope(withShutdownHook, preDestroy, postConstruct, beanMap, reqScopeProviders).start();
+    return new DBeanScope(withShutdownHook, preDestroy, postConstruct, beanMap).start();
   }
 }
