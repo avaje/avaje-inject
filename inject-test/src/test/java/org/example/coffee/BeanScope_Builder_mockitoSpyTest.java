@@ -48,6 +48,7 @@ public class BeanScope_Builder_mockitoSpyTest {
   public void withMockitoSpy_noSetup_expect_spyUsed() {
 
     try (BeanScope context = BeanScope.newBuilder()
+      .forTesting()
       .withSpy(Pump.class)
       .build()) {
 
@@ -64,6 +65,7 @@ public class BeanScope_Builder_mockitoSpyTest {
   public void withMockitoSpy_postLoadSetup_expect_spyUsed() {
 
     try (BeanScope context = BeanScope.newBuilder()
+      .forTesting()
       .withSpy(Pump.class)
       .withSpy(Grinder.class)
       .build()) {
@@ -87,6 +89,7 @@ public class BeanScope_Builder_mockitoSpyTest {
   public void withMockitoSpy_expect_spyUsed() {
 
     try (BeanScope context = BeanScope.newBuilder()
+      .forTesting()
       .withSpy(Pump.class, pump -> {
         // setup the spy
         doNothing().when(pump).pumpWater();
@@ -110,6 +113,7 @@ public class BeanScope_Builder_mockitoSpyTest {
   public void withMockitoSpy_whenPrimary_expect_spyUsed() {
 
     try (BeanScope context = BeanScope.newBuilder()
+      .forTesting()
       .withSpy(PEmailer.class) // has a primary
       .build()) {
 
@@ -125,6 +129,7 @@ public class BeanScope_Builder_mockitoSpyTest {
   public void withMockitoSpy_whenOnlySecondary_expect_spyUsed() {
 
     try (BeanScope context = BeanScope.newBuilder()
+      .forTesting()
       .withSpy(Widget.class) // only secondary
       .build()) {
 
@@ -145,6 +150,7 @@ public class BeanScope_Builder_mockitoSpyTest {
   public void withMockitoSpy_whenSecondary_expect_spyUsed() {
 
     try (BeanScope context = BeanScope.newBuilder()
+      .forTesting()
       .withSpy(Something.class) // has a secondary and a normal
       .build()) {
 
@@ -169,6 +175,7 @@ public class BeanScope_Builder_mockitoSpyTest {
     AtomicReference<Grinder> mock = new AtomicReference<>();
 
     try (BeanScope context = BeanScope.newBuilder()
+      .forTesting()
       .withMock(Pump.class)
       .withMock(Grinder.class, grinder -> {
         // setup the mock

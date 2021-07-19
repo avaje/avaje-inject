@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 /**
  * Build a bean scope with options for shutdown hook and supplying test doubles.
  */
-class DBeanScopeBuilder implements BeanScopeBuilder {
+class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   private static final Logger log = LoggerFactory.getLogger(DBeanScopeBuilder.class);
 
@@ -33,6 +33,11 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
    * Create a BeanScopeBuilder to ultimately load and return a new BeanScope.
    */
   DBeanScopeBuilder() {
+  }
+
+  @Override
+  public ForTesting forTesting() {
+    return this;
   }
 
   @Override
@@ -80,39 +85,39 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
   }
 
   @Override
-  public BeanScopeBuilder withMock(Class<?> type) {
+  public BeanScopeBuilder.ForTesting withMock(Class<?> type) {
     return withMock(type, null, null);
   }
 
-  public BeanScopeBuilder withMock(Class<?> type, String name) {
+  public BeanScopeBuilder.ForTesting withMock(Class<?> type, String name) {
     return withMock(type, name, null);
   }
 
   @Override
-  public <D> BeanScopeBuilder withMock(Class<D> type, Consumer<D> consumer) {
+  public <D> BeanScopeBuilder.ForTesting withMock(Class<D> type, Consumer<D> consumer) {
     return withMock(type, null, consumer);
   }
 
-  private <D> BeanScopeBuilder withMock(Class<D> type, String name, Consumer<D> consumer) {
+  private <D> BeanScopeBuilder.ForTesting withMock(Class<D> type, String name, Consumer<D> consumer) {
     suppliedBeans.add(new SuppliedBean<>(name, type, null, consumer));
     return this;
   }
 
   @Override
-  public BeanScopeBuilder withSpy(Class<?> type) {
+  public BeanScopeBuilder.ForTesting withSpy(Class<?> type) {
     return spy(type, null, null);
   }
 
-  public BeanScopeBuilder withSpy(Class<?> type, String name) {
+  public BeanScopeBuilder.ForTesting withSpy(Class<?> type, String name) {
     return spy(type, name, null);
   }
 
   @Override
-  public <D> DBeanScopeBuilder withSpy(Class<D> type, Consumer<D> consumer) {
+  public <D> BeanScopeBuilder.ForTesting withSpy(Class<D> type, Consumer<D> consumer) {
     return spy(type, null, consumer);
   }
 
-  private <D> DBeanScopeBuilder spy(Class<D> type, String name, Consumer<D> consumer) {
+  private <D> BeanScopeBuilder.ForTesting spy(Class<D> type, String name, Consumer<D> consumer) {
     enrichBeans.add(new EnrichBean<>(type, name, consumer));
     return this;
   }

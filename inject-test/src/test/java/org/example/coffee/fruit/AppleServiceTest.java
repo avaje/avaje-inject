@@ -14,7 +14,7 @@ public class AppleServiceTest {
   public void test_spyWithFieldInjection() {
 
     BeanScopeBuilder contextBuilder = BeanScope.newBuilder();
-    contextBuilder.withSpy(AppleService.class);
+    contextBuilder.forTesting().withSpy(AppleService.class);
 
     try (BeanScope beanScope = contextBuilder.build()) {
 

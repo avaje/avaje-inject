@@ -184,146 +184,11 @@ public interface BeanScopeBuilder {
   <D> BeanScopeBuilder withBean(String name, Class<D> type, D bean);
 
   /**
-   * Use a mockito mock when injecting this bean type.
+   * Extend the builder to support testing methods <code>withMock()</code> and <code>withSpy()</code>
    *
-   * <pre>{@code
-   *
-   *   try (BeanScope scope = BeanScope.newBuilder()
-   *     .withMock(Pump.class)
-   *     .withMock(Grinder.class, grinder -> {
-   *       // setup the mock
-   *       when(grinder.grindBeans()).thenReturn("stub response");
-   *     })
-   *     .build()) {
-   *
-   *
-   *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
-   *     coffeeMaker.makeIt();
-   *
-   *     // this is a mockito mock
-   *     Grinder grinder = scope.get(Grinder.class);
-   *     verify(grinder).grindBeans();
-   *   }
-   *
-   * }</pre>
+   * @return The builder with extra testing support for mocks and spies
    */
-  BeanScopeBuilder withMock(Class<?> type);
-
-  /**
-   * Register as a Mockito mock with a qualifier name.
-   *
-   * <pre>{@code
-   *
-   *   try (BeanScope scope = BeanScope.newBuilder()
-   *     .withMock(Store.class, "red")
-   *     .withMock(Store.class, "blue")
-   *     .build()) {
-   *
-   *     ...
-   *   }
-   *
-   * }</pre>
-   */
-  BeanScopeBuilder withMock(Class<?> type, String name);
-
-  /**
-   * Use a mockito mock when injecting this bean type additionally
-   * running setup on the mock instance.
-   *
-   * <pre>{@code
-   *
-   *   try (BeanScope scope = BeanScope.newBuilder()
-   *     .withMock(Pump.class)
-   *     .withMock(Grinder.class, grinder -> {
-   *
-   *       // setup the mock
-   *       when(grinder.grindBeans()).thenReturn("stub response");
-   *     })
-   *     .build()) {
-   *
-   *
-   *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
-   *     coffeeMaker.makeIt();
-   *
-   *     // this is a mockito mock
-   *     Grinder grinder = scope.get(Grinder.class);
-   *     verify(grinder).grindBeans();
-   *   }
-   *
-   * }</pre>
-   */
-  <D> BeanScopeBuilder withMock(Class<D> type, Consumer<D> consumer);
-
-  /**
-   * Use a mockito spy when injecting this bean type.
-   *
-   * <pre>{@code
-   *
-   *   try (BeanScope scope = BeanScope.newBuilder()
-   *     .withSpy(Pump.class)
-   *     .build()) {
-   *
-   *     // setup spy here ...
-   *     Pump pump = scope.get(Pump.class);
-   *     doNothing().when(pump).pumpSteam();
-   *
-   *     // act
-   *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
-   *     coffeeMaker.makeIt();
-   *
-   *     verify(pump).pumpWater();
-   *     verify(pump).pumpSteam();
-   *   }
-   *
-   * }</pre>
-   */
-  BeanScopeBuilder withSpy(Class<?> type);
-
-  /**
-   * Register a Mockito spy with a qualifier name.
-   *
-   * <pre>{@code
-   *
-   *   try (BeanScope scope = BeanScope.newBuilder()
-   *     .withSpy(Store.class, "red")
-   *     .withSpy(Store.class, "blue")
-   *     .build()) {
-   *
-   *     ...
-   *   }
-   *
-   * }</pre>
-   */
-  BeanScopeBuilder withSpy(Class<?> type, String name);
-
-  /**
-   * Use a mockito spy when injecting this bean type additionally
-   * running setup on the spy instance.
-   *
-   * <pre>{@code
-   *
-   *   try (BeanScope scope = BeanScope.newBuilder()
-   *     .withSpy(Pump.class, pump -> {
-   *       // setup the spy
-   *       doNothing().when(pump).pumpWater();
-   *     })
-   *     .build()) {
-   *
-   *     // or setup here ...
-   *     Pump pump = scope.get(Pump.class);
-   *     doNothing().when(pump).pumpSteam();
-   *
-   *     // act
-   *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
-   *     coffeeMaker.makeIt();
-   *
-   *     verify(pump).pumpWater();
-   *     verify(pump).pumpSteam();
-   *   }
-   *
-   * }</pre>
-   */
-  <D> BeanScopeBuilder withSpy(Class<D> type, Consumer<D> consumer);
+  BeanScopeBuilder.ForTesting forTesting();
 
   /**
    * Build and return the bean scope.
@@ -331,4 +196,153 @@ public interface BeanScopeBuilder {
    * @return The BeanScope
    */
   BeanScope build();
+
+  /**
+   * Extends the building with testing specific support for mocks and spies.
+   */
+  interface ForTesting extends BeanScopeBuilder {
+
+    /**
+     * Use a mockito mock when injecting this bean type.
+     *
+     * <pre>{@code
+     *
+     *   try (BeanScope scope = BeanScope.newBuilder()
+     *     .withMock(Pump.class)
+     *     .withMock(Grinder.class, grinder -> {
+     *       // setup the mock
+     *       when(grinder.grindBeans()).thenReturn("stub response");
+     *     })
+     *     .build()) {
+     *
+     *
+     *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
+     *     coffeeMaker.makeIt();
+     *
+     *     // this is a mockito mock
+     *     Grinder grinder = scope.get(Grinder.class);
+     *     verify(grinder).grindBeans();
+     *   }
+     *
+     * }</pre>
+     */
+    BeanScopeBuilder.ForTesting withMock(Class<?> type);
+
+    /**
+     * Register as a Mockito mock with a qualifier name.
+     *
+     * <pre>{@code
+     *
+     *   try (BeanScope scope = BeanScope.newBuilder()
+     *     .withMock(Store.class, "red")
+     *     .withMock(Store.class, "blue")
+     *     .build()) {
+     *
+     *     ...
+     *   }
+     *
+     * }</pre>
+     */
+    BeanScopeBuilder.ForTesting withMock(Class<?> type, String name);
+
+    /**
+     * Use a mockito mock when injecting this bean type additionally
+     * running setup on the mock instance.
+     *
+     * <pre>{@code
+     *
+     *   try (BeanScope scope = BeanScope.newBuilder()
+     *     .withMock(Pump.class)
+     *     .withMock(Grinder.class, grinder -> {
+     *
+     *       // setup the mock
+     *       when(grinder.grindBeans()).thenReturn("stub response");
+     *     })
+     *     .build()) {
+     *
+     *
+     *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
+     *     coffeeMaker.makeIt();
+     *
+     *     // this is a mockito mock
+     *     Grinder grinder = scope.get(Grinder.class);
+     *     verify(grinder).grindBeans();
+     *   }
+     *
+     * }</pre>
+     */
+    <D> BeanScopeBuilder.ForTesting withMock(Class<D> type, Consumer<D> consumer);
+
+    /**
+     * Use a mockito spy when injecting this bean type.
+     *
+     * <pre>{@code
+     *
+     *   try (BeanScope scope = BeanScope.newBuilder()
+     *     .withSpy(Pump.class)
+     *     .build()) {
+     *
+     *     // setup spy here ...
+     *     Pump pump = scope.get(Pump.class);
+     *     doNothing().when(pump).pumpSteam();
+     *
+     *     // act
+     *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
+     *     coffeeMaker.makeIt();
+     *
+     *     verify(pump).pumpWater();
+     *     verify(pump).pumpSteam();
+     *   }
+     *
+     * }</pre>
+     */
+    BeanScopeBuilder.ForTesting withSpy(Class<?> type);
+
+    /**
+     * Register a Mockito spy with a qualifier name.
+     *
+     * <pre>{@code
+     *
+     *   try (BeanScope scope = BeanScope.newBuilder()
+     *     .withSpy(Store.class, "red")
+     *     .withSpy(Store.class, "blue")
+     *     .build()) {
+     *
+     *     ...
+     *   }
+     *
+     * }</pre>
+     */
+    BeanScopeBuilder.ForTesting withSpy(Class<?> type, String name);
+
+    /**
+     * Use a mockito spy when injecting this bean type additionally
+     * running setup on the spy instance.
+     *
+     * <pre>{@code
+     *
+     *   try (BeanScope scope = BeanScope.newBuilder()
+     *     .withSpy(Pump.class, pump -> {
+     *       // setup the spy
+     *       doNothing().when(pump).pumpWater();
+     *     })
+     *     .build()) {
+     *
+     *     // or setup here ...
+     *     Pump pump = scope.get(Pump.class);
+     *     doNothing().when(pump).pumpSteam();
+     *
+     *     // act
+     *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
+     *     coffeeMaker.makeIt();
+     *
+     *     verify(pump).pumpWater();
+     *     verify(pump).pumpSteam();
+     *   }
+     *
+     * }</pre>
+     */
+    <D> BeanScopeBuilder.ForTesting withSpy(Class<D> type, Consumer<D> consumer);
+
+  }
 }
