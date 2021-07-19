@@ -98,7 +98,7 @@ public interface BeanScope extends AutoCloseable {
    *   // e.g. register all controllers with web a framework
    *   // .. where Controller is an annotation on the beans
    *
-   *   List<Object> controllers = ApplicationScope.listByAnnotation(Controller.class);
+   *   List<Object> controllers = beanScope.listByAnnotation(Controller.class);
    *
    * }</pre>
    *
@@ -117,7 +117,7 @@ public interface BeanScope extends AutoCloseable {
    *
    *   // e.g. register all routes for a web framework
    *
-   *   List<WebRoute> routes = ApplicationScope.list(WebRoute.class);
+   *   List<WebRoute> routes = beanScope.list(WebRoute.class);
    *
    * }</pre>
    *
