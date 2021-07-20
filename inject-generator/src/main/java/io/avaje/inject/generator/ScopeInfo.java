@@ -5,6 +5,7 @@ import io.avaje.inject.spi.DependencyMeta;
 
 import javax.annotation.processing.FilerException;
 import javax.lang.model.element.*;
+import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.util.*;
 
@@ -30,6 +31,7 @@ class ScopeInfo {
   private String moduleShortName;
   private String beanFactoryFullName;
   private String beanFactoryShortName;
+  private JavaFileObject factoryFile;
 
   /**
    * Create for the main/global module scope.
@@ -73,13 +75,18 @@ class ScopeInfo {
     return name;
   }
 
-  void initialiseName(String topPackage) {
+  void initialiseName(String topPackage) throws IOException {
     modulePackage = topPackage;
     final String name = initName(modulePackage);
     moduleShortName = name + "Module";
     moduleFullName = modulePackage + "." + moduleShortName;
     beanFactoryShortName = name + "BeanFactory";
     beanFactoryFullName = modulePackage + "." + beanFactoryShortName;
+    factoryFile = context.createWriter(beanFactoryFullName);
+  }
+
+  JavaFileObject factoryFile() {
+    return factoryFile;
   }
 
   String modulePackage() {

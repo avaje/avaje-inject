@@ -127,8 +127,7 @@ class SimpleFactoryWriter {
   }
 
   private Writer createFileWriter() throws IOException {
-    JavaFileObject jfo = context.createWriter(factoryFullName);
-    return jfo.openWriter();
+    return scopeInfo.factoryFile().openWriter();
   }
 
 }
