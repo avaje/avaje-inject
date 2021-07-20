@@ -24,4 +24,12 @@ public @interface InjectModule {
    */
   Class<?>[] requires() default {};
 
+  /**
+   * Internal use only - identifies the custom scope annotation associated to this module.
+   * <p>
+   * When a module is generated for a custom scope this is set to link the module back to the
+   * custom scope annotation and support partial compilation.
+   */
+  String customScopeType() default "";
+
 }

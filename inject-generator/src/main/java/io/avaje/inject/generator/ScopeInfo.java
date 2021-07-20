@@ -20,6 +20,7 @@ class ScopeInfo {
   private final Set<String> requires = new LinkedHashSet<>();
   private final Set<String> provides = new LinkedHashSet<>();
   private final boolean mainScope;
+  private final TypeElement annotationType;
   private boolean moduleWritten;
   private boolean builderWritten;
   private String name;
@@ -27,9 +28,22 @@ class ScopeInfo {
   private String factoryFullName;
   private String factoryShortName;
 
-  ScopeInfo(ProcessingContext context, boolean mainScope) {
+  /**
+   * Create for the main/global module scope.
+   */
+  ScopeInfo(ProcessingContext context) {
     this.context = context;
-    this.mainScope = mainScope;
+    this.mainScope = true;
+    this.annotationType = null;
+  }
+
+  /**
+   * Create for custom scope.
+   */
+  ScopeInfo(ProcessingContext context, TypeElement type) {
+    this.context = context;
+    this.mainScope = false;
+    this.annotationType = type;
   }
 
   void details(String name, Element contextElement) {
@@ -235,6 +249,13 @@ class ScopeInfo {
     }
     if (!requires.isEmpty()) {
       attributeClasses(leadingComma, writer, "requires", requires);
+      leadingComma = true;
+    }
+    if (annotationType != null) {
+      if (leadingComma) {
+        writer.append(", ");
+      }
+      writer.append("customScopeType=\"%s\"", annotationType.getQualifiedName().toString());
     }
     writer.append(")").eol();
   }
@@ -286,7 +307,7 @@ class ScopeInfo {
     String builderName = factory.substring(0, factory.length() - 6) + "BeanFactory";
     TypeElement builderType = context.element(builderName);
     if (builderType != null) {
-      context.logWarn("Reading module meta data from: " + builderName);
+      // context.logDebug("Reading module meta data from: " + builderName);
       readFactoryMetaData(builderType);
     }
   }

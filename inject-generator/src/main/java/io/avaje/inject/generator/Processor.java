@@ -34,7 +34,7 @@ public class Processor extends AbstractProcessor {
     super.init(processingEnv);
     this.context = new ProcessingContext(processingEnv);
     this.elementUtils = processingEnv.getElementUtils();
-    this.scopeInfo = new ScopeInfo(context, true);
+    this.scopeInfo = new ScopeInfo(context);
     this.customScopes = new CustomScopes(context);
   }
 
@@ -76,7 +76,7 @@ public class Processor extends AbstractProcessor {
   private void readScopes(Set<? extends Element> scopes) {
     for (Element element : scopes) {
       if (element.getKind() == ElementKind.ANNOTATION_TYPE) {
-        context.logWarn("detected scope annotation " + element);
+        // context.logDebug("detected scope annotation " + element);
         TypeElement type = (TypeElement) element;
         customScopes.addAnnotation(type);
       }
@@ -101,14 +101,15 @@ public class Processor extends AbstractProcessor {
    */
   private void readModule(RoundEnvironment roundEnv) {
     if (readModuleInfo) {
+      // only read the module meta data once
       return;
     }
+    readModuleInfo = true;
     String factory = context.loadMetaInfServices();
     if (factory != null) {
       TypeElement moduleType = elementUtils.getTypeElement(factory);
       if (moduleType != null) {
         scopeInfo.readModuleMetaData(factory, moduleType);
-        readModuleInfo = true;
       }
     }
     customScopes.readModules(context.loadMetaInfCustom());

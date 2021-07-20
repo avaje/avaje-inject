@@ -19,7 +19,7 @@ public class AllQue {
     this.frodo = frodo;
     this.sam = sam;
     this.bilbo = bilbo;
-    System.out.println("dfgsdf");
+    System.out.println("hello");
   }
 
   String whichSet() {
