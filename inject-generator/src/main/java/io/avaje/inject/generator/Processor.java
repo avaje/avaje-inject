@@ -133,7 +133,7 @@ public class Processor extends AbstractProcessor {
     if (factory != null) {
       TypeElement moduleType = elementUtils.getTypeElement(factory);
       if (moduleType != null) {
-        defaultScope.readModuleMetaData(factory, moduleType);
+        defaultScope.readModuleMetaData(moduleType);
       }
     }
     allScopes.readModules(context.loadMetaInfCustom());

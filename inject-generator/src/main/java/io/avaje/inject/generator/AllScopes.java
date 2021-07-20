@@ -88,7 +88,7 @@ class AllScopes {
             context.logError(module, "customScopeType [" + customScopeType + "] is invalid? on " + module);
           } else {
             final ScopeInfo scopeInfo = addAnnotation(scopeType);
-            scopeInfo.readModuleMetaData(customScopeModule, module);
+            scopeInfo.readModuleMetaData(module);
           }
         }
       }

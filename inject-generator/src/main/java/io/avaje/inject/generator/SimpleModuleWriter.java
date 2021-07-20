@@ -4,6 +4,7 @@ import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -46,10 +47,12 @@ class SimpleModuleWriter {
   private final String shortName;
   private final String fullName;
   private final ScopeInfo scopeInfo;
+  private final MetaDataOrdering ordering;
 
   private Append writer;
 
-  SimpleModuleWriter(ProcessingContext context, ScopeInfo scopeInfo) {
+  SimpleModuleWriter(MetaDataOrdering ordering, ProcessingContext context, ScopeInfo scopeInfo) {
+    this.ordering = ordering;
     this.context = context;
     this.scopeInfo = scopeInfo;
     this.modulePackage = scopeInfo.modulePackage();
@@ -61,10 +64,10 @@ class SimpleModuleWriter {
     writer = new Append(createFileWriter());
     writePackage();
     writeStartClass();
-    writeCreateMethod();
+    writeBuildMethod();
+    writeBuildMethods();
     writeEndClass();
     writer.close();
-
     if (includeServicesFile) {
       writeServicesFile();
     }
@@ -85,19 +88,46 @@ class SimpleModuleWriter {
     }
   }
 
-  private void writeCreateMethod() {
+  private void writeBuildMethod() {
     writer.append(CODE_COMMENT_CREATE_CONTEXT).eol();
     writer.append("  @Override").eol();
     writer.append("  public void build(Builder builder) {").eol();
-    writer.append("    new %sBeanFactory(builder).build();", scopeInfo.name()).eol();
+    writer.append("    this.builder = builder;").eol();
+    writer.append("    // create beans in order based on constructor dependencies").eol();
+    writer.append("    // i.e. \"provides\" followed by \"dependsOn\"").eol();
+    for (MetaData metaData : ordering.getOrdered()) {
+      writer.append("    build_%s();", metaData.getBuildName()).eol();
+    }
+    final List<MetaData> requestScope = ordering.getRequestScope();
+    if (!requestScope.isEmpty()) {
+      writer.eol();
+      writer.append("    // request scope providers").eol();
+      for (MetaData metaData : requestScope) {
+        writer.append("    build_%s();", metaData.getBuildName()).eol();
+      }
+    }
     writer.append("  }").eol();
     writer.eol();
+  }
+
+  private void writeBuildMethods() {
+    for (MetaData metaData : ordering.getOrdered()) {
+      writer.append(metaData.buildMethod(ordering)).eol();
+    }
+    for (MetaData metaData : ordering.getRequestScope()) {
+      writer.append(metaData.buildMethod(ordering)).eol();
+    }
   }
 
   private void writePackage() {
     writer.append("package %s;", modulePackage).eol().eol();
     for (String type : factoryImportTypes()) {
       writer.append("import %s;", type).eol();
+    }
+    for (String type : ordering.getImportTypes()) {
+      if (Util.validImportType(type)) {
+        writer.append("import %s;", type).eol();
+      }
     }
     writer.eol();
   }
@@ -137,8 +167,7 @@ class SimpleModuleWriter {
   }
 
   private Writer createFileWriter() throws IOException {
-    JavaFileObject jfo = context.createWriter(fullName);
-    return jfo.openWriter();
+    return scopeInfo.moduleFile().openWriter();
   }
 
 }

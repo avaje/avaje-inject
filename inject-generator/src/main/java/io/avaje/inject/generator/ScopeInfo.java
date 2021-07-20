@@ -29,9 +29,7 @@ class ScopeInfo {
   private String modulePackage;
   private String moduleFullName;
   private String moduleShortName;
-  private String beanFactoryFullName;
-  private String beanFactoryShortName;
-  private JavaFileObject factoryFile;
+  private JavaFileObject moduleFile;
 
   /**
    * Create for the main/global module scope.
@@ -80,13 +78,11 @@ class ScopeInfo {
     final String name = initName(modulePackage);
     moduleShortName = name + "Module";
     moduleFullName = modulePackage + "." + moduleShortName;
-    beanFactoryShortName = name + "BeanFactory";
-    beanFactoryFullName = modulePackage + "." + beanFactoryShortName;
-    factoryFile = context.createWriter(beanFactoryFullName);
+    moduleFile = context.createWriter(moduleFullName);
   }
 
-  JavaFileObject factoryFile() {
-    return factoryFile;
+  JavaFileObject moduleFile() {
+    return moduleFile;
   }
 
   String modulePackage() {
@@ -99,14 +95,6 @@ class ScopeInfo {
 
   String moduleShortName() {
     return moduleShortName;
-  }
-
-  String beanFactoryFullName() {
-    return beanFactoryFullName;
-  }
-
-  String beanFactoryShortName() {
-    return beanFactoryShortName;
   }
 
   boolean isMainScope() {
@@ -155,13 +143,9 @@ class ScopeInfo {
     if (!moduleWritten) {
       try {
         initialiseName(MetaTopPackage.of(metaData.values()));
-        SimpleModuleWriter factoryWriter = new SimpleModuleWriter(context, this);
-        factoryWriter.write(mainScope);
         moduleWritten = true;
-      } catch (FilerException e) {
-        context.logWarn("FilerException trying to write factory " + e.getMessage());
       } catch (IOException e) {
-        context.logError("Failed to write factory " + e.getMessage());
+        context.logError("Failed to create module filer " + e.getMessage());
       }
     }
   }
@@ -177,8 +161,8 @@ class ScopeInfo {
       ordering.logWarnings();
     }
     try {
-      SimpleFactoryWriter factoryWriter = new SimpleFactoryWriter(ordering, context, this);
-      factoryWriter.write();
+      SimpleModuleWriter factoryWriter = new SimpleModuleWriter(ordering, context, this);
+      factoryWriter.write(mainScope);
       builderWritten = true;
     } catch (FilerException e) {
       context.logWarn("FilerException trying to write factory " + e.getMessage());
@@ -320,24 +304,19 @@ class ScopeInfo {
     writer.append(";").eol();
     writer.append("  private final Class<?>[] requires = ");
     buildClassArray(writer, requires);
-    writer.append(";").eol().eol();
+    writer.append(";").eol();
+    writer.append("  private Builder builder;").eol().eol();
   }
 
-  void readModuleMetaData(String factory, TypeElement moduleType) {
+  void readModuleMetaData(TypeElement moduleType) {
     context.logDebug("Reading module info for " + moduleType);
     InjectModule module = moduleType.getAnnotation(InjectModule.class);
     details(module.name(), moduleType);
-
-    String builderName = factory.substring(0, factory.length() - 6) + "BeanFactory";
-    TypeElement builderType = context.element(builderName);
-    if (builderType != null) {
-      // context.logDebug("Reading module meta data from: " + builderName);
-      readFactoryMetaData(builderType);
-    }
+    readFactoryMetaData(moduleType);
   }
 
-  private void readFactoryMetaData(TypeElement factoryType) {
-    List<? extends Element> elements = factoryType.getEnclosedElements();
+  private void readFactoryMetaData(TypeElement moduleType) {
+    List<? extends Element> elements = moduleType.getEnclosedElements();
     if (elements != null) {
       for (Element element : elements) {
         if (ElementKind.METHOD == element.getKind()) {
