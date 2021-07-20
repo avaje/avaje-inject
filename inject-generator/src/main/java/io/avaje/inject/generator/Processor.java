@@ -107,27 +107,27 @@ public class Processor extends AbstractProcessor {
     if (factory != null) {
       TypeElement moduleType = elementUtils.getTypeElement(factory);
       if (moduleType != null) {
-        context.logDebug("Reading module info");
-        readModuleDetails(moduleType);
-        String builderName = factory.substring(0, factory.length() - 6) + "BeanFactory";
-        TypeElement builderType = elementUtils.getTypeElement(builderName);
-        if (builderType != null) {
-          context.logDebug("Reading module meta data from: " + builderName);
-          readFactoryMetaData(builderType);
-        }
+        scopeInfo.readModuleMetaData(factory, moduleType);
         readModuleInfo = true;
       }
     }
+    customScopes.readModules(context.loadMetaInfCustom());
+    readInjectModule(roundEnv);
+  }
 
+  /**
+   * Read InjectModule for things like package-info etc (not for custom scopes)
+   */
+  private void readInjectModule(RoundEnvironment roundEnv) {
+    // read other that are annotated with InjectModule
     Set<? extends Element> elementsAnnotatedWith = roundEnv.getElementsAnnotatedWith(InjectModule.class);
     if (!elementsAnnotatedWith.isEmpty()) {
       Iterator<? extends Element> iterator = elementsAnnotatedWith.iterator();
       if (iterator.hasNext()) {
         Element element = iterator.next();
         Scope scope = element.getAnnotation(Scope.class);
-        if (scope != null) {
-          context.logDebug("Custom scope on " + element);
-        } else {
+        if (scope == null) {
+          // it it not a custom scope annotation
           InjectModule annotation = element.getAnnotation(InjectModule.class);
           if (annotation != null) {
             scopeInfo.details(annotation.name(), element);
@@ -137,23 +137,4 @@ public class Processor extends AbstractProcessor {
     }
   }
 
-  /**
-   * Read the existing factory bean. Each of the build methods is annotated with <code>@DependencyMeta</code>
-   * which holds the information we need (to regenerate the factory with any changes).
-   */
-  private void readModuleDetails(TypeElement moduleType) {
-    InjectModule module = moduleType.getAnnotation(InjectModule.class);
-    scopeInfo.details(module.name(), moduleType);
-  }
-
-  private void readFactoryMetaData(TypeElement factoryType) {
-    List<? extends Element> elements = factoryType.getEnclosedElements();
-    if (elements != null) {
-      for (Element element : elements) {
-        if (ElementKind.METHOD == element.getKind()) {
-          scopeInfo.readBuildMethodDependencyMeta(element);
-        }
-      }
-    }
-  }
 }

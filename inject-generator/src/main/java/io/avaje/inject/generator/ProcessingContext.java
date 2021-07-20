@@ -19,9 +19,7 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.Reader;
 import java.nio.file.NoSuchFileException;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 class ProcessingContext {
 
@@ -30,7 +28,6 @@ class ProcessingContext {
   private final Filer filer;
   private final Elements elementUtils;
   private final Types typeUtils;
-  private String metaInfServicesLine;
 
   ProcessingContext(ProcessingEnvironment processingEnv) {
     this.processingEnv = processingEnv;
@@ -60,23 +57,29 @@ class ProcessingContext {
   }
 
   String loadMetaInfServices() {
-    if (metaInfServicesLine == null) {
-      metaInfServicesLine = loadMetaInf();
-    }
-    return metaInfServicesLine;
+    final List<String> lines = loadMetaInf(Constants.META_INF_FACTORY);
+    return lines.isEmpty() ? null : lines.get(0);
   }
 
-  private String loadMetaInf() {
-    // logDebug("loading metaInfServicesLine ...");
+  List<String> loadMetaInfCustom() {
+    return loadMetaInf(Constants.META_INF_CUSTOM);
+  }
+
+  private List<String> loadMetaInf(String fullName) {
     try {
-      FileObject fileObject = processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", Constants.META_INF_FACTORY);
+      FileObject fileObject = processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", fullName);
       if (fileObject != null) {
+        List<String> lines = new ArrayList<>();
         Reader reader = fileObject.openReader(true);
         LineNumberReader lineReader = new LineNumberReader(reader);
-        String line = lineReader.readLine();
-        if (line != null) {
-          return line.trim();
+        String line;
+        while ((line = lineReader.readLine()) != null) {
+          line = line.trim();
+          if (!line.isEmpty()) {
+            lines.add(line);
+          }
         }
+        return lines;
       }
 
     } catch (FileNotFoundException | NoSuchFileException e) {
@@ -89,7 +92,7 @@ class ProcessingContext {
       e.printStackTrace();
       logWarn("Error reading services file: " + e.getMessage());
     }
-    return null;
+    return Collections.emptyList();
   }
 
   /**
@@ -99,11 +102,16 @@ class ProcessingContext {
     return filer.createSourceFile(cls);
   }
 
-  /**
-   * Create a file writer for the given class name.
-   */
   FileObject createMetaInfWriter() throws IOException {
-    return filer.createResource(StandardLocation.CLASS_OUTPUT, "", Constants.META_INF_FACTORY);
+    return createMetaInfWriterFor(Constants.META_INF_FACTORY);
+  }
+
+  FileObject createMetaInfModuleCustom() throws IOException {
+    return createMetaInfWriterFor(Constants.META_INF_CUSTOM);
+  }
+
+  private FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
+    return filer.createResource(StandardLocation.CLASS_OUTPUT, "", interfaceType);
   }
 
   TypeElement element(String rawType) {

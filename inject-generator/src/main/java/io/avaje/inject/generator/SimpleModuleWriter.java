@@ -53,8 +53,9 @@ class SimpleModuleWriter {
     this.context = context;
     this.scopeInfo = scopeInfo;
     this.factoryPackage = topPackage;
-    this.factoryShortName = scopeInfo.moduleShortName(factoryPackage);
-    this.factoryFullName = factoryPackage + "." + factoryShortName;
+    scopeInfo.moduleShortName(factoryPackage);
+    this.factoryShortName = scopeInfo.factoryShortName();
+    this.factoryFullName = scopeInfo.factoryFullName();
   }
 
   void write(boolean includeServicesFile) throws IOException {

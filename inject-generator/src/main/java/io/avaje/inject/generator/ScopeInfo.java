@@ -1,5 +1,6 @@
 package io.avaje.inject.generator;
 
+import io.avaje.inject.InjectModule;
 import io.avaje.inject.spi.DependencyMeta;
 
 import javax.annotation.processing.FilerException;
@@ -23,6 +24,8 @@ class ScopeInfo {
   private boolean builderWritten;
   private String name;
   private String topPackage;
+  private String factoryFullName;
+  private String factoryShortName;
 
   ScopeInfo(ProcessingContext context, boolean mainScope) {
     this.context = context;
@@ -32,7 +35,6 @@ class ScopeInfo {
   void details(String name, Element contextElement) {
     if (name == null || name.isEmpty()) {
       final String simpleName = contextElement.getSimpleName().toString();
-      context.logWarn("derive name from "+simpleName);
       this.name = ScopeUtil.name(simpleName);
     } else {
       this.name = ScopeUtil.name(name);
@@ -52,12 +54,21 @@ class ScopeInfo {
     return name;
   }
 
-  String moduleShortName(String factoryPackage) {
-    return initName(factoryPackage) + "Module";
+  void moduleShortName(String factoryPackage) {
+    factoryShortName = initName(factoryPackage) + "Module";
+    factoryFullName = factoryPackage + "." + factoryShortName;
   }
 
   String factoryShortName(String factoryPackage) {
     return initName(factoryPackage) + "BeanFactory";
+  }
+
+  String factoryFullName() {
+    return factoryFullName;
+  }
+
+  String factoryShortName() {
+    return factoryShortName;
   }
 
   boolean isMainScope() {
@@ -265,5 +276,29 @@ class ScopeInfo {
     writer.append("  private final Class<?>[] requires = ");
     buildClassArray(writer, requires);
     writer.append(";").eol().eol();
+  }
+
+  void readModuleMetaData(String factory, TypeElement moduleType) {
+    context.logDebug("Reading module info for " + moduleType);
+    InjectModule module = moduleType.getAnnotation(InjectModule.class);
+    details(module.name(), moduleType);
+
+    String builderName = factory.substring(0, factory.length() - 6) + "BeanFactory";
+    TypeElement builderType = context.element(builderName);
+    if (builderType != null) {
+      context.logWarn("Reading module meta data from: " + builderName);
+      readFactoryMetaData(builderType);
+    }
+  }
+
+  private void readFactoryMetaData(TypeElement factoryType) {
+    List<? extends Element> elements = factoryType.getEnclosedElements();
+    if (elements != null) {
+      for (Element element : elements) {
+        if (ElementKind.METHOD == element.getKind()) {
+          readBuildMethodDependencyMeta(element);
+        }
+      }
+    }
   }
 }

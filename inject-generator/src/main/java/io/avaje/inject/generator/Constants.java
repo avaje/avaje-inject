@@ -21,6 +21,7 @@ class Constants {
   static final String AT_SINGLETON = "@Singleton";
   static final String AT_GENERATED = "@Generated(\"io.avaje.inject.generator\")";
   static final String META_INF_FACTORY = "META-INF/services/io.avaje.inject.spi.Module";
+  static final String META_INF_CUSTOM = "META-INF/services/io.avaje.inject.spi.Module.Custom";
 
   static final String REQUESTSCOPE = "io.avaje.inject.RequestScope";
   static final String BEANCONTEXT = "io.avaje.inject.BeanScope";
