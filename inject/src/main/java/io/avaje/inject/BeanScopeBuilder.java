@@ -5,32 +5,23 @@ import io.avaje.inject.spi.Module;
 import java.util.function.Consumer;
 
 /**
- * Build a bean scope with options for shutdown hook and supplying test doubles.
+ * Build a bean scope with options for shutdown hook and supplying external dependencies.
  * <p>
- * We would choose to use BeanScopeBuilder in test code (for component testing) as it gives us
- * the ability to inject test doubles, mocks, spy's etc.
+ * We can provide external dependencies that are then used in wiring the components.
  * </p>
  *
  * <pre>{@code
  *
- *   @Test
- *   public void someComponentTest() {
+ *   // external dependencies
+ *   Pump pump = ...
  *
- *     MyRedisApi mockRedis = mock(MyRedisApi.class);
- *     MyDbApi mockDatabase = mock(MyDbApi.class);
+ *   try (BeanScope scope = BeanScope.newBuilder()
+ *     .withBean(pump)
+ *     .build()) {
  *
- *     try (BeanScope scope = BeanScope.newBuilder()
- *       .withBeans(mockRedis, mockDatabase)
- *       .build()) {
- *
- *       // built with test doubles injected ...
- *       CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
- *       coffeeMaker.makeIt();
- *
- *       assertThat(...
- *     }
+ *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
+ *     coffeeMaker.makeIt();
  *   }
- *
  * }</pre>
  */
 public interface BeanScopeBuilder {
@@ -60,37 +51,27 @@ public interface BeanScopeBuilder {
 
   /**
    * Specify the modules to include in dependency injection.
-   * <p/>
-   * This is effectively a "whitelist" of modules names to include in the injection excluding
-   * any other modules that might otherwise exist in the classpath.
-   * <p/>
-   * We typically want to use this in component testing where we wish to exclude any other
-   * modules that exist on the classpath.
+   * <p>
+   * Only beans related to the module are included in the BeanScope that is built.
+   * <p>
+   * When we do not explicitly specify modules then all modules that are not "custom scoped"
+   * are found and used via service loading.
    *
    * <pre>{@code
    *
-   *   @Test
-   *   public void someComponentTest() {
+   *   try (BeanScope scope = BeanScope.newBuilder()
+   *     .withModules(new CustomModule())
+   *     .build()) {
    *
-   *     EmailServiceApi mockEmailService = mock(EmailServiceApi.class);
+   *     // built with test doubles injected ...
+   *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
+   *     coffeeMaker.makeIt();
    *
-   *     try (BeanScope scope = BeanScope.newBuilder()
-   *       .withBeans(mockEmailService)
-   *       .withModules("coffee")
-   *       .withIgnoreMissingModuleDependencies()
-   *       .build()) {
-   *
-   *       // built with test doubles injected ...
-   *       CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
-   *       coffeeMaker.makeIt();
-   *
-   *       assertThat(...
-   *     }
    *   }
    *
    * }</pre>
    *
-   * @param modules The names of modules that we want to include in dependency injection.
+   * @param modules The modules that we want to include in dependency injection.
    * @return This BeanScopeBuilder
    */
   BeanScopeBuilder withModules(Module... modules);
@@ -105,8 +86,9 @@ public interface BeanScopeBuilder {
    *
    * <pre>{@code
    *
-   *   Pump pump = mock(Pump.class);
-   *   Grinder grinder = mock(Grinder.class);
+   *   // external dependencies
+   *   Pump pump = ...
+   *   Grinder grinder = ...
    *
    *   try (BeanScope scope = BeanScope.newBuilder()
    *     .withBeans(pump, grinder)
@@ -120,14 +102,11 @@ public interface BeanScopeBuilder {
    *
    *     assertThat(pump1).isSameAs(pump);
    *     assertThat(grinder1).isSameAs(grinder);
-   *
-   *     verify(pump).pumpWater();
-   *     verify(grinder).grindBeans();
    *   }
    *
    * }</pre>
    *
-   * @param beans The bean used when injecting a dependency for this bean or the interface(s) it implements
+   * @param beans Externally provided beans used when injecting a dependency for the bean or the interface(s) it implements
    * @return This BeanScopeBuilder
    */
   BeanScopeBuilder withBeans(Object... beans);
@@ -140,21 +119,17 @@ public interface BeanScopeBuilder {
    *
    * <pre>{@code
    *
-   *   Pump mockPump = ...
+   *   Pump externalDependency = ...
    *
    *   try (BeanScope scope = BeanScope.newBuilder()
-   *     .withBean(Pump.class, mockPump)
+   *     .withBean(Pump.class, externalDependency)
    *     .build()) {
    *
-   *     Pump pump = scope.get(Pump.class);
-   *     assertThat(pump).isSameAs(mock);
-   *
-   *     // act
    *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
    *     coffeeMaker.makeIt();
    *
-   *     verify(pump).pumpSteam();
-   *     verify(pump).pumpWater();
+   *     Pump pump = scope.get(Pump.class);
+   *     assertThat(pump).isSameAs(externalDependency);
    *   }
    *
    * }</pre>
@@ -174,14 +149,18 @@ public interface BeanScopeBuilder {
   <D> BeanScopeBuilder withBean(String name, Class<D> type, D bean);
 
   /**
-   * Extend the builder to support testing methods <code>withMock()</code> and <code>withSpy()</code>
+   * Extend the builder to support testing using mockito with
+   * <code>withMock()</code> and <code>withSpy()</code> methods.
    *
-   * @return The builder with extra testing support for mocks and spies
+   * @return The builder with extra testing support for mockito mocks and spies
    */
   BeanScopeBuilder.ForTesting forTesting();
 
   /**
    * Build and return the bean scope.
+   * <p>
+   * The BeanScope is effectively immutable in that all components are created
+   * eagerly (eager singletons).
    *
    * @return The BeanScope
    */
@@ -198,6 +177,7 @@ public interface BeanScopeBuilder {
      * <pre>{@code
      *
      *   try (BeanScope scope = BeanScope.newBuilder()
+     *     .forTesting()
      *     .withMock(Pump.class)
      *     .withMock(Grinder.class, grinder -> {
      *       // setup the mock
@@ -224,6 +204,7 @@ public interface BeanScopeBuilder {
      * <pre>{@code
      *
      *   try (BeanScope scope = BeanScope.newBuilder()
+     *     .forTesting()
      *     .withMock(Store.class, "red")
      *     .withMock(Store.class, "blue")
      *     .build()) {
@@ -242,6 +223,7 @@ public interface BeanScopeBuilder {
      * <pre>{@code
      *
      *   try (BeanScope scope = BeanScope.newBuilder()
+     *     .forTesting()
      *     .withMock(Pump.class)
      *     .withMock(Grinder.class, grinder -> {
      *
@@ -269,6 +251,7 @@ public interface BeanScopeBuilder {
      * <pre>{@code
      *
      *   try (BeanScope scope = BeanScope.newBuilder()
+     *     .forTesting()
      *     .withSpy(Pump.class)
      *     .build()) {
      *
@@ -294,6 +277,7 @@ public interface BeanScopeBuilder {
      * <pre>{@code
      *
      *   try (BeanScope scope = BeanScope.newBuilder()
+     *     .forTesting()
      *     .withSpy(Store.class, "red")
      *     .withSpy(Store.class, "blue")
      *     .build()) {
@@ -312,6 +296,7 @@ public interface BeanScopeBuilder {
      * <pre>{@code
      *
      *   try (BeanScope scope = BeanScope.newBuilder()
+     *     .forTesting()
      *     .withSpy(Pump.class, pump -> {
      *       // setup the spy
      *       doNothing().when(pump).pumpWater();
