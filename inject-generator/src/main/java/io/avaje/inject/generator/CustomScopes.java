@@ -15,17 +15,26 @@ import java.util.Map;
 class CustomScopes {
 
   private final Map<TypeElement, Data> scopeAnnotations = new HashMap<>();
-
   private final ProcessingContext context;
+  private final ScopeInfo rootScope;
 
   CustomScopes(ProcessingContext context) {
     this.context = context;
+    this.rootScope = new ScopeInfo(context);
+  }
+
+  ScopeInfo rootScope() {
+    return rootScope;
   }
 
   ScopeInfo addAnnotation(TypeElement type) {
-    final Data data = new Data(type, context);
+    final Data data = new Data(type, context, this);
     scopeAnnotations.put(type, data);
     return data.scopeInfo;
+  }
+
+  boolean providedByDefaultModule(String dependency) {
+    return rootScope.providesDependency(dependency);
   }
 
   void readBeans(RoundEnvironment roundEnv) {
@@ -89,8 +98,8 @@ class CustomScopes {
   static class Data {
     final ScopeInfo scopeInfo;
 
-    Data(TypeElement type, ProcessingContext context) {
-      this.scopeInfo = new ScopeInfo(context, type);
+    Data(TypeElement type, ProcessingContext context, CustomScopes customScopes) {
+      this.scopeInfo = new ScopeInfo(context, type, customScopes);
       this.scopeInfo.details(null, type);
     }
 

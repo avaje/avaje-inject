@@ -21,6 +21,7 @@ class ScopeInfo {
   private final Set<String> provides = new LinkedHashSet<>();
   private final boolean mainScope;
   private final TypeElement annotationType;
+  private final CustomScopes scopes;
   private boolean moduleWritten;
   private boolean builderWritten;
   private String name;
@@ -32,6 +33,7 @@ class ScopeInfo {
    * Create for the main/global module scope.
    */
   ScopeInfo(ProcessingContext context) {
+    this.scopes = null;
     this.context = context;
     this.mainScope = true;
     this.annotationType = null;
@@ -40,7 +42,8 @@ class ScopeInfo {
   /**
    * Create for custom scope.
    */
-  ScopeInfo(ProcessingContext context, TypeElement type) {
+  ScopeInfo(ProcessingContext context, TypeElement type, CustomScopes scopes) {
+    this.scopes = scopes;
     this.context = context;
     this.mainScope = false;
     this.annotationType = type;
@@ -321,5 +324,36 @@ class ScopeInfo {
         }
       }
     }
+  }
+
+  /**
+   * Return true if the scope is a custom scope and the dependency is provided
+   * by the "default" module. We could/should move to be tighter here at some point.
+   */
+  boolean providedByOtherModule(String dependency) {
+    if (mainScope) {
+      return false;
+    }
+    return scopes.providedByDefaultModule(dependency);
+  }
+
+  /**
+   * Return true if this module provides the dependency.
+   */
+  boolean providesDependency(String dependency) {
+    for (MetaData meta : metaData.values()) {
+      if (dependency.equals(meta.getType())) {
+        return true;
+      }
+      final List<String> provides = meta.getProvides();
+      if (provides != null && !provides.isEmpty()) {
+        for (String provide : provides) {
+          if (dependency.equals(provide)) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   }
 }

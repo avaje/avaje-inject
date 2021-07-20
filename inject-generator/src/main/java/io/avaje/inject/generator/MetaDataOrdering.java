@@ -117,32 +117,44 @@ class MetaDataOrdering {
    * Build list of specific dependencies that are missing.
    */
   void missingDependencies() {
-    for (MetaData m : queue) {
-      for (String dependency : m.getDependsOn()) {
-        if (providers.get(dependency) == null) {
-          TypeElement element = context.elementMaybe(m.getType());
-          context.logError(element, "No dependency provided for " + dependency);
-          missingDependencyTypes.add(dependency);
-        }
-      }
-    }
+    queue.removeIf(this::allDependenciesSatisfied);
     if (missingDependencyTypes.isEmpty()) {
       // only look for circular dependencies if there are no missing dependencies
       detectCircularDependency(queue);
     }
   }
 
+  private boolean allDependenciesSatisfied(MetaData metaData) {
+    boolean allSatisfied = true;
+    for (String dependency : metaData.getDependsOn()) {
+      if (providers.get(dependency) == null) {
+        if (scopeInfo.providedByOtherModule(dependency)) {
+          metaData.externallyProvided(dependency);
+          // context.logWarn(metaData.getType()+" has externally provided dependency " + dependency);
+        } else {
+          allSatisfied = false;
+          TypeElement element = context.elementMaybe(metaData.getType());
+          context.logError(element, "No dependency provided for " + dependency);
+          missingDependencyTypes.add(dependency);
+        }
+      }
+    }
+    return allSatisfied;
+  }
+
   /**
    * Log a warning on unsatisfied dependencies that are expected to be provided by another module.
    */
   private void warnOnDependencies() {
-    if (missingDependencyTypes.isEmpty()) {
-      context.logWarn("There are " + queue.size() + " beans with unsatisfied dependencies (assuming external dependencies)");
-      for (MetaData m : queue) {
-        context.logWarn("Unsatisfied dependencies on %s dependsOn %s", m, m.getDependsOn());
-      }
-    } else {
+    if (!missingDependencyTypes.isEmpty()) {
       context.logError("Dependencies %s are not provided - missing @Singleton or @Factory/@Bean or specify external dependency via @InjectModule requires attribute", missingDependencyTypes);
+    } else {
+      if (!queue.isEmpty()) {
+        context.logWarn("There are " + queue.size() + " beans with unsatisfied dependencies (assuming external dependencies)");
+        for (MetaData m : queue) {
+          context.logWarn("Unsatisfied dependencies on %s dependsOn %s", m, m.getDependsOn());
+        }
+      }
     }
   }
 

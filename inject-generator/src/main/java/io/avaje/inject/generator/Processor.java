@@ -34,8 +34,8 @@ public class Processor extends AbstractProcessor {
     super.init(processingEnv);
     this.context = new ProcessingContext(processingEnv);
     this.elementUtils = processingEnv.getElementUtils();
-    this.scopeInfo = new ScopeInfo(context);
     this.customScopes = new CustomScopes(context);
+    this.scopeInfo = customScopes.rootScope();
   }
 
   @Override
