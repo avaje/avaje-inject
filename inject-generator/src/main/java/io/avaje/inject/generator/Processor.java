@@ -17,7 +17,7 @@ public class Processor extends AbstractProcessor {
 
   private ProcessingContext context;
   private Elements elementUtils;
-  private ScopeInfo scopeInfo;
+  private ScopeInfo defaultScope;
   private AllScopes allScopes;
   private boolean readModuleInfo;
 
@@ -35,7 +35,7 @@ public class Processor extends AbstractProcessor {
     this.context = new ProcessingContext(processingEnv);
     this.elementUtils = processingEnv.getElementUtils();
     this.allScopes = new AllScopes(context);
-    this.scopeInfo = allScopes.rootScope();
+    this.defaultScope = allScopes.defaultScope();
   }
 
   @Override
@@ -68,7 +68,7 @@ public class Processor extends AbstractProcessor {
     readChangedBeans(controllers, false);
     allScopes.readBeans(roundEnv);
 
-    scopeInfo.write(roundEnv.processingOver());
+    defaultScope.write(roundEnv.processingOver());
     allScopes.write(roundEnv.processingOver());
     return false;
   }
@@ -91,9 +91,33 @@ public class Processor extends AbstractProcessor {
       if (!(element instanceof TypeElement)) {
         context.logError("unexpected type [" + element + "]");
       } else {
-        scopeInfo.read((TypeElement) element, factory);
+        TypeElement typeElement = (TypeElement) element;
+        if (!factory) {
+          defaultScope.read(typeElement, factory);
+        } else {
+          final ScopeInfo scope = findScope(typeElement);
+          if (scope != null) {
+            // context.logWarn("Adding factory to custom scope "+element+" scope: "+scope);
+            scope.read(typeElement, true);
+          } else {
+            defaultScope.read(typeElement, true);
+          }
+        }
       }
     }
+  }
+
+  /**
+   * Find the scope if the Factory has a scope annotation.
+   */
+  private ScopeInfo findScope(Element element) {
+    for (AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
+      final ScopeInfo scopeInfo = allScopes.get(annotationMirror.getAnnotationType().toString());
+      if (scopeInfo != null) {
+        return scopeInfo;
+      }
+    }
+    return null;
   }
 
   /**
@@ -109,7 +133,7 @@ public class Processor extends AbstractProcessor {
     if (factory != null) {
       TypeElement moduleType = elementUtils.getTypeElement(factory);
       if (moduleType != null) {
-        scopeInfo.readModuleMetaData(factory, moduleType);
+        defaultScope.readModuleMetaData(factory, moduleType);
       }
     }
     allScopes.readModules(context.loadMetaInfCustom());
@@ -131,7 +155,7 @@ public class Processor extends AbstractProcessor {
           // it it not a custom scope annotation
           InjectModule annotation = element.getAnnotation(InjectModule.class);
           if (annotation != null) {
-            scopeInfo.details(annotation.name(), element);
+            defaultScope.details(annotation.name(), element);
           }
         }
       }

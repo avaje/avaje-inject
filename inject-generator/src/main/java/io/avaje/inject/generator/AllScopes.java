@@ -16,15 +16,15 @@ class AllScopes {
 
   private final Map<String, Data> scopeAnnotations = new HashMap<>();
   private final ProcessingContext context;
-  private final ScopeInfo rootScope;
+  private final ScopeInfo defaultScope;
 
   AllScopes(ProcessingContext context) {
     this.context = context;
-    this.rootScope = new ScopeInfo(context);
+    this.defaultScope = new ScopeInfo(context);
   }
 
-  ScopeInfo rootScope() {
-    return rootScope;
+  ScopeInfo defaultScope() {
+    return defaultScope;
   }
 
   ScopeInfo addAnnotation(TypeElement type) {
@@ -34,7 +34,7 @@ class AllScopes {
   }
 
   boolean providedByDefaultModule(String dependency) {
-    return rootScope.providesDependency(dependency);
+    return defaultScope.providesDependency(dependency);
   }
 
   void readBeans(RoundEnvironment roundEnv) {

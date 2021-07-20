@@ -22,6 +22,10 @@ class ParentScopeTest {
       .withParent(parent)
       .build();
 
+    // factory for custom scope
+    final TcsGreen green = scope.get(TcsGreen.class);
+    assertThat(green).isNotNull();
+
     final TcsRed red = scope.get(TcsRed.class);
     final TcsBlue blue = scope.get(TcsBlue.class);
     final OcsOne ocsOne = scope.get(OcsOne.class);
