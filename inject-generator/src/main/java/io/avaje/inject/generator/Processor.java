@@ -18,7 +18,7 @@ public class Processor extends AbstractProcessor {
   private ProcessingContext context;
   private Elements elementUtils;
   private ScopeInfo scopeInfo;
-  private CustomScopes customScopes;
+  private AllScopes allScopes;
   private boolean readModuleInfo;
 
   public Processor() {
@@ -34,8 +34,8 @@ public class Processor extends AbstractProcessor {
     super.init(processingEnv);
     this.context = new ProcessingContext(processingEnv);
     this.elementUtils = processingEnv.getElementUtils();
-    this.customScopes = new CustomScopes(context);
-    this.scopeInfo = customScopes.rootScope();
+    this.allScopes = new AllScopes(context);
+    this.scopeInfo = allScopes.rootScope();
   }
 
   @Override
@@ -66,10 +66,10 @@ public class Processor extends AbstractProcessor {
     readChangedBeans(factoryBeans, true);
     readChangedBeans(beans, false);
     readChangedBeans(controllers, false);
-    customScopes.readBeans(roundEnv);
+    allScopes.readBeans(roundEnv);
 
     scopeInfo.write(roundEnv.processingOver());
-    customScopes.write(roundEnv.processingOver());
+    allScopes.write(roundEnv.processingOver());
     return false;
   }
 
@@ -78,7 +78,7 @@ public class Processor extends AbstractProcessor {
       if (element.getKind() == ElementKind.ANNOTATION_TYPE) {
         // context.logDebug("detected scope annotation " + element);
         TypeElement type = (TypeElement) element;
-        customScopes.addAnnotation(type);
+        allScopes.addAnnotation(type);
       }
     }
   }
@@ -112,7 +112,7 @@ public class Processor extends AbstractProcessor {
         scopeInfo.readModuleMetaData(factory, moduleType);
       }
     }
-    customScopes.readModules(context.loadMetaInfCustom());
+    allScopes.readModules(context.loadMetaInfCustom());
     readInjectModule(roundEnv);
   }
 

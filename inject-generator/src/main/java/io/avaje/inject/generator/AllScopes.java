@@ -12,13 +12,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class CustomScopes {
+class AllScopes {
 
   private final Map<TypeElement, Data> scopeAnnotations = new HashMap<>();
   private final ProcessingContext context;
   private final ScopeInfo rootScope;
 
-  CustomScopes(ProcessingContext context) {
+  AllScopes(ProcessingContext context) {
     this.context = context;
     this.rootScope = new ScopeInfo(context);
   }
@@ -98,8 +98,8 @@ class CustomScopes {
   static class Data {
     final ScopeInfo scopeInfo;
 
-    Data(TypeElement type, ProcessingContext context, CustomScopes customScopes) {
-      this.scopeInfo = new ScopeInfo(context, type, customScopes);
+    Data(TypeElement type, ProcessingContext context, AllScopes allScopes) {
+      this.scopeInfo = new ScopeInfo(context, type, allScopes);
       this.scopeInfo.details(null, type);
     }
 

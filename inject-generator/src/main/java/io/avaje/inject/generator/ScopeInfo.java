@@ -21,7 +21,7 @@ class ScopeInfo {
   private final Set<String> provides = new LinkedHashSet<>();
   private final boolean mainScope;
   private final TypeElement annotationType;
-  private final CustomScopes scopes;
+  private final AllScopes scopes;
   private boolean moduleWritten;
   private boolean builderWritten;
   private String name;
@@ -42,7 +42,7 @@ class ScopeInfo {
   /**
    * Create for custom scope.
    */
-  ScopeInfo(ProcessingContext context, TypeElement type, CustomScopes scopes) {
+  ScopeInfo(ProcessingContext context, TypeElement type, AllScopes scopes) {
     this.scopes = scopes;
     this.context = context;
     this.mainScope = false;
