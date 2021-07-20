@@ -1,5 +1,7 @@
 package io.avaje.inject.spi;
 
+import io.avaje.inject.BeanScope;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +17,8 @@ class DBuilderExtn extends DBuilder {
   private final boolean hasSuppliedBeans;
 
   @SuppressWarnings("rawtypes")
-  DBuilderExtn(List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans) {
-    super();
+  DBuilderExtn(BeanScope parent, List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans) {
+    super(parent);
     this.hasSuppliedBeans = (suppliedBeans != null && !suppliedBeans.isEmpty());
     if (hasSuppliedBeans) {
       beanMap.add(suppliedBeans);

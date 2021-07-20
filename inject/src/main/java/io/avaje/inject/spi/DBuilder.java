@@ -7,6 +7,8 @@ import jakarta.inject.Provider;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static io.avaje.inject.spi.DBeanScope.combine;
+
 class DBuilder implements Builder {
 
   /**
@@ -25,6 +27,8 @@ class DBuilder implements Builder {
    */
   protected final DBeanMap beanMap = new DBeanMap();
 
+  private final BeanScope parent;
+
   /**
    * Debug of the current bean being wired - used in injection errors.
    */
@@ -34,6 +38,10 @@ class DBuilder implements Builder {
    * Flag set when we are running post construct injection.
    */
   private boolean runningPostConstruct;
+
+  DBuilder(BeanScope parent) {
+    this.parent = parent;
+  }
 
   @Override
   public boolean isAddBeanFor(Class<?>... types) {
@@ -63,11 +71,19 @@ class DBuilder implements Builder {
   @SuppressWarnings({"unchecked"})
   @Override
   public <T> List<T> list(Class<T> interfaceType) {
-    return (List<T>) beanMap.all(interfaceType);
+    List<T> values = (List<T>) beanMap.all(interfaceType);
+    if (parent == null) {
+      return values;
+    }
+    return combine(values, parent.list(interfaceType));
   }
 
   private <T> T getMaybe(Class<T> beanClass, String name) {
-    return beanMap.get(beanClass, name);
+    T bean = beanMap.get(beanClass, name);
+    if (bean != null) {
+      return bean;
+    }
+    return (parent == null) ? null : parent.get(beanClass, name);
   }
 
   /**
@@ -182,6 +198,6 @@ class DBuilder implements Builder {
 
   public BeanScope build(boolean withShutdownHook) {
     runInjectors();
-    return new DBeanScope(withShutdownHook, preDestroy, postConstruct, beanMap).start();
+    return new DBeanScope(withShutdownHook, preDestroy, postConstruct, beanMap, parent).start();
   }
 }

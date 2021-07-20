@@ -1,6 +1,6 @@
 package org.example.custom2;
 
 @OtherScope
-class OcsOne {
+public class OcsOne implements OciPlant, OciRock {
 
 }

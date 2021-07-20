@@ -18,14 +18,15 @@ public interface Builder {
    *
    * @param suppliedBeans The list of beans (typically test doubles) supplied when building the context.
    * @param enrichBeans   The list of classes we want to have with mockito spy enhancement
+   * @param parent        The parent BeanScope
    */
   @SuppressWarnings("rawtypes")
-  static Builder newBuilder(List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans) {
+  static Builder newBuilder(List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans, BeanScope parent) {
     if (suppliedBeans.isEmpty() && enrichBeans.isEmpty()) {
       // simple case, no mocks or spies
-      return new DBuilder();
+      return new DBuilder(parent);
     }
-    return new DBuilderExtn(suppliedBeans, enrichBeans);
+    return new DBuilderExtn(parent, suppliedBeans, enrichBeans);
   }
 
   /**

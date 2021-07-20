@@ -20,13 +20,15 @@ class DBeanScope implements BeanScope {
   private final List<AutoCloseable> preDestroy;
   private final DBeanMap beans;
   private final ShutdownHook shutdownHook;
+  private final BeanScope parent;
   private boolean shutdown;
   private boolean closed;
 
-  DBeanScope(boolean withShutdownHook, List<AutoCloseable> preDestroy, List<Runnable> postConstruct, DBeanMap beans) {
+  DBeanScope(boolean withShutdownHook, List<AutoCloseable> preDestroy, List<Runnable> postConstruct, DBeanMap beans, BeanScope parent) {
     this.preDestroy = preDestroy;
     this.postConstruct = postConstruct;
     this.beans = beans;
+    this.parent = parent;
     if (withShutdownHook) {
       this.shutdownHook = new ShutdownHook(this);
       Runtime.getRuntime().addShutdownHook(shutdownHook);
@@ -42,13 +44,32 @@ class DBeanScope implements BeanScope {
 
   @Override
   public <T> T get(Class<T> beanClass, String name) {
-    return beans.get(beanClass, name);
+    final T bean = beans.get(beanClass, name);
+    if (bean != null) {
+      return bean;
+    }
+    return (parent == null) ? null : parent.get(beanClass, name);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public <T> List<T> list(Class<T> interfaceType) {
-    return (List<T>) beans.all(interfaceType);
+    List<T> values = (List<T>) beans.all(interfaceType);
+    if (parent == null) {
+      return values;
+    }
+    return combine(values, parent.list(interfaceType));
+  }
+
+  static <T> List<T> combine(List<T> values, List<T> parentValues) {
+    if (values.isEmpty()) {
+      return parentValues;
+    } else if (parentValues.isEmpty()) {
+      return values;
+    } else {
+      values.addAll(parentValues);
+      return values;
+    }
   }
 
   @Override
@@ -87,7 +108,11 @@ class DBeanScope implements BeanScope {
 
   @Override
   public List<Object> listByAnnotation(Class<?> annotation) {
-    return beans.all(annotation);
+    final List<Object> values = beans.all(annotation);
+    if (parent == null) {
+      return values;
+    }
+    return combine(values, parent.listByAnnotation(annotation));
   }
 
   DBeanScope start() {

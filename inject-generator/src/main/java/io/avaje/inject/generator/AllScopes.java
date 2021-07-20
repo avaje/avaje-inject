@@ -14,7 +14,7 @@ import java.util.Map;
 
 class AllScopes {
 
-  private final Map<TypeElement, Data> scopeAnnotations = new HashMap<>();
+  private final Map<String, Data> scopeAnnotations = new HashMap<>();
   private final ProcessingContext context;
   private final ScopeInfo rootScope;
 
@@ -29,7 +29,7 @@ class AllScopes {
 
   ScopeInfo addAnnotation(TypeElement type) {
     final Data data = new Data(type, context, this);
-    scopeAnnotations.put(type, data);
+    scopeAnnotations.put(type.getQualifiedName().toString(), data);
     return data.scopeInfo;
   }
 
@@ -38,10 +38,10 @@ class AllScopes {
   }
 
   void readBeans(RoundEnvironment roundEnv) {
-    for (Map.Entry<TypeElement, Data> entry : scopeAnnotations.entrySet()) {
-      for (Element customBean : roundEnv.getElementsAnnotatedWith(entry.getKey())) {
+    for (Data data : scopeAnnotations.values()) {
+      for (Element customBean : roundEnv.getElementsAnnotatedWith(data.type)) {
         // context.logWarn("read custom scope bean " + customBean + " for scope " + entry.getKey());
-        entry.getValue().scopeInfo.read((TypeElement) customBean, false);
+        data.scopeInfo.read((TypeElement) customBean, false);
       }
     }
   }
@@ -95,10 +95,20 @@ class AllScopes {
     }
   }
 
+  /**
+   * Find the scope by scope annotation type.
+   */
+  ScopeInfo get(String fullType) {
+    final Data data = scopeAnnotations.get(fullType);
+    return data == null ? null : data.scopeInfo;
+  }
+
   static class Data {
+    final TypeElement type;
     final ScopeInfo scopeInfo;
 
     Data(TypeElement type, ProcessingContext context, AllScopes allScopes) {
+      this.type = type;
       this.scopeInfo = new ScopeInfo(context, type, allScopes);
       this.scopeInfo.details(null, type);
     }

@@ -149,6 +149,14 @@ public interface BeanScopeBuilder {
   <D> BeanScopeBuilder withBean(String name, Class<D> type, D bean);
 
   /**
+   * Use the given BeanScope as the parent. This becomes an additional
+   * source of beans that can be wired and accessed in this scope.
+   *
+   * @param parent The BeanScope that acts as the parent
+   */
+  BeanScopeBuilder withParent(BeanScope parent);
+
+  /**
    * Extend the builder to support testing using mockito with
    * <code>withMock()</code> and <code>withSpy()</code> methods.
    *

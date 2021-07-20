@@ -334,7 +334,20 @@ class ScopeInfo {
     if (mainScope) {
       return false;
     }
-    return scopes.providedByDefaultModule(dependency);
+    if (scopes.providedByDefaultModule(dependency)) {
+      return true;
+    }
+    // look for required scopes ...
+    for (String require : requires) {
+      final ScopeInfo requiredScope = scopes.get(require);
+      if (requiredScope != null) {
+        if (requiredScope.providesDependency(dependency)) {
+          // context.logWarn("dependency "+dependency+" provided by other scope "+requiredScope.name);
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   /**

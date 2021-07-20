@@ -1,7 +1,8 @@
 package org.example.custom2;
 
+@OciMarker
 @OtherScope
-class OcsTwo {
+public class OcsTwo implements OciRock {
 
   final OcsOne one;
 

@@ -17,8 +17,6 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   private static final Logger log = LoggerFactory.getLogger(DBeanScopeBuilder.class);
 
-  private boolean shutdownHook = false;
-
   @SuppressWarnings("rawtypes")
   private final List<SuppliedBean> suppliedBeans = new ArrayList<>();
 
@@ -26,6 +24,10 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private final List<EnrichBean> enrichBeans = new ArrayList<>();
 
   private final Set<Module> includeModules = new LinkedHashSet<>();
+
+  private BeanScope parent;
+
+  private boolean shutdownHook;
 
   /**
    * Create a BeanScopeBuilder to ultimately load and return a new BeanScope.
@@ -67,6 +69,12 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   @Override
   public <D> BeanScopeBuilder withBean(String name, Class<D> type, D bean) {
     suppliedBeans.add(new SuppliedBean<>(name, type, bean));
+    return this;
+  }
+
+  @Override
+  public BeanScopeBuilder withParent(BeanScope parent) {
+    this.parent = parent;
     return this;
   }
 
@@ -125,7 +133,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         " Refer to https://avaje.io/inject#gradle");
     }
     log.debug("building with modules {}", moduleNames);
-    Builder builder = Builder.newBuilder(suppliedBeans, enrichBeans);
+    Builder builder = Builder.newBuilder(suppliedBeans, enrichBeans, parent);
     for (Module factory : factoryOrder.factories()) {
       factory.build(builder);
     }
