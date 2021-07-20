@@ -23,7 +23,7 @@ class DBuilder implements Builder {
   /**
    * The beans created and added to the scope during building.
    */
-  final DBeanMap beanMap = new DBeanMap();
+  protected final DBeanMap beanMap = new DBeanMap();
 
   /**
    * Debug of the current bean being wired - used in injection errors.
