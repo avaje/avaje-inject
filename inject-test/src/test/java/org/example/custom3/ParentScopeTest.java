@@ -37,6 +37,7 @@ class ParentScopeTest {
     assertThat(marked).containsOnly(red, ocsTwo);
 
     // dependency wired from parent
+    assertThat(blue).isNotNull();
     assertThat(blue.getDependency()).isSameAs(ocsThree);
   }
 }

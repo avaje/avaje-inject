@@ -3,6 +3,7 @@ package org.example.custom;
 import io.avaje.inject.BeanScope;
 import org.example.coffee.CoffeeMaker;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,10 +41,12 @@ class CustomScopeTest {
   void buildSimpleCustomScope() {
 
     LocalExt ext = new LocalExt();
+    CoffeeMaker suppliedCoffeeMaker = Mockito.mock(CoffeeMaker.class);
 
     try (BeanScope beanScope = BeanScope.newBuilder()
       .withModules(new MyCustomModule())
       .withBeans(LocalExternal.class, ext)
+      .withBean(CoffeeMaker.class, suppliedCoffeeMaker)
       .build()) {
 
       final CustomBean bean = beanScope.get(CustomBean.class);
@@ -55,7 +58,7 @@ class CustomScopeTest {
       assertThat(externallyProvided).isSameAs(ext);
 
       final CoffeeMaker coffeeMaker = beanScope.get(CoffeeMaker.class);
-      assertThat(coffeeMaker).isNull();
+      assertThat(coffeeMaker).isSameAs(suppliedCoffeeMaker);
     }
   }
 

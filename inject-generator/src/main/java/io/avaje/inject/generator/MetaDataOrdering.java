@@ -117,29 +117,23 @@ class MetaDataOrdering {
    * Build list of specific dependencies that are missing.
    */
   void missingDependencies() {
-    queue.removeIf(this::allDependenciesSatisfied);
+    for (MetaData metaData : queue) {
+      checkMissingDependencies(metaData);
+    }
     if (missingDependencyTypes.isEmpty()) {
       // only look for circular dependencies if there are no missing dependencies
       detectCircularDependency(queue);
     }
   }
 
-  private boolean allDependenciesSatisfied(MetaData metaData) {
-    boolean allSatisfied = true;
+  private void checkMissingDependencies(MetaData metaData) {
     for (String dependency : metaData.getDependsOn()) {
-      if (providers.get(dependency) == null) {
-        if (scopeInfo.providedByOtherModule(dependency)) {
-          metaData.externallyProvided(dependency);
-          // context.logWarn(metaData.getType()+" has externally provided dependency " + dependency);
-        } else {
-          allSatisfied = false;
-          TypeElement element = context.elementMaybe(metaData.getType());
-          context.logError(element, "No dependency provided for " + dependency);
-          missingDependencyTypes.add(dependency);
-        }
+      if (providers.get(dependency) == null && !scopeInfo.providedByOtherModule(dependency)) {
+        TypeElement element = context.elementMaybe(metaData.getType());
+        context.logError(element, "No dependency provided for " + dependency + " on " + metaData.getType());
+        missingDependencyTypes.add(dependency);
       }
     }
-    return allSatisfied;
   }
 
   /**
@@ -192,8 +186,7 @@ class MetaDataOrdering {
         // check non-provider dependency is satisfied
         ProviderList providerList = providers.get(dependency);
         if (providerList == null) {
-          // dependency not yet satisfied
-          return false;
+          return scopeInfo.providedByOtherModule(dependency);
         } else {
           if (!providerList.isAllWired()) {
             return false;
