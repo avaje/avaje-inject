@@ -27,4 +27,10 @@ class ScopeUtilTest {
     assertEquals("Example1", ScopeUtil.name("org.example1"));
     assertEquals("Ex42ample", ScopeUtil.name("org.ex42ample"));
   }
+
+  @Test
+  void name_withSuffix() {
+    assertEquals("MyCustom", ScopeUtil.name("MyCustomScope"));
+    assertEquals("MyCustom", ScopeUtil.name("MyCustomModule"));
+  }
 }

@@ -27,8 +27,6 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   private final Set<Module> includeModules = new LinkedHashSet<>();
 
-  private boolean ignoreMissingModuleDependencies;
-
   /**
    * Create a BeanScopeBuilder to ultimately load and return a new BeanScope.
    */
@@ -49,12 +47,6 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   @Override
   public BeanScopeBuilder withModules(Module... modules) {
     this.includeModules.addAll(Arrays.asList(modules));
-    return this;
-  }
-
-  @Override
-  public BeanScopeBuilder withIgnoreMissingModuleDependencies() {
-    this.ignoreMissingModuleDependencies = true;
     return this;
   }
 
@@ -119,7 +111,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   @Override
   public BeanScope build() {
     // sort factories by dependsOn
-    FactoryOrder factoryOrder = new FactoryOrder(includeModules, !suppliedBeans.isEmpty(), ignoreMissingModuleDependencies);
+    FactoryOrder factoryOrder = new FactoryOrder(includeModules, !suppliedBeans.isEmpty());
     if (factoryOrder.isEmpty()) {
       ServiceLoader.load(Module.class).forEach(factoryOrder::add);
     }
@@ -159,8 +151,6 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   static class FactoryOrder {
 
     private final boolean suppliedBeans;
-    private final boolean ignoreMissingModuleDependencies;
-
     private final Set<String> moduleNames = new LinkedHashSet<>();
     private final List<Module> factories = new ArrayList<>();
     private final List<FactoryState> queue = new ArrayList<>();
@@ -168,10 +158,12 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
     private final Map<String, FactoryList> providesMap = new HashMap<>();
 
-    FactoryOrder(Set<Module> includeModules, boolean suppliedBeans, boolean ignoreMissingModuleDependencies) {
+    FactoryOrder(Set<Module> includeModules, boolean suppliedBeans) {
       this.factories.addAll(includeModules);
       this.suppliedBeans = suppliedBeans;
-      this.ignoreMissingModuleDependencies = ignoreMissingModuleDependencies;
+      for (Module includeModule : includeModules) {
+        moduleNames.add(includeModule.getClass().getCanonicalName());
+      }
     }
 
     void add(Module factory) {
@@ -239,7 +231,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         count = processQueuedFactories();
       } while (count > 0);
 
-      if (suppliedBeans || ignoreMissingModuleDependencies) {
+      if (suppliedBeans) {
         // just push everything left assuming supplied beans
         // will satisfy the required dependencies
         for (FactoryState factoryState : queue) {
@@ -258,7 +250,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         }
 
         sb.append(". Modules that were loaded ok are:").append(moduleNames);
-        sb.append(". Consider using BeanScopeBuilder.withIgnoreMissingModuleDependencies() or BeanScopeBuilder.withSuppliedBeans(...)");
+        sb.append(". Maybe need to add external dependencies via BeanScopeBuilder.withBean()?");
         throw new IllegalStateException(sb.toString());
       }
     }
@@ -270,7 +262,6 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
      * This returns the number of factories added so once this returns 0 it is done.
      */
     private int processQueuedFactories() {
-
       int count = 0;
       Iterator<FactoryState> it = queue.iterator();
       while (it.hasNext()) {

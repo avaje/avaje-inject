@@ -96,12 +96,6 @@ public interface BeanScopeBuilder {
   BeanScopeBuilder withModules(Module... modules);
 
   /**
-   * Set this when building a BeanScope (typically for testing) and supplied beans replace module dependencies.
-   * This means we don't need the usual module dependencies as supplied beans are used instead.
-   */
-  BeanScopeBuilder withIgnoreMissingModuleDependencies();
-
-  /**
    * Supply a bean to the scope that will be used instead of any
    * similar bean in the scope.
    * <p>

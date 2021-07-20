@@ -18,10 +18,10 @@ class MetaDataOrdering {
   private final Map<String, ProviderList> providers = new HashMap<>();
   private final List<DependencyLink> circularDependencies = new ArrayList<>();
   private final Set<String> missingDependencyTypes = new LinkedHashSet<>();
+  private final String topPackage;
 
-  private String topPackage;
-
-  MetaDataOrdering(Collection<MetaData> values, ProcessingContext context, ScopeInfo scopeInfo) {
+  MetaDataOrdering(String topPackage, Collection<MetaData> values, ProcessingContext context, ScopeInfo scopeInfo) {
+    this.topPackage = topPackage;
     this.context = context;
     this.scopeInfo = scopeInfo;
     for (MetaData metaData : values) {
@@ -35,7 +35,6 @@ class MetaDataOrdering {
       } else {
         queue.add(metaData);
       }
-      topPackage = Util.commonParent(topPackage, metaData.getTopPackage());
       // register into map keyed by provider
       providers.computeIfAbsent(metaData.getType(), s -> new ProviderList()).add(metaData);
       for (String provide : metaData.getProvides()) {

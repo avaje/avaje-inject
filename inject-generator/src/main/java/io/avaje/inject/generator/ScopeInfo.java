@@ -18,37 +18,52 @@ class ScopeInfo {
   private final ProcessingContext context;
   private final Set<String> requires = new LinkedHashSet<>();
   private final Set<String> provides = new LinkedHashSet<>();
+  private final boolean mainScope;
+  private boolean moduleWritten;
+  private boolean builderWritten;
   private String name;
-  private String contextPackage;
+  private String topPackage;
 
-  ScopeInfo(ProcessingContext context) {
+  ScopeInfo(ProcessingContext context, boolean mainScope) {
     this.context = context;
+    this.mainScope = mainScope;
   }
 
   void details(String name, Element contextElement) {
-    this.name = ScopeUtil.name(name);
+    if (name == null || name.isEmpty()) {
+      final String simpleName = contextElement.getSimpleName().toString();
+      context.logWarn("derive name from "+simpleName);
+      this.name = ScopeUtil.name(simpleName);
+    } else {
+      this.name = ScopeUtil.name(name);
+    }
+
     // determine the context package (that we put the DI Factory class into)
-    PackageElement pkg = context.getPackageOf(contextElement);
-    context.logDebug("using package from element " + pkg);
-    this.contextPackage = (pkg == null) ? null : pkg.getQualifiedName().toString();
+//    PackageElement pkg = context.getPackageOf(contextElement);
+//    context.logDebug("using package from element " + pkg);
+//    this.contextPackage = (pkg == null) ? null : pkg.getQualifiedName().toString();
   }
 
-  String moduleShortName(String factoryPackage) {
+  private String initName(String factoryPackage) {
     if (name == null || name.isEmpty()) {
       name = ScopeUtil.name(factoryPackage);
     }
-    return name + "Module";
+    return name;
+  }
+
+  String moduleShortName(String factoryPackage) {
+    return initName(factoryPackage) + "Module";
+  }
+
+  String factoryShortName(String factoryPackage) {
+    return initName(factoryPackage) + "BeanFactory";
   }
 
   String name() {
     return name;
   }
 
-  String contextPackage() {
-    return contextPackage;
-  }
-
-  public void provides(List<String> provides) {
+  void provides(List<String> provides) {
     this.provides.addAll(provides);
   }
 
@@ -82,16 +97,35 @@ class ScopeInfo {
     }
   }
 
+  private void writeModule() {
+    if (!moduleWritten) {
+      try {
+        this.topPackage = MetaTopPackage.of(metaData.values());
+        SimpleModuleWriter factoryWriter = new SimpleModuleWriter(topPackage, context, this);
+        factoryWriter.write(mainScope);
+        moduleWritten = true;
+      } catch (FilerException e) {
+        context.logWarn("FilerException trying to write factory " + e.getMessage());
+      } catch (IOException e) {
+        context.logError("Failed to write factory " + e.getMessage());
+      }
+    }
+  }
+
   void writeBeanFactory() {
-    MetaDataOrdering ordering = new MetaDataOrdering(metaData.values(), context, this);
+    if (builderWritten) {
+      context.logError("already written builder " + name);
+      return;
+    }
+    MetaDataOrdering ordering = new MetaDataOrdering(topPackage, metaData.values(), context, this);
     int remaining = ordering.processQueue();
     if (remaining > 0) {
       ordering.logWarnings();
     }
-
     try {
       SimpleFactoryWriter factoryWriter = new SimpleFactoryWriter(ordering, context, this);
       factoryWriter.write();
+      builderWritten = true;
     } catch (FilerException e) {
       context.logWarn("FilerException trying to write factory " + e.getMessage());
     } catch (IOException e) {
@@ -169,6 +203,7 @@ class ScopeInfo {
   void write(boolean processingOver) {
     mergeMetaData();
     writeBeanHelpers();
+    writeModule();
     if (processingOver) {
       writeBeanFactory();
     }
@@ -219,6 +254,6 @@ class ScopeInfo {
     writer.append(";").eol();
     writer.append("  private final Class<?>[] requires = ");
     buildClassArray(writer, requires);
-    writer.append(";").eol();
+    writer.append(";").eol().eol();
   }
 }

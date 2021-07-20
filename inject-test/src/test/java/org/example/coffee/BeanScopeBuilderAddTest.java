@@ -7,28 +7,23 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 
 public class BeanScopeBuilderAddTest {
 
   @Test
-  public void withModules_exludingThisOne() {
-    assertThrows(IllegalStateException.class, () -> {
-      TDPump testDoublePump = new TDPump();
+  public void withModules_excludingThisOne() {
+    TDPump testDoublePump = new TDPump();
+    try (BeanScope context = BeanScope.newBuilder()
+      .withBeans(testDoublePump)
+      // our module is "org.example.coffee"
+      // so this effectively includes no modules
+      .withModules(new SillyModule())
+      .build()) {
 
-      try (BeanScope context = BeanScope.newBuilder()
-        .withBeans(testDoublePump)
-        // our module is "org.example.coffee"
-        // so this effectively includes no modules
-        .withModules(new SillyModule())
-        .withIgnoreMissingModuleDependencies()
-        .build()) {
-
-        CoffeeMaker coffeeMaker = context.get(CoffeeMaker.class);
-        assertThat(coffeeMaker).isNull();
-      }
-    });
+      CoffeeMaker coffeeMaker = context.get(CoffeeMaker.class);
+      assertThat(coffeeMaker).isNull();
+    }
   }
 
   static class SillyModule implements Module {
@@ -49,23 +44,23 @@ public class BeanScopeBuilderAddTest {
     }
   }
 
-//  @Test
-//  public void withModules_includeThisOne() {
-//
-//    TDPump testDoublePump = new TDPump();
-//
-//    try (BeanScope context = BeanScope.newBuilder()
-//      .withBeans(testDoublePump)
-//      .withModules(new org.example.ExampleModule())
-//      .build()) {
-//
-//      String makeIt = context.get(CoffeeMaker.class).makeIt();
-//      assertThat(makeIt).isEqualTo("done");
-//
-//      assertThat(testDoublePump.steam).isEqualTo(1);
-//      assertThat(testDoublePump.water).isEqualTo(1);
-//    }
-//  }
+  @Test
+  public void withModules_includeThisOne() {
+
+    TDPump testDoublePump = new TDPump();
+
+    try (BeanScope context = BeanScope.newBuilder()
+      .withBeans(testDoublePump)
+      .withModules(new org.example.ExampleModule())
+      .build()) {
+
+      String makeIt = context.get(CoffeeMaker.class).makeIt();
+      assertThat(makeIt).isEqualTo("done");
+
+      assertThat(testDoublePump.steam).isEqualTo(1);
+      assertThat(testDoublePump.water).isEqualTo(1);
+    }
+  }
 
   @Test
   public void withBean_expect_testDoublePumpUsed() {

@@ -35,13 +35,19 @@ class ScopeUtil {
     return requiresList;
   }
 
-  public static String name(String name) {
+  static String name(String name) {
     if (name == null) {
       return null;
     }
     final int pos = name.lastIndexOf('.');
     if (pos > -1) {
       name = name.substring(pos + 1);
+    }
+    if (name.endsWith("Scope")) {
+      name = name.substring(0, name.length() - 5);
+    }
+    if (name.endsWith("Module")) {
+      name = name.substring(0, name.length() - 6);
     }
     return camelCase(name);
   }

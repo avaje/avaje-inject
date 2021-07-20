@@ -2,6 +2,7 @@ package io.avaje.inject.generator;
 
 import io.avaje.inject.Factory;
 import io.avaje.inject.InjectModule;
+import jakarta.inject.Scope;
 import jakarta.inject.Singleton;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -17,6 +18,8 @@ public class Processor extends AbstractProcessor {
   private ProcessingContext context;
   private Elements elementUtils;
   private ScopeInfo scopeInfo;
+  private CustomScopes customScopes;
+  private boolean readModuleInfo;
 
   public Processor() {
   }
@@ -31,7 +34,8 @@ public class Processor extends AbstractProcessor {
     super.init(processingEnv);
     this.context = new ProcessingContext(processingEnv);
     this.elementUtils = processingEnv.getElementUtils();
-    this.scopeInfo = new ScopeInfo(context);
+    this.scopeInfo = new ScopeInfo(context, true);
+    this.customScopes = new CustomScopes(context);
   }
 
   @Override
@@ -40,6 +44,7 @@ public class Processor extends AbstractProcessor {
     annotations.add(InjectModule.class.getCanonicalName());
     annotations.add(Factory.class.getCanonicalName());
     annotations.add(Singleton.class.getCanonicalName());
+    annotations.add(Scope.class.getCanonicalName());
     annotations.add(Constants.CONTROLLER);
     return annotations;
   }
@@ -55,14 +60,27 @@ public class Processor extends AbstractProcessor {
 
     Set<? extends Element> factoryBeans = roundEnv.getElementsAnnotatedWith(Factory.class);
     Set<? extends Element> beans = roundEnv.getElementsAnnotatedWith(Singleton.class);
-
+    Set<? extends Element> scopes = roundEnv.getElementsAnnotatedWith(Scope.class);
+    readScopes(scopes);
     readModule(roundEnv);
     readChangedBeans(factoryBeans, true);
     readChangedBeans(beans, false);
     readChangedBeans(controllers, false);
+    customScopes.readBeans(roundEnv);
 
     scopeInfo.write(roundEnv.processingOver());
+    customScopes.write(roundEnv.processingOver());
     return false;
+  }
+
+  private void readScopes(Set<? extends Element> scopes) {
+    for (Element element : scopes) {
+      if (element.getKind() == ElementKind.ANNOTATION_TYPE) {
+        context.logWarn("detected scope annotation " + element);
+        TypeElement type = (TypeElement) element;
+        customScopes.addAnnotation(type);
+      }
+    }
   }
 
   /**
@@ -82,11 +100,22 @@ public class Processor extends AbstractProcessor {
    * Read the existing meta data from InjectModule (if found) and the factory bean (if exists).
    */
   private void readModule(RoundEnvironment roundEnv) {
+    if (readModuleInfo) {
+      return;
+    }
     String factory = context.loadMetaInfServices();
     if (factory != null) {
-      TypeElement factoryType = elementUtils.getTypeElement(factory);
-      if (factoryType != null) {
-        readFactory(factoryType);
+      TypeElement moduleType = elementUtils.getTypeElement(factory);
+      if (moduleType != null) {
+        context.logDebug("Reading module info");
+        readModuleDetails(moduleType);
+        String builderName = factory.substring(0, factory.length() - 6) + "BeanFactory";
+        TypeElement builderType = elementUtils.getTypeElement(builderName);
+        if (builderType != null) {
+          context.logDebug("Reading module meta data from: " + builderName);
+          readFactoryMetaData(builderType);
+        }
+        readModuleInfo = true;
       }
     }
 
@@ -109,12 +138,14 @@ public class Processor extends AbstractProcessor {
    * Read the existing factory bean. Each of the build methods is annotated with <code>@DependencyMeta</code>
    * which holds the information we need (to regenerate the factory with any changes).
    */
-  private void readFactory(TypeElement factoryType) {
-    InjectModule module = factoryType.getAnnotation(InjectModule.class);
-    scopeInfo.details(module.name(), factoryType);
-    scopeInfo.requires(ScopeUtil.readRequires(factoryType));
-    scopeInfo.provides(ScopeUtil.readProvides(factoryType));
+  private void readModuleDetails(TypeElement moduleType) {
+    InjectModule module = moduleType.getAnnotation(InjectModule.class);
+    scopeInfo.details(module.name(), moduleType);
+    scopeInfo.requires(ScopeUtil.readRequires(moduleType));
+    scopeInfo.provides(ScopeUtil.readProvides(moduleType));
+  }
 
+  private void readFactoryMetaData(TypeElement factoryType) {
     List<? extends Element> elements = factoryType.getEnclosedElements();
     if (elements != null) {
       for (Element element : elements) {

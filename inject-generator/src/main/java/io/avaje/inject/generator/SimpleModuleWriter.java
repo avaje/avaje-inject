@@ -4,18 +4,31 @@ import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 /**
  * Write the source code for the factory.
  */
-class SimpleFactoryWriter {
+class SimpleModuleWriter {
 
   private static final String CODE_COMMENT_FACTORY =
     "/**\n" +
-      " * Generated source - Creates the beans for the %s module.\n" +
+      " * Generated source - avaje inject module for %s.\n" +
+      " * \n" +
+      " * With JPMS Java module system this generated class should be explicitly\n" +
+      " * registered in module-info via a <code>provides</code> clause like:\n" +
+      " * \n" +
+      " * <pre>{@code\n" +
+      " * \n" +
+      " *   module example {\n" +
+      " *     requires io.avaje.inject;\n" +
+      " *     \n" +
+      " *     provides io.avaje.inject.spi.Module with %s.%s;\n" +
+      " *     \n" +
+      " *   }\n" +
+      " * \n" +
+      " * }</pre>\n" +
       " */";
 
   private static final String CODE_COMMENT_CREATE_CONTEXT =
@@ -28,7 +41,6 @@ class SimpleFactoryWriter {
       "   * <p>\n" +
       "   */";
 
-  private final MetaDataOrdering ordering;
   private final ProcessingContext context;
   private final String factoryPackage;
   private final String factoryShortName;
@@ -37,53 +49,47 @@ class SimpleFactoryWriter {
 
   private Append writer;
 
-  SimpleFactoryWriter(MetaDataOrdering ordering, ProcessingContext context, ScopeInfo scopeInfo) {
-    this.ordering = ordering;
+  SimpleModuleWriter(String topPackage, ProcessingContext context, ScopeInfo scopeInfo) {
     this.context = context;
     this.scopeInfo = scopeInfo;
-    this.factoryPackage = ordering.getTopPackage();
-    this.factoryShortName = scopeInfo.factoryShortName(factoryPackage);
+    this.factoryPackage = topPackage;
+    this.factoryShortName = scopeInfo.moduleShortName(factoryPackage);
     this.factoryFullName = factoryPackage + "." + factoryShortName;
   }
 
-  void write() throws IOException {
+  void write(boolean includeServicesFile) throws IOException {
     writer = new Append(createFileWriter());
     writePackage();
     writeStartClass();
-
     writeCreateMethod();
-    writeBuildMethods();
-
     writeEndClass();
     writer.close();
+
+    if (includeServicesFile) {
+      writeServicesFile();
+    }
   }
 
-  private void writeBuildMethods() {
-    for (MetaData metaData : ordering.getOrdered()) {
-      writer.append(metaData.buildMethod(ordering)).eol();
-    }
-    for (MetaData metaData : ordering.getRequestScope()) {
-      writer.append(metaData.buildMethod(ordering)).eol();
+  private void writeServicesFile() {
+    try {
+      FileObject jfo = context.createMetaInfWriter();
+      if (jfo != null) {
+        Writer writer = jfo.openWriter();
+        writer.write(factoryFullName);
+        writer.close();
+      }
+
+    } catch (IOException e) {
+      e.printStackTrace();
+      context.logError("Failed to write services file " + e.getMessage());
     }
   }
 
   private void writeCreateMethod() {
     writer.append(CODE_COMMENT_CREATE_CONTEXT).eol();
-
-    writer.append("  void build() {").eol();
-    writer.append("    // create beans in order based on constructor dependencies").eol();
-    writer.append("    // i.e. \"provides\" followed by \"dependsOn\"").eol();
-    for (MetaData metaData : ordering.getOrdered()) {
-      writer.append("    build_%s();", metaData.getBuildName()).eol();
-    }
-    final List<MetaData> requestScope = ordering.getRequestScope();
-    if (!requestScope.isEmpty()) {
-      writer.eol();
-      writer.append("    // request scope providers").eol();
-      for (MetaData metaData : requestScope) {
-        writer.append("    build_%s();", metaData.getBuildName()).eol();
-      }
-    }
+    writer.append("  @Override").eol();
+    writer.append("  public void build(Builder builder) {").eol();
+    writer.append("    new %sBeanFactory(builder).build();", scopeInfo.name()).eol();
     writer.append("  }").eol();
     writer.eol();
   }
@@ -92,11 +98,6 @@ class SimpleFactoryWriter {
     writer.append("package %s;", factoryPackage).eol().eol();
     for (String type : factoryImportTypes()) {
       writer.append("import %s;", type).eol();
-    }
-    for (String type : ordering.getImportTypes()) {
-      if (Util.validImportType(type)) {
-        writer.append("import %s;", type).eol();
-      }
     }
     writer.eol();
   }
@@ -114,25 +115,20 @@ class SimpleFactoryWriter {
 
   private void writeStartClass() {
     writer.append(CODE_COMMENT_FACTORY, scopeInfo.name(), factoryPackage, factoryShortName).eol();
-    writer.append(Constants.AT_GENERATED).eol();
-    //scopeInfo.buildAtInjectModule(writer);
-    writer.append("class %s {", factoryShortName).eol().eol();
-    //scopeInfo.buildFields(writer);
+    scopeInfo.buildAtInjectModule(writer);
 
-    writer.append("  private final Builder builder;").eol().eol();
-    writer.append("  %s(Builder builder) {", factoryShortName).eol();
-    writer.append("    this.builder = builder;").eol();
+    writer.append("public class %s implements Module {", factoryShortName).eol().eol();
+    scopeInfo.buildFields(writer);
+
+    writer.append("  @Override").eol();
+    writer.append("  public Class<?>[] provides() {").eol();
+    writer.append("    return provides;").eol();
     writer.append("  }").eol().eol();
 
-//    writer.append("  @Override").eol();
-//    writer.append("  public Class<?>[] provides() {").eol();
-//    writer.append("    return provides;").eol();
-//    writer.append("  }").eol().eol();
-//
-//    writer.append("  @Override").eol();
-//    writer.append("  public Class<?>[] requires() {").eol();
-//    writer.append("    return requires;").eol();
-//    writer.append("  }").eol().eol();
+    writer.append("  @Override").eol();
+    writer.append("  public Class<?>[] requires() {").eol();
+    writer.append("    return requires;").eol();
+    writer.append("  }").eol().eol();
   }
 
   private void writeEndClass() {

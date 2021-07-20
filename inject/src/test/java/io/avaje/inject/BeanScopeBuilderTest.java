@@ -14,7 +14,7 @@ public class BeanScopeBuilderTest {
   @Test
   public void noDepends() {
 
-    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true, true);
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true);
     factoryOrder.add(bc("1", null, null));
     factoryOrder.add(bc("2", null, null));
     factoryOrder.add(bc("3", null, null));
@@ -26,7 +26,7 @@ public class BeanScopeBuilderTest {
   @Test
   public void name_depends() {
 
-    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true, true);
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true);
     factoryOrder.add(bc("two", null, of(Mod3.class)));
     factoryOrder.add(bc("one", null, null));
     factoryOrder.orderFactories();
@@ -37,7 +37,7 @@ public class BeanScopeBuilderTest {
   @Test
   public void name_depends4() {
 
-    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true, true);
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true);
     factoryOrder.add(bc("1", null, of(Mod3.class)));
     factoryOrder.add(bc("2", null, of(Mod4.class)));
     factoryOrder.add(bc("3", of(Mod3.class), of(Mod4.class)));
@@ -51,7 +51,7 @@ public class BeanScopeBuilderTest {
   @Test
   public void nameFeature_depends() {
 
-    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true, true);
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true);
     factoryOrder.add(bc("1", of(FeatureA.class), of(Mod3.class)));
     factoryOrder.add(bc("2", null, of(Mod4.class, FeatureA.class)));
     factoryOrder.add(bc("3", of(Mod3.class), of(Mod4.class)));
@@ -65,7 +65,7 @@ public class BeanScopeBuilderTest {
   @Test
   public void feature_depends() {
 
-    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true, true);
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true);
     factoryOrder.add(bc("two", null, of(MyFeature.class)));
     factoryOrder.add(bc("one", of(MyFeature.class), null));
     factoryOrder.orderFactories();
@@ -76,7 +76,7 @@ public class BeanScopeBuilderTest {
   @Test
   public void feature_depends2() {
 
-    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true, true);
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true);
     factoryOrder.add(bc("two", null, of(MyFeature.class)));
     factoryOrder.add(bc("one", of(MyFeature.class), null));
     factoryOrder.add(bc("three", of(MyFeature.class), null));
