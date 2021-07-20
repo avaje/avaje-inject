@@ -1,6 +1,5 @@
 package io.avaje.inject.generator;
 
-import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
@@ -51,7 +50,7 @@ class SimpleFactoryWriter {
     writePackage();
     writeStartClass();
 
-    writeCreateMethod();
+    writeBuildMethod();
     writeBuildMethods();
 
     writeEndClass();
@@ -67,7 +66,7 @@ class SimpleFactoryWriter {
     }
   }
 
-  private void writeCreateMethod() {
+  private void writeBuildMethod() {
     writer.append(CODE_COMMENT_CREATE_CONTEXT).eol();
 
     writer.append("  void build() {").eol();
@@ -115,24 +114,12 @@ class SimpleFactoryWriter {
   private void writeStartClass() {
     writer.append(CODE_COMMENT_FACTORY, scopeInfo.name(), factoryPackage, factoryShortName).eol();
     writer.append(Constants.AT_GENERATED).eol();
-    //scopeInfo.buildAtInjectModule(writer);
     writer.append("class %s {", factoryShortName).eol().eol();
-    //scopeInfo.buildFields(writer);
 
     writer.append("  private final Builder builder;").eol().eol();
     writer.append("  %s(Builder builder) {", factoryShortName).eol();
     writer.append("    this.builder = builder;").eol();
     writer.append("  }").eol().eol();
-
-//    writer.append("  @Override").eol();
-//    writer.append("  public Class<?>[] provides() {").eol();
-//    writer.append("    return provides;").eol();
-//    writer.append("  }").eol().eol();
-//
-//    writer.append("  @Override").eol();
-//    writer.append("  public Class<?>[] requires() {").eol();
-//    writer.append("    return requires;").eol();
-//    writer.append("  }").eol().eol();
   }
 
   private void writeEndClass() {

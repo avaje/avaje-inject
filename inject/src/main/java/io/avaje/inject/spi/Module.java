@@ -1,7 +1,7 @@
 package io.avaje.inject.spi;
 
 /**
- * This is the service loader interface defining the bean scope.
+ * A Module that can be included in BeanScope.
  */
 public interface Module {
 
@@ -19,4 +19,11 @@ public interface Module {
    * Build all the beans.
    */
   void build(Builder builder);
+
+  /**
+   * Marker for custom scoped modules.
+   */
+  interface Custom extends Module {
+
+  }
 }

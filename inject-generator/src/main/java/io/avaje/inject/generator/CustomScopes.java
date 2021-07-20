@@ -40,7 +40,6 @@ class CustomScopes {
 
     Data(TypeElement type, ProcessingContext context) {
       this.scopeInfo = new ScopeInfo(context, false);
-      //TODO read name and read InjectModule(provides, requires)
       this.scopeInfo.details(null, type);
     }
 

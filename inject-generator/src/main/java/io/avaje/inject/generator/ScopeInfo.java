@@ -37,11 +37,12 @@ class ScopeInfo {
     } else {
       this.name = ScopeUtil.name(name);
     }
+    read(contextElement);
+  }
 
-    // determine the context package (that we put the DI Factory class into)
-//    PackageElement pkg = context.getPackageOf(contextElement);
-//    context.logDebug("using package from element " + pkg);
-//    this.contextPackage = (pkg == null) ? null : pkg.getQualifiedName().toString();
+  private void read(Element element) {
+    requires(ScopeUtil.readRequires(element));
+    provides(ScopeUtil.readProvides(element));
   }
 
   private String initName(String factoryPackage) {
@@ -59,15 +60,19 @@ class ScopeInfo {
     return initName(factoryPackage) + "BeanFactory";
   }
 
+  boolean isMainScope() {
+    return mainScope;
+  }
+
   String name() {
     return name;
   }
 
-  void provides(List<String> provides) {
+  private void provides(List<String> provides) {
     this.provides.addAll(provides);
   }
 
-  void requires(List<String> contextRequires) {
+  private void requires(List<String> contextRequires) {
     this.requires.addAll(contextRequires);
   }
 
@@ -212,17 +217,22 @@ class ScopeInfo {
   void buildAtInjectModule(Append writer) {
     writer.append(Constants.AT_GENERATED).eol();
     writer.append("@InjectModule(");
+    boolean leadingComma = false;
     if (!provides.isEmpty()) {
-      attributeClasses(writer, "provides", provides);
+      attributeClasses(leadingComma, writer, "provides", provides);
+      leadingComma = true;
     }
     if (!requires.isEmpty()) {
-      attributeClasses(writer, "requires", requires);
+      attributeClasses(leadingComma, writer, "requires", requires);
     }
     writer.append(")").eol();
   }
 
-  private void attributeClasses(Append writer, String prefix, Set<String> classNames) {
-    writer.append(", %s={", prefix);
+  private void attributeClasses(boolean leadingComma, Append writer, String prefix, Set<String> classNames) {
+    if (leadingComma) {
+      writer.append(", ");
+    }
+    writer.append("%s={", prefix);
     int c = 0;
     for (String value : classNames) {
       if (c++ > 0) {

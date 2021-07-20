@@ -124,11 +124,14 @@ public class Processor extends AbstractProcessor {
       Iterator<? extends Element> iterator = elementsAnnotatedWith.iterator();
       if (iterator.hasNext()) {
         Element element = iterator.next();
-        InjectModule annotation = element.getAnnotation(InjectModule.class);
-        if (annotation != null) {
-          scopeInfo.details(annotation.name(), element);
-          scopeInfo.requires(ScopeUtil.readRequires(element));
-          scopeInfo.provides(ScopeUtil.readProvides(element));
+        Scope scope = element.getAnnotation(Scope.class);
+        if (scope != null) {
+          context.logDebug("Custom scope on " + element);
+        } else {
+          InjectModule annotation = element.getAnnotation(InjectModule.class);
+          if (annotation != null) {
+            scopeInfo.details(annotation.name(), element);
+          }
         }
       }
     }
@@ -141,8 +144,6 @@ public class Processor extends AbstractProcessor {
   private void readModuleDetails(TypeElement moduleType) {
     InjectModule module = moduleType.getAnnotation(InjectModule.class);
     scopeInfo.details(module.name(), moduleType);
-    scopeInfo.requires(ScopeUtil.readRequires(moduleType));
-    scopeInfo.provides(ScopeUtil.readProvides(moduleType));
   }
 
   private void readFactoryMetaData(TypeElement factoryType) {

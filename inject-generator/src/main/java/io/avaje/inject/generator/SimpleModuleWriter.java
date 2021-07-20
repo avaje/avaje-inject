@@ -117,7 +117,8 @@ class SimpleModuleWriter {
     writer.append(CODE_COMMENT_FACTORY, scopeInfo.name(), factoryPackage, factoryShortName).eol();
     scopeInfo.buildAtInjectModule(writer);
 
-    writer.append("public class %s implements Module {", factoryShortName).eol().eol();
+    String custom = scopeInfo.isMainScope() ? "" : ".Custom";
+    writer.append("public class %s implements Module%s {", factoryShortName, custom).eol().eol();
     scopeInfo.buildFields(writer);
 
     writer.append("  @Override").eol();

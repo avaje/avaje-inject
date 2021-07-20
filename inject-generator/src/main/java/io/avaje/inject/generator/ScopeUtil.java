@@ -2,6 +2,7 @@ package io.avaje.inject.generator;
 
 import javax.lang.model.element.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,9 @@ class ScopeUtil {
   }
 
   static List<String> readClasses(Element element, String attributeName) {
+    if (element == null) {
+      return Collections.emptyList();
+    }
     List<String> requiresList = new ArrayList<>();
     for (AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
       if (INJECT_MODULE.equals(annotationMirror.getAnnotationType().toString())) {
