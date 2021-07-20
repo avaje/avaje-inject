@@ -40,9 +40,9 @@ class SimpleFactoryWriter {
     this.ordering = ordering;
     this.context = context;
     this.scopeInfo = scopeInfo;
-    this.factoryPackage = ordering.getTopPackage();
-    this.factoryShortName = scopeInfo.factoryShortName(factoryPackage);
-    this.factoryFullName = factoryPackage + "." + factoryShortName;
+    this.factoryPackage = scopeInfo.modulePackage();
+    this.factoryShortName = scopeInfo.beanFactoryShortName();
+    this.factoryFullName = scopeInfo.beanFactoryFullName();
   }
 
   void write() throws IOException {

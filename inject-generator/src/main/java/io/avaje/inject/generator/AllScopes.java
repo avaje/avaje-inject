@@ -64,7 +64,7 @@ class AllScopes {
       if (jfo != null) {
         Writer writer = jfo.openWriter();
         for (Data value : scopeAnnotations.values()) {
-          writer.write(value.factoryFullName());
+          writer.write(value.moduleFullName());
           writer.write("\n");
         }
         writer.close();
@@ -117,8 +117,8 @@ class AllScopes {
       scopeInfo.write(processingOver);
     }
 
-    String factoryFullName() {
-      return scopeInfo.factoryFullName();
+    String moduleFullName() {
+      return scopeInfo.moduleFullName();
     }
   }
 }

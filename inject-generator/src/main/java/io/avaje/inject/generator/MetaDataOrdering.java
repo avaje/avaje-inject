@@ -18,10 +18,8 @@ class MetaDataOrdering {
   private final Map<String, ProviderList> providers = new HashMap<>();
   private final List<DependencyLink> circularDependencies = new ArrayList<>();
   private final Set<String> missingDependencyTypes = new LinkedHashSet<>();
-  private final String topPackage;
 
-  MetaDataOrdering(String topPackage, Collection<MetaData> values, ProcessingContext context, ScopeInfo scopeInfo) {
-    this.topPackage = topPackage;
+  MetaDataOrdering(Collection<MetaData> values, ProcessingContext context, ScopeInfo scopeInfo) {
     this.context = context;
     this.scopeInfo = scopeInfo;
     for (MetaData metaData : values) {
@@ -158,10 +156,6 @@ class MetaDataOrdering {
     } else {
       warnOnDependencies();
     }
-  }
-
-  String getTopPackage() {
-    return topPackage;
   }
 
   private int processQueueRound() {

@@ -25,9 +25,11 @@ class ScopeInfo {
   private boolean moduleWritten;
   private boolean builderWritten;
   private String name;
-  private String topPackage;
-  private String factoryFullName;
-  private String factoryShortName;
+  private String modulePackage;
+  private String moduleFullName;
+  private String moduleShortName;
+  private String beanFactoryFullName;
+  private String beanFactoryShortName;
 
   /**
    * Create for the main/global module scope.
@@ -64,28 +66,40 @@ class ScopeInfo {
     provides(ScopeUtil.readProvides(element));
   }
 
-  private String initName(String factoryPackage) {
+  private String initName(String topPackage) {
     if (name == null || name.isEmpty()) {
-      name = ScopeUtil.name(factoryPackage);
+      name = ScopeUtil.name(topPackage);
     }
     return name;
   }
 
-  void moduleShortName(String factoryPackage) {
-    factoryShortName = initName(factoryPackage) + "Module";
-    factoryFullName = factoryPackage + "." + factoryShortName;
+  void initialiseName(String topPackage) {
+    modulePackage = topPackage;
+    final String name = initName(modulePackage);
+    moduleShortName = name + "Module";
+    moduleFullName = modulePackage + "." + moduleShortName;
+    beanFactoryShortName = name + "BeanFactory";
+    beanFactoryFullName = modulePackage + "." + beanFactoryShortName;
   }
 
-  String factoryShortName(String factoryPackage) {
-    return initName(factoryPackage) + "BeanFactory";
+  String modulePackage() {
+    return modulePackage;
   }
 
-  String factoryFullName() {
-    return factoryFullName;
+  String moduleFullName() {
+    return moduleFullName;
   }
 
-  String factoryShortName() {
-    return factoryShortName;
+  String moduleShortName() {
+    return moduleShortName;
+  }
+
+  String beanFactoryFullName() {
+    return beanFactoryFullName;
+  }
+
+  String beanFactoryShortName() {
+    return beanFactoryShortName;
   }
 
   boolean isMainScope() {
@@ -133,8 +147,8 @@ class ScopeInfo {
   private void writeModule() {
     if (!moduleWritten) {
       try {
-        this.topPackage = MetaTopPackage.of(metaData.values());
-        SimpleModuleWriter factoryWriter = new SimpleModuleWriter(topPackage, context, this);
+        initialiseName(MetaTopPackage.of(metaData.values()));
+        SimpleModuleWriter factoryWriter = new SimpleModuleWriter(context, this);
         factoryWriter.write(mainScope);
         moduleWritten = true;
       } catch (FilerException e) {
@@ -150,7 +164,7 @@ class ScopeInfo {
       context.logError("already written builder " + name);
       return;
     }
-    MetaDataOrdering ordering = new MetaDataOrdering(topPackage, metaData.values(), context, this);
+    MetaDataOrdering ordering = new MetaDataOrdering(metaData.values(), context, this);
     int remaining = ordering.processQueue();
     if (remaining > 0) {
       ordering.logWarnings();

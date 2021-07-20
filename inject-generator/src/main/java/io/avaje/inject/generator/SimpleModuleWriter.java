@@ -42,20 +42,19 @@ class SimpleModuleWriter {
       "   */";
 
   private final ProcessingContext context;
-  private final String factoryPackage;
-  private final String factoryShortName;
-  private final String factoryFullName;
+  private final String modulePackage;
+  private final String shortName;
+  private final String fullName;
   private final ScopeInfo scopeInfo;
 
   private Append writer;
 
-  SimpleModuleWriter(String topPackage, ProcessingContext context, ScopeInfo scopeInfo) {
+  SimpleModuleWriter(ProcessingContext context, ScopeInfo scopeInfo) {
     this.context = context;
     this.scopeInfo = scopeInfo;
-    this.factoryPackage = topPackage;
-    scopeInfo.moduleShortName(factoryPackage);
-    this.factoryShortName = scopeInfo.factoryShortName();
-    this.factoryFullName = scopeInfo.factoryFullName();
+    this.modulePackage = scopeInfo.modulePackage();
+    this.shortName = scopeInfo.moduleShortName();
+    this.fullName = scopeInfo.moduleFullName();
   }
 
   void write(boolean includeServicesFile) throws IOException {
@@ -76,7 +75,7 @@ class SimpleModuleWriter {
       FileObject jfo = context.createMetaInfWriter();
       if (jfo != null) {
         Writer writer = jfo.openWriter();
-        writer.write(factoryFullName);
+        writer.write(fullName);
         writer.close();
       }
 
@@ -96,7 +95,7 @@ class SimpleModuleWriter {
   }
 
   private void writePackage() {
-    writer.append("package %s;", factoryPackage).eol().eol();
+    writer.append("package %s;", modulePackage).eol().eol();
     for (String type : factoryImportTypes()) {
       writer.append("import %s;", type).eol();
     }
@@ -115,11 +114,11 @@ class SimpleModuleWriter {
   }
 
   private void writeStartClass() {
-    writer.append(CODE_COMMENT_FACTORY, scopeInfo.name(), factoryPackage, factoryShortName).eol();
+    writer.append(CODE_COMMENT_FACTORY, scopeInfo.name(), modulePackage, shortName).eol();
     scopeInfo.buildAtInjectModule(writer);
 
     String custom = scopeInfo.isMainScope() ? "" : ".Custom";
-    writer.append("public class %s implements Module%s {", factoryShortName, custom).eol().eol();
+    writer.append("public class %s implements Module%s {", shortName, custom).eol().eol();
     scopeInfo.buildFields(writer);
 
     writer.append("  @Override").eol();
@@ -138,7 +137,7 @@ class SimpleModuleWriter {
   }
 
   private Writer createFileWriter() throws IOException {
-    JavaFileObject jfo = context.createWriter(factoryFullName);
+    JavaFileObject jfo = context.createWriter(fullName);
     return jfo.openWriter();
   }
 
