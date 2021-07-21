@@ -12,7 +12,7 @@ import java.util.List;
  *
  * <h3>Create a BeanScope</h3>
  * <p>
- * We can programmatically create a BeanScope via BeanScopeBuilder.
+ * We can programmatically create a BeanScope via {@code BeanScope.newBuilder()}.
  * </p>
  * <pre>{@code
  *
@@ -26,35 +26,75 @@ import java.util.List;
  *   }
  *
  * }</pre>
+ *
+ * <h3>External dependencies</h3>
+ * <p>
+ * We can supporting external dependencies when creating the BeanScope. We need to do 2 things.
+ * we need to specify these via
+ * </p>
+ * <ul>
+ *   <li>
+ *       1. Specify the external dependency via {@code @InjectModule(requires=...)}.
+ *       Otherwise at compile time the annotation processor detects it as a missing dependency and we can't compile.
+ *   </li>
+ *   <li>
+ *       2. Provide the dependency when creating the BeanScope
+ *   </li>
+ * </ul>
+ * <p>
+ * For example, given we have Pump as an externally provided dependency.
+ *
+ * <pre>{@code
+ *
+ *   // tell the annotation processor Pump is provided externally
+ *   // otherwise it thinks we have a missing dependency
+ *
+ *   @InjectModule(requires=Pump.class)
+ *
+ * }</pre>
+ * <p>
+ * When we build the BeanScope provide the dependency via {@link BeanScopeBuilder#withBean(Class, Object)}.
+ *
+ * <pre>{@code
+ *
+ *   // provide external dependencies ...
+ *   Pump pump = ...
+ *
+ *   try (BeanScope scope = BeanScope.newBuilder()
+ *     .withBean(Pump.class, pump)
+ *     .build()) {
+ *
+ *     CoffeeMaker coffeeMaker = context.get(CoffeeMaker.class);
+ *     coffeeMaker.makeIt()
+ *   }
+ *
+ * }</pre>
  */
 public interface BeanScope extends AutoCloseable {
 
   /**
-   * Build a bean scope with options for shutdown hook and supplying test doubles.
+   * Build a bean scope with options for shutdown hook and supplying external dependencies.
    * <p>
-   * We would choose to use BeanScopeBuilder in test code (for component testing)
-   * as it gives us the ability to inject test doubles, mocks, spy's etc.
-   * </p>
+   * We can optionally:
+   * <ul>
+   *   <li>Provide external dependencies</li>
+   *   <li>Specify a parent BeanScope</li>
+   *   <li>Specify specific modules to wire</li>
+   *   <li>Specify to include a shutdown hook (to fire preDestroy lifecycle methods)</li>
+   *   <li>Use {@code forTesting()} to specify mocks and spies to use when wiring tests</li>
+   * </ul>
    *
    * <pre>{@code
    *
-   *   @Test
-   *   public void someComponentTest() {
+   *   // create a BeanScope ...
    *
-   *     MyRedisApi mockRedis = mock(MyRedisApi.class);
-   *     MyDbApi mockDatabase = mock(MyDbApi.class);
+   *   try (BeanScope scope = BeanScope.newBuilder()
+   *     .build()) {
    *
-   *     try (BeanScope scope = BeanScope.newBuilder()
-   *       .withBeans(mockRedis, mockDatabase)
-   *       .build()) {
-   *
-   *       // built with test doubles injected ...
-   *       CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
-   *       coffeeMaker.makeIt();
-   *
-   *       assertThat(...
-   *     }
+   *     CoffeeMaker coffeeMaker = context.get(CoffeeMaker.class);
+   *     coffeeMaker.makeIt()
    *   }
+   *
    * }</pre>
    */
   static BeanScopeBuilder newBuilder() {
@@ -102,10 +142,6 @@ public interface BeanScope extends AutoCloseable {
    *
    * }</pre>
    *
-   * <p>
-   * The classic use case for this is registering controllers or routes to
-   * web frameworks like Sparkjava, Javlin, Rapidoid etc.
-   *
    * @param annotation An annotation class.
    */
   List<Object> listByAnnotation(Class<?> annotation);
@@ -144,15 +180,14 @@ public interface BeanScope extends AutoCloseable {
   /**
    * Return all the bean entries from the scope.
    * <p>
-   * The bean entries include
-   * This includes entries from the parent scope if it has one.
+   * The bean entries include entries from the parent scope if it has one.
    *
    * @return All bean entries from the scope.
    */
   List<BeanEntry> all();
 
   /**
-   * Close the scope firing any <code>@PreDestroy</code> methods.
+   * Close the scope firing any <code>@PreDestroy</code> lifecycle methods.
    */
   void close();
 }

@@ -4,6 +4,8 @@ import java.util.Set;
 
 /**
  * A bean entry with priority and optional name.
+ *
+ * @see BeanScope#all()
  */
 public interface BeanEntry {
 

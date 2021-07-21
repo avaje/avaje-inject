@@ -15,13 +15,13 @@ import java.util.function.Consumer;
  *   // external dependencies
  *   Pump pump = ...
  *
- *   try (BeanScope scope = BeanScope.newBuilder()
+ *   BeanScope scope = BeanScope.newBuilder()
  *     .withBean(pump)
- *     .build()) {
+ *     .build();
  *
- *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
- *     coffeeMaker.makeIt();
- *   }
+ *   CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
+ *   coffeeMaker.makeIt();
+ *
  * }</pre>
  */
 public interface BeanScopeBuilder {
@@ -29,19 +29,19 @@ public interface BeanScopeBuilder {
   /**
    * Create the bean scope registering a shutdown hook (defaults to false, no shutdown hook).
    * <p>
-   * The expectation is that the BeanScopeBuilder is closed via code or via using
-   * try with resources.
+   * With {@code withShutdownHook(true)} a shutdown hook will be registered with the Runtime
+   * and executed when the JVM initiates a shutdown. This then will run the {@code preDestroy}
+   * lifecycle methods.
    * </p>
    * <pre>{@code
    *
    *   // automatically closed via try with resources
    *
-   *   try (BeanScope scope = BeanScope.newBuilder()
+   *   BeanScope scope = BeanScope.newBuilder()
    *     .withShutdownHook(true)
-   *     .build()) {
+   *     .build());
    *
-   *     String makeIt = scope.get(CoffeeMaker.class).makeIt();
-   *   }
+   *   // on JVM shutdown the preDestroy lifecycle methods are executed
    *
    * }</pre>
    *
@@ -59,15 +59,12 @@ public interface BeanScopeBuilder {
    *
    * <pre>{@code
    *
-   *   try (BeanScope scope = BeanScope.newBuilder()
+   *   BeanScope scope = BeanScope.newBuilder()
    *     .withModules(new CustomModule())
-   *     .build()) {
+   *     .build());
    *
-   *     // built with test doubles injected ...
-   *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
-   *     coffeeMaker.makeIt();
-   *
-   *   }
+   *   CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
+   *   coffeeMaker.makeIt();
    *
    * }</pre>
    *
@@ -90,19 +87,12 @@ public interface BeanScopeBuilder {
    *   Pump pump = ...
    *   Grinder grinder = ...
    *
-   *   try (BeanScope scope = BeanScope.newBuilder()
+   *   BeanScope scope = BeanScope.newBuilder()
    *     .withBeans(pump, grinder)
-   *     .build()) {
+   *     .build();
    *
-   *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
-   *     coffeeMaker.makeIt();
-   *
-   *     Pump pump1 = scope.get(Pump.class);
-   *     Grinder grinder1 = scope.get(Grinder.class);
-   *
-   *     assertThat(pump1).isSameAs(pump);
-   *     assertThat(grinder1).isSameAs(grinder);
-   *   }
+   *   CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
+   *   coffeeMaker.makeIt();
    *
    * }</pre>
    *
@@ -112,10 +102,7 @@ public interface BeanScopeBuilder {
   BeanScopeBuilder withBeans(Object... beans);
 
   /**
-   * Add a supplied bean instance with the given injection type.
-   * <p>
-   * This is typically a test double often created by Mockito or similar.
-   * </p>
+   * Add a supplied bean instance with the given injection type (typically an interface type).
    *
    * <pre>{@code
    *
@@ -168,7 +155,9 @@ public interface BeanScopeBuilder {
    * Build and return the bean scope.
    * <p>
    * The BeanScope is effectively immutable in that all components are created
-   * eagerly (eager singletons).
+   * and all PostConstruct lifecycle methods have been invoked.
+   * <p>
+   * The beanScope effectively contains eager singletons.
    *
    * @return The BeanScope
    */
@@ -187,10 +176,7 @@ public interface BeanScopeBuilder {
      *   try (BeanScope scope = BeanScope.newBuilder()
      *     .forTesting()
      *     .withMock(Pump.class)
-     *     .withMock(Grinder.class, grinder -> {
-     *       // setup the mock
-     *       when(grinder.grindBeans()).thenReturn("stub response");
-     *     })
+     *     .withMock(Grinder.class)
      *     .build()) {
      *
      *
