@@ -142,6 +142,16 @@ public interface BeanScope extends AutoCloseable {
   <T> List<T> listByPriority(Class<T> interfaceType, Class<? extends Annotation> priority);
 
   /**
+   * Return all the bean entries from the scope.
+   * <p>
+   * The bean entries include
+   * This includes entries from the parent scope if it has one.
+   *
+   * @return All bean entries from the scope.
+   */
+  List<BeanEntry> all();
+
+  /**
    * Close the scope firing any <code>@PreDestroy</code> methods.
    */
   void close();

@@ -1,10 +1,11 @@
 package io.avaje.inject.spi;
 
-import io.avaje.inject.BeanEntry;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-import java.util.*;
-
-import static io.avaje.inject.BeanEntry.*;
+import static io.avaje.inject.BeanEntry.SUPPLIED;
 
 /**
  * Map of types (class types, interfaces and annotations) to a DContextEntry where the
@@ -17,6 +18,17 @@ class DBeanMap {
   private NextBean nextBean;
 
   DBeanMap() {
+  }
+
+  /**
+   * Add to the map of entries.
+   */
+  void addAll(Map<DContextEntryBean,DEntry> map) {
+    for (Map.Entry<String, DContextEntry> entry : beans.entrySet()) {
+      for (DContextEntryBean contentEntry : entry.getValue().entries()) {
+        map.computeIfAbsent(contentEntry, dContextEntryBean -> contentEntry.entry()).addKey(entry.getKey());
+      }
+    }
   }
 
   /**

@@ -1,107 +1,66 @@
 package io.avaje.inject;
 
+import java.util.Set;
+
 /**
  * A bean entry with priority and optional name.
  */
-public class BeanEntry<T> {
+public interface BeanEntry {
 
   /**
-   * An explicitly supplied bean. See BeanScopeBuilder.
+   * Priority of externally supplied bean.
    */
-  public static final int SUPPLIED = 2;
+  int SUPPLIED = 2;
 
   /**
-   * An <code>@Primary</code> bean.
+   * Priority of <code>@Primary</code> bean.
    */
-  public static final int PRIMARY = 1;
+  int PRIMARY = 1;
 
   /**
-   * A normal priority bean.
+   * Priority of normal bean.
    */
-  public static final int NORMAL = 0;
+  int NORMAL = 0;
 
   /**
-   * A <code>@Secondary</code> bean.
+   * Priority of <code>@Secondary</code> bean.
    */
-  public static final int SECONDARY = -1;
-
-  private final int priority;
-
-  private final T bean;
-
-  private final String name;
-
-  /**
-   * Construct with priority, name and the bean.
-   */
-  public BeanEntry(int priority, T bean, String name) {
-    this.priority = priority;
-    this.bean = bean;
-    this.name = name;
-  }
-
-  /**
-   * Return the priority (Primary, Normal and Secondary).
-   */
-  public int getPriority() {
-    return priority;
-  }
-
-  /**
-   * Return the bean.
-   */
-  public T getBean() {
-    return bean;
-  }
+  int SECONDARY = -1;
 
   /**
    * Return the bean name.
    */
-  public String getName() {
-    return name;
-  }
+  String qualifierName();
 
   /**
-   * Return true if this entry has Supplied priority.
+   * Return the bean instance.
    */
-  public boolean isSupplied() {
-    return priority == SUPPLIED;
-  }
+  Object bean();
 
   /**
-   * Return true if this entry has Primary priority.
+   * The bean instance type.
    */
-  public boolean isPrimary() {
-    return priority == PRIMARY;
-  }
+  Class<?> type();
 
   /**
-   * Return true if this entry has Secondary priority.
+   * Return the priority indicating if the bean is Supplied Primary, Normal or Secondary.
    */
-  public boolean isSecondary() {
-    return priority == SECONDARY;
-  }
+  int priority();
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("{bean:").append(bean);
-    if (name != null) {
-      sb.append(", name:").append(name);
-    }
-    switch (priority) {
-      case SUPPLIED:
-        sb.append(", Supplied");
-        break;
-      case PRIMARY:
-        sb.append(", @Primary");
-        break;
-      case SECONDARY:
-        sb.append(", @Secondary");
-        break;
-      default:
-        sb.append(", Normal");
-    }
-    return sb.append("}").toString();
-  }
+  /**
+   * Return the type keys for this bean.
+   * <p>
+   * This is the set of type, interface types and annotation types that the entry is registered for.
+   */
+  Set<String> keys();
+
+  /**
+   * Return true if the entry has a key for this type.
+   * <p>
+   * This is true if the keys contains the canonical name of the given type.
+   *
+   * @param type The type to match. Can be any type including concrete, interface or annotation type.
+   */
+  boolean hasKey(Class<?> type);
+
 }

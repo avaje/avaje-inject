@@ -1,14 +1,13 @@
 package io.avaje.inject.spi;
 
+import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.Priority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 class DBeanScope implements BeanScope {
@@ -35,6 +34,20 @@ class DBeanScope implements BeanScope {
     } else {
       this.shutdownHook = null;
     }
+  }
+
+  @Override
+  public List<BeanEntry> all() {
+    IdentityHashMap<DContextEntryBean, DEntry> map = new IdentityHashMap<>();
+    if (parent != null) {
+      ((DBeanScope) parent).addAll(map);
+    }
+    addAll(map);
+    return new ArrayList<>(map.values());
+  }
+
+  void addAll(Map<DContextEntryBean, DEntry> map) {
+    beans.addAll(map);
   }
 
   @Override
