@@ -27,7 +27,7 @@ class AllScopes {
     return defaultScope;
   }
 
-  ScopeInfo addAnnotation(TypeElement type) {
+  ScopeInfo addScopeAnnotation(TypeElement type) {
     final Data data = new Data(type, context, this);
     scopeAnnotations.put(type.getQualifiedName().toString(), data);
     return data.scopeInfo;
@@ -87,7 +87,7 @@ class AllScopes {
           if (scopeType == null) {
             context.logError(module, "customScopeType [" + customScopeType + "] is invalid? on " + module);
           } else {
-            final ScopeInfo scopeInfo = addAnnotation(scopeType);
+            final ScopeInfo scopeInfo = addScopeAnnotation(scopeType);
             scopeInfo.readModuleMetaData(module);
           }
         }

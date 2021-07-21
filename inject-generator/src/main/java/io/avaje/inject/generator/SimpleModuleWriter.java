@@ -1,7 +1,6 @@
 package io.avaje.inject.generator;
 
 import javax.tools.FileObject;
-import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
@@ -147,7 +146,7 @@ class SimpleModuleWriter {
     writer.append(CODE_COMMENT_FACTORY, scopeInfo.name(), modulePackage, shortName).eol();
     scopeInfo.buildAtInjectModule(writer);
 
-    String custom = scopeInfo.isMainScope() ? "" : ".Custom";
+    String custom = scopeInfo.isDefaultScope() ? "" : ".Custom";
     writer.append("public class %s implements Module%s {", shortName, custom).eol().eol();
     scopeInfo.buildFields(writer);
 

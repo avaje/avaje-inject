@@ -78,7 +78,7 @@ public class Processor extends AbstractProcessor {
       if (element.getKind() == ElementKind.ANNOTATION_TYPE) {
         // context.logDebug("detected scope annotation " + element);
         TypeElement type = (TypeElement) element;
-        allScopes.addAnnotation(type);
+        allScopes.addScopeAnnotation(type);
       }
     }
   }

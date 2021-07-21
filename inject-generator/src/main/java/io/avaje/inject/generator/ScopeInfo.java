@@ -20,11 +20,11 @@ class ScopeInfo {
   private final ProcessingContext context;
   private final Set<String> requires = new LinkedHashSet<>();
   private final Set<String> provides = new LinkedHashSet<>();
-  private final boolean mainScope;
+  private final boolean defaultScope;
   private final TypeElement annotationType;
   private final AllScopes scopes;
+  private boolean moduleInitialised;
   private boolean moduleWritten;
-  private boolean builderWritten;
   private String name;
   private String modulePackage;
   private String moduleFullName;
@@ -37,7 +37,7 @@ class ScopeInfo {
   ScopeInfo(ProcessingContext context) {
     this.scopes = null;
     this.context = context;
-    this.mainScope = true;
+    this.defaultScope = true;
     this.annotationType = null;
   }
 
@@ -47,7 +47,7 @@ class ScopeInfo {
   ScopeInfo(ProcessingContext context, TypeElement type, AllScopes scopes) {
     this.scopes = scopes;
     this.context = context;
-    this.mainScope = false;
+    this.defaultScope = false;
     this.annotationType = type;
   }
 
@@ -97,8 +97,8 @@ class ScopeInfo {
     return moduleShortName;
   }
 
-  boolean isMainScope() {
-    return mainScope;
+  boolean isDefaultScope() {
+    return defaultScope;
   }
 
   String name() {
@@ -139,20 +139,20 @@ class ScopeInfo {
     }
   }
 
-  private void writeModule() {
-    if (!moduleWritten) {
+  private void initialiseModule() {
+    if (!moduleInitialised) {
       try {
         initialiseName(MetaTopPackage.of(metaData.values()));
-        moduleWritten = true;
+        moduleInitialised = true;
       } catch (IOException e) {
         context.logError("Failed to create module filer " + e.getMessage());
       }
     }
   }
 
-  void writeBeanFactory() {
-    if (builderWritten) {
-      context.logError("already written builder " + name);
+  void writeModule() {
+    if (moduleWritten) {
+      context.logError("already written module " + name);
       return;
     }
     MetaDataOrdering ordering = new MetaDataOrdering(metaData.values(), context, this);
@@ -162,8 +162,8 @@ class ScopeInfo {
     }
     try {
       SimpleModuleWriter factoryWriter = new SimpleModuleWriter(ordering, context, this);
-      factoryWriter.write(mainScope);
-      builderWritten = true;
+      factoryWriter.write(defaultScope);
+      moduleWritten = true;
     } catch (FilerException e) {
       context.logWarn("FilerException trying to write factory " + e.getMessage());
     } catch (IOException e) {
@@ -241,9 +241,9 @@ class ScopeInfo {
   void write(boolean processingOver) {
     mergeMetaData();
     writeBeanHelpers();
-    writeModule();
+    initialiseModule();
     if (processingOver) {
-      writeBeanFactory();
+      writeModule();
     }
   }
 
@@ -331,7 +331,7 @@ class ScopeInfo {
    * by the "default" module. We could/should move to be tighter here at some point.
    */
   boolean providedByOtherModule(String dependency) {
-    if (mainScope) {
+    if (defaultScope) {
       return false;
     }
     if (scopes.providedByDefaultModule(dependency)) {
