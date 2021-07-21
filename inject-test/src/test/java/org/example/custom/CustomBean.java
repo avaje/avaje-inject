@@ -1,6 +1,6 @@
 package org.example.custom;
 
-import jakarta.inject.Named;
+import javax.inject.Named;
 import org.example.MyCustomScope;
 
 @Named("Hello")
