@@ -1,5 +1,37 @@
 /**
  * Avaje Inject API - see {@link io.avaje.inject.BeanScope}.
+ *
+ * <h2>Overview</h2>
+ *
+ * <h4>1. @Singleton / @Factory</h4>
+ * <p>
+ * Put <code>@Singleton</code> on beans that we want avaje-inject to wire.
+ * <p>
+ * We can use <code>@Factory/@Bean</code> to programmatically create dependencies
+ * when they have interesting construction logic (e.g. construction depends on
+ * system/environment properties etc - like Spring @Configuration).
+ *
+ * <pre>{@code
+ *
+ *   @Singleton
+ *   public class CoffeeMaker { ... }
+ *
+ *   @Singleton
+ *   public class Pump { ... }
+ *
+ *   // Use @Factory to programmatically build dependencies
+ *
+ *   @Factory
+ *   public class MyFactory {
+ *
+ *     @Bean
+ *     Grinder buildGrinder(Pump pump) { // interesting construction logic ... }
+ *
+ *   }
+ *
+ * }</pre>
+ *
+ * <h4>2. Create and use BeanScope</h4>
  * <p>
  * Create {@link io.avaje.inject.BeanScope} using a builder.
  * Obtain beans from the scope and use them.
@@ -10,14 +42,117 @@
  *
  * <pre>{@code
  *
+ *   // create BeanScope
  *   BeanScope scope = BeanScope.newBuilder()
  *     .build();
  *
+ *   // use it
  *   CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
  *   coffeeMaker.makeIt();
  *
- *   // fire preDestroy lifecycle methods
+ *   // close it to fire preDestroy lifecycle methods
  *   scope.close();
+ *
+ * }</pre>
+ *
+ * <h2>Default scope</h3>
+ * <p>
+ * All beans annotated with {@code @Singleton} and {@code @Factory} are by default included in
+ * the "default scope".
+ * <p>
+ * When we create a BeanScope and do not specify any modules then all the beans in the default
+ * scope are included. This is done via ServiceLoader and includes all 'default scope' modules
+ * that are in the classpath (other jars can have default scope modules and these are all included).
+ *
+ * <h4>Generated code</h4>
+ * <p>
+ * <em>avaje-inject</em> will generate a <code>$DI</code> class for each bean that it is going to
+ * wire - this has the code that instantiates the bean, performs field and method injection and
+ * lifecycle support (PostConstruct and PreDestroy).
+ * <p>
+ * <em>avaje-inject</em> will generate a Module class for the default scope. The main job of
+ * the module code is to specify the ordering of how all the beans are instantiated.
+ * <p>
+ * We typically find the generated source code in  <em>target/generate-sources/annotations</em>.
+ *
+ *
+ * <h2>Custom scopes</h3>
+ * <p>
+ * We can create custom scopes that only contain the beans/components that we want to include in
+ * that scope. These beans/components in the custom scope are not included in the default scope.
+ * <p>
+ * To do this we:
+ *
+ * <h4>1. Create the scope annotation</h4>
+ * <p>
+ * Create an annotation that has the {@code Scope} annotation. In the example below we create the
+ * <code>@StoreComponent</code> annotation. We will put this annotation on beans that we want
+ * included in the scope.
+ *
+ * <pre>{@code
+ *
+ *    @Scope
+ *    public @interface StoreComponent {
+ *    }
+ *
+ * }</pre>
+ *
+ * <p>
+ * Note that if this scope depends on external dependencies or another scope we specify that via
+ * {@code @InjectModule requires}. In the example below our StoreComponent depends on another
+ * scope called QueueComponent and an external dependency - SomeExternalDependency.
+ *
+ * <pre>{@code
+ *
+ *    @Scope
+ *    @InjectModule(requires = {QueueComponent.class, SomeExternalDependency.class})
+ *    public @interface StoreComponent {
+ *    }
+ *
+ * }</pre>
+ *
+ * <h4>2. Use the annotation</h4>
+ * <p>
+ * Put the <code>@StoreComponent</code> annotation on the beans that we want included in the
+ * custom scope.
+ *
+ * <pre>{@code
+ *
+ *   @StoreComponent
+ *   public class StoreLoader {
+ *     ...
+ *   }
+ *
+ * }</pre>
+ *
+ *
+ * <h4>3. Generated Module</h4>
+ * <p>
+ * <em>avaje-inject</em> will generate a <code>StoreComponentModule</code> with the appropriate
+ * code to create/wire all the beans in the custom scope.
+ * <p>
+ * StoreComponentModule is typically found in <em>target/generate-sources/annotations</em>.
+ * For each component we will also see a <code>$DI</code> class which is the generated code
+ * that creates the component.
+ *
+ * <h4>4. Use the custom scope</h4>
+ * <p>
+ * To use the custom scope we specify the <code>StoreComponentModule</code> when creating the
+ * BeanScope. Only the components in our module will be create/wired into the BeanScope.
+ * <p>
+ * If the scope depends on another scope then we specify that using {@code withParent()}.
+ *
+ * <pre>{@code
+ *
+ *   BeanScope parentScope = ...
+ *
+ *   BeanScope scope = BeanScope.newBuilder()
+ *     .withModules(new StoreComponentModule())
+ *     .withParent(parentScope)
+ *     .build());
+ *
+ *   StoreLoader storeLoader = scope.get(StoreLoader.class);
+ *   storeLoader.load();
  *
  * }</pre>
  */
