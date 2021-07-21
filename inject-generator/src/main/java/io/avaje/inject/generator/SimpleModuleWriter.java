@@ -80,7 +80,6 @@ class SimpleModuleWriter {
         writer.write(fullName);
         writer.close();
       }
-
     } catch (IOException e) {
       e.printStackTrace();
       context.logError("Failed to write services file " + e.getMessage());

@@ -30,6 +30,7 @@ class ScopeInfo {
   private String moduleFullName;
   private String moduleShortName;
   private JavaFileObject moduleFile;
+  private boolean emptyModule;
 
   /**
    * Create for the main/global module scope.
@@ -74,11 +75,14 @@ class ScopeInfo {
   }
 
   void initialiseName(String topPackage) throws IOException {
-    modulePackage = topPackage;
-    final String name = initName(modulePackage);
-    moduleShortName = name + "Module";
-    moduleFullName = modulePackage + "." + moduleShortName;
-    moduleFile = context.createWriter(moduleFullName);
+    emptyModule = topPackage == null;
+    if (!emptyModule) {
+      modulePackage = topPackage;
+      final String name = initName(modulePackage);
+      moduleShortName = name + "Module";
+      moduleFullName = modulePackage + "." + moduleShortName;
+      moduleFile = context.createWriter(moduleFullName);
+    }
   }
 
   JavaFileObject moduleFile() {
@@ -155,7 +159,15 @@ class ScopeInfo {
       context.logError("already written module " + name);
       return;
     }
-    MetaDataOrdering ordering = new MetaDataOrdering(metaData.values(), context, this);
+    final Collection<MetaData> meta = metaData.values();
+    if (emptyModule) {
+      // typically nothing in the default scope, only custom scopes
+      if (meta.size() > 0) {
+        context.logWarn("Empty module but meta is not empty? " + meta);
+      }
+      return;
+    }
+    MetaDataOrdering ordering = new MetaDataOrdering(meta, context, this);
     int remaining = ordering.processQueue();
     if (remaining > 0) {
       ordering.logWarnings();
