@@ -19,9 +19,7 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.Reader;
 import java.nio.file.NoSuchFileException;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 class ProcessingContext {
 
@@ -30,13 +28,6 @@ class ProcessingContext {
   private final Filer filer;
   private final Elements elementUtils;
   private final Types typeUtils;
-
-  private String contextName;
-  private String[] contextProvides;
-  private String[] contextDependsOn;
-  private Set<String> contextRequires = new LinkedHashSet<>();
-  private String contextPackage;
-  private String metaInfServicesLine;
 
   ProcessingContext(ProcessingEnvironment processingEnv) {
     this.processingEnv = processingEnv;
@@ -66,23 +57,29 @@ class ProcessingContext {
   }
 
   String loadMetaInfServices() {
-    if (metaInfServicesLine == null) {
-      metaInfServicesLine = loadMetaInf();
-    }
-    return metaInfServicesLine;
+    final List<String> lines = loadMetaInf(Constants.META_INF_FACTORY);
+    return lines.isEmpty() ? null : lines.get(0);
   }
 
-  private String loadMetaInf() {
-    // logDebug("loading metaInfServicesLine ...");
+  List<String> loadMetaInfCustom() {
+    return loadMetaInf(Constants.META_INF_CUSTOM);
+  }
+
+  private List<String> loadMetaInf(String fullName) {
     try {
-      FileObject fileObject = processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", Constants.META_INF_FACTORY);
+      FileObject fileObject = processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", fullName);
       if (fileObject != null) {
+        List<String> lines = new ArrayList<>();
         Reader reader = fileObject.openReader(true);
         LineNumberReader lineReader = new LineNumberReader(reader);
-        String line = lineReader.readLine();
-        if (line != null) {
-          return line.trim();
+        String line;
+        while ((line = lineReader.readLine()) != null) {
+          line = line.trim();
+          if (!line.isEmpty()) {
+            lines.add(line);
+          }
         }
+        return lines;
       }
 
     } catch (FileNotFoundException | NoSuchFileException e) {
@@ -95,7 +92,7 @@ class ProcessingContext {
       e.printStackTrace();
       logWarn("Error reading services file: " + e.getMessage());
     }
-    return null;
+    return Collections.emptyList();
   }
 
   /**
@@ -105,44 +102,16 @@ class ProcessingContext {
     return filer.createSourceFile(cls);
   }
 
-  /**
-   * Create a file writer for the given class name.
-   */
   FileObject createMetaInfWriter() throws IOException {
-    return filer.createResource(StandardLocation.CLASS_OUTPUT, "", Constants.META_INF_FACTORY);
+    return createMetaInfWriterFor(Constants.META_INF_FACTORY);
   }
 
-  void setContextDetails(String name, String[] provides, String[] dependsOn, Element contextElement) {
-    this.contextName = name;
-    this.contextProvides = provides;
-    this.contextDependsOn = dependsOn;
-
-    // determine the context package (that we put the DI Factory class into)
-    PackageElement pkg = elementUtils.getPackageOf(contextElement);
-    logDebug("using package from element " + pkg);
-    this.contextPackage = (pkg == null) ? null : pkg.getQualifiedName().toString();
+  FileObject createMetaInfModuleCustom() throws IOException {
+    return createMetaInfWriterFor(Constants.META_INF_CUSTOM);
   }
 
-  void setContextRequires(List<String> contextRequires) {
-    this.contextRequires.addAll(contextRequires);
-  }
-
-  Set<String> contextRequires() {
-    return contextRequires;
-  }
-
-  void deriveContextName(String factoryPackage) {
-    if (contextName == null) {
-      contextName = factoryPackage;
-    }
-  }
-
-  String contextName() {
-    return contextName;
-  }
-
-  String getContextPackage() {
-    return contextPackage;
+  private FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
+    return filer.createResource(StandardLocation.CLASS_OUTPUT, "", interfaceType);
   }
 
   TypeElement element(String rawType) {
@@ -161,61 +130,7 @@ class ProcessingContext {
     return typeUtils.asElement(returnType);
   }
 
-  void buildNewBuilder(Append writer) {
-    writer.append("    this.name = \"%s\";", contextName).eol();
-    writer.append("    this.provides = ", contextProvides);
-    buildStringArray(writer, contextProvides, true);
-    writer.append(";").eol();
-    writer.append("    this.dependsOn = ", contextDependsOn);
-    buildStringArray(writer, contextDependsOn, true);
-    writer.append(";").eol();
-  }
-
-  void buildAtInjectModule(Append writer) {
-    writer.append(Constants.AT_GENERATED).eol();
-    writer.append("@InjectModule(name=\"%s\"", contextName);
-    if (!isEmpty(contextProvides)) {
-      writer.append(", provides=");
-      buildStringArray(writer, contextProvides, false);
-    }
-    if (!isEmpty(contextDependsOn)) {
-      writer.append(", dependsOn=");
-      buildStringArray(writer, contextDependsOn, false);
-    }
-    if (!contextRequires.isEmpty()) {
-      writer.append(", requires={");
-      int c = 0;
-      for (String value : contextRequires) {
-        if (c++ > 0) {
-          writer.append(",");
-        }
-        writer.append(value).append(".class");
-      }
-      writer.append("}");
-    }
-    writer.append(")").eol();
-  }
-
-  private boolean isEmpty(String[] strings) {
-    return strings == null || strings.length == 0;
-  }
-
-  private void buildStringArray(Append writer, String[] values, boolean asArray) {
-    if (isEmpty(values)) {
-      writer.append("null");
-    } else {
-      if (asArray) {
-        writer.append("new String[]");
-      }
-      writer.append("{");
-      int c = 0;
-      for (String value : values) {
-        if (c++ > 0) {
-          writer.append(",");
-        }
-        writer.append("\"").append(value).append("\"");
-      }
-      writer.append("}");
-    }
+  PackageElement getPackageOf(Element element) {
+    return elementUtils.getPackageOf(element);
   }
 }

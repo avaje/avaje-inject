@@ -12,6 +12,10 @@ class DContextEntry {
 
   private final List<DContextEntryBean> entries = new ArrayList<>(5);
 
+  List<DContextEntryBean> entries() {
+    return entries;
+  }
+
   void add(DContextEntryBean entryBean) {
     entries.add(entryBean);
   }
@@ -102,7 +106,8 @@ class DContextEntry {
         match = entry;
         return;
       }
-      throw new IllegalStateException("Expecting only 1 bean match but have multiple matching beans " + match.getBean() + " and " + entry.getBean());
+      throw new IllegalStateException("Expecting only 1 bean match but have multiple matching beans " + match.getBean()
+        + " and " + entry.getBean() + ". Maybe need a rebuild is required after adding a @Named qualifier?");
     }
 
     private Object candidate() {

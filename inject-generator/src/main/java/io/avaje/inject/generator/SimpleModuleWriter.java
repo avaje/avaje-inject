@@ -1,7 +1,6 @@
 package io.avaje.inject.generator;
 
 import javax.tools.FileObject;
-import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
@@ -11,11 +10,11 @@ import java.util.TreeSet;
 /**
  * Write the source code for the factory.
  */
-class SimpleFactoryWriter {
+class SimpleModuleWriter {
 
   private static final String CODE_COMMENT_FACTORY =
     "/**\n" +
-      " * Generated source - Creates the BeanScope for the %s module.\n" +
+      " * Generated source - avaje inject module for %s.\n" +
       " * \n" +
       " * With JPMS Java module system this generated class should be explicitly\n" +
       " * registered in module-info via a <code>provides</code> clause like:\n" +
@@ -25,7 +24,7 @@ class SimpleFactoryWriter {
       " *   module example {\n" +
       " *     requires io.avaje.inject;\n" +
       " *     \n" +
-      " *     provides io.avaje.inject.spi.BeanScopeFactory with %s._DI$BeanScopeFactory;\n" +
+      " *     provides io.avaje.inject.spi.Module with %s.%s;\n" +
       " *     \n" +
       " *   }\n" +
       " * \n" +
@@ -36,43 +35,41 @@ class SimpleFactoryWriter {
     "  /**\n" +
       "   * Create the beans.\n" +
       "   * <p>\n" +
-      "   * Creates all the beans in order based on constuctor dependencies.\n" +
+      "   * Creates all the beans in order based on constructor dependencies.\n" +
       "   * The beans are registered into the builder along with callbacks for\n" +
       "   * field injection, method injection and lifecycle support.\n" +
       "   * <p>\n" +
       "   */";
 
-  private final MetaDataOrdering ordering;
   private final ProcessingContext context;
-  private final String factoryPackage;
-  private final String factoryShortName;
-  private final String factoryFullName;
+  private final String modulePackage;
+  private final String shortName;
+  private final String fullName;
+  private final ScopeInfo scopeInfo;
+  private final MetaDataOrdering ordering;
 
   private Append writer;
 
-  SimpleFactoryWriter(MetaDataOrdering ordering, ProcessingContext context) {
+  SimpleModuleWriter(MetaDataOrdering ordering, ProcessingContext context, ScopeInfo scopeInfo) {
     this.ordering = ordering;
     this.context = context;
-
-    String pkg = context.getContextPackage();
-    this.factoryPackage = (pkg != null) ? pkg : ordering.getTopPackage();
-    context.deriveContextName(factoryPackage);
-    this.factoryShortName = "_DI$BeanScopeFactory";
-    this.factoryFullName = factoryPackage + "." + factoryShortName;
+    this.scopeInfo = scopeInfo;
+    this.modulePackage = scopeInfo.modulePackage();
+    this.shortName = scopeInfo.moduleShortName();
+    this.fullName = scopeInfo.moduleFullName();
   }
 
-  void write() throws IOException {
+  void write(boolean includeServicesFile) throws IOException {
     writer = new Append(createFileWriter());
     writePackage();
     writeStartClass();
-
-    writeCreateMethod();
+    writeBuildMethod();
     writeBuildMethods();
-
     writeEndClass();
     writer.close();
-
-    writeServicesFile();
+    if (includeServicesFile) {
+      writeServicesFile();
+    }
   }
 
   private void writeServicesFile() {
@@ -80,26 +77,16 @@ class SimpleFactoryWriter {
       FileObject jfo = context.createMetaInfWriter();
       if (jfo != null) {
         Writer writer = jfo.openWriter();
-        writer.write(factoryFullName);
+        writer.write(fullName);
         writer.close();
       }
-
     } catch (IOException e) {
       e.printStackTrace();
       context.logError("Failed to write services file " + e.getMessage());
     }
   }
 
-  private void writeBuildMethods() {
-    for (MetaData metaData : ordering.getOrdered()) {
-      writer.append(metaData.buildMethod(ordering)).eol();
-    }
-    for (MetaData metaData : ordering.getRequestScope()) {
-      writer.append(metaData.buildMethod(ordering)).eol();
-    }
-  }
-
-  private void writeCreateMethod() {
+  private void writeBuildMethod() {
     writer.append(CODE_COMMENT_CREATE_CONTEXT).eol();
     writer.append("  @Override").eol();
     writer.append("  public void build(Builder builder) {").eol();
@@ -121,8 +108,17 @@ class SimpleFactoryWriter {
     writer.eol();
   }
 
+  private void writeBuildMethods() {
+    for (MetaData metaData : ordering.getOrdered()) {
+      writer.append(metaData.buildMethod(ordering)).eol();
+    }
+    for (MetaData metaData : ordering.getRequestScope()) {
+      writer.append(metaData.buildMethod(ordering)).eol();
+    }
+  }
+
   private void writePackage() {
-    writer.append("package %s;", factoryPackage).eol().eol();
+    writer.append("package %s;", modulePackage).eol().eol();
     for (String type : factoryImportTypes()) {
       writer.append("import %s;", type).eol();
     }
@@ -140,38 +136,27 @@ class SimpleFactoryWriter {
     importTypes.add(Constants.BEANCONTEXT);
     importTypes.add(Constants.INJECTMODULE);
     importTypes.add(Constants.DEPENDENCYMETA);
-    importTypes.add(Constants.BEANSCOPEFACTORY);
+    importTypes.add(Constants.MODULE);
     importTypes.add(Constants.BUILDER);
     return importTypes;
   }
 
   private void writeStartClass() {
-    writer.append(CODE_COMMENT_FACTORY, context.contextName(), factoryPackage).eol();
-    context.buildAtInjectModule(writer);
+    writer.append(CODE_COMMENT_FACTORY, scopeInfo.name(), modulePackage, shortName).eol();
+    scopeInfo.buildAtInjectModule(writer);
 
-    writer.append("public class %s implements BeanScopeFactory {", factoryShortName).eol().eol();
-    writer.append("  private final String name;").eol();
-    writer.append("  private final String[] provides;").eol();
-    writer.append("  private final String[] dependsOn;").eol();
-    writer.append("  private Builder builder;").eol().eol();
-
-    writer.append("  public %s() {", factoryShortName).eol();
-    context.buildNewBuilder(writer);
-    writer.append("  }").eol().eol();
+    String custom = scopeInfo.isDefaultScope() ? "" : ".Custom";
+    writer.append("public class %s implements Module%s {", shortName, custom).eol().eol();
+    scopeInfo.buildFields(writer);
 
     writer.append("  @Override").eol();
-    writer.append("  public String getName() {").eol();
-    writer.append("    return name;").eol();
-    writer.append("  }").eol().eol();
-
-    writer.append("  @Override").eol();
-    writer.append("  public String[] getProvides() {").eol();
+    writer.append("  public Class<?>[] provides() {").eol();
     writer.append("    return provides;").eol();
     writer.append("  }").eol().eol();
 
     writer.append("  @Override").eol();
-    writer.append("  public String[] getDependsOn() {").eol();
-    writer.append("    return dependsOn;").eol();
+    writer.append("  public Class<?>[] requires() {").eol();
+    writer.append("    return requires;").eol();
     writer.append("  }").eol().eol();
   }
 
@@ -180,8 +165,7 @@ class SimpleFactoryWriter {
   }
 
   private Writer createFileWriter() throws IOException {
-    JavaFileObject jfo = context.createWriter(factoryFullName);
-    return jfo.openWriter();
+    return scopeInfo.moduleFile().openWriter();
   }
 
 }

@@ -22,6 +22,7 @@ public class ExtensionExampleTest {
     Class<?> cls1 = SEmailer.class;
 
     BeanScopeBuilder bootContext = BeanScope.newBuilder()
+      .forTesting()
       .withSpy(cls0)
       .withSpy(cls1)
       .withMock(cls0)

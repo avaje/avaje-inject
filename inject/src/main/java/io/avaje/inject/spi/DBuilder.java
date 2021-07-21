@@ -2,12 +2,12 @@ package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
-import io.avaje.inject.RequestScopeMatch;
-import io.avaje.inject.RequestScopeProvider;
 import javax.inject.Provider;
 
 import java.util.*;
 import java.util.function.Consumer;
+
+import static io.avaje.inject.spi.DBeanScope.combine;
 
 class DBuilder implements Builder {
 
@@ -23,14 +23,11 @@ class DBuilder implements Builder {
   private final List<Consumer<Builder>> injectors = new ArrayList<>();
 
   /**
-   * Map of request scope providers and their associated keys.
-   */
-  private final Map<String, RequestScopeMatch<?>> reqScopeProviders = new HashMap<>();
-
-  /**
    * The beans created and added to the scope during building.
    */
-  final DBeanMap beanMap = new DBeanMap();
+  protected final DBeanMap beanMap = new DBeanMap();
+
+  private final BeanScope parent;
 
   /**
    * Debug of the current bean being wired - used in injection errors.
@@ -41,6 +38,10 @@ class DBuilder implements Builder {
    * Flag set when we are running post construct injection.
    */
   private boolean runningPostConstruct;
+
+  DBuilder(BeanScope parent) {
+    this.parent = parent;
+  }
 
   @Override
   public boolean isAddBeanFor(Class<?>... types) {
@@ -58,19 +59,6 @@ class DBuilder implements Builder {
     beanMap.nextBean(name, types);
   }
 
-  @Override
-  public <T> void requestScope(Class<T> type, RequestScopeProvider<T> provider) {
-    requestScope(type, provider, null, null);
-  }
-
-  @Override
-  public <T> void requestScope(Class<T> type, RequestScopeProvider<T> provider, String name, Class<?>... types) {
-    final DRequestScopeMatch<T> match = DRequestScopeMatch.of(provider, type, name, types);
-    for (String key : match.keys()) {
-      reqScopeProviders.put(key, match);
-    }
-  }
-
   private Class<?> firstOf(Class<?>[] types) {
     return types != null && types.length > 0 ? types[0] : null;
   }
@@ -83,11 +71,19 @@ class DBuilder implements Builder {
   @SuppressWarnings({"unchecked"})
   @Override
   public <T> List<T> list(Class<T> interfaceType) {
-    return (List<T>) beanMap.all(interfaceType);
+    List<T> values = (List<T>) beanMap.all(interfaceType);
+    if (parent == null) {
+      return values;
+    }
+    return combine(values, parent.list(interfaceType));
   }
 
   private <T> T getMaybe(Class<T> beanClass, String name) {
-    return beanMap.get(beanClass, name);
+    T bean = beanMap.get(beanClass, name);
+    if (bean != null) {
+      return bean;
+    }
+    return (parent == null) ? null : parent.get(beanClass, name);
   }
 
   /**
@@ -202,6 +198,6 @@ class DBuilder implements Builder {
 
   public BeanScope build(boolean withShutdownHook) {
     runInjectors();
-    return new DBeanScope(withShutdownHook, preDestroy, postConstruct, beanMap, reqScopeProviders).start();
+    return new DBeanScope(withShutdownHook, preDestroy, postConstruct, beanMap, parent).start();
   }
 }

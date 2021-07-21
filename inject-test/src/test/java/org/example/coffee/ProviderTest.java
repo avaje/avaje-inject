@@ -14,11 +14,11 @@ public class ProviderTest {
 
     try (BeanScope context = BeanScope.newBuilder().build()) {
 
-      ProvOther bean = context.getBean(ProvOther.class);
+      ProvOther bean = context.get(ProvOther.class);
       String other = bean.other();
       assertThat(other).isEqualTo("mush mush beans");
 
-      ProvOther2 bean2 = context.getBean(ProvOther2.class);
+      ProvOther2 bean2 = context.get(ProvOther2.class);
       assertThat(bean2.getaProv()).isSameAs(bean.getaProv());
     }
 

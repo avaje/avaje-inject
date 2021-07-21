@@ -14,11 +14,11 @@ public class AppleServiceTest {
   public void test_spyWithFieldInjection() {
 
     BeanScopeBuilder contextBuilder = BeanScope.newBuilder();
-    contextBuilder.withSpy(AppleService.class);
+    contextBuilder.forTesting().withSpy(AppleService.class);
 
     try (BeanScope beanScope = contextBuilder.build()) {
 
-      AppleService appleService = beanScope.getBean(AppleService.class);
+      AppleService appleService = beanScope.get(AppleService.class);
 
       doNothing()
         .when(appleService)
@@ -39,7 +39,7 @@ public class AppleServiceTest {
 
     try (BeanScope beanScope = BeanScope.newBuilder().build()) {
 
-      AppleService appleService = beanScope.getBean(AppleService.class);
+      AppleService appleService = beanScope.get(AppleService.class);
 
       assertThat(appleService.bananaService).isNotNull();
       assertThat(appleService.peachService).isNotNull();

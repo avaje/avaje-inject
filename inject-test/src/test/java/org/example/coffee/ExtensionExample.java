@@ -16,7 +16,7 @@ class ExtensionExample {
   }
 
   BeanScope build() {
-    BeanScopeBuilder bootContext = BeanScope.newBuilder();
+    BeanScopeBuilder.ForTesting bootContext = BeanScope.newBuilder().forTesting();
     withMocks.forEach(bootContext::withMock);
     withSpies.forEach(bootContext::withSpy);
     return bootContext.build();

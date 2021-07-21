@@ -38,6 +38,7 @@ class WithExtnNamedMocksTest {
     void test() {
 
       try (BeanScope beanScope = BeanScope.newBuilder()
+        .forTesting()
         .withMock(SomeStore.class, "Blue")
         .withMock(SomeStore.class, "green")
         .build()) {

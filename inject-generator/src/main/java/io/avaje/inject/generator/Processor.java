@@ -1,45 +1,25 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.InjectModule;
 import io.avaje.inject.Factory;
-import io.avaje.inject.Request;
-import io.avaje.inject.spi.DependencyMeta;
+import io.avaje.inject.InjectModule;
+import javax.inject.Scope;
+import javax.inject.Singleton;
 
 import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.FilerException;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
-import javax.inject.Singleton;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
 import javax.lang.model.util.Elements;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Processor extends AbstractProcessor {
 
-  private static final String INJECT_MODULE = "io.avaje.inject.InjectModule";
-
   private ProcessingContext context;
-
   private Elements elementUtils;
-
-  /**
-   * Map to merge the existing meta data with partially compiled code. Keyed by type and qualifier/name.
-   */
-  private final Map<String, MetaData> metaData = new LinkedHashMap<>();
-
-  private final List<BeanReader> beanReaders = new ArrayList<>();
-
-  private final Set<String> readBeans = new HashSet<>();
+  private ScopeInfo defaultScope;
+  private AllScopes allScopes;
+  private boolean readModuleInfo;
 
   public Processor() {
   }
@@ -54,15 +34,17 @@ public class Processor extends AbstractProcessor {
     super.init(processingEnv);
     this.context = new ProcessingContext(processingEnv);
     this.elementUtils = processingEnv.getElementUtils();
+    this.allScopes = new AllScopes(context);
+    this.defaultScope = allScopes.defaultScope();
   }
 
   @Override
   public Set<String> getSupportedAnnotationTypes() {
-
     Set<String> annotations = new LinkedHashSet<>();
     annotations.add(InjectModule.class.getCanonicalName());
     annotations.add(Factory.class.getCanonicalName());
     annotations.add(Singleton.class.getCanonicalName());
+    annotations.add(Scope.class.getCanonicalName());
     annotations.add(Constants.CONTROLLER);
     return annotations;
   }
@@ -78,55 +60,26 @@ public class Processor extends AbstractProcessor {
 
     Set<? extends Element> factoryBeans = roundEnv.getElementsAnnotatedWith(Factory.class);
     Set<? extends Element> beans = roundEnv.getElementsAnnotatedWith(Singleton.class);
-    Set<? extends Element> requestBeans = roundEnv.getElementsAnnotatedWith(Request.class);
-
+    Set<? extends Element> scopes = roundEnv.getElementsAnnotatedWith(Scope.class);
+    readScopes(scopes);
     readModule(roundEnv);
     readChangedBeans(factoryBeans, true);
     readChangedBeans(beans, false);
     readChangedBeans(controllers, false);
-    readChangedBeans(requestBeans, false);
+    allScopes.readBeans(roundEnv);
 
-    mergeMetaData();
-
-    writeBeanHelpers();
-    if (roundEnv.processingOver()) {
-      writeBeanFactory();
-    }
+    defaultScope.write(roundEnv.processingOver());
+    allScopes.write(roundEnv.processingOver());
     return false;
   }
 
-  private void writeBeanHelpers() {
-    for (BeanReader beanReader : beanReaders) {
-      try {
-        if (!beanReader.isWrittenToFile()) {
-          SimpleBeanWriter writer = new SimpleBeanWriter(beanReader, context);
-          writer.write();
-          beanReader.setWrittenToFile();
-        }
-      } catch (FilerException e) {
-        context.logWarn("FilerException to write $DI class " + beanReader.getBeanType() + " " + e.getMessage());
-
-      } catch (IOException e) {
-        e.printStackTrace();
-        context.logError(beanReader.getBeanType(), "Failed to write $DI class");
+  private void readScopes(Set<? extends Element> scopes) {
+    for (Element element : scopes) {
+      if (element.getKind() == ElementKind.ANNOTATION_TYPE) {
+        // context.logDebug("detected scope annotation " + element);
+        TypeElement type = (TypeElement) element;
+        allScopes.addScopeAnnotation(type);
       }
-    }
-  }
-
-  private void writeBeanFactory() {
-    MetaDataOrdering ordering = new MetaDataOrdering(metaData.values(), context);
-    int remaining = ordering.processQueue();
-    if (remaining > 0) {
-      ordering.logWarnings();
-    }
-
-    try {
-      SimpleFactoryWriter factoryWriter = new SimpleFactoryWriter(ordering, context);
-      factoryWriter.write();
-    } catch (FilerException e) {
-      context.logWarn("FilerException trying to write factory " + e.getMessage());
-    } catch (IOException e) {
-      context.logError("Failed to write factory " + e.getMessage());
     }
   }
 
@@ -138,138 +91,75 @@ public class Processor extends AbstractProcessor {
       if (!(element instanceof TypeElement)) {
         context.logError("unexpected type [" + element + "]");
       } else {
-        if (readBeans.add(element.toString())) {
-          readBeanMeta((TypeElement) element, factory);
+        TypeElement typeElement = (TypeElement) element;
+        if (!factory) {
+          defaultScope.read(typeElement, factory);
         } else {
-          context.logDebug("skipping already processed bean " + element);
+          final ScopeInfo scope = findScope(typeElement);
+          if (scope != null) {
+            // context.logWarn("Adding factory to custom scope "+element+" scope: "+scope);
+            scope.read(typeElement, true);
+          } else {
+            defaultScope.read(typeElement, true);
+          }
         }
       }
     }
   }
 
   /**
-   * Merge the changed bean meta data into the existing (factory) metaData.
+   * Find the scope if the Factory has a scope annotation.
    */
-  private void mergeMetaData() {
-    for (BeanReader beanReader : beanReaders) {
-      if (!beanReader.isRequestScopedController()) {
-        MetaData metaData = this.metaData.get(beanReader.getMetaKey());
-        if (metaData == null) {
-          addMeta(beanReader);
-        } else {
-          updateMeta(metaData, beanReader);
-        }
+  private ScopeInfo findScope(Element element) {
+    for (AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
+      final ScopeInfo scopeInfo = allScopes.get(annotationMirror.getAnnotationType().toString());
+      if (scopeInfo != null) {
+        return scopeInfo;
       }
     }
-  }
-
-  /**
-   * Add a new previously unknown bean.
-   */
-  private void addMeta(BeanReader beanReader) {
-    MetaData meta = beanReader.createMeta();
-    metaData.put(meta.getKey(), meta);
-    for (MetaData methodMeta : beanReader.createFactoryMethodMeta()) {
-      metaData.put(methodMeta.getKey(), methodMeta);
-    }
-  }
-
-  /**
-   * Update the meta data on a previously known bean.
-   */
-  private void updateMeta(MetaData metaData, BeanReader beanReader) {
-    metaData.update(beanReader);
-  }
-
-  /**
-   * Read the dependency injection meta data for the given bean.
-   */
-  private void readBeanMeta(TypeElement typeElement, boolean factory) {
-    if (typeElement.getKind() == ElementKind.ANNOTATION_TYPE) {
-      context.logDebug("skipping annotation type " + typeElement);
-      return;
-    }
-    beanReaders.add(new BeanReader(typeElement, context, factory).read());
+    return null;
   }
 
   /**
    * Read the existing meta data from InjectModule (if found) and the factory bean (if exists).
    */
   private void readModule(RoundEnvironment roundEnv) {
+    if (readModuleInfo) {
+      // only read the module meta data once
+      return;
+    }
+    readModuleInfo = true;
     String factory = context.loadMetaInfServices();
     if (factory != null) {
-      TypeElement factoryType = elementUtils.getTypeElement(factory);
-      if (factoryType != null) {
-        readFactory(factoryType);
+      TypeElement moduleType = elementUtils.getTypeElement(factory);
+      if (moduleType != null) {
+        defaultScope.readModuleMetaData(moduleType);
       }
     }
+    allScopes.readModules(context.loadMetaInfCustom());
+    readInjectModule(roundEnv);
+  }
 
+  /**
+   * Read InjectModule for things like package-info etc (not for custom scopes)
+   */
+  private void readInjectModule(RoundEnvironment roundEnv) {
+    // read other that are annotated with InjectModule
     Set<? extends Element> elementsAnnotatedWith = roundEnv.getElementsAnnotatedWith(InjectModule.class);
     if (!elementsAnnotatedWith.isEmpty()) {
       Iterator<? extends Element> iterator = elementsAnnotatedWith.iterator();
       if (iterator.hasNext()) {
         Element element = iterator.next();
-        InjectModule annotation = element.getAnnotation(InjectModule.class);
-        if (annotation != null) {
-          context.setContextDetails(annotation.name(), annotation.provides(), annotation.dependsOn(), element);
-          context.setContextRequires(readRequires(element));
-        }
-      }
-    }
-  }
-
-  /**
-   * Read the list of required class names.
-   */
-  private List<String> readRequires(Element element) {
-    List<String> requiresList = new ArrayList<>();
-    for (AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
-      if (INJECT_MODULE.equals(annotationMirror.getAnnotationType().toString())) {
-        for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : annotationMirror.getElementValues().entrySet()) {
-          if (entry.getKey().toString().startsWith("requires")) {
-            for (Object requiresType : (List<?>) entry.getValue().getValue()) {
-              String fullName = requiresType.toString();
-              fullName = fullName.substring(0, fullName.length() - 6);
-              requiresList.add(fullName);
-            }
+        Scope scope = element.getAnnotation(Scope.class);
+        if (scope == null) {
+          // it it not a custom scope annotation
+          InjectModule annotation = element.getAnnotation(InjectModule.class);
+          if (annotation != null) {
+            defaultScope.details(annotation.name(), element);
           }
         }
       }
     }
-    return requiresList;
   }
 
-
-  /**
-   * Read the existing factory bean. Each of the build methods is annotated with <code>@DependencyMeta</code>
-   * which holds the information we need (to regenerate the factory with any changes).
-   */
-  private void readFactory(TypeElement factoryType) {
-    InjectModule module = factoryType.getAnnotation(InjectModule.class);
-    context.setContextDetails(module.name(), module.provides(), module.dependsOn(), factoryType);
-    context.setContextRequires(readRequires(factoryType));
-
-    List<? extends Element> elements = factoryType.getEnclosedElements();
-    if (elements != null) {
-      for (Element element : elements) {
-        if (ElementKind.METHOD == element.getKind()) {
-          readBuildMethodDependencyMeta(element);
-        }
-      }
-    }
-  }
-
-  private void readBuildMethodDependencyMeta(Element element) {
-    Name simpleName = element.getSimpleName();
-    if (simpleName.toString().startsWith("build_")) {
-      // read a build method - DependencyMeta
-      DependencyMeta meta = element.getAnnotation(DependencyMeta.class);
-      if (meta == null) {
-        context.logError("Missing @DependencyMeta on method " + simpleName);
-      } else {
-        final MetaData metaData = new MetaData(meta);
-        this.metaData.put(metaData.getKey(), metaData);
-      }
-    }
-  }
 }

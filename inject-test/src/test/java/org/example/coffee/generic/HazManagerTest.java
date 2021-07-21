@@ -23,10 +23,11 @@ public class HazManagerTest {
   public void fin_with_mockHaz() {
 
     try (BeanScope context = BeanScope.newBuilder()
+      .forTesting()
       .withMock(HazRepo.class)
       .build()) {
 
-      HazManager hazManager = context.getBean(HazManager.class);
+      HazManager hazManager = context.get(HazManager.class);
       Haz haz = hazManager.find(42L);
 
       assertThat(haz).isNull();
@@ -37,12 +38,13 @@ public class HazManagerTest {
   public void find_with_stubHazUsingMockito() {
 
     try (BeanScope context = BeanScope.newBuilder()
+      .forTesting()
       .withMock(HazRepo.class, hazRepo -> {
         when(hazRepo.findById(anyLong())).thenReturn(new Haz(-23L));
       })
       .build()) {
 
-      HazManager hazManager = context.getBean(HazManager.class);
+      HazManager hazManager = context.get(HazManager.class);
       Haz haz = hazManager.find(42L);
 
       assertThat(haz.id).isEqualTo(-23L);
@@ -58,7 +60,7 @@ public class HazManagerTest {
       .withBeans(testDouble)
       .build()) {
 
-      HazManager hazManager = context.getBean(HazManager.class);
+      HazManager hazManager = context.get(HazManager.class);
 
       Haz haz = hazManager.find(42L);
       assertThat(haz.id).isEqualTo(64L);

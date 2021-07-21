@@ -22,10 +22,11 @@ public class NestedInterfaceTest {
   void test_provided() {
 
     try (BeanScope context = BeanScope.newBuilder()
+      .forTesting()
       .withMock(Some.Nested.class, nested -> when(nested.doNested()).thenReturn("myMock"))
       .build()) {
 
-      final Some.Nested nestedInterface = context.getBean(Some.Nested.class);
+      final Some.Nested nestedInterface = context.get(Some.Nested.class);
       assertNotNull(nestedInterface);
       assertEquals("myMock", nestedInterface.doNested());
     }

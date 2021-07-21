@@ -1,34 +1,48 @@
 package org.example.coffee;
 
 import io.avaje.inject.BeanScope;
+import io.avaje.inject.spi.Builder;
+import io.avaje.inject.spi.Module;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 
 public class BeanScopeBuilderAddTest {
 
   @Test
-  public void withModules_exludingThisOne() {
-    assertThrows(IllegalStateException.class, () -> {
-      TDPump testDoublePump = new TDPump();
+  public void withModules_excludingThisOne() {
+    TDPump testDoublePump = new TDPump();
+    try (BeanScope context = BeanScope.newBuilder()
+      .withBeans(testDoublePump)
+      // our module is "org.example.coffee"
+      // so this effectively includes no modules
+      .withModules(new SillyModule())
+      .build()) {
 
-      try (BeanScope context = BeanScope.newBuilder()
-        .withBeans(testDoublePump)
-        // our module is "org.example.coffee"
-        // so this effectively includes no modules
-        .withModules("other")
-        .withIgnoreMissingModuleDependencies()
-        .build()) {
-
-        CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
-        assertThat(coffeeMaker).isNull();
-      }
-    });
+      CoffeeMaker coffeeMaker = context.get(CoffeeMaker.class);
+      assertThat(coffeeMaker).isNull();
+    }
   }
 
+  static class SillyModule implements Module {
+
+    @Override
+    public Class<?>[] requires() {
+      return new Class[0];
+    }
+
+    @Override
+    public Class<?>[] provides() {
+      return new Class[0];
+    }
+
+    @Override
+    public void build(Builder builder) {
+      // do nothing
+    }
+  }
 
   @Test
   public void withModules_includeThisOne() {
@@ -37,10 +51,10 @@ public class BeanScopeBuilderAddTest {
 
     try (BeanScope context = BeanScope.newBuilder()
       .withBeans(testDoublePump)
-      .withModules("org.example")
+      .withModules(new org.example.ExampleModule())
       .build()) {
 
-      String makeIt = context.getBean(CoffeeMaker.class).makeIt();
+      String makeIt = context.get(CoffeeMaker.class).makeIt();
       assertThat(makeIt).isEqualTo("done");
 
       assertThat(testDoublePump.steam).isEqualTo(1);
@@ -57,7 +71,7 @@ public class BeanScopeBuilderAddTest {
       .withBeans(testDoublePump)
       .build()) {
 
-      String makeIt = context.getBean(CoffeeMaker.class).makeIt();
+      String makeIt = context.get(CoffeeMaker.class).makeIt();
       assertThat(makeIt).isEqualTo("done");
 
       assertThat(testDoublePump.steam).isEqualTo(1);
@@ -74,10 +88,10 @@ public class BeanScopeBuilderAddTest {
       .withBean(Pump.class, mock)
       .build()) {
 
-      Pump pump = context.getBean(Pump.class);
+      Pump pump = context.get(Pump.class);
       assertThat(pump).isSameAs(mock);
 
-      CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+      CoffeeMaker coffeeMaker = context.get(CoffeeMaker.class);
       assertThat(coffeeMaker).isNotNull();
       coffeeMaker.makeIt();
 

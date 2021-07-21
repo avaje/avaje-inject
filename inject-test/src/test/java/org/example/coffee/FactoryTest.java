@@ -12,7 +12,7 @@ public class FactoryTest {
   public void test() {
 
     try (BeanScope context = BeanScope.newBuilder().build()) {
-      BFact bean = context.getBean(BFact.class);
+      BFact bean = context.get(BFact.class);
       String b = bean.b();
       assertThat(b).isNotNull();
     }

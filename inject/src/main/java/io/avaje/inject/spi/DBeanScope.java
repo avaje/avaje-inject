@@ -1,17 +1,14 @@
 package io.avaje.inject.spi;
 
-import io.avaje.inject.*;
+import io.avaje.inject.BeanEntry;
+import io.avaje.inject.BeanScope;
+import io.avaje.inject.Priority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
-
-import static io.avaje.inject.spi.KeyUtil.key;
 
 class DBeanScope implements BeanScope {
 
@@ -21,16 +18,16 @@ class DBeanScope implements BeanScope {
   private final List<Runnable> postConstruct;
   private final List<AutoCloseable> preDestroy;
   private final DBeanMap beans;
-  private final Map<String, RequestScopeMatch<?>> reqScopeProviders;
   private final ShutdownHook shutdownHook;
+  private final BeanScope parent;
   private boolean shutdown;
   private boolean closed;
 
-  DBeanScope(boolean withShutdownHook, List<AutoCloseable> preDestroy, List<Runnable> postConstruct, DBeanMap beans, Map<String, RequestScopeMatch<?>> reqScopeProviders) {
+  DBeanScope(boolean withShutdownHook, List<AutoCloseable> preDestroy, List<Runnable> postConstruct, DBeanMap beans, BeanScope parent) {
     this.preDestroy = preDestroy;
     this.postConstruct = postConstruct;
     this.beans = beans;
-    this.reqScopeProviders = reqScopeProviders;
+    this.parent = parent;
     if (withShutdownHook) {
       this.shutdownHook = new ShutdownHook(this);
       Runtime.getRuntime().addShutdownHook(shutdownHook);
@@ -40,14 +37,17 @@ class DBeanScope implements BeanScope {
   }
 
   @Override
-  public RequestScopeBuilder newRequestScope() {
-    return new DRequestScopeBuilder(this);
+  public List<BeanEntry> all() {
+    IdentityHashMap<DContextEntryBean, DEntry> map = new IdentityHashMap<>();
+    if (parent != null) {
+      ((DBeanScope) parent).addAll(map);
+    }
+    addAll(map);
+    return new ArrayList<>(map.values());
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  public <T> RequestScopeMatch<T> requestProvider(Class<T> type, String name) {
-    return (RequestScopeMatch<T>) reqScopeProviders.get(key(type, name));
+  void addAll(Map<DContextEntryBean, DEntry> map) {
+    beans.addAll(map);
   }
 
   @Override
@@ -57,13 +57,32 @@ class DBeanScope implements BeanScope {
 
   @Override
   public <T> T get(Class<T> beanClass, String name) {
-    return beans.get(beanClass, name);
+    final T bean = beans.get(beanClass, name);
+    if (bean != null) {
+      return bean;
+    }
+    return (parent == null) ? null : parent.get(beanClass, name);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public <T> List<T> list(Class<T> interfaceType) {
-    return (List<T>) beans.all(interfaceType);
+    List<T> values = (List<T>) beans.all(interfaceType);
+    if (parent == null) {
+      return values;
+    }
+    return combine(values, parent.list(interfaceType));
+  }
+
+  static <T> List<T> combine(List<T> values, List<T> parentValues) {
+    if (values.isEmpty()) {
+      return parentValues;
+    } else if (parentValues.isEmpty()) {
+      return values;
+    } else {
+      values.addAll(parentValues);
+      return values;
+    }
   }
 
   @Override
@@ -102,7 +121,11 @@ class DBeanScope implements BeanScope {
 
   @Override
   public List<Object> listByAnnotation(Class<?> annotation) {
-    return beans.all(annotation);
+    final List<Object> values = beans.all(annotation);
+    if (parent == null) {
+      return values;
+    }
+    return combine(values, parent.listByAnnotation(annotation));
   }
 
   DBeanScope start() {
@@ -164,7 +187,6 @@ class DBeanScope implements BeanScope {
       scope.shutdown();
     }
   }
-
 
   private static class SortBean<T> implements Comparable<SortBean<T>> {
 

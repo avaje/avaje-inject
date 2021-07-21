@@ -8,8 +8,7 @@ module org.example {
 
   requires io.avaje.inject;
 
-  // register org.example._DI$BeanScopeFactory from generated sources
-  provides io.avaje.inject.spi.BeanScopeFactory with org.example._DI$BeanScopeFactory;
+  provides io.avaje.inject.spi.Module with org.example.ExampleModule;
 }
 ```
 

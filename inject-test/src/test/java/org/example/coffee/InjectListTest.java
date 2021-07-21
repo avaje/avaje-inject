@@ -14,7 +14,7 @@ public class InjectListTest {
   @Test
   public void test() {
     try (BeanScope context = BeanScope.newBuilder().build()) {
-      CombinedSomei bean = context.getBean(CombinedSomei.class);
+      CombinedSomei bean = context.get(CombinedSomei.class);
       List<String> somes = bean.lotsOfSomes();
       assertThat(somes).containsOnly("a", "b", "a2");
     }
@@ -23,7 +23,7 @@ public class InjectListTest {
   @Test
   public void test_set() {
     try (BeanScope context = BeanScope.newBuilder().build()) {
-      CombinedSetSomei bean = context.getBean(CombinedSetSomei.class);
+      CombinedSetSomei bean = context.get(CombinedSetSomei.class);
       List<String> somes = bean.lotsOfSomes();
       assertThat(somes).containsOnly("a", "b", "a2");
     }

@@ -25,7 +25,7 @@ class DContextEntryBean {
     }
   }
 
-  final Object source;
+  protected final Object source;
   private final String name;
   private final int flag;
 
@@ -33,6 +33,10 @@ class DContextEntryBean {
     this.source = source;
     this.name = KeyUtil.lower(name);
     this.flag = flag;
+  }
+
+  DEntry entry() {
+    return new DEntry(name, flag, getBean());
   }
 
   /**

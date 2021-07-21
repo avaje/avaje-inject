@@ -1,6 +1,5 @@
 package io.avaje.inject;
 
-import java.io.Closeable;
 import java.lang.annotation.Annotation;
 import java.util.List;
 
@@ -13,7 +12,7 @@ import java.util.List;
  *
  * <h3>Create a BeanScope</h3>
  * <p>
- * We can programmatically create a BeanScope via BeanScopeBuilder.
+ * We can programmatically create a BeanScope via {@code BeanScope.newBuilder()}.
  * </p>
  * <pre>{@code
  *
@@ -22,93 +21,85 @@ import java.util.List;
  *   try (BeanScope scope = BeanScope.newBuilder()
  *     .build()) {
  *
- *     CoffeeMaker coffeeMaker = context.getBean(CoffeeMaker.class);
+ *     CoffeeMaker coffeeMaker = context.get(CoffeeMaker.class);
  *     coffeeMaker.makeIt()
  *   }
  *
  * }</pre>
  *
- * <h3>Implicitly used</h3>
+ * <h3>External dependencies</h3>
  * <p>
- * The BeanScope is implicitly used by ApplicationScope.  It will be created as needed and
- * a shutdown hook will close the underlying BeanScope on JVM shutdown.
+ * We can supporting external dependencies when creating the BeanScope. We need to do 2 things.
+ * we need to specify these via
  * </p>
+ * <ul>
+ *   <li>
+ *       1. Specify the external dependency via {@code @InjectModule(requires=...)}.
+ *       Otherwise at compile time the annotation processor detects it as a missing dependency and we can't compile.
+ *   </li>
+ *   <li>
+ *       2. Provide the dependency when creating the BeanScope
+ *   </li>
+ * </ul>
+ * <p>
+ * For example, given we have Pump as an externally provided dependency.
+ *
  * <pre>{@code
  *
- *   // BeanScope created as needed under the hood
+ *   // tell the annotation processor Pump is provided externally
+ *   // otherwise it thinks we have a missing dependency
  *
- *   CoffeeMaker coffeeMaker = ApplicationScope.get(CoffeeMaker.class);
- *   coffeeMaker.brew();
+ *   @InjectModule(requires=Pump.class)
+ *
+ * }</pre>
+ * <p>
+ * When we build the BeanScope provide the dependency via {@link BeanScopeBuilder#withBean(Class, Object)}.
+ *
+ * <pre>{@code
+ *
+ *   // provide external dependencies ...
+ *   Pump pump = ...
+ *
+ *   try (BeanScope scope = BeanScope.newBuilder()
+ *     .withBean(Pump.class, pump)
+ *     .build()) {
+ *
+ *     CoffeeMaker coffeeMaker = context.get(CoffeeMaker.class);
+ *     coffeeMaker.makeIt()
+ *   }
  *
  * }</pre>
  */
-public interface BeanScope extends Closeable {
+public interface BeanScope extends AutoCloseable {
 
   /**
-   * Build a bean scope with options for shutdown hook and supplying test doubles.
+   * Build a bean scope with options for shutdown hook and supplying external dependencies.
    * <p>
-   * We would choose to use BeanScopeBuilder in test code (for component testing)
-   * as it gives us the ability to inject test doubles, mocks, spy's etc.
-   * </p>
+   * We can optionally:
+   * <ul>
+   *   <li>Provide external dependencies</li>
+   *   <li>Specify a parent BeanScope</li>
+   *   <li>Specify specific modules to wire</li>
+   *   <li>Specify to include a shutdown hook (to fire preDestroy lifecycle methods)</li>
+   *   <li>Use {@code forTesting()} to specify mocks and spies to use when wiring tests</li>
+   * </ul>
    *
    * <pre>{@code
    *
-   *   @Test
-   *   public void someComponentTest() {
+   *   // create a BeanScope ...
    *
-   *     MyRedisApi mockRedis = mock(MyRedisApi.class);
-   *     MyDbApi mockDatabase = mock(MyDbApi.class);
+   *   try (BeanScope scope = BeanScope.newBuilder()
+   *     .build()) {
    *
-   *     try (BeanScope scope = BeanScope.newBuilder()
-   *       .withBeans(mockRedis, mockDatabase)
-   *       .build()) {
-   *
-   *       // built with test doubles injected ...
-   *       CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
-   *       coffeeMaker.makeIt();
-   *
-   *       assertThat(...
-   *     }
+   *     CoffeeMaker coffeeMaker = context.get(CoffeeMaker.class);
+   *     coffeeMaker.makeIt()
    *   }
+   *
    * }</pre>
    */
   static BeanScopeBuilder newBuilder() {
     return new DBeanScopeBuilder();
   }
-
-  /**
-   * Create a RequestScope via builder where we provide extra instances
-   * that can be used/included in wiring request scoped beans.
-   *
-   * <pre>{@code
-   *
-   *   try (RequestScope requestScope = beanScope.newRequestScope()
-   *       // supply some instances
-   *       .withBean(HttpRequest.class, request)
-   *       .withBean(HttpResponse.class, response)
-   *       .build()) {
-   *
-   *       MyController controller = requestScope.get(MyController.class);
-   *       controller.process();
-   *   }
-   *
-   *   ...
-   *
-   *   // define request scoped beans
-   *   @Request
-   *   MyController {
-   *
-   *     // can depend on supplied instances, singletons and other request scope beans
-   *     @Inject
-   *     MyController(HttpRequest request, HttpResponse response, MyService myService) {
-   *       ...
-   *     }
-   *
-   *   }
-   *
-   * }</pre>
-   */
-  RequestScopeBuilder newRequestScope();
 
   /**
    * Return a single bean given the type.
@@ -123,14 +114,6 @@ public interface BeanScope extends Closeable {
    * @param type an interface or bean type
    */
   <T> T get(Class<T> type);
-
-  /**
-   * Deprecated - migrate to get(type)
-   */
-  @Deprecated
-  default <T> T getBean(Class<T> type) {
-    return get(type);
-  }
 
   /**
    * Return a single bean given the type and name.
@@ -148,14 +131,6 @@ public interface BeanScope extends Closeable {
   <T> T get(Class<T> type, String name);
 
   /**
-   * Deprecated - migrate to get(type, name).
-   */
-  @Deprecated
-  default <T> T getBean(Class<T> type, String name) {
-    return get(type, name);
-  }
-
-  /**
    * Return the list of beans that have an annotation.
    *
    * <pre>{@code
@@ -163,25 +138,13 @@ public interface BeanScope extends Closeable {
    *   // e.g. register all controllers with web a framework
    *   // .. where Controller is an annotation on the beans
    *
-   *   List<Object> controllers = ApplicationScope.listByAnnotation(Controller.class);
+   *   List<Object> controllers = beanScope.listByAnnotation(Controller.class);
    *
    * }</pre>
-   *
-   * <p>
-   * The classic use case for this is registering controllers or routes to
-   * web frameworks like Sparkjava, Javlin, Rapidoid etc.
    *
    * @param annotation An annotation class.
    */
   List<Object> listByAnnotation(Class<?> annotation);
-
-  /**
-   * Deprecated - migrate to listByAnnotation()
-   */
-  @Deprecated
-  default List<Object> getBeansWithAnnotation(Class<?> annotation) {
-    return listByAnnotation(annotation);
-  }
 
   /**
    * Return the list of beans that implement the interface.
@@ -190,7 +153,7 @@ public interface BeanScope extends Closeable {
    *
    *   // e.g. register all routes for a web framework
    *
-   *   List<WebRoute> routes = ApplicationScope.list(WebRoute.class);
+   *   List<WebRoute> routes = beanScope.list(WebRoute.class);
    *
    * }</pre>
    *
@@ -199,25 +162,9 @@ public interface BeanScope extends Closeable {
   <T> List<T> list(Class<T> interfaceType);
 
   /**
-   * Deprecated - migrate to list(interfaceType).
-   */
-  @Deprecated
-  default <T> List<T> getBeans(Class<T> interfaceType) {
-    return list(interfaceType);
-  }
-
-  /**
    * Return the list of beans that implement the interface sorting by priority.
    */
   <T> List<T> listByPriority(Class<T> interfaceType);
-
-  /**
-   * Deprecated - migrate to listByPriority(interfaceType).
-   */
-  @Deprecated
-  default <T> List<T> getBeansByPriority(Class<T> interfaceType) {
-    return listByPriority(interfaceType);
-  }
 
   /**
    * Return the beans that implement the interface sorting by the priority annotation used.
@@ -231,24 +178,16 @@ public interface BeanScope extends Closeable {
   <T> List<T> listByPriority(Class<T> interfaceType, Class<? extends Annotation> priority);
 
   /**
-   * Deprecated - migrate to listByPriority().
-   */
-  @Deprecated
-  default <T> List<T> getBeansByPriority(Class<T> interfaceType, Class<? extends Annotation> priority) {
-    return listByPriority(interfaceType, priority);
-  }
-
-  /**
-   * Return a request scoped provided for the specific type and name.
+   * Return all the bean entries from the scope.
+   * <p>
+   * The bean entries include entries from the parent scope if it has one.
    *
-   * @param type The type of the request scoped bean
-   * @param name The optional qualifier name
-   * @return The request scope provider or null
+   * @return All bean entries from the scope.
    */
-  <T> RequestScopeMatch<T> requestProvider(Class<T> type, String name);
+  List<BeanEntry> all();
 
   /**
-   * Close the scope firing any <code>@PreDestroy</code> methods.
+   * Close the scope firing any <code>@PreDestroy</code> lifecycle methods.
    */
   void close();
 }

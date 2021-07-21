@@ -1,6 +1,6 @@
 package io.avaje.inject;
 
-import io.avaje.inject.spi.BeanScopeFactory;
+import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.Builder;
 import io.avaje.inject.spi.EnrichBean;
 import io.avaje.inject.spi.SuppliedBean;
@@ -13,11 +13,9 @@ import java.util.function.Consumer;
 /**
  * Build a bean scope with options for shutdown hook and supplying test doubles.
  */
-class DBeanScopeBuilder implements BeanScopeBuilder {
+class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   private static final Logger log = LoggerFactory.getLogger(DBeanScopeBuilder.class);
-
-  private boolean shutdownHook = false;
 
   @SuppressWarnings("rawtypes")
   private final List<SuppliedBean> suppliedBeans = new ArrayList<>();
@@ -25,9 +23,11 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
   @SuppressWarnings("rawtypes")
   private final List<EnrichBean> enrichBeans = new ArrayList<>();
 
-  private final Set<String> includeModules = new LinkedHashSet<>();
+  private final Set<Module> includeModules = new LinkedHashSet<>();
 
-  private boolean ignoreMissingModuleDependencies;
+  private BeanScope parent;
+
+  private boolean shutdownHook;
 
   /**
    * Create a BeanScopeBuilder to ultimately load and return a new BeanScope.
@@ -36,8 +36,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
   }
 
   @Override
-  public BeanScopeBuilder withNoShutdownHook() {
-    this.shutdownHook = false;
+  public ForTesting forTesting() {
     return this;
   }
 
@@ -48,14 +47,8 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
   }
 
   @Override
-  public BeanScopeBuilder withModules(String... modules) {
+  public BeanScopeBuilder withModules(Module... modules) {
     this.includeModules.addAll(Arrays.asList(modules));
-    return this;
-  }
-
-  @Override
-  public BeanScopeBuilder withIgnoreMissingModuleDependencies() {
-    this.ignoreMissingModuleDependencies = true;
     return this;
   }
 
@@ -80,39 +73,45 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
   }
 
   @Override
-  public BeanScopeBuilder withMock(Class<?> type) {
+  public BeanScopeBuilder withParent(BeanScope parent) {
+    this.parent = parent;
+    return this;
+  }
+
+  @Override
+  public BeanScopeBuilder.ForTesting withMock(Class<?> type) {
     return withMock(type, null, null);
   }
 
-  public BeanScopeBuilder withMock(Class<?> type, String name) {
+  public BeanScopeBuilder.ForTesting withMock(Class<?> type, String name) {
     return withMock(type, name, null);
   }
 
   @Override
-  public <D> BeanScopeBuilder withMock(Class<D> type, Consumer<D> consumer) {
+  public <D> BeanScopeBuilder.ForTesting withMock(Class<D> type, Consumer<D> consumer) {
     return withMock(type, null, consumer);
   }
 
-  private <D> BeanScopeBuilder withMock(Class<D> type, String name, Consumer<D> consumer) {
+  private <D> BeanScopeBuilder.ForTesting withMock(Class<D> type, String name, Consumer<D> consumer) {
     suppliedBeans.add(new SuppliedBean<>(name, type, null, consumer));
     return this;
   }
 
   @Override
-  public BeanScopeBuilder withSpy(Class<?> type) {
+  public BeanScopeBuilder.ForTesting withSpy(Class<?> type) {
     return spy(type, null, null);
   }
 
-  public BeanScopeBuilder withSpy(Class<?> type, String name) {
+  public BeanScopeBuilder.ForTesting withSpy(Class<?> type, String name) {
     return spy(type, name, null);
   }
 
   @Override
-  public <D> DBeanScopeBuilder withSpy(Class<D> type, Consumer<D> consumer) {
+  public <D> BeanScopeBuilder.ForTesting withSpy(Class<D> type, Consumer<D> consumer) {
     return spy(type, null, consumer);
   }
 
-  private <D> DBeanScopeBuilder spy(Class<D> type, String name, Consumer<D> consumer) {
+  private <D> BeanScopeBuilder.ForTesting spy(Class<D> type, String name, Consumer<D> consumer) {
     enrichBeans.add(new EnrichBean<>(type, name, consumer));
     return this;
   }
@@ -120,8 +119,10 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
   @Override
   public BeanScope build() {
     // sort factories by dependsOn
-    FactoryOrder factoryOrder = new FactoryOrder(includeModules, !suppliedBeans.isEmpty(), ignoreMissingModuleDependencies);
-    ServiceLoader.load(BeanScopeFactory.class).forEach(factoryOrder::add);
+    FactoryOrder factoryOrder = new FactoryOrder(includeModules, !suppliedBeans.isEmpty());
+    if (factoryOrder.isEmpty()) {
+      ServiceLoader.load(Module.class).forEach(factoryOrder::add);
+    }
 
     Set<String> moduleNames = factoryOrder.orderFactories();
     if (moduleNames.isEmpty()) {
@@ -132,8 +133,8 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
         " Refer to https://avaje.io/inject#gradle");
     }
     log.debug("building with modules {}", moduleNames);
-    Builder builder = Builder.newBuilder(suppliedBeans, enrichBeans);
-    for (BeanScopeFactory factory : factoryOrder.factories()) {
+    Builder builder = Builder.newBuilder(suppliedBeans, enrichBeans, parent);
+    for (Module factory : factoryOrder.factories()) {
       factory.build(builder);
     }
     return builder.build(shutdownHook);
@@ -157,57 +158,46 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
    */
   static class FactoryOrder {
 
-    private final Set<String> includeModules;
     private final boolean suppliedBeans;
-    private final boolean ignoreMissingModuleDependencies;
-
     private final Set<String> moduleNames = new LinkedHashSet<>();
-    private final List<BeanScopeFactory> factories = new ArrayList<>();
+    private final List<Module> factories = new ArrayList<>();
     private final List<FactoryState> queue = new ArrayList<>();
     private final List<FactoryState> queueNoDependencies = new ArrayList<>();
 
     private final Map<String, FactoryList> providesMap = new HashMap<>();
 
-    FactoryOrder(Set<String> includeModules, boolean suppliedBeans, boolean ignoreMissingModuleDependencies) {
-      this.includeModules = includeModules;
+    FactoryOrder(Set<Module> includeModules, boolean suppliedBeans) {
+      this.factories.addAll(includeModules);
       this.suppliedBeans = suppliedBeans;
-      this.ignoreMissingModuleDependencies = ignoreMissingModuleDependencies;
-    }
-
-    void add(BeanScopeFactory factory) {
-
-      if (includeModule(factory)) {
-        FactoryState wrappedFactory = new FactoryState(factory);
-        providesMap.computeIfAbsent(factory.getName(), s -> new FactoryList()).add(wrappedFactory);
-        if (!isEmpty(factory.getProvides())) {
-          for (String feature : factory.getProvides()) {
-            providesMap.computeIfAbsent(feature, s -> new FactoryList()).add(wrappedFactory);
-          }
-        }
-        if (isEmpty(factory.getDependsOn())) {
-          if (!isEmpty(factory.getProvides())) {
-            // only has 'provides' so we can push this
-            push(wrappedFactory);
-          } else {
-            // hold until after all the 'provides only' modules are added
-            queueNoDependencies.add(wrappedFactory);
-          }
-        } else {
-          // queue it to process by dependency ordering
-          queue.add(wrappedFactory);
-        }
+      for (Module includeModule : includeModules) {
+        moduleNames.add(includeModule.getClass().getCanonicalName());
       }
     }
 
-    private boolean isEmpty(String[] values) {
-      return values == null || values.length == 0;
+    void add(Module factory) {
+      FactoryState wrappedFactory = new FactoryState(factory);
+      providesMap.computeIfAbsent(factory.getClass().getCanonicalName(), s -> new FactoryList()).add(wrappedFactory);
+      if (!isEmpty(factory.provides())) {
+        for (Class<?> feature : factory.provides()) {
+          providesMap.computeIfAbsent(feature.getCanonicalName(), s -> new FactoryList()).add(wrappedFactory);
+        }
+      }
+      if (isEmpty(factory.requires())) {
+        if (!isEmpty(factory.provides())) {
+          // only has 'provides' so we can push this
+          push(wrappedFactory);
+        } else {
+          // hold until after all the 'provides only' modules are added
+          queueNoDependencies.add(wrappedFactory);
+        }
+      } else {
+        // queue it to process by dependency ordering
+        queue.add(wrappedFactory);
+      }
     }
 
-    /**
-     * Return true of the factory (for the module) should be included.
-     */
-    private boolean includeModule(BeanScopeFactory factory) {
-      return includeModules.isEmpty() || includeModules.contains(factory.getName());
+    private boolean isEmpty(Class<?>[] values) {
+      return values == null || values.length == 0;
     }
 
     /**
@@ -215,8 +205,8 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
      */
     private void push(FactoryState factory) {
       factory.setPushed();
-      factories.add(factory.getFactory());
-      moduleNames.add(factory.getName());
+      factories.add(factory.factory());
+      moduleNames.add(factory.getClass().getCanonicalName());
     }
 
     /**
@@ -235,7 +225,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
     /**
      * Return the list of factories in the order they should be built.
      */
-    List<BeanScopeFactory> factories() {
+    List<Module> factories() {
       return factories;
     }
 
@@ -249,7 +239,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
         count = processQueuedFactories();
       } while (count > 0);
 
-      if (suppliedBeans || ignoreMissingModuleDependencies) {
+      if (suppliedBeans) {
         // just push everything left assuming supplied beans
         // will satisfy the required dependencies
         for (FactoryState factoryState : queue) {
@@ -259,8 +249,8 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
       } else if (!queue.isEmpty()) {
         StringBuilder sb = new StringBuilder();
         for (FactoryState factory : queue) {
-          sb.append("Module [").append(factory.getName()).append("] has unsatisfied dependencies on modules:");
-          for (String depModuleName : factory.getDependsOn()) {
+          sb.append("Module [").append(factory.getClass().getCanonicalName()).append("] has unsatisfied dependencies on modules:");
+          for (Class<?> depModuleName : factory.requires()) {
             if (!moduleNames.contains(depModuleName)) {
               sb.append(String.format(" [%s]", depModuleName));
             }
@@ -268,7 +258,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
         }
 
         sb.append(". Modules that were loaded ok are:").append(moduleNames);
-        sb.append(". Consider using BeanScopeBuilder.withIgnoreMissingModuleDependencies() or BeanScopeBuilder.withSuppliedBeans(...)");
+        sb.append(". Maybe need to add external dependencies via BeanScopeBuilder.withBean()?");
         throw new IllegalStateException(sb.toString());
       }
     }
@@ -280,7 +270,6 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
      * This returns the number of factories added so once this returns 0 it is done.
      */
     private int processQueuedFactories() {
-
       int count = 0;
       Iterator<FactoryState> it = queue.iterator();
       while (it.hasNext()) {
@@ -299,13 +288,17 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
      * Return true if the (module) dependencies are satisfied for this factory.
      */
     private boolean satisfiedDependencies(FactoryState factory) {
-      for (String moduleOrFeature : factory.getDependsOn()) {
-        FactoryList factories = providesMap.get(moduleOrFeature);
+      for (Class<?> moduleOrFeature : factory.requires()) {
+        FactoryList factories = providesMap.get(moduleOrFeature.getCanonicalName());
         if (factories == null || !factories.allPushed()) {
           return false;
         }
       }
       return true;
+    }
+
+    boolean isEmpty() {
+      return factories.isEmpty();
     }
   }
 
@@ -314,10 +307,10 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
    */
   private static class FactoryState {
 
-    private final BeanScopeFactory factory;
+    private final Module factory;
     private boolean pushed;
 
-    private FactoryState(BeanScopeFactory factory) {
+    private FactoryState(Module factory) {
       this.factory = factory;
     }
 
@@ -332,16 +325,12 @@ class DBeanScopeBuilder implements BeanScopeBuilder {
       return pushed;
     }
 
-    BeanScopeFactory getFactory() {
+    Module factory() {
       return factory;
     }
 
-    String getName() {
-      return factory.getName();
-    }
-
-    String[] getDependsOn() {
-      return factory.getDependsOn();
+    Class<?>[] requires() {
+      return factory.requires();
     }
   }
 

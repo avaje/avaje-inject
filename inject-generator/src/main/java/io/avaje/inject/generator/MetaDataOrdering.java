@@ -11,21 +11,17 @@ class MetaDataOrdering {
       "\n See https://avaje.io/inject/#circular";
 
   private final ProcessingContext context;
-
+  private final ScopeInfo scopeInfo;
   private final List<MetaData> orderedList = new ArrayList<>();
   private final List<MetaData> requestScope = new ArrayList<>();
   private final List<MetaData> queue = new ArrayList<>();
-
   private final Map<String, ProviderList> providers = new HashMap<>();
-
   private final List<DependencyLink> circularDependencies = new ArrayList<>();
-
   private final Set<String> missingDependencyTypes = new LinkedHashSet<>();
 
-  private String topPackage;
-
-  MetaDataOrdering(Collection<MetaData> values, ProcessingContext context) {
+  MetaDataOrdering(Collection<MetaData> values, ProcessingContext context, ScopeInfo scopeInfo) {
     this.context = context;
+    this.scopeInfo = scopeInfo;
     for (MetaData metaData : values) {
       if (metaData.isRequestScope()) {
         // request scoped expected to have externally provided dependencies
@@ -37,21 +33,20 @@ class MetaDataOrdering {
       } else {
         queue.add(metaData);
       }
-      topPackage = Util.commonParent(topPackage, metaData.getTopPackage());
       // register into map keyed by provider
       providers.computeIfAbsent(metaData.getType(), s -> new ProviderList()).add(metaData);
       for (String provide : metaData.getProvides()) {
         providers.computeIfAbsent(provide, s -> new ProviderList()).add(metaData);
       }
     }
-    externallyRequiredDependencies(context);
+    externallyRequiredDependencies();
   }
 
   /**
    * These if defined are expected to be required at wiring time probably via another module.
    */
-  private void externallyRequiredDependencies(ProcessingContext context) {
-    for (String requireType : context.contextRequires()) {
+  private void externallyRequiredDependencies() {
+    for (String requireType : scopeInfo.requires()) {
       providers.computeIfAbsent(requireType, s -> new ProviderList());
     }
   }
@@ -120,14 +115,8 @@ class MetaDataOrdering {
    * Build list of specific dependencies that are missing.
    */
   void missingDependencies() {
-    for (MetaData m : queue) {
-      for (String dependency : m.getDependsOn()) {
-        if (providers.get(dependency) == null) {
-          TypeElement element = context.elementMaybe(m.getType());
-          context.logError(element, "No dependency provided for " + dependency);
-          missingDependencyTypes.add(dependency);
-        }
-      }
+    for (MetaData metaData : queue) {
+      checkMissingDependencies(metaData);
     }
     if (missingDependencyTypes.isEmpty()) {
       // only look for circular dependencies if there are no missing dependencies
@@ -135,17 +124,29 @@ class MetaDataOrdering {
     }
   }
 
+  private void checkMissingDependencies(MetaData metaData) {
+    for (String dependency : metaData.getDependsOn()) {
+      if (providers.get(dependency) == null && !scopeInfo.providedByOtherModule(dependency)) {
+        TypeElement element = context.elementMaybe(metaData.getType());
+        context.logError(element, "No dependency provided for " + dependency + " on " + metaData.getType());
+        missingDependencyTypes.add(dependency);
+      }
+    }
+  }
+
   /**
    * Log a warning on unsatisfied dependencies that are expected to be provided by another module.
    */
   private void warnOnDependencies() {
-    if (missingDependencyTypes.isEmpty()) {
-      context.logWarn("There are " + queue.size() + " beans with unsatisfied dependencies (assuming external dependencies)");
-      for (MetaData m : queue) {
-        context.logWarn("Unsatisfied dependencies on %s dependsOn %s", m, m.getDependsOn());
-      }
-    } else {
+    if (!missingDependencyTypes.isEmpty()) {
       context.logError("Dependencies %s are not provided - missing @Singleton or @Factory/@Bean or specify external dependency via @InjectModule requires attribute", missingDependencyTypes);
+    } else {
+      if (!queue.isEmpty()) {
+        context.logWarn("There are " + queue.size() + " beans with unsatisfied dependencies (assuming external dependencies)");
+        for (MetaData m : queue) {
+          context.logWarn("Unsatisfied dependencies on %s dependsOn %s", m, m.getDependsOn());
+        }
+      }
     }
   }
 
@@ -155,10 +156,6 @@ class MetaDataOrdering {
     } else {
       warnOnDependencies();
     }
-  }
-
-  String getTopPackage() {
-    return topPackage;
   }
 
   private int processQueueRound() {
@@ -183,8 +180,7 @@ class MetaDataOrdering {
         // check non-provider dependency is satisfied
         ProviderList providerList = providers.get(dependency);
         if (providerList == null) {
-          // dependency not yet satisfied
-          return false;
+          return scopeInfo.providedByOtherModule(dependency);
         } else {
           if (!providerList.isAllWired()) {
             return false;

@@ -1,111 +1,71 @@
 package io.avaje.inject;
 
 /**
- * Used to explicitly name a bean scope and optionally specify if it depends on other bean scopes.
- * <p>
- * If this annotation is not present then the name will be derived as the "top level package name"
- * e.g. "org.example.featuretoggle"
- * </p>
+ * Used to explicitly specify if it depends on externally provided beans or provides.
  *
+ * <h3>External dependencies</h3>
  * <p>
- * Typically there is a single bean scope per Jar (module). In that sense the name is the "module name" and
- * the dependsOn specifies the names of modules that this depends on (provide beans that are used to wire this module).
- * </p>
- *
- * <p>
- * This annotation is typically placed on a top level interface or package-info in the module.
- * </p>
+ * Use {@code requires} to specify dependencies that will be provided externally.
  *
  * <pre>{@code
  *
- * package org.example.featuretoggle;
+ *   // tell the annotation processor Pump and Grinder are provided externally
+ *   // otherwise it will think we have missing dependencies at compile time
  *
- * import io.avaje.inject.InjectModule;
- *
- * @InjectModule(name = "feature-toggle")
- * public interface FeatureToggle {
- *
- *   boolean isEnabled(String key);
- * }
+ *   @InjectModule(requires = {Pump.class, Grinder.class})
  *
  * }</pre>
  *
- * <h2>dependsOn</h2>
+ * <h3>Custom scope depending on another scope</h3>
  * <p>
- * We specify <code>dependsOn</code> when we have a module that depends on beans that
- * will be supplied by another module (jar).
- * </p>
+ * When using custom scopes we can have the case where we desire one scope to depend
+ * on another. In this case we put the custom scope annotation in requires.
  * <p>
- * In the example below we have the "Job System" which depends on the common "Feature Toggle" module.
- * When wiring the Job system module we expect some beans to be provided by the feature toggle module (jar).
- * </p>
+ * For example lets say we have a custom scope called {@code StoreComponent} and that
+ * depends on {@code QueueComponent} custom scope.
  *
  * <pre>{@code
  *
- * package org.example.jobsystem;
+ *   @Scope
+ *   @InjectModule(requires = {QueueComponent.class})
+ *   public @interface StoreComponent {
+ *   }
  *
- * import io.avaje.inject.InjectModule;
- *
- * @InjectModule(name = "job-system", dependsOn = {"feature-toggle"})
- * public interface JobSystem {
- *
- *   ...
- * }
  *
  * }</pre>
  */
 public @interface InjectModule {
 
   /**
-   * The name of this context/module.
-   * <p>
-   * Other modules can then depend on this name and when they do they should wire after than module.
-   * </p>
+   * Explicitly specify the name of the module.
    */
   String name() default "";
 
   /**
-   * Additional module features that is provided by this module.
+   * Explicitly define features that are provided by this module and required by other modules.
    * <p>
-   * These names are an addition to the module name and can be used in the <code>dependsOn</code> of other modules.
-   * </p>
-   *
-   * <pre>{@code
-   *
-   * // A module that provides 'email-service' and also 'health-check'.
-   * // ie. it has bean(s) that implement a health check interface
-   * @InjectModule(name="email-service", provides={"health-checks"})
-   *
-   * // provides beans that implement a health check interface
-   * // ... wires after 'email-service'
-   * @InjectModule(name="main", provides={"health-checks"}, dependsOn={"email-service"})
-   *
-   * // wire this after all modules that provide 'health-checks'
-   * @InjectModule(name="health-check-service", dependsOn={"health-checks"})
-   *
-   * }</pre>
+   * This is used to order wiring across multiple modules. Modules that provide dependencies
+   * should be wired before modules that require dependencies.
    */
-  String[] provides() default {};
+  Class<?>[] provides() default {};
 
   /**
-   * The list of modules this scope depends on.
+   * The dependencies that are provided externally or by other modules and that are required
+   * when wiring this module.
    * <p>
-   * Effectively dependsOn specifies the modules that must wire before this module.
-   * </p>
-   * <pre>{@code
-   *
-   * // wire after a module that is called 'email-service'
-   * // ... or any module that provides 'email-service'
-   *
-   * @InjectModule(name="...", dependsOn={"email-service"})
-   *
-   * }</pre>
-   */
-  String[] dependsOn() default {};
-
-  /**
-   * The dependencies that are provided externally and required when wiring this module.
+   * This effectively tells the annotation processor that these types are expected to be
+   * provided and to not treat them as missing dependencies. If we don't do this the annotation
+   * processor thinks the dependency is missing and will error the compilation saying there is
+   * a missing dependency.
    */
   Class<?>[] requires() default {};
+
+  /**
+   * Internal use only - identifies the custom scope annotation associated to this module.
+   * <p>
+   * When a module is generated for a custom scope this is set to link the module back to the
+   * custom scope annotation and support partial compilation.
+   */
+  String customScopeType() default "";
 
 }

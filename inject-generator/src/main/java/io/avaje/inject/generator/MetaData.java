@@ -17,7 +17,7 @@ class MetaData {
   private final String type;
   private final String shortType;
   private final String name;
-
+  private final List<String> externallyProvided = new ArrayList<>();
   private String method;
   private boolean wired;
   private boolean requestScope;
@@ -229,4 +229,7 @@ class MetaData {
     this.method = method;
   }
 
+  void externallyProvided(String dependency) {
+    externallyProvided.add(dependency);
+  }
 }

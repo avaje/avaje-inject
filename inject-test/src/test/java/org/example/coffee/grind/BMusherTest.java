@@ -12,7 +12,7 @@ public class BMusherTest {
 
     BMusher bMusher;
     try (BeanScope context = BeanScope.newBuilder().build()) {
-      bMusher = context.getBean(BMusher.class);
+      bMusher = context.get(BMusher.class);
       assertEquals(bMusher.getCountInit(), 1);
       assertEquals(bMusher.getCountClose(), 0);
     }

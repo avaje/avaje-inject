@@ -137,41 +137,4 @@ public class ApplicationScope {
     return appScope.listByAnnotation(annotation);
   }
 
-  /**
-   * Start building a RequestScope.
-   *
-   * <pre>{@code
-   *
-   *   try (RequestScope requestScope = ApplicationScope.newRequestScope()
-   *       // supply some instances
-   *       .withBean(HttpRequest.class, request)
-   *       .withBean(HttpResponse.class, response)
-   *       .build()) {
-   *
-   *       MyController controller = requestScope.get(MyController.class);
-   *       controller.process();
-   *
-   *   }
-   *
-   *   ...
-   *
-   *   // define request scoped beans
-   *   @Request
-   *   MyController {
-   *
-   *     // can depend on supplied instances, singletons and other request scope beans
-   *     @Inject
-   *     MyController(HttpRequest request, HttpResponse response, MyService myService) {
-   *       ...
-   *     }
-   *
-   *   }
-   *
-   * }</pre>
-   *
-   * @return The request scope builder
-   */
-  public static RequestScopeBuilder newRequestScope() {
-    return appScope.newRequestScope();
-  }
 }
