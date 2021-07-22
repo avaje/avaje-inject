@@ -17,10 +17,8 @@ class MetaData {
   private final String type;
   private final String shortType;
   private final String name;
-  private final List<String> externallyProvided = new ArrayList<>();
   private String method;
   private boolean wired;
-  private boolean requestScope;
 
   /**
    * The interfaces and class annotations the bean has (to register into lists).
@@ -33,7 +31,6 @@ class MetaData {
   private List<String> dependsOn;
 
   MetaData(DependencyMeta meta) {
-    this.requestScope = meta.requestScope();
     this.type = meta.type();
     this.name = trimName(meta.name());
     this.shortType = Util.shortName(type);
@@ -103,17 +100,12 @@ class MetaData {
   }
 
   void update(BeanReader beanReader) {
-    this.requestScope = beanReader.isRequestScopedBean();
     this.provides = beanReader.getInterfaces();
     this.dependsOn = beanReader.getDependsOn();
   }
 
   String getType() {
     return type;
-  }
-
-  boolean isRequestScope() {
-    return requestScope;
   }
 
   List<String> getProvides() {
@@ -156,9 +148,6 @@ class MetaData {
 
     StringBuilder sb = new StringBuilder(200);
     sb.append("  @DependencyMeta(type=\"").append(type).append("\"");
-    if (requestScope) {
-      sb.append(", requestScope=true");
-    }
     if (name != null) {
       sb.append(", name=\"").append(name).append("\"");
     }
@@ -229,7 +218,4 @@ class MetaData {
     this.method = method;
   }
 
-  void externallyProvided(String dependency) {
-    externallyProvided.add(dependency);
-  }
 }

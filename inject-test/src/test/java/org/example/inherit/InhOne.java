@@ -5,7 +5,7 @@ import javax.inject.Singleton;
 import org.example.coffee.core.Steamer;
 
 @Singleton
-class InhOne extends InhBase {
+public class InhOne extends InhBase {
 
   @Inject
   Steamer expectSetTopField;

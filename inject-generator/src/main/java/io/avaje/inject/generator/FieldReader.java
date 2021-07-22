@@ -29,9 +29,9 @@ class FieldReader {
     importTypes.add(fieldType);
   }
 
-  String builderGetDependency(String builderRef) {
+  String builderGetDependency() {
     StringBuilder sb = new StringBuilder();
-    sb.append(builderRef).append(".").append(type.getMethod(nullable));
+    sb.append("b.").append(type.getMethod(nullable));
     sb.append(nm(fieldType)).append(".class");
     if (name != null) {
       sb.append(",\"").append(name).append("\"");

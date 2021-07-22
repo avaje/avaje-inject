@@ -1,5 +1,6 @@
 package io.avaje.inject.generator;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -9,35 +10,34 @@ import java.util.Set;
 class TypeAppender {
 
   private final Set<String> importTypes;
-  private final StringBuilder sb = new StringBuilder();
-  private int count;
+  private final Set<String> types = new LinkedHashSet<>();
 
   TypeAppender(Set<String> importTypes) {
     this.importTypes = importTypes;
   }
 
   void add(String type) {
-    addType(type);
+    types.add(type);
+    importTypes.add(type);
   }
 
   void add(List<String> types) {
     for (String type : types) {
       if (!GenericType.isGeneric(type)) {
-        if (count > 0) {
-          sb.append(", ");
-        }
-        addType(type);
+        add(type);
       }
     }
   }
 
-  private void addType(String type) {
-    count++;
-    importTypes.add(type);
-    sb.append(Util.shortName(type)).append(".class");
-  }
-
   String asString() {
+    int count = 0;
+    final StringBuilder sb = new StringBuilder();
+    for (String type : types) {
+      if (count++ > 0) {
+        sb.append(", ");
+      }
+      sb.append(Util.shortName(type)).append(".class");
+    }
     return sb.toString();
   }
 }

@@ -14,7 +14,6 @@ class TypeReader {
   private final TypeElement beanType;
   private final Set<String> importTypes;
   private final TypeExtendsReader extendsReader;
-  private final TypeInterfaceReader interfaceReader;
   private final TypeAnnotationReader annotationReader;
   private String typesRegister;
 
@@ -31,7 +30,6 @@ class TypeReader {
     this.beanType = beanType;
     this.importTypes = importTypes;
     this.extendsReader = new TypeExtendsReader(beanType, context, factory);
-    this.interfaceReader = new TypeInterfaceReader(beanType, context);
     this.annotationReader = new TypeAnnotationReader(beanType, context);
   }
 
@@ -40,73 +38,11 @@ class TypeReader {
   }
 
   List<String> getInterfaces() {
-    return interfaceReader.getInterfaceTypes();
+    return extendsReader.getInterfaceTypes();
   }
 
   boolean isClosable() {
-    return interfaceReader.isCloseable();
-  }
-
-  boolean isRequestScopeBean() {
-    return annotationReader.isRequestScopeBean();
-  }
-
-  void process() {
-    extendsReader.process(forBean);
-    interfaceReader.process();
-    if (forBean) {
-      annotationReader.process();
-    }
-    initRegistrationTypes();
-  }
-
-  String getName() {
-    Named named = beanType.getAnnotation(Named.class);
-    if (named != null) {
-      return named.value().toLowerCase();
-    }
-    if (annotationReader.hasQualifierName()) {
-      return annotationReader.getQualifierName();
-    }
-    String derivedName = extendsReader.getQualifierName();
-    if (derivedName != null) {
-      return derivedName;
-    }
-    derivedName = interfaceReader.getQualifierName();
-    if (derivedName != null) {
-      return derivedName;
-    }
-    return derivedName;
-  }
-
-  private void initRegistrationTypes() {
-    TypeAppender appender = new TypeAppender(importTypes);
-    if (isRequestScopeBean()) {
-      List<String> interfaceTypes = interfaceReader.getInterfaceTypes();
-      interfaceTypes.remove(extendsReader.getBaseType());
-      if (interfaceTypes.isEmpty()) {
-        this.typesRegister = null;
-      } else {
-        appender.add(interfaceTypes);
-        this.typesRegister = appender.asString();
-      }
-      return;
-    }
-    List<String> interfaceTypes = interfaceReader.getInterfaceTypes();
-    if (interfaceTypes.isEmpty()) {
-      // only register extends type if no interfaces implemented
-      appender.add(extendsReader.getExtendsTypes());
-    } else {
-      String baseType = extendsReader.getBaseType();
-      if (!interfaceTypes.contains(baseType)) {
-        appender.add(baseType);
-      }
-      appender.add(interfaceTypes);
-    }
-    if (forBean) {
-      appender.add(annotationReader.getAnnotationTypes());
-    }
-    this.typesRegister = appender.asString();
+    return extendsReader.isCloseable();
   }
 
   void addImports(Set<String> importTypes) {
@@ -136,4 +72,39 @@ class TypeReader {
   MethodReader getConstructor() {
     return extendsReader.getConstructor();
   }
+
+  void process() {
+    extendsReader.process(forBean);
+    if (forBean) {
+      annotationReader.process();
+    }
+    initRegistrationTypes();
+  }
+
+  String getName() {
+    Named named = beanType.getAnnotation(Named.class);
+    if (named != null) {
+      return named.value().toLowerCase();
+    }
+    if (annotationReader.hasQualifierName()) {
+      return annotationReader.getQualifierName();
+    }
+    String derivedName = extendsReader.getQualifierName();
+    if (derivedName != null) {
+      return derivedName;
+    }
+    return derivedName;
+  }
+
+  private void initRegistrationTypes() {
+    TypeAppender appender = new TypeAppender(importTypes);
+    appender.add(extendsReader.getBaseType());
+    appender.add(extendsReader.getExtendsTypes());
+    appender.add(extendsReader.getInterfaceTypes());
+    if (forBean) {
+      appender.add(annotationReader.getAnnotationTypes());
+    }
+    this.typesRegister = appender.asString();
+  }
+
 }
