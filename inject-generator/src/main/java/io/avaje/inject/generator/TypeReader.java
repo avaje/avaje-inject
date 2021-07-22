@@ -15,7 +15,6 @@ class TypeReader {
   private final Set<String> importTypes;
   private final TypeExtendsReader extendsReader;
   private final TypeAnnotationReader annotationReader;
-  private final ProcessingContext context;
   private String typesRegister;
 
   TypeReader(TypeElement beanType, ProcessingContext context, Set<String> importTypes, boolean factory) {
@@ -29,7 +28,6 @@ class TypeReader {
   private TypeReader(boolean forBean, TypeElement beanType, ProcessingContext context, Set<String> importTypes, boolean factory) {
     this.forBean = forBean;
     this.beanType = beanType;
-    this.context = context;
     this.importTypes = importTypes;
     this.extendsReader = new TypeExtendsReader(beanType, context, factory);
     this.annotationReader = new TypeAnnotationReader(beanType, context);
@@ -45,10 +43,6 @@ class TypeReader {
 
   boolean isClosable() {
     return extendsReader.isCloseable();
-  }
-
-  boolean isRequestScopeBean() {
-    return annotationReader.isRequestScopeBean();
   }
 
   void addImports(Set<String> importTypes) {
@@ -104,17 +98,6 @@ class TypeReader {
 
   private void initRegistrationTypes() {
     TypeAppender appender = new TypeAppender(importTypes);
-    if (isRequestScopeBean()) {
-      List<String> interfaceTypes = extendsReader.getInterfaceTypes();
-      interfaceTypes.remove(extendsReader.getBaseType());
-      if (interfaceTypes.isEmpty()) {
-        this.typesRegister = null;
-      } else {
-        appender.add(interfaceTypes);
-        this.typesRegister = appender.asString();
-      }
-      return;
-    }
     appender.add(extendsReader.getBaseType());
     appender.add(extendsReader.getExtendsTypes());
     appender.add(extendsReader.getInterfaceTypes());

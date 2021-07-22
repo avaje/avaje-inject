@@ -12,18 +12,15 @@ class Constants {
   static final String PROVIDER = "jakarta.inject.Provider";
   static final String SINGLETON = "jakarta.inject.Singleton";
   static final String INJECT = "jakarta.inject.Inject";
-  static final String REQUEST = "io.avaje.inject.Request";
 
   static final String PATH = "io.avaje.http.api.Path";
   static final String CONTROLLER = "io.avaje.http.api.Controller";
-  static final String REQUESTSCOPEPROVIDER = "io.avaje.inject.RequestScopeProvider";
 
   static final String AT_SINGLETON = "@Singleton";
   static final String AT_GENERATED = "@Generated(\"io.avaje.inject.generator\")";
   static final String META_INF_FACTORY = "META-INF/services/io.avaje.inject.spi.Module";
   static final String META_INF_CUSTOM = "META-INF/services/io.avaje.inject.spi.Module.Custom";
 
-  static final String REQUESTSCOPE = "io.avaje.inject.RequestScope";
   static final String BEANCONTEXT = "io.avaje.inject.BeanScope";
   static final String INJECTMODULE = "io.avaje.inject.InjectModule";
 

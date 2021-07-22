@@ -27,7 +27,6 @@ class BeanReader {
   private final TypeReader typeReader;
   private final boolean primary;
   private final boolean secondary;
-  private final boolean requestScopedBean;
 
   private boolean writtenToFile;
 
@@ -41,8 +40,7 @@ class BeanReader {
     this.typeReader = new TypeReader(beanType, context, importTypes, factory);
 
     typeReader.process();
-    this.requestScopedBean = typeReader.isRequestScopeBean();
-    this.requestParams = new BeanRequestParams(context, type, requestScopedBean);
+    this.requestParams = new BeanRequestParams(type);
     this.name = typeReader.getName();
     this.injectMethods = typeReader.getInjectMethods();
     this.injectFields = typeReader.getInjectFields();
@@ -76,10 +74,6 @@ class BeanReader {
     }
     for (MethodReader factoryMethod : factoryMethods) {
       factoryMethod.addImports(importTypes);
-    }
-    if (requestScopedBean) {
-      importTypes.add(Constants.REQUESTSCOPEPROVIDER);
-      importTypes.add(Constants.REQUESTSCOPE);
     }
     return this;
   }
@@ -123,7 +117,7 @@ class BeanReader {
    * Return true if lifecycle via annotated methods is required.
    */
   boolean hasLifecycleMethods() {
-    return !requestScopedBean && (postConstructMethod != null || preDestroyMethod != null || typeReader.isClosable());
+    return (postConstructMethod != null || preDestroyMethod != null || typeReader.isClosable());
   }
 
   List<MetaData> createFactoryMethodMeta() {
@@ -215,10 +209,6 @@ class BeanReader {
    */
   boolean isRequestScopedController() {
     return requestParams.isRequestScopedController();
-  }
-
-  boolean isRequestScopedBean() {
-    return requestScopedBean;
   }
 
   String suffix() {
