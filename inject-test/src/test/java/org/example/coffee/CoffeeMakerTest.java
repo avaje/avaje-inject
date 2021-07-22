@@ -5,11 +5,14 @@ import io.avaje.inject.BeanScope;
 import org.example.coffee.core.DuperPump;
 import org.example.coffee.list.BSomei;
 import org.example.coffee.list.Somei;
+import org.example.coffee.provider.AProv;
+import org.example.coffee.provider.AProvProvider;
 import org.example.iface.ConcreteExtend;
 import org.example.iface.IfaceExtend;
 import org.example.iface.IfaseBase;
 import org.example.inherit.InhBase;
 import org.example.inherit.InhBaseBase;
+//import org.example.inherit.InhBaseIface;
 import org.example.inherit.InhOne;
 import org.junit.jupiter.api.Test;
 
@@ -83,7 +86,7 @@ public class CoffeeMakerTest {
         .findFirst().orElse(null);
 
       assertThat(inhEntry.keys())
-        .containsExactly(can(InhOne.class), can(InhBase.class), can(InhBaseBase.class));
+        .containsExactly(can(InhOne.class), can(InhBase.class), can(InhBaseBase.class));//, can(InhBaseIface.class));
     }
   }
 
@@ -99,6 +102,21 @@ public class CoffeeMakerTest {
 
       assertThat(extendIfaces.keys())
         .containsExactly(can(ConcreteExtend.class), can(IfaceExtend.class), can(IfaseBase.class));
+    }
+  }
+
+  @Test
+  public void beanScope_all_provider() {
+    try (BeanScope context = BeanScope.newBuilder().build()) {
+
+      final List<BeanEntry> beanEntries = context.all();
+
+      final BeanEntry extendIfaces = beanEntries.stream()
+        .filter(e -> e.hasKey(AProvProvider.class))
+        .findFirst().orElse(null);
+
+      assertThat(extendIfaces.keys())
+        .containsExactly(can(AProvProvider.class), can(AProv.class));
     }
   }
 
