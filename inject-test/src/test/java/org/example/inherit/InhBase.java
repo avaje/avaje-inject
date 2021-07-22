@@ -3,7 +3,7 @@ package org.example.inherit;
 import jakarta.inject.Inject;
 import org.example.coffee.core.Steamer;
 
-public class InhBase extends InhBaseBase {
+public class InhBase extends InhBaseBase implements InhBaseIface2 {
 
   @Inject
   Steamer expectSetBaseField;
