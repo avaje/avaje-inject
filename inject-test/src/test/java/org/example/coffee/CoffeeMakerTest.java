@@ -12,7 +12,7 @@ import org.example.iface.IfaceExtend;
 import org.example.iface.IfaseBase;
 import org.example.inherit.InhBase;
 import org.example.inherit.InhBaseBase;
-//import org.example.inherit.InhBaseIface;
+import org.example.inherit.InhBaseIface;
 import org.example.inherit.InhOne;
 import org.junit.jupiter.api.Test;
 
@@ -86,7 +86,7 @@ public class CoffeeMakerTest {
         .findFirst().orElse(null);
 
       assertThat(inhEntry.keys())
-        .containsExactly(can(InhOne.class), can(InhBase.class), can(InhBaseBase.class));//, can(InhBaseIface.class));
+        .containsExactly(can(InhOne.class), can(InhBase.class), can(InhBaseBase.class), can(InhBaseIface.class));
     }
   }
 
