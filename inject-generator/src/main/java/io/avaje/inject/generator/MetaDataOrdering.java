@@ -13,7 +13,6 @@ class MetaDataOrdering {
   private final ProcessingContext context;
   private final ScopeInfo scopeInfo;
   private final List<MetaData> orderedList = new ArrayList<>();
-  private final List<MetaData> requestScope = new ArrayList<>();
   private final List<MetaData> queue = new ArrayList<>();
   private final Map<String, ProviderList> providers = new HashMap<>();
   private final List<DependencyLink> circularDependencies = new ArrayList<>();
@@ -23,11 +22,7 @@ class MetaDataOrdering {
     this.context = context;
     this.scopeInfo = scopeInfo;
     for (MetaData metaData : values) {
-      if (metaData.isRequestScope()) {
-        // request scoped expected to have externally provided dependencies
-        requestScope.add(metaData);
-        metaData.setWired();
-      } else if (metaData.noDepends()) {
+      if (metaData.noDepends()) {
         orderedList.add(metaData);
         metaData.setWired();
       } else {
@@ -195,16 +190,9 @@ class MetaDataOrdering {
     return orderedList;
   }
 
-  List<MetaData> getRequestScope() {
-    return requestScope;
-  }
-
   Set<String> getImportTypes() {
     Set<String> importTypes = new TreeSet<>();
     for (MetaData metaData : orderedList) {
-      metaData.addImportTypes(importTypes);
-    }
-    for (MetaData metaData : requestScope) {
       metaData.addImportTypes(importTypes);
     }
     return importTypes;

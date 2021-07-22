@@ -19,7 +19,6 @@ class MetaData {
   private final String name;
   private String method;
   private boolean wired;
-  private boolean requestScope;
 
   /**
    * The interfaces and class annotations the bean has (to register into lists).
@@ -32,7 +31,6 @@ class MetaData {
   private List<String> dependsOn;
 
   MetaData(DependencyMeta meta) {
-    this.requestScope = meta.requestScope();
     this.type = meta.type();
     this.name = trimName(meta.name());
     this.shortType = Util.shortName(type);
@@ -110,10 +108,6 @@ class MetaData {
     return type;
   }
 
-  boolean isRequestScope() {
-    return requestScope;
-  }
-
   List<String> getProvides() {
     return provides;
   }
@@ -154,9 +148,6 @@ class MetaData {
 
     StringBuilder sb = new StringBuilder(200);
     sb.append("  @DependencyMeta(type=\"").append(type).append("\"");
-    if (requestScope) {
-      sb.append(", requestScope=true");
-    }
     if (name != null) {
       sb.append(", name=\"").append(name).append("\"");
     }

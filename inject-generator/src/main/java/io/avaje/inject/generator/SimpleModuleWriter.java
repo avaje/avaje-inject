@@ -3,7 +3,6 @@ package io.avaje.inject.generator;
 import javax.tools.FileObject;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -96,23 +95,12 @@ class SimpleModuleWriter {
     for (MetaData metaData : ordering.getOrdered()) {
       writer.append("    build_%s();", metaData.getBuildName()).eol();
     }
-    final List<MetaData> requestScope = ordering.getRequestScope();
-    if (!requestScope.isEmpty()) {
-      writer.eol();
-      writer.append("    // request scope providers").eol();
-      for (MetaData metaData : requestScope) {
-        writer.append("    build_%s();", metaData.getBuildName()).eol();
-      }
-    }
     writer.append("  }").eol();
     writer.eol();
   }
 
   private void writeBuildMethods() {
     for (MetaData metaData : ordering.getOrdered()) {
-      writer.append(metaData.buildMethod(ordering)).eol();
-    }
-    for (MetaData metaData : ordering.getRequestScope()) {
       writer.append(metaData.buildMethod(ordering)).eol();
     }
   }
