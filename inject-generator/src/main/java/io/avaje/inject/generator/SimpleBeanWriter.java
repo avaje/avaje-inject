@@ -22,7 +22,6 @@ class SimpleBeanWriter {
   private final String packageName;
   private final String suffix;
   private Append writer;
-  private final String indent = "     ";
 
   SimpleBeanWriter(BeanReader beanReader, ProcessingContext context) {
     this.beanReader = beanReader;
@@ -92,7 +91,7 @@ class SimpleBeanWriter {
 
   private void writeAddFor(MethodReader constructor) {
     beanReader.buildAddFor(writer);
-    writeCreateBean(constructor, "builder");
+    writeCreateBean(constructor);
     beanReader.buildRegister(writer);
     beanReader.addLifecycleCallbacks(writer);
     if (beanReader.isExtraInjectionRequired()) {
@@ -120,34 +119,32 @@ class SimpleBeanWriter {
     writer.append(") {").eol();
   }
 
-  private void writeCreateBean(MethodReader constructor, String builderName) {
-    writer.append("%s %s bean = new %s(", indent, shortName, shortName);
+  private void writeCreateBean(MethodReader constructor) {
+    writer.append("      %s bean = new %s(", shortName, shortName);
     // add constructor dependencies
-    writeMethodParams(builderName, constructor);
+    writeMethodParams("builder", constructor);
   }
 
   private void writeExtraInjection() {
-    String builderRef = "b";
-    String beanRef = "$bean";
     writer.append("      builder.addInjector(b -> {").eol();
     writer.append("        // field and method injection").eol();
-    injectFields(builderRef, beanRef);
-    injectMethods(builderRef, beanRef);
+    injectFields();
+    injectMethods();
     writer.append("      });").eol();
   }
 
-  private void injectFields(String builderRef, String beanRef) {
+  private void injectFields() {
     for (FieldReader fieldReader : beanReader.getInjectFields()) {
       String fieldName = fieldReader.getFieldName();
-      String getDependency = fieldReader.builderGetDependency(builderRef);
-      writer.append("        %s.%s = %s;", beanRef, fieldName, getDependency).eol();
+      String getDependency = fieldReader.builderGetDependency();
+      writer.append("        $bean.%s = %s;", fieldName, getDependency).eol();
     }
   }
 
-  private void injectMethods(String builderRef, String beanRef) {
+  private void injectMethods() {
     for (MethodReader methodReader : beanReader.getInjectMethods()) {
-      writer.append("        %s.%s(", beanRef, methodReader.getName());
-      writeMethodParams(builderRef, methodReader);
+      writer.append("        $bean.%s(", methodReader.getName());
+      writeMethodParams("b", methodReader);
     }
   }
 
