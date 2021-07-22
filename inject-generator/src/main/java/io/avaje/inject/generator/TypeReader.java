@@ -51,6 +51,34 @@ class TypeReader {
     return annotationReader.isRequestScopeBean();
   }
 
+  void addImports(Set<String> importTypes) {
+    importTypes.addAll(this.importTypes);
+  }
+
+  List<FieldReader> getInjectFields() {
+    return extendsReader.getInjectFields();
+  }
+
+  List<MethodReader> getInjectMethods() {
+    return extendsReader.getInjectMethods();
+  }
+
+  List<MethodReader> getFactoryMethods() {
+    return extendsReader.getFactoryMethods();
+  }
+
+  Element getPostConstructMethod() {
+    return extendsReader.getPostConstructMethod();
+  }
+
+  Element getPreDestroyMethod() {
+    return extendsReader.getPreDestroyMethod();
+  }
+
+  MethodReader getConstructor() {
+    return extendsReader.getConstructor();
+  }
+
   void process() {
     extendsReader.process(forBean);
     if (forBean) {
@@ -96,31 +124,4 @@ class TypeReader {
     this.typesRegister = appender.asString();
   }
 
-  void addImports(Set<String> importTypes) {
-    importTypes.addAll(this.importTypes);
-  }
-
-  List<FieldReader> getInjectFields() {
-    return extendsReader.getInjectFields();
-  }
-
-  List<MethodReader> getInjectMethods() {
-    return extendsReader.getInjectMethods();
-  }
-
-  List<MethodReader> getFactoryMethods() {
-    return extendsReader.getFactoryMethods();
-  }
-
-  Element getPostConstructMethod() {
-    return extendsReader.getPostConstructMethod();
-  }
-
-  Element getPreDestroyMethod() {
-    return extendsReader.getPreDestroyMethod();
-  }
-
-  MethodReader getConstructor() {
-    return extendsReader.getConstructor();
-  }
 }

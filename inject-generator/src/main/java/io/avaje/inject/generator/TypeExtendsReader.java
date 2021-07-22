@@ -44,6 +44,38 @@ class TypeExtendsReader {
     return qualifierName;
   }
 
+  List<FieldReader> getInjectFields() {
+    return extendsInjection.getInjectFields();
+  }
+
+  List<MethodReader> getInjectMethods() {
+    return extendsInjection.getInjectMethods();
+  }
+
+  List<MethodReader> getFactoryMethods() {
+    return extendsInjection.getFactoryMethods();
+  }
+
+  Element getPostConstructMethod() {
+    return extendsInjection.getPostConstructMethod();
+  }
+
+  Element getPreDestroyMethod() {
+    return extendsInjection.getPreDestroyMethod();
+  }
+
+  MethodReader getConstructor() {
+    return extendsInjection.getConstructor();
+  }
+
+  List<String> getInterfaceTypes() {
+    return interfaceTypes;
+  }
+
+  boolean isCloseable() {
+    return closeable;
+  }
+
   void process(boolean forBean) {
     String base = Util.unwrapProvider(baseType.getQualifiedName().toString());
     if (!GenericType.isGeneric(base)) {
@@ -82,38 +114,6 @@ class TypeExtendsReader {
 
   private TypeElement superOf(TypeElement element) {
     return (TypeElement) context.asElement(element.getSuperclass());
-  }
-
-  List<FieldReader> getInjectFields() {
-    return extendsInjection.getInjectFields();
-  }
-
-  List<MethodReader> getInjectMethods() {
-    return extendsInjection.getInjectMethods();
-  }
-
-  List<MethodReader> getFactoryMethods() {
-    return extendsInjection.getFactoryMethods();
-  }
-
-  Element getPostConstructMethod() {
-    return extendsInjection.getPostConstructMethod();
-  }
-
-  Element getPreDestroyMethod() {
-    return extendsInjection.getPreDestroyMethod();
-  }
-
-  MethodReader getConstructor() {
-    return extendsInjection.getConstructor();
-  }
-
-  List<String> getInterfaceTypes() {
-    return interfaceTypes;
-  }
-
-  boolean isCloseable() {
-    return closeable;
   }
 
   private void readInterfaces(TypeElement type) {
