@@ -49,6 +49,6 @@ class DEntry implements BeanEntry {
 
   @Override
   public boolean hasKey(Class<?> type) {
-    return keys.contains(type.getCanonicalName());
+    return keys.contains(type.getTypeName());
   }
 }

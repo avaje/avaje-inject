@@ -1,5 +1,7 @@
 package io.avaje.inject.spi;
 
+import java.lang.reflect.Type;
+
 /**
  * Build a "flat key" combining type and name.
  */
@@ -9,8 +11,8 @@ class KeyUtil {
     return name == null ? null : name.toLowerCase();
   }
 
-  static String key(Class<?> type, String name) {
-    return name == null ? type.getCanonicalName() : type.getCanonicalName() + "|" + name;
+  static String key(Type type, String name) {
+    return name == null ? type.getTypeName() : type.getTypeName() + "|" + name;
   }
 
 }

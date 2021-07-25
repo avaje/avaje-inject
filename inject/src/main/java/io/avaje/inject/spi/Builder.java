@@ -3,6 +3,7 @@ package io.avaje.inject.spi;
 import io.avaje.inject.BeanScope;
 import jakarta.inject.Provider;
 
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -38,7 +39,7 @@ public interface Builder {
    * @param name  The qualifier name
    * @param types The types that the bean implements and provides
    */
-  boolean isAddBeanFor(String name, Class<?>... types);
+  boolean isAddBeanFor(String name, Type... types);
 
   /**
    * Return true if the bean should be created and registered with the context.
@@ -48,7 +49,7 @@ public interface Builder {
    *
    * @param types The types that the bean implements and provides
    */
-  boolean isAddBeanFor(Class<?>... types);
+  boolean isAddBeanFor(Type... types);
 
   /**
    * Register the bean instance into the context.

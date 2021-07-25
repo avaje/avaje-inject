@@ -1,5 +1,6 @@
 package io.avaje.inject.spi;
 
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,7 +24,7 @@ class DBeanMap {
   /**
    * Add to the map of entries.
    */
-  void addAll(Map<DContextEntryBean,DEntry> map) {
+  void addAll(Map<DContextEntryBean, DEntry> map) {
     for (Map.Entry<String, DContextEntry> entry : beans.entrySet()) {
       for (DContextEntryBean contentEntry : entry.getValue().entries()) {
         map.computeIfAbsent(contentEntry, dContextEntryBean -> contentEntry.entry()).addKey(entry.getKey());
@@ -45,22 +46,22 @@ class DBeanMap {
   private void addSuppliedBean(SuppliedBean supplied) {
     Class<?> suppliedType = supplied.getType();
     DContextEntryBean entryBean = DContextEntryBean.of(supplied.getBean(), supplied.name(), SUPPLIED);
-    beans.computeIfAbsent(suppliedType.getCanonicalName(), s -> new DContextEntry()).add(entryBean);
+    beans.computeIfAbsent(suppliedType.getTypeName(), s -> new DContextEntry()).add(entryBean);
     for (Class<?> anInterface : suppliedType.getInterfaces()) {
-      beans.computeIfAbsent(anInterface.getCanonicalName(), s -> new DContextEntry()).add(entryBean);
+      beans.computeIfAbsent(anInterface.getTypeName(), s -> new DContextEntry()).add(entryBean);
     }
   }
 
   void register(int flag, Object bean) {
     DContextEntryBean entryBean = DContextEntryBean.of(bean, nextBean.name, flag);
-    for (Class<?> type : nextBean.types) {
-      beans.computeIfAbsent(type.getCanonicalName(), s -> new DContextEntry()).add(entryBean);
+    for (Type type : nextBean.types) {
+      beans.computeIfAbsent(type.getTypeName(), s -> new DContextEntry()).add(entryBean);
     }
   }
 
   @SuppressWarnings("unchecked")
   <T> T get(Class<T> type, String name) {
-    DContextEntry entry = beans.get(type.getCanonicalName());
+    DContextEntry entry = beans.get(type.getTypeName());
     if (entry == null) {
       return null;
     }
@@ -72,16 +73,16 @@ class DBeanMap {
    */
   @SuppressWarnings("rawtypes")
   List<Object> all(Class type) {
-    DContextEntry entry = beans.get(type.getCanonicalName());
+    DContextEntry entry = beans.get(type.getTypeName());
     return entry != null ? entry.all() : Collections.emptyList();
   }
 
   /**
    * Return true if there is a supplied bean for the name and types.
    */
-  boolean isSupplied(String qualifierName, Class<?>... types) {
+  boolean isSupplied(String qualifierName, Type... types) {
     if (types != null) {
-      for (Class<?> type : types) {
+      for (Type type : types) {
         if (isSuppliedType(qualifierName, type)) {
           return true;
         }
@@ -90,15 +91,15 @@ class DBeanMap {
     return false;
   }
 
-  private boolean isSuppliedType(String qualifierName, Class<?> type) {
-    DContextEntry entry = beans.get(type.getCanonicalName());
+  private boolean isSuppliedType(String qualifierName, Type type) {
+    DContextEntry entry = beans.get(type.getTypeName());
     return entry != null && entry.isSupplied(qualifierName);
   }
 
   /**
    * Store the qualifier name and type for the next bean to register.
    */
-  void nextBean(String name, Class<?>[] types) {
+  void nextBean(String name, Type[] types) {
     nextBean = new NextBean(name, types);
   }
 
@@ -111,9 +112,9 @@ class DBeanMap {
 
   static class NextBean {
     final String name;
-    final Class<?>[] types;
+    final Type[] types;
 
-    NextBean(String name, Class<?>[] types) {
+    NextBean(String name, Type[] types) {
       this.name = name;
       this.types = types;
     }

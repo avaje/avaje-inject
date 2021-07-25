@@ -2,6 +2,7 @@ package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanScope;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ class DBuilderExtn extends DBuilder {
   }
 
   @Override
-  public boolean isAddBeanFor(String qualifierName, Class<?>... types) {
+  public boolean isAddBeanFor(String qualifierName, Type... types) {
     next(qualifierName, types);
     if (hasSuppliedBeans) {
       return !beanMap.isSupplied(qualifierName, types);
@@ -48,7 +49,7 @@ class DBuilderExtn extends DBuilder {
     if (enrich != null) {
       return enrich.enrich(bean);
     }
-    for (Class<?> type : next.types) {
+    for (Type type : next.types) {
       enrich = enrichLookup(type, next.name);
       if (enrich != null) {
         return enrich.enrich(bean);
@@ -59,7 +60,7 @@ class DBuilderExtn extends DBuilder {
   }
 
   @SuppressWarnings({"unchecked"})
-  private <T> EnrichBean<T> enrichLookup(Class<?> type, String name) {
+  private <T> EnrichBean<T> enrichLookup(Type type, String name) {
     EnrichBean<T> enrich = enrichMap.get(KeyUtil.key(type, null));
     if (enrich == null && name != null) {
       enrich = enrichMap.get(KeyUtil.key(type, name));
