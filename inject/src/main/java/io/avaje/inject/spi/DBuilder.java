@@ -4,6 +4,7 @@ import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
 import javax.inject.Provider;
 
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -32,7 +33,7 @@ class DBuilder implements Builder {
   /**
    * Debug of the current bean being wired - used in injection errors.
    */
-  private Class<?> injectTarget;
+  private Type injectTarget;
 
   /**
    * Flag set when we are running post construct injection.
@@ -44,22 +45,22 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public boolean isAddBeanFor(Class<?>... types) {
+  public boolean isAddBeanFor(Type... types) {
     return isAddBeanFor(null, types);
   }
 
   @Override
-  public boolean isAddBeanFor(String name, Class<?>... types) {
+  public boolean isAddBeanFor(String name, Type... types) {
     next(name, types);
     return true;
   }
 
-  protected void next(String name, Class<?>... types) {
+  protected void next(String name, Type... types) {
     injectTarget = firstOf(types);
     beanMap.nextBean(name, types);
   }
 
-  private Class<?> firstOf(Class<?>[] types) {
+  private Type firstOf(Type[] types) {
     return types != null && types.length > 0 ? types[0] : null;
   }
 
@@ -78,12 +79,12 @@ class DBuilder implements Builder {
     return combine(values, parent.list(interfaceType));
   }
 
-  private <T> T getMaybe(Class<T> beanClass, String name) {
-    T bean = beanMap.get(beanClass, name);
+  private <T> T getMaybe(Type type, String name) {
+    T bean = beanMap.get(type, name);
     if (bean != null) {
       return bean;
     }
-    return (parent == null) ? null : parent.get(beanClass, name);
+    return (parent == null) ? null : parent.get(type, name);
   }
 
   /**
@@ -164,6 +165,21 @@ class DBuilder implements Builder {
     ProviderPromise<T> promise = new ProviderPromise<>(cls, name);
     injectors.add(promise);
     return promise;
+  }
+
+  @Override
+  public <T> Provider<T> getProviderFor(Class<?> cls, Type type) {
+    return () -> {
+      T bean = getMaybe(cls, null);
+      if (bean == null) {
+        bean = getMaybe(type, null);
+      }
+      if (bean != null) {
+        return bean;
+      }
+      String msg = "Unable to inject an instance for generic type " + type + " usually provided by " + cls + "?";
+      throw new IllegalStateException(msg);
+    };
   }
 
   @Override

@@ -8,6 +8,7 @@ class Constants {
   static final String AUTO_CLOSEABLE = "java.lang.AutoCloseable";
   static final String OPTIONAL = "java.util.Optional";
   static final String KOTLIN_METADATA = "kotlin.Metadata";
+  static final String TYPE = "java.lang.reflect.Type";
 
   static final String PROVIDER = "javax.inject.Provider";
   static final String SINGLETON = "javax.inject.Singleton";
@@ -30,4 +31,6 @@ class Constants {
   static final String BUILDER = "io.avaje.inject.spi.Builder";
   static final String DEPENDENCYMETA = "io.avaje.inject.spi.DependencyMeta";
   static final String MODULE = "io.avaje.inject.spi.Module";
+  static final String GENERICTYPE = "io.avaje.inject.spi.GenericType";
+
 }

@@ -2,6 +2,7 @@ package io.avaje.inject;
 
 import io.avaje.inject.spi.Module;
 
+import java.lang.reflect.Type;
 import java.util.function.Consumer;
 
 /**
@@ -96,7 +97,8 @@ public interface BeanScopeBuilder {
    *
    * }</pre>
    *
-   * @param beans Externally provided beans used when injecting a dependency for the bean or the interface(s) it implements
+   * @param beans Externally provided beans used when injecting a dependency
+   *              for the bean or the interface(s) it implements
    * @return This BeanScopeBuilder
    */
   BeanScopeBuilder withBeans(Object... beans);
@@ -122,7 +124,7 @@ public interface BeanScopeBuilder {
    * }</pre>
    *
    * @param type The dependency injection type this bean is target for
-   * @param bean The supplied bean instance to use (typically a test mock)
+   * @param bean The supplied bean instance to use for injection
    */
   <D> BeanScopeBuilder withBean(Class<D> type, D bean);
 
@@ -131,9 +133,26 @@ public interface BeanScopeBuilder {
    *
    * @param name The name qualifier
    * @param type The dependency injection type this bean is target for
-   * @param bean The supplied bean instance to use (typically a test mock)
+   * @param bean The supplied bean instance to use for injection
    */
   <D> BeanScopeBuilder withBean(String name, Class<D> type, D bean);
+
+  /**
+   * Add a supplied bean instance with the given name and generic type.
+   *
+   * @param name The name qualifier
+   * @param type The dependency injection type this bean is target for
+   * @param bean The supplied bean instance to use for injection
+   */
+  <D> BeanScopeBuilder withBean(String name, Type type, D bean);
+
+  /**
+   * Add a supplied bean instance with a generic type.
+   *
+   * @param type The dependency injection type this bean is target for
+   * @param bean The supplied bean instance to use for injection
+   */
+  <D> BeanScopeBuilder withBean(Type type, D bean);
 
   /**
    * Use the given BeanScope as the parent. This becomes an additional

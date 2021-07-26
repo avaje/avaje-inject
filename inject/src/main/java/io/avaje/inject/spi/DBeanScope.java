@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -51,17 +52,26 @@ class DBeanScope implements BeanScope {
   }
 
   @Override
-  public <T> T get(Class<T> beanClass) {
-    return get(beanClass, null);
+  public <T> T get(Class<T> type) {
+    return get(type, null);
   }
 
   @Override
-  public <T> T get(Class<T> beanClass, String name) {
-    final T bean = beans.get(beanClass, name);
+  public <T> T get(Class<T> type, String name) {
+    return getByType(type, name);
+  }
+
+  @Override
+  public <T> T get(Type type, String name) {
+    return getByType(type, name);
+  }
+
+  private  <T> T getByType(Type type, String name) {
+    final T bean = beans.get(type, name);
     if (bean != null) {
       return bean;
     }
-    return (parent == null) ? null : parent.get(beanClass, name);
+    return (parent == null) ? null : parent.get(type, name);
   }
 
   @SuppressWarnings("unchecked")

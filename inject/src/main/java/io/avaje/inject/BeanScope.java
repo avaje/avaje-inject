@@ -1,6 +1,7 @@
 package io.avaje.inject;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.List;
 
 /**
@@ -129,6 +130,14 @@ public interface BeanScope extends AutoCloseable {
    * @param name the name qualifier of a specific bean
    */
   <T> T get(Class<T> type, String name);
+
+  /**
+   * Return a single bean given the generic type and name.
+   *
+   * @param type The generic type
+   * @param name the name qualifier of a specific bean
+   */
+  <T> T get(Type type, String name);
 
   /**
    * Return the list of beans that have an annotation.

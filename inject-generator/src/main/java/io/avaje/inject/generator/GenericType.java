@@ -9,9 +9,24 @@ import java.util.Set;
  */
 class GenericType {
 
+  private final String raw;
   private String mainType;
 
   private final List<GenericType> params = new ArrayList<>();
+
+  /**
+   * Create for top level type.
+   */
+  GenericType(String raw) {
+    this.raw = raw;
+  }
+
+  /**
+   * Create for parameter type.
+   */
+  GenericType() {
+    this.raw = null;
+  }
 
   /**
    * Return true if this is a generic type.
@@ -34,6 +49,10 @@ class GenericType {
     return isGeneric(paramType) ? parse(paramType) : null;
   }
 
+  @Override
+  public String toString() {
+    return raw != null ? raw : mainType + '<' + params + '>';
+  }
 
   void addImports(Set<String> importTypes) {
     final String type = trimExtends();
@@ -67,6 +86,19 @@ class GenericType {
         params.get(i).writeShort(writer);
       }
       writer.append(">");
+    }
+  }
+
+  String shortName() {
+    StringBuilder sb = new StringBuilder();
+    shortName(sb);
+    return sb.toString();
+  }
+
+  void shortName(StringBuilder sb) {
+    sb.append(Util.shortName(trimExtends()));
+    for (GenericType param : params) {
+      param.shortName(sb);
     }
   }
 

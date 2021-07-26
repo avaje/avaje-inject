@@ -96,6 +96,10 @@ class BeanReader {
     return typeReader.getInterfaces();
   }
 
+  Set<GenericType> getGenericTypes() {
+    return typeReader.getGenericTypes();
+  }
+
   /**
    * Return the short name of the element.
    */
@@ -176,6 +180,7 @@ class BeanReader {
     if (Util.validImportType(type)) {
       importTypes.add(type);
     }
+    typeReader.extraImports(importTypes);
     requestParams.addImports(importTypes);
     return importTypes;
   }
@@ -252,42 +257,6 @@ class BeanReader {
     }
     writer.append("    return bean;").eol();
     writer.append("  }").eol();
-  }
-
-  void buildReq(Append writer) {
-    writer.append("    builder.requestScope(%s.class, new RequestScopeProvider<%s>() {", shortName, shortName).eol();
-    writer.append("      @Override").eol();
-    writer.append("      public %s provide(RequestScope scope) {", shortName).eol();
-  }
-
-  void buildReqEnd(Append writer) {
-    writer.append("        return bean;").eol();
-    writer.append("      }").eol();
-    writer.append("    }");
-
-    final String ifaceTypes = typeReader.getTypesRegister();
-    if (ifaceTypes != null) {
-      if (name != null && !name.isEmpty()) {
-        writer.append(", \"%s\"", name);
-        writer.append(", ");
-        writer.append(ifaceTypes);
-      }
-    }
-    writer.append(");").eol();
-  }
-
-  void writePostConstruct(Append writer) {
-    if (postConstructMethod != null) {
-      writer.append("        bean.%s();", postConstructMethod.getSimpleName()).eol();
-    }
-  }
-
-  void writePreDestroy(Append writer) {
-    if (preDestroyMethod != null) {
-      writer.append("        scope.addClosable(bean::%s);", preDestroyMethod.getSimpleName()).eol();
-    } else if (typeReader.isClosable()) {
-      writer.append("        scope.addClosable(bean);").eol();
-    }
   }
 
   List<FieldReader> getInjectFields() {

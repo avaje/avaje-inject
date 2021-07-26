@@ -12,7 +12,7 @@ class GenericTypeParser {
 
   GenericTypeParser(String raw) {
     this.raw = raw;
-    stack.push(new GenericType());
+    stack.push(new GenericType(raw));
   }
 
   GenericType parse() {

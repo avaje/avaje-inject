@@ -5,6 +5,7 @@ import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Write the source code for the bean.
@@ -46,11 +47,40 @@ class SimpleBeanWriter {
     if (isRequestScopedController()) {
       writeRequestCreate();
     } else {
+      writeGenericTypeFields();
+      writeGenericProviders();
       writeStaticFactoryMethod();
       writeStaticFactoryBeanMethods();
     }
     writeClassEnd();
     writer.close();
+  }
+
+  private void writeGenericProviders() {
+    final Set<GenericType> genericTypes = beanReader.getGenericTypes();
+    if (genericTypes != null && !genericTypes.isEmpty()) {
+      for (GenericType type : genericTypes) {
+        final String sn = type.shortName();
+        writer.append("  public static Provider<");
+        type.writeShort(writer);
+        writer.append("> provider%s(Builder builder) {",  sn).eol();
+        writer.append("    return builder.getProviderFor(%s.class, TYPE_%s);", shortName, sn).eol();
+        writer.append("  }").eol();
+      }
+      writer.eol();
+    }
+  }
+
+  private void writeGenericTypeFields() {
+    final Set<GenericType> genericTypes = beanReader.getGenericTypes();
+    if (genericTypes != null && !genericTypes.isEmpty()) {
+      for (GenericType type : genericTypes) {
+        writer.append("  public static final Type TYPE_%s = new GenericType<", type.shortName());
+        type.writeShort(writer);
+        writer.append(">(){};").eol();
+      }
+      writer.eol();
+    }
   }
 
   private void writeRequestCreate() {

@@ -1,12 +1,13 @@
 package io.avaje.inject;
 
-import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.Builder;
 import io.avaje.inject.spi.EnrichBean;
+import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.SuppliedBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -53,10 +54,9 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  @SuppressWarnings({"unchecked", "rawtypes"})
   public BeanScopeBuilder withBeans(Object... beans) {
     for (Object bean : beans) {
-      suppliedBeans.add(new SuppliedBean(null, suppliedType(bean.getClass()), bean));
+      suppliedBeans.add(SuppliedBean.of(superOf(bean.getClass()), bean));
     }
     return this;
   }
@@ -68,7 +68,18 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   @Override
   public <D> BeanScopeBuilder withBean(String name, Class<D> type, D bean) {
-    suppliedBeans.add(new SuppliedBean<>(name, type, bean));
+    suppliedBeans.add(SuppliedBean.of(name, type, bean));
+    return this;
+  }
+
+  @Override
+  public <D> BeanScopeBuilder withBean(Type type, D bean) {
+    return withBean(null, type, bean);
+  }
+
+  @Override
+  public <D> BeanScopeBuilder withBean(String name, Type type, D bean) {
+    suppliedBeans.add(SuppliedBean.ofType(name, type, bean));
     return this;
   }
 
@@ -93,7 +104,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   private <D> BeanScopeBuilder.ForTesting withMock(Class<D> type, String name, Consumer<D> consumer) {
-    suppliedBeans.add(new SuppliedBean<>(name, type, null, consumer));
+    suppliedBeans.add(SuppliedBean.of(name, type, null, consumer));
     return this;
   }
 
@@ -143,7 +154,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   /**
    * Return the type that we map the supplied bean to.
    */
-  private Class<?> suppliedType(Class<?> suppliedClass) {
+  private static Class<?> superOf(Class<?> suppliedClass) {
     Class<?> suppliedSuper = suppliedClass.getSuperclass();
     if (Object.class.equals(suppliedSuper)) {
       return suppliedClass;
@@ -170,16 +181,16 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       this.factories.addAll(includeModules);
       this.suppliedBeans = suppliedBeans;
       for (Module includeModule : includeModules) {
-        moduleNames.add(includeModule.getClass().getCanonicalName());
+        moduleNames.add(includeModule.getClass().getTypeName());
       }
     }
 
     void add(Module factory) {
       FactoryState wrappedFactory = new FactoryState(factory);
-      providesMap.computeIfAbsent(factory.getClass().getCanonicalName(), s -> new FactoryList()).add(wrappedFactory);
+      providesMap.computeIfAbsent(factory.getClass().getTypeName(), s -> new FactoryList()).add(wrappedFactory);
       if (!isEmpty(factory.provides())) {
         for (Class<?> feature : factory.provides()) {
-          providesMap.computeIfAbsent(feature.getCanonicalName(), s -> new FactoryList()).add(wrappedFactory);
+          providesMap.computeIfAbsent(feature.getTypeName(), s -> new FactoryList()).add(wrappedFactory);
         }
       }
       if (isEmpty(factory.requires())) {
@@ -206,7 +217,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     private void push(FactoryState factory) {
       factory.setPushed();
       factories.add(factory.factory());
-      moduleNames.add(factory.getClass().getCanonicalName());
+      moduleNames.add(factory.getClass().getTypeName());
     }
 
     /**
@@ -249,7 +260,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       } else if (!queue.isEmpty()) {
         StringBuilder sb = new StringBuilder();
         for (FactoryState factory : queue) {
-          sb.append("Module [").append(factory.getClass().getCanonicalName()).append("] has unsatisfied dependencies on modules:");
+          sb.append("Module [").append(factory.getClass()).append("] has unsatisfied dependencies on modules:");
           for (Class<?> depModuleName : factory.requires()) {
             if (!moduleNames.contains(depModuleName)) {
               sb.append(String.format(" [%s]", depModuleName));
@@ -289,7 +300,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
      */
     private boolean satisfiedDependencies(FactoryState factory) {
       for (Class<?> moduleOrFeature : factory.requires()) {
-        FactoryList factories = providesMap.get(moduleOrFeature.getCanonicalName());
+        FactoryList factories = providesMap.get(moduleOrFeature.getTypeName());
         if (factories == null || !factories.allPushed()) {
           return false;
         }

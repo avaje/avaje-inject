@@ -12,7 +12,6 @@ public class HazManagerTest {
 
   @Test
   public void find_when_allWired() {
-
     HazManager hazManager = ApplicationScope.get(HazManager.class);
     Haz haz = hazManager.find(42L);
 
@@ -20,8 +19,7 @@ public class HazManagerTest {
   }
 
   @Test
-  public void fin_with_mockHaz() {
-
+  public void find_with_mockHaz() {
     try (BeanScope context = BeanScope.newBuilder()
       .forTesting()
       .withMock(HazRepo.class)
@@ -36,7 +34,6 @@ public class HazManagerTest {
 
   @Test
   public void find_with_stubHazUsingMockito() {
-
     try (BeanScope context = BeanScope.newBuilder()
       .forTesting()
       .withMock(HazRepo.class, hazRepo -> {
@@ -52,8 +49,22 @@ public class HazManagerTest {
   }
 
   @Test
-  public void find_with_testDouble() {
+  public void withBean_usingGenericType() {
+    TDFoo testDouble = new TDFoo();
 
+    try (BeanScope context = BeanScope.newBuilder()
+      .withBean(HazRepo$DI.TYPE_RepositoryHazLong, testDouble)
+      .build()) {
+
+      HazManager hazManager = context.get(HazManager.class);
+      Haz haz = hazManager.find(42L);
+
+      assertThat(haz.id).isEqualTo(7L);
+    }
+  }
+
+  @Test
+  public void find_with_testDouble() {
     TDHazRepo testDouble = new TDHazRepo();
 
     try (BeanScope context = BeanScope.newBuilder()
@@ -73,6 +84,14 @@ public class HazManagerTest {
       haz = hazManager.find(42L);
       assertThat(haz.id).isEqualTo(128L);
 
+    }
+  }
+
+  static class TDFoo implements Repository<Haz, Long> {
+
+    @Override
+    public Haz findById(Long id) {
+      return new Haz(7L);
     }
   }
 
