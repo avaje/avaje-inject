@@ -145,7 +145,6 @@ class MetaData {
   }
 
   String buildMethod(MetaDataOrdering ordering) {
-
     StringBuilder sb = new StringBuilder(200);
     sb.append("  @DependencyMeta(type=\"").append(type).append("\"");
     if (name != null) {
@@ -172,16 +171,16 @@ class MetaData {
       if (GenericType.isGeneric(depend) && !Util.isProvider(depend)) {
         // provide implementation of generic interface as a parameter to the build method
         final MetaData providerMeta = findProviderOf(depend, ordering);
-        String prov = (providerMeta == null) ? "UnknownProvider" : Util.shortName(providerMeta.type);
-        sb.append(", () -> {").append(NEWLINE);
-        sb.append("      return builder.get(").append(prov).append(".class);").append(NEWLINE);
-        sb.append("    }");
+        if (providerMeta != null) {
+          final GenericType type = GenericType.parse(depend);
+          sb.append(", ").append(providerMeta.shortType).append("$DI.provider").append(type.shortName()).append("(builder)");
+        } else {
+          sb.append("UnknownProvider??");
+        }
       }
     }
-
     sb.append(");").append(NEWLINE);
     sb.append("  }").append(NEWLINE);
-
     return sb.toString();
   }
 

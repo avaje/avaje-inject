@@ -114,6 +114,14 @@ public interface Builder {
   <T> Provider<T> getProvider(Class<T> cls, String name);
 
   /**
+   * Return Provider for a generic interface type.
+   *
+   * @param cls  The usual implementation class
+   * @param type The generic interface type
+   */
+  <T> Provider<T> getProviderFor(Class<?> cls, Type type);
+
+  /**
    * Get a dependency.
    */
   <T> T get(Class<T> cls);

@@ -79,12 +79,12 @@ class DBuilder implements Builder {
     return combine(values, parent.list(interfaceType));
   }
 
-  private <T> T getMaybe(Class<T> beanClass, String name) {
-    T bean = beanMap.get(beanClass, name);
+  private <T> T getMaybe(Type type, String name) {
+    T bean = beanMap.get(type, name);
     if (bean != null) {
       return bean;
     }
-    return (parent == null) ? null : parent.get(beanClass, name);
+    return (parent == null) ? null : parent.get(type, name);
   }
 
   /**
@@ -165,6 +165,21 @@ class DBuilder implements Builder {
     ProviderPromise<T> promise = new ProviderPromise<>(cls, name);
     injectors.add(promise);
     return promise;
+  }
+
+  @Override
+  public <T> Provider<T> getProviderFor(Class<?> cls, Type type) {
+    return () -> {
+      T bean = getMaybe(cls, null);
+      if (bean == null) {
+        bean = getMaybe(type, null);
+      }
+      if (bean != null) {
+        return bean;
+      }
+      String msg = "Unable to inject an instance for generic type " + type + " usually provided by " + cls + "?";
+      throw new IllegalStateException(msg);
+    };
   }
 
   @Override

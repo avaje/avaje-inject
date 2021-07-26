@@ -7,6 +7,7 @@ import io.avaje.inject.spi.SuppliedBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -53,10 +54,9 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  @SuppressWarnings({"unchecked", "rawtypes"})
   public BeanScopeBuilder withBeans(Object... beans) {
     for (Object bean : beans) {
-      suppliedBeans.add(new SuppliedBean(null, suppliedType(bean.getClass()), bean));
+      suppliedBeans.add(SuppliedBean.of(superOf(bean.getClass()), bean));
     }
     return this;
   }
@@ -68,7 +68,18 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   @Override
   public <D> BeanScopeBuilder withBean(String name, Class<D> type, D bean) {
-    suppliedBeans.add(new SuppliedBean<>(name, type, bean));
+    suppliedBeans.add(SuppliedBean.of(name, type, bean));
+    return this;
+  }
+
+  @Override
+  public <D> BeanScopeBuilder withBean(Type type, D bean) {
+    return withBean(null, type, bean);
+  }
+
+  @Override
+  public <D> BeanScopeBuilder withBean(String name, Type type, D bean) {
+    suppliedBeans.add(SuppliedBean.ofType(name, type, bean));
     return this;
   }
 
@@ -93,7 +104,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   private <D> BeanScopeBuilder.ForTesting withMock(Class<D> type, String name, Consumer<D> consumer) {
-    suppliedBeans.add(new SuppliedBean<>(name, type, null, consumer));
+    suppliedBeans.add(SuppliedBean.of(name, type, null, consumer));
     return this;
   }
 
@@ -143,7 +154,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   /**
    * Return the type that we map the supplied bean to.
    */
-  private Class<?> suppliedType(Class<?> suppliedClass) {
+  private static Class<?> superOf(Class<?> suppliedClass) {
     Class<?> suppliedSuper = suppliedClass.getSuperclass();
     if (Object.class.equals(suppliedSuper)) {
       return suppliedClass;

@@ -44,10 +44,10 @@ class DBeanMap {
 
   @SuppressWarnings("rawtypes")
   private void addSuppliedBean(SuppliedBean supplied) {
-    Class<?> suppliedType = supplied.type();
+    Type suppliedType = supplied.type();
     DContextEntryBean entryBean = DContextEntryBean.of(supplied.bean(), supplied.name(), SUPPLIED);
     beans.computeIfAbsent(suppliedType.getTypeName(), s -> new DContextEntry()).add(entryBean);
-    for (Class<?> anInterface : suppliedType.getInterfaces()) {
+    for (Class<?> anInterface : supplied.interfaces()) {
       beans.computeIfAbsent(anInterface.getTypeName(), s -> new DContextEntry()).add(entryBean);
     }
   }
@@ -60,7 +60,7 @@ class DBeanMap {
   }
 
   @SuppressWarnings("unchecked")
-  <T> T get(Class<T> type, String name) {
+  <T> T get(Type type, String name) {
     DContextEntry entry = beans.get(type.getTypeName());
     if (entry == null) {
       return null;
@@ -71,8 +71,7 @@ class DBeanMap {
   /**
    * Return all bean instances matching the given type.
    */
-  @SuppressWarnings("rawtypes")
-  List<Object> all(Class type) {
+  List<Object> all(Type type) {
     DContextEntry entry = beans.get(type.getTypeName());
     return entry != null ? entry.all() : Collections.emptyList();
   }
