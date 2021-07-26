@@ -5,6 +5,7 @@ import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Write the source code for the bean.
@@ -46,11 +47,25 @@ class SimpleBeanWriter {
     if (isRequestScopedController()) {
       writeRequestCreate();
     } else {
+      writeGenericTypeFields();
       writeStaticFactoryMethod();
       writeStaticFactoryBeanMethods();
     }
     writeClassEnd();
     writer.close();
+  }
+
+  private void writeGenericTypeFields() {
+    final Set<GenericType> genericTypes = beanReader.getGenericTypes();
+    if (genericTypes != null && !genericTypes.isEmpty()) {
+      for (GenericType type : genericTypes) {
+        writer.append("  public static final Type TYPE_%s = new GenericType<", type.shortName());
+        type.writeShort(writer);
+        writer.append(">(){};").eol();
+      }
+      writer.eol();
+    }
+
   }
 
   private void writeRequestCreate() {

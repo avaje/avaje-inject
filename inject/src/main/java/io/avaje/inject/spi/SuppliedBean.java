@@ -43,14 +43,15 @@ public class SuppliedBean<B> {
   /**
    * Return the dependency injection target type.
    */
-  public Class<B> getType() {
+  public Class<B> type() {
     return type;
   }
 
   /**
    * Return the bean instance to use (often a test double or mock).
    */
-  public B getBean() {
+  @SuppressWarnings("unchecked")
+  public B bean() {
     if (bean == null) {
       // should extract a SPI for this
       bean = Mockito.mock(type);

@@ -44,8 +44,8 @@ class DBeanMap {
 
   @SuppressWarnings("rawtypes")
   private void addSuppliedBean(SuppliedBean supplied) {
-    Class<?> suppliedType = supplied.getType();
-    DContextEntryBean entryBean = DContextEntryBean.of(supplied.getBean(), supplied.name(), SUPPLIED);
+    Class<?> suppliedType = supplied.type();
+    DContextEntryBean entryBean = DContextEntryBean.of(supplied.bean(), supplied.name(), SUPPLIED);
     beans.computeIfAbsent(suppliedType.getTypeName(), s -> new DContextEntry()).add(entryBean);
     for (Class<?> anInterface : suppliedType.getInterfaces()) {
       beans.computeIfAbsent(anInterface.getTypeName(), s -> new DContextEntry()).add(entryBean);

@@ -3,6 +3,8 @@ package org.example.coffee;
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
 import org.example.coffee.core.DuperPump;
+import org.example.coffee.generic.HazRepo;
+import org.example.coffee.generic.HazRepo$DI;
 import org.example.coffee.list.BSomei;
 import org.example.coffee.list.Somei;
 import org.example.coffee.provider.AProv;
@@ -13,6 +15,7 @@ import org.example.iface.IfaseBase;
 import org.example.inherit.*;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,7 +67,7 @@ public class CoffeeMakerTest {
 
       final BeanEntry entry = bsomeEntry.get();
       assertThat(entry.qualifierName()).isEqualTo("b");
-      assertThat(entry.keys()).containsExactly(can(BSomei.class), can(Somei.class));
+      assertThat(entry.keys()).containsExactly(name(BSomei.class), name(Somei.class));
       assertThat(entry.type()).isEqualTo(BSomei.class);
       assertThat(entry.priority()).isEqualTo(0);
       assertThat(entry.bean()).isEqualTo(context.get(Somei.class, "b"));
@@ -83,8 +86,8 @@ public class CoffeeMakerTest {
         .findFirst().orElse(null);
 
       assertThat(inhEntry.keys())
-        .containsExactly(can(InhOne.class), can(InhBase.class), can(InhBaseBase.class),
-          can(InhBaseIface2.class), can(InhBaseIface3.class), can(InhBaseIface.class));
+        .containsExactly(name(InhOne.class), name(InhBase.class), name(InhBaseBase.class),
+          name(InhBaseIface2.class), name(InhBaseIface3.class), name(InhBaseIface.class));
     }
   }
 
@@ -99,7 +102,22 @@ public class CoffeeMakerTest {
         .findFirst().orElse(null);
 
       assertThat(extendIfaces.keys())
-        .containsExactly(can(ConcreteExtend.class), can(IfaceExtend.class), can(IfaseBase.class));
+        .containsExactly(name(ConcreteExtend.class), name(IfaceExtend.class), name(IfaseBase.class));
+    }
+  }
+
+  @Test
+  public void beanScope_all_includesGenericInterfaces() {
+    try (BeanScope context = BeanScope.newBuilder().build()) {
+
+      final List<BeanEntry> beanEntries = context.all();
+
+      final BeanEntry hazRepo = beanEntries.stream()
+        .filter(e -> e.hasKey(HazRepo.class))
+        .findFirst().orElse(null);
+
+      assertThat(hazRepo.keys())
+        .containsExactly(name(HazRepo.class), name(HazRepo$DI.TYPE_RepositoryHazLong));
     }
   }
 
@@ -114,12 +132,12 @@ public class CoffeeMakerTest {
         .findFirst().orElse(null);
 
       assertThat(extendIfaces.keys())
-        .containsExactly(can(AProvProvider.class), can(AProv.class));
+        .containsExactly(name(AProvProvider.class), name(AProv.class));
     }
   }
 
-  String can(Class<?> cls) {
-    return cls.getCanonicalName();
+  String name(Type cls) {
+    return cls.getTypeName();
   }
 
 }

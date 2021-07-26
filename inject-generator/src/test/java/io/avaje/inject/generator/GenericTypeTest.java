@@ -76,6 +76,12 @@ public class GenericTypeTest {
   }
 
   @Test
+  public void shortName() {
+    assertThat(GenericType.parse("java.lang.List<Foo>").shortName()).isEqualTo("ListFoo");
+    assertThat(GenericType.parse("java.lang.List<org.Foo<com.Bar>>").shortName()).isEqualTo("ListFooBar");
+  }
+
+  @Test
   public void write() {
 
     GenericType type = new GenericTypeParser("my.exa.Repo<my.a.Prov<my.b.Haz>,my.a.Key<java.util.UUID>>").parse();

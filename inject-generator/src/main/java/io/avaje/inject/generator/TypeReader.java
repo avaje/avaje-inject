@@ -15,6 +15,7 @@ class TypeReader {
   private final Set<String> importTypes;
   private final TypeExtendsReader extendsReader;
   private final TypeAnnotationReader annotationReader;
+  private Set<GenericType> genericTypes;
   private String typesRegister;
 
   TypeReader(TypeElement beanType, ProcessingContext context, Set<String> importTypes, boolean factory) {
@@ -73,6 +74,10 @@ class TypeReader {
     return extendsReader.getConstructor();
   }
 
+  Set<GenericType> getGenericTypes() {
+    return genericTypes;
+  }
+
   void process() {
     extendsReader.process(forBean);
     if (forBean) {
@@ -89,11 +94,7 @@ class TypeReader {
     if (annotationReader.hasQualifierName()) {
       return annotationReader.getQualifierName();
     }
-    String derivedName = extendsReader.getQualifierName();
-    if (derivedName != null) {
-      return derivedName;
-    }
-    return derivedName;
+    return extendsReader.getQualifierName();
   }
 
   private void initRegistrationTypes() {
@@ -104,7 +105,17 @@ class TypeReader {
     if (forBean) {
       appender.add(annotationReader.getAnnotationTypes());
     }
+    this.genericTypes = appender.genericTypes();
     this.typesRegister = appender.asString();
   }
 
+  void extraImports(Set<String> importTypes) {
+    if (!genericTypes.isEmpty()) {
+      importTypes.add(Constants.TYPE);
+      importTypes.add(Constants.GENERICTYPE);
+      for (GenericType type : genericTypes) {
+        type.addImports(importTypes);
+      }
+    }
+  }
 }

@@ -1,8 +1,8 @@
 package io.avaje.inject;
 
-import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.Builder;
 import io.avaje.inject.spi.EnrichBean;
+import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.SuppliedBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

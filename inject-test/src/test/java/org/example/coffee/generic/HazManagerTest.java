@@ -12,7 +12,6 @@ public class HazManagerTest {
 
   @Test
   public void find_when_allWired() {
-
     HazManager hazManager = ApplicationScope.get(HazManager.class);
     Haz haz = hazManager.find(42L);
 
@@ -20,8 +19,7 @@ public class HazManagerTest {
   }
 
   @Test
-  public void fin_with_mockHaz() {
-
+  public void find_with_mockHaz() {
     try (BeanScope context = BeanScope.newBuilder()
       .forTesting()
       .withMock(HazRepo.class)
@@ -36,7 +34,6 @@ public class HazManagerTest {
 
   @Test
   public void find_with_stubHazUsingMockito() {
-
     try (BeanScope context = BeanScope.newBuilder()
       .forTesting()
       .withMock(HazRepo.class, hazRepo -> {
@@ -53,7 +50,6 @@ public class HazManagerTest {
 
   @Test
   public void find_with_testDouble() {
-
     TDHazRepo testDouble = new TDHazRepo();
 
     try (BeanScope context = BeanScope.newBuilder()
