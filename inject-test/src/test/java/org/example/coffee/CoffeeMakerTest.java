@@ -9,9 +9,7 @@ import org.example.coffee.list.BSomei;
 import org.example.coffee.list.Somei;
 import org.example.coffee.provider.AProv;
 import org.example.coffee.provider.AProvProvider;
-import org.example.iface.ConcreteExtend;
-import org.example.iface.IfaceExtend;
-import org.example.iface.IfaseBase;
+import org.example.iface.*;
 import org.example.inherit.*;
 import org.junit.jupiter.api.Test;
 
@@ -120,6 +118,22 @@ public class CoffeeMakerTest {
         .containsExactly(name(HazRepo.class), name(HazRepo$DI.TYPE_RepositoryHazLong));
     }
   }
+
+  @Test
+  public void beanScope_all_interfaceWithParameter() {
+    try (BeanScope context = BeanScope.newBuilder().build()) {
+
+      final List<BeanEntry> beanEntries = context.all();
+
+      final BeanEntry hazRepo = beanEntries.stream()
+        .filter(e -> e.hasKey(MyParam.class))
+        .findFirst().orElse(null);
+
+      assertThat(hazRepo.keys())
+        .containsExactly(name(MyParam.class), name(IfaceParam.class), name(IfaceParamParent.class));
+    }
+  }
+
 
   @Test
   public void beanScope_all_provider() {
