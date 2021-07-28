@@ -43,6 +43,14 @@ class GenericType {
   }
 
   /**
+   * Parse and return the main type if it contains a type parameter like {@code <T>}.
+   */
+  static String removeParameter(String raw) {
+    final GenericType type = parse(raw);
+    return type.hasParameter() ? type.getMainType() : raw;
+  }
+
+  /**
    * Parse and return as GenericType or null if it is not generic.
    */
   static GenericType maybe(String paramType) {
@@ -52,6 +60,21 @@ class GenericType {
   @Override
   public String toString() {
     return raw != null ? raw : mainType + '<' + params + '>';
+  }
+
+  /**
+   * Return true if the type contains a type parameter like {@code <T>}.
+   */
+  boolean hasParameter() {
+    if (mainType != null && mainType.indexOf('.') == -1) {
+      return true;
+    }
+    for (GenericType param : params) {
+      if (param.hasParameter()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   void addImports(Set<String> importTypes) {

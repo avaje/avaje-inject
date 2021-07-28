@@ -16,7 +16,6 @@ class GenericTypeParser {
   }
 
   GenericType parse() {
-
     int len = raw.length();
     for (int i = 0; i < len; i++) {
       char ch = raw.charAt(i);

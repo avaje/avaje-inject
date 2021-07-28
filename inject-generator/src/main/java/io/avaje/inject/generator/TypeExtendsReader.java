@@ -124,6 +124,7 @@ class TypeExtendsReader {
       } else if (Constants.AUTO_CLOSEABLE.equals(rawType) || Constants.IO_CLOSEABLE.equals(rawType)) {
         closeable = true;
       } else {
+        rawType = GenericType.removeParameter(rawType);
         if (qualifierName == null) {
           final String iShortName = Util.shortName(rawType);
           if (beanSimpleName.endsWith(iShortName)) {

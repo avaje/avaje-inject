@@ -8,24 +8,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class GenericTypeTest {
+class GenericTypeTest {
 
   @Test
-  public void isGeneric() {
+  void isGeneric() {
 
     assertFalse(GenericType.isGeneric("java.lang.List"));
     assertTrue(GenericType.isGeneric("java.lang.List<Foo>"));
   }
 
   @Test
-  public void maybe() {
+  void maybe() {
 
     assertThat(GenericType.maybe("java.lang.List<Foo>").getMainType()).isEqualTo("java.lang.List");
     assertThat(GenericType.maybe("java.lang.List")).isNull();
   }
 
   @Test
-  public void parse() {
+  void parse() {
 
     GenericType type = new GenericTypeParser("my.exa.Repo<T,K>").parse();
 
@@ -36,8 +36,7 @@ public class GenericTypeTest {
   }
 
   @Test
-  public void parse_withParams() {
-
+  void parse_withParams() {
 
     GenericType type = GenericType.parse("my.exa.Repo<my.d.Haz,java.lang.Long>");
 
@@ -48,7 +47,7 @@ public class GenericTypeTest {
   }
 
   @Test
-  public void parse_withExtendsParams() {
+  void parse_withExtendsParams() {
 
     GenericType type = new GenericTypeParser("my.exa.Repo<? extends my.d.Haz,java.lang.Long>").parse();
 
@@ -58,9 +57,8 @@ public class GenericTypeTest {
     assertThat(type.getParams().get(1).getMainType()).isEqualTo("java.lang.Long");
   }
 
-
   @Test
-  public void parse_withNestedParams() {
+  void parse_withNestedParams() {
 
     GenericType type = new GenericTypeParser("my.exa.Repo<my.a.Prov<my.b.Haz>,my.a.Key<java.util.UUID>>").parse();
 
@@ -76,13 +74,29 @@ public class GenericTypeTest {
   }
 
   @Test
-  public void shortName() {
+  void shortName() {
     assertThat(GenericType.parse("java.lang.List<Foo>").shortName()).isEqualTo("ListFoo");
     assertThat(GenericType.parse("java.lang.List<org.Foo<com.Bar>>").shortName()).isEqualTo("ListFooBar");
   }
 
   @Test
-  public void write() {
+  void hasParameter() {
+    assertThat(GenericType.parse("java.lang.List<T>").hasParameter()).isTrue();
+    assertThat(GenericType.parse("java.lang.List<org.Foo<TYPE>").hasParameter()).isTrue();
+    assertThat(GenericType.parse("java.lang.List<org.Foo<com.Bar>>").hasParameter()).isFalse();
+  }
+
+  @Test
+  void removeParameter() {
+    assertThat(GenericType.removeParameter("java.lang.List<T>")).isEqualTo("java.lang.List");
+    assertThat(GenericType.removeParameter("java.lang.List<org.Foo<T>>")).isEqualTo("java.lang.List");
+    assertThat(GenericType.removeParameter("java.lang.List<org.Foo<TYPE>>")).isEqualTo("java.lang.List");
+    assertThat(GenericType.removeParameter("face.FaceParam<T>")).isEqualTo("face.FaceParam");
+    assertThat(GenericType.removeParameter("java.lang.List<org.Foo<com.Bar>>")).isEqualTo("java.lang.List<org.Foo<com.Bar>>");
+  }
+
+  @Test
+  void write() {
 
     GenericType type = new GenericTypeParser("my.exa.Repo<my.a.Prov<my.b.Haz>,my.a.Key<java.util.UUID>>").parse();
 
