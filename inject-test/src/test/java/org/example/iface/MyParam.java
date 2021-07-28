@@ -1,7 +1,7 @@
 package org.example.iface;
 
 
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 
 @Singleton
 public class MyParam<T> implements IfaceParam<T> {
