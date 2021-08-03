@@ -52,6 +52,14 @@ class ScopeInfo {
     this.annotationType = type;
   }
 
+  @Override
+  public String toString() {
+    return "ScopeInfo{" +
+      "name=" + name +
+      ", metaData=" + metaData +
+      '}';
+  }
+
   void details(String name, Element contextElement) {
     if (name == null || name.isEmpty()) {
       final String simpleName = contextElement.getSimpleName().toString();
@@ -83,6 +91,10 @@ class ScopeInfo {
       moduleFullName = modulePackage + "." + moduleShortName;
       moduleFile = context.createWriter(moduleFullName);
     }
+  }
+
+  TypeElement annotationType() {
+    return annotationType;
   }
 
   JavaFileObject moduleFile() {
@@ -267,7 +279,7 @@ class ScopeInfo {
     writer.append("@InjectModule(");
     boolean leadingComma = false;
     if (!provides.isEmpty()) {
-      attributeClasses(leadingComma, writer, "provides", provides);
+      attributeClasses(false, writer, "provides", provides);
       leadingComma = true;
     }
     if (!requires.isEmpty()) {
@@ -357,7 +369,7 @@ class ScopeInfo {
       final ScopeInfo requiredScope = scopes.get(require);
       if (requiredScope != null) {
         if (requiredScope.providesDependency(dependency)) {
-          // context.logWarn("dependency "+dependency+" provided by other scope "+requiredScope.name);
+          // context.logWarn("dependency " + dependency + " provided by other scope " + requiredScope.name);
           return true;
         }
       }
@@ -369,6 +381,9 @@ class ScopeInfo {
    * Return true if this module provides the dependency.
    */
   boolean providesDependency(String dependency) {
+    if (requires.contains(dependency)) {
+      return true;
+    }
     for (MetaData meta : metaData.values()) {
       if (dependency.equals(meta.getType())) {
         return true;

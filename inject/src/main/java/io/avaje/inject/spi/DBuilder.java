@@ -200,6 +200,8 @@ class DBuilder implements Builder {
       if (!beanList.isEmpty()) {
         msg += ". Check @Named or Qualifier being used";
       }
+      msg += ". Check for missing module? [ missing beanScopeBuilder.withModules() ]";
+      msg += ". If it is expected to be externally provided, missing beanScopeBuilder.withBean() ?";
       throw new IllegalStateException(msg);
     }
     return bean;

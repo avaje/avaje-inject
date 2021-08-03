@@ -64,8 +64,17 @@ class AllScopes {
       if (jfo != null) {
         Writer writer = jfo.openWriter();
         for (Data value : scopeAnnotations.values()) {
-          writer.write(value.moduleFullName());
-          writer.write("\n");
+          final String moduleFullName = value.moduleFullName();
+          if (moduleFullName == null) {
+            // an empty module, custom scope with no beans
+            final TypeElement typeElement = value.annotationType();
+            if (typeElement != null) {
+              context.logWarn("Empty module for "+typeElement);
+            }
+          } else {
+            writer.write(moduleFullName);
+            writer.write("\n");
+          }
         }
         writer.close();
       }
@@ -119,6 +128,10 @@ class AllScopes {
 
     String moduleFullName() {
       return scopeInfo.moduleFullName();
+    }
+
+    TypeElement annotationType() {
+      return scopeInfo.annotationType();
     }
   }
 }
