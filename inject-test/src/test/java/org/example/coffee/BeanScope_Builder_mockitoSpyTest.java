@@ -146,6 +146,27 @@ public class BeanScope_Builder_mockitoSpyTest {
     }
   }
 
+  /**
+   * Still matches when only 1 candidate even if the qualifier name doesn't exist.
+   */
+  @Test
+  public void withNamed_when_qualifierNameDoesNotExist_but_onlyOneCandidate() {
+
+    try (BeanScope context = BeanScope.newBuilder()
+      .build()) {
+
+      WidgetUser widgetUser = context.get(WidgetUser.class);
+
+      String val = widgetUser.wid();
+      assertThat(val).isEqualTo("second");
+      Widget widget = context.get(Widget.class);
+
+      // these are the same (secondary only)
+      WidgetSecondary widgetSecondary = context.get(WidgetSecondary.class);
+      assertThat(widget).isSameAs(widgetSecondary);
+    }
+  }
+
   @Test
   public void withMockitoSpy_whenSecondary_expect_spyUsed() {
 

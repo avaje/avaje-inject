@@ -22,7 +22,7 @@ class DContextEntry {
 
   Object get(String name) {
     if (entries.size() == 1) {
-      return entries.get(0).candidate(name);
+      return entries.get(0).getBean();
     }
     return new EntryMatcher(name).match(entries);
   }
