@@ -5,9 +5,6 @@ import io.avaje.inject.InjectModule;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.tools.FileObject;
-import java.io.IOException;
-import java.io.Writer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,39 +47,6 @@ class AllScopes {
     for (Data value : scopeAnnotations.values()) {
       value.write(processingOver);
     }
-    if (processingOver) {
-      writeModuleCustomServicesFile();
-    }
-  }
-
-  private void writeModuleCustomServicesFile() {
-    if (scopeAnnotations.isEmpty()) {
-      return;
-    }
-    try {
-      FileObject jfo = context.createMetaInfModuleCustom();
-      if (jfo != null) {
-        Writer writer = jfo.openWriter();
-        for (Data value : scopeAnnotations.values()) {
-          final String moduleFullName = value.moduleFullName();
-          if (moduleFullName == null) {
-            // an empty module, custom scope with no beans
-            final TypeElement typeElement = value.annotationType();
-            if (typeElement != null) {
-              context.logWarn("Empty module for "+typeElement);
-            }
-          } else {
-            writer.write(moduleFullName);
-            writer.write("\n");
-          }
-        }
-        writer.close();
-      }
-
-    } catch (IOException e) {
-      e.printStackTrace();
-      context.logError("Failed to write services file " + e.getMessage());
-    }
   }
 
   void readModules(List<String> customScopeModules) {
@@ -124,14 +88,6 @@ class AllScopes {
 
     void write(boolean processingOver) {
       scopeInfo.write(processingOver);
-    }
-
-    String moduleFullName() {
-      return scopeInfo.moduleFullName();
-    }
-
-    TypeElement annotationType() {
-      return scopeInfo.annotationType();
     }
   }
 }
