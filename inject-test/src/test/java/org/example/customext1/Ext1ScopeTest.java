@@ -51,9 +51,7 @@ class Ext1ScopeTest {
       .withBean(Ext0iface.class, new If0())
       .withBean(Ext0conc.class, new Ext0conc())
       .withBean(Ext0Other.class, new Ext0Other())
-      .withBean(Ext1iface.class, new If1())
-      .withBean(Ext1conc.class, new Ext1conc())
-      .withModules(new Ext1Module()) //new Ext0Module(),
+      .withModules(new Ext1Module(new If1(), new Ext1conc())) //new Ext0Module(),
       .build();
 
     final Ext1Bean ext1Bean = scope.get(Ext1Bean.class);

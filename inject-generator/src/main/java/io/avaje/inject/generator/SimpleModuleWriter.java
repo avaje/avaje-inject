@@ -3,6 +3,7 @@ package io.avaje.inject.generator;
 import javax.tools.FileObject;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -89,6 +90,9 @@ class SimpleModuleWriter {
     writer.append(CODE_COMMENT_CREATE_CONTEXT).eol();
     writer.append("  @Override").eol();
     writer.append("  public void build(Builder builder) {").eol();
+    if (scopeInfo.addWithBeans()) {
+      writeWithBeans();
+    }
     writer.append("    this.builder = builder;").eol();
     writer.append("    // create beans in order based on constructor dependencies").eol();
     writer.append("    // i.e. \"provides\" followed by \"dependsOn\"").eol();
@@ -136,7 +140,9 @@ class SimpleModuleWriter {
     String custom = scopeInfo.isDefaultScope() ? "" : ".Custom";
     writer.append("public class %s implements Module%s {", shortName, custom).eol().eol();
     scopeInfo.buildFields(writer);
-
+    if (scopeInfo.addModuleConstructor()) {
+      writeConstructor();
+    }
     writer.append("  @Override").eol();
     writer.append("  public Class<?>[] provides() {").eol();
     writer.append("    return provides;").eol();
@@ -145,6 +151,41 @@ class SimpleModuleWriter {
     writer.append("  @Override").eol();
     writer.append("  public Class<?>[] requires() {").eol();
     writer.append("    return requires;").eol();
+    writer.append("  }").eol().eol();
+  }
+
+  private void writeWithBeans() {
+    writer.append("    // register external dependencies").eol();
+    final Map<String,String> dependencies = scopeInfo.constructorDependencies();
+    for (Map.Entry<String, String> entry : dependencies.entrySet()) {
+      writer.append("    builder.withBean(%s.class, %s);", entry.getKey(), entry.getValue()).eol();
+    }
+  }
+
+  private void writeConstructor() {
+    final Map<String,String> dependencies = scopeInfo.constructorDependencies();
+    for (Map.Entry<String, String> entry : dependencies.entrySet()) {
+      writer.append("  private %s %s;", entry.getKey(), entry.getValue()).eol();
+    }
+    writer.eol();
+    writer.append("  /**").eol();
+    writer.append("   * Create providing the external dependencies.").eol();
+    writer.append("   */").eol();
+    writer.append("  public %s(", shortName);
+
+    boolean comma = false;
+    for (Map.Entry<String, String> entry : dependencies.entrySet()) {
+      if (!comma) {
+        comma = true;
+      } else {
+        writer.append(", ");
+      }
+      writer.append(entry.getKey()).append(" ").append(entry.getValue());
+    }
+    writer.append(") {", shortName).eol();
+    for (Map.Entry<String, String> entry : dependencies.entrySet()) {
+      writer.append("    this.%s = %s;", entry.getValue(), entry.getValue()).eol();
+    }
     writer.append("  }").eol().eol();
   }
 

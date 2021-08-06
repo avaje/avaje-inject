@@ -50,6 +50,20 @@ class Util {
     }
   }
 
+  static String initLower(String name) {
+    StringBuilder sb = new StringBuilder(name.length());
+    boolean upper = true;
+    for (char ch : name.toCharArray()) {
+      if (upper && Character.isUpperCase(ch)) {
+        sb.append(Character.toLowerCase(ch));
+      } else {
+        upper = false;
+        sb.append(ch);
+      }
+    }
+    return sb.toString();
+  }
+
   static String shortName(String fullType) {
     int p = fullType.lastIndexOf('.');
     if (p == -1) {

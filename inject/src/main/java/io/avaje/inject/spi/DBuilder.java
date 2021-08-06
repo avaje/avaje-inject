@@ -117,6 +117,12 @@ class DBuilder implements Builder {
   }
 
   @Override
+  public <T> void withBean(Class<T> type, T bean) {
+    next(null, type);
+    beanMap.register(BeanEntry.SUPPLIED, bean);
+  }
+
+  @Override
   public void addPostConstruct(Runnable invoke) {
     postConstruct.add(invoke);
   }

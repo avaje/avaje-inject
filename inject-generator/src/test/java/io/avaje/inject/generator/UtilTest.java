@@ -58,4 +58,12 @@ public class UtilTest {
   void shortMethod() {
     assertThat(Util.shortMethod("foo.bar.processMe")).isEqualTo("bar.processMe");
   }
+
+  @Test
+  void initLower() {
+    assertThat(Util.initLower("URL")).isEqualTo("url");
+    assertThat(Util.initLower("URfoo")).isEqualTo("urfoo");
+    assertThat(Util.initLower("Time")).isEqualTo("time");
+    assertThat(Util.initLower("TiMe")).isEqualTo("tiMe");
+  }
 }

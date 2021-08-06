@@ -69,6 +69,14 @@ public interface Builder {
   <T> T registerSecondary(T bean);
 
   /**
+   * Register the externally provided bean.
+   *
+   * @param type The type of the provided bean.
+   * @param bean The bean instance
+   */
+  <T> void withBean(Class<T> type, T bean);
+
+  /**
    * Add lifecycle PostConstruct method.
    */
   void addPostConstruct(Runnable runnable);
