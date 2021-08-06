@@ -235,11 +235,13 @@ class MethodReader {
     private final String paramType;
     private final GenericType genericType;
     private final boolean nullable;
+    private final String simpleName;
     private int providerIndex;
     private boolean requestParam;
     private String requestParamName;
 
     MethodParam(VariableElement param) {
+      this.simpleName = param.getSimpleName().toString();
       this.named = Util.getNamed(param);
       this.nullable = Util.isNullable(param);
       this.utilType = Util.determineType(param.asType());
@@ -260,8 +262,11 @@ class MethodReader {
       } else if (isProvider()) {
         sb.append(providerParam()).append(".class");
       }
-      if (named != null) {
+      if (named != null && !named.isEmpty()) {
         sb.append(",\"").append(named).append("\"");
+      } else if (!isGenericParam() && utilType.allowsNamedQualifier()) {
+        // implied qualifier name, leading '!' means implied
+        sb.append(",\"!").append(simpleName).append("\"");
       }
       sb.append(")");
       return sb.toString();

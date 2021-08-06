@@ -65,17 +65,12 @@ class DContextEntryBean {
     return flag == BeanEntry.SECONDARY;
   }
 
-  boolean isSupplied(String qualifierName) {
-    return flag == BeanEntry.SUPPLIED && (qualifierName == null || qualifierName.equals(name));
+  boolean isSupplied() {
+    return flag == BeanEntry.SUPPLIED;
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  Object candidate(String qualifierName) {
-    if (qualifierName == null || Objects.equals(name, qualifierName)) {
-      return getBean();
-    } else {
-      return null;
-    }
+  boolean isSupplied(String qualifierName) {
+    return flag == BeanEntry.SUPPLIED && (qualifierName == null || qualifierName.equals(name));
   }
 
   /**

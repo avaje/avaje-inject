@@ -22,7 +22,7 @@ class DContextEntry {
 
   Object get(String name) {
     if (entries.size() == 1) {
-      return entries.get(0).candidate(name);
+      return entries.get(0).getBean();
     }
     return new EntryMatcher(name).match(entries);
   }
@@ -53,12 +53,18 @@ class DContextEntry {
   static class EntryMatcher {
 
     private final String name;
-
+    private final boolean impliedName;
     private DContextEntryBean match;
     private DContextEntryBean ignoredSecondaryMatch;
 
     EntryMatcher(String name) {
-      this.name = name;
+      if (name != null && name.startsWith("!")) {
+        this.name = name.substring(1);
+        this.impliedName = true;
+      } else {
+        this.name = name;
+        this.impliedName = false;
+      }
     }
 
     Object match(List<DContextEntryBean> entries) {
@@ -67,11 +73,27 @@ class DContextEntry {
           checkMatch(entry);
         }
       }
+      if (match == null && impliedName) {
+        // search again as if the implied name wasn't there, name = null
+        for (DContextEntryBean entry : entries) {
+          if (entry.isNameMatch(null)) {
+            checkMatch(entry);
+          }
+        }
+      }
       return candidate();
     }
 
     private void checkMatch(DContextEntryBean entry) {
       if (match == null) {
+        match = entry;
+        return;
+      }
+      if (match.isSupplied()) {
+        // existing supplied match always wins
+        return;
+      } else if (entry.isSupplied()) {
+        // new supplied wins
         match = entry;
         return;
       }
