@@ -5,6 +5,6 @@ import javax.inject.Scope;
 import org.example.custom.LocalExternal;
 
 @Scope
-@InjectModule(requires = {System.class, LocalExternal.class})
+@InjectModule(requires = {LocalExternal.class})
 public @interface MyCustomScope {
 }
