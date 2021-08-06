@@ -1,0 +1,43 @@
+package org.example.autonamed;
+
+import io.avaje.inject.BeanScope;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class MyAutoNameTest {
+
+  @Test
+  void impliedNames_multiple() {
+
+    try (final BeanScope beanScope = BeanScope.newBuilder().build()) {
+
+      final MyAutoB2 myAutoName = beanScope.get(MyAutoB2.class);
+      assertThat(myAutoName.one()).isEqualTo("oneB2");
+      assertThat(myAutoName.two()).isEqualTo("twoB2");
+
+      final MyAutoB2Explicit myAutoB2Explicit = beanScope.get(MyAutoB2Explicit.class);
+      assertThat(myAutoB2Explicit.one()).isEqualTo("oneB2");
+      assertThat(myAutoB2Explicit.two()).isEqualTo("twoB2");
+
+      final MyAutoB2OneImplied myAutoB2OneImplied = beanScope.get(MyAutoB2OneImplied.class);
+      assertThat(myAutoB2OneImplied.one()).isEqualTo("oneB2");
+
+      final MyAutoB2TwoExplicit myAutoB2TwoExplicit = beanScope.get(MyAutoB2TwoExplicit.class);
+      assertThat(myAutoB2TwoExplicit.two()).isEqualTo("twoB2");
+    }
+  }
+
+  @Test
+  void test() {
+
+    try (final BeanScope beanScope = BeanScope.newBuilder().build()) {
+
+      final MyAutoName myAutoName = beanScope.get(MyAutoName.class);
+      assertThat(myAutoName.who()).isEqualTo("one");
+
+      final MyAutoName2 myAutoName2 = beanScope.get(MyAutoName2.class);
+      assertThat(myAutoName2.who()).isEqualTo("one");
+    }
+  }
+}
