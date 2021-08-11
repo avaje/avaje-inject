@@ -266,7 +266,14 @@ class MethodReader {
         sb.append(",\"").append(named).append("\"");
       } else if (!isGenericParam() && utilType.allowsNamedQualifier()) {
         // implied qualifier name, leading '!' means implied
-        sb.append(",\"!").append(simpleName).append("\"");
+        sb.append(",\"!");
+        final String shortName = Util.shortName(paramType);
+        if (simpleName.endsWith(shortName)) {
+          sb.append(simpleName, 0, simpleName.length() - shortName.length());
+        } else {
+          sb.append(simpleName);
+        }
+        sb.append("\"");
       }
       sb.append(")");
       return sb.toString();
