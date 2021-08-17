@@ -1,4 +1,4 @@
-package org.example.custom;
+package org.example.custom.loc;
 
 public interface LocalExternal {
 }

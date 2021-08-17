@@ -4,6 +4,7 @@ import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
 import org.example.MyCustomScope;
 import org.example.coffee.CoffeeMaker;
+import org.example.custom.loc.LocalExternal;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
