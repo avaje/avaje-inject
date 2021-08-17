@@ -2,6 +2,7 @@ package org.example.custom;
 
 import org.example.MyCustomScope;
 import org.example.coffee.CoffeeMaker;
+import org.example.custom.loc.LocalExternal;
 
 @MyCustomScope
 public class FooCustom {

@@ -114,7 +114,7 @@ class SimpleModuleWriter {
     for (String type : factoryImportTypes()) {
       writer.append("import %s;", type).eol();
     }
-    for (String type : ordering.getImportTypes()) {
+    for (String type : scopeInfo.initModuleDependencies(ordering.getImportTypes())) {
       if (Util.validImportType(type)) {
         writer.append("import %s;", type).eol();
       }
@@ -156,14 +156,14 @@ class SimpleModuleWriter {
 
   private void writeWithBeans() {
     writer.append("    // register external dependencies").eol();
-    final Map<String,String> dependencies = scopeInfo.constructorDependencies();
+    final Map<String, String> dependencies = scopeInfo.constructorDependencies();
     for (Map.Entry<String, String> entry : dependencies.entrySet()) {
       writer.append("    builder.withBean(%s.class, %s);", entry.getKey(), entry.getValue()).eol();
     }
   }
 
   private void writeConstructor() {
-    final Map<String,String> dependencies = scopeInfo.constructorDependencies();
+    final Map<String, String> dependencies = scopeInfo.constructorDependencies();
     for (Map.Entry<String, String> entry : dependencies.entrySet()) {
       writer.append("  private %s %s;", entry.getKey(), entry.getValue()).eol();
     }

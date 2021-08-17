@@ -401,18 +401,23 @@ class ScopeInfo {
     return false;
   }
 
-  boolean addModuleConstructor() {
+  Set<String> initModuleDependencies(Set<String> importTypes) {
     if (defaultScope || requires.isEmpty()) {
-      return false;
+      return importTypes;
     }
     for (String require : requires) {
       final ScopeInfo otherScope = scopes.get(require);
       if (otherScope == null) {
+        importTypes.add(require);
         final String type = Util.shortName(require);
         final String var = Util.initLower(type);
         constructorDependencies.put(type, var);
       }
     }
+    return importTypes;
+  }
+
+  boolean addModuleConstructor() {
     return !constructorDependencies.isEmpty();
   }
 
