@@ -181,7 +181,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       this.factories.addAll(includeModules);
       this.suppliedBeans = suppliedBeans;
       for (Module includeModule : includeModules) {
-        moduleNames.add(includeModule.getClass().getTypeName());
+        moduleNames.add(includeModule.getClass().getName());
       }
     }
 
@@ -217,7 +217,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     private void push(FactoryState factory) {
       factory.setPushed();
       factories.add(factory.factory());
-      moduleNames.add(factory.getClass().getTypeName());
+      moduleNames.add(factory.factory().getClass().getName());
     }
 
     /**
