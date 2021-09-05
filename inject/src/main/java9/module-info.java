@@ -7,6 +7,6 @@ module io.avaje.inject {
   requires transitive org.slf4j;
   requires static org.mockito;
 
-  uses io.avaje.inject.spi.BeanContextFactory;
+  uses io.avaje.inject.spi.Module;
 
 }
