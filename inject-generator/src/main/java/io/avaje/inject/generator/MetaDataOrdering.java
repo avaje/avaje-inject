@@ -188,11 +188,11 @@ class MetaDataOrdering {
     return true;
   }
 
-  List<MetaData> getOrdered() {
+  List<MetaData> ordered() {
     return orderedList;
   }
 
-  Set<String> getImportTypes() {
+  Set<String> importTypes() {
     Set<String> importTypes = new TreeSet<>();
     for (MetaData metaData : orderedList) {
       metaData.addImportTypes(importTypes);
