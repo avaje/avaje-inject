@@ -175,7 +175,9 @@ class MetaDataOrdering {
         // check non-provider dependency is satisfied
         ProviderList providerList = providers.get(dependency);
         if (providerList == null) {
-          return scopeInfo.providedByOtherModule(dependency);
+          if (!scopeInfo.providedByOtherModule(dependency)) {
+            return false;
+          }
         } else {
           if (!providerList.isAllWired()) {
             return false;
