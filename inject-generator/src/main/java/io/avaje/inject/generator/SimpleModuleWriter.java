@@ -96,7 +96,7 @@ class SimpleModuleWriter {
     writer.append("    this.builder = builder;").eol();
     writer.append("    // create beans in order based on constructor dependencies").eol();
     writer.append("    // i.e. \"provides\" followed by \"dependsOn\"").eol();
-    for (MetaData metaData : ordering.getOrdered()) {
+    for (MetaData metaData : ordering.ordered()) {
       writer.append("    build_%s();", metaData.getBuildName()).eol();
     }
     writer.append("  }").eol();
@@ -104,7 +104,7 @@ class SimpleModuleWriter {
   }
 
   private void writeBuildMethods() {
-    for (MetaData metaData : ordering.getOrdered()) {
+    for (MetaData metaData : ordering.ordered()) {
       writer.append(metaData.buildMethod(ordering)).eol();
     }
   }
@@ -114,7 +114,7 @@ class SimpleModuleWriter {
     for (String type : factoryImportTypes()) {
       writer.append("import %s;", type).eol();
     }
-    for (String type : scopeInfo.initModuleDependencies(ordering.getImportTypes())) {
+    for (String type : scopeInfo.initModuleDependencies(ordering.importTypes())) {
       if (Util.validImportType(type)) {
         writer.append("import %s;", type).eol();
       }
