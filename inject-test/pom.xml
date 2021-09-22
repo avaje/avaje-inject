@@ -10,8 +10,8 @@
   <artifactId>avaje-inject-test</artifactId>
 
   <properties>
-    <jupiter.version>5.7.1</jupiter.version>
-    <mockito.version>3.9.0</mockito.version>
+    <jupiter.version>5.8.0</jupiter.version>
+    <mockito.version>3.12.4</mockito.version>
   </properties>
 
   <dependencies>
