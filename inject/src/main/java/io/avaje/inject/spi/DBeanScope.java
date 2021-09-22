@@ -13,7 +13,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 class DBeanScope implements BeanScope {
 
-  private static final Logger log = LoggerFactory.getLogger(DBeanScope.class);
+  private static final Logger log = LoggerFactory.getLogger("io.avaje.inject");
 
   private final ReentrantLock lock = new ReentrantLock();
   private final List<Runnable> postConstruct;

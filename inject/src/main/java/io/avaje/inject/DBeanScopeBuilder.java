@@ -16,7 +16,7 @@ import java.util.function.Consumer;
  */
 class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
-  private static final Logger log = LoggerFactory.getLogger(DBeanScopeBuilder.class);
+  private static final Logger log = LoggerFactory.getLogger("io.avaje.inject");
 
   @SuppressWarnings("rawtypes")
   private final List<SuppliedBean> suppliedBeans = new ArrayList<>();
