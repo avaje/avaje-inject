@@ -14,9 +14,9 @@
   <dependencies>
 
     <dependency>
-      <groupId>jakarta.inject</groupId>
+      <groupId>io.avaje</groupId>
       <artifactId>jakarta.inject-api</artifactId>
-      <version>2.0.0</version>
+      <version>1.0</version>
     </dependency>
 
     <dependency>
@@ -64,7 +64,6 @@
               <goal>add-module-info</goal>
             </goals>
             <configuration>
-              <jvmVersion>9</jvmVersion>
               <module>
                 <moduleInfoFile>src/main/java9/module-info.java</moduleInfoFile>
               </module>
