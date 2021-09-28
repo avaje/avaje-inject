@@ -15,7 +15,7 @@ class ScopeInfo {
    * Map to merge the existing meta data with partially compiled code. Keyed by type and qualifier/name.
    */
   private final Map<String, MetaData> metaData = new LinkedHashMap<>();
-  private final Map<String,String> constructorDependencies = new LinkedHashMap<>();
+  private final Map<String, String> constructorDependencies = new LinkedHashMap<>();
   private final List<BeanReader> beanReaders = new ArrayList<>();
   private final Set<String> readBeans = new HashSet<>();
   private final ProcessingContext context;
@@ -421,7 +421,7 @@ class ScopeInfo {
     return !constructorDependencies.isEmpty();
   }
 
-  Map<String,String> constructorDependencies() {
+  Map<String, String> constructorDependencies() {
     return constructorDependencies;
   }
 

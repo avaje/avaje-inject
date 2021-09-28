@@ -92,10 +92,13 @@ public class Processor extends AbstractProcessor {
         context.logError("unexpected type [" + element + "]");
       } else {
         TypeElement typeElement = (TypeElement) element;
+        final ScopeInfo scope = findScope(typeElement);
         if (!factory) {
-          defaultScope.read(typeElement, factory);
+          // will be found via custom scope so effectively ignore additional @Singleton
+          if (scope == null) {
+            defaultScope.read(typeElement, false);
+          }
         } else {
-          final ScopeInfo scope = findScope(typeElement);
           if (scope != null) {
             // context.logWarn("Adding factory to custom scope "+element+" scope: "+scope);
             scope.read(typeElement, true);
