@@ -18,8 +18,8 @@ class DBuilderExtn extends DBuilder {
   private final boolean hasSuppliedBeans;
 
   @SuppressWarnings("rawtypes")
-  DBuilderExtn(BeanScope parent, List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans) {
-    super(parent);
+  DBuilderExtn(BeanScope parent, boolean parentOverride, List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans) {
+    super(parent, parentOverride);
     this.hasSuppliedBeans = (suppliedBeans != null && !suppliedBeans.isEmpty());
     if (hasSuppliedBeans) {
       beanMap.add(suppliedBeans);
@@ -33,7 +33,9 @@ class DBuilderExtn extends DBuilder {
 
   @Override
   public boolean isAddBeanFor(String qualifierName, Type... types) {
-    next(qualifierName, types);
+    if (!super.isAddBeanFor(qualifierName, types)) {
+      return false;
+    }
     if (hasSuppliedBeans) {
       return !beanMap.isSupplied(qualifierName, types);
     }
@@ -44,7 +46,7 @@ class DBuilderExtn extends DBuilder {
    * Potentially enrich the bean prior to registering with context.
    */
   @Override
-  protected  <T> T enrich(T bean, DBeanMap.NextBean next) {
+  protected <T> T enrich(T bean, DBeanMap.NextBean next) {
     EnrichBean<T> enrich = enrichLookup(bean.getClass(), next.name);
     if (enrich != null) {
       return enrich.enrich(bean);

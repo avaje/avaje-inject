@@ -29,6 +29,7 @@ class DBuilder implements Builder {
   protected final DBeanMap beanMap = new DBeanMap();
 
   private final BeanScope parent;
+  private final boolean parentOverride;
 
   /**
    * Debug of the current bean being wired - used in injection errors.
@@ -40,8 +41,9 @@ class DBuilder implements Builder {
    */
   private boolean runningPostConstruct;
 
-  DBuilder(BeanScope parent) {
+  DBuilder(BeanScope parent, boolean parentOverride) {
     this.parent = parent;
+    this.parentOverride = parentOverride;
   }
 
   @Override
@@ -52,6 +54,15 @@ class DBuilder implements Builder {
   @Override
   public boolean isAddBeanFor(String name, Type... types) {
     next(name, types);
+    if (parentOverride || parent == null) {
+      return true;
+    }
+    for (Type type : types) {
+      Object o = parent.get(type, name);
+      if (o != null) {
+        return false;
+      }
+    }
     return true;
   }
 
