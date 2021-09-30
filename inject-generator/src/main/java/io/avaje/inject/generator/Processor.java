@@ -45,13 +45,13 @@ public class Processor extends AbstractProcessor {
     annotations.add(Factory.class.getCanonicalName());
     annotations.add(Singleton.class.getCanonicalName());
     annotations.add(Scope.class.getCanonicalName());
+    annotations.add(Constants.TESTSCOPE);
     annotations.add(Constants.CONTROLLER);
     return annotations;
   }
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-
     Set<? extends Element> controllers = Collections.emptySet();
     TypeElement typeElement = elementUtils.getTypeElement(Constants.CONTROLLER);
     if (typeElement != null) {
@@ -67,7 +67,6 @@ public class Processor extends AbstractProcessor {
     readChangedBeans(beans, false);
     readChangedBeans(controllers, false);
     allScopes.readBeans(roundEnv);
-
     defaultScope.write(roundEnv.processingOver());
     allScopes.write(roundEnv.processingOver());
     return false;
@@ -80,6 +79,17 @@ public class Processor extends AbstractProcessor {
         TypeElement type = (TypeElement) element;
         allScopes.addScopeAnnotation(type);
       }
+    }
+    addTestScope();
+  }
+
+  /**
+   * Add built-in test scope for <code>@TestScope</code> if available.
+   */
+  private void addTestScope() {
+    TypeElement testScopeType = elementUtils.getTypeElement(Constants.TESTSCOPE);
+    if (testScopeType != null) {
+      allScopes.addScopeAnnotation(testScopeType);
     }
   }
 

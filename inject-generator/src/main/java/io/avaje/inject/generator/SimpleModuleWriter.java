@@ -59,7 +59,7 @@ class SimpleModuleWriter {
     this.fullName = scopeInfo.moduleFullName();
   }
 
-  void write(boolean includeServicesFile) throws IOException {
+  void write(ScopeInfo.Type scopeType) throws IOException {
     writer = new Append(createFileWriter());
     writePackage();
     writeStartClass();
@@ -67,14 +67,14 @@ class SimpleModuleWriter {
     writeBuildMethods();
     writeEndClass();
     writer.close();
-    if (includeServicesFile) {
-      writeServicesFile();
+    if (scopeType != ScopeInfo.Type.CUSTOM) {
+      writeServicesFile(scopeType);
     }
   }
 
-  private void writeServicesFile() {
+  private void writeServicesFile(ScopeInfo.Type scopeType) {
     try {
-      FileObject jfo = context.createMetaInfWriter();
+      FileObject jfo = context.createMetaInfWriter(scopeType);
       if (jfo != null) {
         Writer writer = jfo.openWriter();
         writer.write(fullName);
@@ -137,8 +137,8 @@ class SimpleModuleWriter {
     writer.append(CODE_COMMENT_FACTORY, scopeInfo.name(), modulePackage, shortName).eol();
     scopeInfo.buildAtInjectModule(writer);
 
-    String custom = scopeInfo.isDefaultScope() ? "" : ".Custom";
-    writer.append("public class %s implements Module%s {", shortName, custom).eol().eol();
+    String interfaceType = scopeInfo.type().type();
+    writer.append("public class %s implements %s {", shortName, interfaceType).eol().eol();
     scopeInfo.buildFields(writer);
     if (scopeInfo.addModuleConstructor()) {
       writeConstructor();

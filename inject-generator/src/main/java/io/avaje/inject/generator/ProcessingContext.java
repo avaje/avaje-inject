@@ -102,8 +102,9 @@ class ProcessingContext {
     return filer.createSourceFile(cls);
   }
 
-  FileObject createMetaInfWriter() throws IOException {
-    return createMetaInfWriterFor(Constants.META_INF_FACTORY);
+  FileObject createMetaInfWriter(ScopeInfo.Type scopeType) throws IOException {
+    String serviceName = scopeType == ScopeInfo.Type.DEFAULT ? Constants.META_INF_FACTORY : Constants.META_INF_TESTMODULE;
+    return createMetaInfWriterFor(serviceName);
   }
 
   FileObject createMetaInfModuleCustom() throws IOException {

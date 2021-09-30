@@ -27,6 +27,7 @@
     <module>inject</module>
     <module>inject-generator</module>
     <module>inject-test</module>
+    <module>blackbox-test-inject</module>
   </modules>
 </project>
 
