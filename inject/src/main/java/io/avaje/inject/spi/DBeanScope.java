@@ -38,6 +38,11 @@ class DBeanScope implements BeanScope {
   }
 
   @Override
+  public String toString() {
+    return "BeanScope{" + beans + '}';
+  }
+
+  @Override
   public List<BeanEntry> all() {
     IdentityHashMap<DContextEntryBean, DEntry> map = new IdentityHashMap<>();
     if (parent != null) {

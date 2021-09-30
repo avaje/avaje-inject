@@ -28,10 +28,22 @@ class MetaReader {
 
   MetaReader(Object testInstance) {
     this.testInstance = testInstance;
-    final Class<?> cls = testInstance.getClass();
-    for (Field field : cls.getDeclaredFields()) {
+    for (Field field : testInstance.getClass().getDeclaredFields()) {
       readField(field);
     }
+  }
+
+  @Override
+  public String toString() {
+    String s = toStringAppend("mocks:", mocks);
+    s += toStringAppend("spies:", spies);
+    s += toStringAppend("inject:", injection);
+    s += toStringAppend("captors:", captors);
+    return s;
+  }
+
+  private String toStringAppend(String key, List<?> entries) {
+    return entries.isEmpty() ? "" : key + entries + "; ";
   }
 
   List<FieldTarget> mocks() {
@@ -131,9 +143,16 @@ class MetaReader {
       this.field = field;
       this.name = name;
     }
+
+    @Override
+    public String toString() {
+      return field.getName();
+    }
+
     Class<?> type() {
       return field.getType();
     }
+
     String name() {
       return name;
     }

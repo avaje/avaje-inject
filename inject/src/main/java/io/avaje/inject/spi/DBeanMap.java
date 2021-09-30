@@ -21,6 +21,11 @@ class DBeanMap {
   DBeanMap() {
   }
 
+  @Override
+  public String toString() {
+    return "BeanMap{" + beans + '}';
+  }
+
   /**
    * Add to the map of entries.
    */
