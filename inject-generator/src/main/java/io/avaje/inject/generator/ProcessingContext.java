@@ -57,7 +57,7 @@ class ProcessingContext {
   }
 
   String loadMetaInfServices() {
-    final List<String> lines = loadMetaInf(Constants.META_INF_FACTORY);
+    final List<String> lines = loadMetaInf(Constants.META_INF_MODULE);
     return lines.isEmpty() ? null : lines.get(0);
   }
 
@@ -103,7 +103,7 @@ class ProcessingContext {
   }
 
   FileObject createMetaInfWriter(ScopeInfo.Type scopeType) throws IOException {
-    String serviceName = scopeType == ScopeInfo.Type.DEFAULT ? Constants.META_INF_FACTORY : Constants.META_INF_TESTMODULE;
+    String serviceName = scopeType == ScopeInfo.Type.DEFAULT ? Constants.META_INF_MODULE : Constants.META_INF_TESTMODULE;
     return createMetaInfWriterFor(serviceName);
   }
 

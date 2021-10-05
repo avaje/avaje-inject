@@ -125,7 +125,7 @@ class SimpleModuleWriter {
   private Set<String> factoryImportTypes() {
     Set<String> importTypes = new TreeSet<>();
     importTypes.add(Constants.GENERATED);
-    importTypes.add(Constants.BEANCONTEXT);
+    importTypes.add(Constants.BEANSCOPE);
     importTypes.add(Constants.INJECTMODULE);
     importTypes.add(Constants.DEPENDENCYMETA);
     importTypes.add(Constants.MODULE);
