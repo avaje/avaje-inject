@@ -25,6 +25,7 @@ class Constants {
 
   static final String BEANSCOPE = "io.avaje.inject.BeanScope";
   static final String INJECTMODULE = "io.avaje.inject.InjectModule";
+  static final String TESTSCOPE = "io.avaje.inject.test.TestScope";
 
   static final String GENERATED = "io.avaje.inject.spi.Generated";
   static final String BEAN_FACTORY = "io.avaje.inject.spi.BeanFactory";

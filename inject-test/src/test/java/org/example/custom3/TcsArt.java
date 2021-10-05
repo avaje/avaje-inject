@@ -1,6 +1,6 @@
 package org.example.custom3;
 
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 
 @MyThreeScope
 @Singleton
