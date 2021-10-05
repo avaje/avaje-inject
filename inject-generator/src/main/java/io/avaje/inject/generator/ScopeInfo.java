@@ -11,6 +11,29 @@ import java.util.*;
 
 class ScopeInfo {
 
+  enum Type {
+    /**
+     * Default scope.
+     */
+    DEFAULT("Module"),
+    /**
+     * Custom scope.
+     */
+    CUSTOM("Module.Custom"),
+    /**
+     * Built-in Test scope.
+     */
+    TEST("io.avaje.inject.test.TestModule");
+
+    final String type;
+    Type(String type) {
+      this.type = type;
+    }
+    String type() {
+      return type;
+    }
+  }
+
   /**
    * Map to merge the existing meta data with partially compiled code. Keyed by type and qualifier/name.
    */
@@ -190,13 +213,20 @@ class ScopeInfo {
     }
     try {
       SimpleModuleWriter factoryWriter = new SimpleModuleWriter(ordering, context, this);
-      factoryWriter.write(defaultScope);
+      factoryWriter.write(type());
       moduleWritten = true;
     } catch (FilerException e) {
       context.logWarn("FilerException trying to write factory " + e.getMessage());
     } catch (IOException e) {
       context.logError("Failed to write factory " + e.getMessage());
     }
+  }
+
+  /**
+   * Return the type of this scope.
+   */
+  Type type() {
+    return annotationType == null ? Type.DEFAULT : Constants.TESTSCOPE.equals(annotationType.getQualifiedName().toString()) ? Type.TEST : Type.CUSTOM;
   }
 
   /**
@@ -270,7 +300,7 @@ class ScopeInfo {
     mergeMetaData();
     writeBeanHelpers();
     initialiseModule();
-    if (processingOver) {
+    if (processingOver && !metaData.isEmpty()) {
       writeModule();
     }
   }

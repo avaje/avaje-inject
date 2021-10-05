@@ -27,7 +27,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private final Set<Module> includeModules = new LinkedHashSet<>();
 
   private BeanScope parent;
-
+  private boolean parentOverride;
   private boolean shutdownHook;
 
   /**
@@ -85,7 +85,13 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   @Override
   public BeanScopeBuilder withParent(BeanScope parent) {
+    return withParent(parent, true);
+  }
+
+  @Override
+  public BeanScopeBuilder withParent(BeanScope parent, boolean parentOverride) {
     this.parent = parent;
+    this.parentOverride = parentOverride;
     return this;
   }
 
@@ -144,7 +150,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         " Refer to https://avaje.io/inject#gradle");
     }
     log.debug("building with modules {}", moduleNames);
-    Builder builder = Builder.newBuilder(suppliedBeans, enrichBeans, parent);
+    Builder builder = Builder.newBuilder(suppliedBeans, enrichBeans, parent, parentOverride);
     for (Module factory : factoryOrder.factories()) {
       factory.build(builder);
     }

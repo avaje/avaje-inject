@@ -12,6 +12,11 @@ class DContextEntry {
 
   private final List<DContextEntryBean> entries = new ArrayList<>(5);
 
+  @Override
+  public String toString() {
+    return String.valueOf(entries);
+  }
+
   List<DContextEntryBean> entries() {
     return entries;
   }

@@ -25,8 +25,13 @@ class AllScopes {
   }
 
   ScopeInfo addScopeAnnotation(TypeElement type) {
+    String key = type.getQualifiedName().toString();
+    Data existing = scopeAnnotations.get(key);
+    if (existing != null) {
+      return existing.scopeInfo;
+    }
     final Data data = new Data(type, context, this);
-    scopeAnnotations.put(type.getQualifiedName().toString(), data);
+    scopeAnnotations.put(key, data);
     return data.scopeInfo;
   }
 

@@ -35,6 +35,15 @@ class DContextEntryBean {
     this.flag = flag;
   }
 
+  @Override
+  public String toString() {
+    return "Bean{" +
+      "source=" + source +
+      ", name='" + name + '\'' +
+      ", flag=" + flag +
+      '}';
+  }
+
   DEntry entry() {
     return new DEntry(name, flag, getBean());
   }

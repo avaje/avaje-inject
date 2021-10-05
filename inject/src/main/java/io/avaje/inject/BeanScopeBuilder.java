@@ -163,6 +163,16 @@ public interface BeanScopeBuilder {
   BeanScopeBuilder withParent(BeanScope parent);
 
   /**
+   * Use the given BeanScope as the parent additionally specifying if beans
+   * added will effectively override beans that exist in the parent scope.
+   *
+   * @param parent         The BeanScope that acts as the parent
+   * @param parentOverride When false do not add beans that already exist on the parent.
+   *                       When true add beans regardless of whether they exist in the parent scope.
+   */
+  BeanScopeBuilder withParent(BeanScope parent, boolean parentOverride);
+
+  /**
    * Extend the builder to support testing using mockito with
    * <code>withMock()</code> and <code>withSpy()</code> methods.
    *
