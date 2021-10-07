@@ -2,6 +2,8 @@ package org.example.autonamed;
 
 import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
+import org.example.iface.Some;
+
 import javax.inject.Named;
 
 @Factory
