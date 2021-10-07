@@ -9,7 +9,7 @@
 
   <groupId>io.avaje</groupId>
   <artifactId>avaje-inject-parent</artifactId>
-  <version>6.13-SNAPSHOT</version>
+  <version>6.13</version>
   <packaging>pom</packaging>
   <name>avaje inject parent</name>
   <description>parent pom for avaje inject library</description>
@@ -27,7 +27,7 @@
     <module>inject</module>
     <module>inject-generator</module>
     <module>inject-test</module>
-    <module>blackbox-test-inject</module>
+<!--    <module>blackbox-test-inject</module>-->
   </modules>
 </project>
 
