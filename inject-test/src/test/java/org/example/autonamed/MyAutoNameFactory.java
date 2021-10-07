@@ -3,9 +3,28 @@ package org.example.autonamed;
 import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
 import jakarta.inject.Named;
+import org.example.iface.Some;
 
 @Factory
 public class MyAutoNameFactory {
+
+  @Named("wild")
+  @Bean
+  MyGeneric<?> genericWildcard() {
+    return new DMyGeneric<>();
+  }
+
+  @Named("genericString")
+  @Bean
+  MyGeneric<String> genericString() {
+    return new DMyGeneric<>();
+  }
+
+  @Named("genericOther")
+  @Bean
+  MyGeneric<Some> genericWithSomeType() {
+    return new DMyGeneric<>();
+  }
 
   @Bean
   AutoIface one() {
@@ -45,6 +64,14 @@ public class MyAutoNameFactory {
     @Override
     public String who() {
       return name;
+    }
+  }
+
+  static class DMyGeneric<T> implements MyGeneric<T> {
+
+    @Override
+    public T obtain() {
+      return null;
     }
   }
 }

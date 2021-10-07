@@ -17,6 +17,7 @@ class MethodReader {
   private final String factoryType;
   private final String methodName;
   private final String returnTypeRaw;
+  private final GenericType genericType;
   private final String shortName;
   private final boolean isVoid;
   private final List<MethodParam> params = new ArrayList<>();
@@ -40,19 +41,21 @@ class MethodReader {
     String raw = returnMirror.toString();
     if (Util.isOptional(raw)) {
       optionalType = true;
-      returnTypeRaw = Util.extractOptionalType(raw);
+      returnTypeRaw = GenericType.trimWildcard(Util.extractOptionalType(raw));
     } else {
       optionalType = false;
-      returnTypeRaw = raw;
+      returnTypeRaw = GenericType.trimWildcard(raw);
     }
-    this.shortName = Util.shortName(returnTypeRaw);
+    this.genericType = GenericType.parse(returnTypeRaw);
+    String topType = genericType.topType();
+    this.shortName = Util.shortName(topType);
     this.factoryType = beanType.getQualifiedName().toString();
     this.factoryShortName = Util.shortName(factoryType);
-    this.isVoid = Util.isVoid(returnTypeRaw);
+    this.isVoid = Util.isVoid(topType);
     String initMethod = (bean == null) ? null : bean.initMethod();
     String destroyMethod = (bean == null) ? null : bean.destroyMethod();
     this.name = (named == null) ? null : named.value().toLowerCase();
-    TypeElement returnElement = context.element(returnTypeRaw);
+    TypeElement returnElement = context.element(topType);
     if (returnElement == null) {
       this.typeReader = null;
       this.initMethod = initMethod;
@@ -164,7 +167,7 @@ class MethodReader {
       param.addImports(importTypes);
     }
     if (isFactory) {
-      importTypes.add(returnTypeRaw);
+      genericType.addImports(importTypes);
     }
     if (optionalType) {
       importTypes.add(Constants.OPTIONAL);

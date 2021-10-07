@@ -9,6 +9,17 @@ import java.util.Set;
  */
 class GenericType {
 
+  /**
+   * Trim off generic wildcard from the raw type if present.
+   */
+  static String trimWildcard(String rawType) {
+    if (rawType.endsWith("<?>")) {
+      return rawType.substring(0, rawType.length() - 3);
+    } else {
+      return rawType;
+    }
+  }
+
   private final String raw;
   private String mainType;
 
@@ -39,6 +50,10 @@ class GenericType {
    * Parse and return as GenericType.
    */
   static GenericType parse(String raw) {
+    raw = trimWildcard(raw);
+    if (raw.indexOf('<') == -1) {
+      return new GenericType(raw);
+    }
     return new GenericTypeParser(raw).parse();
   }
 
@@ -87,8 +102,8 @@ class GenericType {
     }
   }
 
-  private boolean includeInImports(String type) {
-    return !type.startsWith("java.lang.") && type.contains(".");
+  private static boolean includeInImports(String type) {
+    return type != null && !type.startsWith("java.lang.") && type.contains(".");
   }
 
   /**
@@ -126,10 +141,15 @@ class GenericType {
   }
 
   private String trimExtends() {
-    if (mainType.startsWith("? extends ")) {
-      return mainType.substring(10);
+    String type = topType();
+    if (type != null &&  type.startsWith("? extends ")) {
+      return type.substring(10);
     }
-    return mainType;
+    return type;
+  }
+
+  String topType() {
+    return (mainType != null) ? mainType : raw;
   }
 
   /**

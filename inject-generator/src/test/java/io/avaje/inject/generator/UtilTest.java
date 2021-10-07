@@ -66,4 +66,15 @@ public class UtilTest {
     assertThat(Util.initLower("Time")).isEqualTo("time");
     assertThat(Util.initLower("TiMe")).isEqualTo("tiMe");
   }
+
+  @Test
+  void trimGenerics() {
+    assertThat(Util.trimGenerics("foo.bar.ProcessMe<java.lang.String>")).isEqualTo("foo.bar.ProcessMe");
+    assertThat(Util.trimGenerics("foo.bar.ProcessMe")).isEqualTo("foo.bar.ProcessMe");
+  }
+
+  @Test
+  void trimMethod_when_genericType() {
+    assertThat(Util.trimMethod("foo.bar.ProcessMe<java.lang.String>")).isEqualTo("bar_ProcessMe");
+  }
 }

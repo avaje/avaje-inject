@@ -3,30 +3,29 @@ package io.avaje.inject.generator;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class GenericTypeTest {
 
   @Test
   void isGeneric() {
-
     assertFalse(GenericType.isGeneric("java.lang.List"));
     assertTrue(GenericType.isGeneric("java.lang.List<Foo>"));
+    assertTrue(GenericType.isGeneric("java.lang.List<?>"));
   }
 
   @Test
   void maybe() {
-
     assertThat(GenericType.maybe("java.lang.List<Foo>").getMainType()).isEqualTo("java.lang.List");
     assertThat(GenericType.maybe("java.lang.List")).isNull();
   }
 
   @Test
   void parse() {
-
     GenericType type = new GenericTypeParser("my.exa.Repo<T,K>").parse();
 
     assertThat(type.getMainType()).isEqualTo("my.exa.Repo");
@@ -36,8 +35,50 @@ class GenericTypeTest {
   }
 
   @Test
-  void parse_withParams() {
+  void parse_basic() {
+    GenericType type = GenericType.parse("my.exa.Repo");
+    assertThat(type.shortName()).isEqualTo("Repo");
+    assertThat(type.topType()).isEqualTo("my.exa.Repo");
+    assertThat(type.getMainType()).isNull();
+    assertThat(type.getParams()).isEmpty();
 
+    Set<String> importSet = new HashSet<>();
+    type.addImports(importSet);
+    assertThat(importSet).hasSize(1);
+    assertThat(importSet).containsOnly("my.exa.Repo");
+  }
+
+  @Test
+  void parse_genericWildcard() {
+    GenericType type = GenericType.parse("my.exa.Repo<?>");
+    assertThat(type.shortName()).isEqualTo("Repo");
+    assertThat(type.topType()).isEqualTo("my.exa.Repo");
+    assertThat(type.getMainType()).isNull();
+    assertThat(type.getParams()).isEmpty();
+
+    Set<String> importSet = new HashSet<>();
+    type.addImports(importSet);
+    assertThat(importSet).hasSize(1);
+    assertThat(importSet).containsOnly("my.exa.Repo");
+  }
+
+  @Test
+  void parse_withParam() {
+    GenericType type = GenericType.parse("my.exa.Repo<my.Other>");
+    assertThat(type.shortName()).isEqualTo("RepoOther");
+    assertThat(type.topType()).isEqualTo("my.exa.Repo");
+    assertThat(type.getMainType()).isEqualTo("my.exa.Repo");
+    assertThat(type.getParams()).hasSize(1);
+    assertThat(type.getParams().get(0).getMainType()).isEqualTo("my.Other");
+
+    Set<String> importSet = new HashSet<>();
+    type.addImports(importSet);
+    assertThat(importSet).hasSize(2);
+    assertThat(importSet).contains("my.exa.Repo", "my.Other");
+  }
+
+  @Test
+  void parse_withParams() {
     GenericType type = GenericType.parse("my.exa.Repo<my.d.Haz,java.lang.Long>");
 
     assertThat(type.getMainType()).isEqualTo("my.exa.Repo");
@@ -48,7 +89,6 @@ class GenericTypeTest {
 
   @Test
   void parse_withExtendsParams() {
-
     GenericType type = new GenericTypeParser("my.exa.Repo<? extends my.d.Haz,java.lang.Long>").parse();
 
     assertThat(type.getMainType()).isEqualTo("my.exa.Repo");
@@ -59,7 +99,6 @@ class GenericTypeTest {
 
   @Test
   void parse_withNestedParams() {
-
     GenericType type = new GenericTypeParser("my.exa.Repo<my.a.Prov<my.b.Haz>,my.a.Key<java.util.UUID>>").parse();
 
     assertThat(type.getMainType()).isEqualTo("my.exa.Repo");
@@ -96,8 +135,14 @@ class GenericTypeTest {
   }
 
   @Test
-  void write() {
+  void trimWildcard() {
+    assertEquals("my.exa.Repo", GenericType.trimWildcard("my.exa.Repo<?>"));
+    assertEquals("my.exa.Repo", GenericType.trimWildcard("my.exa.Repo"));
+    assertEquals("my.exa.Repo<my.Other>", GenericType.trimWildcard("my.exa.Repo<my.Other>"));
+  }
 
+  @Test
+  void write() {
     GenericType type = new GenericTypeParser("my.exa.Repo<my.a.Prov<my.b.Haz>,my.a.Key<java.util.UUID>>").parse();
 
     StringWriter stringWriter = new StringWriter();
