@@ -7,6 +7,24 @@ import javax.inject.Named;
 @Factory
 public class MyAutoNameFactory {
 
+  @Named("wild")
+  @Bean
+  MyGeneric<?> genericWildcard() {
+    return new DMyGeneric<>();
+  }
+
+  @Named("genericString")
+  @Bean
+  MyGeneric<String> genericString() {
+    return new DMyGeneric<>();
+  }
+
+  @Named("genericOther")
+  @Bean
+  MyGeneric<Some> genericWithSomeType() {
+    return new DMyGeneric<>();
+  }
+
   @Bean
   AutoIface one() {
     return new DAutoIface("one");
@@ -45,6 +63,14 @@ public class MyAutoNameFactory {
     @Override
     public String who() {
       return name;
+    }
+  }
+
+  static class DMyGeneric<T> implements MyGeneric<T> {
+
+    @Override
+    public T obtain() {
+      return null;
     }
   }
 }

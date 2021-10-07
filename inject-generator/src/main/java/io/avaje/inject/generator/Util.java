@@ -27,6 +27,7 @@ class Util {
   }
 
   static String shortMethod(String method) {
+    method = trimGenerics(method);
     int p = method.lastIndexOf('.');
     if (p > -1) {
       p = method.lastIndexOf('.', p - 1);
@@ -35,6 +36,14 @@ class Util {
       }
     }
     return method;
+  }
+
+  static String trimGenerics(String type) {
+    int i = type.indexOf('<');
+    if (i == -1) {
+      return type;
+    }
+    return type.substring(0, i);
   }
 
   static String packageOf(String cls) {
