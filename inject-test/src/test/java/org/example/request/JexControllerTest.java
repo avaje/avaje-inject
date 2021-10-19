@@ -5,6 +5,8 @@ import io.avaje.jex.Context;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.util.NoSuchElementException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class JexControllerTest {
@@ -12,7 +14,7 @@ class JexControllerTest {
   @Test
   void uses_factory_taking_context() {
 
-    assertNull(ApplicationScope.get(JexController.class));
+    assertThrows(NoSuchElementException.class, () -> ApplicationScope.get(JexController.class));
 
     final JexController$Factory factory = ApplicationScope.get(JexController$Factory.class);
     final Context context = Mockito.mock(Context.class);

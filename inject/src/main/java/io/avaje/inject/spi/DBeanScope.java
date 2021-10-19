@@ -3,6 +3,8 @@ package io.avaje.inject.spi;
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.Priority;
+import io.avaje.lang.NonNullApi;
+import io.avaje.lang.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +13,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
+@NonNullApi
 class DBeanScope implements BeanScope {
 
   private static final Logger log = LoggerFactory.getLogger("io.avaje.inject");
@@ -58,25 +61,28 @@ class DBeanScope implements BeanScope {
 
   @Override
   public <T> T get(Class<T> type) {
-    return get(type, null);
+    return getByType(type, null);
   }
 
   @Override
-  public <T> T get(Class<T> type, String name) {
+  public <T> T get(Class<T> type, @Nullable String name) {
     return getByType(type, name);
   }
 
   @Override
-  public <T> T get(Type type, String name) {
+  public <T> T get(Type type, @Nullable String name) {
     return getByType(type, name);
   }
 
-  private  <T> T getByType(Type type, String name) {
+  private  <T> T getByType(Type type, @Nullable String name) {
     final T bean = beans.get(type, name);
     if (bean != null) {
       return bean;
     }
-    return (parent == null) ? null : parent.get(type, name);
+    if (parent == null) {
+      throw new NoSuchElementException("No bean found for type: " + type + " name: " + name);
+    }
+    return parent.get(type, name);
   }
 
   @SuppressWarnings("unchecked")

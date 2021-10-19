@@ -1,6 +1,7 @@
 package io.avaje.inject;
 
 import io.avaje.inject.spi.Module;
+import io.avaje.lang.NonNullApi;
 
 import java.lang.reflect.Type;
 import java.util.function.Consumer;
@@ -25,6 +26,7 @@ import java.util.function.Consumer;
  *
  * }</pre>
  */
+@NonNullApi
 public interface BeanScopeBuilder {
 
   /**

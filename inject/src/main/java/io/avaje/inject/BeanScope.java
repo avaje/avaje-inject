@@ -1,5 +1,8 @@
 package io.avaje.inject;
 
+import io.avaje.lang.NonNullApi;
+import io.avaje.lang.Nullable;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -71,6 +74,7 @@ import java.util.List;
  *
  * }</pre>
  */
+@NonNullApi
 public interface BeanScope extends AutoCloseable {
 
   /**
@@ -113,6 +117,7 @@ public interface BeanScope extends AutoCloseable {
    * }</pre>
    *
    * @param type an interface or bean type
+   * @throws java.util.NoSuchElementException When no matching bean is found
    */
   <T> T get(Class<T> type);
 
@@ -128,16 +133,18 @@ public interface BeanScope extends AutoCloseable {
    *
    * @param type an interface or bean type
    * @param name the name qualifier of a specific bean
+   * @throws java.util.NoSuchElementException When no matching bean is found
    */
-  <T> T get(Class<T> type, String name);
+  <T> T get(Class<T> type, @Nullable String name);
 
   /**
    * Return a single bean given the generic type and name.
    *
    * @param type The generic type
    * @param name the name qualifier of a specific bean
+   * @throws java.util.NoSuchElementException When no matching bean is found
    */
-  <T> T get(Type type, String name);
+  <T> T get(Type type, @Nullable String name);
 
   /**
    * Return the list of beans that have an annotation.

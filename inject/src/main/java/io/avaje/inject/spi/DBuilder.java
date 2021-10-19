@@ -58,9 +58,11 @@ class DBuilder implements Builder {
       return true;
     }
     for (Type type : types) {
-      Object o = parent.get(type, name);
-      if (o != null) {
+      try {
+        parent.get(type, name);
         return false;
+      } catch (NoSuchElementException e) {
+        // ignore
       }
     }
     return true;

@@ -4,6 +4,7 @@ import io.avaje.inject.spi.Builder;
 import io.avaje.inject.spi.EnrichBean;
 import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.SuppliedBean;
+import io.avaje.lang.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +68,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  public <D> BeanScopeBuilder withBean(String name, Class<D> type, D bean) {
+  public <D> BeanScopeBuilder withBean(@Nullable String name, Class<D> type, D bean) {
     suppliedBeans.add(SuppliedBean.of(name, type, bean));
     return this;
   }
@@ -78,7 +79,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  public <D> BeanScopeBuilder withBean(String name, Type type, D bean) {
+  public <D> BeanScopeBuilder withBean(@Nullable String name, Type type, D bean) {
     suppliedBeans.add(SuppliedBean.ofType(name, type, bean));
     return this;
   }
@@ -109,7 +110,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     return withMock(type, null, consumer);
   }
 
-  private <D> BeanScopeBuilder.ForTesting withMock(Class<D> type, String name, Consumer<D> consumer) {
+  private <D> BeanScopeBuilder.ForTesting withMock(Class<D> type, @Nullable String name, @Nullable Consumer<D> consumer) {
     suppliedBeans.add(SuppliedBean.of(name, type, null, consumer));
     return this;
   }
@@ -128,7 +129,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     return spy(type, null, consumer);
   }
 
-  private <D> BeanScopeBuilder.ForTesting spy(Class<D> type, String name, Consumer<D> consumer) {
+  private <D> BeanScopeBuilder.ForTesting spy(Class<D> type, @Nullable String name, @Nullable Consumer<D> consumer) {
     enrichBeans.add(new EnrichBean<>(type, name, consumer));
     return this;
   }
@@ -213,7 +214,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       }
     }
 
-    private boolean isEmpty(Class<?>[] values) {
+    private boolean isEmpty(@Nullable Class<?>[] values) {
       return values == null || values.length == 0;
     }
 
@@ -268,7 +269,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         for (FactoryState factory : queue) {
           sb.append("Module [").append(factory.getClass()).append("] has unsatisfied dependencies on modules:");
           for (Class<?> depModuleName : factory.requires()) {
-            if (!moduleNames.contains(depModuleName)) {
+            if (!moduleNames.contains(depModuleName.getName())) {
               sb.append(String.format(" [%s]", depModuleName));
             }
           }
