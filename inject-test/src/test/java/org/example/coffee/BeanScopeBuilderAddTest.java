@@ -6,7 +6,10 @@ import io.avaje.inject.spi.Module;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.util.NoSuchElementException;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 
 public class BeanScopeBuilderAddTest {
@@ -21,8 +24,7 @@ public class BeanScopeBuilderAddTest {
       .withModules(new SillyModule())
       .build()) {
 
-      CoffeeMaker coffeeMaker = context.get(CoffeeMaker.class);
-      assertThat(coffeeMaker).isNull();
+      assertThrows(NoSuchElementException.class, () -> context.get(CoffeeMaker.class));
     }
   }
 

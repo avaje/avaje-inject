@@ -13,9 +13,11 @@ import org.example.coffee.secondary.WidgetSecondary;
 import org.example.coffee.secondary.WidgetUser;
 import org.junit.jupiter.api.Test;
 
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class BeanScope_Builder_mockitoSpyTest {
@@ -183,8 +185,7 @@ public class BeanScope_Builder_mockitoSpyTest {
       // someImpl has higher precedence than the Secondary
       assertThat(result).isEqualTo("SomeImpl");
 
-      SomeImpl someImpl = context.get(SomeImpl.class);
-      assertThat(someImpl).isNull();
+      assertThrows(NoSuchElementException.class, () -> context.get(SomeImpl.class));
       SomeImplBean someImplBean = context.get(SomeImplBean.class);
       assertThat(something).isNotSameAs(someImplBean);
     }

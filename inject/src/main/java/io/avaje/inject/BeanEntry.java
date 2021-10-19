@@ -1,5 +1,7 @@
 package io.avaje.inject;
 
+import io.avaje.lang.NonNullApi;
+
 import java.util.Set;
 
 /**
@@ -7,6 +9,7 @@ import java.util.Set;
  *
  * @see BeanScope#all()
  */
+@NonNullApi
 public interface BeanEntry {
 
   /**

@@ -1,16 +1,18 @@
 package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanEntry;
+import io.avaje.lang.NonNullApi;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+@NonNullApi
 class DEntry implements BeanEntry {
 
   private final String qualifierName;
   private final int priority;
   private final Object bean;
-  private Set<String> keys = new LinkedHashSet<>();
+  private final Set<String> keys = new LinkedHashSet<>();
 
   DEntry(String qualifierName, int priority, Object bean) {
     this.qualifierName = qualifierName;
