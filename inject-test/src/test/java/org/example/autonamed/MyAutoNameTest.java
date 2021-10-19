@@ -47,6 +47,12 @@ class MyAutoNameTest {
       assertThat(generic3).isNotNull();
       assertThat(genericWild).isNotSameAs(generic2);
       assertThat(generic2).isNotSameAs(generic3);
+
+      final MyAutoNameFactory factory = beanScope.get(MyAutoNameFactory.class);
+      assertThat(factory.wiredSome()).isNotNull();
+      assertThat(factory.wiredWild()).isNotNull();
+      assertThat(factory.wiredWild2()).isNotNull();
+      assertThat(factory.wiredWild2()).isSameAs(factory.wiredWild());
     }
   }
 }

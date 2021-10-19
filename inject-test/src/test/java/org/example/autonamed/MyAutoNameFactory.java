@@ -8,6 +8,21 @@ import org.example.iface.Some;
 @Factory
 public class MyAutoNameFactory {
 
+  private MyGeneric<?> wiredWild;
+  private MyGeneric<?> wiredWild2;
+  private MyGeneric<Some> wiredSome;
+
+  MyGeneric<?> wiredWild() {
+    return wiredWild;
+  }
+  MyGeneric<?> wiredWild2() {
+    return wiredWild2;
+  }
+
+  MyGeneric<Some> wiredSome() {
+    return wiredSome;
+  }
+
   @Named("wild")
   @Bean
   MyGeneric<?> genericWildcard() {
@@ -24,6 +39,21 @@ public class MyAutoNameFactory {
   @Bean
   MyGeneric<Some> genericWithSomeType() {
     return new DMyGeneric<>();
+  }
+
+  @Bean
+  void someGenericDependency(@Named("wild") MyGeneric wild) {
+    this.wiredWild = wild;
+  }
+
+  @Bean
+  void someGenericDependency2(@Named("wild") MyGeneric<?> wild2) {
+    this.wiredWild2 = wild2;
+  }
+
+  @Bean
+  void someOtherGenericDependency(@Named("genericOther") MyGeneric<Some> some) {
+    this.wiredSome = some;
   }
 
   @Bean

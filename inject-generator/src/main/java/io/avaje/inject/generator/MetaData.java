@@ -174,8 +174,6 @@ class MetaData {
         if (providerMeta != null) {
           final GenericType type = GenericType.parse(depend);
           sb.append(", ").append(providerMeta.shortType).append("$DI.provider").append(type.shortName()).append("(builder)");
-        } else {
-          sb.append("UnknownProvider??");
         }
       }
     }
