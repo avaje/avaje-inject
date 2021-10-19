@@ -92,7 +92,7 @@ class MethodReader {
     List<String> dependsOn = new ArrayList<>(params.size() + 1);
     dependsOn.add(factoryType);
     for (MethodParam param : params) {
-      dependsOn.add(param.paramType);
+      dependsOn.add(GenericType.trimWildcard(param.paramType));
     }
     metaData.setDependsOn(dependsOn);
     metaData.setProvides(new ArrayList<>());
@@ -122,7 +122,7 @@ class MethodReader {
       if (i > 0) {
         sb.append(", ");
       }
-      sb.append(params.get(i).builderGetDependency("builder"));
+      sb.append(params.get(i).builderGetDependency("builder", true));
     }
     sb.append(");");
     return sb.toString();
@@ -252,9 +252,9 @@ class MethodReader {
       this.genericType = GenericType.maybe(paramType);
     }
 
-    String builderGetDependency(String builderName) {
+    String builderGetDependency(String builderName, boolean forFactory) {
       StringBuilder sb = new StringBuilder();
-      if (isGenericParam()) {
+      if (!forFactory && isGenericParam()) {
         // passed as provider to build method
         sb.append("prov").append(providerIndex).append(".get(");
       } else {
@@ -264,6 +264,8 @@ class MethodReader {
         sb.append(Util.shortName(paramType)).append(".class");
       } else if (isProvider()) {
         sb.append(providerParam()).append(".class");
+      } else if (forFactory) {
+        sb.append(Util.shortName(genericType.topType())).append(".class");
       }
       if (named != null && !named.isEmpty()) {
         sb.append(",\"").append(named).append("\"");
