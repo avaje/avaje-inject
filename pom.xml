@@ -9,7 +9,7 @@
 
   <groupId>io.avaje</groupId>
   <artifactId>avaje-inject-parent</artifactId>
-  <version>6.14</version>
+  <version>6.15</version>
   <packaging>pom</packaging>
   <name>avaje inject parent</name>
   <description>parent pom for avaje inject library</description>
@@ -20,7 +20,7 @@
   </scm>
 
   <properties>
-    <nexus.staging.autoReleaseAfterClose>true</nexus.staging.autoReleaseAfterClose>
+    <nexus.staging.autoReleaseAfterClose>false</nexus.staging.autoReleaseAfterClose>
   </properties>
 
   <modules>
