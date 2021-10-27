@@ -1,8 +1,11 @@
 package io.avaje.inject.generator;
 
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -16,7 +19,7 @@ class SimpleModuleWriter {
     "/**\n" +
       " * Generated source - avaje inject module for %s.\n" +
       " * \n" +
-      " * With JPMS Java module system this generated class should be explicitly\n" +
+      " * With Java module system this generated class should be explicitly\n" +
       " * registered in module-info via a <code>provides</code> clause like:\n" +
       " * \n" +
       " * <pre>{@code\n" +
@@ -38,8 +41,15 @@ class SimpleModuleWriter {
       "   * Creates all the beans in order based on constructor dependencies.\n" +
       "   * The beans are registered into the builder along with callbacks for\n" +
       "   * field injection, method injection and lifecycle support.\n" +
-      "   * <p>\n" +
       "   */";
+
+  private static final String CLASSES_COMMENT =
+    "  /**\n" +
+    "   * Return public classes of the beans that would be registered by this module.\n" +
+    "   * <p>\n" +
+    "   * This method allows code to use reflection to inspect the modules classes \n" +
+    "   * before the module is wired. This method is not required for DI wiring.\n" +
+    "   */";
 
   private final ProcessingContext context;
   private final String modulePackage;
@@ -63,6 +73,7 @@ class SimpleModuleWriter {
     writer = new Append(createFileWriter());
     writePackage();
     writeStartClass();
+    writeClassesMethod();
     writeBuildMethod();
     writeBuildMethods();
     writeEndClass();
@@ -84,6 +95,36 @@ class SimpleModuleWriter {
       e.printStackTrace();
       context.logError("Failed to write services file " + e.getMessage());
     }
+  }
+
+  private void writeClassesMethod() {
+    Set<String> allClasses = distinctPublicClasses();
+    writer.append(CLASSES_COMMENT).eol();
+    writer.append("  public static Class<?>[] classes() {").eol();
+    writer.append("    return new Class<?>[]{").eol();
+    for (String rawType : allClasses) {
+      writer.append("      %s.class,", rawType).eol();
+    }
+    writer.append("    };").eol();
+    writer.append("  }").eol().eol();
+  }
+
+  /**
+   * Return the distinct set of public classes that are dependency types.
+   */
+  private Set<String> distinctPublicClasses() {
+    Set<String> publicClasses = new LinkedHashSet<>();
+    for (MetaData metaData : ordering.ordered()) {
+      String rawType = metaData.getType();
+      if (!"void".equals(rawType)) {
+        String type = GenericType.parse(rawType).topType();
+        TypeElement element = context.element(type);
+        if (element != null && element.getModifiers().contains(Modifier.PUBLIC)) {
+          publicClasses.add(type);
+        }
+      }
+    }
+    return publicClasses;
   }
 
   private void writeBuildMethod() {

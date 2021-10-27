@@ -4,7 +4,10 @@ import io.avaje.inject.BeanScope;
 import org.example.custom2.*;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,5 +46,21 @@ class ParentScopeTest {
     // dependency wired from parent
     assertThat(blue).isNotNull();
     assertThat(blue.getDependency()).isSameAs(ocsThree);
+  }
+
+  @Test
+  void module_classes() {
+    Class<?>[] classes = MyThreeModule.classes();
+    Set<Class<?>> asSet = new HashSet<>(Arrays.asList(classes));
+
+    assertThat(asSet).contains(
+      org.example.custom3.TcsFactory.class,
+      org.example.custom3.TcsCart.class,
+      org.example.custom3.TcsGreen.class,
+      org.example.custom3.TcsBlue.class,
+      org.example.custom3.TcsBart.class,
+      org.example.custom3.TcsArt.class,
+      org.example.custom3.TcsRed.class,
+      org.example.custom3.TcsA.class);
   }
 }
