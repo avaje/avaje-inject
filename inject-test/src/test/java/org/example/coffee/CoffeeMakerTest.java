@@ -20,10 +20,10 @@ import java.util.Optional;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CoffeeMakerTest {
+class CoffeeMakerTest {
 
   @Test
-  public void makeIt_via_SystemContext() {
+  void makeIt_via_SystemContext() {
     try (BeanScope context = BeanScope.newBuilder().build()) {
       String makeIt = context.get(CoffeeMaker.class).makeIt();
       assertThat(makeIt).isEqualTo("done");
@@ -34,7 +34,7 @@ public class CoffeeMakerTest {
   }
 
   @Test
-  public void makeIt_via_BootContext_withNoShutdownHook() {
+  void makeIt_via_BootContext_withNoShutdownHook() {
     try (BeanScope context = BeanScope.newBuilder()
       .withShutdownHook(false)
       .build()) {
@@ -45,7 +45,7 @@ public class CoffeeMakerTest {
   }
 
   @Test
-  public void beanScope_all() {
+  void beanScope_all() {
     try (BeanScope context = BeanScope.newBuilder().build()) {
       String makeIt = context.get(CoffeeMaker.class).makeIt();
       assertThat(makeIt).isEqualTo("done");
@@ -65,7 +65,7 @@ public class CoffeeMakerTest {
 
       final BeanEntry entry = bsomeEntry.get();
       assertThat(entry.qualifierName()).isEqualTo("b");
-      assertThat(entry.keys()).containsExactly(name(BSomei.class), name(Somei.class));
+      assertThat(entry.keys()).containsExactlyInAnyOrder(name(BSomei.class), name(Somei.class));
       assertThat(entry.type()).isEqualTo(BSomei.class);
       assertThat(entry.priority()).isEqualTo(0);
       assertThat(entry.bean()).isEqualTo(context.get(Somei.class, "b"));
@@ -74,7 +74,7 @@ public class CoffeeMakerTest {
   }
 
   @Test
-  public void beanScope_all_superClasses() {
+  void beanScope_all_superClasses() {
     try (BeanScope context = BeanScope.newBuilder().build()) {
 
       final List<BeanEntry> beanEntries = context.all();
@@ -90,7 +90,7 @@ public class CoffeeMakerTest {
   }
 
   @Test
-  public void beanScope_all_interfaces() {
+  void beanScope_all_interfaces() {
     try (BeanScope context = BeanScope.newBuilder().build()) {
 
       final List<BeanEntry> beanEntries = context.all();
@@ -105,7 +105,7 @@ public class CoffeeMakerTest {
   }
 
   @Test
-  public void beanScope_all_includesGenericInterfaces() {
+  void beanScope_all_includesGenericInterfaces() {
     try (BeanScope context = BeanScope.newBuilder().build()) {
 
       final List<BeanEntry> beanEntries = context.all();
@@ -120,7 +120,7 @@ public class CoffeeMakerTest {
   }
 
   @Test
-  public void beanScope_all_interfaceWithParameter() {
+  void beanScope_all_interfaceWithParameter() {
     try (BeanScope context = BeanScope.newBuilder().build()) {
 
       final List<BeanEntry> beanEntries = context.all();
@@ -134,9 +134,8 @@ public class CoffeeMakerTest {
     }
   }
 
-
   @Test
-  public void beanScope_all_provider() {
+  void beanScope_all_provider() {
     try (BeanScope context = BeanScope.newBuilder().build()) {
 
       final List<BeanEntry> beanEntries = context.all();
