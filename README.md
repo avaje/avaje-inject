@@ -1,3 +1,5 @@
+[![Build](https://github.com/avaje/avaje-inject/actions/workflows/build.yml/badge.svg)](https://github.com/avaje/avaje-inject/actions/workflows/build.yml)
+
 # [avaje-inject](https://avaje.io/inject)
 APT based dependency injection for server side developers - https://avaje.io/inject
 
