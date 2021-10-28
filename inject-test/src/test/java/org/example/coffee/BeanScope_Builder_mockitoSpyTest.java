@@ -20,10 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-public class BeanScope_Builder_mockitoSpyTest {
+class BeanScope_Builder_mockitoSpyTest {
 
   @Test
-  public void withBeans_asMocks() {
+  void withBeans_asMocks() {
 
     Pump pump = mock(Pump.class);
     Grinder grinder = mock(Grinder.class);
@@ -47,7 +47,7 @@ public class BeanScope_Builder_mockitoSpyTest {
   }
 
   @Test
-  public void withMockitoSpy_noSetup_expect_spyUsed() {
+  void withMockitoSpy_noSetup_expect_spyUsed() {
 
     try (BeanScope context = BeanScope.newBuilder()
       .forTesting()
@@ -64,7 +64,7 @@ public class BeanScope_Builder_mockitoSpyTest {
   }
 
   @Test
-  public void withMockitoSpy_postLoadSetup_expect_spyUsed() {
+  void withMockitoSpy_postLoadSetup_expect_spyUsed() {
 
     try (BeanScope context = BeanScope.newBuilder()
       .forTesting()
@@ -88,7 +88,7 @@ public class BeanScope_Builder_mockitoSpyTest {
   }
 
   @Test
-  public void withMockitoSpy_expect_spyUsed() {
+  void withMockitoSpy_expect_spyUsed() {
 
     try (BeanScope context = BeanScope.newBuilder()
       .forTesting()
@@ -112,7 +112,7 @@ public class BeanScope_Builder_mockitoSpyTest {
   }
 
   @Test
-  public void withMockitoSpy_whenPrimary_expect_spyUsed() {
+  void withMockitoSpy_whenPrimary_expect_spyUsed() {
 
     try (BeanScope context = BeanScope.newBuilder()
       .forTesting()
@@ -128,7 +128,7 @@ public class BeanScope_Builder_mockitoSpyTest {
   }
 
   @Test
-  public void withMockitoSpy_whenOnlySecondary_expect_spyUsed() {
+  void withMockitoSpy_whenOnlySecondary_expect_spyUsed() {
 
     try (BeanScope context = BeanScope.newBuilder()
       .forTesting()
@@ -152,7 +152,7 @@ public class BeanScope_Builder_mockitoSpyTest {
    * Still matches when only 1 candidate even if the qualifier name doesn't exist.
    */
   @Test
-  public void withNamed_when_qualifierNameDoesNotExist_but_onlyOneCandidate() {
+  void withNamed_when_qualifierNameDoesNotExist_but_onlyOneCandidate() {
 
     try (BeanScope context = BeanScope.newBuilder()
       .build()) {
@@ -170,7 +170,7 @@ public class BeanScope_Builder_mockitoSpyTest {
   }
 
   @Test
-  public void withMockitoSpy_whenSecondary_expect_spyUsed() {
+  void withMockitoSpy_whenSecondary_expect_spyUsed() {
 
     try (BeanScope context = BeanScope.newBuilder()
       .forTesting()
@@ -192,7 +192,7 @@ public class BeanScope_Builder_mockitoSpyTest {
   }
 
   @Test
-  public void withMockitoMock_expect_mockUsed() {
+  void withMockitoMock_expect_mockUsed() {
 
     AtomicReference<Grinder> mock = new AtomicReference<>();
 

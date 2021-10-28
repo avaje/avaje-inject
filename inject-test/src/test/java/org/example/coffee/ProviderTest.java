@@ -7,13 +7,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ProviderTest {
+class ProviderTest {
 
   @Test
-  public void test() {
-
+  void test() {
     try (BeanScope context = BeanScope.newBuilder().build()) {
-
       ProvOther bean = context.get(ProvOther.class);
       String other = bean.other();
       assertThat(other).isEqualTo("mush mush beans");

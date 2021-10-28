@@ -12,10 +12,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 
-public class BeanScopeBuilderAddTest {
+class BeanScopeBuilderAddTest {
 
   @Test
-  public void withModules_excludingThisOne() {
+  void withModules_excludingThisOne() {
     TDPump testDoublePump = new TDPump();
     try (BeanScope context = BeanScope.newBuilder()
       .withBeans(testDoublePump)
@@ -47,7 +47,7 @@ public class BeanScopeBuilderAddTest {
   }
 
   @Test
-  public void withModules_includeThisOne() {
+  void withModules_includeThisOne() {
 
     TDPump testDoublePump = new TDPump();
 
@@ -65,7 +65,7 @@ public class BeanScopeBuilderAddTest {
   }
 
   @Test
-  public void withBean_expect_testDoublePumpUsed() {
+  void withBean_expect_testDoublePumpUsed() {
 
     TDPump testDoublePump = new TDPump();
 
@@ -82,7 +82,7 @@ public class BeanScopeBuilderAddTest {
   }
 
   @Test
-  public void withMockitoMock_expect_mockUsed() {
+  void withMockitoMock_expect_mockUsed() {
 
     Pump mock = Mockito.mock(Pump.class);
 
