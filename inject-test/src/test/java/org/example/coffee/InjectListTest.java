@@ -9,10 +9,10 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class InjectListTest {
+class InjectListTest {
 
   @Test
-  public void test() {
+  void test() {
     try (BeanScope context = BeanScope.newBuilder().build()) {
       CombinedSomei bean = context.get(CombinedSomei.class);
       List<String> somes = bean.lotsOfSomes();
@@ -21,7 +21,7 @@ public class InjectListTest {
   }
 
   @Test
-  public void test_set() {
+  void test_set() {
     try (BeanScope context = BeanScope.newBuilder().build()) {
       CombinedSetSomei bean = context.get(CombinedSetSomei.class);
       List<String> somes = bean.lotsOfSomes();

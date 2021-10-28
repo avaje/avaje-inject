@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class ExtensionExampleTest {
+class ExtensionExampleTest {
 
   @Test
-  public void checkForCompilerWarningsOnly_notATestThatRuns() {
+  void checkForCompilerWarningsOnly_notATestThatRuns() {
 
     ExtensionExample extensionExample = new ExtensionExample(asList(Widget.class, SEmailer.class), asList(SomeStore.class));
     BeanScope context = extensionExample.build();

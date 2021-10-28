@@ -6,11 +6,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class FactoryTest {
+class FactoryTest {
 
   @Test
-  public void test() {
-
+  void test() {
     try (BeanScope context = BeanScope.newBuilder().build()) {
       BFact bean = context.get(BFact.class);
       String b = bean.b();
