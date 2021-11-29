@@ -92,8 +92,8 @@ class BeanReader {
     return factoryMethods;
   }
 
-  List<String> getInterfaces() {
-    return typeReader.getInterfaces();
+  List<String> getProvides() {
+    return typeReader.getProvides();
   }
 
   Set<GenericType> getGenericTypes() {

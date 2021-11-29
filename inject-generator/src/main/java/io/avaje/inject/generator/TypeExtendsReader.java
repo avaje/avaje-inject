@@ -72,6 +72,14 @@ class TypeExtendsReader {
     return interfaceTypes;
   }
 
+  List<String> getProvides() {
+    List<String> all = new ArrayList<>(extendsTypes.size() + interfaceTypes.size());
+    all.addAll(extendsTypes);
+    all.addAll(interfaceTypes);
+    all.remove(baseTypeRaw);
+    return all;
+  }
+
   boolean isCloseable() {
     return closeable;
   }
