@@ -38,8 +38,8 @@ class TypeReader {
     return typesRegister;
   }
 
-  List<String> getInterfaces() {
-    return extendsReader.getInterfaceTypes();
+  List<String> getProvides() {
+    return extendsReader.getProvides();
   }
 
   boolean isClosable() {

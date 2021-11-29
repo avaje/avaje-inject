@@ -100,7 +100,7 @@ class MetaData {
   }
 
   void update(BeanReader beanReader) {
-    this.provides = beanReader.getInterfaces();
+    this.provides = beanReader.getProvides();
     this.dependsOn = beanReader.getDependsOn();
   }
 
