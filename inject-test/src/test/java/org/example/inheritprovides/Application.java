@@ -1,7 +1,7 @@
 package org.example.inheritprovides;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.List;
 
 @Singleton
