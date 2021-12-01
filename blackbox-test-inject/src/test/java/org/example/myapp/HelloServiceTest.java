@@ -16,6 +16,7 @@ class HelloServiceTest {
     BeanScope beanScope = BeanScope.newBuilder().build();
 
     HelloService helloService = beanScope.get(HelloService.class);
+    assertEquals("hello+AppHelloData", helloService.bazz("foo", 42));
     assertEquals("hello+AppHelloData", helloService.hello());
   }
 }

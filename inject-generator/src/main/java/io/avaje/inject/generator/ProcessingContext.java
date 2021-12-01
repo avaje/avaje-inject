@@ -28,6 +28,7 @@ class ProcessingContext {
   private final Filer filer;
   private final Elements elementUtils;
   private final Types typeUtils;
+  private final AllAspectTargets allAspectTargets;
 
   ProcessingContext(ProcessingEnvironment processingEnv) {
     this.processingEnv = processingEnv;
@@ -35,6 +36,7 @@ class ProcessingContext {
     this.filer = processingEnv.getFiler();
     this.elementUtils = processingEnv.getElementUtils();
     this.typeUtils = processingEnv.getTypeUtils();
+    this.allAspectTargets = new AllAspectTargets(this);
   }
 
   /**
@@ -133,5 +135,9 @@ class ProcessingContext {
 
   PackageElement getPackageOf(Element element) {
     return elementUtils.getPackageOf(element);
+  }
+
+  AspectTarget findAspectTarget(String target) {
+    return allAspectTargets.findTarget(target);
   }
 }
