@@ -28,6 +28,7 @@ class ProcessingContext {
   private final Filer filer;
   private final Elements elementUtils;
   private final Types typeUtils;
+  private final Set<String> uniqueModuleNames = new HashSet<>();
 
   ProcessingContext(ProcessingEnvironment processingEnv) {
     this.processingEnv = processingEnv;
@@ -133,5 +134,15 @@ class ProcessingContext {
 
   PackageElement getPackageOf(Element element) {
     return elementUtils.getPackageOf(element);
+  }
+
+  void addModule(String moduleFullName) {
+    if (moduleFullName != null) {
+      uniqueModuleNames.add(moduleFullName);
+    }
+  }
+
+  boolean isDuplicateModule(String moduleFullName) {
+    return uniqueModuleNames.contains(moduleFullName);
   }
 }
