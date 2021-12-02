@@ -4,7 +4,10 @@ import io.avaje.inject.InjectModule;
 import io.avaje.inject.spi.DependencyMeta;
 
 import javax.annotation.processing.FilerException;
-import javax.lang.model.element.*;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Name;
+import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.util.*;
@@ -183,8 +186,17 @@ class ScopeInfo {
     if (!moduleInitialised) {
       try {
         initialiseName(MetaTopPackage.of(metaData.values()));
+        context.addModule(moduleFullName);
         moduleInitialised = true;
       } catch (IOException e) {
+        if (context.isDuplicateModule(moduleFullName)) {
+          String msg = "Attempting to create 2 modules both called " + moduleFullName
+            + ". This can occur when a custom scope (named from it's annotation) has a name clash with" +
+            " the default module which can be named from the package. Look to resolve this by either " +
+            "changing the name of the custom scope annotation, or explicitly naming the default scope " +
+            "using @InjectModule(name), or changing the top level package used by the default scope";
+          throw new IllegalStateException(msg);
+        }
         context.logError("Failed to create module filer " + e.getMessage());
       }
     }
