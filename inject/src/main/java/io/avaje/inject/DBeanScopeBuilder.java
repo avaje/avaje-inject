@@ -5,8 +5,6 @@ import io.avaje.inject.spi.EnrichBean;
 import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.SuppliedBean;
 import io.avaje.lang.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -16,8 +14,6 @@ import java.util.function.Consumer;
  * Build a bean scope with options for shutdown hook and supplying test doubles.
  */
 class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
-
-  private static final Logger log = LoggerFactory.getLogger("io.avaje.inject");
 
   @SuppressWarnings("rawtypes")
   private final List<SuppliedBean> suppliedBeans = new ArrayList<>();
@@ -150,7 +146,6 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         " Review IntelliJ Settings / Build / Build tools / Gradle - 'Build and run using' value and set that to 'Gradle'. " +
         " Refer to https://avaje.io/inject#gradle");
     }
-    log.debug("building with modules {}", moduleNames);
     Builder builder = Builder.newBuilder(suppliedBeans, enrichBeans, parent, parentOverride);
     for (Module factory : factoryOrder.factories()) {
       factory.build(builder);

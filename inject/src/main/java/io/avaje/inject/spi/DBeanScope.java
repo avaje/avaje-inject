@@ -5,8 +5,6 @@ import io.avaje.inject.BeanScope;
 import io.avaje.inject.Priority;
 import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -15,8 +13,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 @NonNullApi
 class DBeanScope implements BeanScope {
-
-  private static final Logger log = LoggerFactory.getLogger("io.avaje.inject");
 
   private final ReentrantLock lock = new ReentrantLock();
   private final List<Runnable> postConstruct;
@@ -152,7 +148,7 @@ class DBeanScope implements BeanScope {
   DBeanScope start() {
     lock.lock();
     try {
-      log.trace("firing postConstruct");
+      Log.trace("firing postConstruct");
       for (Runnable invoke : postConstruct) {
         invoke.run();
       }
@@ -172,12 +168,12 @@ class DBeanScope implements BeanScope {
       if (!closed) {
         // we only allow one call to preDestroy
         closed = true;
-        log.trace("firing preDestroy");
+        Log.trace("firing preDestroy");
         for (AutoCloseable closeable : preDestroy) {
           try {
             closeable.close();
           } catch (Exception e) {
-            log.error("Error during PreDestroy lifecycle method", e);
+            Log.error("Error during PreDestroy lifecycle method", e);
           }
         }
       }
