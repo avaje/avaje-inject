@@ -407,11 +407,18 @@ class ScopeInfo {
     if (scopes.providedByDefaultModule(dependency)) {
       return true;
     }
+    return providesDependencyRecursive(dependency);
+  }
+
+  boolean providesDependencyRecursive(String dependency) {
+    if (providesDependency(dependency)) {
+      return true;
+    }
     // look for required scopes ...
     for (String require : requires) {
       final ScopeInfo requiredScope = scopes.get(require);
       if (requiredScope != null) {
-        if (requiredScope.providesDependency(dependency)) {
+        if (requiredScope.providesDependencyRecursive(dependency)) {
           // context.logWarn("dependency " + dependency + " provided by other scope " + requiredScope.name);
           return true;
         }
