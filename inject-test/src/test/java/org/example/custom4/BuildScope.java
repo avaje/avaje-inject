@@ -1,7 +1,7 @@
 package org.example.custom4;
 
 import io.avaje.inject.InjectModule;
-import jakarta.inject.Scope;
+import javax.inject.Scope;
 
 @Scope
 @InjectModule(requires = Build.class )
