@@ -36,7 +36,7 @@ class AllScopes {
   }
 
   boolean providedByDefaultModule(String dependency) {
-    return defaultScope.providesDependency(dependency);
+    return defaultScope.providesDependencyLocally(dependency);
   }
 
   void readBeans(RoundEnvironment roundEnv) {

@@ -407,11 +407,22 @@ class ScopeInfo {
     if (scopes.providedByDefaultModule(dependency)) {
       return true;
     }
+    return providesDependencyRecursive(dependency);
+  }
+
+  /**
+   * Recursively search including 'parent' scopes.
+   */
+  private boolean providesDependencyRecursive(String dependency) {
+    if (providesDependencyLocally(dependency)) {
+      return true;
+    }
     // look for required scopes ...
     for (String require : requires) {
       final ScopeInfo requiredScope = scopes.get(require);
       if (requiredScope != null) {
-        if (requiredScope.providesDependency(dependency)) {
+        // recursively search parent scope
+        if (requiredScope.providesDependencyRecursive(dependency)) {
           // context.logWarn("dependency " + dependency + " provided by other scope " + requiredScope.name);
           return true;
         }
@@ -421,9 +432,9 @@ class ScopeInfo {
   }
 
   /**
-   * Return true if this module provides the dependency.
+   * Return true if this module provides the dependency (non-recursive, local only).
    */
-  boolean providesDependency(String dependency) {
+  boolean providesDependencyLocally(String dependency) {
     if (requires.contains(dependency)) {
       return true;
     }
