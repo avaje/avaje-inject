@@ -1,14 +1,11 @@
 package org.example.myapp;
 
 import io.avaje.inject.Invocation;
+import io.avaje.inject.MethodInterceptor;
 import io.avaje.inject.spi.Proxy;
-import jakarta.inject.Singleton;
 import org.example.myapp.aspect.MyAround;
 import org.example.myapp.aspect.MyAroundAspect;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 
 @Proxy
@@ -16,14 +13,15 @@ import java.lang.reflect.Method;
 public class OtherServiceProxy extends OtherService {
 
   final MyAroundAspect aroundAspect;
+
   private final Method otherMethod;
-  private final MyAround myAround;
+  private final MethodInterceptor otherInterceptor;
 
   public OtherServiceProxy(MyAroundAspect aroundAspect) {
     this.aroundAspect = aroundAspect;
     try {
       otherMethod = OtherService.class.getMethod("other", String.class, int.class);
-      myAround = otherMethod.getAnnotation(MyAround.class);
+      otherInterceptor = aroundAspect.interceptor(otherMethod, otherMethod.getAnnotation(MyAround.class));
     } catch (Exception e) {
       throw new IllegalStateException(e);
     }
@@ -31,9 +29,13 @@ public class OtherServiceProxy extends OtherService {
 
   @Override
   public String other(String param0, int param1) {
-    var invocation = new Invocation.Call<>(() -> super.other(param0, param1));
-    aroundAspect.around3(invocation);
-    return invocation.result();
+    var invocation = new Invocation.Call<>(() -> super.other(param0, param1)).method(otherMethod).arguments(param0, param1);
+    try {
+      otherInterceptor.invoke(invocation);
+      return invocation.result();
+    } catch (Throwable e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

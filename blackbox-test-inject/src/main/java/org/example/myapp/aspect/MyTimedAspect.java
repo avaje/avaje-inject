@@ -1,23 +1,29 @@
 package org.example.myapp.aspect;
 
-import io.avaje.inject.Aspect;
+import io.avaje.inject.AspectProvider;
 import io.avaje.inject.Invocation;
+import io.avaje.inject.MethodInterceptor;
 import jakarta.inject.Singleton;
 
 import java.lang.reflect.Method;
 
 @Singleton
 //@Aspect(target = MyAround.class)
-public class MyTimedAspect {
+public class MyTimedAspect implements AspectProvider<MyTimed>, MethodInterceptor {
 
-  @Aspect.Around
-  public void around3(Method method, Invocation invocation, Object... args) throws Throwable {
+  @Override
+  public MethodInterceptor interceptor(Method method, MyTimed aspectAnnotation) {
+    return this;
+  }
+
+  @Override
+  public void invoke(Invocation invocation) throws Throwable {
     long start = System.nanoTime();
     try {
       invocation.invoke();
     } finally {
       long exeNanos = System.nanoTime() - start;
-      String fullName = method.getName();
+      String fullName = invocation.method().getName();
       System.out.println("executed " + fullName + " in " + exeNanos);
     }
   }

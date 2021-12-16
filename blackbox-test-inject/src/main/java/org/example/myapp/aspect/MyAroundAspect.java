@@ -1,20 +1,25 @@
 package org.example.myapp.aspect;
 
-import io.avaje.inject.Aspect;
+import io.avaje.inject.AspectProvider;
 import io.avaje.inject.Invocation;
+import io.avaje.inject.MethodInterceptor;
 import jakarta.inject.Singleton;
 
-import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Method;
-import java.util.function.Supplier;
+import java.util.Arrays;
 
 @Singleton
 //@Aspect(target = MyAround.class)
-public class MyAroundAspect {
+public class MyAroundAspect implements AspectProvider<MyAround>, MethodInterceptor {
 
-  @Aspect.Around
-  public void around3(Invocation invoke) {
-    System.out.println("before");
+  @Override
+  public MethodInterceptor interceptor(Method method, MyAround around) {
+    return this;//new Interceptor();
+  }
+
+  @Override
+  public void invoke(Invocation invoke) throws Throwable {
+    System.out.println("before args: " + Arrays.toString(invoke.arguments()));
     try {
       invoke.invoke();
       invoke.invoke();
@@ -23,6 +28,24 @@ public class MyAroundAspect {
       throw new RuntimeException(e);
     } finally {
       System.out.println("after");
+    }
+  }
+
+
+  static class Interceptor implements MethodInterceptor {
+
+    @Override
+    public void invoke(Invocation invoke) {
+      System.out.println("before");
+      try {
+        invoke.invoke();
+        invoke.invoke();
+        invoke.invoke();
+      } catch (Throwable e) {
+        throw new RuntimeException(e);
+      } finally {
+        System.out.println("after");
+      }
     }
   }
 }
