@@ -28,6 +28,12 @@ class Constants {
   static final String BEANSCOPE = "io.avaje.inject.BeanScope";
   static final String INJECTMODULE = "io.avaje.inject.InjectModule";
 
+  static final String REFLECT_METHOD = "java.lang.reflect.Method";
+  static final String INVOCATION = "io.avaje.inject.Invocation";
+  static final String INVOCATION_EXCEPTION = "io.avaje.inject.InvocationException";
+  static final String METHOD_INTERCEPTOR = "io.avaje.inject.MethodInterceptor";
+  static final String PROXY = "io.avaje.inject.spi.Proxy";
+
   static final String GENERATED = "io.avaje.inject.spi.Generated";
   static final String BEAN_FACTORY = "io.avaje.inject.spi.BeanFactory";
   static final String BEAN_FACTORY2 = "io.avaje.inject.spi.BeanFactory2";

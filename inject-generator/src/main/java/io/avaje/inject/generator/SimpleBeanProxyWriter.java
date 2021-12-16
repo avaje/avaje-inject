@@ -99,8 +99,11 @@ class SimpleBeanProxyWriter {
   }
 
   private void writeImports() {
-    writer.append("import java.lang.reflect.Method;").eol();
-    writer.append("import io.avaje.inject.*;").eol();
+    writer.append("import %s;", Constants.REFLECT_METHOD).eol();
+    writer.append("import %s;", Constants.INVOCATION).eol();
+    writer.append("import %s;", Constants.INVOCATION_EXCEPTION).eol();
+    writer.append("import %s;", Constants.METHOD_INTERCEPTOR).eol();
+    writer.append("import %s;", Constants.PROXY).eol();
     beanReader.writeImports(writer);
   }
 

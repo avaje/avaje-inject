@@ -183,7 +183,8 @@ class BeanReader {
   }
 
   private Set<String> importTypes() {
-    importTypes.add("io.avaje.inject.spi.*");
+    importTypes.add(Constants.GENERATED);
+    importTypes.add(Constants.BUILDER);
     if (Util.validImportType(type)) {
       importTypes.add(type);
     }
