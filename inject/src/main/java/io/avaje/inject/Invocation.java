@@ -3,20 +3,20 @@ package io.avaje.inject;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
+/**
+ * Method invocation using in {@link MethodInterceptor#invoke(Invocation)} for Aspects.
+ * <p>
+ * Represents a method invocation that can be intercepted with additional before and after
+ * invocation logic.
+ */
 public interface Invocation {
 
   /**
-   * Invoke the underlying method.
-   */
-  void invoke() throws Throwable;
-
-  /**
-   * Return the result of {@code #invoke}. This will be null for void methods.
+   * Invoke the underlying method returning the result.
    * <p>
-   * If invoke is called multiple times (e.g. a retry mechanism) then this returns
-   * the result of the last successful call to {@code #invoke}.
+   * This will return null for void methods.
    */
-  Object result();
+  Object invoke() throws Throwable;
 
   /**
    * Set the result that will be returned to the caller.
@@ -65,18 +65,14 @@ public interface Invocation {
       return this;
     }
 
-    @Override
-    public Object result() {
-      return result;
-    }
-
+    @SuppressWarnings("unchecked")
     @Override
     public void result(Object result) {
       this.result = (T) result;
     }
 
     /**
-     * Return the invocation result. This is null for method invocations returning void.
+     * Return the final invocation result.
      */
     public T finalResult() {
       return result;
@@ -100,13 +96,17 @@ public interface Invocation {
 
     private final Runnable delegate;
 
+    /**
+     * Create with a given closure to run.
+     */
     public Run(Runnable delegate) {
       this.delegate = delegate;
     }
 
     @Override
-    public void invoke() {
+    public Object invoke() {
       delegate.run();
+      return null;
     }
   }
 
@@ -117,13 +117,17 @@ public interface Invocation {
 
     private final Supplier<T> delegate;
 
+    /**
+     * Create with a given supplier.
+     */
     public Call(Supplier<T> delegate) {
       this.delegate = delegate;
     }
 
     @Override
-    public void invoke() {
+    public Object invoke() {
       result = delegate.get();
+      return result;
     }
 
     @Override
@@ -140,13 +144,17 @@ public interface Invocation {
     private final CheckedSupplier<T> delegate;
     private T result;
 
+    /**
+     * Create with a given support that can throw checked exceptions.
+     */
     public CheckedCall(CheckedSupplier<T> delegate) {
       this.delegate = delegate;
     }
 
     @Override
-    public void invoke() throws Throwable {
+    public Object invoke() throws Throwable {
       result = delegate.get();
+      return result;
     }
 
     @Override

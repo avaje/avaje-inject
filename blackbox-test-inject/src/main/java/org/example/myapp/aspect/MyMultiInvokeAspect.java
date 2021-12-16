@@ -22,8 +22,7 @@ public class MyMultiInvokeAspect implements AspectProvider<MyMultiInvoke>, Metho
   @Override
   public void invoke(Invocation invocation) throws Throwable {
     for (int i = 0; i < 5; i++) {
-      invocation.invoke();
-      results.add(invocation.result());
+      results.add(invocation.invoke());
     }
   }
 
