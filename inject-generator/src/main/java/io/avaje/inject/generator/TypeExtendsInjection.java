@@ -27,7 +27,7 @@ class TypeExtendsInjection {
   private final TypeElement baseType;
   private final ProcessingContext context;
   private final boolean factory;
-  private final AspectPair typeAspect;
+  private final List<AspectPair> typeAspects;
   private Element postConstructMethod;
   private Element preDestroyMethod;
 
@@ -37,7 +37,7 @@ class TypeExtendsInjection {
     this.factory = factory;
 
     AspectAnnotationReader reader = new AspectAnnotationReader(context, baseType, baseType);
-    this.typeAspect = reader.read();
+    this.typeAspects = reader.read();
   }
 
   void read(TypeElement type) {
@@ -136,11 +136,11 @@ class TypeExtendsInjection {
       return;
     }
     int nameIndex = methodNameIndex(methodElement.getSimpleName().toString());
-    AspectPair aspectPair = new AspectAnnotationReader(context, baseType, methodElement).read();
-    if (aspectPair != null) {
-      aspectMethods.add(new AspectMethod(nameIndex, context, aspectPair, methodElement));
-    } else if (typeAspect != null) {
-      aspectMethods.add(new AspectMethod(nameIndex, context, typeAspect, methodElement));
+    List<AspectPair> aspectPairs = new AspectAnnotationReader(context, baseType, methodElement).read();
+    if (!aspectPairs.isEmpty()) {
+      aspectMethods.add(new AspectMethod(nameIndex, aspectPairs, methodElement));
+    } else if (!typeAspects.isEmpty()) {
+      aspectMethods.add(new AspectMethod(nameIndex, typeAspects, methodElement));
     }
   }
 

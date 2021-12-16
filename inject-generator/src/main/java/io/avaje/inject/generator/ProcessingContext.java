@@ -5,7 +5,6 @@ import javax.annotation.processing.FilerException;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
@@ -29,7 +28,6 @@ class ProcessingContext {
   private final Elements elementUtils;
   private final Types typeUtils;
   private final Set<String> uniqueModuleNames = new HashSet<>();
-  private final AllAspectTargets allAspectTargets;
 
   ProcessingContext(ProcessingEnvironment processingEnv) {
     this.processingEnv = processingEnv;
@@ -37,7 +35,6 @@ class ProcessingContext {
     this.filer = processingEnv.getFiler();
     this.elementUtils = processingEnv.getElementUtils();
     this.typeUtils = processingEnv.getTypeUtils();
-    this.allAspectTargets = new AllAspectTargets(this);
   }
 
   /**
@@ -110,10 +107,6 @@ class ProcessingContext {
     return createMetaInfWriterFor(serviceName);
   }
 
-  FileObject createMetaInfModuleCustom() throws IOException {
-    return createMetaInfWriterFor(Constants.META_INF_CUSTOM);
-  }
-
   private FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
     return filer.createResource(StandardLocation.CLASS_OUTPUT, "", interfaceType);
   }
@@ -134,10 +127,6 @@ class ProcessingContext {
     return typeUtils.asElement(returnType);
   }
 
-  PackageElement getPackageOf(Element element) {
-    return elementUtils.getPackageOf(element);
-  }
-
   void addModule(String moduleFullName) {
     if (moduleFullName != null) {
       uniqueModuleNames.add(moduleFullName);
@@ -148,7 +137,4 @@ class ProcessingContext {
     return uniqueModuleNames.contains(moduleFullName);
   }
 
-  AspectTarget findAspectTarget(String target) {
-    return allAspectTargets.findTarget(target);
-  }
 }

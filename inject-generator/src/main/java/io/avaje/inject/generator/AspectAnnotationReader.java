@@ -3,7 +3,8 @@ package io.avaje.inject.generator;
 import io.avaje.inject.Aspect;
 
 import javax.lang.model.element.*;
-import javax.lang.model.type.DeclaredType;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,7 +23,8 @@ class AspectAnnotationReader {
     this.element = element;
   }
 
-  AspectPair read() {
+  List<AspectPair> read() {
+    List<AspectPair> aspects = new ArrayList<>();
     for (AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
       Element anElement = annotationMirror.getAnnotationType().asElement();
       Aspect aspect = anElement.getAnnotation(Aspect.class);
@@ -30,11 +32,11 @@ class AspectAnnotationReader {
         String target = readTarget(anElement);
         if (target != null) {
           context.logDebug(baseType + " " + element + " has aspect:" + anElement + " target:" + target);
-          return new AspectPair(anElement, target);
+          aspects.add(new AspectPair(anElement, target));
         }
       }
     }
-    return null;
+    return aspects;
   }
 
   private String readTarget(Element anElement) {

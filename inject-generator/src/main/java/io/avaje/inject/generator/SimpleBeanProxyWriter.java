@@ -4,8 +4,6 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Set;
-import java.util.TreeSet;
 
 class SimpleBeanProxyWriter {
 
@@ -71,7 +69,7 @@ class SimpleBeanProxyWriter {
     writer.append(") {").eol();
     beanReader.writeConstructorInit(writer);
     for (String target : aspects.targets()) {
-      String name = AspectTarget.shortName(target);
+      String name = AspectMethod.aspectTargetShortName(target);
       writer.append("    this.%s = %s;", name, name).eol();
     }
     writeSetupForMethods();

@@ -39,7 +39,7 @@ class BeanAspects {
   Set<String> initTargets() {
     Set<String> targets = new LinkedHashSet<>();
     for (AspectMethod aspectMethod : aspectMethods) {
-      targets.add(aspectMethod.target());
+      aspectMethod.addTargets(targets);
     }
     return targets;
   }

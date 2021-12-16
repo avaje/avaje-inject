@@ -8,32 +8,23 @@ import java.util.List;
 import java.util.Set;
 
 class AspectMethod {
-  private final int nameIndex;
-  private final AspectPair aspect;
+
+  private final List<AspectPair> aspectPairs;
   private final ExecutableElement method;
   private final List<MethodReader.MethodParam> params;
-  private final TypeMirror returnMirror;
   private final String rawReturn;
-  private final AspectTarget aspectTarget;
   private final String simpleName;
   private final List<? extends TypeMirror> thrownTypes;
+  private final String localName;
 
-  private final String localMethodName;
-  private final String localInteceptor;
-
-  AspectMethod(int nameIndex, ProcessingContext context, AspectPair aspect, ExecutableElement method) {
-    this.nameIndex = nameIndex;
-    this.aspect = aspect;
+  AspectMethod(int nameIndex, List<AspectPair> aspectPairs, ExecutableElement method) {
+    this.aspectPairs = aspectPairs;
     this.method = method;
     this.simpleName = method.getSimpleName().toString();
     this.params = initParams(method.getParameters());
-    this.returnMirror = method.getReturnType();
-    this.rawReturn = returnMirror.toString();
-    this.aspectTarget = context.findAspectTarget(aspect.target());
+    this.rawReturn = method.getReturnType().toString();
     this.thrownTypes = method.getThrownTypes();
-
-    this.localMethodName = simpleName + "Method" + nameIndex;
-    this.localInteceptor = simpleName + "Interceptor" + nameIndex;
+    this.localName = simpleName + nameIndex;
   }
 
   List<MethodReader.MethodParam> initParams(List<? extends VariableElement> parameters) {
@@ -44,8 +35,10 @@ class AspectMethod {
     return mps;
   }
 
-  String target() {
-    return aspect.target();
+  void addTargets(Set<String> targets) {
+    for (AspectPair aspectPair : aspectPairs) {
+      targets.add(aspectPair.target());
+    }
   }
 
   boolean isVoid() {
@@ -53,7 +46,9 @@ class AspectMethod {
   }
 
   void addImports(Set<String> importTypes) {
-    aspect.addImports(importTypes);
+    for (AspectPair aspect : aspectPairs) {
+      aspect.addImports(importTypes);
+    }
     for (TypeMirror thrownType : method.getThrownTypes()) {
       importTypes.add(thrownType.toString());
     }
@@ -72,10 +67,12 @@ class AspectMethod {
     writeThrowsClause(writer);
 
     writer.append(" {").eol();
-    aspectTarget.writeBefore(writer, this);
+
+    String type = isVoid() ? "Run" : "Call<>";
+    writer.append("    var call = new Invocation.%s(() ->", type);
     invokeSuper(writer, simpleName);
     writer.append(")").eol();
-    aspectTarget.writeAfter(writer, this);
+    writeArgs(writer);
     writer.append("  }").eol();
   }
 
@@ -103,12 +100,15 @@ class AspectMethod {
   }
 
   void writeSetupFields(Append writer) {
-    writer.append("  private Method %s;", localMethodName).eol();
-    writer.append("  private MethodInterceptor %s;", localInteceptor).eol();
+    writer.append("  private Method %s;", localName).eol();
+    for (AspectPair aspectPair : aspectPairs) {
+      String sn = aspectPair.annotationShortName();
+      writer.append("  private MethodInterceptor %s%s;", localName, sn).eol();
+    }
   }
 
   void writeSetupForMethods(Append writer, String shortName) {
-    writer.append("      %s = %s.class.getDeclaredMethod(\"%s\"", localMethodName, shortName, simpleName);
+    writer.append("      %s = %s.class.getDeclaredMethod(\"%s\"", localName, shortName, simpleName);
     for (MethodReader.MethodParam param : params) {
       writer.append(", ");
       param.writeMethodParamType(writer);
@@ -118,10 +118,17 @@ class AspectMethod {
   }
 
   void writeSetupForMethodsInterceptor(Append writer) {
-    String target = aspect.target();
-    String name = AspectTarget.shortName(target);
-    String annoShortName = aspect.annotationShortName();
-    writer.append("       %s = %s.interceptor(%s, %s.getAnnotation(%s.class));", localInteceptor, name, localMethodName, localMethodName, annoShortName).eol();
+    for (AspectPair aspect : aspectPairs) {
+      String target = aspect.target();
+      String name = aspectTargetShortName(target);
+      String sn = aspect.annotationShortName();
+      writer.append("      %s%s = %s.interceptor(%s, %s.getAnnotation(%s.class));", localName, sn, name, localName, localName, sn).eol();
+    }
+  }
+
+  static String aspectTargetShortName(String target) {
+    String type = Util.shortName(target);
+    return Util.initLower(type);
   }
 
   void writeArgs(Append writer) {
@@ -135,9 +142,14 @@ class AspectMethod {
       }
       writer.append(")").eol();
     }
-    writer.append("      .method(%s);", localMethodName).eol();
+    writer.append("      .method(%s);", localName).eol();
     writer.append("    try {").eol();
-    writer.append("      %s.invoke(call);", localInteceptor).eol();
+
+    for (AspectPair aspect : aspectPairs) {
+      String sn = aspect.annotationShortName();
+      writer.append("      %s%s.invoke(call);", localName, sn).eol();
+    }
+
     if (!isVoid()) {
       writer.append("      return call.finalResult();").eol();
     }
