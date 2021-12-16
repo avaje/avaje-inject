@@ -44,8 +44,8 @@ public interface Invocation {
    */
   abstract class Build<T> implements Invocation {
 
-    private Method method;
-    private Object[] args;
+    protected Method method;
+    protected Object[] args;
     protected T result;
 
     /**
@@ -86,6 +86,16 @@ public interface Invocation {
     public Method method() {
       return method;
     }
+
+    /**
+     * Wrap this invocation using a methodInterceptor returning the wrapped call.
+     * <p>
+     * This invocation is effectively nested inside the returned invocation.
+     *
+     * @param methodInterceptor The method interceptor to use to wrap this call with
+     * @return The wrapped call
+     */
+    public abstract Build<T> wrap(MethodInterceptor methodInterceptor);
   }
 
   /**
@@ -107,6 +117,14 @@ public interface Invocation {
       delegate.invoke();
       return null;
     }
+
+    @Override
+    public Build<Void> wrap(MethodInterceptor methodInterceptor) {
+      return new Invocation.Run(() -> methodInterceptor.invoke(this))
+        .arguments(args)
+        .method(method);
+    }
+
   }
 
   /**
@@ -132,6 +150,17 @@ public interface Invocation {
     @Override
     public T finalResult() {
       return result;
+    }
+
+    @Override
+    public Build<T> wrap(MethodInterceptor methodInterceptor) {
+      return new Invocation.Call<T>(() -> {
+        final Call<T> delegate = this;
+        methodInterceptor.invoke(delegate);
+        return delegate.finalResult();
+      })
+        .arguments(args)
+        .method(method);
     }
   }
 
