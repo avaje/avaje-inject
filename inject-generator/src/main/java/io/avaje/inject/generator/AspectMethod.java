@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 class AspectMethod {
+  private final int nameIndex;
   private final AspectPair aspect;
   private final ExecutableElement method;
   private final List<MethodReader.MethodParam> params;
@@ -17,7 +18,11 @@ class AspectMethod {
   private final String simpleName;
   private final List<? extends TypeMirror> thrownTypes;
 
-  AspectMethod(ProcessingContext context, AspectPair aspect, ExecutableElement method) {
+  private final String localMethodName;
+  private final String localInteceptor;
+
+  AspectMethod(int nameIndex, ProcessingContext context, AspectPair aspect, ExecutableElement method) {
+    this.nameIndex = nameIndex;
     this.aspect = aspect;
     this.method = method;
     this.simpleName = method.getSimpleName().toString();
@@ -26,6 +31,9 @@ class AspectMethod {
     this.rawReturn = returnMirror.toString();
     this.aspectTarget = context.findAspectTarget(aspect.target());
     this.thrownTypes = method.getThrownTypes();
+
+    this.localMethodName = simpleName + "Method" + nameIndex;
+    this.localInteceptor = simpleName + "Interceptor" + nameIndex;
   }
 
   List<MethodReader.MethodParam> initParams(List<? extends VariableElement> parameters) {
@@ -95,12 +103,12 @@ class AspectMethod {
   }
 
   void writeSetupFields(Append writer) {
-    writer.append("  private Method %sMethod;", simpleName).eol();
-    writer.append("  private MethodInterceptor %sInterceptor;", simpleName).eol();
+    writer.append("  private Method %s;", localMethodName).eol();
+    writer.append("  private MethodInterceptor %s;", localInteceptor).eol();
   }
 
   void writeSetupForMethods(Append writer, String shortName) {
-    writer.append("      %sMethod = %s.class.getDeclaredMethod(\"%s\"", simpleName, shortName, simpleName);
+    writer.append("      %s = %s.class.getDeclaredMethod(\"%s\"", localMethodName, shortName, simpleName);
     for (MethodReader.MethodParam param : params) {
       writer.append(", ");
       param.writeMethodParamType(writer);
@@ -113,7 +121,7 @@ class AspectMethod {
     String target = aspect.target();
     String name = AspectTarget.shortName(target);
     String annoShortName = aspect.annotationShortName();
-    writer.append("      %sInterceptor = %s.interceptor(%sMethod, %sMethod.getAnnotation(%s.class));", simpleName, name, simpleName, simpleName, annoShortName).eol();
+    writer.append("       %s = %s.interceptor(%s, %s.getAnnotation(%s.class));", localInteceptor, name, localMethodName, localMethodName, annoShortName).eol();
   }
 
   void writeArgs(Append writer) {
@@ -127,9 +135,9 @@ class AspectMethod {
       }
       writer.append(")").eol();
     }
-    writer.append("      .method(%sMethod);", simpleName).eol();
+    writer.append("      .method(%s);", localMethodName).eol();
     writer.append("    try {").eol();
-    writer.append("      %sInterceptor.invoke(call);", simpleName).eol();
+    writer.append("      %s.invoke(call);", localInteceptor).eol();
     if (!isVoid()) {
       writer.append("      return call.finalResult();").eol();
     }

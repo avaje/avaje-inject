@@ -36,6 +36,11 @@ public class HelloService {
   }
 
   @MyBefore
+  public String foo(String param, int overloaded) {
+    return "foo+" + param;
+  }
+
+  @MyBefore
   public String foo(String param) {
     return "foo+" + param;
   }
@@ -70,6 +75,11 @@ public class HelloService {
   public void appCodeThrowsDeclared() throws IllegalArgumentException {
     throw new IllegalArgumentException("appCodeDeclared");
   }
+
+  public void multiAspectsHere() {
+
+  }
+
 
   public String justRunResult() {
     return justRunResult;

@@ -117,18 +117,33 @@ class TypeExtendsInjection {
     }
   }
 
+  private final Map<String, Integer> nameIndex = new HashMap<>();
+
+  private int methodNameIndex(String name) {
+    Integer counter = nameIndex.get(name);
+    if (counter == null) {
+      nameIndex.put(name, 1);
+      return 0;
+    } else {
+      nameIndex.put(name, counter + 1);
+      return counter;
+    }
+  }
+
   private void checkForAspect(ExecutableElement methodElement) {
     Set<Modifier> modifiers = methodElement.getModifiers();
     if (modifiers.contains(Modifier.PRIVATE) || modifiers.contains(Modifier.STATIC) || modifiers.contains(Modifier.ABSTRACT)) {
       return;
     }
+    int nameIndex = methodNameIndex(methodElement.getSimpleName().toString());
     AspectPair aspectPair = new AspectAnnotationReader(context, baseType, methodElement).read();
     if (aspectPair != null) {
-      aspectMethods.add(new AspectMethod(context, aspectPair, methodElement));
+      aspectMethods.add(new AspectMethod(nameIndex, context, aspectPair, methodElement));
     } else if (typeAspect != null) {
-      aspectMethods.add(new AspectMethod(context, typeAspect, methodElement));
+      aspectMethods.add(new AspectMethod(nameIndex, context, typeAspect, methodElement));
     }
   }
+
 
   private void addFactoryMethod(ExecutableElement methodElement, Bean bean) {
     // Not yet reading Qualifier annotations, Named only at this stage
