@@ -14,10 +14,12 @@ class AspectMethod {
   private final TypeMirror returnMirror;
   private final String rawReturn;
   private final AspectTarget aspectTarget;
+  private final String simpleName;
 
   AspectMethod(ProcessingContext context, AspectPair aspect, ExecutableElement method) {
     this.aspect = aspect;
     this.method = method;
+    this.simpleName = method.getSimpleName().toString();
     this.params = initParams(method.getParameters());
     this.returnMirror = method.getReturnType();
     this.rawReturn = returnMirror.toString();
@@ -45,8 +47,6 @@ class AspectMethod {
   }
 
   void writeMethod(Append writer) {
-    //MethodReader mr = new MethodReader(method);
-    String simpleName = method.getSimpleName().toString();
     writer.eol().append("  @Override").eol();
     writer.append("  public %s %s(", rawReturn, simpleName);
     for (int i = 0, size = params.size(); i < size; i++) {
@@ -56,26 +56,63 @@ class AspectMethod {
       params.get(i).writeMethodParam(writer);
     }
     writer.append(") {").eol();
-    aspectTarget.writeBefore(writer);
-
-
-    writer.append("    ");
+    aspectTarget.writeBefore(writer, this);
     invokeSuper(writer, simpleName);
+    writer.append(")").eol();
+    aspectTarget.writeAfter(writer, this);
     writer.append("  }").eol();
   }
 
   private void invokeSuper(Append writer, String simpleName) {
-    if (!isVoid()) {
-      writer.append("return ");
-    }
-    writer.append("super.%s(", simpleName);
+    writer.append(" super.%s(", simpleName);
     for (int i = 0, size = params.size(); i < size; i++) {
       if (i > 0) {
         writer.append(", ");
       }
       writer.append(params.get(i).simpleName());
     }
+    writer.append(")");
+  }
+
+  void writeSetupFields(Append writer) {
+    writer.append("  private Method %sMethod;", simpleName).eol();
+    writer.append("  private MethodInterceptor %sInterceptor;", simpleName).eol();
+  }
+
+  void writeSetupForMethods(Append writer, String shortName) {
+    writer.append("      %sMethod = %s.class.getDeclaredMethod(\"%s\"", simpleName, shortName, simpleName);
+    for (MethodReader.MethodParam param : params) {
+      writer.append(", ");
+      param.writeMethodParamType(writer);
+      writer.append(".class");
+    }
     writer.append(");").eol();
   }
 
+  void writeSetupForMethodsInterceptor(Append writer) {
+    String target = aspect.target();
+    String name = AspectTarget.shortName(target);
+    String annoShortName = aspect.annotationShortName();
+    writer.append("      %sInterceptor = %s.interceptor(%sMethod, %sMethod.getAnnotation(%s.class));", simpleName, name, simpleName, simpleName, annoShortName).eol();
+  }
+
+  void writeArgs(Append writer) {
+    writer.append("      .arguments(");
+    for (int i = 0, size = params.size(); i < size; i++) {
+      if (i > 0) {
+        writer.append(", ");
+      }
+      writer.append(params.get(i).simpleName());
+    }
+    writer.append(")").eol();
+    writer.append("      .method(%sMethod);", simpleName).eol();
+    writer.append("    try {").eol();
+    writer.append("      %sInterceptor.invoke(call);", simpleName).eol();
+    if (!isVoid()) {
+      writer.append("      return call.result();").eol();
+    }
+    writer.append("    } catch (Throwable e) {").eol();
+    writer.append("      throw new RuntimeException(e);").eol();
+    writer.append("    }").eol();
+  }
 }

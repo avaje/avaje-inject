@@ -1,5 +1,7 @@
 package org.example.myapp;
 
+import io.avaje.inject.PostConstruct;
+import io.avaje.inject.PreDestroy;
 import jakarta.inject.Singleton;
 import org.example.myapp.aspect.MyAround;
 import org.example.myapp.aspect.MyBefore;
@@ -26,5 +28,15 @@ public class HelloService {
   public String bazz(String param0, int param1) {
     System.out.println("execute bazz ...");
     return "bazz " + param0 + " " + param1;
+  }
+
+  @PostConstruct
+  void postCon() {
+
+  }
+
+  @PreDestroy
+  void preDest() {
+
   }
 }

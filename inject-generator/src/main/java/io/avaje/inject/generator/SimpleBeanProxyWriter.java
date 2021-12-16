@@ -4,6 +4,8 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Set;
+import java.util.TreeSet;
 
 class SimpleBeanProxyWriter {
 
@@ -48,6 +50,10 @@ class SimpleBeanProxyWriter {
 
   private void writeFields() {
     aspects.writeFields(writer);
+    for (AspectMethod method : aspects.methods()) {
+      method.writeSetupFields(writer);
+    }
+    writer.eol();
   }
 
   private void writeConstructor() {
@@ -65,11 +71,25 @@ class SimpleBeanProxyWriter {
     writer.append(") {").eol();
     beanReader.writeConstructorInit(writer);
     for (String target : aspects.targets()) {
-      String type = Util.shortName(target);
-      String name = Util.initLower(type);
+      String name = AspectTarget.shortName(target);
       writer.append("    this.%s = %s;", name, name).eol();
     }
+    writeSetupForMethods();
     writer.append("  }").eol();
+  }
+
+  private void writeSetupForMethods() {
+    writer.append("    try {").eol();
+    for (AspectMethod method : aspects.methods()) {
+      method.writeSetupForMethods(writer, shortName);
+    }
+    writer.eol();
+    for (AspectMethod method : aspects.methods()) {
+      method.writeSetupForMethodsInterceptor(writer);
+    }
+    writer.append("    } catch (Exception e) {").eol();
+    writer.append("      throw new IllegalStateException(e);").eol();
+    writer.append("    }").eol();
   }
 
   private void writePackage() {
@@ -79,6 +99,14 @@ class SimpleBeanProxyWriter {
   }
 
   private void writeImports() {
+    Set<String> aspectImports = new TreeSet<>();
+    aspectImports.add("java.lang.reflect.Method");
+    aspectImports.add("io.avaje.inject.Invocation");
+    aspectImports.add("io.avaje.inject.MethodInterceptor");
+    aspectImports.add("io.avaje.inject.spi.Proxy");
+    for (String aspectImport : aspectImports) {
+      writer.append("import %s;", aspectImport).eol();
+    }
     beanReader.writeImports(writer);
   }
 
@@ -87,6 +115,7 @@ class SimpleBeanProxyWriter {
   }
 
   private void writeClassStart() {
+    writer.append(Constants.AT_PROXY).eol();
     writer.append(Constants.AT_GENERATED).eol();
     writer.append("public class %s%s extends %s {", shortName, suffix, shortName).eol().eol();
   }

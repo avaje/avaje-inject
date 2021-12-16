@@ -1,7 +1,6 @@
 package org.example.myapp;
 
 import io.avaje.inject.MethodInterceptor;
-import io.avaje.inject.spi.Proxy;
 import io.avaje.inject.Invocation;
 import org.example.myapp.aspect.MyAround;
 import org.example.myapp.aspect.MyAroundAspect;
@@ -9,7 +8,7 @@ import org.example.myapp.aspect.MyBeforeAspect;
 
 import java.lang.reflect.Method;
 
-@Proxy
+//@Proxy
 //@Singleton
 public class HelloServiceProxy extends HelloService {
 

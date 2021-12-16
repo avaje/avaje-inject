@@ -22,6 +22,7 @@ class SimpleBeanWriter {
   private final String shortName;
   private final String packageName;
   private final String suffix;
+  private final boolean proxied;
   private Append writer;
 
   SimpleBeanWriter(BeanReader beanReader, ProcessingContext context) {
@@ -32,6 +33,7 @@ class SimpleBeanWriter {
     this.shortName = origin.getSimpleName().toString();
     this.packageName = Util.packageOf(originName);
     this.suffix = beanReader.suffix();
+    this.proxied = beanReader.isGenerateProxy();
   }
 
   private Writer createFileWriter() throws IOException {
@@ -115,7 +117,11 @@ class SimpleBeanWriter {
       return;
     }
     writeBuildMethodStart(constructor);
-    writeAddFor(constructor);
+    if (proxied) {
+      writer.append("    // this bean is proxied, see %s$Proxy$DI instead", shortName).eol().eol();
+    } else {
+      writeAddFor(constructor);
+    }
     writer.append("  }").eol().eol();
   }
 

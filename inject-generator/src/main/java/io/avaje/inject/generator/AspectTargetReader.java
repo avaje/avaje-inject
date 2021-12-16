@@ -1,8 +1,9 @@
 package io.avaje.inject.generator;
 
-import javax.lang.model.element.*;
-import java.util.Set;
-import java.util.stream.Collectors;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 
 class AspectTargetReader {
 
@@ -34,47 +35,44 @@ class AspectTargetReader {
   private TargetMethod readMethod(Element element) {
     ExecutableElement methodElement = (ExecutableElement) element;
     MethodReader methodReader = new MethodReader(context, methodElement, baseType).read();
-    Set<String> annotationTypes = readAnnotations(methodElement);
-    return new TargetMethod(annotationTypes, methodReader);
+    return new TargetMethod(methodReader);
   }
 
-  private Set<String> readAnnotations(ExecutableElement methodElement) {
-    return methodElement.getAnnotationMirrors().stream()
-      .map(AnnotationMirror::getAnnotationType)
-      .map(Object::toString)
-      .collect(Collectors.toSet());
-  }
+//  private Set<String> readAnnotations(ExecutableElement methodElement) {
+//    return methodElement.getAnnotationMirrors().stream()
+//      .map(AnnotationMirror::getAnnotationType)
+//      .map(Object::toString)
+//      .collect(Collectors.toSet());
+//  }
 
-  void writeBefore(Append writer) {
+  void writeBefore(Append writer, AspectMethod aspectMethod) {
     if (method != null) {
-      method.writeBefore(writer, targetName);
+      method.writeBefore(writer, aspectMethod);
+    }
+  }
+
+  void writeAfter(Append writer, AspectMethod aspectMethod) {
+    if (method != null) {
+      method.writeAfter(writer, aspectMethod);
     }
   }
 
   static class TargetMethod {
 
-    //private final Set<String> annotationTypes;
     final MethodReader methodReader;
-    final boolean beforeAspect;
-    final boolean aroundAspect;
-    private final String methodName;
 
-    TargetMethod(Set<String> annotationTypes, MethodReader methodReader) {
-      //this.annotationTypes = annotationTypes;
+    TargetMethod(MethodReader methodReader) {
       this.methodReader = methodReader;
-      this.methodName = methodReader.getName();
-      this.beforeAspect = annotationTypes.contains("io.avaje.inject.Aspect.Before");
-      this.aroundAspect = annotationTypes.contains("io.avaje.inject.Aspect.Around");
     }
 
-    void writeBefore(Append writer, String targetName) {
-      if (beforeAspect) {
-        methodReader.writeAspectBefore(writer, targetName);
+    void writeBefore(Append writer, AspectMethod aspectMethod) {
+      boolean aVoid = aspectMethod.isVoid();
+      String type = aVoid ? "Run" : "Call<>";
+      writer.append("    var call = new Invocation.%s(() ->", type);
+    }
 
-      } else if (aroundAspect) {
-        methodReader.writeAspectAround(writer, targetName);
-
-      }
+    void writeAfter(Append writer, AspectMethod aspectMethod) {
+      aspectMethod.writeArgs(writer);
     }
   }
 }

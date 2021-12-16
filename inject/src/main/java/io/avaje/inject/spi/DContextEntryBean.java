@@ -26,16 +26,13 @@ class DContextEntryBean {
   }
 
   protected final Object source;
-  private Object proxyBean;
   private final String name;
   private final int flag;
-  private final boolean proxy;
 
   private DContextEntryBean(Object source, String name, int flag) {
     this.source = source;
     this.name = KeyUtil.lower(name);
     this.flag = flag;
-    this.proxy = source.getClass().getAnnotation(Proxy.class) != null;
   }
 
   @Override
@@ -44,7 +41,6 @@ class DContextEntryBean {
       "source=" + source +
       ", name='" + name + '\'' +
       ", flag=" + flag +
-      ", proxy=" + proxy +
       '}';
   }
 
@@ -67,15 +63,11 @@ class DContextEntryBean {
   }
 
   Object getBean() {
-    return proxyBean != null ? proxyBean : source;
+    return source;
   }
 
   boolean isPrimary() {
     return flag == BeanEntry.PRIMARY;
-  }
-
-  boolean isProxy() {
-    return proxy;
   }
 
   boolean isSecondary() {
@@ -88,15 +80,6 @@ class DContextEntryBean {
 
   boolean isSupplied(String qualifierName) {
     return flag == BeanEntry.SUPPLIED && (qualifierName == null || qualifierName.equals(name));
-  }
-
-  boolean isProxiedBy(DContextEntryBean proxyEntry) {
-    if (source.getClass() != proxyEntry.source.getClass().getSuperclass()) {
-      return false;
-    } else {
-      proxyBean = proxyEntry.source;
-      return true;
-    }
   }
 
   /**
@@ -112,7 +95,7 @@ class DContextEntryBean {
 
     @Override
     Object getBean() {
-      // its a provider, get it once
+      // it's a provider, get it once
       if (actualBean == null) {
         actualBean = ((Provider<?>) source).get();
       }

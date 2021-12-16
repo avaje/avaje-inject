@@ -8,7 +8,16 @@ class AspectTarget {
     this.reader = reader;
   }
 
-  void writeBefore(Append writer) {
-    reader.writeBefore(writer);
+  static String shortName(String target) {
+    String type = Util.shortName(target);
+    return Util.initLower(type);
+  }
+
+  void writeBefore(Append writer, AspectMethod aspectMethod) {
+    reader.writeBefore(writer, aspectMethod);
+  }
+
+  void writeAfter(Append writer, AspectMethod aspectMethod) {
+    reader.writeAfter(writer, aspectMethod);
   }
 }

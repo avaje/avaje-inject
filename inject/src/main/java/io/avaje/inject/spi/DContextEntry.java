@@ -22,20 +22,7 @@ class DContextEntry {
   }
 
   void add(DContextEntryBean entryBean) {
-    // here ... when proxy wrap existing entry?
-    if (entryBean.isProxy()) {
-     addProxy(entryBean);
-    } else {
-      entries.add(entryBean);
-    }
-  }
-
-  private void addProxy(DContextEntryBean entryBean) {
-    for (DContextEntryBean bean : entries) {
-      if (bean.isProxiedBy(entryBean)) {
-        return;
-      }
-    }
+    entries.add(entryBean);
   }
 
   Object get(String name) {
@@ -112,11 +99,6 @@ class DContextEntry {
         return;
       } else if (entry.isSupplied()) {
         // new supplied wins
-        match = entry;
-        return;
-      }
-      if (match.isProxy() && !entry.isSecondary()) {
-        // secondary loses
         match = entry;
         return;
       }

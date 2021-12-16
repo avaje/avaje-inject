@@ -2,13 +2,12 @@ package org.example.myapp;
 
 import io.avaje.inject.Invocation;
 import io.avaje.inject.MethodInterceptor;
-import io.avaje.inject.spi.Proxy;
 import org.example.myapp.aspect.MyTimed;
 import org.example.myapp.aspect.MyTimedAspect;
 
 import java.lang.reflect.Method;
 
-@Proxy
+//@Proxy
 //@Singleton
 public class ExampleServiceProxy extends ExampleService {
 

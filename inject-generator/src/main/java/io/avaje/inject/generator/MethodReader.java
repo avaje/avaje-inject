@@ -391,6 +391,14 @@ class MethodReader {
       writer.append(" ").append(simpleName);
     }
 
+    void writeMethodParamType(Append writer) {
+      if (genericType != null) {
+        genericType.writeShort(writer);
+      } else {
+        writer.append(Util.shortName(paramType));
+      }
+    }
+
     void writeConstructorInit(Append writer) {
       writer.append(simpleName);
     }
