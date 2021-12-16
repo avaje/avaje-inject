@@ -15,7 +15,12 @@ public interface BeanEntry {
   /**
    * Priority of externally supplied bean.
    */
-  int SUPPLIED = 2;
+  int SUPPLIED = 3;
+
+  /**
+   * Priority of proxy.
+   */
+  int PROXY = 2;
 
   /**
    * Priority of <code>@Primary</code> bean.

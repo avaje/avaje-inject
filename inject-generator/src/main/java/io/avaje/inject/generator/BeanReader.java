@@ -2,6 +2,7 @@ package io.avaje.inject.generator;
 
 import io.avaje.inject.Primary;
 import io.avaje.inject.Secondary;
+import io.avaje.inject.spi.Proxy;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -27,7 +28,8 @@ class BeanReader {
   private final TypeReader typeReader;
   private final boolean primary;
   private final boolean secondary;
-
+  private final boolean proxy;
+  private final BeanAspects aspects;
   private boolean writtenToFile;
 
   BeanReader(TypeElement beanType, ProcessingContext context, boolean factory) {
@@ -37,11 +39,13 @@ class BeanReader {
     this.shortName = shortName(beanType);
     this.primary = (beanType.getAnnotation(Primary.class) != null);
     this.secondary = !primary && (beanType.getAnnotation(Secondary.class) != null);
+    this.proxy = (beanType.getAnnotation(Proxy.class) != null);
     this.typeReader = new TypeReader(beanType, context, importTypes, factory);
 
     typeReader.process();
     this.requestParams = new BeanRequestParams(type);
     this.name = typeReader.getName();
+    this.aspects = typeReader.hasAspects();
     this.injectMethods = typeReader.getInjectMethods();
     this.injectFields = typeReader.getInjectFields();
     this.factoryMethods = typeReader.getFactoryMethods();
@@ -57,6 +61,10 @@ class BeanReader {
 
   TypeElement getBeanType() {
     return beanType;
+  }
+
+  BeanAspects aspects() {
+    return aspects;
   }
 
   BeanReader read() {
@@ -182,6 +190,7 @@ class BeanReader {
     }
     typeReader.extraImports(importTypes);
     requestParams.addImports(importTypes);
+    aspects.extraImports(importTypes);
     return importTypes;
   }
 
@@ -265,5 +274,23 @@ class BeanReader {
 
   List<MethodReader> getInjectMethods() {
     return typeReader.getInjectMethods();
+  }
+
+  boolean isGenerateProxy() {
+    return aspects.hasAspects() && !proxy;
+  }
+
+  void writeConstructorParams(Append writer) {
+    if (constructor != null) {
+      constructor.writeConstructorParams(writer);
+    }
+  }
+
+  void writeConstructorInit(Append writer) {
+    if (constructor != null) {
+      writer.append("    super(");
+      constructor.writeConstructorInit(writer);
+      writer.append(");").eol();
+    }
   }
 }

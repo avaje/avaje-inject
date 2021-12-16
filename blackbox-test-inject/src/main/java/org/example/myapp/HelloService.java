@@ -1,6 +1,8 @@
 package org.example.myapp;
 
 import jakarta.inject.Singleton;
+import org.example.myapp.aspect.MyAround;
+import org.example.myapp.aspect.MyBefore;
 
 @Singleton
 public class HelloService {
@@ -13,5 +15,16 @@ public class HelloService {
 
   public String hello() {
     return "hello+" + data.helloData();
+  }
+
+  @MyBefore
+  public String foo(String param) {
+    return "foo+" + param;
+  }
+
+  @MyAround(name="what")
+  public String bazz(String param0, int param1) {
+    System.out.println("execute bazz ...");
+    return "bazz " + param0 + " " + param1;
   }
 }

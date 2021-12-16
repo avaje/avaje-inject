@@ -170,6 +170,11 @@ class ScopeInfo {
         if (!beanReader.isWrittenToFile()) {
           SimpleBeanWriter writer = new SimpleBeanWriter(beanReader, context);
           writer.write();
+          if (beanReader.isGenerateProxy()) {
+            context.logDebug("Bean has Aspects "+beanReader);
+            SimpleBeanProxyWriter proxyWriter = new SimpleBeanProxyWriter(beanReader, context);
+            proxyWriter.write();
+          }
           beanReader.setWrittenToFile();
         }
       } catch (FilerException e) {

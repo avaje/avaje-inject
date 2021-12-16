@@ -29,6 +29,7 @@ class ProcessingContext {
   private final Elements elementUtils;
   private final Types typeUtils;
   private final Set<String> uniqueModuleNames = new HashSet<>();
+  private final AllAspectTargets allAspectTargets;
 
   ProcessingContext(ProcessingEnvironment processingEnv) {
     this.processingEnv = processingEnv;
@@ -36,6 +37,7 @@ class ProcessingContext {
     this.filer = processingEnv.getFiler();
     this.elementUtils = processingEnv.getElementUtils();
     this.typeUtils = processingEnv.getTypeUtils();
+    this.allAspectTargets = new AllAspectTargets(this);
   }
 
   /**
@@ -144,5 +146,9 @@ class ProcessingContext {
 
   boolean isDuplicateModule(String moduleFullName) {
     return uniqueModuleNames.contains(moduleFullName);
+  }
+
+  AspectTarget findAspectTarget(String target) {
+    return allAspectTargets.findTarget(target);
   }
 }
