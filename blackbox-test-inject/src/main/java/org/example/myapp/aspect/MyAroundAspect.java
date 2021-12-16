@@ -14,12 +14,12 @@ public class MyAroundAspect implements AspectProvider<MyAround>, MethodIntercept
 
   @Override
   public MethodInterceptor interceptor(Method method, MyAround around) {
-    return this;//new Interceptor();
+    return this;
   }
 
   @Override
   public void invoke(Invocation invoke) throws Throwable {
-    System.out.println("before args: " + Arrays.toString(invoke.arguments()));
+    System.out.println("before args: " + Arrays.toString(invoke.arguments()) + " method: " + invoke.method());
     try {
       invoke.invoke();
       invoke.invoke();
@@ -31,21 +31,4 @@ public class MyAroundAspect implements AspectProvider<MyAround>, MethodIntercept
     }
   }
 
-
-  static class Interceptor implements MethodInterceptor {
-
-    @Override
-    public void invoke(Invocation invoke) {
-      System.out.println("before");
-      try {
-        invoke.invoke();
-        invoke.invoke();
-        invoke.invoke();
-      } catch (Throwable e) {
-        throw new RuntimeException(e);
-      } finally {
-        System.out.println("after");
-      }
-    }
-  }
 }

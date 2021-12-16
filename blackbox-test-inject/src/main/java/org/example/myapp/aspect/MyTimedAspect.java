@@ -8,7 +8,6 @@ import jakarta.inject.Singleton;
 import java.lang.reflect.Method;
 
 @Singleton
-//@Aspect(target = MyAround.class)
 public class MyTimedAspect implements AspectProvider<MyTimed>, MethodInterceptor {
 
   @Override

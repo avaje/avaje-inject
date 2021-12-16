@@ -8,12 +8,7 @@ import jakarta.inject.Singleton;
 import java.lang.reflect.Method;
 
 @Singleton
-//@Aspect(target=MyBefore.class)
 public class MyBeforeAspect implements AspectProvider<MyBefore> {
-
-//  @Aspect.Before
-//  public void beforeInvoke(Method method) {
-//  }
 
   @Override
   public MethodInterceptor interceptor(Method method, MyBefore aspectAnnotation) {
