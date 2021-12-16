@@ -101,8 +101,10 @@ class SimpleBeanProxyWriter {
   private void writeImports() {
     Set<String> aspectImports = new TreeSet<>();
     aspectImports.add("java.lang.reflect.Method");
-    aspectImports.add("io.avaje.inject.Invocation");
-    aspectImports.add("io.avaje.inject.MethodInterceptor");
+    aspectImports.add("io.avaje.inject.*");
+//    aspectImports.add("io.avaje.inject.InvocationException");
+//    aspectImports.add("io.avaje.inject.Invocation");
+//    aspectImports.add("io.avaje.inject.MethodInterceptor");
     aspectImports.add("io.avaje.inject.spi.Proxy");
     for (String aspectImport : aspectImports) {
       writer.append("import %s;", aspectImport).eol();

@@ -15,6 +15,7 @@ class AspectMethod {
   private final String rawReturn;
   private final AspectTarget aspectTarget;
   private final String simpleName;
+  private final List<? extends TypeMirror> thrownTypes;
 
   AspectMethod(ProcessingContext context, AspectPair aspect, ExecutableElement method) {
     this.aspect = aspect;
@@ -24,6 +25,7 @@ class AspectMethod {
     this.returnMirror = method.getReturnType();
     this.rawReturn = returnMirror.toString();
     this.aspectTarget = context.findAspectTarget(aspect.target());
+    this.thrownTypes = method.getThrownTypes();
   }
 
   List<MethodReader.MethodParam> initParams(List<? extends VariableElement> parameters) {
@@ -44,6 +46,9 @@ class AspectMethod {
 
   void addImports(Set<String> importTypes) {
     aspect.addImports(importTypes);
+    for (TypeMirror thrownType : method.getThrownTypes()) {
+      importTypes.add(thrownType.toString());
+    }
   }
 
   void writeMethod(Append writer) {
@@ -55,12 +60,27 @@ class AspectMethod {
       }
       params.get(i).writeMethodParam(writer);
     }
-    writer.append(") {").eol();
+    writer.append(")");
+    writeThrowsClause(writer);
+
+    writer.append(" {").eol();
     aspectTarget.writeBefore(writer, this);
     invokeSuper(writer, simpleName);
     writer.append(")").eol();
     aspectTarget.writeAfter(writer, this);
     writer.append("  }").eol();
+  }
+
+  private void writeThrowsClause(Append writer) {
+    if (!thrownTypes.isEmpty()) {
+      writer.append(" throws ");
+      for (int i = 0; i < thrownTypes.size(); i++) {
+        if (i > 0) {
+          writer.append(", ");
+        }
+        writer.append(Util.shortName(thrownTypes.get(i).toString()));
+      }
+    }
   }
 
   private void invokeSuper(Append writer, String simpleName) {
@@ -113,8 +133,24 @@ class AspectMethod {
     if (!isVoid()) {
       writer.append("      return call.finalResult();").eol();
     }
+
+    writeThrowsCatch(writer);
     writer.append("    } catch (Throwable e) {").eol();
-    writer.append("      throw new RuntimeException(e);").eol();
+    writer.append("      throw new InvocationException(e);").eol();
     writer.append("    }").eol();
+  }
+
+  private void writeThrowsCatch(Append writer) {
+    writer.append("    } catch (");
+    if (thrownTypes.isEmpty()) {
+      writer.append("InvocationException");
+    } else {
+      writer.append("InvocationException");
+      for (TypeMirror thrownType : thrownTypes) {
+        writer.append(" | ").append(Util.shortName(thrownType.toString()));
+      }
+    }
+    writer.append(" e) {").eol();
+    writer.append("      throw e;").eol();
   }
 }

@@ -3,10 +3,10 @@ package org.example.myapp;
 import io.avaje.inject.PostConstruct;
 import io.avaje.inject.PreDestroy;
 import jakarta.inject.Singleton;
-import org.example.myapp.aspect.MyAround;
-import org.example.myapp.aspect.MyBefore;
-import org.example.myapp.aspect.MyMultiInvoke;
-import org.example.myapp.aspect.MySkip;
+import org.example.myapp.aspect.*;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
 
 @Singleton
 public class HelloService {
@@ -14,6 +14,7 @@ public class HelloService {
   private final HelloData data;
 
   private int counter;
+  private String justRunResult;
 
   HelloService(HelloData data) {
     this.data = data;
@@ -40,9 +41,38 @@ public class HelloService {
   }
 
   @MyAround(name="what")
-  public String bazz(String param0, int param1) {
+  public String bazz(String param0, int param1) throws IOException {
     System.out.println("execute bazz ...");
     return "bazz " + param0 + " " + param1;
+  }
+
+  @MyAround
+  public void justRun(String param0, int param1, int param2) throws IOException, ClassNotFoundException, UncheckedIOException {
+    System.out.println("justRun ...");
+    justRunResult = param0+" "+param1+" "+param2;
+  }
+
+  @MyThrowing
+  public void thisWillThrow() {
+    System.out.println("this just never gets called");
+    throw new IllegalCallerException("never happens");
+  }
+
+  @MyAround
+  public void appCodeThrowsUnchecked() {
+    throw new IllegalArgumentException("appCodeUnchecked");
+  }
+
+  /**
+   * Declared exception is NOT wrapped in InvocationException
+   */
+  @MyAround
+  public void appCodeThrowsDeclared() throws IllegalArgumentException {
+    throw new IllegalArgumentException("appCodeDeclared");
+  }
+
+  public String justRunResult() {
+    return justRunResult;
   }
 
   @PostConstruct
