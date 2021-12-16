@@ -5,6 +5,7 @@ import io.avaje.inject.PreDestroy;
 import jakarta.inject.Singleton;
 import org.example.myapp.aspect.MyAround;
 import org.example.myapp.aspect.MyBefore;
+import org.example.myapp.aspect.MySkip;
 
 @Singleton
 public class HelloService {
@@ -17,6 +18,12 @@ public class HelloService {
 
   public String hello() {
     return "hello+" + data.helloData();
+  }
+
+  @MySkip
+  public String skipExample(String p0) {
+    // this is never called due to MySkip aspect
+    return p0;
   }
 
   @MyBefore

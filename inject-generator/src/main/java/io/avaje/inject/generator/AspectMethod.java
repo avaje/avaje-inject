@@ -109,7 +109,7 @@ class AspectMethod {
     writer.append("    try {").eol();
     writer.append("      %sInterceptor.invoke(call);", simpleName).eol();
     if (!isVoid()) {
-      writer.append("      return call.result();").eol();
+      writer.append("      return call.finalResult();").eol();
     }
     writer.append("    } catch (Throwable e) {").eol();
     writer.append("      throw new RuntimeException(e);").eol();

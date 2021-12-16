@@ -50,7 +50,7 @@ public class HelloServiceProxy extends HelloService {
     try {
       bazzInterceptor.invoke(call);
       //aroundAspect.around3(call);
-      return call.result();
+      return call.finalResult();
     } catch (Throwable e) {
       throw new RuntimeException(e);
     }

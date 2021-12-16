@@ -31,7 +31,7 @@ public class OtherServiceProxy extends OtherService {
     var invocation = new Invocation.Call<>(() -> super.other(param0, param1)).method(otherMethod).arguments(param0, param1);
     try {
       otherInterceptor.invoke(invocation);
-      return invocation.result();
+      return invocation.finalResult();
     } catch (Throwable e) {
       throw new RuntimeException(e);
     }

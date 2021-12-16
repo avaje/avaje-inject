@@ -42,7 +42,7 @@ public class ExampleServiceProxy extends ExampleService {
     try {
       final var invocation = new Invocation.CheckedCall<>(() -> super.other(param0, param1)).method(otherMethod);
       otherInterceptor.invoke(invocation);
-      return invocation.result();
+      return invocation.finalResult();
       //} catch (IOException | IllegalStateException e) {
       //  throw e;
     } catch (RuntimeException e) {

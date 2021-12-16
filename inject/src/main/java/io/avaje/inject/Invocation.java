@@ -11,6 +11,24 @@ public interface Invocation {
   void invoke() throws Throwable;
 
   /**
+   * Return the result of {@code #invoke}. This will be null for void methods.
+   * <p>
+   * If invoke is called multiple times (e.g. a retry mechanism) then this returns
+   * the result of the last successful call to {@code #invoke}.
+   */
+  Object result();
+
+  /**
+   * Set the result that will be returned to the caller.
+   * <p>
+   * This will replace a prior result set by calling {@code #invoke} or can be used
+   * to provide a result allowing to skip calling {@code #invoke} altogether.
+   *
+   * @param result The result that will be returned to the caller.
+   */
+  void result(Object result);
+
+  /**
    * Return the arguments used for this invocation.
    */
   Object[] arguments();
@@ -29,6 +47,7 @@ public interface Invocation {
 
     private Method method;
     private Object[] args;
+    protected T result;
 
     /**
      * Set the method for the invocation.
@@ -46,11 +65,21 @@ public interface Invocation {
       return this;
     }
 
+    @Override
+    public Object result() {
+      return result;
+    }
+
+    @Override
+    public void result(Object result) {
+      this.result = (T) result;
+    }
+
     /**
      * Return the invocation result. This is null for method invocations returning void.
      */
-    public T result() {
-      return null;
+    public T finalResult() {
+      return result;
     }
 
     @Override
@@ -87,7 +116,6 @@ public interface Invocation {
   final class Call<T> extends Build<T> {
 
     private final Supplier<T> delegate;
-    private T result;
 
     public Call(Supplier<T> delegate) {
       this.delegate = delegate;
@@ -99,7 +127,7 @@ public interface Invocation {
     }
 
     @Override
-    public T result() {
+    public T finalResult() {
       return result;
     }
   }
@@ -122,7 +150,7 @@ public interface Invocation {
     }
 
     @Override
-    public T result() {
+    public T finalResult() {
       return result;
     }
   }

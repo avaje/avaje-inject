@@ -19,4 +19,14 @@ class HelloServiceTest {
     assertEquals("bazz foo 42", helloService.bazz("foo", 42));
     assertEquals("hello+AppHelloData", helloService.hello());
   }
+
+  @Test
+  void skip() {
+    // just wire everything with no test scope, mocks etc
+    BeanScope beanScope = BeanScope.newBuilder().build();
+
+    HelloService helloService = beanScope.get(HelloService.class);
+    String result = helloService.skipExample("echo me back");
+    assertEquals("my-skip-result", result);
+  }
 }
