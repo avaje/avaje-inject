@@ -5,12 +5,15 @@ import io.avaje.inject.PreDestroy;
 import jakarta.inject.Singleton;
 import org.example.myapp.aspect.MyAround;
 import org.example.myapp.aspect.MyBefore;
+import org.example.myapp.aspect.MyMultiInvoke;
 import org.example.myapp.aspect.MySkip;
 
 @Singleton
 public class HelloService {
 
   private final HelloData data;
+
+  private int counter;
 
   HelloService(HelloData data) {
     this.data = data;
@@ -24,6 +27,11 @@ public class HelloService {
   public String skipExample(String p0) {
     // this is never called due to MySkip aspect
     return p0;
+  }
+
+  @MyMultiInvoke
+  int counter() {
+    return counter++;
   }
 
   @MyBefore

@@ -97,14 +97,16 @@ class AspectMethod {
   }
 
   void writeArgs(Append writer) {
-    writer.append("      .arguments(");
-    for (int i = 0, size = params.size(); i < size; i++) {
-      if (i > 0) {
-        writer.append(", ");
+    if (!params.isEmpty()) {
+      writer.append("      .arguments(");
+      for (int i = 0, size = params.size(); i < size; i++) {
+        if (i > 0) {
+          writer.append(", ");
+        }
+        writer.append(params.get(i).simpleName());
       }
-      writer.append(params.get(i).simpleName());
+      writer.append(")").eol();
     }
-    writer.append(")").eol();
     writer.append("      .method(%sMethod);", simpleName).eol();
     writer.append("    try {").eol();
     writer.append("      %sInterceptor.invoke(call);", simpleName).eol();
