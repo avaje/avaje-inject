@@ -1,7 +1,6 @@
 package io.avaje.inject;
 
 import java.lang.reflect.Method;
-import java.util.function.Supplier;
 
 /**
  * Method invocation using in {@link MethodInterceptor#invoke(Invocation)} for Aspects.
@@ -39,7 +38,7 @@ public interface Invocation {
   Method method();
 
   /**
-   * Builds Invocation.
+   * Builds Invocation for both callable and runnable methods.
    *
    * @param <T> The result type
    */
@@ -94,66 +93,39 @@ public interface Invocation {
    */
   final class Run extends Build<Void> {
 
-    private final Runnable delegate;
+    private final CheckedRunnable delegate;
 
     /**
      * Create with a given closure to run.
      */
-    public Run(Runnable delegate) {
+    public Run(CheckedRunnable delegate) {
       this.delegate = delegate;
     }
 
     @Override
-    public Object invoke() {
-      delegate.run();
+    public Object invoke() throws Throwable {
+      delegate.invoke();
       return null;
-    }
-  }
-
-  /**
-   * Callable based Invocation.
-   */
-  final class Call<T> extends Build<T> {
-
-    private final Supplier<T> delegate;
-
-    /**
-     * Create with a given supplier.
-     */
-    public Call(Supplier<T> delegate) {
-      this.delegate = delegate;
-    }
-
-    @Override
-    public Object invoke() {
-      result = delegate.get();
-      return result;
-    }
-
-    @Override
-    public T finalResult() {
-      return result;
     }
   }
 
   /**
    * Callable based Invocation with checked exceptions.
    */
-  final class CheckedCall<T> extends Build<T> {
+  final class Call<T> extends Build<T> {
 
     private final CheckedSupplier<T> delegate;
-    private T result;
 
     /**
-     * Create with a given support that can throw checked exceptions.
+     * Create with a given supplier.
      */
-    public CheckedCall(CheckedSupplier<T> delegate) {
+    public Call(CheckedSupplier<T> delegate) {
       this.delegate = delegate;
     }
 
     @Override
     public Object invoke() throws Throwable {
-      result = delegate.get();
+      result = delegate.invoke();
       return result;
     }
 
@@ -164,12 +136,22 @@ public interface Invocation {
   }
 
   /**
-   * Supplier with checked exceptions.
+   * Runnable with checked exceptions.
+   */
+  @FunctionalInterface
+  interface CheckedRunnable {
+
+    void invoke() throws Throwable;
+  }
+
+  /**
+   * Callable with checked exceptions.
    *
    * @param <T> The result type
    */
+  @FunctionalInterface
   interface CheckedSupplier<T> {
 
-    T get() throws Throwable;
+    T invoke() throws Throwable;
   }
 }
