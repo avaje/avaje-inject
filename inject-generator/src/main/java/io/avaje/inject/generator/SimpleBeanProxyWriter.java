@@ -81,10 +81,6 @@ class SimpleBeanProxyWriter {
     for (AspectMethod method : aspects.methods()) {
       method.writeSetupForMethods(writer, shortName);
     }
-    writer.eol();
-    for (AspectMethod method : aspects.methods()) {
-      method.writeSetupForMethodsInterceptor(writer);
-    }
     writer.append("    } catch (Exception e) {").eol();
     writer.append("      throw new IllegalStateException(e);").eol();
     writer.append("    }").eol();

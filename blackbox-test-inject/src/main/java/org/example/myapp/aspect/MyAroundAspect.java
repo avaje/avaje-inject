@@ -23,6 +23,7 @@ public class MyAroundAspect implements AspectProvider<MyAround>, MethodIntercept
 
   @Override
   public void invoke(Invocation invoke) throws Throwable {
+    TraceAspect.add("MyAroundAspect-begin");
     trace.add(invoke.method().getName() + " args:" + Arrays.toString(invoke.arguments()));
     System.out.println("before args: " + Arrays.toString(invoke.arguments()) + " method: " + invoke.method());
     try {
@@ -31,6 +32,7 @@ public class MyAroundAspect implements AspectProvider<MyAround>, MethodIntercept
       invoke.invoke();
     } finally {
       System.out.println("after");
+      TraceAspect.add("MyAroundAspect-end");
     }
   }
 

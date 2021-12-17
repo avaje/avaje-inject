@@ -3,9 +3,7 @@ package io.avaje.inject.generator;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 class AspectMethod {
 
@@ -18,13 +16,18 @@ class AspectMethod {
   private final String localName;
 
   AspectMethod(int nameIndex, List<AspectPair> aspectPairs, ExecutableElement method) {
-    this.aspectPairs = aspectPairs;
+    this.aspectPairs = sort(aspectPairs);
     this.method = method;
     this.simpleName = method.getSimpleName().toString();
     this.params = initParams(method.getParameters());
     this.rawReturn = method.getReturnType().toString();
     this.thrownTypes = method.getThrownTypes();
     this.localName = simpleName + nameIndex;
+  }
+
+  private List<AspectPair> sort(List<AspectPair> aspectPairs) {
+    Collections.sort(aspectPairs);
+    return aspectPairs;
   }
 
   List<MethodReader.MethodParam> initParams(List<? extends VariableElement> parameters) {
@@ -115,15 +118,13 @@ class AspectMethod {
       writer.append(".class");
     }
     writer.append(");").eol();
-  }
-
-  void writeSetupForMethodsInterceptor(Append writer) {
     for (AspectPair aspect : aspectPairs) {
       String target = aspect.target();
       String name = aspectTargetShortName(target);
       String sn = aspect.annotationShortName();
       writer.append("      %s%s = %s.interceptor(%s, %s.getAnnotation(%s.class));", localName, sn, name, localName, localName, sn).eol();
     }
+    writer.eol();
   }
 
   static String aspectTargetShortName(String target) {
@@ -142,13 +143,33 @@ class AspectMethod {
       }
       writer.append(")").eol();
     }
-    writer.append("      .method(%s);", localName).eol();
-    writer.append("    try {").eol();
-
-    for (AspectPair aspect : aspectPairs) {
-      String sn = aspect.annotationShortName();
-      writer.append("      %s%s.invoke(call);", localName, sn).eol();
+    writer.append("      .method(%s)", localName);
+    int aspectCount = aspectPairs.size();
+    if (aspectCount < 2) {
+      writer.append(";").eol();
+    } else {
+      // nesting all but last aspect
+      writer.eol();
+      writer.append("      // wrapping inner nested aspects based on ordering attribute").eol();
+      int nesting = aspectCount - 1;
+      for (int i = 0; i < nesting; i++) {
+        AspectPair aspect = aspectPairs.get(i);
+        String sn = aspect.annotationShortName();
+        writer.append("      .wrap(%s%s)", localName, sn);
+        if (i < nesting -1) {
+          writer.eol();
+        } else {
+          writer.append(";").eol();
+        }
+      }
     }
+    writer.append("    try {").eol();
+    if (aspectCount > 1) {
+      writer.append("      // outer-most aspect").eol();
+    }
+    AspectPair outerAspect = aspectPairs.get(aspectCount - 1);
+    String sn = outerAspect.annotationShortName();
+    writer.append("      %s%s.invoke(call);", localName, sn).eol();
 
     if (!isVoid()) {
       writer.append("      return call.finalResult();").eol();

@@ -17,6 +17,7 @@ public class MyTimedAspect implements AspectProvider<MyTimed>, MethodInterceptor
 
   @Override
   public void invoke(Invocation invocation) throws Throwable {
+    TraceAspect.add("MyTimedAspect-begin");
     long start = System.nanoTime();
     try {
       invocation.invoke();
@@ -24,6 +25,7 @@ public class MyTimedAspect implements AspectProvider<MyTimed>, MethodInterceptor
       long exeNanos = System.nanoTime() - start;
       String fullName = invocation.method().getName();
       System.out.println("executed " + fullName + " in " + exeNanos);
+      TraceAspect.add("MyTimedAspect-end");
     }
   }
 }

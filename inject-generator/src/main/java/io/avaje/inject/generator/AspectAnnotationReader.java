@@ -29,27 +29,53 @@ class AspectAnnotationReader {
       Element anElement = annotationMirror.getAnnotationType().asElement();
       Aspect aspect = anElement.getAnnotation(Aspect.class);
       if (aspect != null) {
-        String target = readTarget(anElement);
-        if (target != null) {
-          context.logDebug(baseType + " " + element + " has aspect:" + anElement + " target:" + target);
-          aspects.add(new AspectPair(anElement, target));
+        Meta meta = readTarget(anElement);
+        if (meta != null) {
+          context.logDebug(baseType + " " + element + " has aspect:" + anElement + " " + meta);
+          aspects.add(new AspectPair(anElement, meta.target, meta.ordering));
         }
       }
     }
     return aspects;
   }
 
-  private String readTarget(Element anElement) {
+  private Meta readTarget(Element anElement) {
     for (AnnotationMirror annotationMirror : anElement.getAnnotationMirrors()) {
       if (ASPECT.equals(annotationMirror.getAnnotationType().toString())) {
+        Meta meta = new Meta();
         for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : annotationMirror.getElementValues().entrySet()) {
-          if (entry.getKey().toString().equals("target()")) {
-            return entry.getValue().getValue().toString();
+          String key = entry.getKey().toString();
+          if (key.equals("target()")) {
+            meta.target(entry.getValue().getValue().toString());
+          } else if (key.equals("ordering()")) {
+            meta.ordering(Integer.parseInt(entry.getValue().getValue().toString()));
           }
         }
+        return meta;
       }
     }
     context.logError(baseType + " aspect target() not found on " + element);
     return null;
+  }
+
+  private static class Meta {
+    String target;
+    int ordering = 1000;
+
+    void target(String target) {
+      this.target = target;
+    }
+
+    void ordering(int ordering) {
+      this.ordering = ordering;
+    }
+
+    @Override
+    public String toString() {
+      return "Meta{" +
+        "target='" + target + '\'' +
+        ", ordering=" + ordering +
+        '}';
+    }
   }
 }

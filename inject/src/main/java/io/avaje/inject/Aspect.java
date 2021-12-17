@@ -22,4 +22,22 @@ public @interface Aspect {
    */
   Class<?> target();
 
+  /**
+   * Specify the priority ordering when multiple aspects are on a method.
+   * <p>
+   * When multiple aspects are on a method they are nested. The highest
+   * {@link #ordering()} value will be the outer-most aspect, the lowest
+   * ordering will be the inner-most aspect.
+   * <p>
+   * The outer-most aspect will have it's <em>before</em> executed first,
+   * followed by the <em>before</em> of the inner nested aspects ultimately
+   * down the invocation of the target method.
+   * <p>
+   * The reverse ordering occurs for <em>after</em> with the outer-most aspect
+   * having it's <em>after</em> executed last.
+   *
+   * @return The ordering of this aspect. High value for outer-most aspect.
+   */
+  int ordering() default 1000;
+
 }

@@ -12,13 +12,11 @@ public class OtherService {
     return "other " + param0 + " " + param1;
   }
 
-  @MyTimed
   @MyAround
+  @MyTimed
   public void multi() {
-
     System.out.println("sdsd");
   }
-
 
   public void notAopWrapped() {
     System.out.println("just a normal method");
