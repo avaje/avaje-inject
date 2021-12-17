@@ -49,14 +49,6 @@ class TypeExtendsReader {
     return extendsInjection.hasAspects();
   }
 
-//  void extraImports(Set<String> importTypes) {
-//    extendsInjection.extraImports(importTypes);
-//  }
-//
-//  List<AspectMethod> aspects() {
-//    return extendsInjection.aspects();
-//  }
-
   List<FieldReader> getInjectFields() {
     return extendsInjection.getInjectFields();
   }

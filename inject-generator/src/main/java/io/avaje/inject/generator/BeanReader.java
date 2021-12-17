@@ -10,7 +10,6 @@ import java.util.*;
 
 class BeanReader {
 
-  private final ProcessingContext context;
   private final TypeElement beanType;
   private final String shortName;
   private final String type;
@@ -34,7 +33,6 @@ class BeanReader {
 
   BeanReader(TypeElement beanType, ProcessingContext context, boolean factory) {
     this.beanType = beanType;
-    this.context = context;
     this.type = beanType.getQualifiedName().toString();
     this.shortName = shortName(beanType);
     this.primary = (beanType.getAnnotation(Primary.class) != null);

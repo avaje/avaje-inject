@@ -59,8 +59,10 @@ class AspectAnnotationReader {
   }
 
   private static class Meta {
+
     String target;
-    int ordering = 1000;
+
+    int ordering = Constants.ORDERING_DEFAULT;
 
     void target(String target) {
       this.target = target;
@@ -72,10 +74,7 @@ class AspectAnnotationReader {
 
     @Override
     public String toString() {
-      return "Meta{" +
-        "target='" + target + '\'' +
-        ", ordering=" + ordering +
-        '}';
+      return "Meta(target=" + target + ", ordering=" + ordering + ')';
     }
   }
 }

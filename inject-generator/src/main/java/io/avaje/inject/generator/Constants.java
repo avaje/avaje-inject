@@ -2,6 +2,8 @@ package io.avaje.inject.generator;
 
 class Constants {
 
+  static final int ORDERING_DEFAULT = 1000;
+
   static final String FACTORY = "$Factory";
   static final String DI = "$DI";
   static final String IO_CLOSEABLE = "java.io.Closeable";

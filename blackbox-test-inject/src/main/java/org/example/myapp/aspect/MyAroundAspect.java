@@ -14,7 +14,7 @@ import java.util.List;
 //@Aspect(target = MyAround.class)
 public class MyAroundAspect implements AspectProvider<MyAround>, MethodInterceptor {
 
-  private List<String> trace = new ArrayList<>();
+  private final List<String> trace = new ArrayList<>();
 
   @Override
   public MethodInterceptor interceptor(Method method, MyAround around) {
@@ -37,8 +37,8 @@ public class MyAroundAspect implements AspectProvider<MyAround>, MethodIntercept
   }
 
   public List<String> trace() {
-    ArrayList<String> result = new ArrayList<>(trace);
+    ArrayList<String> copy = new ArrayList<>(trace);
     trace.clear();
-    return result;
+    return copy;
   }
 }
