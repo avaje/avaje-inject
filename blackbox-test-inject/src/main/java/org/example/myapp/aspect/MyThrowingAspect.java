@@ -12,8 +12,6 @@ import java.util.List;
 @Singleton
 public class MyThrowingAspect implements AspectProvider<MyThrowing>, MethodInterceptor {
 
-  private List<String> trace = new ArrayList<>();
-
   @Override
   public MethodInterceptor interceptor(Method method, MyThrowing around) {
     return this;

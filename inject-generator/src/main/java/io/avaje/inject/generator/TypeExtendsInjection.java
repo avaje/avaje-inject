@@ -23,7 +23,8 @@ class TypeExtendsInjection {
   private final Map<String, MethodReader> injectMethods = new LinkedHashMap<>();
   private final Set<String> notInjectMethods = new HashSet<>();
   private final List<AspectMethod> aspectMethods = new ArrayList<>();
-
+  private final Map<String, Integer> nameIndex = new HashMap<>();
+  
   private final TypeElement baseType;
   private final ProcessingContext context;
   private final boolean factory;
@@ -116,8 +117,6 @@ class TypeExtendsInjection {
       checkForAspect(methodElement);
     }
   }
-
-  private final Map<String, Integer> nameIndex = new HashMap<>();
 
   private int methodNameIndex(String name) {
     Integer counter = nameIndex.get(name);

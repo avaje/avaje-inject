@@ -118,7 +118,7 @@ class SimpleBeanWriter {
     }
     writeBuildMethodStart(constructor);
     if (proxied) {
-      writer.append("    // this bean is proxied, see %s$Proxy$DI instead", shortName).eol().eol();
+      writer.append("    // this bean is proxied, see %s$Proxy$DI instead", shortName).eol();
     } else {
       writeAddFor(constructor);
     }

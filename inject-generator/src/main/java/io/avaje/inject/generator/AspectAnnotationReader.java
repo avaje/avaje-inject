@@ -31,7 +31,6 @@ class AspectAnnotationReader {
       if (aspect != null) {
         Meta meta = readTarget(anElement);
         if (meta != null) {
-          context.logDebug(baseType + " " + element + " has aspect:" + anElement + " " + meta);
           aspects.add(new AspectPair(anElement, meta.target, meta.ordering));
         }
       }
