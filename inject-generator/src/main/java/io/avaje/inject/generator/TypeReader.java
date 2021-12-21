@@ -50,6 +50,10 @@ class TypeReader {
     importTypes.addAll(this.importTypes);
   }
 
+  BeanAspects hasAspects() {
+    return extendsReader.hasAspects();
+  }
+
   List<FieldReader> getInjectFields() {
     return extendsReader.getInjectFields();
   }

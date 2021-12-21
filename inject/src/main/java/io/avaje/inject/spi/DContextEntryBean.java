@@ -95,7 +95,7 @@ class DContextEntryBean {
 
     @Override
     Object getBean() {
-      // its a provider, get it once
+      // it's a provider, get it once
       if (actualBean == null) {
         actualBean = ((Provider<?>) source).get();
       }

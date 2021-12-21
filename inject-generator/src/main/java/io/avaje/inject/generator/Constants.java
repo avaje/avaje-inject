@@ -2,6 +2,8 @@ package io.avaje.inject.generator;
 
 class Constants {
 
+  static final int ORDERING_DEFAULT = 1000;
+
   static final String FACTORY = "$Factory";
   static final String DI = "$DI";
   static final String IO_CLOSEABLE = "java.io.Closeable";
@@ -19,6 +21,7 @@ class Constants {
   static final String CONTROLLER = "io.avaje.http.api.Controller";
 
   static final String AT_SINGLETON = "@Singleton";
+  static final String AT_PROXY = "@Proxy";
   static final String AT_GENERATED = "@Generated(\"io.avaje.inject.generator\")";
   static final String META_INF_MODULE = "META-INF/services/io.avaje.inject.spi.Module";
   static final String META_INF_TESTMODULE = "META-INF/services/io.avaje.inject.test.TestModule";
@@ -26,6 +29,13 @@ class Constants {
 
   static final String BEANSCOPE = "io.avaje.inject.BeanScope";
   static final String INJECTMODULE = "io.avaje.inject.InjectModule";
+
+  static final String REFLECT_METHOD = "java.lang.reflect.Method";
+  static final String ASPECT = "io.avaje.inject.aop.Aspect";
+  static final String INVOCATION = "io.avaje.inject.aop.Invocation";
+  static final String INVOCATION_EXCEPTION = "io.avaje.inject.aop.InvocationException";
+  static final String METHOD_INTERCEPTOR = "io.avaje.inject.aop.MethodInterceptor";
+  static final String PROXY = "io.avaje.inject.spi.Proxy";
 
   static final String GENERATED = "io.avaje.inject.spi.Generated";
   static final String BEAN_FACTORY = "io.avaje.inject.spi.BeanFactory";

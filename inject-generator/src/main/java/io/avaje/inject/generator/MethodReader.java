@@ -231,6 +231,39 @@ class MethodReader {
     return !element.getModifiers().contains(Modifier.PRIVATE);
   }
 
+  void writeConstructorParams(Append writer) {
+    for (MethodParam param : params) {
+      writer.append(", ");
+      param.writeMethodParam(writer);
+    }
+  }
+
+  void writeConstructorInit(Append writer) {
+    for (int i = 0, size = params.size(); i < size; i++) {
+      if (i > 0) {
+        writer.append(", ");
+      }
+      params.get(i).writeConstructorInit(writer);
+    }
+  }
+
+  void writeAspectBefore(Append writer, String targetName) {
+    writer.append("    // %s.%s( ... ", targetName, methodName);
+    for (int i = 0, size = params.size(); i < size; i++) {
+      if (i > 0) {
+        writer.append(", ");
+      }
+      params.get(i).writeConstructorInit(writer);
+    }
+    writer.append(");", targetName, methodName);
+    writer.eol();
+  }
+
+  void writeAspectAround(Append writer, String targetName) {
+    writer.append("    // %s %s aroundAspect", targetName, methodName);
+    writer.eol();
+  }
+
   static class MethodParam {
 
     private final String named;
@@ -286,6 +319,10 @@ class MethodReader {
 
     private String providerParam() {
       return Util.shortName(Util.unwrapProvider(paramType));
+    }
+
+    String simpleName() {
+      return simpleName;
     }
 
     boolean isProvider() {
@@ -345,5 +382,25 @@ class MethodReader {
       return Util.shortName(raw);
     }
 
+    void writeMethodParam(Append writer) {
+      if (genericType != null) {
+        genericType.writeShort(writer);
+      } else {
+        writer.append(Util.shortName(paramType));
+      }
+      writer.append(" ").append(simpleName);
+    }
+
+    void writeMethodParamType(Append writer) {
+      if (genericType != null) {
+        genericType.writeShort(writer);
+      } else {
+        writer.append(Util.shortName(paramType));
+      }
+    }
+
+    void writeConstructorInit(Append writer) {
+      writer.append(simpleName);
+    }
   }
 }

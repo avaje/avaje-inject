@@ -6,6 +6,7 @@ import jakarta.inject.Named;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.*;
 
@@ -21,10 +22,13 @@ class TypeExtendsInjection {
   private final List<FieldReader> injectFields = new ArrayList<>();
   private final Map<String, MethodReader> injectMethods = new LinkedHashMap<>();
   private final Set<String> notInjectMethods = new HashSet<>();
+  private final List<AspectMethod> aspectMethods = new ArrayList<>();
+  private final Map<String, Integer> nameIndex = new HashMap<>();
 
   private final TypeElement baseType;
   private final ProcessingContext context;
   private final boolean factory;
+  private final List<AspectPair> typeAspects;
   private Element postConstructMethod;
   private Element preDestroyMethod;
 
@@ -32,6 +36,9 @@ class TypeExtendsInjection {
     this.baseType = baseType;
     this.context = context;
     this.factory = factory;
+
+    AspectAnnotationReader reader = new AspectAnnotationReader(context, baseType, baseType);
+    this.typeAspects = reader.read();
   }
 
   void read(TypeElement type) {
@@ -76,11 +83,13 @@ class TypeExtendsInjection {
   }
 
   private void readMethod(Element element, TypeElement type) {
+    boolean checkAspect = true;
     ExecutableElement methodElement = (ExecutableElement) element;
     if (factory) {
       Bean bean = element.getAnnotation(Bean.class);
       if (bean != null) {
         addFactoryMethod(methodElement, bean);
+        checkAspect = false;
       }
     }
     Inject inject = element.getAnnotation(Inject.class);
@@ -90,6 +99,7 @@ class TypeExtendsInjection {
         MethodReader methodReader = new MethodReader(context, methodElement, type).read();
         if (methodReader.isNotPrivate()) {
           injectMethods.put(methodKey, methodReader);
+          checkAspect = false;
         }
       }
     } else {
@@ -97,11 +107,42 @@ class TypeExtendsInjection {
     }
     if (AnnotationUtil.hasAnnotationWithName(element, "PostConstruct")) {
       postConstructMethod = element;
+      checkAspect = false;
     }
     if (AnnotationUtil.hasAnnotationWithName(element, "PreDestroy")) {
       preDestroyMethod = element;
+      checkAspect = false;
+    }
+    if (checkAspect) {
+      checkForAspect(methodElement);
     }
   }
+
+  private int methodNameIndex(String name) {
+    Integer counter = nameIndex.get(name);
+    if (counter == null) {
+      nameIndex.put(name, 1);
+      return 0;
+    } else {
+      nameIndex.put(name, counter + 1);
+      return counter;
+    }
+  }
+
+  private void checkForAspect(ExecutableElement methodElement) {
+    Set<Modifier> modifiers = methodElement.getModifiers();
+    if (modifiers.contains(Modifier.PRIVATE) || modifiers.contains(Modifier.STATIC) || modifiers.contains(Modifier.ABSTRACT)) {
+      return;
+    }
+    int nameIndex = methodNameIndex(methodElement.getSimpleName().toString());
+    List<AspectPair> aspectPairs = new AspectAnnotationReader(context, baseType, methodElement).read();
+    if (!aspectPairs.isEmpty()) {
+      aspectMethods.add(new AspectMethod(nameIndex, aspectPairs, methodElement));
+    } else if (!typeAspects.isEmpty()) {
+      aspectMethods.add(new AspectMethod(nameIndex, typeAspects, methodElement));
+    }
+  }
+
 
   private void addFactoryMethod(ExecutableElement methodElement, Bean bean) {
     // Not yet reading Qualifier annotations, Named only at this stage
@@ -109,8 +150,12 @@ class TypeExtendsInjection {
     factoryMethods.add(new MethodReader(context, methodElement, baseType, bean, named).read());
   }
 
+  BeanAspects hasAspects() {
+    return aspectMethods.isEmpty() ? BeanAspects.EMPTY : new BeanAspects(aspectMethods);
+  }
+
   List<FieldReader> getInjectFields() {
-    List<FieldReader> list = new ArrayList(injectFields);
+    List<FieldReader> list = new ArrayList<>(injectFields);
     Collections.reverse(list);
     return list;
   }

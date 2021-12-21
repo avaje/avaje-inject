@@ -5,6 +5,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Read the inheritance types for a given bean type.
@@ -42,6 +43,10 @@ class TypeExtendsReader {
 
   String getQualifierName() {
     return qualifierName;
+  }
+
+  BeanAspects hasAspects() {
+    return extendsInjection.hasAspects();
   }
 
   List<FieldReader> getInjectFields() {
