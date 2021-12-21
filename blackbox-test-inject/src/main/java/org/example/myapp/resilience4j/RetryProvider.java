@@ -6,7 +6,7 @@ import io.avaje.inject.aop.Invocation;
 import io.avaje.inject.aop.MethodInterceptor;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 
 import java.lang.reflect.Method;
 import java.time.Duration;

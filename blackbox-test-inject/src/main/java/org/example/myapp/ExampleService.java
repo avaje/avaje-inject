@@ -1,6 +1,6 @@
 package org.example.myapp;
 
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 import org.example.myapp.aspect.MyTimed;
 
 import java.io.IOException;

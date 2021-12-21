@@ -1,6 +1,6 @@
 package org.example.myapp.r4j;
 
-import jakarta.inject.Singleton;
+import javax.inject.Singleton;
 import org.example.myapp.resilience4j.MyRetry;
 
 @Singleton
