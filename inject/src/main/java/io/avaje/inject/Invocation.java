@@ -1,6 +1,7 @@
 package io.avaje.inject;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * Method invocation using in {@link MethodInterceptor#invoke(Invocation)} for Aspects.
@@ -33,9 +34,21 @@ public interface Invocation {
   Object[] arguments();
 
   /**
+   * Return the arguments additionally appending the throwable.
+   */
+  Object[] arguments(Throwable e);
+
+  /**
    * Return the method being called for this invocation.
    */
   Method method();
+
+  /**
+   * Return the 'this' instance of the invocation.
+   * <p>
+   * This is typically used when invoking fallback/recovery methods.
+   */
+  Object instance();
 
   /**
    * Builds Invocation for both callable and runnable methods.
@@ -46,20 +59,15 @@ public interface Invocation {
 
     protected Method method;
     protected Object[] args;
+    protected Object instance;
     protected T result;
 
     /**
-     * Set the method for the invocation.
+     * Set the instance, method and arguments for the invocation.
      */
-    public Build<T> method(Method method) {
+    public Build<T> with(Object instance, Method method, Object... args) {
+      this.instance = instance;
       this.method = method;
-      return this;
-    }
-
-    /**
-     * Set the arguments for the invocation.
-     */
-    public Build<T> arguments(Object... args) {
       this.args = args;
       return this;
     }
@@ -83,8 +91,24 @@ public interface Invocation {
     }
 
     @Override
+    public Object[] arguments(Throwable e) {
+      if (args == null || args.length == 0) {
+        return new Object[]{e};
+      } else {
+        Object[] newArgs = Arrays.copyOf(args, args.length + 1);
+        newArgs[args.length] = e;
+        return newArgs;
+      }
+    }
+
+    @Override
     public Method method() {
       return method;
+    }
+
+    @Override
+    public Object instance() {
+      return instance;
     }
 
     /**
@@ -121,8 +145,7 @@ public interface Invocation {
     @Override
     public Build<Void> wrap(MethodInterceptor methodInterceptor) {
       return new Invocation.Run(() -> methodInterceptor.invoke(this))
-        .arguments(args)
-        .method(method);
+        .with(instance, method, args);
     }
 
   }
@@ -158,9 +181,7 @@ public interface Invocation {
         final Call<T> delegate = this;
         methodInterceptor.invoke(delegate);
         return delegate.finalResult();
-      })
-        .arguments(args)
-        .method(method);
+      }).with(instance, method, args);
     }
   }
 
@@ -170,6 +191,9 @@ public interface Invocation {
   @FunctionalInterface
   interface CheckedRunnable {
 
+    /**
+     * Invoke the method.
+     */
     void invoke() throws Throwable;
   }
 
@@ -181,6 +205,9 @@ public interface Invocation {
   @FunctionalInterface
   interface CheckedSupplier<T> {
 
+    /**
+     * Invoke the method returning the result.
+     */
     T invoke() throws Throwable;
   }
 }

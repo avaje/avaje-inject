@@ -45,8 +45,7 @@ public class HelloServiceProxy extends HelloService {
   @Override
   public String bazz(String param0, int param1) {
     var call = new Invocation.Call<>(() -> super.bazz(param0, param1))
-      .arguments(param0, param1)
-      .method(bazzMethod);
+      .with(this, bazzMethod, param0, param1);
     try {
       bazzInterceptor.invoke(call);
       //aroundAspect.around3(call);

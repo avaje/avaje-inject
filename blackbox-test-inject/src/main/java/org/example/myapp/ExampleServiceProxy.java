@@ -40,7 +40,9 @@ public class ExampleServiceProxy extends ExampleService {
   @Override
   public String other(String param0, int param1) {// throws IOException, IllegalStateException {
     try {
-      final var invocation = new Invocation.Call<>(() -> super.other(param0, param1)).method(otherMethod);
+      final var invocation = new Invocation.Call<>(() -> super.other(param0, param1))
+        .with(this, otherMethod);
+
       otherInterceptor.invoke(invocation);
       return invocation.finalResult();
       //} catch (IOException | IllegalStateException e) {
@@ -56,7 +58,8 @@ public class ExampleServiceProxy extends ExampleService {
   @Override
   public void runOnly(String param) {
     try {
-      final var invocation = new Invocation.Run(() -> super.runOnly(param)).method(runOnlyMethod);
+      final var invocation = new Invocation.Run(() -> super.runOnly(param))
+        .with(this, runOnlyMethod);
       runOnlyInterceptor.invoke(invocation);
     } catch (Throwable e) {
       throw new IllegalStateException(e);

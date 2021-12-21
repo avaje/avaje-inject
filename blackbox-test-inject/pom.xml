@@ -14,6 +14,8 @@
 
   <properties>
     <java.version>11</java.version>
+    <resilience4jVersion></resilience4jVersion>
+
   </properties>
 
   <dependencies>
@@ -22,6 +24,18 @@
       <groupId>io.avaje</groupId>
       <artifactId>avaje-inject</artifactId>
       <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.github.resilience4j</groupId>
+      <artifactId>resilience4j-retry</artifactId>
+      <version>1.7.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.github.resilience4j</groupId>
+      <artifactId>resilience4j-annotations</artifactId>
+      <version>1.7.1</version>
     </dependency>
 
     <!-- annotation processor -->

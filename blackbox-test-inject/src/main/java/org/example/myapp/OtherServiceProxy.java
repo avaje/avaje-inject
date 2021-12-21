@@ -28,7 +28,8 @@ public class OtherServiceProxy extends OtherService {
 
   @Override
   public String other(String param0, int param1) {
-    var invocation = new Invocation.Call<>(() -> super.other(param0, param1)).method(otherMethod).arguments(param0, param1);
+    var invocation = new Invocation.Call<>(() -> super.other(param0, param1))
+      .with(this, otherMethod, param0, param1);
     try {
       otherInterceptor.invoke(invocation);
       return invocation.finalResult();

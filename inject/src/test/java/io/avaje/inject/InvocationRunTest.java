@@ -35,8 +35,7 @@ class InvocationRunTest {
   @Test
   void single() throws Throwable {
     Invocation.Build<Void> call = new Invocation.Run(() -> this.doStuff(myArg))
-      .arguments(myArg)
-      .method(doStuffMethod);
+      .with(this, doStuffMethod, myArg);
 
     new Inter0().invoke(call);
 
@@ -49,8 +48,7 @@ class InvocationRunTest {
   @Test
   void wrapped() throws Throwable {
     Invocation.Build<Void> call = new Invocation.Run(() -> this.doStuff(myArg))
-      .arguments(myArg)
-      .method(doStuffMethod)
+      .with(this, doStuffMethod, myArg)
       .wrap(new Inter0());
 
     new Inter1().invoke(call);
@@ -64,8 +62,7 @@ class InvocationRunTest {
   @Test
   void wrapped_wrapped() throws Throwable {
     Invocation.Build<Void> call = new Invocation.Run(() -> this.doStuff(myArg))
-      .arguments(myArg)
-      .method(doStuffMethod)
+      .with(this, doStuffMethod, myArg)
       .wrap(new Inter0())
       .wrap(new Inter1());
 
