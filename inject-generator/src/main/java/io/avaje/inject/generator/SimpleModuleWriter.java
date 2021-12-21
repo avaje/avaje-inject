@@ -43,14 +43,6 @@ class SimpleModuleWriter {
       "   * field injection, method injection and lifecycle support.\n" +
       "   */";
 
-  private static final String CLASSES_COMMENT =
-    "  /**\n" +
-    "   * Return public classes of the beans that would be registered by this module.\n" +
-    "   * <p>\n" +
-    "   * This method allows code to use reflection to inspect the modules classes \n" +
-    "   * before the module is wired. This method is not required for DI wiring.\n" +
-    "   */";
-
   private final ProcessingContext context;
   private final String modulePackage;
   private final String shortName;
@@ -99,8 +91,8 @@ class SimpleModuleWriter {
 
   private void writeClassesMethod() {
     Set<String> allClasses = distinctPublicClasses();
-    writer.append(CLASSES_COMMENT).eol();
-    writer.append("  public static Class<?>[] classes() {").eol();
+    writer.append("  @Override").eol();
+    writer.append("  public Class<?>[] classes() {").eol();
     writer.append("    return new Class<?>[]{").eol();
     for (String rawType : allClasses) {
       writer.append("      %s.class,", rawType).eol();

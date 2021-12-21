@@ -118,6 +118,11 @@ public class BeanScopeBuilderTest {
     }
 
     @Override
+    public Class<?>[] classes() {
+      return new Class[0];
+    }
+
+    @Override
     public Class<?>[] requires() {
       return requires;
     }

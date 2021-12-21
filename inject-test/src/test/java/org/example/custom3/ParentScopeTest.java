@@ -50,7 +50,8 @@ class ParentScopeTest {
 
   @Test
   void module_classes() {
-    Class<?>[] classes = MyThreeModule.classes();
+    MyThreeModule module = new MyThreeModule();
+    Class<?>[] classes = module.classes();
     Set<Class<?>> asSet = new HashSet<>(Arrays.asList(classes));
 
     assertThat(asSet).contains(

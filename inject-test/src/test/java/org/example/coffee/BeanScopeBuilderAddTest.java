@@ -41,6 +41,11 @@ class BeanScopeBuilderAddTest {
     }
 
     @Override
+    public Class<?>[] classes() {
+      return new Class[0];
+    }
+
+    @Override
     public void build(Builder builder) {
       // do nothing
     }
