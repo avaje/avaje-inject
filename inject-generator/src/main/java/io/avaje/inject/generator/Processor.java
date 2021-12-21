@@ -2,6 +2,7 @@ package io.avaje.inject.generator;
 
 import io.avaje.inject.Factory;
 import io.avaje.inject.InjectModule;
+import io.avaje.inject.spi.Proxy;
 import javax.inject.Scope;
 import javax.inject.Singleton;
 
@@ -61,11 +62,13 @@ public class Processor extends AbstractProcessor {
     Set<? extends Element> factoryBeans = roundEnv.getElementsAnnotatedWith(Factory.class);
     Set<? extends Element> beans = roundEnv.getElementsAnnotatedWith(Singleton.class);
     Set<? extends Element> scopes = roundEnv.getElementsAnnotatedWith(Scope.class);
+    Set<? extends Element> proxies = roundEnv.getElementsAnnotatedWith(Proxy.class);
     readScopes(scopes);
     readModule(roundEnv);
     readChangedBeans(factoryBeans, true);
     readChangedBeans(beans, false);
     readChangedBeans(controllers, false);
+    readChangedBeans(proxies, false);
     allScopes.readBeans(roundEnv);
     defaultScope.write(roundEnv.processingOver());
     allScopes.write(roundEnv.processingOver());
