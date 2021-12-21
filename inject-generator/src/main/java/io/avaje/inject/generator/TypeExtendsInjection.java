@@ -24,7 +24,7 @@ class TypeExtendsInjection {
   private final Set<String> notInjectMethods = new HashSet<>();
   private final List<AspectMethod> aspectMethods = new ArrayList<>();
   private final Map<String, Integer> nameIndex = new HashMap<>();
-  
+
   private final TypeElement baseType;
   private final ProcessingContext context;
   private final boolean factory;
