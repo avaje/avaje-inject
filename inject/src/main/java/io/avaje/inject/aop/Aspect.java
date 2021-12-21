@@ -1,4 +1,4 @@
-package io.avaje.inject;
+package io.avaje.inject.aop;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

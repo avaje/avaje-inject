@@ -1,9 +1,9 @@
 package org.example.myapp.resilience4j;
 
-import io.avaje.inject.AspectProvider;
-import io.avaje.inject.Fallback;
-import io.avaje.inject.Invocation;
-import io.avaje.inject.MethodInterceptor;
+import io.avaje.inject.aop.AspectProvider;
+import io.avaje.inject.aop.Fallback;
+import io.avaje.inject.aop.Invocation;
+import io.avaje.inject.aop.MethodInterceptor;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import jakarta.inject.Singleton;

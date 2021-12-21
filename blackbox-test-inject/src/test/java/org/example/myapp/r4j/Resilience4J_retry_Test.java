@@ -1,7 +1,7 @@
 package org.example.myapp.r4j;
 
 import io.avaje.inject.BeanScope;
-import io.avaje.inject.InvocationException;
+import io.avaje.inject.aop.InvocationException;
 import org.example.myapp.resilience4j.RetryProvider;
 import org.junit.jupiter.api.Test;
 

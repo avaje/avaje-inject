@@ -1,13 +1,12 @@
 package org.example.myapp.aspect;
 
-import io.avaje.inject.AspectProvider;
-import io.avaje.inject.Invocation;
-import io.avaje.inject.MethodInterceptor;
+import io.avaje.inject.aop.AspectProvider;
+import io.avaje.inject.aop.Invocation;
+import io.avaje.inject.aop.MethodInterceptor;
 import jakarta.inject.Singleton;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Singleton

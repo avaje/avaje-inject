@@ -1,6 +1,6 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.Aspect;
+import io.avaje.inject.aop.Aspect;
 
 import javax.lang.model.element.*;
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import java.util.Map;
  */
 class AspectAnnotationReader {
 
-  private static final String ASPECT = "io.avaje.inject.Aspect";
+  private static final String ASPECT = Constants.ASPECT;
   private final TypeElement baseType;
   private final Element element;
   private final ProcessingContext context;

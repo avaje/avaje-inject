@@ -1,4 +1,4 @@
-package io.avaje.inject;
+package io.avaje.inject.aop;
 
 import org.junit.jupiter.api.Test;
 

@@ -1,6 +1,6 @@
 package org.example.myapp.aspect;
 
-import io.avaje.inject.Aspect;
+import io.avaje.inject.aop.Aspect;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

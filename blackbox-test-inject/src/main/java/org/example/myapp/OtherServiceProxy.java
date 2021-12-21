@@ -1,7 +1,7 @@
 package org.example.myapp;
 
-import io.avaje.inject.Invocation;
-import io.avaje.inject.MethodInterceptor;
+import io.avaje.inject.aop.Invocation;
+import io.avaje.inject.aop.MethodInterceptor;
 import org.example.myapp.aspect.MyAround;
 import org.example.myapp.aspect.MyAroundAspect;
 

@@ -1,7 +1,7 @@
 package org.example.myapp;
 
 import io.avaje.inject.BeanScope;
-import io.avaje.inject.InvocationException;
+import io.avaje.inject.aop.InvocationException;
 import org.example.myapp.aspect.MyAroundAspect;
 import org.example.myapp.aspect.MyMultiInvokeAspect;
 import org.junit.jupiter.api.Test;
