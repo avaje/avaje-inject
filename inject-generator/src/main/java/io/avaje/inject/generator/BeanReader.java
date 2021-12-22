@@ -7,6 +7,7 @@ import io.avaje.inject.spi.Proxy;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.*;
+import java.util.stream.Collectors;
 
 class BeanReader {
 
@@ -187,6 +188,9 @@ class BeanReader {
       importTypes.add(type);
     }
     typeReader.extraImports(importTypes);
+    factoryMethods.forEach(methodReader -> {
+      methodReader.factoryImports(importTypes);
+    });
     requestParams.addImports(importTypes);
     aspects.extraImports(importTypes);
 
