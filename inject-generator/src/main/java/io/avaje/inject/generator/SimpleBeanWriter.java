@@ -77,11 +77,13 @@ class SimpleBeanWriter {
   private void writeGenericTypeFields() {
     // collect all types to prevent duplicates
     Set<GenericType> genericTypes = new HashSet<>();
-    if (beanReader.getGenericTypes()!=null) {
+    if (beanReader.getGenericTypes() != null) {
       genericTypes.addAll(beanReader.getGenericTypes());
     }
-    for (MethodReader factoryMethod : beanReader.getFactoryMethods()) {
-      genericTypes.addAll(factoryMethod.getGenericTypes());
+    if (beanReader.getFactoryMethods() != null) {
+      for (MethodReader factoryMethod : beanReader.getFactoryMethods()) {
+        genericTypes.addAll(factoryMethod.getGenericTypes());
+      }
     }
     if (!genericTypes.isEmpty()) {
       for (GenericType type : genericTypes) {

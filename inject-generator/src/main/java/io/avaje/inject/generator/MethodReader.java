@@ -6,8 +6,11 @@ import jakarta.inject.Named;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class MethodReader {
 
@@ -178,7 +181,21 @@ class MethodReader {
   }
 
   Set<GenericType> getGenericTypes() {
-    return typeReader.getGenericTypes();
+    return typeReader != null ? typeReader.getGenericTypes() : Collections.emptySet();
+  }
+
+  void factoryImports(Set<String> importTypes) {
+    Set<GenericType> genericTypes = getGenericTypes();
+    if (!genericTypes.isEmpty()) {
+      importTypes.add(Constants.TYPE);
+      importTypes.add(Constants.GENERICTYPE);
+      importTypes.addAll(genericTypes
+        .stream()
+        .flatMap(g-> Stream.concat(
+          Stream.of(g.getMainType()),
+          g.getParams().stream().map(GenericType::getMainType)))
+        .collect(Collectors.toSet()));
+    }
   }
 
   void buildAddFor(Append writer) {
@@ -267,6 +284,7 @@ class MethodReader {
     writer.append("    // %s %s aroundAspect", targetName, methodName);
     writer.eol();
   }
+
 
   static class MethodParam {
 
