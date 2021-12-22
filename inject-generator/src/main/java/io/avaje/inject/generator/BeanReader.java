@@ -189,6 +189,19 @@ class BeanReader {
     typeReader.extraImports(importTypes);
     requestParams.addImports(importTypes);
     aspects.extraImports(importTypes);
+
+    for (MethodReader factoryMethod : factoryMethods) {
+      Set<GenericType> genericTypes = factoryMethod.getGenericTypes();
+      if (!genericTypes.isEmpty()) {
+        importTypes.add(Constants.TYPE);
+        importTypes.add(Constants.GENERICTYPE);
+        importTypes.add(Constants.PROVIDER);
+        for (GenericType genericType : genericTypes) {
+          genericType.addImports(importTypes);
+        }
+      }
+    }
+
     return importTypes;
   }
 

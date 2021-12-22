@@ -6,6 +6,7 @@ import javax.inject.Named;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -175,6 +176,10 @@ class MethodReader {
     if (typeReader != null) {
       typeReader.addImports(importTypes);
     }
+  }
+
+  Set<GenericType> getGenericTypes() {
+    return typeReader == null ? Collections.emptySet() : typeReader.getGenericTypes();
   }
 
   void buildAddFor(Append writer) {
