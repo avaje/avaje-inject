@@ -4,6 +4,7 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -74,8 +75,15 @@ class SimpleBeanWriter {
   }
 
   private void writeGenericTypeFields() {
-    final Set<GenericType> genericTypes = beanReader.getGenericTypes();
-    if (genericTypes != null && !genericTypes.isEmpty()) {
+    // collect all types to prevent duplicates
+    Set<GenericType> genericTypes = new HashSet<>();
+    if (beanReader.getGenericTypes()!=null) {
+      genericTypes.addAll(beanReader.getGenericTypes());
+    }
+    for (MethodReader factoryMethod : beanReader.getFactoryMethods()) {
+      genericTypes.addAll(factoryMethod.getGenericTypes());
+    }
+    if (!genericTypes.isEmpty()) {
       for (GenericType type : genericTypes) {
         writer.append("  public static final Type TYPE_%s = new GenericType<", type.shortName());
         type.writeShort(writer);

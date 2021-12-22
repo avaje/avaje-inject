@@ -177,6 +177,10 @@ class MethodReader {
     }
   }
 
+  Set<GenericType> getGenericTypes() {
+    return typeReader.getGenericTypes();
+  }
+
   void buildAddFor(Append writer) {
     writer.append("    if (builder.isAddBeanFor(");
     if (isVoid) {
