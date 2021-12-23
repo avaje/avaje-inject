@@ -1,8 +1,6 @@
 package org.example.coffee;
 
 import io.avaje.inject.BeanScope;
-import org.example.coffee.factory.BFact;
-import org.example.coffee.factory.BeanWithGenericInterface;
 import org.example.coffee.inner.InnerClassBean;
 import org.junit.jupiter.api.Test;
 
