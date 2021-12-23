@@ -1,8 +1,8 @@
 package org.example.optional;
 
 import io.avaje.inject.Secondary;
-import jakarta.inject.Named;
-import jakarta.inject.Singleton;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 @Singleton
 @Named("defaultBazz")
