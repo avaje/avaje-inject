@@ -8,11 +8,22 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class UtilTest {
+class UtilTest {
 
   @Test
-  public void commonParent() {
+  void nestedShortName() {
+    assertEquals(Util.nestedShortName("com.example.Foo.Bar"), "Foo.Bar");
+    assertEquals(Util.nestedShortName("com.example.foo.Bar"), "foo.Bar");
+  }
 
+  @Test
+  void nestedPackageOf() {
+    assertEquals(Util.nestedPackageOf("com.example.Foo.Bar"), "com.example");
+    assertEquals(Util.nestedPackageOf("com.example.other.foo.Bar"), "com.example.other");
+  }
+
+  @Test
+  void commonParent() {
     assertEquals(Util.commonParent(null, "org.b"), "org.b");
     assertEquals(Util.commonParent("org.a", null), "org.a");
 
@@ -24,31 +35,31 @@ public class UtilTest {
   }
 
   @Test
-  public void extractList() {
+  void extractList() {
     assertEquals("Foo", Util.extractList("List<? extends Foo>"));
     assertEquals("org.foo.Bar", Util.extractList("List<? extends org.foo.Bar>"));
   }
 
   @Test
-  public void extractSet() {
+  void extractSet() {
     assertEquals("Foo", Util.extractSet("Set<? extends Foo>"));
     assertEquals("org.foo.Bar", Util.extractSet("Set<? extends org.foo.Bar>"));
   }
 
   @Test
-  public void addForInterface() {
+  void addForInterface() {
     assertNull(Util.addForInterface("java.util.List<Some>"));
     assertEquals("Bar", Util.addForInterface("com.foo.Bar"));
   }
 
   @Test
-  public void validImportType() {
+  void validImportType() {
     assertTrue(Util.validImportType("my.Foo"));
     assertTrue(Util.validImportType("other.pack.Foo"));
   }
 
   @Test
-  public void validImportType_not() {
+  void validImportType_not() {
     assertFalse(Util.validImportType("void"));
     assertFalse(Util.validImportType("Foo"));
     assertFalse(Util.validImportType("NoPackage"));
