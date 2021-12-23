@@ -31,13 +31,22 @@ class SimpleBeanWriter {
     this.context = context;
     TypeElement origin = beanReader.getBeanType();
     this.originName = origin.getQualifiedName().toString();
-    this.shortName = origin.getSimpleName().toString();
-    this.packageName = Util.packageOf(originName);
+    if (origin.getNestingKind().isNested()) {
+      this.packageName = Util.nestedPackageOf(originName);
+      this.shortName = Util.nestedShortName(originName);
+    } else {
+      this.packageName = Util.packageOf(originName);
+      this.shortName = Util.shortName(originName);
+    }
     this.suffix = beanReader.suffix();
     this.proxied = beanReader.isGenerateProxy();
   }
 
   private Writer createFileWriter() throws IOException {
+    String originName = this.originName;
+    if (beanReader.getBeanType().getNestingKind().isNested()) {
+      originName = originName.replace(shortName, shortName.replace(".", "$"));
+    }
     JavaFileObject jfo = context.createWriter(originName + suffix);
     return jfo.openWriter();
   }
@@ -66,7 +75,7 @@ class SimpleBeanWriter {
         final String sn = type.shortName();
         writer.append("  public static Provider<");
         type.writeShort(writer);
-        writer.append("> provider%s(Builder builder) {",  sn).eol();
+        writer.append("> provider%s(Builder builder) {", sn).eol();
         writer.append("    return builder.getProviderFor(%s.class, TYPE_%s);", shortName, sn).eol();
         writer.append("  }").eol();
       }
@@ -220,6 +229,10 @@ class SimpleBeanWriter {
     writer.append(Constants.AT_GENERATED).eol();
     if (beanReader.isRequestScopedController()) {
       writer.append(Constants.AT_SINGLETON).eol();
+    }
+    String shortName = this.shortName;
+    if (beanReader.getBeanType().getNestingKind().isNested()) {
+      shortName = shortName.replace(".", "$");
     }
     writer.append("public class ").append(shortName).append(suffix).append(" ");
     if (beanReader.isRequestScopedController()) {
