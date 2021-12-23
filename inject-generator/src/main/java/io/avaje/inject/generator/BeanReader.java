@@ -84,8 +84,8 @@ class BeanReader {
     return this;
   }
 
-  List<String> getDependsOn() {
-    List<String> list = new ArrayList<>();
+  List<Dependency> getDependsOn() {
+    List<Dependency> list = new ArrayList<>();
     if (constructor != null) {
       for (MethodReader.MethodParam param : constructor.getParams()) {
         list.add(param.getDependsOn());
