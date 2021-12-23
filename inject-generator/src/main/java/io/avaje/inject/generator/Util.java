@@ -2,6 +2,7 @@ package io.avaje.inject.generator;
 
 import jakarta.inject.Named;
 import jakarta.inject.Qualifier;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
@@ -46,6 +47,15 @@ class Util {
     return type.substring(0, i);
   }
 
+  static String nestedPackageOf(String cls) {
+    int pos = cls.lastIndexOf('.');
+    if (pos < 0) {
+      return "";
+    }
+    pos = cls.lastIndexOf('.', pos - 1);
+    return (pos == -1) ? "" : cls.substring(0, pos);
+  }
+
   static String packageOf(String cls) {
     int pos = cls.lastIndexOf('.');
     return (pos == -1) ? "" : cls.substring(0, pos);
@@ -71,6 +81,16 @@ class Util {
       }
     }
     return sb.toString();
+  }
+
+  static String nestedShortName(String fullType) {
+    int pos = fullType.lastIndexOf('.');
+    if (pos < 0) {
+      return fullType;
+    } else {
+      pos = fullType.lastIndexOf('.', pos - 1);
+      return pos < 0 ? fullType : fullType.substring(pos + 1);
+    }
   }
 
   static String shortName(String fullType) {

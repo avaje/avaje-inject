@@ -143,6 +143,12 @@ class BeanReader {
   }
 
   MetaData createMeta() {
+    String type;
+    if (beanType.getNestingKind().isNested()) {
+      type = beanType.getEnclosingElement().toString() + "$" + beanType.getSimpleName();
+    } else {
+      type = beanType.getQualifiedName().toString();
+    }
     MetaData metaData = new MetaData(type, name);
     metaData.update(this);
     return metaData;
