@@ -1,23 +1,29 @@
 package io.avaje.inject.generator;
 
-public class Dependency {
+final class Dependency {
+
   private final String name;
   private final boolean softDependency;
 
-  public Dependency(String name) {
+  Dependency(String name) {
     this(name, false);
   }
 
-  public Dependency(String name, boolean softDependency) {
+  Dependency(String name, boolean softDependency) {
     this.name = name;
     this.softDependency = softDependency;
   }
 
-  public String getName() {
+  String getName() {
     return name;
   }
 
-  public boolean isSoftDependency() {
+  /**
+   * Return true if a collection dependency which can be empty.
+   * <p>
+   * A soft dependency isn't absolutely required (inject empty lists, sets).
+   */
+  boolean isSoftDependency() {
     return softDependency;
   }
 }
