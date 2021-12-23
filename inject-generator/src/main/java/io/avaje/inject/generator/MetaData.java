@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Holds the data as per <code>@DependencyMeta</code>
@@ -28,7 +30,7 @@ class MetaData {
   /**
    * The list of dependencies with optional and named.
    */
-  private List<String> dependsOn;
+  private List<Dependency> dependsOn;
 
   MetaData(DependencyMeta meta) {
     this.type = meta.type();
@@ -36,7 +38,7 @@ class MetaData {
     this.shortType = Util.shortName(type);
     this.method = meta.method();
     this.provides = asList(meta.provides());
-    this.dependsOn = asList(meta.dependsOn());
+    this.dependsOn = Stream.of(meta.dependsOn()).map(Dependency::new).collect(Collectors.toList());
   }
 
   MetaData(String type, String name) {
@@ -112,7 +114,7 @@ class MetaData {
     return provides;
   }
 
-  List<String> getDependsOn() {
+  List<Dependency> getDependsOn() {
     return dependsOn;
   }
 
@@ -157,7 +159,7 @@ class MetaData {
       appendProvides(sb, "provides", provides);
     }
     if (!dependsOn.isEmpty()) {
-      appendProvides(sb, "dependsOn", dependsOn);
+      appendProvides(sb, "dependsOn", dependsOn.stream().map(Dependency::getName).collect(Collectors.toList()));
     }
     sb.append(")").append(NEWLINE);
     sb.append("  protected void build_").append(getBuildName()).append("() {").append(NEWLINE);
@@ -167,7 +169,7 @@ class MetaData {
       sb.append("    ").append(shortType).append(Constants.DI).append(".build(builder");
     }
 
-    for (String depend : dependsOn) {
+    dependsOn.stream().map(Dependency::getName).forEach(depend-> {
       if (GenericType.isGeneric(depend) && !Util.isProvider(depend)) {
         // provide implementation of generic interface as a parameter to the build method
         final MetaData providerMeta = findProviderOf(depend, ordering);
@@ -176,7 +178,7 @@ class MetaData {
           sb.append(", ").append(providerMeta.shortType).append("$DI.provider").append(type.shortName()).append("(builder)");
         }
       }
-    }
+    });
     sb.append(");").append(NEWLINE);
     sb.append("  }").append(NEWLINE);
     return sb.toString();
@@ -208,7 +210,7 @@ class MetaData {
   }
 
   void setDependsOn(List<String> dependsOn) {
-    this.dependsOn = dependsOn;
+    this.dependsOn = dependsOn.stream().map(Dependency::new).collect(Collectors.toList());
   }
 
   void setMethod(String method) {

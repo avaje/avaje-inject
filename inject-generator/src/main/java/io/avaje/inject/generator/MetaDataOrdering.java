@@ -67,12 +67,12 @@ class MetaDataOrdering {
   private void detectCircularDependency(List<MetaData> remainder) {
     final List<DependencyLink> dependencyLinks = new ArrayList<>();
     for (MetaData metaData : remainder) {
-      final List<String> dependsOn = metaData.getDependsOn();
+      final List<Dependency> dependsOn = metaData.getDependsOn();
       if (dependsOn != null) {
-        for (String dependency : dependsOn) {
+        for (Dependency dependency : dependsOn) {
           final MetaData provider = findCircularDependency(remainder, dependency);
           if (provider != null) {
-            dependencyLinks.add(new DependencyLink(metaData, provider, dependency));
+            dependencyLinks.add(new DependencyLink(metaData, provider, dependency.getName()));
           }
         }
       }
@@ -83,13 +83,13 @@ class MetaDataOrdering {
     }
   }
 
-  private MetaData findCircularDependency(List<MetaData> remainder, String dependency) {
+  private MetaData findCircularDependency(List<MetaData> remainder, Dependency dependency) {
     for (MetaData metaData : remainder) {
-      if (metaData.getType().equals(dependency)) {
+      if (metaData.getType().equals(dependency.getName())) {
         return metaData;
       }
       final List<String> provides = metaData.getProvides();
-      if (provides != null && provides.contains(dependency)) {
+      if (provides != null && provides.contains(dependency.getName())) {
         return metaData;
       }
     }
@@ -120,11 +120,12 @@ class MetaDataOrdering {
   }
 
   private void checkMissingDependencies(MetaData metaData) {
-    for (String dependency : metaData.getDependsOn()) {
-      if (providers.get(dependency) == null && !scopeInfo.providedByOtherModule(dependency)) {
+    for (Dependency dependency : metaData.getDependsOn()) {
+      if (providers.get(dependency.getName()) == null
+        && !scopeInfo.providedByOtherModule(dependency.getName())) {
         TypeElement element = context.elementMaybe(metaData.getType());
         context.logError(element, "No dependency provided for " + dependency + " on " + metaData.getType());
-        missingDependencyTypes.add(dependency);
+        missingDependencyTypes.add(dependency.getName());
       }
     }
   }
@@ -170,12 +171,12 @@ class MetaDataOrdering {
   }
 
   private boolean allDependenciesWired(MetaData queuedMeta) {
-    for (String dependency : queuedMeta.getDependsOn()) {
-      if (!Util.isProvider(dependency)) {
+    for (Dependency dependency : queuedMeta.getDependsOn()) {
+      if (!Util.isProvider(dependency.getName())) {
         // check non-provider dependency is satisfied
-        ProviderList providerList = providers.get(dependency);
+        ProviderList providerList = providers.get(dependency.getName());
         if (providerList == null) {
-          if (!scopeInfo.providedByOtherModule(dependency)) {
+          if (!scopeInfo.providedByOtherModule(dependency.getName()) && !dependency.isSoftDependency()) {
             return false;
           }
         } else {

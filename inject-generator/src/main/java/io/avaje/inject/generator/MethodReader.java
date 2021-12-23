@@ -342,8 +342,8 @@ class MethodReader {
       return isGenericType() && !isProvider();
     }
 
-    String getDependsOn() {
-      return paramType;
+    Dependency getDependsOn() {
+      return new Dependency(paramType, utilType.isCollection());
     }
 
     void addImports(Set<String> importTypes) {
