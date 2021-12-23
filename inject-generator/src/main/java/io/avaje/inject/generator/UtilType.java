@@ -39,6 +39,10 @@ class UtilType {
     return type == Type.OPTIONAL || type == Type.OTHER;
   }
 
+  boolean isCollection() {
+    return type == Type.LIST || type == Type.SET;
+  }
+
   String rawType() {
     switch (type) {
       case SET:
