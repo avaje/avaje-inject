@@ -85,6 +85,27 @@ class DBeanScope implements BeanScope {
     return parent.get(type, name);
   }
 
+  @Override
+  public <T> Optional<T> getOptional(Class<T> type) {
+    return getMaybe(type, null);
+  }
+
+  @Override
+  public <T> Optional<T> getOptional(Type type, @Nullable String name) {
+    return getMaybe(type, name);
+  }
+
+  private <T> Optional<T> getMaybe(Type type, @Nullable String name) {
+    final T bean = beans.get(type, name);
+    if (bean != null) {
+      return Optional.of(bean);
+    }
+    if (parent == null) {
+      return Optional.empty();
+    }
+    return parent.getOptional(type, name);
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   public <T> List<T> list(Class<T> interfaceType) {

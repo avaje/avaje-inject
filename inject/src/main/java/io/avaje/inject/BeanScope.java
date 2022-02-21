@@ -6,6 +6,7 @@ import io.avaje.lang.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Holds beans created by dependency injection.
@@ -145,6 +146,21 @@ public interface BeanScope extends AutoCloseable {
    * @throws java.util.NoSuchElementException When no matching bean is found
    */
   <T> T get(Type type, @Nullable String name);
+
+  /**
+   * Optionally return a single bean given the type and empty if it is not found.
+   *
+   * @param type an interface or bean type
+   */
+  <T> Optional<T> getOptional(Class<T> type);
+
+  /**
+   * Optionally return a single bean given the type and name and empty if it is not found.
+   *
+   * @param type an interface or bean type
+   * @param name the name qualifier of a specific bean
+   */
+  <T> Optional<T> getOptional(Type type, @Nullable String name);
 
   /**
    * Return the list of beans that have an annotation.
