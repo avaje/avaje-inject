@@ -67,7 +67,7 @@ class DBeanMap {
   }
 
   void register(int flag, Provider<?> provider) {
-    DContextEntryBean entryBean = DContextEntryBean.prototype(provider, nextBean.name, flag);
+    DContextEntryBean entryBean = DContextEntryBean.provider(provider, nextBean.name, flag);
     for (Type type : nextBean.types) {
       beans.computeIfAbsent(type.getTypeName(), s -> new DContextEntry()).add(entryBean);
     }

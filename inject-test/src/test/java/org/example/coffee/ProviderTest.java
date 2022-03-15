@@ -17,7 +17,7 @@ class ProviderTest {
       assertThat(other).isEqualTo("mush mush beans");
 
       ProvOther2 bean2 = context.get(ProvOther2.class);
-      assertThat(bean2.getaProv()).isSameAs(bean.getaProv());
+      assertThat(bean2.getaProv()).isNotSameAs(bean.getaProv());
     }
 
   }

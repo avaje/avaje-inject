@@ -9,14 +9,12 @@ class MethodInjectProviderTest {
 
   @Test
   void test() {
-
     MethodInjectProvider bean = ApplicationScope.get(MethodInjectProvider.class);
     AProv aProv = bean.testGet();
-
     assertThat(aProv).isNotNull();
 
     AProv beanDirect = ApplicationScope.get(AProv.class);
-    assertThat(aProv).isSameAs(beanDirect);
+    assertThat(aProv).isNotSameAs(beanDirect);
   }
 
   @Test

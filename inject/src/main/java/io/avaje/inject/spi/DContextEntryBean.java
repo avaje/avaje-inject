@@ -19,14 +19,14 @@ class DContextEntryBean {
    */
   static DContextEntryBean of(Object bean, String name, int flag) {
     if (bean instanceof Provider) {
-      return new DContextEntryBean.Prov((Provider<?>)bean, name, flag);
+      return new Prov((Provider<?>)bean, name, flag);
     } else {
       return new DContextEntryBean(bean, name, flag);
     }
   }
 
-  static DContextEntryBean prototype(Provider<?> provider, String name, int flag) {
-      return new Prototype(provider, name, flag);
+  static DContextEntryBean provider(Provider<?> provider, String name, int flag) {
+      return new Prov(provider, name, flag);
   }
 
   protected final Object source;
@@ -91,36 +91,13 @@ class DContextEntryBean {
   }
 
   /**
-   * Provider based entry - get it once.
+   * Provider based entry - provider controls the scope of the provided bean.
    */
   static final class Prov extends DContextEntryBean {
 
-    private Object actualBean;
     private final Provider<?> provider;
 
     private Prov(Provider<?> provider, String name, int flag) {
-      super(provider, name, flag);
-      this.provider = provider;
-    }
-
-    @Override
-    Object getBean() {
-      // it's a provider, get it once
-      if (actualBean == null) {
-        actualBean = provider.get();
-      }
-      return actualBean;// provider.get();
-    }
-  }
-
-  /**
-   * Prototype based entry - new every time.
-   */
-  static final class Prototype extends DContextEntryBean {
-
-    private final Provider<?> provider;
-
-    private Prototype(Provider<?> provider, String name, int flag) {
       super(provider, name, flag);
       this.provider = provider;
     }
