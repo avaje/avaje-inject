@@ -2,6 +2,7 @@ package io.avaje.inject.generator;
 
 import io.avaje.inject.Factory;
 import io.avaje.inject.InjectModule;
+import io.avaje.inject.Prototype;
 import io.avaje.inject.spi.Proxy;
 import jakarta.inject.Scope;
 import jakarta.inject.Singleton;
@@ -45,6 +46,7 @@ public class Processor extends AbstractProcessor {
     annotations.add(InjectModule.class.getCanonicalName());
     annotations.add(Factory.class.getCanonicalName());
     annotations.add(Singleton.class.getCanonicalName());
+    annotations.add(Prototype.class.getCanonicalName());
     annotations.add(Scope.class.getCanonicalName());
     annotations.add(Constants.TESTSCOPE);
     annotations.add(Constants.CONTROLLER);
@@ -61,12 +63,14 @@ public class Processor extends AbstractProcessor {
 
     Set<? extends Element> factoryBeans = roundEnv.getElementsAnnotatedWith(Factory.class);
     Set<? extends Element> beans = roundEnv.getElementsAnnotatedWith(Singleton.class);
+    Set<? extends Element> prototypes = roundEnv.getElementsAnnotatedWith(Prototype.class);
     Set<? extends Element> scopes = roundEnv.getElementsAnnotatedWith(Scope.class);
     Set<? extends Element> proxies = roundEnv.getElementsAnnotatedWith(Proxy.class);
     readScopes(scopes);
     readModule(roundEnv);
     readChangedBeans(factoryBeans, true);
     readChangedBeans(beans, false);
+    readChangedBeans(prototypes, false);
     readChangedBeans(controllers, false);
     readChangedBeans(proxies, false);
     allScopes.readBeans(roundEnv);

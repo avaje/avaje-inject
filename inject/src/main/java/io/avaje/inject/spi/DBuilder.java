@@ -130,6 +130,12 @@ class DBuilder implements Builder {
   }
 
   @Override
+  public <T> void registerProvider(Provider<T> provider) {
+    // no enrichment
+    beanMap.register(BeanEntry.NORMAL, provider);
+  }
+
+  @Override
   public <T> void withBean(Class<T> type, T bean) {
     next(null, type);
     beanMap.register(BeanEntry.SUPPLIED, bean);
@@ -179,11 +185,20 @@ class DBuilder implements Builder {
   @Override
   public <T> Provider<T> getProvider(Class<T> cls, String name) {
     if (runningPostConstruct) {
-      return new ProviderWrapper<>(get(cls, name));
+      return obtainProvider(cls, name);
     }
-    ProviderPromise<T> promise = new ProviderPromise<>(cls, name);
+    // use injectors to delay obtaining the provider until end of build
+    ProviderPromise<T> promise = new ProviderPromise<>(cls, name, this);
     injectors.add(promise);
     return promise;
+  }
+
+  <T> Provider<T> obtainProvider(Class<T> type, String name) {
+    Provider<T> provider = beanMap.provider(type, name);
+    if (provider != null) {
+      return provider;
+    }
+    return ()-> this.get(type, name);
   }
 
   @Override

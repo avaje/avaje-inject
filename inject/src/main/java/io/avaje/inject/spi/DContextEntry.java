@@ -1,5 +1,7 @@
 package io.avaje.inject.spi;
 
+import jakarta.inject.Provider;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +25,13 @@ class DContextEntry {
 
   void add(DContextEntryBean entryBean) {
     entries.add(entryBean);
+  }
+
+  Provider<?> provider(String name) {
+    if (entries.size() == 1) {
+      return entries.get(0).provider();
+    }
+    return new EntryMatcher(name).provider(entries);
   }
 
   Object get(String name) {
@@ -72,7 +81,17 @@ class DContextEntry {
       }
     }
 
-    Object match(List<DContextEntryBean> entries) {
+    private Provider<?> provider(List<DContextEntryBean> entries) {
+      DContextEntryBean match = findMatch(entries);
+      return match == null ? null : match.provider();
+    }
+
+    private Object match(List<DContextEntryBean> entries) {
+      DContextEntryBean match = findMatch(entries);
+      return match == null ? null : match.getBean();
+    }
+
+    private DContextEntryBean findMatch(List<DContextEntryBean> entries) {
       for (DContextEntryBean entry : entries) {
         if (entry.isNameMatch(name)) {
           checkMatch(entry);
@@ -137,12 +156,12 @@ class DContextEntry {
         + " and " + entry.getBean() + ". Maybe need a rebuild is required after adding a @Named qualifier?");
     }
 
-    private Object candidate() {
+    private DContextEntryBean candidate() {
       if (match == null) {
         return null;
       }
       checkSecondary();
-      return match.getBean();
+      return match;
     }
 
     private void checkSecondary() {

@@ -17,12 +17,16 @@ class DContextEntryBean {
    * @param name The optional name for the bean
    * @param flag The flag for primary, secondary or normal
    */
-  public static DContextEntryBean of(Object bean, String name, int flag) {
+  static DContextEntryBean of(Object bean, String name, int flag) {
     if (bean instanceof Provider) {
-      return new DContextEntryBean.Prov(bean, name, flag);
+      return new DContextEntryBean.Prov((Provider<?>)bean, name, flag);
     } else {
       return new DContextEntryBean(bean, name, flag);
     }
+  }
+
+  static DContextEntryBean prototype(Provider<?> provider, String name, int flag) {
+      return new Prototype(provider, name, flag);
   }
 
   protected final Object source;
@@ -36,7 +40,7 @@ class DContextEntryBean {
   }
 
   @Override
-  public String toString() {
+  public final String toString() {
     return "Bean{" +
       "source=" + source +
       ", name='" + name + '\'' +
@@ -44,21 +48,21 @@ class DContextEntryBean {
       '}';
   }
 
-  DEntry entry() {
+  final DEntry entry() {
     return new DEntry(name, flag, getBean());
   }
 
   /**
    * Return true if qualifierName is null or matched.
    */
-  boolean isNameMatch(String qualifierName) {
+  final boolean isNameMatch(String qualifierName) {
     return qualifierName == null || qualifierName.equals(name);
   }
 
   /**
    * Return true if qualifierName is matched including null.
    */
-  boolean isNameEqual(String qualifierName) {
+  final boolean isNameEqual(String qualifierName) {
     return Objects.equals(qualifierName, name);
   }
 
@@ -66,41 +70,69 @@ class DContextEntryBean {
     return source;
   }
 
-  boolean isPrimary() {
+  Provider<?> provider() {
+    return this::getBean;
+  }
+
+  final boolean isPrimary() {
     return flag == BeanEntry.PRIMARY;
   }
 
-  boolean isSecondary() {
+  final boolean isSecondary() {
     return flag == BeanEntry.SECONDARY;
   }
 
-  boolean isSupplied() {
+  final boolean isSupplied() {
     return flag == BeanEntry.SUPPLIED;
   }
 
-  boolean isSupplied(String qualifierName) {
+  final boolean isSupplied(String qualifierName) {
     return flag == BeanEntry.SUPPLIED && (qualifierName == null || qualifierName.equals(name));
   }
 
   /**
    * Provider based entry - get it once.
    */
-  static class Prov extends DContextEntryBean {
+  static final class Prov extends DContextEntryBean {
 
     private Object actualBean;
+    private final Provider<?> provider;
 
-    private Prov(Object provider, String name, int flag) {
+    private Prov(Provider<?> provider, String name, int flag) {
       super(provider, name, flag);
+      this.provider = provider;
     }
 
     @Override
     Object getBean() {
       // it's a provider, get it once
       if (actualBean == null) {
-        actualBean = ((Provider<?>) source).get();
+        actualBean = provider.get();
       }
-      return actualBean;
+      return actualBean;// provider.get();
+    }
+  }
+
+  /**
+   * Prototype based entry - new every time.
+   */
+  static final class Prototype extends DContextEntryBean {
+
+    private final Provider<?> provider;
+
+    private Prototype(Provider<?> provider, String name, int flag) {
+      super(provider, name, flag);
+      this.provider = provider;
     }
 
+    @Override
+    Provider<?> provider() {
+      return provider;
+    }
+
+    @Override
+    Object getBean() {
+      return provider.get();
+    }
   }
 }

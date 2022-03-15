@@ -144,11 +144,19 @@ class SimpleBeanWriter {
 
   private void writeAddFor(MethodReader constructor) {
     beanReader.buildAddFor(writer);
+    if (beanReader.prototype()) {
+      indent += "  ";
+      writer.append("      builder.registerProvider(() -> {", shortName, shortName).eol();
+    }
     writeCreateBean(constructor);
     beanReader.buildRegister(writer);
-    beanReader.addLifecycleCallbacks(writer);
+    beanReader.addLifecycleCallbacks(writer, indent);
     if (beanReader.isExtraInjectionRequired()) {
       writeExtraInjection();
+    }
+    if (beanReader.prototype()) {
+      writer.append("        return bean;").eol();
+      writer.append("      });", shortName, shortName).eol();
     }
     writer.append("    }").eol();
   }
@@ -172,8 +180,9 @@ class SimpleBeanWriter {
     writer.append(") {").eol();
   }
 
+  String indent = "     ";
   private void writeCreateBean(MethodReader constructor) {
-    writer.append("      %s bean = new %s(", shortName, shortName);
+    writer.append("%s %s bean = new %s(", indent, shortName, shortName);
     // add constructor dependencies
     writeMethodParams("builder", constructor);
   }
