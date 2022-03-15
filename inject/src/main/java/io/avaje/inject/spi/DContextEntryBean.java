@@ -49,7 +49,7 @@ class DContextEntryBean {
   }
 
   final DEntry entry() {
-    return new DEntry(name, flag, getBean());
+    return new DEntry(name, flag, bean());
   }
 
   /**
@@ -66,12 +66,12 @@ class DContextEntryBean {
     return Objects.equals(qualifierName, name);
   }
 
-  Object getBean() {
+  Object bean() {
     return source;
   }
 
   Provider<?> provider() {
-    return this::getBean;
+    return this::bean;
   }
 
   final boolean isPrimary() {
@@ -108,7 +108,7 @@ class DContextEntryBean {
     }
 
     @Override
-    Object getBean() {
+    Object bean() {
       return provider.get();
     }
   }

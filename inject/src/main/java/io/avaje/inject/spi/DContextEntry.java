@@ -36,7 +36,7 @@ class DContextEntry {
 
   Object get(String name) {
     if (entries.size() == 1) {
-      return entries.get(0).getBean();
+      return entries.get(0).bean();
     }
     return new EntryMatcher(name).match(entries);
   }
@@ -47,7 +47,7 @@ class DContextEntry {
   List<Object> all() {
     List<Object> list = new ArrayList<>(entries.size());
     for (DContextEntryBean entry : entries) {
-      list.add(entry.getBean());
+      list.add(entry.bean());
     }
     return list;
   }
@@ -64,7 +64,7 @@ class DContextEntry {
     return false;
   }
 
-  static class EntryMatcher {
+  static final class EntryMatcher {
 
     private final String name;
     private final boolean impliedName;
@@ -88,7 +88,7 @@ class DContextEntry {
 
     private Object match(List<DContextEntryBean> entries) {
       DContextEntryBean match = findMatch(entries);
-      return match == null ? null : match.getBean();
+      return match == null ? null : match.bean();
     }
 
     private DContextEntryBean findMatch(List<DContextEntryBean> entries) {
@@ -100,9 +100,7 @@ class DContextEntry {
       if (match == null && impliedName) {
         // search again as if the implied name wasn't there, name = null
         for (DContextEntryBean entry : entries) {
-          if (entry.isNameMatch(null)) {
-            checkMatch(entry);
-          }
+          checkMatch(entry);
         }
       }
       return candidate();
@@ -128,7 +126,7 @@ class DContextEntry {
       }
       if (match.isPrimary()) {
         if (entry.isPrimary()) {
-          throw new IllegalStateException("Expecting only 1 bean match but have multiple primary beans " + match.getBean() + " and " + entry.getBean());
+          throw new IllegalStateException("Expecting only 1 bean match but have multiple primary beans " + match.bean() + " and " + entry.bean());
         }
         // leave as is, current primary wins
         return;
@@ -152,8 +150,8 @@ class DContextEntry {
         match = entry;
         return;
       }
-      throw new IllegalStateException("Expecting only 1 bean match but have multiple matching beans " + match.getBean()
-        + " and " + entry.getBean() + ". Maybe need a rebuild is required after adding a @Named qualifier?");
+      throw new IllegalStateException("Expecting only 1 bean match but have multiple matching beans " + match.bean()
+        + " and " + entry.bean() + ". Maybe need a rebuild is required after adding a @Named qualifier?");
     }
 
     private DContextEntryBean candidate() {
@@ -166,7 +164,7 @@ class DContextEntry {
 
     private void checkSecondary() {
       if (match.isSecondary() && ignoredSecondaryMatch != null) {
-        throw new IllegalStateException("Expecting only 1 bean match but have multiple secondary beans " + match.getBean() + " and " + ignoredSecondaryMatch.getBean());
+        throw new IllegalStateException("Expecting only 1 bean match but have multiple secondary beans " + match.bean() + " and " + ignoredSecondaryMatch.bean());
       }
     }
 
