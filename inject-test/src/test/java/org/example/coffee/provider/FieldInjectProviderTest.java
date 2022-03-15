@@ -9,13 +9,11 @@ class FieldInjectProviderTest {
 
   @Test
   void test() {
-
     FieldInjectProvider bean = ApplicationScope.get(FieldInjectProvider.class);
     AProv aProv = bean.testGet();
-
     assertThat(aProv).isNotNull();
 
     AProv beanDirect = ApplicationScope.get(AProv.class);
-    assertThat(aProv).isSameAs(beanDirect);
+    assertThat(aProv).isNotSameAs(beanDirect);
   }
 }

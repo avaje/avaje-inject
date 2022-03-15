@@ -130,6 +130,12 @@ class DBuilder implements Builder {
   }
 
   @Override
+  public <T> void registerProvider(Provider<T> provider) {
+    // no enrichment
+    beanMap.register(BeanEntry.NORMAL, provider);
+  }
+
+  @Override
   public <T> void withBean(Class<T> type, T bean) {
     next(null, type);
     beanMap.register(BeanEntry.SUPPLIED, bean);
@@ -179,11 +185,20 @@ class DBuilder implements Builder {
   @Override
   public <T> Provider<T> getProvider(Class<T> cls, String name) {
     if (runningPostConstruct) {
-      return new ProviderWrapper<>(get(cls, name));
+      return obtainProvider(cls, name);
     }
-    ProviderPromise<T> promise = new ProviderPromise<>(cls, name);
+    // use injectors to delay obtaining the provider until end of build
+    ProviderPromise<T> promise = new ProviderPromise<>(cls, name, this);
     injectors.add(promise);
     return promise;
+  }
+
+  <T> Provider<T> obtainProvider(Class<T> type, String name) {
+    Provider<T> provider = beanMap.provider(type, name);
+    if (provider != null) {
+      return provider;
+    }
+    return ()-> this.get(type, name);
   }
 
   @Override
@@ -210,20 +225,24 @@ class DBuilder implements Builder {
   public <T> T get(Class<T> cls, String name) {
     T bean = getMaybe(cls, name);
     if (bean == null) {
-      String msg = "Injecting null for " + cls.getName();
-      if (name != null) {
-        msg += " name:" + name;
-      }
-      List<T> beanList = list(cls);
-      msg += " when creating " + injectTarget + " - potential beans to inject: " + beanList;
-      if (!beanList.isEmpty()) {
-        msg += ". Check @Named or Qualifier being used";
-      }
-      msg += ". Check for missing module? [ missing beanScopeBuilder.withModules() ]";
-      msg += ". If it is expected to be externally provided, missing beanScopeBuilder.withBean() ?";
-      throw new IllegalStateException(msg);
+      throw new IllegalStateException(errorInjectingNull(cls, name));
     }
     return bean;
+  }
+
+  private <T> String errorInjectingNull(Class<T> cls, String name) {
+    String msg = "Injecting null for " + cls.getName();
+    if (name != null) {
+      msg += " name:" + name;
+    }
+    List<T> beanList = list(cls);
+    msg += " when creating " + injectTarget + " - potential beans to inject: " + beanList;
+    if (!beanList.isEmpty()) {
+      msg += ". Check @Named or Qualifier being used";
+    }
+    msg += ". Check for missing module? [ missing beanScopeBuilder.withModules() ]";
+    msg += ". If it is expected to be externally provided, missing beanScopeBuilder.withBean() ?";
+    return msg;
   }
 
   private void runInjectors() {

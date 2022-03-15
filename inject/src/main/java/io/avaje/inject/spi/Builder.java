@@ -53,6 +53,11 @@ public interface Builder {
   boolean isAddBeanFor(Type... types);
 
   /**
+   * Register the provider into the context.
+   */
+  <T> void registerProvider(Provider<T> provider);
+
+  /**
    * Register the bean instance into the context.
    *
    * @param bean The bean instance that has been created.

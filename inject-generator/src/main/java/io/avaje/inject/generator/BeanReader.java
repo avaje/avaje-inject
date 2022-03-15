@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import io.avaje.inject.Primary;
+import io.avaje.inject.Prototype;
 import io.avaje.inject.Secondary;
 import io.avaje.inject.spi.Proxy;
 
@@ -25,6 +26,7 @@ class BeanReader {
   private final Set<String> importTypes = new TreeSet<>();
   private final BeanRequestParams requestParams;
   private final TypeReader typeReader;
+  private final boolean prototype;
   private final boolean primary;
   private final boolean secondary;
   private final boolean proxy;
@@ -35,6 +37,7 @@ class BeanReader {
     this.beanType = beanType;
     this.type = beanType.getQualifiedName().toString();
     this.shortName = shortName(beanType);
+    this.prototype = (beanType.getAnnotation(Prototype.class) != null);
     this.primary = (beanType.getAnnotation(Primary.class) != null);
     this.secondary = !primary && (beanType.getAnnotation(Secondary.class) != null);
     this.proxy = (beanType.getAnnotation(Proxy.class) != null);
@@ -63,6 +66,10 @@ class BeanReader {
 
   BeanAspects aspects() {
     return aspects;
+  }
+
+  boolean prototype() {
+    return prototype;
   }
 
   BeanReader read() {
@@ -167,6 +174,9 @@ class BeanReader {
   }
 
   void buildRegister(Append writer) {
+    if (prototype) {
+      return;
+    }
     writer.append("      ");
     if (isExtraInjectionRequired() || hasLifecycleMethods()) {
       writer.append("%s $bean = ", shortName);
@@ -175,14 +185,27 @@ class BeanReader {
     writer.append("builder.register%s(bean);", flags).eol();
   }
 
-  void addLifecycleCallbacks(Append writer) {
-    if (postConstructMethod != null) {
-      writer.append("      builder.addPostConstruct($bean::%s);", postConstructMethod.getSimpleName()).eol();
+  void addLifecycleCallbacks(Append writer, String indent) {
+    if (postConstructMethod != null && !prototype) {
+      writer.append("%s builder.addPostConstruct($bean::%s);", indent, postConstructMethod.getSimpleName()).eol();
     }
     if (preDestroyMethod != null) {
-      writer.append("      builder.addPreDestroy($bean::%s);", preDestroyMethod.getSimpleName()).eol();
-    } else if (typeReader.isClosable()) {
-      writer.append("      builder.addPreDestroy($bean);").eol();
+      prototypeNotSupported(writer, "@PreDestroy");
+      writer.append("%s builder.addPreDestroy($bean::%s);", indent, preDestroyMethod.getSimpleName()).eol();
+    } else if (typeReader.isClosable() && !prototype) {
+      writer.append("%s builder.addPreDestroy($bean);", indent).eol();
+    }
+  }
+
+  void prototypePostConstruct(Append writer, String indent) {
+    if (postConstructMethod != null) {
+      writer.append("%s bean.%s();", indent, postConstructMethod.getSimpleName()).eol();
+    }
+  }
+
+  private void prototypeNotSupported(Append writer, String lifecycle) {
+    if (prototype) {
+      writer.append("        // @Prototype scoped bean does not support %s lifecycle method", lifecycle).eol();
     }
   }
 

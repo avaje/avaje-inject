@@ -1,5 +1,7 @@
 package io.avaje.inject.spi;
 
+import jakarta.inject.Provider;
+
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -64,6 +66,13 @@ class DBeanMap {
     }
   }
 
+  void register(int flag, Provider<?> provider) {
+    DContextEntryBean entryBean = DContextEntryBean.provider(provider, nextBean.name, flag);
+    for (Type type : nextBean.types) {
+      beans.computeIfAbsent(type.getTypeName(), s -> new DContextEntry()).add(entryBean);
+    }
+  }
+
   @SuppressWarnings("unchecked")
   <T> T get(Type type, String name) {
     DContextEntry entry = beans.get(type.getTypeName());
@@ -71,6 +80,15 @@ class DBeanMap {
       return null;
     }
     return (T) entry.get(KeyUtil.lower(name));
+  }
+
+  @SuppressWarnings("unchecked")
+  <T> Provider<T> provider(Type type, String name) {
+    DContextEntry entry = beans.get(type.getTypeName());
+    if (entry == null) {
+      return null;
+    }
+    return (Provider<T>) entry.provider(KeyUtil.lower(name));
   }
 
   /**
