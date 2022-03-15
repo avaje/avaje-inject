@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.avaje</groupId>
     <artifactId>avaje-inject-parent</artifactId>
-    <version>6.22</version>
+    <version>8.0</version>
   </parent>
 
   <artifactId>avaje-inject</artifactId>
@@ -20,12 +20,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.7.30</version>
-    </dependency>
-
-    <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-lang</artifactId>
       <version>1.0</version>
@@ -34,7 +28,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>3.6.0</version>
+      <version>4.3.1</version>
       <optional>true</optional>
     </dependency>
 
@@ -63,7 +57,6 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>3.2.0</version>
         <configuration>
-<!--          <source>15</source>-->
           <doclint>none</doclint>
           <show>public</show>
           <linksource>true</linksource>
@@ -78,25 +71,18 @@
           </execution>
         </executions>
       </plugin>
+
       <plugin>
-        <groupId>org.moditect</groupId>
-        <artifactId>moditect-maven-plugin</artifactId>
-        <version>1.0.0.RC1</version>
-        <executions>
-          <execution>
-            <id>add-module-infos</id>
-            <phase>package</phase>
-            <goals>
-              <goal>add-module-info</goal>
-            </goals>
-            <configuration>
-              <module>
-                <moduleInfoFile>src/main/java9/module-info.java</moduleInfoFile>
-              </module>
-            </configuration>
-          </execution>
-        </executions>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>
+            --add-opens io.avaje.inject/io.avaje.inject.spi=ALL-UNNAMED
+            --add-opens io.avaje.inject/io.avaje.inject.aop=ALL-UNNAMED
+          </argLine>
+        </configuration>
       </plugin>
+
     </plugins>
   </build>
 

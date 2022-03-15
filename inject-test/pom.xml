@@ -4,14 +4,14 @@
   <parent>
     <groupId>io.avaje</groupId>
     <artifactId>avaje-inject-parent</artifactId>
-    <version>6.22</version>
+    <version>8.0</version>
   </parent>
 
   <artifactId>avaje-inject-test</artifactId>
 
   <properties>
-    <jupiter.version>5.8.0</jupiter.version>
-    <mockito.version>3.12.4</mockito.version>
+    <jupiter.version>5.8.2</jupiter.version>
+    <mockito.version>4.4.0</mockito.version>
   </properties>
 
   <dependencies>
@@ -118,17 +118,5 @@
     </dependency>
 
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 
 </project>

@@ -7,9 +7,8 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -23,7 +22,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class InjectExtension implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback, ExtensionContext.Store.CloseableResource {
 
-  private static final Logger log = LoggerFactory.getLogger(InjectExtension.class);
+  private static final System.Logger log = System.getLogger("io.avaje.inject");
   private static final Namespace INJECT_NS = Namespace.create("io.avaje.inject.InjectTest");
   private static final String BEAN_SCOPE = "BEAN_SCOPE";
   private static final ReentrantLock lock = new ReentrantLock();
@@ -44,11 +43,11 @@ public class InjectExtension implements BeforeAllCallback, BeforeEachCallback, A
   }
 
   @Override
-  public void close() throws Throwable {
+  public void close() {
     lock.lock();
     try {
       if (globalTestScope != null) {
-        log.debug("Closing global test BeanScope");
+        log.log(Level.DEBUG, "Closing global test BeanScope");
         globalTestScope.close();
       }
     } finally {
@@ -59,12 +58,12 @@ public class InjectExtension implements BeforeAllCallback, BeforeEachCallback, A
   private void initialiseGlobalTestScope(ExtensionContext context) {
     Iterator<TestModule> iterator = ServiceLoader.load(TestModule.class).iterator();
     if (iterator.hasNext()) {
-      log.debug("Building global test BeanScope (as parent scope for tests)");
+      log.log(Level.DEBUG, "Building global test BeanScope (as parent scope for tests)");
       globalTestScope = BeanScope.newBuilder()
         .withModules(iterator.next())
         .build();
 
-      log.trace("register global test BeanScope with beans {}", globalTestScope);
+      log.log(Level.TRACE, "register global test BeanScope with beans %s", globalTestScope);
       context.getRoot().getStore(Namespace.GLOBAL).put(InjectExtension.class.getCanonicalName(), this);
     }
   }
@@ -90,7 +89,7 @@ public class InjectExtension implements BeforeAllCallback, BeforeEachCallback, A
     for (MetaReader reader : readers) {
       reader.setFromScope(beanScope);
     }
-    log.trace("test setup with {}", readers);
+    log.log(Level.TRACE, "test setup with %s", readers);
     context.getStore(INJECT_NS).put(BEAN_SCOPE, beanScope);
   }
 
