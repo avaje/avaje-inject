@@ -1,6 +1,6 @@
 package io.avaje.inject;
 
-import jakarta.inject.Scope;
+import javax.inject.Scope;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
