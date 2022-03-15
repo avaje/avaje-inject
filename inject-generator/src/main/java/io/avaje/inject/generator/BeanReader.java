@@ -186,13 +186,26 @@ class BeanReader {
   }
 
   void addLifecycleCallbacks(Append writer, String indent) {
-    if (postConstructMethod != null) {
+    if (postConstructMethod != null && !prototype) {
       writer.append("%s builder.addPostConstruct($bean::%s);", indent, postConstructMethod.getSimpleName()).eol();
     }
     if (preDestroyMethod != null) {
+      prototypeNotSupported(writer, "@PreDestroy");
       writer.append("%s builder.addPreDestroy($bean::%s);", indent, preDestroyMethod.getSimpleName()).eol();
-    } else if (typeReader.isClosable()) {
+    } else if (typeReader.isClosable() && !prototype) {
       writer.append("%s builder.addPreDestroy($bean);", indent).eol();
+    }
+  }
+
+  void prototypePostConstruct(Append writer, String indent) {
+    if (postConstructMethod != null) {
+      writer.append("%s bean.%s();", indent, postConstructMethod.getSimpleName()).eol();
+    }
+  }
+
+  private void prototypeNotSupported(Append writer, String lifecycle) {
+    if (prototype) {
+      writer.append("        // @Prototype scoped bean does not support %s lifecycle method", lifecycle).eol();
     }
   }
 

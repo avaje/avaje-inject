@@ -16,6 +16,7 @@ class SimpleBeanWriter {
   private static final String CODE_COMMENT = "/**\n * Generated source - dependency injection builder for %s.\n */";
   private static final String CODE_COMMENT_FACTORY = "/**\n * Generated source - dependency injection factory for request scoped %s.\n */";
   private static final String CODE_COMMENT_BUILD = "  /**\n   * Create and register %s.\n   */";
+  private static final String CODE_COMMENT_BUILD_PROVIDER = "  /**\n   * Register %s provider.\n   */";
 
   private final BeanReader beanReader;
   private final ProcessingContext context;
@@ -146,6 +147,7 @@ class SimpleBeanWriter {
     beanReader.buildAddFor(writer);
     if (beanReader.prototype()) {
       indent += "  ";
+      writer.append("      // prototype scope so register provider").eol();
       writer.append("      builder.registerProvider(() -> {", shortName, shortName).eol();
     }
     writeCreateBean(constructor);
@@ -155,6 +157,7 @@ class SimpleBeanWriter {
       writeExtraInjection();
     }
     if (beanReader.prototype()) {
+      beanReader.prototypePostConstruct(writer, indent);
       writer.append("        return bean;").eol();
       writer.append("      });", shortName, shortName).eol();
     }
@@ -163,7 +166,11 @@ class SimpleBeanWriter {
 
   private void writeBuildMethodStart(MethodReader constructor) {
     int providerIndex = 0;
-    writer.append(CODE_COMMENT_BUILD, shortName).eol();
+    if (beanReader.prototype()) {
+      writer.append(CODE_COMMENT_BUILD_PROVIDER, shortName).eol();
+    } else {
+      writer.append(CODE_COMMENT_BUILD, shortName).eol();
+    }
     writer.append("  public static void build(Builder builder");
     for (MethodReader.MethodParam param : constructor.getParams()) {
       if (param.isGenericParam()) {
@@ -188,25 +195,33 @@ class SimpleBeanWriter {
   }
 
   private void writeExtraInjection() {
-    writer.append("      builder.addInjector(b -> {").eol();
-    writer.append("        // field and method injection").eol();
+    if (!beanReader.prototype()) {
+      writer.append("      builder.addInjector(b -> {").eol();
+      writer.append("        // field and method injection").eol();
+    }
     injectFields();
     injectMethods();
-    writer.append("      });").eol();
+    if (!beanReader.prototype()) {
+      writer.append("      });").eol();
+    }
   }
 
   private void injectFields() {
+    String bean = beanReader.prototype() ? "bean" : "$bean";
+    String builder = beanReader.prototype() ? "builder" : "b";
     for (FieldReader fieldReader : beanReader.getInjectFields()) {
       String fieldName = fieldReader.getFieldName();
-      String getDependency = fieldReader.builderGetDependency();
-      writer.append("        $bean.%s = %s;", fieldName, getDependency).eol();
+      String getDependency = fieldReader.builderGetDependency(builder);
+      writer.append("        %s.%s = %s;", bean, fieldName, getDependency).eol();
     }
   }
 
   private void injectMethods() {
+    String bean = beanReader.prototype() ? "bean" : "$bean";
+    String builder = beanReader.prototype() ? "builder" : "b";
     for (MethodReader methodReader : beanReader.getInjectMethods()) {
-      writer.append("        $bean.%s(", methodReader.getName());
-      writeMethodParams("b", methodReader);
+      writer.append("        %s.%s(", bean, methodReader.getName());
+      writeMethodParams(builder, methodReader);
     }
   }
 
