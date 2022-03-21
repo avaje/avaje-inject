@@ -8,7 +8,9 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 
+import java.io.*;
 import java.lang.System.Logger.Level;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -58,14 +60,49 @@ public class InjectExtension implements BeforeAllCallback, BeforeEachCallback, A
   private void initialiseGlobalTestScope(ExtensionContext context) {
     Iterator<TestModule> iterator = ServiceLoader.load(TestModule.class).iterator();
     if (iterator.hasNext()) {
-      log.log(Level.DEBUG, "Building global test BeanScope (as parent scope for tests)");
-      globalTestScope = BeanScope.newBuilder()
-        .withModules(iterator.next())
-        .build();
-
-      log.log(Level.TRACE, "register global test BeanScope with beans %s", globalTestScope);
-      context.getRoot().getStore(Namespace.GLOBAL).put(InjectExtension.class.getCanonicalName(), this);
+      registerTestModule(context, iterator.next());
+    } else {
+      registerViaResources(context);
     }
+  }
+
+  private void registerTestModule(ExtensionContext context, TestModule testModule) {
+    log.log(Level.DEBUG, "Building global test BeanScope (as parent scope for tests)");
+    globalTestScope = BeanScope.newBuilder()
+      .withModules(testModule)
+      .build();
+
+    log.log(Level.TRACE, "register global test BeanScope with beans %s", globalTestScope);
+    context.getRoot().getStore(Namespace.GLOBAL).put(InjectExtension.class.getCanonicalName(), this);
+  }
+
+  /**
+   * Fallback when ServiceLoader does not work in module-path for generated test service.
+   */
+  private void registerViaResources(ExtensionContext context) {
+    try {
+      URL url = ClassLoader.getSystemResource("META-INF/services/io.avaje.inject.test.TestModule");
+      String className = readServiceClassName(url);
+      if (className != null) {
+        Class<?> cls = Class.forName(className);
+        TestModule testModule = (TestModule) cls.getDeclaredConstructor().newInstance();
+        registerTestModule(context, testModule);
+      }
+    } catch (Throwable e) {
+      throw new RuntimeException("Error trying to create TestModule", e);
+    }
+  }
+
+  private String readServiceClassName(URL url) throws IOException {
+    if (url != null) {
+      InputStream is = url.openStream();
+      if (is != null) {
+        try (LineNumberReader lineNumberReader = new LineNumberReader(new InputStreamReader(is))) {
+          return lineNumberReader.readLine();
+        }
+      }
+    }
+    return null;
   }
 
   /**

@@ -1,4 +1,6 @@
-package io.avaje.inject;
+package io.avaje.inject.xtra;
+
+import io.avaje.inject.BeanScope;
 
 import java.util.List;
 

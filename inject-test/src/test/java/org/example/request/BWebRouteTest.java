@@ -1,7 +1,7 @@
 package org.example.request;
 
 
-import io.avaje.inject.ApplicationScope;
+import io.avaje.inject.xtra.ApplicationScope;
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
 import org.junit.jupiter.api.Test;
