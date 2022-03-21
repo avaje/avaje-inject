@@ -1,6 +1,6 @@
 package org.example.coffee.priority.base;
 
-import io.avaje.inject.ApplicationScope;
+import io.avaje.inject.xtra.ApplicationScope;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

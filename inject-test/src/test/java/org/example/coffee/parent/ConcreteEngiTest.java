@@ -1,6 +1,6 @@
 package org.example.coffee.parent;
 
-import io.avaje.inject.ApplicationScope;
+import io.avaje.inject.xtra.ApplicationScope;
 import org.example.coffee.parent.sub.Engi;
 import org.example.coffee.parent.sub.PetEngi;
 import org.junit.jupiter.api.Test;

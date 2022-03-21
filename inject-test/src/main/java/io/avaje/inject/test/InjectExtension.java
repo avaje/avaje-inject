@@ -7,9 +7,10 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.io.*;
+import java.lang.System.Logger.Level;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -23,7 +24,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class InjectExtension implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback, ExtensionContext.Store.CloseableResource {
 
-  private static final Logger log = LoggerFactory.getLogger(InjectExtension.class);
+  private static final System.Logger log = System.getLogger("io.avaje.inject");
   private static final Namespace INJECT_NS = Namespace.create("io.avaje.inject.InjectTest");
   private static final String BEAN_SCOPE = "BEAN_SCOPE";
   private static final ReentrantLock lock = new ReentrantLock();
@@ -44,11 +45,11 @@ public class InjectExtension implements BeforeAllCallback, BeforeEachCallback, A
   }
 
   @Override
-  public void close() throws Throwable {
+  public void close() {
     lock.lock();
     try {
       if (globalTestScope != null) {
-        log.debug("Closing global test BeanScope");
+        log.log(Level.DEBUG, "Closing global test BeanScope");
         globalTestScope.close();
       }
     } finally {
@@ -59,14 +60,49 @@ public class InjectExtension implements BeforeAllCallback, BeforeEachCallback, A
   private void initialiseGlobalTestScope(ExtensionContext context) {
     Iterator<TestModule> iterator = ServiceLoader.load(TestModule.class).iterator();
     if (iterator.hasNext()) {
-      log.debug("Building global test BeanScope (as parent scope for tests)");
-      globalTestScope = BeanScope.newBuilder()
-        .withModules(iterator.next())
-        .build();
-
-      log.trace("register global test BeanScope with beans {}", globalTestScope);
-      context.getRoot().getStore(Namespace.GLOBAL).put(InjectExtension.class.getCanonicalName(), this);
+      registerTestModule(context, iterator.next());
+    } else {
+      registerViaResources(context);
     }
+  }
+
+  private void registerTestModule(ExtensionContext context, TestModule testModule) {
+    log.log(Level.DEBUG, "Building global test BeanScope (as parent scope for tests)");
+    globalTestScope = BeanScope.newBuilder()
+      .withModules(testModule)
+      .build();
+
+    log.log(Level.TRACE, "register global test BeanScope with beans %s", globalTestScope);
+    context.getRoot().getStore(Namespace.GLOBAL).put(InjectExtension.class.getCanonicalName(), this);
+  }
+
+  /**
+   * Fallback when ServiceLoader does not work in module-path for generated test service.
+   */
+  private void registerViaResources(ExtensionContext context) {
+    try {
+      URL url = ClassLoader.getSystemResource("META-INF/services/io.avaje.inject.test.TestModule");
+      String className = readServiceClassName(url);
+      if (className != null) {
+        Class<?> cls = Class.forName(className);
+        TestModule testModule = (TestModule) cls.getDeclaredConstructor().newInstance();
+        registerTestModule(context, testModule);
+      }
+    } catch (Throwable e) {
+      throw new RuntimeException("Error trying to create TestModule", e);
+    }
+  }
+
+  private String readServiceClassName(URL url) throws IOException {
+    if (url != null) {
+      InputStream is = url.openStream();
+      if (is != null) {
+        try (LineNumberReader lineNumberReader = new LineNumberReader(new InputStreamReader(is))) {
+          return lineNumberReader.readLine();
+        }
+      }
+    }
+    return null;
   }
 
   /**
@@ -90,7 +126,7 @@ public class InjectExtension implements BeforeAllCallback, BeforeEachCallback, A
     for (MetaReader reader : readers) {
       reader.setFromScope(beanScope);
     }
-    log.trace("test setup with {}", readers);
+    log.log(Level.TRACE, "test setup with %s", readers);
     context.getStore(INJECT_NS).put(BEAN_SCOPE, beanScope);
   }
 

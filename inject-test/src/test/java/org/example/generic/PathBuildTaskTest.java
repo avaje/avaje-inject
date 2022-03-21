@@ -3,6 +3,8 @@ package org.example.generic;
 import io.avaje.inject.BeanScope;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PathBuildTaskTest {

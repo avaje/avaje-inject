@@ -1,6 +1,6 @@
 package org.example.coffee.priority.custom;
 
-import io.avaje.inject.ApplicationScope;
+import io.avaje.inject.xtra.ApplicationScope;
 import io.avaje.inject.BeanScope;
 import org.junit.jupiter.api.Test;
 

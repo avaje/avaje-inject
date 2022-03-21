@@ -1,5 +1,6 @@
-package io.avaje.inject;
+package io.avaje.inject.xtra;
 
+import io.avaje.inject.BeanScope;
 import org.example.coffee.fruit.Fruit;
 import org.example.coffee.list.A2Somei;
 import org.example.coffee.list.ASomei;
