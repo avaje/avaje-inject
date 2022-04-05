@@ -47,6 +47,8 @@ class ScopeInfo {
   private final ProcessingContext context;
   private final Set<String> requires = new LinkedHashSet<>();
   private final Set<String> provides = new LinkedHashSet<>();
+  private final Set<String> requiresPackages = new LinkedHashSet<>();
+  private final List<String> requirePkg = new ArrayList<>();
   private final boolean defaultScope;
   private final TypeElement annotationType;
   private final AllScopes scopes;
@@ -100,6 +102,10 @@ class ScopeInfo {
   private void read(Element element) {
     requires(ScopeUtil.readRequires(element));
     provides(ScopeUtil.readProvides(element));
+    for (String require : ScopeUtil.readRequiresPackages(element)) {
+      requiresPackages.add(require);
+      requirePkg.add(Util.packageOf(require) + ".");
+    }
   }
 
   private String initName(String topPackage) {
@@ -158,10 +164,6 @@ class ScopeInfo {
 
   Set<String> requires() {
     return requires;
-  }
-
-  Set<String> provides() {
-    return provides;
   }
 
   void writeBeanHelpers() {
@@ -333,6 +335,10 @@ class ScopeInfo {
       attributeClasses(leadingComma, writer, "requires", requires);
       leadingComma = true;
     }
+    if (!requiresPackages.isEmpty()) {
+      attributeClasses(leadingComma, writer, "requiresPackages", requiresPackages);
+      leadingComma = true;
+    }
     if (annotationType != null) {
       if (leadingComma) {
         writer.append(", ");
@@ -378,6 +384,9 @@ class ScopeInfo {
     writer.append(";").eol();
     writer.append("  private final Class<?>[] requires = ");
     buildClassArray(writer, requires);
+    writer.append(";").eol();
+    writer.append("  private final Class<?>[] requiresPackages = ");
+    buildClassArray(writer, requiresPackages);
     writer.append(";").eol();
     writer.append("  private Builder builder;").eol().eol();
   }
@@ -456,6 +465,21 @@ class ScopeInfo {
       }
     }
     return false;
+  }
+
+  boolean providedByPackage(String dependency) {
+    for (String pkg : requirePkg) {
+      if (dependency.startsWith(pkg)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  boolean providedByOther(Dependency dependency) {
+    return dependency.isSoftDependency()
+      || providedByPackage(dependency.getName())
+      || providedByOtherModule(dependency.getName());
   }
 
   Set<String> initModuleDependencies(Set<String> importTypes) {

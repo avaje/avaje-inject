@@ -185,6 +185,11 @@ class SimpleModuleWriter {
     writer.append("  public Class<?>[] requires() {").eol();
     writer.append("    return requires;").eol();
     writer.append("  }").eol().eol();
+
+    writer.append("  @Override").eol();
+    writer.append("  public Class<?>[] requiresPackages() {").eol();
+    writer.append("    return requiresPackages;").eol();
+    writer.append("  }").eol().eol();
   }
 
   private void writeWithBeans() {

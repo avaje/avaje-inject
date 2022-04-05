@@ -36,6 +36,11 @@ class BeanScopeBuilderAddTest {
     }
 
     @Override
+    public Class<?>[] requiresPackages() {
+      return new Class[0];
+    }
+
+    @Override
     public Class<?>[] provides() {
       return new Class[0];
     }

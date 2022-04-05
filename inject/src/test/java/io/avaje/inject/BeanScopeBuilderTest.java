@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class BeanScopeBuilderTest {
 
@@ -85,14 +86,68 @@ public class BeanScopeBuilderTest {
     assertThat(names(factoryOrder.factories())).containsExactly("one", "three", "two");
   }
 
+  @Test
+  public void name_requiresPackage() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true);
+    factoryOrder.add(bc("1", null, new Class[0], of(Mod3.class)));
+    factoryOrder.add(bc("2", null, new Class[0], of(Mod4.class)));
+    factoryOrder.add(bc("3", of(Mod3.class), new Class[0], of(Mod4.class)));
+    factoryOrder.add(bc("4", of(Mod4.class), new Class[0]));
+
+    factoryOrder.orderFactories();
+
+    assertThat(names(factoryOrder.factories())).containsExactly("4", "2", "3", "1");
+  }
+
+  @Test
+  public void name_requiresPackage_mixed() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true);
+    factoryOrder.add(bc("1", null, new Class[0], of(Mod3.class)));
+    factoryOrder.add(bc("2", null, of(Mod4.class), new Class[0]));
+    factoryOrder.add(bc("3", of(Mod3.class), new Class[0], of(Mod4.class)));
+    factoryOrder.add(bc("4", of(Mod4.class), new Class[0]));
+
+    factoryOrder.orderFactories();
+
+    assertThat(names(factoryOrder.factories())).containsExactly("4", "2", "3", "1");
+  }
+
+  @Test
+  public void missingRequiresPackage_expect_unsatisfiedRequiresPackages() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), false);
+    factoryOrder.add(bc("1", null, new Class[0], of(Mod3.class)));
+    factoryOrder.add(bc("2", null, of(Mod4.class), new Class[0]));
+    factoryOrder.add(bc("4", of(Mod4.class), new Class[0]));
+
+    assertThatThrownBy(factoryOrder::orderFactories)
+      .isInstanceOf(IllegalStateException.class)
+      .hasMessageContaining("has unsatisfied requiresPackages [io.avaje.inject.BeanScopeBuilderTest$Mod3] ");
+  }
+
+  @Test
+  public void missingRequires_expect_unsatisfiedRequires() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), false);
+    factoryOrder.add(bc("1", null, of(Mod3.class), new Class[0]));
+    factoryOrder.add(bc("2", null, of(Mod4.class), new Class[0]));
+    factoryOrder.add(bc("4", of(Mod4.class), new Class[0]));
+
+    assertThatThrownBy(factoryOrder::orderFactories)
+      .isInstanceOf(IllegalStateException.class)
+      .hasMessageContaining("has unsatisfied requires [io.avaje.inject.BeanScopeBuilderTest$Mod3] ");
+  }
+
   private List<String> names(List<Module> factories) {
     return factories.stream()
       .map(Module::toString)
       .collect(Collectors.toList());
   }
 
-  private TDBeanScope bc(String name, Class<?>[] provides, Class<?>[] dependsOn) {
-    return new TDBeanScope(name, provides, dependsOn);
+  private TDBeanScope bc(String name, Class<?>[] provides, Class<?>[] requires) {
+    return bc(name, provides, requires, new Class[0]);
+  }
+
+  private TDBeanScope bc(String name, Class<?>[] provides, Class<?>[] requires, Class<?>[] requiresPkg) {
+    return new TDBeanScope(name, provides, requires, requiresPkg);
   }
 
   private static class TDBeanScope implements Module {
@@ -100,11 +155,13 @@ public class BeanScopeBuilderTest {
     final String name;
     final Class<?>[] provides;
     final Class<?>[] requires;
+    final Class<?>[] requiresPackages;
 
-    private TDBeanScope(String name, Class<?>[] provides, Class<?>[] requires) {
+    private TDBeanScope(String name, Class<?>[] provides, Class<?>[] requires, Class<?>[] requiresPackages) {
       this.name = name;
       this.provides = provides;
       this.requires = requires;
+      this.requiresPackages = requiresPackages;
     }
 
     @Override
@@ -125,6 +182,11 @@ public class BeanScopeBuilderTest {
     @Override
     public Class<?>[] requires() {
       return requires;
+    }
+
+    @Override
+    public Class<?>[] requiresPackages() {
+      return requiresPackages;
     }
 
     @Override
