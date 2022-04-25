@@ -1,4 +1,7 @@
 [![Build](https://github.com/avaje/avaje-inject/actions/workflows/build.yml/badge.svg)](https://github.com/avaje/avaje-inject/actions/workflows/build.yml)
+[![JDK EA](https://github.com/avaje/avaje-inject/actions/workflows/jdk-ea.yml/badge.svg)](https://github.com/avaje/avaje-inject/actions/workflows/jdk-ea.yml)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/avaje/avaje-inject/blob/master/LICENSE)
+[![Maven Central : avaje-inject](https://maven-badges.herokuapp.com/maven-central/io.avaje/avaje-inject/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.avaje/avaje-inject)
 
 # [avaje-inject](https://avaje.io/inject)
 APT based dependency injection for server side developers - https://avaje.io/inject

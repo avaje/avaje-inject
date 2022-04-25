@@ -61,6 +61,17 @@ public @interface InjectModule {
   Class<?>[] requires() default {};
 
   /**
+   * Dependencies in these packages are expected to be provided by other modules.
+   * <p>
+   * Instead of listing each and every dependency in {@code requires} we can use this to specify
+   * that any required dependency that is in these packages is expected to be provided by another module.
+   * <p>
+   * Use this rather than {@code requires} when there are lots of required dependencies, and we don't
+   * want to list each one in {@code requires} and {@code provides}.
+   */
+  Class<?>[] requiresPackages() default {};
+
+  /**
    * Internal use only - identifies the custom scope annotation associated to this module.
    * <p>
    * When a module is generated for a custom scope this is set to link the module back to the

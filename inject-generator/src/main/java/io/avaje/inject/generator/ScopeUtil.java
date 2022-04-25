@@ -11,11 +11,15 @@ class ScopeUtil {
   private static final String INJECT_MODULE = "io.avaje.inject.InjectModule";
 
   static List<String> readProvides(Element element) {
-    return readClasses(element, "provides");
+    return readClasses(element, "provides(");
   }
 
   static List<String> readRequires(Element element) {
-    return readClasses(element, "requires");
+    return readClasses(element, "requires(");
+  }
+
+  static List<String> readRequiresPackages(Element element) {
+    return readClasses(element, "requiresPackages(");
   }
 
   static List<String> readClasses(Element element, String attributeName) {
