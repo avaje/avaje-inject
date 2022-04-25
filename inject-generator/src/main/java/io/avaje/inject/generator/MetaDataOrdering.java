@@ -38,7 +38,7 @@ class MetaDataOrdering {
   }
 
   /**
-   * These if defined are expected to be required at wiring time probably via another module.
+   * These, if defined are expected to be required at wiring time probably via another module.
    */
   private void externallyRequiredDependencies() {
     for (String requireType : scopeInfo.requires()) {
@@ -121,8 +121,7 @@ class MetaDataOrdering {
 
   private void checkMissingDependencies(MetaData metaData) {
     for (Dependency dependency : metaData.getDependsOn()) {
-      if (providers.get(dependency.getName()) == null
-        && !scopeInfo.providedByOtherModule(dependency.getName())) {
+      if (providers.get(dependency.getName()) == null && !scopeInfo.providedByOtherModule(dependency.getName())) {
         TypeElement element = context.elementMaybe(metaData.getType());
         context.logError(element, "No dependency provided for " + dependency + " on " + metaData.getType());
         missingDependencyTypes.add(dependency.getName());
@@ -176,7 +175,7 @@ class MetaDataOrdering {
         // check non-provider dependency is satisfied
         ProviderList providerList = providers.get(dependency.getName());
         if (providerList == null) {
-          if (!scopeInfo.providedByOtherModule(dependency.getName()) && !dependency.isSoftDependency()) {
+          if (!scopeInfo.providedByOther(dependency)) {
             return false;
           }
         } else {

@@ -14,6 +14,11 @@ final class Dependency {
     this.softDependency = softDependency;
   }
 
+  @Override
+  public String toString() {
+    return name;
+  }
+
   String getName() {
     return name;
   }

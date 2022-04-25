@@ -6,14 +6,19 @@ package io.avaje.inject.spi;
 public interface Module {
 
   /**
+   * Return the set of types this module explicitly provides to other modules.
+   */
+  Class<?>[] provides();
+
+  /**
    * Return the types this module needs to be provided externally or via other modules.
    */
   Class<?>[] requires();
 
   /**
-   * Return the set of types this module explicitly provides to other modules.
+   * Return the packages this module needs to be provided via other modules.
    */
-  Class<?>[] provides();
+  Class<?>[] requiresPackages();
 
   /**
    * Return public classes of the beans that would be registered by this module.
