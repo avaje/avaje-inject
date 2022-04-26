@@ -60,6 +60,7 @@ class ScopeInfo {
   private String moduleShortName;
   private JavaFileObject moduleFile;
   private boolean emptyModule;
+  private boolean ignoreSingleton;
 
   /**
    * Create for the main/global module scope.
@@ -89,6 +90,10 @@ class ScopeInfo {
       '}';
   }
 
+  boolean includeSingleton() {
+    return !ignoreSingleton;
+  }
+
   void details(String name, Element contextElement) {
     if (name == null || name.isEmpty()) {
       final String simpleName = contextElement.getSimpleName().toString();
@@ -100,6 +105,7 @@ class ScopeInfo {
   }
 
   private void read(Element element) {
+    ignoreSingleton = ScopeUtil.readIgnoreSingleton(element);
     requires(ScopeUtil.readRequires(element));
     provides(ScopeUtil.readProvides(element));
     for (String require : ScopeUtil.readRequiresPackages(element)) {

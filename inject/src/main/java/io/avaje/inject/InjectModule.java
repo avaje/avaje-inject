@@ -42,6 +42,16 @@ public @interface InjectModule {
   String name() default "";
 
   /**
+   * Set to true to ignore anything annotated with <code>@Singleton</code>.
+   * <p>
+   * Set this to true when some other library is using <code>@Singleton</code> and we want
+   * avaje-inject to be completely independent of that by ignoring the standard <code>@Singleton</code>.
+   * <p>
+   * We instead use <code>@Component</code> instead of <code>@Singleton</code>.
+   */
+  boolean ignoreSingleton() default false;
+
+  /**
    * Explicitly define features that are provided by this module and required by other modules.
    * <p>
    * This is used to order wiring across multiple modules. Modules that provide dependencies

@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
  * <p>
  * MethodInterceptor instances are provided by {@link AspectProvider#interceptor(Method, Annotation)}.
  */
+@FunctionalInterface
 public interface MethodInterceptor {
 
   /**
