@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
  *
  * @param <T> The aspect annotation
  */
+@FunctionalInterface
 public interface AspectProvider<T extends Annotation> {
 
   /**

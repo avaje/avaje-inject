@@ -134,7 +134,7 @@ class MetaDataOrdering {
    */
   private void warnOnDependencies() {
     if (!missingDependencyTypes.isEmpty()) {
-      context.logError("Dependencies %s are not provided - missing @Singleton or @Factory/@Bean or specify external dependency via @InjectModule requires attribute", missingDependencyTypes);
+      context.logError("Dependencies %s are not provided - missing @Singleton, @Component, @Factory/@Bean or specify external dependency via @InjectModule requires attribute", missingDependencyTypes);
     } else {
       if (!queue.isEmpty()) {
         context.logWarn("There are " + queue.size() + " beans with unsatisfied dependencies (assuming external dependencies)");
