@@ -1,12 +1,12 @@
 package org.example.myapp.resilience4j;
 
+import io.avaje.inject.Component;
 import io.avaje.inject.aop.AspectProvider;
 import io.avaje.inject.aop.Fallback;
 import io.avaje.inject.aop.Invocation;
 import io.avaje.inject.aop.MethodInterceptor;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
-import javax.inject.Singleton;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -14,7 +14,7 @@ import java.time.format.DateTimeParseException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-@Singleton
+@Component
 public class RetryProvider implements AspectProvider<MyRetry> {
 
   @Override

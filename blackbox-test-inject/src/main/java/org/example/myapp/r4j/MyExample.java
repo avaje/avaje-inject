@@ -1,9 +1,9 @@
 package org.example.myapp.r4j;
 
-import javax.inject.Singleton;
+import io.avaje.inject.Component;
 import org.example.myapp.resilience4j.MyRetry;
 
-@Singleton
+@Component
 public class MyExample {
 
   public int barfCounter;

@@ -1,5 +1,6 @@
 package io.avaje.inject.generator;
 
+import io.avaje.inject.Component;
 import io.avaje.inject.Factory;
 import io.avaje.inject.InjectModule;
 import io.avaje.inject.Prototype;
@@ -55,24 +56,19 @@ public class Processor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-    Set<? extends Element> controllers = Collections.emptySet();
+    readScopes(roundEnv.getElementsAnnotatedWith(Scope.class));
+    readModule(roundEnv);
+    readChangedBeans(roundEnv.getElementsAnnotatedWith(Factory.class), true);
+    if (defaultScope.includeSingleton()) {
+      readChangedBeans(roundEnv.getElementsAnnotatedWith(Singleton.class), false);
+    }
+    readChangedBeans(roundEnv.getElementsAnnotatedWith(Component.class), false);
+    readChangedBeans(roundEnv.getElementsAnnotatedWith(Prototype.class), false);
     TypeElement typeElement = elementUtils.getTypeElement(Constants.CONTROLLER);
     if (typeElement != null) {
-      controllers = roundEnv.getElementsAnnotatedWith(typeElement);
+      readChangedBeans(roundEnv.getElementsAnnotatedWith(typeElement), false);
     }
-
-    Set<? extends Element> factoryBeans = roundEnv.getElementsAnnotatedWith(Factory.class);
-    Set<? extends Element> beans = roundEnv.getElementsAnnotatedWith(Singleton.class);
-    Set<? extends Element> prototypes = roundEnv.getElementsAnnotatedWith(Prototype.class);
-    Set<? extends Element> scopes = roundEnv.getElementsAnnotatedWith(Scope.class);
-    Set<? extends Element> proxies = roundEnv.getElementsAnnotatedWith(Proxy.class);
-    readScopes(scopes);
-    readModule(roundEnv);
-    readChangedBeans(factoryBeans, true);
-    readChangedBeans(beans, false);
-    readChangedBeans(prototypes, false);
-    readChangedBeans(controllers, false);
-    readChangedBeans(proxies, false);
+    readChangedBeans(roundEnv.getElementsAnnotatedWith(Proxy.class), false);
     allScopes.readBeans(roundEnv);
     defaultScope.write(roundEnv.processingOver());
     allScopes.write(roundEnv.processingOver());

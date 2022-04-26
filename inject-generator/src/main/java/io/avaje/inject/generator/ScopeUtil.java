@@ -10,6 +10,23 @@ class ScopeUtil {
 
   private static final String INJECT_MODULE = "io.avaje.inject.InjectModule";
 
+  static boolean readIgnoreSingleton(Element element) {
+    if (element == null) {
+      return false;
+    }
+    for (AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
+      if (INJECT_MODULE.equals(annotationMirror.getAnnotationType().toString())) {
+        for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : annotationMirror.getElementValues().entrySet()) {
+          if (entry.getKey().toString().startsWith("ignoreSingleton(")) {
+            Object value = entry.getValue().getValue();
+            return "true".equalsIgnoreCase(value.toString());
+          }
+        }
+      }
+    }
+    return false;
+  }
+
   static List<String> readProvides(Element element) {
     return readClasses(element, "provides(");
   }
