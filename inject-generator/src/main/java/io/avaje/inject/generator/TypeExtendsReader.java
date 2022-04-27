@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
@@ -117,8 +118,10 @@ class TypeExtendsReader {
     if (!fullName.equals(JAVA_LANG_OBJECT)) {
       String type = Util.unwrapProvider(fullName);
       if (!GenericType.isGeneric(type)) {
-        extendsTypes.add(type);
-        extendsInjection.read(element);
+        if (isPublic(element)) {
+          extendsTypes.add(type);
+          extendsInjection.read(element);
+        }
         addSuperType(superOf(element));
       }
     }
@@ -130,24 +133,31 @@ class TypeExtendsReader {
 
   private void readInterfaces(TypeElement type) {
     for (TypeMirror anInterface : type.getInterfaces()) {
-      String rawType = Util.unwrapProvider(anInterface.toString());
-      if (rawType.indexOf('.') == -1) {
-        context.logWarn("skip when no package on interface " + rawType);
-      } else if (Constants.AUTO_CLOSEABLE.equals(rawType) || Constants.IO_CLOSEABLE.equals(rawType)) {
-        closeable = true;
-      } else {
-        rawType = GenericType.removeParameter(rawType);
-        if (qualifierName == null) {
-          final String iShortName = Util.shortName(rawType);
-          if (beanSimpleName.endsWith(iShortName)) {
-            // derived qualifier name based on prefix to interface short name
-            qualifierName = beanSimpleName.substring(0, beanSimpleName.length() - iShortName.length()).toLowerCase();
+      Element element = context.asElement(anInterface);
+      if (isPublic(element)) {
+        String rawType = Util.unwrapProvider(anInterface.toString());
+        if (rawType.indexOf('.') == -1) {
+          context.logWarn("skip when no package on interface " + rawType);
+        } else if (Constants.AUTO_CLOSEABLE.equals(rawType) || Constants.IO_CLOSEABLE.equals(rawType)) {
+          closeable = true;
+        } else {
+          rawType = GenericType.removeParameter(rawType);
+          if (qualifierName == null) {
+            final String iShortName = Util.shortName(rawType);
+            if (beanSimpleName.endsWith(iShortName)) {
+              // derived qualifier name based on prefix to interface short name
+              qualifierName = beanSimpleName.substring(0, beanSimpleName.length() - iShortName.length()).toLowerCase();
+            }
           }
+          interfaceTypes.add(rawType);
+          readExtendedInterfaces(rawType);
         }
-        interfaceTypes.add(rawType);
-        readExtendedInterfaces(rawType);
       }
     }
+  }
+
+  private boolean isPublic(Element element) {
+    return element != null && element.getModifiers().contains(Modifier.PUBLIC);
   }
 
   private void readExtendedInterfaces(String type) {
