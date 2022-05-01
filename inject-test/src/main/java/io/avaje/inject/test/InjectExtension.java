@@ -2,6 +2,7 @@ package io.avaje.inject.test;
 
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.BeanScopeBuilder;
+import io.avaje.inject.spi.Module;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -11,11 +12,10 @@ import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import java.io.*;
 import java.lang.System.Logger.Level;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ServiceLoader;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static java.util.Collections.singletonList;
 
 /**
  * Junit 5 extension for avaje inject.
@@ -58,18 +58,21 @@ public class InjectExtension implements BeforeAllCallback, BeforeEachCallback, A
   }
 
   private void initialiseGlobalTestScope(ExtensionContext context) {
-    Iterator<TestModule> iterator = ServiceLoader.load(TestModule.class).iterator();
-    if (iterator.hasNext()) {
-      registerTestModule(context, iterator.next());
-    } else {
+    List<TestModule> testModules = new ArrayList<>();
+    for (TestModule next : ServiceLoader.load(TestModule.class)) {
+      testModules.add(next);
+    }
+    if (testModules.isEmpty()) {
       registerViaResources(context);
+    } else {
+      registerTestModule(context, testModules);
     }
   }
 
-  private void registerTestModule(ExtensionContext context, TestModule testModule) {
+  private void registerTestModule(ExtensionContext context, List<TestModule> testModules) {
     log.log(Level.DEBUG, "Building global test BeanScope (as parent scope for tests)");
     globalTestScope = BeanScope.newBuilder()
-      .withModules(testModule)
+      .withModules(testModules.toArray(Module[]::new))
       .build();
 
     log.log(Level.TRACE, "register global test BeanScope with beans %s", globalTestScope);
@@ -86,7 +89,7 @@ public class InjectExtension implements BeforeAllCallback, BeforeEachCallback, A
       if (className != null) {
         Class<?> cls = Class.forName(className);
         TestModule testModule = (TestModule) cls.getDeclaredConstructor().newInstance();
-        registerTestModule(context, testModule);
+        registerTestModule(context, singletonList(testModule));
       }
     } catch (Throwable e) {
       throw new RuntimeException("Error trying to create TestModule", e);
