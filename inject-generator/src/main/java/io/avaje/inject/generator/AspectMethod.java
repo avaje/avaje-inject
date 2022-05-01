@@ -1,5 +1,6 @@
 package io.avaje.inject.generator;
 
+import io.avaje.inject.generator.MethodReader.MethodParam;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
@@ -51,6 +52,9 @@ class AspectMethod {
   void addImports(Set<String> importTypes) {
     for (AspectPair aspect : aspectPairs) {
       aspect.addImports(importTypes);
+    }
+    for (MethodParam param : params) {
+      param.addImports(importTypes);
     }
     for (TypeMirror thrownType : method.getThrownTypes()) {
       importTypes.add(thrownType.toString());

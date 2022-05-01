@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -85,6 +86,22 @@ class GenericTypeTest {
     assertThat(type.getParams()).hasSize(2);
     assertThat(type.getParams().get(0).getMainType()).isEqualTo("my.d.Haz");
     assertThat(type.getParams().get(1).getMainType()).isEqualTo("java.lang.Long");
+  }
+
+  @Test
+  void parse_withParams2() {
+    GenericType type = GenericType.parse("java.util.concurrent.ConcurrentMap<java.lang.String,my.d.Has>");
+
+    assertThat(type.getMainType()).isEqualTo("java.util.concurrent.ConcurrentMap");
+    assertThat(type.getParams()).hasSize(2);
+    assertThat(type.getParams().get(0).getMainType()).isEqualTo("java.lang.String");
+    assertThat(type.getParams().get(1).getMainType()).isEqualTo("my.d.Has");
+
+    LinkedHashSet<String> importTypes = new LinkedHashSet<>();
+    type.addImports(importTypes);
+
+    assertThat(importTypes).hasSize(2);
+    assertThat(importTypes).containsExactly("java.util.concurrent.ConcurrentMap", "my.d.Has");
   }
 
   @Test

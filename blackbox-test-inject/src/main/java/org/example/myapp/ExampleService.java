@@ -3,7 +3,8 @@ package org.example.myapp;
 import javax.inject.Singleton;
 import org.example.myapp.aspect.MyTimed;
 
-import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 @MyTimed
 @Singleton
@@ -20,6 +21,14 @@ public class ExampleService {
   }
 
   public void runOnly(String param) {
-    System.out.println("runOnly "+param);
+    System.out.println("runOnly " + param);
+  }
+
+  public void withParamAtomic(AtomicLong atomicLong) {
+    System.out.println("withParamAtomic " + atomicLong);
+  }
+
+  public void withParamImport(ConcurrentHashMap<String, String> param0) {
+    System.out.println("withParamAtomic " + param0);
   }
 }

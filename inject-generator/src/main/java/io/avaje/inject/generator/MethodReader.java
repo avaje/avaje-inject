@@ -398,7 +398,8 @@ class MethodReader {
 
     void writeMethodParamType(Append writer) {
       if (genericType != null) {
-        genericType.writeShort(writer);
+        // for getDeclaredMethod only need top level main type
+        writer.append(genericType.getMainType());
       } else {
         writer.append(Util.shortName(paramType));
       }
