@@ -18,12 +18,12 @@ class TestModule_serviceLoad_Test {
 
 //    if (testMod.isPresent()) {
 //      // build what is our "global test BeanScope" which we use as a parent for all tests
-//      BeanScope parent = BeanScope.newBuilder()
+//      BeanScope parent = BeanScope.builder()
 //        .withModules(testMod.get())
 //        .build();
 //
 //      // a test creates a BeanScope with the parent of our "global test BeanScope"
-//      BeanScope child = BeanScope.newBuilder().withParent(parent, false).build();
+//      BeanScope child = BeanScope.builder().withParent(parent, false).build();
 //
 //      HelloService helloService = child.get(HelloService.class);
 //      assertEquals("hello+TestHelloData", helloService.hello());

@@ -11,7 +11,7 @@ public class MyFactoryTest {
 
   @Test
   public void methodsCalled() {
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
       final MyFactory myFactory = context.get(MyFactory.class);
       assertThat(myFactory.methodsCalled()).contains("|useCFact", "|anotherCFact", "|buildEngi");
     }
@@ -22,7 +22,7 @@ public class MyFactoryTest {
 
     final MyFactory.MyClose myClose;
     final MyFactory.MyAutoClose myAutoClose;
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
       myClose = context.get(MyFactory.MyClose.class);
       myAutoClose = context.get(MyFactory.MyAutoClose.class);
     }

@@ -9,7 +9,7 @@ class MyProtoTest {
 
   @Test
   void test_prototype_differentInstance() {
-    try (BeanScope scope = BeanScope.newBuilder()
+    try (BeanScope scope = BeanScope.builder()
       .build()) {
 
       MyProto one = scope.get(MyProto.class);

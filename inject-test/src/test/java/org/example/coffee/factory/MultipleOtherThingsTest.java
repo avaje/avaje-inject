@@ -11,7 +11,7 @@ class MultipleOtherThingsTest {
 
   @Test
   void test() {
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
       final MultipleOtherThings combined = context.get(MultipleOtherThings.class);
       assertEquals("blue", combined.blue());
       assertEquals("red", combined.red());

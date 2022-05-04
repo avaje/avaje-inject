@@ -17,13 +17,13 @@ import java.util.Optional;
  *
  * <h3>Create a BeanScope</h3>
  * <p>
- * We can programmatically create a BeanScope via {@code BeanScope.newBuilder()}.
+ * We can programmatically create a BeanScope via {@code BeanScope.builder()}.
  * </p>
  * <pre>{@code
  *
  *   // create a BeanScope ...
  *
- *   try (BeanScope scope = BeanScope.newBuilder()
+ *   try (BeanScope scope = BeanScope.builder()
  *     .build()) {
  *
  *     CoffeeMaker coffeeMaker = context.get(CoffeeMaker.class);
@@ -65,7 +65,7 @@ import java.util.Optional;
  *   // provide external dependencies ...
  *   Pump pump = ...
  *
- *   try (BeanScope scope = BeanScope.newBuilder()
+ *   try (BeanScope scope = BeanScope.builder()
  *     .withBean(Pump.class, pump)
  *     .build()) {
  *
@@ -94,7 +94,7 @@ public interface BeanScope extends AutoCloseable {
    *
    *   // create a BeanScope ...
    *
-   *   try (BeanScope scope = BeanScope.newBuilder()
+   *   try (BeanScope scope = BeanScope.builder()
    *     .build()) {
    *
    *     CoffeeMaker coffeeMaker = context.get(CoffeeMaker.class);
@@ -103,8 +103,16 @@ public interface BeanScope extends AutoCloseable {
    *
    * }</pre>
    */
-  static BeanScopeBuilder newBuilder() {
+  static BeanScopeBuilder builder() {
     return new DBeanScopeBuilder();
+  }
+
+  /**
+   * Deprecated - migrate to builder().
+   */
+  @Deprecated
+  static BeanScopeBuilder newBuilder() {
+    return builder();
   }
 
   /**

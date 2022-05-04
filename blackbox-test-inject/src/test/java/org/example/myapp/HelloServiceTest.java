@@ -20,7 +20,7 @@ class HelloServiceTest {
   @Test
   void basic() throws IOException {
     // just wire everything with no test scope, mocks etc
-    BeanScope beanScope = BeanScope.newBuilder().build();
+    BeanScope beanScope = BeanScope.builder().build();
 
     HelloService helloService = beanScope.get(HelloService.class);
     assertEquals("bazz foo 42", helloService.bazz("foo", 42));
@@ -30,7 +30,7 @@ class HelloServiceTest {
   @Test
   void skip() {
     // just wire everything with no test scope, mocks etc
-    BeanScope beanScope = BeanScope.newBuilder().build();
+    BeanScope beanScope = BeanScope.builder().build();
 
     HelloService helloService = beanScope.get(HelloService.class);
     String result = helloService.skipExample("echo me back");
@@ -39,7 +39,7 @@ class HelloServiceTest {
 
   @Test
   void aspect_multiInvoke() {
-    BeanScope beanScope = BeanScope.newBuilder().build();
+    BeanScope beanScope = BeanScope.builder().build();
 
     MyMultiInvokeAspect aspect = beanScope.get(MyMultiInvokeAspect.class);
     HelloService helloService = beanScope.get(HelloService.class);
@@ -51,7 +51,7 @@ class HelloServiceTest {
 
   @Test
   void aspect_checkedRunnable() throws IOException, ClassNotFoundException {
-    BeanScope beanScope = BeanScope.newBuilder().build();
+    BeanScope beanScope = BeanScope.builder().build();
 
     MyAroundAspect aspect = beanScope.get(MyAroundAspect.class);
     HelloService helloService = beanScope.get(HelloService.class);
@@ -67,7 +67,7 @@ class HelloServiceTest {
 
   @Test
   void aspect_throwingUndeclaredException_expect_InvocationException() {
-    BeanScope beanScope = BeanScope.newBuilder().build();
+    BeanScope beanScope = BeanScope.builder().build();
 
     HelloService helloService = beanScope.get(HelloService.class);
 
@@ -80,7 +80,7 @@ class HelloServiceTest {
 
   @Test
   void aspect_appCodeThrowingUnchecked_expect_InvocationException() {
-    BeanScope beanScope = BeanScope.newBuilder().build();
+    BeanScope beanScope = BeanScope.builder().build();
 
     HelloService helloService = beanScope.get(HelloService.class);
 
@@ -92,7 +92,7 @@ class HelloServiceTest {
 
   @Test
   void aspect_appCodeThrowingDeclared_expect_declaredException() {
-    BeanScope beanScope = BeanScope.newBuilder().build();
+    BeanScope beanScope = BeanScope.builder().build();
 
     HelloService helloService = beanScope.get(HelloService.class);
 

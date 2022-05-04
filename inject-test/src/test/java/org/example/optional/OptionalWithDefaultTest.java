@@ -9,7 +9,7 @@ class OptionalWithDefaultTest {
 
   @Test
   void whenOptionalEmpty_fallback() {
-    try (BeanScope beanScope = BeanScope.newBuilder().build()) {
+    try (BeanScope beanScope = BeanScope.builder().build()) {
       OptBax bax = beanScope.get(OptBax.class);
       assertThat(bax.hi()).isEqualTo("defaultOptionalBax");
     }
@@ -18,7 +18,7 @@ class OptionalWithDefaultTest {
   @Test
   void whenOptionalSupplied() {
     OptionalService supplied = new Supplied();
-    try (BeanScope beanScope = BeanScope.newBuilder()
+    try (BeanScope beanScope = BeanScope.builder()
       .withBean("supplied", OptionalService.class, supplied)
       .build()) {
       OptBax bax = beanScope.get(OptBax.class);

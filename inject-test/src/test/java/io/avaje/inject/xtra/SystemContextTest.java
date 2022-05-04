@@ -21,7 +21,7 @@ public class SystemContextTest {
 
   @Test
   public void getBeansByPriority() {
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
       final List<BaseIface> beans = context.listByPriority(BaseIface.class);
       assertThat(beans).hasSize(3);
 
@@ -33,7 +33,7 @@ public class SystemContextTest {
 
   @Test
   public void getBeansByPriority_withAnnotation() {
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
       final List<Somei> beans = context.listByPriority(Somei.class, Priority.class);
       assertThat(beans).hasSize(3);
 
@@ -45,7 +45,7 @@ public class SystemContextTest {
 
   @Test
   public void getBeansUnsorted_withPriority() {
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
       final List<Somei> beans = context.list(Somei.class);
       assertThat(beans).hasSize(3);
       // can't assert bean order
@@ -54,7 +54,7 @@ public class SystemContextTest {
 
   @Test
   public void getBeansWithAnnotation() {
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
       final List<Object> beans = context.listByAnnotation(Fruit.class);
       assertThat(beans).hasSize(2);
     }

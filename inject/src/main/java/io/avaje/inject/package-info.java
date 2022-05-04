@@ -14,7 +14,7 @@
  *
  *   // Create BeanScope to wire and access beans
  *
- *   BeanScope scope = BeanScope.newBuilder()
+ *   BeanScope scope = BeanScope.builder()
  *     .build();
  *
  *   // use it

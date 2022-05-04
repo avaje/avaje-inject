@@ -10,7 +10,7 @@ class ExampleServiceTest {
 
   @Test
   void exercise() {
-    try (BeanScope beanScope = BeanScope.newBuilder().build()) {
+    try (BeanScope beanScope = BeanScope.builder().build()) {
       ExampleService exampleService = beanScope.get(ExampleService.class);
 
       exampleService.other("foo", 42);

@@ -41,7 +41,7 @@ class WithExtnNamedSpyTest {
     @Test
     void test() {
 
-      try (BeanScope beanScope = BeanScope.newBuilder()
+      try (BeanScope beanScope = BeanScope.builder()
         .forTesting()
         .withSpy(SomeStore.class, "blue")
         .withSpy(SomeStore.class, "Green")

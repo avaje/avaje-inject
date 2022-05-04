@@ -17,7 +17,7 @@ class BeanScopeBuilderAddTest {
   @Test
   void withModules_excludingThisOne() {
     TDPump testDoublePump = new TDPump();
-    try (BeanScope context = BeanScope.newBuilder()
+    try (BeanScope context = BeanScope.builder()
       .withBeans(testDoublePump)
       // our module is "org.example.coffee"
       // so this effectively includes no modules
@@ -61,7 +61,7 @@ class BeanScopeBuilderAddTest {
 
     TDPump testDoublePump = new TDPump();
 
-    try (BeanScope context = BeanScope.newBuilder()
+    try (BeanScope context = BeanScope.builder()
       .withBeans(testDoublePump)
       .withModules(new org.example.ExampleModule())
       .build()) {
@@ -79,7 +79,7 @@ class BeanScopeBuilderAddTest {
 
     TDPump testDoublePump = new TDPump();
 
-    try (BeanScope context = BeanScope.newBuilder()
+    try (BeanScope context = BeanScope.builder()
       .withBeans(testDoublePump)
       .build()) {
 
@@ -96,7 +96,7 @@ class BeanScopeBuilderAddTest {
 
     Pump mock = Mockito.mock(Pump.class);
 
-    try (BeanScope context = BeanScope.newBuilder()
+    try (BeanScope context = BeanScope.builder()
       .withBean(Pump.class, mock)
       .build()) {
 

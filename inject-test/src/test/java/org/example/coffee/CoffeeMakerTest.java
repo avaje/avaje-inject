@@ -24,7 +24,7 @@ class CoffeeMakerTest {
 
   @Test
   void makeIt_via_SystemContext() {
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
       String makeIt = context.get(CoffeeMaker.class).makeIt();
       assertThat(makeIt).isEqualTo("done");
 
@@ -35,7 +35,7 @@ class CoffeeMakerTest {
 
   @Test
   void makeIt_via_BootContext_withNoShutdownHook() {
-    try (BeanScope context = BeanScope.newBuilder()
+    try (BeanScope context = BeanScope.builder()
       .withShutdownHook(false)
       .build()) {
 
@@ -46,7 +46,7 @@ class CoffeeMakerTest {
 
   @Test
   void beanScope_all() {
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
       String makeIt = context.get(CoffeeMaker.class).makeIt();
       assertThat(makeIt).isEqualTo("done");
 
@@ -75,7 +75,7 @@ class CoffeeMakerTest {
 
   @Test
   void beanScope_all_superClasses() {
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
 
       final List<BeanEntry> beanEntries = context.all();
 
@@ -91,7 +91,7 @@ class CoffeeMakerTest {
 
   @Test
   void beanScope_all_interfaces() {
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
 
       final List<BeanEntry> beanEntries = context.all();
 
@@ -106,7 +106,7 @@ class CoffeeMakerTest {
 
   @Test
   void beanScope_all_includesGenericInterfaces() {
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
 
       final List<BeanEntry> beanEntries = context.all();
 
@@ -121,7 +121,7 @@ class CoffeeMakerTest {
 
   @Test
   void beanScope_all_interfaceWithParameter() {
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
 
       final List<BeanEntry> beanEntries = context.all();
 
@@ -136,7 +136,7 @@ class CoffeeMakerTest {
 
   @Test
   void beanScope_all_provider() {
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
 
       final List<BeanEntry> beanEntries = context.all();
 

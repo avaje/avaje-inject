@@ -17,7 +17,7 @@ import java.util.function.Consumer;
  *   // external dependencies
  *   Pump pump = ...
  *
- *   BeanScope scope = BeanScope.newBuilder()
+ *   BeanScope scope = BeanScope.builder()
  *     .withBean(pump)
  *     .build();
  *
@@ -40,7 +40,7 @@ public interface BeanScopeBuilder {
    *
    *   // automatically closed via try with resources
    *
-   *   BeanScope scope = BeanScope.newBuilder()
+   *   BeanScope scope = BeanScope.builder()
    *     .withShutdownHook(true)
    *     .build());
    *
@@ -62,7 +62,7 @@ public interface BeanScopeBuilder {
    *
    * <pre>{@code
    *
-   *   BeanScope scope = BeanScope.newBuilder()
+   *   BeanScope scope = BeanScope.builder()
    *     .withModules(new CustomModule())
    *     .build());
    *
@@ -90,7 +90,7 @@ public interface BeanScopeBuilder {
    *   Pump pump = ...
    *   Grinder grinder = ...
    *
-   *   BeanScope scope = BeanScope.newBuilder()
+   *   BeanScope scope = BeanScope.builder()
    *     .withBeans(pump, grinder)
    *     .build();
    *
@@ -112,7 +112,7 @@ public interface BeanScopeBuilder {
    *
    *   Pump externalDependency = ...
    *
-   *   try (BeanScope scope = BeanScope.newBuilder()
+   *   try (BeanScope scope = BeanScope.builder()
    *     .withBean(Pump.class, externalDependency)
    *     .build()) {
    *
@@ -204,7 +204,7 @@ public interface BeanScopeBuilder {
      *
      * <pre>{@code
      *
-     *   try (BeanScope scope = BeanScope.newBuilder()
+     *   try (BeanScope scope = BeanScope.builder()
      *     .forTesting()
      *     .withMock(Pump.class)
      *     .withMock(Grinder.class)
@@ -228,7 +228,7 @@ public interface BeanScopeBuilder {
      *
      * <pre>{@code
      *
-     *   try (BeanScope scope = BeanScope.newBuilder()
+     *   try (BeanScope scope = BeanScope.builder()
      *     .forTesting()
      *     .withMock(Store.class, "red")
      *     .withMock(Store.class, "blue")
@@ -247,7 +247,7 @@ public interface BeanScopeBuilder {
      *
      * <pre>{@code
      *
-     *   try (BeanScope scope = BeanScope.newBuilder()
+     *   try (BeanScope scope = BeanScope.builder()
      *     .forTesting()
      *     .withMock(Pump.class)
      *     .withMock(Grinder.class, grinder -> {
@@ -275,7 +275,7 @@ public interface BeanScopeBuilder {
      *
      * <pre>{@code
      *
-     *   try (BeanScope scope = BeanScope.newBuilder()
+     *   try (BeanScope scope = BeanScope.builder()
      *     .forTesting()
      *     .withSpy(Pump.class)
      *     .build()) {
@@ -301,7 +301,7 @@ public interface BeanScopeBuilder {
      *
      * <pre>{@code
      *
-     *   try (BeanScope scope = BeanScope.newBuilder()
+     *   try (BeanScope scope = BeanScope.builder()
      *     .forTesting()
      *     .withSpy(Store.class, "red")
      *     .withSpy(Store.class, "blue")
@@ -320,7 +320,7 @@ public interface BeanScopeBuilder {
      *
      * <pre>{@code
      *
-     *   try (BeanScope scope = BeanScope.newBuilder()
+     *   try (BeanScope scope = BeanScope.builder()
      *     .forTesting()
      *     .withSpy(Pump.class, pump -> {
      *       // setup the spy

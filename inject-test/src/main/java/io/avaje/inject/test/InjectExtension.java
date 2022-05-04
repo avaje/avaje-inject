@@ -67,7 +67,7 @@ public class InjectExtension implements BeforeAllCallback, BeforeEachCallback, A
   @Override
   public void beforeEach(final ExtensionContext context) {
     final List<MetaReader> readers = createMetaReaders(context);
-    final BeanScopeBuilder builder = BeanScope.newBuilder();
+    final BeanScopeBuilder builder = BeanScope.builder();
     if (globalTestScope != null) {
       builder.withParent(globalTestScope, false);
     }

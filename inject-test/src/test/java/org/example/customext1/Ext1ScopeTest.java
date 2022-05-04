@@ -18,13 +18,13 @@ class Ext1ScopeTest {
   @Test
   void wireParentChild() {
 
-    final BeanScope parentScope = BeanScope.newBuilder()
+    final BeanScope parentScope = BeanScope.builder()
       .withBean(Ext0iface.class, new If0())
       .withBean(Ext0conc.class, new Ext0conc())
       .withModules(new Ext0Module())
       .build();
 
-    final BeanScope scope = BeanScope.newBuilder()
+    final BeanScope scope = BeanScope.builder()
       .withBean(Ext1iface.class, new If1())
       .withBean(Ext1conc.class, new Ext1conc())
       .withModules(new Ext1Module())
@@ -47,7 +47,7 @@ class Ext1ScopeTest {
 
     // wire everything using only Ext1Module so simulating
     // Ext0Module via external dependencies
-    final BeanScope scope = BeanScope.newBuilder()
+    final BeanScope scope = BeanScope.builder()
       .withBean(Ext0iface.class, new If0())
       .withBean(Ext0conc.class, new Ext0conc())
       .withBean(Ext0Other.class, new Ext0Other())

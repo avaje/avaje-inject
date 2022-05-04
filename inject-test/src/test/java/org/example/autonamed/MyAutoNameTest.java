@@ -10,7 +10,7 @@ class MyAutoNameTest {
   @Test
   void impliedNames_multiple() {
 
-    try (final BeanScope beanScope = BeanScope.newBuilder().build()) {
+    try (final BeanScope beanScope = BeanScope.builder().build()) {
 
       final MyAutoB2 myAutoName = beanScope.get(MyAutoB2.class);
       assertThat(myAutoName.one()).isEqualTo("oneB2");
@@ -31,7 +31,7 @@ class MyAutoNameTest {
   @Test
   void test() {
 
-    try (final BeanScope beanScope = BeanScope.newBuilder().build()) {
+    try (final BeanScope beanScope = BeanScope.builder().build()) {
 
       final MyAutoName myAutoName = beanScope.get(MyAutoName.class);
       assertThat(myAutoName.who()).isEqualTo("one");

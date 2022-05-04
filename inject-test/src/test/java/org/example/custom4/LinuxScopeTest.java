@@ -13,7 +13,7 @@ class LinuxScopeTest {
     BuildModule buildModule = new BuildModule(buildExternal);
 
     // our top scope
-    try (BeanScope buildScope = BeanScope.newBuilder()
+    try (BeanScope buildScope = BeanScope.builder()
       .withModules(buildModule)
       .build()) {
 
@@ -24,7 +24,7 @@ class LinuxScopeTest {
       MachineModule machineModule = new MachineModule(machineExternal);
 
       // our middle scope (depends on top scope)
-      try (BeanScope machineScope = BeanScope.newBuilder()
+      try (BeanScope machineScope = BeanScope.builder()
         .withParent(buildScope)
         .withModules(machineModule)
         .build()) {
@@ -36,7 +36,7 @@ class LinuxScopeTest {
         //  bottom scope depends on middle scope and transitively depends on top scope
         // this is our case for Issue 171 where LinuxOne depends on Build
         // which is transitively supplied via MachineScope
-        try (BeanScope linuxScope = BeanScope.newBuilder()
+        try (BeanScope linuxScope = BeanScope.builder()
           .withParent(machineScope)
           .withModules(new LinuxModule())
           .build()) {
@@ -62,7 +62,7 @@ class LinuxScopeTest {
     Machine machineExternal = new Machine();
 
     // our 'flattened' bean scope
-    try (BeanScope flatScope = BeanScope.newBuilder()
+    try (BeanScope flatScope = BeanScope.builder()
       // all our scope modules
       .withModules(new BuildModule(buildExternal), new MachineModule(machineExternal), new LinuxModule())
       .build()) {

@@ -28,7 +28,7 @@ class BeanScope_Builder_mockitoSpyTest {
     Pump pump = mock(Pump.class);
     Grinder grinder = mock(Grinder.class);
 
-    try (BeanScope context = BeanScope.newBuilder()
+    try (BeanScope context = BeanScope.builder()
       .withBeans(pump, grinder)
       .build()) {
 
@@ -49,7 +49,7 @@ class BeanScope_Builder_mockitoSpyTest {
   @Test
   void withMockitoSpy_noSetup_expect_spyUsed() {
 
-    try (BeanScope context = BeanScope.newBuilder()
+    try (BeanScope context = BeanScope.builder()
       .forTesting()
       .withSpy(Pump.class)
       .build()) {
@@ -66,7 +66,7 @@ class BeanScope_Builder_mockitoSpyTest {
   @Test
   void withMockitoSpy_postLoadSetup_expect_spyUsed() {
 
-    try (BeanScope context = BeanScope.newBuilder()
+    try (BeanScope context = BeanScope.builder()
       .forTesting()
       .withSpy(Pump.class)
       .withSpy(Grinder.class)
@@ -90,7 +90,7 @@ class BeanScope_Builder_mockitoSpyTest {
   @Test
   void withMockitoSpy_expect_spyUsed() {
 
-    try (BeanScope context = BeanScope.newBuilder()
+    try (BeanScope context = BeanScope.builder()
       .forTesting()
       .withSpy(Pump.class, pump -> {
         // setup the spy
@@ -114,7 +114,7 @@ class BeanScope_Builder_mockitoSpyTest {
   @Test
   void withMockitoSpy_whenPrimary_expect_spyUsed() {
 
-    try (BeanScope context = BeanScope.newBuilder()
+    try (BeanScope context = BeanScope.builder()
       .forTesting()
       .withSpy(PEmailer.class) // has a primary
       .build()) {
@@ -130,7 +130,7 @@ class BeanScope_Builder_mockitoSpyTest {
   @Test
   void withMockitoSpy_whenOnlySecondary_expect_spyUsed() {
 
-    try (BeanScope context = BeanScope.newBuilder()
+    try (BeanScope context = BeanScope.builder()
       .forTesting()
       .withSpy(Widget.class) // only secondary
       .build()) {
@@ -154,7 +154,7 @@ class BeanScope_Builder_mockitoSpyTest {
   @Test
   void withNamed_when_qualifierNameDoesNotExist_but_onlyOneCandidate() {
 
-    try (BeanScope context = BeanScope.newBuilder()
+    try (BeanScope context = BeanScope.builder()
       .build()) {
 
       WidgetUser widgetUser = context.get(WidgetUser.class);
@@ -172,7 +172,7 @@ class BeanScope_Builder_mockitoSpyTest {
   @Test
   void withMockitoSpy_whenSecondary_expect_spyUsed() {
 
-    try (BeanScope context = BeanScope.newBuilder()
+    try (BeanScope context = BeanScope.builder()
       .forTesting()
       .withSpy(Something.class) // has a secondary and a normal
       .build()) {
@@ -196,7 +196,7 @@ class BeanScope_Builder_mockitoSpyTest {
 
     AtomicReference<Grinder> mock = new AtomicReference<>();
 
-    try (BeanScope context = BeanScope.newBuilder()
+    try (BeanScope context = BeanScope.builder()
       .forTesting()
       .withMock(Pump.class)
       .withMock(Grinder.class, grinder -> {

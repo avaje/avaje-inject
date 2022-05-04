@@ -16,11 +16,11 @@ class ParentScopeTest {
   @Test
   void parentScope() {
 
-    final BeanScope parent = BeanScope.newBuilder()
+    final BeanScope parent = BeanScope.builder()
       .withModules(new OtherModule())
       .build();
 
-    final BeanScope scope = BeanScope.newBuilder()
+    final BeanScope scope = BeanScope.builder()
       .withModules(new MyThreeModule())
       .withParent(parent)
       .build();

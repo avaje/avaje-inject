@@ -35,7 +35,7 @@ public class ApplicationScope {
   private static final BeanScope appScope = init();
 
   private static BeanScope init() {
-    return BeanScope.newBuilder().withShutdownHook(true).build();
+    return BeanScope.builder().withShutdownHook(true).build();
   }
 
   private ApplicationScope() {

@@ -9,7 +9,7 @@ class CircularDependencyTest {
 
   @Test
   void wire() {
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
       assertThat(context.get(CircA.class)).isNotNull();
       assertThat(context.get(CircB.class)).isNotNull();
       assertThat(context.get(CircC.class)).isNotNull();

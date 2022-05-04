@@ -13,7 +13,7 @@ class OtherServiceProxyTest {
   @Test
   void proxyMethodInvocation() {
 
-    BeanScope beanScope = BeanScope.newBuilder().build();
+    BeanScope beanScope = BeanScope.builder().build();
     OtherService otherService = beanScope.get(OtherService.class);
 
     String result = otherService.other("foo", 42);

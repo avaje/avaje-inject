@@ -11,7 +11,7 @@ public class BFactTest {
   public void getCountInit() {
 
     BFact bFact;
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
       bFact = context.get(BFact.class);
       assertThat(bFact.getCountInit()).isEqualTo(1);
       assertThat(bFact.getCountClose()).isEqualTo(0);

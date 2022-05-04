@@ -10,7 +10,7 @@ class InnerClassBeanTest {
 
   @Test
   void test() {
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
       InnerClassBean.MyBean bean = context.get(InnerClassBean.MyBean.class);
       assertThat(bean).isNotNull();
     }

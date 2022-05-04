@@ -11,7 +11,7 @@ class ShouldCloseAutoTest {
   void test_closable() {
 
     ShouldCloseAuto shouldCloseAuto;
-    try (final BeanScope scope = BeanScope.newBuilder().build()) {
+    try (final BeanScope scope = BeanScope.builder().build()) {
       shouldCloseAuto = scope.get(ShouldCloseAuto.class);
     }
 
@@ -22,7 +22,7 @@ class ShouldCloseAutoTest {
   void test_autoCloseable() {
 
     ShouldCloseAuto2 shouldCloseAuto;
-    try (final BeanScope scope = BeanScope.newBuilder().build()) {
+    try (final BeanScope scope = BeanScope.builder().build()) {
       shouldCloseAuto = scope.get(ShouldCloseAuto2.class);
     }
 
