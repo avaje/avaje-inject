@@ -25,8 +25,8 @@ class CustomScopeTest {
       LocalExt ext = new LocalExt();
 
       try (BeanScope beanScope = BeanScope.builder()
-        .withParent(parentScope)
-        .withModules(new MyCustomModule(ext))
+        .parent(parentScope)
+        .modules(new MyCustomModule(ext))
         .build()) {
 
         final CoffeeMaker coffeeMaker = beanScope.get(CoffeeMaker.class);
@@ -50,8 +50,8 @@ class CustomScopeTest {
     CoffeeMaker suppliedCoffeeMaker = Mockito.mock(CoffeeMaker.class);
 
     try (BeanScope beanScope = BeanScope.builder()
-      .withModules(new MyCustomModule(ext))
-      .withBean(CoffeeMaker.class, suppliedCoffeeMaker)
+      .modules(new MyCustomModule(ext))
+      .bean(CoffeeMaker.class, suppliedCoffeeMaker)
       .build()) {
 
       final CustomBean bean = beanScope.get(CustomBean.class);
@@ -74,8 +74,8 @@ class CustomScopeTest {
     CoffeeMaker suppliedCoffeeMaker = Mockito.mock(CoffeeMaker.class);
 
     try (BeanScope beanScope = BeanScope.builder()
-      .withModules(new MyCustomModule(ext))
-      .withBean(CoffeeMaker.class, suppliedCoffeeMaker)
+      .modules(new MyCustomModule(ext))
+      .bean(CoffeeMaker.class, suppliedCoffeeMaker)
       .build()) {
 
       // includes the 2 supplied beans

@@ -21,7 +21,7 @@ public abstract class TestBeanScope {
    */
   public static BeanScopeBuilder builder() {
     BeanScope globalTestScope = init(true);
-    return BeanScope.builder().withParent(globalTestScope, false);
+    return BeanScope.builder().parent(globalTestScope, false);
   }
 
   /**

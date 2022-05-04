@@ -23,10 +23,10 @@ class ExtensionExampleTest {
 
     BeanScopeBuilder bootContext = BeanScope.builder()
       .forTesting()
-      .withSpy(cls0)
-      .withSpy(cls1)
-      .withMock(cls0)
-      .withMock(cls1);
+      .spy(cls0)
+      .spy(cls1)
+      .mock(cls0)
+      .mock(cls1);
 
     assertNotNull(context);
     assertNotNull(bootContext);

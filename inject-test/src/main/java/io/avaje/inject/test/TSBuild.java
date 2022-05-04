@@ -72,8 +72,8 @@ final class TSBuild {
 
   private BeanScope buildFromModules(List<TestModule> testModules) {
     return BeanScope.builder()
-      .withModules(testModules.toArray(Module[]::new))
-      .withShutdownHook(shutdownHook)
+      .modules(testModules.toArray(Module[]::new))
+      .shutdownHook(shutdownHook)
       .build();
   }
 

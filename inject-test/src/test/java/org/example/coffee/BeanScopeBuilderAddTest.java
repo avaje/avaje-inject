@@ -18,10 +18,10 @@ class BeanScopeBuilderAddTest {
   void withModules_excludingThisOne() {
     TDPump testDoublePump = new TDPump();
     try (BeanScope context = BeanScope.builder()
-      .withBeans(testDoublePump)
+      .beans(testDoublePump)
       // our module is "org.example.coffee"
       // so this effectively includes no modules
-      .withModules(new SillyModule())
+      .modules(new SillyModule())
       .build()) {
 
       assertThrows(NoSuchElementException.class, () -> context.get(CoffeeMaker.class));
@@ -62,8 +62,8 @@ class BeanScopeBuilderAddTest {
     TDPump testDoublePump = new TDPump();
 
     try (BeanScope context = BeanScope.builder()
-      .withBeans(testDoublePump)
-      .withModules(new org.example.ExampleModule())
+      .beans(testDoublePump)
+      .modules(new org.example.ExampleModule())
       .build()) {
 
       String makeIt = context.get(CoffeeMaker.class).makeIt();
@@ -80,7 +80,7 @@ class BeanScopeBuilderAddTest {
     TDPump testDoublePump = new TDPump();
 
     try (BeanScope context = BeanScope.builder()
-      .withBeans(testDoublePump)
+      .beans(testDoublePump)
       .build()) {
 
       String makeIt = context.get(CoffeeMaker.class).makeIt();
@@ -97,7 +97,7 @@ class BeanScopeBuilderAddTest {
     Pump mock = Mockito.mock(Pump.class);
 
     try (BeanScope context = BeanScope.builder()
-      .withBean(Pump.class, mock)
+      .bean(Pump.class, mock)
       .build()) {
 
       Pump pump = context.get(Pump.class);

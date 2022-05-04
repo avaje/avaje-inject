@@ -69,7 +69,7 @@ public class InjectExtension implements BeforeAllCallback, BeforeEachCallback, A
     final List<MetaReader> readers = createMetaReaders(context);
     final BeanScopeBuilder builder = BeanScope.builder();
     if (globalTestScope != null) {
-      builder.withParent(globalTestScope, false);
+      builder.parent(globalTestScope, false);
     }
     // register mocks and spies local to this test
     for (MetaReader reader : readers) {

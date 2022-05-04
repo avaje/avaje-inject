@@ -23,7 +23,7 @@ public class NestedInterfaceTest {
 
     try (BeanScope context = BeanScope.builder()
       .forTesting()
-      .withMock(Some.Nested.class, nested -> when(nested.doNested()).thenReturn("myMock"))
+      .mock(Some.Nested.class, nested -> when(nested.doNested()).thenReturn("myMock"))
       .build()) {
 
       final Some.Nested nestedInterface = context.get(Some.Nested.class);

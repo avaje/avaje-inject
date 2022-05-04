@@ -36,7 +36,7 @@ class CoffeeMakerTest {
   @Test
   void makeIt_via_BootContext_withNoShutdownHook() {
     try (BeanScope context = BeanScope.builder()
-      .withShutdownHook(false)
+      .shutdownHook(false)
       .build()) {
 
       String makeIt = context.get(CoffeeMaker.class).makeIt();

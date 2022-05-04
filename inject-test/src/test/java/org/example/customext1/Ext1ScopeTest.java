@@ -19,16 +19,16 @@ class Ext1ScopeTest {
   void wireParentChild() {
 
     final BeanScope parentScope = BeanScope.builder()
-      .withBean(Ext0iface.class, new If0())
-      .withBean(Ext0conc.class, new Ext0conc())
-      .withModules(new Ext0Module())
+      .bean(Ext0iface.class, new If0())
+      .bean(Ext0conc.class, new Ext0conc())
+      .modules(new Ext0Module())
       .build();
 
     final BeanScope scope = BeanScope.builder()
-      .withBean(Ext1iface.class, new If1())
-      .withBean(Ext1conc.class, new Ext1conc())
-      .withModules(new Ext1Module())
-      .withParent(parentScope)
+      .bean(Ext1iface.class, new If1())
+      .bean(Ext1conc.class, new Ext1conc())
+      .modules(new Ext1Module())
+      .parent(parentScope)
       .build();
 
     final Ext1Bean ext1Bean = scope.get(Ext1Bean.class);
@@ -48,10 +48,10 @@ class Ext1ScopeTest {
     // wire everything using only Ext1Module so simulating
     // Ext0Module via external dependencies
     final BeanScope scope = BeanScope.builder()
-      .withBean(Ext0iface.class, new If0())
-      .withBean(Ext0conc.class, new Ext0conc())
-      .withBean(Ext0Other.class, new Ext0Other())
-      .withModules(new Ext1Module(new If1(), new Ext1conc())) //new Ext0Module(),
+      .bean(Ext0iface.class, new If0())
+      .bean(Ext0conc.class, new Ext0conc())
+      .bean(Ext0Other.class, new Ext0Other())
+      .modules(new Ext1Module(new If1(), new Ext1conc())) //new Ext0Module(),
       .build();
 
     final Ext1Bean ext1Bean = scope.get(Ext1Bean.class);

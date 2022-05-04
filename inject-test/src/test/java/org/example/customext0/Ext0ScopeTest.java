@@ -11,7 +11,7 @@ class Ext0ScopeTest {
   void wire() {
 
     final BeanScope scope = BeanScope.builder()
-      .withModules(new Ext0Module(new If0(), new Ext0conc()))
+      .modules(new Ext0Module(new If0(), new Ext0conc()))
       .build();
 
     final Ext0Other other = scope.get(Ext0Other.class);
