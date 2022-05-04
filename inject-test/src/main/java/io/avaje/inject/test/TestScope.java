@@ -7,4 +7,5 @@ import jakarta.inject.Scope;
  */
 @Scope
 public @interface TestScope {
+
 }

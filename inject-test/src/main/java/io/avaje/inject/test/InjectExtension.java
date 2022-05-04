@@ -2,20 +2,16 @@ package io.avaje.inject.test;
 
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.BeanScopeBuilder;
-import io.avaje.inject.spi.Module;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 
-import java.io.*;
 import java.lang.System.Logger.Level;
-import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
-
-import static java.util.Collections.singletonList;
 
 /**
  * Junit 5 extension for avaje inject.
@@ -58,54 +54,11 @@ public class InjectExtension implements BeforeAllCallback, BeforeEachCallback, A
   }
 
   private void initialiseGlobalTestScope(ExtensionContext context) {
-    List<TestModule> testModules = new ArrayList<>();
-    for (TestModule next : ServiceLoader.load(TestModule.class)) {
-      testModules.add(next);
+    globalTestScope = TestBeanScope.init(false);
+    if (globalTestScope != null) {
+      log.log(Level.TRACE, "register global test BeanScope with beans {0}", globalTestScope);
+      context.getRoot().getStore(Namespace.GLOBAL).put(InjectExtension.class.getCanonicalName(), this);
     }
-    if (testModules.isEmpty()) {
-      registerViaResources(context);
-    } else {
-      registerTestModule(context, testModules);
-    }
-  }
-
-  private void registerTestModule(ExtensionContext context, List<TestModule> testModules) {
-    log.log(Level.DEBUG, "Building global test BeanScope (as parent scope for tests)");
-    globalTestScope = BeanScope.newBuilder()
-      .withModules(testModules.toArray(Module[]::new))
-      .build();
-
-    log.log(Level.TRACE, "register global test BeanScope with beans %s", globalTestScope);
-    context.getRoot().getStore(Namespace.GLOBAL).put(InjectExtension.class.getCanonicalName(), this);
-  }
-
-  /**
-   * Fallback when ServiceLoader does not work in module-path for generated test service.
-   */
-  private void registerViaResources(ExtensionContext context) {
-    try {
-      URL url = ClassLoader.getSystemResource("META-INF/services/io.avaje.inject.test.TestModule");
-      String className = readServiceClassName(url);
-      if (className != null) {
-        Class<?> cls = Class.forName(className);
-        TestModule testModule = (TestModule) cls.getDeclaredConstructor().newInstance();
-        registerTestModule(context, singletonList(testModule));
-      }
-    } catch (Throwable e) {
-      throw new RuntimeException("Error trying to create TestModule", e);
-    }
-  }
-
-  private String readServiceClassName(URL url) throws IOException {
-    if (url != null) {
-      InputStream is = url.openStream();
-      if (is != null) {
-        try (LineNumberReader lineNumberReader = new LineNumberReader(new InputStreamReader(is))) {
-          return lineNumberReader.readLine();
-        }
-      }
-    }
-    return null;
   }
 
   /**
@@ -114,7 +67,6 @@ public class InjectExtension implements BeforeAllCallback, BeforeEachCallback, A
   @Override
   public void beforeEach(final ExtensionContext context) {
     final List<MetaReader> readers = createMetaReaders(context);
-
     final BeanScopeBuilder builder = BeanScope.newBuilder();
     if (globalTestScope != null) {
       builder.withParent(globalTestScope, false);
@@ -129,7 +81,7 @@ public class InjectExtension implements BeforeAllCallback, BeforeEachCallback, A
     for (MetaReader reader : readers) {
       reader.setFromScope(beanScope);
     }
-    log.log(Level.TRACE, "test setup with %s", readers);
+    log.log(Level.TRACE, "test setup with {0}", readers);
     context.getStore(INJECT_NS).put(BEAN_SCOPE, beanScope);
   }
 
