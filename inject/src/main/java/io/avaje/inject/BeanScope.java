@@ -58,7 +58,7 @@ import java.util.Optional;
  *
  * }</pre>
  * <p>
- * When we build the BeanScope provide the dependency via {@link BeanScopeBuilder#withBean(Class, Object)}.
+ * When we build the BeanScope provide the dependency via {@link BeanScopeBuilder#bean(Class, Object)}.
  *
  * <pre>{@code
  *
@@ -66,7 +66,7 @@ import java.util.Optional;
  *   Pump pump = ...
  *
  *   try (BeanScope scope = BeanScope.builder()
- *     .withBean(Pump.class, pump)
+ *     .bean(Pump.class, pump)
  *     .build()) {
  *
  *     CoffeeMaker coffeeMaker = context.get(CoffeeMaker.class);

@@ -150,8 +150,8 @@
     BeanScope parentScope = ...
 
     BeanScope scope = BeanScope.builder()
-      .withModules(new StoreComponentModule())
-      .withParent(parentScope)
+      .modules(new StoreComponentModule())
+      .parent(parentScope)
       .build());
 
     StoreLoader storeLoader = scope.get(StoreLoader.class);

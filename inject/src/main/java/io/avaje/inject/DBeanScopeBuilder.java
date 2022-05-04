@@ -42,19 +42,19 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  public BeanScopeBuilder withShutdownHook(boolean shutdownHook) {
+  public BeanScopeBuilder shutdownHook(boolean shutdownHook) {
     this.shutdownHook = shutdownHook;
     return this;
   }
 
   @Override
-  public BeanScopeBuilder withModules(Module... modules) {
+  public BeanScopeBuilder modules(Module... modules) {
     this.includeModules.addAll(Arrays.asList(modules));
     return this;
   }
 
   @Override
-  public BeanScopeBuilder withBeans(Object... beans) {
+  public BeanScopeBuilder beans(Object... beans) {
     for (Object bean : beans) {
       suppliedBeans.add(SuppliedBean.of(superOf(bean.getClass()), bean));
     }
@@ -62,69 +62,69 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  public <D> BeanScopeBuilder withBean(Class<D> type, D bean) {
-    return withBean(null, type, bean);
+  public <D> BeanScopeBuilder bean(Class<D> type, D bean) {
+    return bean(null, type, bean);
   }
 
   @Override
-  public <D> BeanScopeBuilder withBean(@Nullable String name, Class<D> type, D bean) {
+  public <D> BeanScopeBuilder bean(@Nullable String name, Class<D> type, D bean) {
     suppliedBeans.add(SuppliedBean.of(name, type, bean));
     return this;
   }
 
   @Override
-  public <D> BeanScopeBuilder withBean(Type type, D bean) {
-    return withBean(null, type, bean);
+  public <D> BeanScopeBuilder bean(Type type, D bean) {
+    return bean(null, type, bean);
   }
 
   @Override
-  public <D> BeanScopeBuilder withBean(@Nullable String name, Type type, D bean) {
+  public <D> BeanScopeBuilder bean(@Nullable String name, Type type, D bean) {
     suppliedBeans.add(SuppliedBean.ofType(name, type, bean));
     return this;
   }
 
   @Override
-  public BeanScopeBuilder withParent(BeanScope parent) {
-    return withParent(parent, true);
+  public BeanScopeBuilder parent(BeanScope parent) {
+    return parent(parent, true);
   }
 
   @Override
-  public BeanScopeBuilder withParent(BeanScope parent, boolean parentOverride) {
+  public BeanScopeBuilder parent(BeanScope parent, boolean parentOverride) {
     this.parent = parent;
     this.parentOverride = parentOverride;
     return this;
   }
 
   @Override
-  public BeanScopeBuilder.ForTesting withMock(Class<?> type) {
-    return withMock(type, null, null);
+  public BeanScopeBuilder.ForTesting mock(Class<?> type) {
+    return mock(type, null, null);
   }
 
-  public BeanScopeBuilder.ForTesting withMock(Class<?> type, String name) {
-    return withMock(type, name, null);
+  public BeanScopeBuilder.ForTesting mock(Class<?> type, String name) {
+    return mock(type, name, null);
   }
 
   @Override
-  public <D> BeanScopeBuilder.ForTesting withMock(Class<D> type, Consumer<D> consumer) {
-    return withMock(type, null, consumer);
+  public <D> BeanScopeBuilder.ForTesting mock(Class<D> type, Consumer<D> consumer) {
+    return mock(type, null, consumer);
   }
 
-  private <D> BeanScopeBuilder.ForTesting withMock(Class<D> type, @Nullable String name, @Nullable Consumer<D> consumer) {
+  private <D> BeanScopeBuilder.ForTesting mock(Class<D> type, @Nullable String name, @Nullable Consumer<D> consumer) {
     suppliedBeans.add(SuppliedBean.of(name, type, null, consumer));
     return this;
   }
 
   @Override
-  public BeanScopeBuilder.ForTesting withSpy(Class<?> type) {
+  public BeanScopeBuilder.ForTesting spy(Class<?> type) {
     return spy(type, null, null);
   }
 
-  public BeanScopeBuilder.ForTesting withSpy(Class<?> type, String name) {
+  public BeanScopeBuilder.ForTesting spy(Class<?> type, String name) {
     return spy(type, name, null);
   }
 
   @Override
-  public <D> BeanScopeBuilder.ForTesting withSpy(Class<D> type, Consumer<D> consumer) {
+  public <D> BeanScopeBuilder.ForTesting spy(Class<D> type, Consumer<D> consumer) {
     return spy(type, null, consumer);
   }
 
@@ -273,7 +273,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
           }
         }
         sb.append(" - none of the loaded modules ").append(moduleNames).append(" have this in their @InjectModule( provides = ... ). ");
-        sb.append("Either @InjectModule requires/provides are not aligned? or add external dependencies via BeanScopeBuilder.withBean()?");
+        sb.append("Either @InjectModule requires/provides are not aligned? or add external dependencies via BeanScopeBuilder.bean()?");
         throw new IllegalStateException(sb.toString());
       }
     }
