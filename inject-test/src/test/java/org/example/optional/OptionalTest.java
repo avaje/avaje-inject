@@ -12,7 +12,7 @@ class OptionalTest {
 
   @Test
   void empty() {
-    try (BeanScope scope = BeanScope.newBuilder().build()) {
+    try (BeanScope scope = BeanScope.builder().build()) {
 
       Optional<IllegalStateException> orEmpty = scope.getOptional(IllegalStateException.class);
       assertThat(orEmpty).isEmpty();
@@ -24,7 +24,7 @@ class OptionalTest {
 
   @Test
   void empty_withName() {
-    try (BeanScope scope = BeanScope.newBuilder().build()) {
+    try (BeanScope scope = BeanScope.builder().build()) {
 
       Optional<IllegalStateException> orEmpty = scope.getOptional(IllegalStateException.class, null);
       assertThat(orEmpty).isEmpty();

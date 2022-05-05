@@ -46,7 +46,7 @@
 <pre>{@code
 
     // create BeanScope
-    BeanScope scope = BeanScope.newBuilder()
+    BeanScope scope = BeanScope.builder()
       .build();
 
     // use it
@@ -149,9 +149,9 @@
 
     BeanScope parentScope = ...
 
-    BeanScope scope = BeanScope.newBuilder()
-      .withModules(new StoreComponentModule())
-      .withParent(parentScope)
+    BeanScope scope = BeanScope.builder()
+      .modules(new StoreComponentModule())
+      .parent(parentScope)
       .build());
 
     StoreLoader storeLoader = scope.get(StoreLoader.class);

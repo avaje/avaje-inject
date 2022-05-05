@@ -10,7 +10,7 @@ class FactoryTest {
 
   @Test
   void test() {
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
       BFact bean = context.get(BFact.class);
       String b = bean.b();
       assertThat(b).isNotNull();

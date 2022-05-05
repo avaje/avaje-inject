@@ -10,7 +10,7 @@ public class StoreManagerWithFieldQualifierTest {
   @Test
   public void test() {
 
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
       StoreManagerWithFieldQualifier manager = context.get(StoreManagerWithFieldQualifier.class);
       String store = manager.store();
       assertThat(store).isEqualTo("blue");

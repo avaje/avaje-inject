@@ -28,8 +28,13 @@ class DBuilder implements Builder {
    */
   protected final DBeanMap beanMap = new DBeanMap();
 
-  private final BeanScope parent;
-  private final boolean parentOverride;
+  protected final BeanScope parent;
+  protected final boolean parentOverride;
+
+  /**
+   * Bean provided by the parent scope that we are not overriding.
+   */
+  protected Object parentMatch;
 
   /**
    * Debug of the current bean being wired - used in injection errors.
@@ -53,17 +58,16 @@ class DBuilder implements Builder {
 
   @Override
   public boolean isAddBeanFor(String name, Type... types) {
+    parentMatch = null;
     next(name, types);
     if (parentOverride || parent == null) {
       return true;
     }
-    for (Type type : types) {
-      try {
-        parent.get(type, name);
-        return false;
-      } catch (NoSuchElementException e) {
-        // ignore
-      }
+    if (parent instanceof DBeanScope) {
+      // effectively looking for a match in the test scope
+      DBeanScope dParent = (DBeanScope) parent;
+      parentMatch = dParent.getStrict(name, types);
+      return parentMatch == null;
     }
     return true;
   }
@@ -240,8 +244,8 @@ class DBuilder implements Builder {
     if (!beanList.isEmpty()) {
       msg += ". Check @Named or Qualifier being used";
     }
-    msg += ". Check for missing module? [ missing beanScopeBuilder.withModules() ]";
-    msg += ". If it is expected to be externally provided, missing beanScopeBuilder.withBean() ?";
+    msg += ". Check for missing module? [ missing beanScopeBuilder.modules() ]";
+    msg += ". If it is expected to be externally provided, missing beanScopeBuilder.bean() ?";
     return msg;
   }
 

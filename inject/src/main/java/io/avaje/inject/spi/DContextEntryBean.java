@@ -66,6 +66,13 @@ class DContextEntryBean {
     return Objects.equals(qualifierName, name);
   }
 
+  /**
+   * Return the bean if name matches and otherwise null.
+   */
+  Object beanIfNameMatch(String name) {
+    return isNameMatch(name) ? bean() : null;
+  }
+
   Object bean() {
     return source;
   }

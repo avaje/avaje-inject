@@ -16,13 +16,13 @@ class ParentScopeTest {
   @Test
   void parentScope() {
 
-    final BeanScope parent = BeanScope.newBuilder()
-      .withModules(new OtherModule())
+    final BeanScope parent = BeanScope.builder()
+      .modules(new OtherModule())
       .build();
 
-    final BeanScope scope = BeanScope.newBuilder()
-      .withModules(new MyThreeModule())
-      .withParent(parent)
+    final BeanScope scope = BeanScope.builder()
+      .modules(new MyThreeModule())
+      .parent(parent)
       .build();
 
     // factory for custom scope

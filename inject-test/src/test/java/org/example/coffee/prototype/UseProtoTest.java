@@ -9,7 +9,7 @@ class UseProtoTest {
 
   @Test
   void test_injectProvider() {
-    try (BeanScope scope = BeanScope.newBuilder()
+    try (BeanScope scope = BeanScope.builder()
       .build()) {
       UseProto useProto = scope.get(UseProto.class);
 

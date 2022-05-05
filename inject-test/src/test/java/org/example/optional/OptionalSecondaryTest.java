@@ -9,7 +9,7 @@ class OptionalSecondaryTest {
 
   @Test
   void uses_secondary_by_default() {
-    try (BeanScope beanScope = BeanScope.newBuilder().build()) {
+    try (BeanScope beanScope = BeanScope.builder().build()) {
 
       OFooBar one = beanScope.get(OFooBar.class);
       OFooBazz two = beanScope.get(OFooBazz.class);
@@ -22,9 +22,9 @@ class OptionalSecondaryTest {
   @Test
   void uses_supplied_when_provided() {
     OFooService supplied = new Supplied();
-    try (BeanScope beanScope = BeanScope.newBuilder()
-      .withBean("forBar", OFooService.class, supplied)
-      .withBean("forBazz", OFooService.class, supplied)
+    try (BeanScope beanScope = BeanScope.builder()
+      .bean("forBar", OFooService.class, supplied)
+      .bean("forBazz", OFooService.class, supplied)
       .build()) {
 
       OFooBar one = beanScope.get(OFooBar.class);

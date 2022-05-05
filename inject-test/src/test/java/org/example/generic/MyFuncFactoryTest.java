@@ -9,7 +9,7 @@ class MyFuncFactoryTest {
 
   @Test
   void test_does_wire() {
-    try (BeanScope beanScope = BeanScope.newBuilder().build()) {
+    try (BeanScope beanScope = BeanScope.builder().build()) {
       MyFunc myFunc = beanScope.get(MyFunc.class);
 
       assertThat(myFunc.apply("Hi")).isEqualTo("echo: Hi");

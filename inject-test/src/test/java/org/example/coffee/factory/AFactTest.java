@@ -11,7 +11,7 @@ public class AFactTest {
   public void postConstruct() {
 
     AFact bean;
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
       bean = context.get(AFact.class);
 
       assertThat(bean.getCountConstruct()).isEqualTo(1);

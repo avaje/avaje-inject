@@ -11,7 +11,7 @@ public class BMusherTest {
   public void init() {
 
     BMusher bMusher;
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
       bMusher = context.get(BMusher.class);
       assertEquals(bMusher.getCountInit(), 1);
       assertEquals(bMusher.getCountClose(), 0);

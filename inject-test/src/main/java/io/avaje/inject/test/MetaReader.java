@@ -122,10 +122,10 @@ class MetaReader {
   void build(BeanScopeBuilder builder) {
     final BeanScopeBuilder.ForTesting forTesting = builder.forTesting();
     for (FieldTarget target : mocks) {
-      forTesting.withMock(target.type(), target.name());
+      forTesting.mock(target.type(), target.name());
     }
     for (FieldTarget target : spies) {
-      forTesting.withSpy(target.type(), target.name());
+      forTesting.spy(target.type(), target.name());
     }
   }
 

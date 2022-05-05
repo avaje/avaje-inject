@@ -6,7 +6,7 @@ public class Main {
 
   public static void main(String[] args) {
 
-    BeanScope beanScope = BeanScope.newBuilder().build();
+    BeanScope beanScope = BeanScope.builder().build();
 
     HelloService helloService = beanScope.get(HelloService.class);
     String greeting = helloService.hello();

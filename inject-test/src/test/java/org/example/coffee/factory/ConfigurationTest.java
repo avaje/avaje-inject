@@ -11,7 +11,7 @@ public class ConfigurationTest {
   public void getCountInit() {
 
     Configuration configuration;
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
       configuration = context.get(Configuration.class);
       assertEquals(configuration.getCountInit(), 1);
       assertEquals(configuration.getCountClose(), 0);

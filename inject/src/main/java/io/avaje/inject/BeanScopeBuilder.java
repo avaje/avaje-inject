@@ -17,8 +17,8 @@ import java.util.function.Consumer;
  *   // external dependencies
  *   Pump pump = ...
  *
- *   BeanScope scope = BeanScope.newBuilder()
- *     .withBean(pump)
+ *   BeanScope scope = BeanScope.builder()
+ *     .bean(pump)
  *     .build();
  *
  *   CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
@@ -40,8 +40,8 @@ public interface BeanScopeBuilder {
    *
    *   // automatically closed via try with resources
    *
-   *   BeanScope scope = BeanScope.newBuilder()
-   *     .withShutdownHook(true)
+   *   BeanScope scope = BeanScope.builder()
+   *     .shutdownHook(true)
    *     .build());
    *
    *   // on JVM shutdown the preDestroy lifecycle methods are executed
@@ -50,7 +50,15 @@ public interface BeanScopeBuilder {
    *
    * @return This BeanScopeBuilder
    */
-  BeanScopeBuilder withShutdownHook(boolean shutdownHook);
+  BeanScopeBuilder shutdownHook(boolean shutdownHook);
+
+  /**
+   * Deprecated - migrate to shutdownHook().
+   */
+  @Deprecated
+  default BeanScopeBuilder withShutdownHook(boolean shutdownHook) {
+    return shutdownHook(shutdownHook);
+  }
 
   /**
    * Specify the modules to include in dependency injection.
@@ -62,8 +70,8 @@ public interface BeanScopeBuilder {
    *
    * <pre>{@code
    *
-   *   BeanScope scope = BeanScope.newBuilder()
-   *     .withModules(new CustomModule())
+   *   BeanScope scope = BeanScope.builder()
+   *     .modules(new CustomModule())
    *     .build());
    *
    *   CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
@@ -74,7 +82,15 @@ public interface BeanScopeBuilder {
    * @param modules The modules that we want to include in dependency injection.
    * @return This BeanScopeBuilder
    */
-  BeanScopeBuilder withModules(Module... modules);
+  BeanScopeBuilder modules(Module... modules);
+
+  /**
+   * Deprecated - migrate to modules()
+   */
+  @Deprecated
+  default BeanScopeBuilder withModules(Module... modules) {
+    return modules(modules);
+  }
 
   /**
    * Supply a bean to the scope that will be used instead of any
@@ -90,8 +106,8 @@ public interface BeanScopeBuilder {
    *   Pump pump = ...
    *   Grinder grinder = ...
    *
-   *   BeanScope scope = BeanScope.newBuilder()
-   *     .withBeans(pump, grinder)
+   *   BeanScope scope = BeanScope.builder()
+   *     .beans(pump, grinder)
    *     .build();
    *
    *   CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
@@ -103,7 +119,15 @@ public interface BeanScopeBuilder {
    *              for the bean or the interface(s) it implements
    * @return This BeanScopeBuilder
    */
-  BeanScopeBuilder withBeans(Object... beans);
+  BeanScopeBuilder beans(Object... beans);
+
+  /**
+   * Deprecated - migrate to beans().
+   */
+  @Deprecated
+  default BeanScopeBuilder withBeans(Object... beans) {
+    return beans(beans);
+  }
 
   /**
    * Add a supplied bean instance with the given injection type (typically an interface type).
@@ -112,8 +136,8 @@ public interface BeanScopeBuilder {
    *
    *   Pump externalDependency = ...
    *
-   *   try (BeanScope scope = BeanScope.newBuilder()
-   *     .withBean(Pump.class, externalDependency)
+   *   try (BeanScope scope = BeanScope.builder()
+   *     .bean(Pump.class, externalDependency)
    *     .build()) {
    *
    *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
@@ -128,7 +152,15 @@ public interface BeanScopeBuilder {
    * @param type The dependency injection type this bean is target for
    * @param bean The supplied bean instance to use for injection
    */
-  <D> BeanScopeBuilder withBean(Class<D> type, D bean);
+  <D> BeanScopeBuilder bean(Class<D> type, D bean);
+
+  /**
+   * Deprecated - migrate to bean().
+   */
+  @Deprecated
+  default <D> BeanScopeBuilder withBean(Class<D> type, D bean) {
+    return bean(type, bean);
+  }
 
   /**
    * Add a supplied bean instance with the given name and injection type.
@@ -137,7 +169,15 @@ public interface BeanScopeBuilder {
    * @param type The dependency injection type this bean is target for
    * @param bean The supplied bean instance to use for injection
    */
-  <D> BeanScopeBuilder withBean(String name, Class<D> type, D bean);
+  <D> BeanScopeBuilder bean(String name, Class<D> type, D bean);
+
+  /**
+   * Deprecated - migrate to bean().
+   */
+  @Deprecated
+  default <D> BeanScopeBuilder withBean(String name, Class<D> type, D bean) {
+    return bean(name, type, bean);
+  }
 
   /**
    * Add a supplied bean instance with the given name and generic type.
@@ -146,7 +186,15 @@ public interface BeanScopeBuilder {
    * @param type The dependency injection type this bean is target for
    * @param bean The supplied bean instance to use for injection
    */
-  <D> BeanScopeBuilder withBean(String name, Type type, D bean);
+  <D> BeanScopeBuilder bean(String name, Type type, D bean);
+
+  /**
+   * Deprecated - migrate to bean().
+   */
+  @Deprecated
+  default <D> BeanScopeBuilder withBean(String name, Type type, D bean) {
+    return bean(name, type, bean);
+  }
 
   /**
    * Add a supplied bean instance with a generic type.
@@ -154,7 +202,15 @@ public interface BeanScopeBuilder {
    * @param type The dependency injection type this bean is target for
    * @param bean The supplied bean instance to use for injection
    */
-  <D> BeanScopeBuilder withBean(Type type, D bean);
+  <D> BeanScopeBuilder bean(Type type, D bean);
+
+  /**
+   * Deprecated - migrate to bean().
+   */
+  @Deprecated
+  default <D> BeanScopeBuilder withBean(Type type, D bean) {
+    return bean(type, bean);
+  }
 
   /**
    * Use the given BeanScope as the parent. This becomes an additional
@@ -162,7 +218,15 @@ public interface BeanScopeBuilder {
    *
    * @param parent The BeanScope that acts as the parent
    */
-  BeanScopeBuilder withParent(BeanScope parent);
+  BeanScopeBuilder parent(BeanScope parent);
+
+  /**
+   * Deprecated - migrate to parent().
+   */
+  @Deprecated
+  default BeanScopeBuilder withParent(BeanScope parent) {
+    return parent(parent);
+  }
 
   /**
    * Use the given BeanScope as the parent additionally specifying if beans
@@ -172,7 +236,15 @@ public interface BeanScopeBuilder {
    * @param parentOverride When false do not add beans that already exist on the parent.
    *                       When true add beans regardless of whether they exist in the parent scope.
    */
-  BeanScopeBuilder withParent(BeanScope parent, boolean parentOverride);
+  BeanScopeBuilder parent(BeanScope parent, boolean parentOverride);
+
+  /**
+   * Deprecated - migrate to parent().
+   */
+  @Deprecated
+  default BeanScopeBuilder withParent(BeanScope parent, boolean parentOverride) {
+    return parent(parent, parentOverride);
+  }
 
   /**
    * Extend the builder to support testing using mockito with
@@ -204,10 +276,10 @@ public interface BeanScopeBuilder {
      *
      * <pre>{@code
      *
-     *   try (BeanScope scope = BeanScope.newBuilder()
+     *   try (BeanScope scope = BeanScope.builder()
      *     .forTesting()
-     *     .withMock(Pump.class)
-     *     .withMock(Grinder.class)
+     *     .mock(Pump.class)
+     *     .mock(Grinder.class)
      *     .build()) {
      *
      *
@@ -221,17 +293,25 @@ public interface BeanScopeBuilder {
      *
      * }</pre>
      */
-    BeanScopeBuilder.ForTesting withMock(Class<?> type);
+    BeanScopeBuilder.ForTesting mock(Class<?> type);
+
+    /**
+     * Deprecated - migrate to mock().
+     */
+    @Deprecated
+    default BeanScopeBuilder.ForTesting withMock(Class<?> type) {
+      return  mock(type);
+    }
 
     /**
      * Register as a Mockito mock with a qualifier name.
      *
      * <pre>{@code
      *
-     *   try (BeanScope scope = BeanScope.newBuilder()
+     *   try (BeanScope scope = BeanScope.builder()
      *     .forTesting()
-     *     .withMock(Store.class, "red")
-     *     .withMock(Store.class, "blue")
+     *     .mock(Store.class, "red")
+     *     .mock(Store.class, "blue")
      *     .build()) {
      *
      *     ...
@@ -239,7 +319,15 @@ public interface BeanScopeBuilder {
      *
      * }</pre>
      */
-    BeanScopeBuilder.ForTesting withMock(Class<?> type, String name);
+    BeanScopeBuilder.ForTesting mock(Class<?> type, String name);
+
+    /**
+     * Deprecated - migrate to mock().
+     */
+    @Deprecated
+    default BeanScopeBuilder.ForTesting withMock(Class<?> type, String name) {
+      return mock(type, name);
+    }
 
     /**
      * Use a mockito mock when injecting this bean type additionally
@@ -247,10 +335,10 @@ public interface BeanScopeBuilder {
      *
      * <pre>{@code
      *
-     *   try (BeanScope scope = BeanScope.newBuilder()
+     *   try (BeanScope scope = BeanScope.builder()
      *     .forTesting()
-     *     .withMock(Pump.class)
-     *     .withMock(Grinder.class, grinder -> {
+     *     .mock(Pump.class)
+     *     .mock(Grinder.class, grinder -> {
      *
      *       // setup the mock
      *       when(grinder.grindBeans()).thenReturn("stub response");
@@ -268,16 +356,24 @@ public interface BeanScopeBuilder {
      *
      * }</pre>
      */
-    <D> BeanScopeBuilder.ForTesting withMock(Class<D> type, Consumer<D> consumer);
+    <D> BeanScopeBuilder.ForTesting mock(Class<D> type, Consumer<D> consumer);
+
+    /**
+     * Deprecated - migrate to mock().
+     */
+    @Deprecated
+    default <D> BeanScopeBuilder.ForTesting withMock(Class<D> type, Consumer<D> consumer) {
+      return mock(type, consumer);
+    }
 
     /**
      * Use a mockito spy when injecting this bean type.
      *
      * <pre>{@code
      *
-     *   try (BeanScope scope = BeanScope.newBuilder()
+     *   try (BeanScope scope = BeanScope.builder()
      *     .forTesting()
-     *     .withSpy(Pump.class)
+     *     .spy(Pump.class)
      *     .build()) {
      *
      *     // setup spy here ...
@@ -294,17 +390,25 @@ public interface BeanScopeBuilder {
      *
      * }</pre>
      */
-    BeanScopeBuilder.ForTesting withSpy(Class<?> type);
+    BeanScopeBuilder.ForTesting spy(Class<?> type);
+
+    /**
+     * Deprecated - migrate to spy().
+     */
+    @Deprecated
+    default BeanScopeBuilder.ForTesting withSpy(Class<?> type) {
+      return spy(type);
+    }
 
     /**
      * Register a Mockito spy with a qualifier name.
      *
      * <pre>{@code
      *
-     *   try (BeanScope scope = BeanScope.newBuilder()
+     *   try (BeanScope scope = BeanScope.builder()
      *     .forTesting()
-     *     .withSpy(Store.class, "red")
-     *     .withSpy(Store.class, "blue")
+     *     .spy(Store.class, "red")
+     *     .spy(Store.class, "blue")
      *     .build()) {
      *
      *     ...
@@ -312,7 +416,15 @@ public interface BeanScopeBuilder {
      *
      * }</pre>
      */
-    BeanScopeBuilder.ForTesting withSpy(Class<?> type, String name);
+    BeanScopeBuilder.ForTesting spy(Class<?> type, String name);
+
+    /**
+     * Deprecated - migrate to spy().
+     */
+    @Deprecated
+    default BeanScopeBuilder.ForTesting withSpy(Class<?> type, String name) {
+      return spy(type, name);
+    }
 
     /**
      * Use a mockito spy when injecting this bean type additionally
@@ -320,9 +432,9 @@ public interface BeanScopeBuilder {
      *
      * <pre>{@code
      *
-     *   try (BeanScope scope = BeanScope.newBuilder()
+     *   try (BeanScope scope = BeanScope.builder()
      *     .forTesting()
-     *     .withSpy(Pump.class, pump -> {
+     *     .spy(Pump.class, pump -> {
      *       // setup the spy
      *       doNothing().when(pump).pumpWater();
      *     })
@@ -342,7 +454,15 @@ public interface BeanScopeBuilder {
      *
      * }</pre>
      */
-    <D> BeanScopeBuilder.ForTesting withSpy(Class<D> type, Consumer<D> consumer);
+    <D> BeanScopeBuilder.ForTesting spy(Class<D> type, Consumer<D> consumer);
+
+    /**
+     * Deprecated - migrate to spy().
+     */
+    @Deprecated
+    default <D> BeanScopeBuilder.ForTesting withSpy(Class<D> type, Consumer<D> consumer) {
+      return spy(type, consumer);
+    }
 
   }
 }

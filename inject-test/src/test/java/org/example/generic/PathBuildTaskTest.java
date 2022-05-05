@@ -3,8 +3,6 @@ package org.example.generic;
 import io.avaje.inject.BeanScope;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PathBuildTaskTest {
@@ -12,7 +10,7 @@ class PathBuildTaskTest {
   @Test
   void genericInterfaceWithExtends_expect_providesExtendedInterface() {
 
-    try (BeanScope beanScope = BeanScope.newBuilder().build()) {
+    try (BeanScope beanScope = BeanScope.builder().build()) {
 
       PathBuildTask pathBuildTask = beanScope.get(PathBuildTask.class);
       BuildTask buildTask = beanScope.get(BuildTask.class);

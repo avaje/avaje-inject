@@ -41,10 +41,10 @@ class WithExtnNamedSpyTest {
     @Test
     void test() {
 
-      try (BeanScope beanScope = BeanScope.newBuilder()
+      try (BeanScope beanScope = BeanScope.builder()
         .forTesting()
-        .withSpy(SomeStore.class, "blue")
-        .withSpy(SomeStore.class, "Green")
+        .spy(SomeStore.class, "blue")
+        .spy(SomeStore.class, "Green")
         .build()) {
 
         final StoreManagerWithSetterQualifier storeManager = beanScope.get(StoreManagerWithSetterQualifier.class);

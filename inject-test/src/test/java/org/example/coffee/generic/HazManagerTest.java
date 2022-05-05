@@ -20,9 +20,9 @@ public class HazManagerTest {
 
   @Test
   public void find_with_mockHaz() {
-    try (BeanScope context = BeanScope.newBuilder()
+    try (BeanScope context = BeanScope.builder()
       .forTesting()
-      .withMock(HazRepo.class)
+      .mock(HazRepo.class)
       .build()) {
 
       HazManager hazManager = context.get(HazManager.class);
@@ -34,9 +34,9 @@ public class HazManagerTest {
 
   @Test
   public void find_with_stubHazUsingMockito() {
-    try (BeanScope context = BeanScope.newBuilder()
+    try (BeanScope context = BeanScope.builder()
       .forTesting()
-      .withMock(HazRepo.class, hazRepo -> {
+      .mock(HazRepo.class, hazRepo -> {
         when(hazRepo.findById(anyLong())).thenReturn(new Haz(-23L));
       })
       .build()) {
@@ -52,8 +52,8 @@ public class HazManagerTest {
   public void withBean_usingGenericType() {
     TDFoo testDouble = new TDFoo();
 
-    try (BeanScope context = BeanScope.newBuilder()
-      .withBean(HazRepo$DI.TYPE_RepositoryHazLong, testDouble)
+    try (BeanScope context = BeanScope.builder()
+      .bean(HazRepo$DI.TYPE_RepositoryHazLong, testDouble)
       .build()) {
 
       HazManager hazManager = context.get(HazManager.class);
@@ -67,8 +67,8 @@ public class HazManagerTest {
   public void find_with_testDouble() {
     TDHazRepo testDouble = new TDHazRepo();
 
-    try (BeanScope context = BeanScope.newBuilder()
-      .withBeans(testDouble)
+    try (BeanScope context = BeanScope.builder()
+      .beans(testDouble)
       .build()) {
 
       HazManager hazManager = context.get(HazManager.class);

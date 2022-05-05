@@ -34,6 +34,16 @@ class DContextEntry {
     return new EntryMatcher(name).provider(entries);
   }
 
+  /**
+   * Get with strict name match for the single entry case.
+   */
+  Object getStrict(String name) {
+    if (entries.size() == 1) {
+      return entries.get(0).beanIfNameMatch(name);
+    }
+    return new EntryMatcher(name).match(entries);
+  }
+
   Object get(String name) {
     if (entries.size() == 1) {
       return entries.get(0).bean();

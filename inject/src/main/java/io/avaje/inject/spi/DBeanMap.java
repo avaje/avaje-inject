@@ -73,6 +73,17 @@ class DBeanMap {
     }
   }
 
+  /**
+   * Get with a strict match on name for the single entry case.
+   */
+  Object getStrict(Type type, String name) {
+    DContextEntry entry = beans.get(type.getTypeName());
+    if (entry == null) {
+      return null;
+    }
+    return entry.getStrict(KeyUtil.lower(name));
+  }
+
   @SuppressWarnings("unchecked")
   <T> T get(Type type, String name) {
     DContextEntry entry = beans.get(type.getTypeName());

@@ -1,5 +1,6 @@
 package io.avaje.inject.spi;
 
+import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
 
 import java.lang.reflect.Type;
@@ -34,12 +35,26 @@ class DBuilderExtn extends DBuilder {
   @Override
   public boolean isAddBeanFor(String qualifierName, Type... types) {
     if (!super.isAddBeanFor(qualifierName, types)) {
+      enrichParentMatch();
       return false;
     }
     if (hasSuppliedBeans) {
       return !beanMap.isSupplied(qualifierName, types);
     }
     return true;
+  }
+
+  /**
+   * If we have a parentMatch (e.g. test scope bean) but we want to enrich it (Mockito Spy),
+   * then enrich the parentMatch bean and register that into this scope.
+   */
+  private void enrichParentMatch() {
+    if (parentMatch != null && !enrichMap.isEmpty()) {
+      Object enrichedBean = enrich(parentMatch, beanMap.next());
+      if (enrichedBean != parentMatch) {
+        beanMap.register(BeanEntry.SUPPLIED, enrichedBean);
+      }
+    }
   }
 
   /**

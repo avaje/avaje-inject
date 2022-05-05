@@ -11,7 +11,7 @@ class ApplicationTest {
 
   @Test
   void asd() {
-    try (BeanScope beanScope =  BeanScope.newBuilder().build()) {
+    try (BeanScope beanScope =  BeanScope.builder().build()) {
       Application application = beanScope.get(Application.class);
       List<? extends Controller> controllers = application.getControllers();
 

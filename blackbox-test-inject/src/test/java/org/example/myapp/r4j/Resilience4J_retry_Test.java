@@ -14,7 +14,7 @@ class Resilience4J_retry_Test {
   void retry_test() {
 
     MyExample myExample;
-    try (BeanScope beanScope = BeanScope.newBuilder().build()) {
+    try (BeanScope beanScope = BeanScope.builder().build()) {
       myExample = beanScope.get(MyExample.class);
 
       assertThatThrownBy(myExample::doingItWithRetry)
@@ -31,7 +31,7 @@ class Resilience4J_retry_Test {
   void retry_fallback_test() {
 
     MyExample myExample;
-    try (BeanScope beanScope = BeanScope.newBuilder().build()) {
+    try (BeanScope beanScope = BeanScope.builder().build()) {
       myExample = beanScope.get(MyExample.class);
 
       String result = myExample.retryWithFallback();
@@ -46,7 +46,7 @@ class Resilience4J_retry_Test {
   void retry_fallback_throwable_test() {
 
     MyExample myExample;
-    try (BeanScope beanScope = BeanScope.newBuilder().build()) {
+    try (BeanScope beanScope = BeanScope.builder().build()) {
       myExample = beanScope.get(MyExample.class);
 
       String result = myExample.retry2("foo", 45);

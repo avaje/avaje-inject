@@ -11,7 +11,7 @@ class ProviderTest {
 
   @Test
   void test() {
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
       ProvOther bean = context.get(ProvOther.class);
       String other = bean.other();
       assertThat(other).isEqualTo("mush mush beans");

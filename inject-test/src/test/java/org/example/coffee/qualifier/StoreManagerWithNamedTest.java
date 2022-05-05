@@ -10,7 +10,7 @@ public class StoreManagerWithNamedTest {
   @Test
   public void test() {
 
-    try (BeanScope context = BeanScope.newBuilder().build()) {
+    try (BeanScope context = BeanScope.builder().build()) {
       StoreManagerWithNamed manager = context.get(StoreManagerWithNamed.class);
       String store = manager.store();
       assertThat(store).isEqualTo("blue");
