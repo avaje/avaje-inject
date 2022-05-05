@@ -85,6 +85,26 @@ class DBeanScope implements BeanScope {
     return parent.get(type, name);
   }
 
+  /**
+   * Get with a strict match on name for the single entry case.
+   */
+  @Nullable
+  Object getStrict(String name, Type[] types) {
+    for (Type type : types) {
+      if (!isAnnotationType(type)) {
+        Object match = beans.getStrict(type, name);
+        if (match != null) {
+          return match;
+        }
+      }
+    }
+    return null;
+  }
+
+  private boolean isAnnotationType(Type type) {
+    return type instanceof Class && ((Class<?>) type).isAnnotation();
+  }
+
   @Override
   public <T> Optional<T> getOptional(Class<T> type) {
     return getMaybe(type, null);

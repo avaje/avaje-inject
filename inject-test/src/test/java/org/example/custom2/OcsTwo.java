@@ -1,5 +1,8 @@
 package org.example.custom2;
 
+import jakarta.inject.Named;
+
+@Named("two")
 @OciMarker
 @OtherScope
 public class OcsTwo implements OciRock {
@@ -8,5 +11,9 @@ public class OcsTwo implements OciRock {
 
   OcsTwo(OcsOne one) {
     this.one = one;
+  }
+
+  public String twoPlusOne() {
+    return "two+" + one.one();
   }
 }
