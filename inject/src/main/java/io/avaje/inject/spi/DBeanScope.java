@@ -98,6 +98,10 @@ class DBeanScope implements BeanScope {
         }
       }
     }
+    if (parent instanceof DBeanScope) {
+      DBeanScope dParent = (DBeanScope)parent;
+      return dParent.getStrict(name, types);
+    }
     return null;
   }
 

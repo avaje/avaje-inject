@@ -7,6 +7,7 @@ import io.avaje.lang.Nullable;
 
 /**
  * Provides access to the global "test scope" and helper methods to use it.
+ *
  */
 @NonNullApi
 public abstract class TestBeanScope {
@@ -16,6 +17,23 @@ public abstract class TestBeanScope {
    * <p>
    * That is, beans created using {@code @TestScope} are all in the global "test scope"
    * which is a parent to this scope.
+   *
+   * <pre>{@code
+   *
+   *  try (BeanScope testScope = TestBeanScope.builder()
+   *   .forTesting()
+   *   .mock(MyDataApi.class)
+   *   .build()) {
+   *
+   *   // mockito mock, use when() etc as needed
+   *   var myDataApi = testScope.get(MyDataApi.class);
+   *
+   *   var myService = testScope.get(MyService.class);
+   *
+   *   ...
+   *  }
+   *
+   * }</pre>
    *
    * @return A new test BeanScope with the global "test scope" as its parent.
    */
@@ -27,7 +45,16 @@ public abstract class TestBeanScope {
   /**
    * Return the BeanScope for {@code @TestScope} beans ONLY building once.
    * <p>
-   * If the BeanScope has already been created then that shared scope is returned.
+   * If the BeanScope has already been created then that shared scope instance is
+   * returned. This will be the same BeanScope as is used by {@code @InjectTest}.
+   * <p>
+   * The global test scope is closed when either JUnit closes or on JVM shutdown.
+   *
+   * <pre>{@code
+   *
+   *   final BeanScope globalTestScope = TestBeanScope.initialise();
+   *
+   * }</pre>
    *
    * @return The test scope BeanScope (nullable).
    */

@@ -27,7 +27,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private final Set<Module> includeModules = new LinkedHashSet<>();
 
   private BeanScope parent;
-  private boolean parentOverride;
+  private boolean parentOverride = true;
   private boolean shutdownHook;
 
   /**
@@ -85,7 +85,8 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   @Override
   public BeanScopeBuilder parent(BeanScope parent) {
-    return parent(parent, true);
+    this.parent = parent;
+    return this;
   }
 
   @Override

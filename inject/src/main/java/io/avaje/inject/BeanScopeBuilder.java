@@ -231,6 +231,13 @@ public interface BeanScopeBuilder {
   /**
    * Use the given BeanScope as the parent additionally specifying if beans
    * added will effectively override beans that exist in the parent scope.
+   * <p>
+   * By default, child scopes will override a bean that exists in a parent scope.
+   * For testing purposes, parentOverride=false is used such that bean provided
+   * in parent test scopes are used (unless we mock() or spy() them).
+   * <p>
+   * See TestBeanScope in avaje-inject-test which has helper methods to build
+   * BeanScopes for testing with the "Global test scope" as a parent scope.
    *
    * @param parent         The BeanScope that acts as the parent
    * @param parentOverride When false do not add beans that already exist on the parent.

@@ -15,22 +15,34 @@ import org.mockito.plugins.MemberAccessor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
 class MetaReader {
 
-  private final List<Field> captors = new ArrayList<>();
-  private final List<FieldTarget> mocks = new ArrayList<>();
-  private final List<FieldTarget> spies = new ArrayList<>();
-  private final List<FieldTarget> injection = new ArrayList<>();
-  private final Object testInstance;
+  final List<Field> captors = new ArrayList<>();
+  final List<FieldTarget> mocks = new ArrayList<>();
+  final List<FieldTarget> spies = new ArrayList<>();
+  final List<FieldTarget> injection = new ArrayList<>();
+  final List<FieldTarget> staticMocks = new ArrayList<>();
+  final List<FieldTarget> staticSpies = new ArrayList<>();
+  final List<FieldTarget> staticInjection = new ArrayList<>();
+  boolean classInjection;
+  boolean instanceInjection;
 
-  MetaReader(Object testInstance) {
-    this.testInstance = testInstance;
-    for (Field field : testInstance.getClass().getDeclaredFields()) {
+  MetaReader(Class<?> testClass) {
+    for (Field field : testClass.getDeclaredFields()) {
       readField(field);
     }
+  }
+
+  boolean hasClassInjection() {
+    return classInjection;
+  }
+
+  boolean hasInstanceInjection() {
+    return instanceInjection;
   }
 
   @Override
@@ -39,6 +51,9 @@ class MetaReader {
     s += toStringAppend("spies:", spies);
     s += toStringAppend("inject:", injection);
     s += toStringAppend("captors:", captors);
+    s += toStringAppend("staticMocks:", staticMocks);
+    s += toStringAppend("staticSpies:", staticSpies);
+    s += toStringAppend("staticInjection:", staticInjection);
     return s;
   }
 
@@ -46,19 +61,15 @@ class MetaReader {
     return entries.isEmpty() ? "" : key + entries + "; ";
   }
 
-  List<FieldTarget> mocks() {
-    return mocks;
-  }
-
   private void readField(Field field) {
     final Mock mockAnnotation = field.getAnnotation(Mock.class);
     if (mockAnnotation != null) {
-      mocks.add(newTarget(field));
+      add(newTarget(field), mocks, staticMocks);
       return;
     }
     final Spy spyAnnotation = field.getAnnotation(Spy.class);
     if (spyAnnotation != null) {
-      spies.add(newTarget(field));
+      add(newTarget(field), spies, staticSpies);
       return;
     }
     final Captor captorAnnotation = field.getAnnotation(Captor.class);
@@ -68,7 +79,17 @@ class MetaReader {
     }
     final Inject injectAnnotation = field.getAnnotation(Inject.class);
     if (injectAnnotation != null) {
-      injection.add(newTarget(field));
+      add(newTarget(field), injection, staticInjection);
+    }
+  }
+
+  private void add(FieldTarget target, List<FieldTarget> instanceList, List<FieldTarget> staticList) {
+    if (target.isStatic()) {
+      classInjection = true;
+      staticList.add(target);
+    } else {
+      instanceInjection = true;
+      instanceList.add(target);
     }
   }
 
@@ -91,19 +112,43 @@ class MetaReader {
     return null;
   }
 
-  void setFromScope(BeanScope beanScope) {
+  void setFromScope(BeanScope beanScope, Object testInstance) {
+    if (testInstance != null) {
+      setForInstance(beanScope, testInstance);
+    } else {
+      setForStatics(beanScope);
+    }
+  }
+
+  private void setForInstance(BeanScope beanScope, Object testInstance) {
     try {
       for (Field field : captors) {
-        set(field, captorFor(field));
+        set(field, captorFor(field), testInstance);
       }
-      for (FieldTarget mock : mocks) {
-        mock.setFromScope(beanScope);
+      for (FieldTarget target : mocks) {
+        target.setFromScope(beanScope, testInstance);
       }
       for (FieldTarget target : spies) {
-        target.setFromScope(beanScope);
+        target.setFromScope(beanScope, testInstance);
       }
       for (FieldTarget target : injection) {
-        target.setFromScope(beanScope);
+        target.setFromScope(beanScope, testInstance);
+      }
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void setForStatics(BeanScope beanScope) {
+    try {
+      for (FieldTarget target : staticMocks) {
+        target.setFromScope(beanScope, null);
+      }
+      for (FieldTarget target : staticSpies) {
+        target.setFromScope(beanScope, null);
+      }
+      for (FieldTarget target : staticInjection) {
+        target.setFromScope(beanScope, null);
       }
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e);
@@ -119,7 +164,15 @@ class MetaReader {
     return ArgumentCaptor.forClass(cls);
   }
 
-  void build(BeanScopeBuilder builder) {
+  void build(BeanScopeBuilder builder, Object testInstance) {
+    if (testInstance != null) {
+      buildForInstance(builder);
+    } else {
+      buildForStatics(builder);
+    }
+  }
+
+  void buildForInstance(BeanScopeBuilder builder) {
     final BeanScopeBuilder.ForTesting forTesting = builder.forTesting();
     for (FieldTarget target : mocks) {
       forTesting.mock(target.type(), target.name());
@@ -129,7 +182,17 @@ class MetaReader {
     }
   }
 
-  void set(Field field, Object val) throws IllegalAccessException {
+  void buildForStatics(BeanScopeBuilder builder) {
+    final BeanScopeBuilder.ForTesting forTesting = builder.forTesting();
+    for (FieldTarget target : staticMocks) {
+      forTesting.mock(target.type(), target.name());
+    }
+    for (FieldTarget target : staticSpies) {
+      forTesting.spy(target.type(), target.name());
+    }
+  }
+
+  void set(Field field, Object val, Object testInstance) throws IllegalAccessException {
     final MemberAccessor memberAccessor = Plugins.getMemberAccessor();
     memberAccessor.set(field, testInstance, val);
   }
@@ -138,9 +201,11 @@ class MetaReader {
 
     private final Field field;
     private final String name;
+    private final boolean isStatic;
 
     FieldTarget(Field field, String name) {
       this.field = field;
+      this.isStatic = Modifier.isStatic(field.getModifiers());
       this.name = name;
     }
 
@@ -157,8 +222,12 @@ class MetaReader {
       return name;
     }
 
-    void setFromScope(BeanScope beanScope) throws IllegalAccessException {
-      set(field, beanScope.get(type(), name));
+    boolean isStatic() {
+      return isStatic;
+    }
+
+    void setFromScope(BeanScope beanScope, Object testInstance) throws IllegalAccessException {
+      set(field, beanScope.get(type(), name), testInstance);
     }
   }
 
