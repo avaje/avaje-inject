@@ -1,7 +1,11 @@
 package org.example.myapp.config;
 
 import io.avaje.inject.Bean;
+import io.avaje.inject.Component;
 import io.avaje.inject.Factory;
+import io.avaje.inject.Prototype;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import org.example.myapp.HelloData;
 
 @Factory
@@ -20,8 +24,9 @@ public class AppConfig {
     }
   }
 
+  @Prototype
   @Bean
-  Builder newBuilder() {
+  public Builder newBuilder() {
     return new Builder();
   }
 
@@ -34,5 +39,20 @@ public class AppConfig {
   }
 
   public static class Generated {
+  }
+
+  @Component
+  public static class BuilderUser {
+
+    final Provider<Builder> builderProvider;
+
+    @Inject
+    public BuilderUser(Provider<Builder> builderProvider) {
+      this.builderProvider = builderProvider;
+    }
+
+    public Builder createBuilder() {
+      return builderProvider.get();
+    }
   }
 }

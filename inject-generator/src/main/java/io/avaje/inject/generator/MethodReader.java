@@ -17,6 +17,7 @@ class MethodReader {
   private final ExecutableElement element;
   private final String factoryType;
   private final String methodName;
+  private final boolean prototype;
   private final String returnTypeRaw;
   private final GenericType genericType;
   private final String shortName;
@@ -31,11 +32,12 @@ class MethodReader {
   private final boolean optionalType;
 
   MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType) {
-    this(context, element, beanType, null, null);
+    this(context, element, beanType, null, null, false);
   }
 
-  MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType, Bean bean, Named named) {
+  MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType, Bean bean, Named named, boolean prototype) {
     this.isFactory = bean != null;
+    this.prototype = prototype;
     this.element = element;
     this.methodName = element.getSimpleName().toString();
     TypeMirror returnMirror = element.getReturnType();
@@ -127,6 +129,31 @@ class MethodReader {
     }
     sb.append(");");
     return sb.toString();
+  }
+
+  public void builderAddProtoBean(Append writer) {
+    if (isVoid) {
+      writer.append("Error - void @Prototype method ?").eol();
+      return;
+    }
+    if (optionalType) {
+      writer.append("Error - Optional type with @Prototype method is not supported").eol();
+      return;
+    }
+    String indent = "    ";
+    writer.append(indent).append("  // prototype scope bean method").eol();
+    writer.append(indent).append("  builder.registerProvider(() -> {").eol();
+    writer.append("%s    return ", indent);
+    writer.append(String.format("factory.%s(", methodName));
+    for (int i = 0; i < params.size(); i++) {
+      if (i > 0) {
+        writer.append(", ");
+      }
+      writer.append(params.get(i).builderGetDependency("builder", true));
+    }
+    writer.append(");").eol();
+    writer.append(indent).append("  });").eol();
+    writer.append(indent).append("}").eol();
   }
 
   void builderBuildAddBean(Append writer) {
@@ -228,11 +255,15 @@ class MethodReader {
     writer.append(CODE_COMMENT_BUILD_FACTORYBEAN, shortName, factoryShortName, methodName).eol();
   }
 
-  public boolean isPublic() {
+  boolean isProtoType() {
+    return prototype;
+  }
+
+  boolean isPublic() {
     return element.getModifiers().contains(Modifier.PUBLIC);
   }
 
-  public boolean isNotPrivate() {
+  boolean isNotPrivate() {
     return !element.getModifiers().contains(Modifier.PRIVATE);
   }
 

@@ -42,8 +42,9 @@ class AllScopes {
   void readBeans(RoundEnvironment roundEnv) {
     for (Data data : scopeAnnotations.values()) {
       for (Element customBean : roundEnv.getElementsAnnotatedWith(data.type)) {
-        // context.logWarn("read custom scope bean " + customBean + " for scope " + entry.getKey());
-        data.scopeInfo.read((TypeElement) customBean, false);
+        if (customBean instanceof TypeElement) {
+          data.scopeInfo.read((TypeElement) customBean, false);
+        }
       }
     }
   }

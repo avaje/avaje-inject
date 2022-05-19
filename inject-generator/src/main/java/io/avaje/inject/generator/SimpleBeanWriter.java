@@ -122,9 +122,13 @@ class SimpleBeanWriter {
     writer.append("  public static void build_%s(%s builder) {", method.getName(), beanReader.builderType()).eol();
     method.buildAddFor(writer);
     writer.append(method.builderGetFactory()).eol();
-    writer.append(method.builderBuildBean()).eol();
-    method.builderBuildAddBean(writer);
-    writer.append("    }").eol();
+    if (method.isProtoType()) {
+      method.builderAddProtoBean(writer);
+    } else {
+      writer.append(method.builderBuildBean()).eol();
+      method.builderBuildAddBean(writer);
+      writer.append("    }").eol();
+    }
     writer.append("  }").eol().eol();
   }
 
