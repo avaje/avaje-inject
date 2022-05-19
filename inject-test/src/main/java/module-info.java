@@ -10,6 +10,8 @@ module io.avaje.inject.test {
   requires transitive org.mockito.junit.jupiter;
 //  requires transitive org.assertj.core;
 //  requires transitive net.bytebuddy;
+  requires static java.net.http; // for testing only
 
   uses io.avaje.inject.test.TestModule;
+  uses io.avaje.inject.test.Plugin;
 }

@@ -31,7 +31,12 @@ class MetaReader {
   boolean classInjection;
   boolean instanceInjection;
 
-  MetaReader(Class<?> testClass) {
+  final Plugin plugin;
+  boolean staticPlugin;
+  boolean instancePlugin;
+
+  MetaReader(Class<?> testClass, Plugin plugin) {
+    this.plugin = plugin;
     for (Field field : testClass.getDeclaredFields()) {
       readField(field);
     }
@@ -79,7 +84,16 @@ class MetaReader {
     }
     final Inject injectAnnotation = field.getAnnotation(Inject.class);
     if (injectAnnotation != null) {
-      add(newTarget(field), injection, staticInjection);
+      FieldTarget target = newTarget(field);
+      if (plugin != null && plugin.forType(target.type())) {
+        target.markForPluginInjection();
+        if (target.isStatic()) {
+          staticPlugin = true;
+        } else {
+          instancePlugin = true;
+        }
+      }
+      add(target, injection, staticInjection);
     }
   }
 
@@ -112,16 +126,18 @@ class MetaReader {
     return null;
   }
 
-  void setFromScope(BeanScope beanScope, Object testInstance) {
+  MetaInfo.Scope setFromScope(BeanScope beanScope, Object testInstance) {
     if (testInstance != null) {
-      setForInstance(beanScope, testInstance);
+      return setForInstance(beanScope, testInstance);
     } else {
-      setForStatics(beanScope);
+      return setForStatics(beanScope);
     }
   }
 
-  private void setForInstance(BeanScope beanScope, Object testInstance) {
+  private MetaInfo.Scope setForInstance(BeanScope beanScope, Object testInstance) {
     try {
+      Plugin.Scope pluginScope = instancePlugin ? plugin.createScope(beanScope) : null;
+
       for (Field field : captors) {
         set(field, captorFor(field), testInstance);
       }
@@ -132,15 +148,24 @@ class MetaReader {
         target.setFromScope(beanScope, testInstance);
       }
       for (FieldTarget target : injection) {
-        target.setFromScope(beanScope, testInstance);
+        if (target.pluginInjection) {
+          Object instance = pluginScope.create(target.type());
+          target.setFromPlugin(instance, testInstance);
+        } else {
+          target.setFromScope(beanScope, testInstance);
+        }
       }
+      return new MetaInfo.Scope(beanScope, pluginScope);
+
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private void setForStatics(BeanScope beanScope) {
+  private MetaInfo.Scope setForStatics(BeanScope beanScope) {
     try {
+      Plugin.Scope pluginScope = staticPlugin ? plugin.createScope(beanScope) : null;
+
       for (FieldTarget target : staticMocks) {
         target.setFromScope(beanScope, null);
       }
@@ -148,8 +173,14 @@ class MetaReader {
         target.setFromScope(beanScope, null);
       }
       for (FieldTarget target : staticInjection) {
-        target.setFromScope(beanScope, null);
+        if (target.pluginInjection) {
+          Object instance = pluginScope.create(target.type());
+          target.setFromPlugin(instance, null);
+        } else {
+          target.setFromScope(beanScope, null);
+        }
       }
+      return new MetaInfo.Scope(beanScope, pluginScope);
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e);
     }
@@ -202,6 +233,7 @@ class MetaReader {
     private final Field field;
     private final String name;
     private final boolean isStatic;
+    private boolean pluginInjection;
 
     FieldTarget(Field field, String name) {
       this.field = field;
@@ -228,6 +260,14 @@ class MetaReader {
 
     void setFromScope(BeanScope beanScope, Object testInstance) throws IllegalAccessException {
       set(field, beanScope.get(type(), name), testInstance);
+    }
+
+    void setFromPlugin(Object value, Object testInstance) throws IllegalAccessException {
+      set(field, value, testInstance);
+    }
+
+    void markForPluginInjection() {
+      pluginInjection = true;
     }
   }
 
