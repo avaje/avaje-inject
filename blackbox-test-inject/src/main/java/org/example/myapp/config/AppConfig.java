@@ -19,4 +19,20 @@ public class AppConfig {
       return "AppHelloData";
     }
   }
+
+  @Bean
+  Builder newBuilder() {
+    return new Builder();
+  }
+
+  @Bean
+  Generated newGenerated() {
+    return new Generated();
+  }
+
+  public static class Builder {
+  }
+
+  public static class Generated {
+  }
 }

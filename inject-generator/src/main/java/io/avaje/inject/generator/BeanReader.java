@@ -32,6 +32,8 @@ class BeanReader {
   private final boolean proxy;
   private final BeanAspects aspects;
   private boolean writtenToFile;
+  private boolean suppressBuilderImport;
+  private boolean suppressGeneratedImport;
 
   BeanReader(TypeElement beanType, ProcessingContext context, boolean factory) {
     this.beanType = beanType;
@@ -210,8 +212,6 @@ class BeanReader {
   }
 
   private Set<String> importTypes() {
-    importTypes.add(Constants.GENERATED);
-    importTypes.add(Constants.BUILDER);
     if (Util.validImportType(type)) {
       importTypes.add(type);
     }
@@ -230,8 +230,32 @@ class BeanReader {
         }
       }
     }
-
+    checkImports();
+    if (!suppressGeneratedImport){
+      importTypes.add(Constants.GENERATED);
+    }
+    if (!suppressBuilderImport) {
+      importTypes.add(Constants.BUILDER);
+    }
     return importTypes;
+  }
+
+  private void checkImports() {
+    for (String type : importTypes) {
+      if (type.endsWith(".Builder")) {
+        suppressBuilderImport = true;
+      } else if (type.endsWith(".Generated")) {
+        suppressGeneratedImport = true;
+      }
+    }
+  }
+
+  String builderType() {
+    return suppressBuilderImport ? Constants.BUILDER : "Builder";
+  }
+
+  String generatedType() {
+    return suppressGeneratedImport ? "@io.avaje.inject.spi.Generated" : "@Generated";
   }
 
   void writeImports(Append writer) {
