@@ -60,7 +60,7 @@ public class InjectExtension implements BeforeAllCallback, AfterAllCallback, Bef
       putMetaInfo(context, metaInfo);
 
       if (metaInfo.hasStaticInjection()) {
-        BeanScope testClassBeanScope = metaInfo.buildForClass(globalTestScope);
+        MetaInfo.Scope testClassBeanScope = metaInfo.buildForClass(globalTestScope);
         putClassScope(context, testClassBeanScope);
       }
     } finally {
@@ -78,14 +78,15 @@ public class InjectExtension implements BeforeAllCallback, AfterAllCallback, Bef
     return (MetaInfo) context.getStore(INJECT_NS).get(META + testClass);
   }
 
-  private void putClassScope(ExtensionContext context, BeanScope testClassBeanScope) {
+  private void putClassScope(ExtensionContext context, MetaInfo.Scope testClassBeanScope) {
     Class<?> testClass = context.getRequiredTestClass();
     context.getStore(INJECT_NS).put(BEAN_SCOPE + testClass, testClassBeanScope);
   }
 
   private BeanScope getClassScope(ExtensionContext context) {
     Class<?> testClass = context.getRequiredTestClass();
-    return (BeanScope) context.getStore(INJECT_NS).get(BEAN_SCOPE + testClass);
+    MetaInfo.Scope pair = (MetaInfo.Scope) context.getStore(INJECT_NS).get(BEAN_SCOPE + testClass);
+    return pair.beanScope();
   }
 
   /**
@@ -99,7 +100,7 @@ public class InjectExtension implements BeforeAllCallback, AfterAllCallback, Bef
       // if (static fields) then (class scope) else (globalTestScope)
       final BeanScope parent = metaInfo.hasStaticInjection() ? getClassScope(context) : globalTestScope;
 
-      BeanScope beanScope = metaInfo.buildForInstance(parent, context.getRequiredTestInstance());
+      AutoCloseable beanScope = metaInfo.buildForInstance(parent, context.getRequiredTestInstance());
 
       // put method level test scope
       Method testMethod = context.getRequiredTestMethod();
@@ -113,9 +114,13 @@ public class InjectExtension implements BeforeAllCallback, AfterAllCallback, Bef
   @Override
   public void afterEach(ExtensionContext context) {
     Method testMethod = context.getRequiredTestMethod();
-    final BeanScope beanScope = (BeanScope) context.getStore(INJECT_NS).remove(BEAN_SCOPE + testMethod);
+    final AutoCloseable beanScope = (AutoCloseable) context.getStore(INJECT_NS).remove(BEAN_SCOPE + testMethod);
     if (beanScope != null) {
-      beanScope.close();
+      try {
+        beanScope.close();
+      } catch (Exception e) {
+        log.log(Level.ERROR, "Error closing scope", e);
+      }
     }
   }
 
@@ -125,9 +130,13 @@ public class InjectExtension implements BeforeAllCallback, AfterAllCallback, Bef
   @Override
   public void afterAll(ExtensionContext context) {
     Class<?> testClass = context.getRequiredTestClass();
-    final BeanScope testClassBeanScope = (BeanScope) context.getStore(INJECT_NS).remove(BEAN_SCOPE + testClass);
-    if (testClassBeanScope != null) {
-      testClassBeanScope.close();
+    final AutoCloseable scope = (AutoCloseable) context.getStore(INJECT_NS).remove(BEAN_SCOPE + testClass);
+    if (scope != null) {
+      try {
+        scope.close();
+      } catch (Exception e) {
+        log.log(Level.ERROR, "Error closing scope", e);
+      }
     }
   }
 
@@ -135,7 +144,7 @@ public class InjectExtension implements BeforeAllCallback, AfterAllCallback, Bef
    * Return the MetaInfo.
    */
   private MetaInfo createMetaInfo(ExtensionContext context) {
-    return new MetaInfo(context.getRequiredTestClass());
+    return new MetaInfo(context.getRequiredTestClass(), PluginInitialise.plugin());
   }
 
 }

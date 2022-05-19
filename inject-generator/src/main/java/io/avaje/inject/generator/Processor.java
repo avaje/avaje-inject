@@ -12,9 +12,14 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.*;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class Processor extends AbstractProcessor {
 
@@ -78,9 +83,10 @@ public class Processor extends AbstractProcessor {
   private void readScopes(Set<? extends Element> scopes) {
     for (Element element : scopes) {
       if (element.getKind() == ElementKind.ANNOTATION_TYPE) {
-        // context.logDebug("detected scope annotation " + element);
-        TypeElement type = (TypeElement) element;
-        allScopes.addScopeAnnotation(type);
+        if (element instanceof TypeElement) {
+          TypeElement type = (TypeElement) element;
+          allScopes.addScopeAnnotation(type);
+        }
       }
     }
     addTestScope();
@@ -101,9 +107,8 @@ public class Processor extends AbstractProcessor {
    */
   private void readChangedBeans(Set<? extends Element> beans, boolean factory) {
     for (Element element : beans) {
-      if (!(element instanceof TypeElement)) {
-        context.logError("unexpected type [" + element + "]");
-      } else {
+      // ignore methods (e.g. factory methods with @Prototype on them)
+      if (element instanceof TypeElement) {
         TypeElement typeElement = (TypeElement) element;
         final ScopeInfo scope = findScope(typeElement);
         if (!factory) {

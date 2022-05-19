@@ -10,8 +10,8 @@ class MetaInfo {
 
   private final MetaReader reader;
 
-  MetaInfo(Class<?> testClass) {
-    this.reader = new MetaReader(testClass);
+  MetaInfo(Class<?> testClass, Plugin plugin) {
+    this.reader = new MetaReader(testClass, plugin);
   }
 
   boolean hasStaticInjection() {
@@ -25,18 +25,18 @@ class MetaInfo {
   /**
    * Build for static fields class level scope.
    */
-  BeanScope buildForClass(BeanScope globalTestScope) {
+  Scope buildForClass(BeanScope globalTestScope) {
     return buildSet(globalTestScope, null);
   }
 
   /**
    * Build test instance per test scope.
    */
-  BeanScope buildForInstance(BeanScope globalTestScope, Object testInstance) {
+  Scope buildForInstance(BeanScope globalTestScope, Object testInstance) {
     return buildSet(globalTestScope, testInstance);
   }
 
-  private BeanScope buildSet(BeanScope parent, Object testInstance) {
+  private Scope buildSet(BeanScope parent, Object testInstance) {
     final BeanScopeBuilder builder = BeanScope.builder();
     if (parent != null) {
       builder.parent(parent, false);
@@ -48,7 +48,31 @@ class MetaInfo {
     final BeanScope beanScope = builder.build();
 
     // set inject, spy, mock fields from beanScope
-    reader.setFromScope(beanScope, testInstance);
-    return beanScope;
+    return reader.setFromScope(beanScope, testInstance);
+  }
+
+  /**
+   * Wraps both BeanScope and Plugin.Scope for either EACH or ALL
+   * (aka instance or class level).
+   */
+  static class Scope implements AutoCloseable {
+
+    private final BeanScope beanScope;
+    private final Plugin.Scope pluginScope;
+
+    Scope(BeanScope beanScope, Plugin.Scope pluginScope) {
+      this.beanScope = beanScope;
+      this.pluginScope = pluginScope;
+    }
+
+    BeanScope beanScope() {
+      return beanScope;
+    }
+
+    @Override
+    public void close() {
+      beanScope.close();
+      pluginScope.close();
+    }
   }
 }

@@ -119,12 +119,16 @@ class SimpleBeanWriter {
 
   private void writeFactoryBeanMethod(MethodReader method) {
     method.commentBuildMethod(writer);
-    writer.append("  public static void build_%s(Builder builder) {", method.getName()).eol();
+    writer.append("  public static void build_%s(%s builder) {", method.getName(), beanReader.builderType()).eol();
     method.buildAddFor(writer);
     writer.append(method.builderGetFactory()).eol();
-    writer.append(method.builderBuildBean()).eol();
-    method.builderBuildAddBean(writer);
-    writer.append("    }").eol();
+    if (method.isProtoType()) {
+      method.builderAddProtoBean(writer);
+    } else {
+      writer.append(method.builderBuildBean()).eol();
+      method.builderBuildAddBean(writer);
+      writer.append("    }").eol();
+    }
     writer.append("  }").eol().eol();
   }
 
@@ -171,7 +175,7 @@ class SimpleBeanWriter {
     } else {
       writer.append(CODE_COMMENT_BUILD, shortName).eol();
     }
-    writer.append("  public static void build(Builder builder");
+    writer.append("  public static void build(%s builder", beanReader.builderType());
     for (MethodReader.MethodParam param : constructor.getParams()) {
       if (param.isGenericParam()) {
         param.addProviderParam(writer, providerIndex++);
@@ -250,7 +254,7 @@ class SimpleBeanWriter {
     } else {
       writer.append(CODE_COMMENT, shortName).eol();
     }
-    writer.append(Constants.AT_GENERATED).eol();
+    writer.append(beanReader.generatedType()).append(Constants.AT_GENERATED_COMMENT).eol();
     if (beanReader.isRequestScopedController()) {
       writer.append(Constants.AT_SINGLETON).eol();
     }
