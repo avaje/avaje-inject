@@ -9,10 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.ServiceLoader;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -83,14 +80,17 @@ final class TSBuild {
   @Nullable
   private BeanScope buildFromResources() {
     try {
-      List<TestModule> testModules = new ArrayList<>();
+      Set<Class<?>> testModuleClasses = new LinkedHashSet<>();
       Enumeration<URL> urls = ClassLoader.getSystemResources("META-INF/services/io.avaje.inject.test.TestModule");
       while (urls.hasMoreElements()) {
         String className = readServiceClassName(urls.nextElement());
         if (className != null) {
-          Class<?> cls = Class.forName(className);
-          testModules.add((TestModule) cls.getDeclaredConstructor().newInstance());
+          testModuleClasses.add(Class.forName(className));
         }
+      }
+      List<TestModule> testModules = new ArrayList<>();
+      for (Class<?> cls : testModuleClasses) {
+        testModules.add((TestModule) cls.getDeclaredConstructor().newInstance());
       }
       return testModules.isEmpty() ? null : buildFromModules(testModules);
     } catch (Throwable e) {
