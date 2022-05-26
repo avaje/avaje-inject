@@ -98,7 +98,7 @@ class MethodReader {
       dependsOn.add(GenericType.trimWildcard(param.paramType));
     }
     metaData.setDependsOn(dependsOn);
-    metaData.setProvides(new ArrayList<>());
+    metaData.setProvides(typeReader == null ? Collections.emptyList() : typeReader.getProvides());
     return metaData;
   }
 
