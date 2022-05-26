@@ -159,7 +159,7 @@ class MetaData {
       appendProvides(sb, "provides", provides);
     }
     if (!dependsOn.isEmpty()) {
-      appendProvides(sb, "dependsOn", dependsOn.stream().map(Dependency::getName).collect(Collectors.toList()));
+      appendProvides(sb, "dependsOn", dependsOn.stream().map(Dependency::dependsOn).collect(Collectors.toList()));
     }
     sb.append(")").append(NEWLINE);
     sb.append("  protected void build_").append(getBuildName()).append("() {").append(NEWLINE);
