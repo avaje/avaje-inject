@@ -1,7 +1,7 @@
 package org.example.customext1;
 
 import io.avaje.inject.InjectModule;
-import javax.inject.Scope;
+import jakarta.inject.Scope;
 import org.example.customext0.Ext0Scope;
 
 @Scope

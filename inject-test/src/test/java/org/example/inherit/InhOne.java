@@ -1,7 +1,7 @@
 package org.example.inherit;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.example.coffee.core.Steamer;
 
 @Singleton

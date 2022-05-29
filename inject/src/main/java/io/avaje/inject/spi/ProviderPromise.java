@@ -1,6 +1,6 @@
 package io.avaje.inject.spi;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import java.util.function.Consumer;
 
 /**

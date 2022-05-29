@@ -1,7 +1,7 @@
 package org.example.coffee.generic;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 /**
  * Has a Dependency via generic interface.

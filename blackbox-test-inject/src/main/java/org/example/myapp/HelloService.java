@@ -2,7 +2,7 @@ package org.example.myapp;
 
 import io.avaje.inject.PostConstruct;
 import io.avaje.inject.PreDestroy;
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import org.example.myapp.aspect.*;
 
 import java.io.IOException;

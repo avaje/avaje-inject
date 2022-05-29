@@ -1,6 +1,6 @@
 package org.example.autonamed;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class MyAutoB2 {

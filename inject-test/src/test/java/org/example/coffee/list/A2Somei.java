@@ -1,7 +1,7 @@
 package org.example.coffee.list;
 
 import javax.annotation.Priority;
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 @Priority(22)

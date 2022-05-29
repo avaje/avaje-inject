@@ -1,6 +1,6 @@
 package org.example.coffee.prototype;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class UseProto2 {

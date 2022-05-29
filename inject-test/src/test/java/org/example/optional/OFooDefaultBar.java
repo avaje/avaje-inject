@@ -1,8 +1,8 @@
 package org.example.optional;
 
 import io.avaje.inject.Secondary;
-import javax.inject.Named;
-import javax.inject.Singleton;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 
 @Named("forBar")
 @Singleton

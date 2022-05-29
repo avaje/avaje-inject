@@ -1,6 +1,6 @@
 package org.example.inherit;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import org.example.coffee.core.Steamer;
 
 public class InhBaseBase implements InhBaseIface {

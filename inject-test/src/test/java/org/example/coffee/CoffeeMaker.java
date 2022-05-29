@@ -2,7 +2,7 @@ package org.example.coffee;
 
 import org.example.coffee.grind.Grinder;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 //@InjectModule(name = "coffee-maker", requires = Object.class)
 @Singleton

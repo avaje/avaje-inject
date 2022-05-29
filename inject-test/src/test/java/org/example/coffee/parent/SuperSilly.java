@@ -1,6 +1,6 @@
 package org.example.coffee.parent;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class SuperSilly extends Silly {

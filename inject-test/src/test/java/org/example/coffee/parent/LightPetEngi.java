@@ -1,7 +1,7 @@
 package org.example.coffee.parent;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import org.example.coffee.parent.sub.PetEngi;
 
 @Named("Lite")

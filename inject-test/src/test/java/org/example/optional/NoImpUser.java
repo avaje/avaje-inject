@@ -1,6 +1,6 @@
 package org.example.optional;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import org.jetbrains.annotations.Nullable;
 
 @Singleton

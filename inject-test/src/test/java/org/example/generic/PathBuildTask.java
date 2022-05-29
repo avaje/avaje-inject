@@ -1,6 +1,6 @@
 package org.example.generic;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import java.nio.file.Path;
 

@@ -2,7 +2,7 @@ package org.example.coffee.prototype;
 
 import io.avaje.inject.PostConstruct;
 import io.avaje.inject.Prototype;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import java.io.Closeable;
 import java.io.IOException;

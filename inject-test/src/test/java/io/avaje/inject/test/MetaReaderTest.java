@@ -1,7 +1,7 @@
 package io.avaje.inject.test;
 
 import io.avaje.inject.BeanScope;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import org.example.coffee.Pump;
 import org.example.coffee.grind.AMusher;
 import org.example.coffee.grind.Grinder;

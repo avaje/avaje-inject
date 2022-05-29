@@ -1,7 +1,7 @@
 package org.example;
 
 import io.avaje.inject.InjectModule;
-import javax.inject.Scope;
+import jakarta.inject.Scope;
 import org.example.custom.loc.LocalExternal;
 
 @Scope

@@ -5,8 +5,8 @@ import io.avaje.inject.Factory;
 import io.avaje.inject.InjectModule;
 import io.avaje.inject.Prototype;
 import io.avaje.inject.spi.Proxy;
-import javax.inject.Scope;
-import javax.inject.Singleton;
+import jakarta.inject.Scope;
+import jakarta.inject.Singleton;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;

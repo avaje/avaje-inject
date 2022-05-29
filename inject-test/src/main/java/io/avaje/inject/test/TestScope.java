@@ -1,6 +1,6 @@
 package io.avaje.inject.test;
 
-import javax.inject.Scope;
+import jakarta.inject.Scope;
 
 /**
  * Specify test scope for a `@Factory` or `@Singleton`.

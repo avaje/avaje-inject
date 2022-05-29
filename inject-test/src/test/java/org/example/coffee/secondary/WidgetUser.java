@@ -1,7 +1,7 @@
 package org.example.coffee.secondary;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class WidgetUser {

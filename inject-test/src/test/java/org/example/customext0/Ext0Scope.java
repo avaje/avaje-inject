@@ -1,7 +1,7 @@
 package org.example.customext0;
 
 import io.avaje.inject.InjectModule;
-import javax.inject.Scope;
+import jakarta.inject.Scope;
 
 @Scope
 @InjectModule(requires = {Ext0iface.class, Ext0conc.class})

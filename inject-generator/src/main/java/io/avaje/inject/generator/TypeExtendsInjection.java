@@ -2,8 +2,8 @@ package io.avaje.inject.generator;
 
 import io.avaje.inject.Bean;
 import io.avaje.inject.Prototype;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;

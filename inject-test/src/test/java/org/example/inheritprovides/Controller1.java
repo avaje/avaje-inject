@@ -1,6 +1,6 @@
 package org.example.inheritprovides;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.Map;
 
 @Singleton

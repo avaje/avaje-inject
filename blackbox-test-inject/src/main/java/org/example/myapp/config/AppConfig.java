@@ -4,8 +4,8 @@ import io.avaje.inject.Bean;
 import io.avaje.inject.Component;
 import io.avaje.inject.Factory;
 import io.avaje.inject.Prototype;
-import javax.inject.Inject;
-import javax.inject.Provider;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import org.example.myapp.HelloData;
 
 @Factory

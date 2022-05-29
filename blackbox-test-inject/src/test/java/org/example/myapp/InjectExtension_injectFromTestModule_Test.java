@@ -1,7 +1,7 @@
 package org.example.myapp;
 
 import io.avaje.inject.test.InjectExtension;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import org.example.myapp.testconfig.CountTestScopeStart;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

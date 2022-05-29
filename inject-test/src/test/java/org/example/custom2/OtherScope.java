@@ -1,6 +1,6 @@
 package org.example.custom2;
 
-import javax.inject.Scope;
+import jakarta.inject.Scope;
 
 @Scope
 public @interface OtherScope {

@@ -2,7 +2,7 @@ package org.example.coffee.grind;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class BMusher {

@@ -1,6 +1,6 @@
 package org.example.closable;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import java.io.Closeable;
 

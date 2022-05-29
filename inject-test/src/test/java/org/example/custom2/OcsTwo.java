@@ -1,6 +1,6 @@
 package org.example.custom2;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 @Named("two")
 @OciMarker

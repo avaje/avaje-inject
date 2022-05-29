@@ -1,7 +1,7 @@
 package org.example.custom4;
 
 import io.avaje.inject.InjectModule;
-import javax.inject.Scope;
+import jakarta.inject.Scope;
 
 @Scope
 @InjectModule(requires = {Machine.class, IntentionallyEmptyScope.class})

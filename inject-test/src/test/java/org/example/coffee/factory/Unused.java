@@ -2,8 +2,8 @@ package org.example.coffee.factory;
 
 import org.example.coffee.factory.other.Something;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class Unused {

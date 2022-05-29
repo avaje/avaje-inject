@@ -1,6 +1,6 @@
 package org.example.coffee.inner;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 public class InnerClassBean {
   @Singleton

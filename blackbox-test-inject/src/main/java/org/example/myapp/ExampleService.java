@@ -1,6 +1,6 @@
 package org.example.myapp;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import org.example.myapp.aspect.MyTimed;
 
 import java.util.concurrent.ConcurrentHashMap;

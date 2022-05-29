@@ -1,6 +1,6 @@
 package io.avaje.inject.generator;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
