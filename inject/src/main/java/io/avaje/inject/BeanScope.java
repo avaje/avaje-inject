@@ -227,6 +227,16 @@ public interface BeanScope extends AutoCloseable {
   List<BeanEntry> all();
 
   /**
+   * Return true if the bean scope contains the given type.
+   */
+  boolean contains(Type type);
+
+  /**
+   * Return true if the bean scope contains the given type.
+   */
+  boolean contains(String type);
+
+  /**
    * Close the scope firing any <code>@PreDestroy</code> lifecycle methods.
    */
   void close();

@@ -1,0 +1,32 @@
+package io.avaje.inject.generator;
+
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class DependencyTest {
+
+  @Test
+  void dependsOn_soft() {
+    Dependency dependency = new Dependency("org.foo.Bar", true);
+
+    assertThat(dependency.isSoftDependency()).isTrue();
+    assertThat(dependency.getName()).isEqualTo("org.foo.Bar");
+    assertThat(dependency.dependsOn()).isEqualTo("soft:org.foo.Bar");
+
+    Dependency dependencyFromMeta = new Dependency("soft:org.foo.Bar");
+    assertThat(dependencyFromMeta.getName()).isEqualTo("org.foo.Bar");
+    assertThat(dependencyFromMeta.isSoftDependency()).isTrue();
+    assertThat(dependencyFromMeta.getName()).isEqualTo(dependency.getName());
+    assertThat(dependencyFromMeta.dependsOn()).isEqualTo(dependency.dependsOn());
+  }
+
+  @Test
+  void dependsOn_notSoft() {
+    Dependency dependency = new Dependency("org.foo.Bar");
+
+    assertThat(dependency.dependsOn()).isEqualTo("org.foo.Bar");
+    assertThat(dependency.isSoftDependency()).isFalse();
+    assertThat(dependency.getName()).isEqualTo("org.foo.Bar");
+  }
+}

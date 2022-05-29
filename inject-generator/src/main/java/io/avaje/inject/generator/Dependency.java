@@ -6,7 +6,13 @@ final class Dependency {
   private final boolean softDependency;
 
   Dependency(String name) {
-    this(name, false);
+    if (name.startsWith("soft:")) {
+      this.softDependency = true;
+      this.name = name.substring(5);
+    } else {
+      this.softDependency = false;
+      this.name = name;
+    }
   }
 
   Dependency(String name, boolean softDependency) {
@@ -16,7 +22,7 @@ final class Dependency {
 
   @Override
   public String toString() {
-    return name;
+    return softDependency ? "soft:" + name : name;
   }
 
   String getName() {
@@ -30,5 +36,9 @@ final class Dependency {
    */
   boolean isSoftDependency() {
     return softDependency;
+  }
+
+  String dependsOn() {
+    return toString();
   }
 }

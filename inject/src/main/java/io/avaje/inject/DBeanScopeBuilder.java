@@ -137,7 +137,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   @Override
   public BeanScope build() {
     // sort factories by dependsOn
-    FactoryOrder factoryOrder = new FactoryOrder(includeModules, !suppliedBeans.isEmpty());
+    FactoryOrder factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
     if (factoryOrder.isEmpty()) {
       ServiceLoader.load(Module.class).forEach(factoryOrder::add);
     }
@@ -176,6 +176,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
    */
   static class FactoryOrder {
 
+    private final BeanScope parent;
     private final boolean suppliedBeans;
     private final Set<String> moduleNames = new LinkedHashSet<>();
     private final List<Module> factories = new ArrayList<>();
@@ -184,7 +185,8 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
     private final Map<String, FactoryList> providesMap = new HashMap<>();
 
-    FactoryOrder(Set<Module> includeModules, boolean suppliedBeans) {
+    FactoryOrder(BeanScope parent, Set<Module> includeModules, boolean suppliedBeans) {
+      this.parent = parent;
       this.factories.addAll(includeModules);
       this.suppliedBeans = suppliedBeans;
       for (Module includeModule : includeModules) {
@@ -274,12 +276,18 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
           }
         }
         sb.append(" - none of the loaded modules ").append(moduleNames).append(" have this in their @InjectModule( provides = ... ). ");
+        if (parent != null) {
+          sb.append("The parent BeanScope " + parent + " also does not provide this dependency. ");
+        }
         sb.append("Either @InjectModule requires/provides are not aligned? or add external dependencies via BeanScopeBuilder.bean()?");
         throw new IllegalStateException(sb.toString());
       }
     }
 
     private boolean notProvided(String dependency) {
+      if (parent != null && parent.contains(dependency)) {
+        return false;
+      }
       FactoryList factories = providesMap.get(dependency);
       return (factories == null || !factories.allPushed());
     }
