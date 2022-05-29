@@ -84,6 +84,14 @@ class DBeanMap {
     return entry.getStrict(KeyUtil.lower(name));
   }
 
+  boolean contains(String type) {
+    return beans.containsKey(type);
+  }
+
+  boolean contains(Type type) {
+    return beans.containsKey(type.getTypeName());
+  }
+
   @SuppressWarnings("unchecked")
   <T> T get(Type type, String name) {
     DContextEntry entry = beans.get(type.getTypeName());

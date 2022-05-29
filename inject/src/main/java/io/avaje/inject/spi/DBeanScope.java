@@ -60,6 +60,16 @@ class DBeanScope implements BeanScope {
   }
 
   @Override
+  public boolean contains(String type) {
+    return beans.contains(type);
+  }
+
+  @Override
+  public boolean contains(Type type) {
+    return beans.contains(type);
+  }
+
+  @Override
   public <T> T get(Class<T> type) {
     return getByType(type, null);
   }

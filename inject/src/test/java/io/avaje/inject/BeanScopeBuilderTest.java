@@ -1,21 +1,42 @@
 package io.avaje.inject;
 
-import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.Builder;
+import io.avaje.inject.spi.Module;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class BeanScopeBuilderTest {
+class BeanScopeBuilderTest {
 
   @Test
-  public void noDepends() {
+  void depends_providedByParent() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(new TDBeanScope(MyFeature.class), Collections.emptySet(), false);
+    factoryOrder.add(bc("1", null, of(MyFeature.class)));
+    factoryOrder.orderFactories();
 
-    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true);
+    assertThat(names(factoryOrder.factories())).containsExactly("1");
+  }
+
+  @Test
+  void depends_notProvidedByParent_expect_IllegalStateException() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(new TDBeanScope(FeatureA.class), Collections.emptySet(), false);
+    factoryOrder.add(bc("1", null, of(MyFeature.class)));
+    assertThatThrownBy(factoryOrder::orderFactories)
+      .isInstanceOf(IllegalStateException.class)
+      .hasMessageContaining("Module [io.avaje.inject.BeanScopeBuilderTest$TDModule] has unsatisfied requires [io.avaje.inject.BeanScopeBuilderTest$MyFeature]");
+  }
+
+  @Test
+  void noDepends() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
     factoryOrder.add(bc("1", null, null));
     factoryOrder.add(bc("2", null, null));
     factoryOrder.add(bc("3", null, null));
@@ -25,9 +46,8 @@ public class BeanScopeBuilderTest {
   }
 
   @Test
-  public void name_depends() {
-
-    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true);
+  void name_depends() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
     factoryOrder.add(bc("two", null, of(Mod3.class)));
     factoryOrder.add(bc("one", null, null));
     factoryOrder.orderFactories();
@@ -36,9 +56,8 @@ public class BeanScopeBuilderTest {
   }
 
   @Test
-  public void name_depends4() {
-
-    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true);
+  void name_depends4() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
     factoryOrder.add(bc("1", null, of(Mod3.class)));
     factoryOrder.add(bc("2", null, of(Mod4.class)));
     factoryOrder.add(bc("3", of(Mod3.class), of(Mod4.class)));
@@ -50,9 +69,8 @@ public class BeanScopeBuilderTest {
   }
 
   @Test
-  public void nameFeature_depends() {
-
-    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true);
+  void nameFeature_depends() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
     factoryOrder.add(bc("1", of(FeatureA.class), of(Mod3.class)));
     factoryOrder.add(bc("2", null, of(Mod4.class, FeatureA.class)));
     factoryOrder.add(bc("3", of(Mod3.class), of(Mod4.class)));
@@ -64,9 +82,8 @@ public class BeanScopeBuilderTest {
   }
 
   @Test
-  public void feature_depends() {
-
-    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true);
+  void feature_depends() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
     factoryOrder.add(bc("two", null, of(MyFeature.class)));
     factoryOrder.add(bc("one", of(MyFeature.class), null));
     factoryOrder.orderFactories();
@@ -75,9 +92,8 @@ public class BeanScopeBuilderTest {
   }
 
   @Test
-  public void feature_depends2() {
-
-    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true);
+  void feature_depends2() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
     factoryOrder.add(bc("two", null, of(MyFeature.class)));
     factoryOrder.add(bc("one", of(MyFeature.class), null));
     factoryOrder.add(bc("three", of(MyFeature.class), null));
@@ -87,8 +103,8 @@ public class BeanScopeBuilderTest {
   }
 
   @Test
-  public void name_requiresPackage() {
-    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true);
+  void name_requiresPackage() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
     factoryOrder.add(bc("1", null, new Class[0], of(Mod3.class)));
     factoryOrder.add(bc("2", null, new Class[0], of(Mod4.class)));
     factoryOrder.add(bc("3", of(Mod3.class), new Class[0], of(Mod4.class)));
@@ -100,8 +116,8 @@ public class BeanScopeBuilderTest {
   }
 
   @Test
-  public void name_requiresPackage_mixed() {
-    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), true);
+  void name_requiresPackage_mixed() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
     factoryOrder.add(bc("1", null, new Class[0], of(Mod3.class)));
     factoryOrder.add(bc("2", null, of(Mod4.class), new Class[0]));
     factoryOrder.add(bc("3", of(Mod3.class), new Class[0], of(Mod4.class)));
@@ -113,8 +129,8 @@ public class BeanScopeBuilderTest {
   }
 
   @Test
-  public void missingRequiresPackage_expect_unsatisfiedRequiresPackages() {
-    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), false);
+  void missingRequiresPackage_expect_unsatisfiedRequiresPackages() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), false);
     factoryOrder.add(bc("1", null, new Class[0], of(Mod3.class)));
     factoryOrder.add(bc("2", null, of(Mod4.class), new Class[0]));
     factoryOrder.add(bc("4", of(Mod4.class), new Class[0]));
@@ -125,8 +141,8 @@ public class BeanScopeBuilderTest {
   }
 
   @Test
-  public void missingRequires_expect_unsatisfiedRequires() {
-    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(Collections.emptySet(), false);
+  void missingRequires_expect_unsatisfiedRequires() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), false);
     factoryOrder.add(bc("1", null, of(Mod3.class), new Class[0]));
     factoryOrder.add(bc("2", null, of(Mod4.class), new Class[0]));
     factoryOrder.add(bc("4", of(Mod4.class), new Class[0]));
@@ -142,22 +158,22 @@ public class BeanScopeBuilderTest {
       .collect(Collectors.toList());
   }
 
-  private TDBeanScope bc(String name, Class<?>[] provides, Class<?>[] requires) {
+  private TDModule bc(String name, Class<?>[] provides, Class<?>[] requires) {
     return bc(name, provides, requires, new Class[0]);
   }
 
-  private TDBeanScope bc(String name, Class<?>[] provides, Class<?>[] requires, Class<?>[] requiresPkg) {
-    return new TDBeanScope(name, provides, requires, requiresPkg);
+  private TDModule bc(String name, Class<?>[] provides, Class<?>[] requires, Class<?>[] requiresPkg) {
+    return new TDModule(name, provides, requires, requiresPkg);
   }
 
-  private static class TDBeanScope implements Module {
+  private static class TDModule implements Module {
 
     final String name;
     final Class<?>[] provides;
     final Class<?>[] requires;
     final Class<?>[] requiresPackages;
 
-    private TDBeanScope(String name, Class<?>[] provides, Class<?>[] requires, Class<?>[] requiresPackages) {
+    private TDModule(String name, Class<?>[] provides, Class<?>[] requires, Class<?>[] requiresPackages) {
       this.name = name;
       this.provides = provides;
       this.requires = requires;
@@ -206,5 +222,79 @@ public class BeanScopeBuilderTest {
   class Mod3 {
   }
   class Mod4 {
+  }
+
+  static class TDBeanScope implements BeanScope {
+
+    final String containsType;
+
+    TDBeanScope(Class<?> containsType) {
+      this.containsType = containsType.getTypeName();
+    }
+
+    @Override
+    public boolean contains(String type) {
+      return containsType.equals(type);
+    }
+
+    @Override
+    public <T> T get(Class<T> type) {
+      return null;
+    }
+
+    @Override
+    public <T> T get(Class<T> type, String name) {
+      return null;
+    }
+
+    @Override
+    public <T> T get(Type type, String name) {
+      return null;
+    }
+
+    @Override
+    public <T> Optional<T> getOptional(Class<T> type) {
+      return Optional.empty();
+    }
+
+    @Override
+    public <T> Optional<T> getOptional(Type type, String name) {
+      return Optional.empty();
+    }
+
+    @Override
+    public List<Object> listByAnnotation(Class<?> annotation) {
+      return null;
+    }
+
+    @Override
+    public <T> List<T> list(Class<T> interfaceType) {
+      return null;
+    }
+
+    @Override
+    public <T> List<T> listByPriority(Class<T> interfaceType) {
+      return null;
+    }
+
+    @Override
+    public <T> List<T> listByPriority(Class<T> interfaceType, Class<? extends Annotation> priority) {
+      return null;
+    }
+
+    @Override
+    public List<BeanEntry> all() {
+      return null;
+    }
+
+    @Override
+    public boolean contains(Type type) {
+      return false;
+    }
+
+    @Override
+    public void close() {
+
+    }
   }
 }

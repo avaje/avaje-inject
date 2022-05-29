@@ -72,7 +72,9 @@ class MetaInfo {
     @Override
     public void close() {
       beanScope.close();
-      pluginScope.close();
+      if (pluginScope != null) {
+        pluginScope.close();
+      }
     }
   }
 }
