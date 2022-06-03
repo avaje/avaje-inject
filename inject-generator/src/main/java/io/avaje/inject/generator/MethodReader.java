@@ -296,7 +296,6 @@ class MethodReader {
     private final GenericType genericType;
     private final boolean nullable;
     private final String simpleName;
-    private int providerIndex;
     private boolean requestParam;
     private String requestParamName;
 
@@ -315,33 +314,32 @@ class MethodReader {
       }
     }
 
-    Append builderGetDependency(Append sb, String builderName, boolean forFactory) {
-      sb.append(builderName).append(".").append(utilType.getMethod(nullable));
+    void builderGetDependency(Append writer, String builderName, boolean forFactory) {
+      writer.append(builderName).append(".").append(utilType.getMethod(nullable));
       if (genericType == null) {
-        sb.append(Util.shortName(paramType)).append(".class");
+        writer.append(Util.shortName(paramType)).append(".class");
       } else if (isProvider()) {
-        sb.append(providerParam()).append(".class");
+        writer.append(providerParam()).append(".class");
       } else if (forFactory) {
-        sb.append(Util.shortName(genericType.topType())).append(".class");
-        sb.append(" /* RobForFactory */ ");
+        writer.append(Util.shortName(genericType.topType())).append(".class");
+        writer.append(" /* RobForFactory */ ");
       } else {
-        sb.append("TYPE_").append(genericType.shortName());
+        writer.append("TYPE_").append(genericType.shortName());
       }
       if (named != null && !named.isEmpty()) {
-        sb.append(",\"").append(named).append("\"");
+        writer.append(",\"").append(named).append("\"");
       } else if (!isGenericParam() && utilType.allowsNamedQualifier()) {
         // implied qualifier name, leading '!' means implied
-        sb.append(",\"!");
+        writer.append(",\"!");
         final String shortName = Util.shortName(paramType);
         if (simpleName.endsWith(shortName)) {
-          sb.append(simpleName, 0, simpleName.length() - shortName.length());
+          writer.append(simpleName, 0, simpleName.length() - shortName.length());
         } else {
-          sb.append(simpleName);
+          writer.append(simpleName);
         }
-        sb.append("\"");
+        writer.append("\"");
       }
-      sb.append(")");
-      return sb;
+      writer.append(")");
     }
 
     private String providerParam() {
@@ -375,14 +373,6 @@ class MethodReader {
       } else {
         importTypes.add(paramType);
       }
-    }
-
-    void addProviderParam(Append writer, int providerIndex) {
-      this.providerIndex = providerIndex;
-      writer.append(", ");
-      writer.append("Provider<");
-      genericType.writeShort(writer);
-      writer.append("> prov%s", providerIndex);
     }
 
     void checkRequest(BeanRequestParams requestParams) {

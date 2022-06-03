@@ -131,7 +131,7 @@ class SimpleBeanWriter {
       context.logError(beanReader.getBeanType(), "Unable to determine constructor to use for %s? Add explicit @Inject to one of the constructors.", beanReader.getBeanType());
       return;
     }
-    writeBuildMethodStart(constructor);
+    writeBuildMethodStart();
     if (proxied) {
       writer.append("    // this bean is proxied, see %s$Proxy$DI instead", shortName).eol();
     } else {
@@ -161,22 +161,13 @@ class SimpleBeanWriter {
     writer.append("    }").eol();
   }
 
-  private void writeBuildMethodStart(MethodReader constructor) {
-    int providerIndex = 0;
+  private void writeBuildMethodStart() {
     if (beanReader.prototype()) {
       writer.append(CODE_COMMENT_BUILD_PROVIDER, shortName).eol();
     } else {
       writer.append(CODE_COMMENT_BUILD, shortName).eol();
     }
-    writer.append("  public static void build(%s builder", beanReader.builderType());
-    for (MethodReader methodReader : beanReader.getInjectMethods()) {
-      for (MethodReader.MethodParam param : methodReader.getParams()) {
-        if (param.isGenericParam()) {
-          param.addProviderParam(writer, providerIndex++);
-        }
-      }
-    }
-    writer.append(") {").eol();
+    writer.append("  public static void build(%s builder) {", beanReader.builderType()).eol();
   }
 
   String indent = "     ";
