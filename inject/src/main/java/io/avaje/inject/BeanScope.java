@@ -202,6 +202,11 @@ public interface BeanScope extends AutoCloseable {
   <T> List<T> list(Class<T> interfaceType);
 
   /**
+   * Return the list of beans that implement the given type.
+   */
+  <T> List<T> list(Type interfaceType);
+
+  /**
    * Return the list of beans that implement the interface sorting by priority.
    */
   <T> List<T> listByPriority(Class<T> interfaceType);

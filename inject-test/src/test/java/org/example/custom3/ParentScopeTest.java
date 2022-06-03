@@ -4,6 +4,7 @@ import io.avaje.inject.BeanScope;
 import org.example.custom2.*;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -38,6 +39,9 @@ class ParentScopeTest {
     // combined from both scopes
     final List<OciRock> allRocks = scope.list(OciRock.class);
     assertThat(allRocks).containsOnly(red, ocsOne, ocsTwo);
+
+    final List<OciRock> allRocksAsType = scope.list((Type)OciRock.class);
+    assertThat(allRocksAsType).containsOnly(red, ocsOne, ocsTwo);
 
     // combined from both scopes
     final List<Object> marked = scope.listByAnnotation(OciMarker.class);

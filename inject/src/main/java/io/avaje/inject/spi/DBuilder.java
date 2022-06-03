@@ -113,7 +113,7 @@ class DBuilder implements Builder {
     if (parent == null) {
       return values;
     }
-    return combine(values, parent.list((Class)interfaceType));
+    return combine(values, parent.list(interfaceType));
   }
 
   private <T> T getMaybe(Type type, String name) {

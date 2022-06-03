@@ -134,9 +134,18 @@ class DBeanScope implements BeanScope {
     return parent.getOptional(type, name);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> List<T> list(Class<T> interfaceType) {
+    return listOf(interfaceType);
+  }
+
+  @Override
+  public <T> List<T> list(Type interfaceType) {
+    return listOf(interfaceType);
+  }
+
+  @SuppressWarnings("unchecked")
+  private  <T> List<T> listOf(Type interfaceType) {
     List<T> values = (List<T>) beans.all(interfaceType);
     if (parent == null) {
       return values;

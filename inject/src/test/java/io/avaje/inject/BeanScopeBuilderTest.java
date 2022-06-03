@@ -273,6 +273,11 @@ class BeanScopeBuilderTest {
     }
 
     @Override
+    public <T> List<T> list(Type interfaceType) {
+      return null;
+    }
+
+    @Override
     public <T> List<T> listByPriority(Class<T> interfaceType) {
       return null;
     }
