@@ -7,9 +7,10 @@ class FieldReader {
 
   private final Element element;
   private final String name;
-  private final UtilType type;
+  private final UtilType utype;
   private final boolean nullable;
   private final String fieldType;
+  private final GenericType type;
   private boolean requestParam;
   private String requestParamName;
 
@@ -17,8 +18,19 @@ class FieldReader {
     this.element = element;
     this.name = Util.getNamed(element);
     this.nullable = Util.isNullable(element);
-    this.type = Util.determineType(element.asType());
-    this.fieldType = Util.unwrapProvider(type.rawType());
+    this.utype = Util.determineType(element.asType());
+    this.fieldType = Util.unwrapProvider(utype.rawType());
+    this.type = GenericType.parse(utype.rawType());
+  }
+
+  boolean isGenericParam() {
+    return type.isGenericType() && !type.isProviderType();
+  }
+
+  void addDependsOnGeneric(Set<GenericType> set) {
+    if (isGenericParam()) {
+      set.add(type);
+    }
   }
 
   String getFieldName() {
@@ -26,13 +38,17 @@ class FieldReader {
   }
 
   void addImports(Set<String> importTypes) {
-    importTypes.add(fieldType);
+    type.addImports(importTypes);
   }
 
   String builderGetDependency(String builder) {
     StringBuilder sb = new StringBuilder();
-    sb.append(builder).append(".").append(type.getMethod(nullable));
-    sb.append(nm(fieldType)).append(".class");
+    sb.append(builder).append(".").append(utype.getMethod(nullable));
+    if (isGenericParam()) {
+      sb.append("TYPE_").append(type.shortName());
+    } else {
+      sb.append(Util.shortName(fieldType)).append(".class");
+    }
     if (name != null) {
       sb.append(",\"").append(name).append("\"");
     }
@@ -44,9 +60,9 @@ class FieldReader {
    * Check for request scoped dependency.
    */
   void checkRequest(BeanRequestParams requestParams) {
-    requestParam = requestParams.check(type.rawType());
+    requestParam = requestParams.check(utype.rawType());
     if (requestParam) {
-      requestParamName = requestParams.argumentName(type.rawType());
+      requestParamName = requestParams.argumentName(utype.rawType());
     }
   }
 
@@ -57,9 +73,9 @@ class FieldReader {
     if (!requestParam) {
       // just add as field dependency
       requestParamName = writer.nextName(getFieldName().toLowerCase());
-      final String shortType = nm(type.rawType());
-      writer.append("  @Inject").eol();
-      writer.append("  %s %s;", shortType, requestParamName).eol().eol();
+      writer.append("  @Inject").eol().append("  ");
+      type.writeShort(writer);
+      writer.append(" %s;", requestParamName).eol().eol();
     }
   }
 
@@ -68,10 +84,6 @@ class FieldReader {
    */
   void writeRequestInject(Append writer) {
     writer.append("    bean.%s = %s;", getFieldName(), requestParamName).eol();
-  }
-
-  private String nm(String raw) {
-    return Util.shortName(raw);
   }
 
 }

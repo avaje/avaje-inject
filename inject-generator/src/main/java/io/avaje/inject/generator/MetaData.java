@@ -168,24 +168,9 @@ class MetaData {
     } else {
       sb.append("    ").append(shortType).append(Constants.DI).append(".build(builder");
     }
-
-    dependsOn.stream().map(Dependency::getName).forEach(depend-> {
-      if (GenericType.isGeneric(depend) && !Util.isProvider(depend)) {
-        // provide implementation of generic interface as a parameter to the build method
-        final MetaData providerMeta = findProviderOf(depend, ordering);
-        if (providerMeta != null) {
-          final GenericType type = GenericType.parse(depend);
-          sb.append(", ").append(providerMeta.shortType).append("$DI.provider").append(type.shortName()).append("(builder)");
-        }
-      }
-    });
     sb.append(");").append(NEWLINE);
     sb.append("  }").append(NEWLINE);
     return sb.toString();
-  }
-
-  private MetaData findProviderOf(String depend, MetaDataOrdering ordering) {
-    return ordering.findProviderOf(depend);
   }
 
   private boolean hasMethod() {

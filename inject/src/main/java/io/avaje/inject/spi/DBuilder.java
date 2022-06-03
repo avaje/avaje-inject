@@ -66,10 +66,30 @@ class DBuilder implements Builder {
     if (parent instanceof DBeanScope) {
       // effectively looking for a match in the test scope
       DBeanScope dParent = (DBeanScope) parent;
-      parentMatch = dParent.getStrict(name, types);
+      parentMatch = dParent.getStrict(name, removeAnnotations(types));
       return parentMatch == null;
     }
     return true;
+  }
+
+  /**
+   * Return the types without any annotation types.
+   * <p>
+   * For the purposes of supplied beans (typically test doubles) we are not
+   * interested in annotation types.
+   */
+  protected Type[] removeAnnotations(Type[] source) {
+    for (int i = 1, end = source.length; i < end; i++) {
+      if (isAnnotationType(source[i])) {
+        // the annotation types are always at the tail so just return leading types
+        return Arrays.copyOf(source, i);
+      }
+    }
+    return source;
+  }
+
+  private boolean isAnnotationType(Type type) {
+    return type instanceof Class && ((Class<?>) type).isAnnotation();
   }
 
   protected void next(String name, Type... types) {
@@ -82,18 +102,18 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public <T> Set<T> set(Class<T> interfaceType) {
+  public <T> Set<T> set(Type interfaceType) {
     return new LinkedHashSet<>(list(interfaceType));
   }
 
   @SuppressWarnings({"unchecked"})
   @Override
-  public <T> List<T> list(Class<T> interfaceType) {
+  public <T> List<T> list(Type interfaceType) {
     List<T> values = (List<T>) beanMap.all(interfaceType);
     if (parent == null) {
       return values;
     }
-    return combine(values, parent.list(interfaceType));
+    return combine(values, parent.list((Class)interfaceType));
   }
 
   private <T> T getMaybe(Type type, String name) {
@@ -161,33 +181,33 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public <T> Optional<T> getOptional(Class<T> cls) {
+  public <T> Optional<T> getOptional(Type cls) {
     return getOptional(cls, null);
   }
 
   @Override
-  public <T> Optional<T> getOptional(Class<T> cls, String name) {
+  public <T> Optional<T> getOptional(Type cls, String name) {
     T bean = getMaybe(cls, name);
     return Optional.ofNullable(bean);
   }
 
   @Override
-  public <T> T getNullable(Class<T> cls) {
+  public <T> T getNullable(Type cls) {
     return getNullable(cls, null);
   }
 
   @Override
-  public <T> T getNullable(Class<T> cls, String name) {
+  public <T> T getNullable(Type cls, String name) {
     return getMaybe(cls, name);
   }
 
   @Override
-  public <T> Provider<T> getProvider(Class<T> cls) {
+  public <T> Provider<T> getProvider(Type cls) {
     return getProvider(cls, null);
   }
 
   @Override
-  public <T> Provider<T> getProvider(Class<T> cls, String name) {
+  public <T> Provider<T> getProvider(Type cls, String name) {
     if (runningPostConstruct) {
       return obtainProvider(cls, name);
     }
@@ -197,7 +217,7 @@ class DBuilder implements Builder {
     return promise;
   }
 
-  <T> Provider<T> obtainProvider(Class<T> type, String name) {
+  <T> Provider<T> obtainProvider(Type type, String name) {
     Provider<T> provider = beanMap.provider(type, name);
     if (provider != null) {
       return provider;
@@ -221,12 +241,12 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public <T> T get(Class<T> cls) {
+  public <T> T get(Type cls) {
     return get(cls, null);
   }
 
   @Override
-  public <T> T get(Class<T> cls, String name) {
+  public <T> T get(Type cls, String name) {
     T bean = getMaybe(cls, name);
     if (bean == null) {
       throw new IllegalStateException(errorInjectingNull(cls, name));
@@ -234,8 +254,8 @@ class DBuilder implements Builder {
     return bean;
   }
 
-  private <T> String errorInjectingNull(Class<T> cls, String name) {
-    String msg = "Injecting null for " + cls.getName();
+  private <T> String errorInjectingNull(Type cls, String name) {
+    String msg = "Injecting null for " + cls.getTypeName();
     if (name != null) {
       msg += " name:" + name;
     }

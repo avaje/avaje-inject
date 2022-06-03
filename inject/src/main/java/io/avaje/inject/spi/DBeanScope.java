@@ -101,11 +101,9 @@ class DBeanScope implements BeanScope {
   @Nullable
   Object getStrict(String name, Type[] types) {
     for (Type type : types) {
-      if (!isAnnotationType(type)) {
-        Object match = beans.getStrict(type, name);
-        if (match != null) {
-          return match;
-        }
+      Object match = beans.getStrict(type, name);
+      if (match != null) {
+        return match;
       }
     }
     if (parent instanceof DBeanScope) {
@@ -113,10 +111,6 @@ class DBeanScope implements BeanScope {
       return dParent.getStrict(name, types);
     }
     return null;
-  }
-
-  private boolean isAnnotationType(Type type) {
-    return type instanceof Class && ((Class<?>) type).isAnnotation();
   }
 
   @Override

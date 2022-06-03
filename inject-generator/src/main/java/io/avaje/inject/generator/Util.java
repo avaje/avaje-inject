@@ -9,7 +9,7 @@ import javax.lang.model.type.TypeMirror;
 
 class Util {
 
-  private static final String PROVIDER_PREFIX = "jakarta.inject.Provider<";
+  static final String PROVIDER_PREFIX = "jakarta.inject.Provider<";
   private static final String OPTIONAL_PREFIX = "java.util.Optional<";
   private static final String NULLABLE = "Nullable";
   private static final int PROVIDER_LENGTH = PROVIDER_PREFIX.length();
@@ -99,6 +99,10 @@ class Util {
     } else {
       return fullType.substring(p + 1);
     }
+  }
+
+  static String trimmedName(GenericType type) {
+    return shortName(type.topType()).toLowerCase();
   }
 
   static boolean isOptional(String rawType) {

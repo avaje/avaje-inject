@@ -39,7 +39,7 @@ class DBuilderExtn extends DBuilder {
       return false;
     }
     if (hasSuppliedBeans) {
-      return !beanMap.isSupplied(qualifierName, types);
+      return !beanMap.isSupplied(qualifierName, removeAnnotations(types));
     }
     return true;
   }

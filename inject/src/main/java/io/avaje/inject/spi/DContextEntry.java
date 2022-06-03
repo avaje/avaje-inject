@@ -63,15 +63,15 @@ class DContextEntry {
   }
 
   /**
-   * Return true if a supplied bean is one of the entries.
+   * Return a supplied bean is one of the entries.
    */
-  boolean isSupplied(String qualifierName) {
+  DContextEntryBean supplied(String qualifierName) {
     for (DContextEntryBean entry : entries) {
       if (entry.isSupplied(qualifierName)) {
-        return true;
+        return entry;
       }
     }
-    return false;
+    return null;
   }
 
   static final class EntryMatcher {

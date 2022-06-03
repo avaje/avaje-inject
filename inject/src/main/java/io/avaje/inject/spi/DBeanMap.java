@@ -124,17 +124,29 @@ class DBeanMap {
   boolean isSupplied(String qualifierName, Type... types) {
     if (types != null) {
       for (Type type : types) {
-        if (isSuppliedType(qualifierName, type)) {
-          return true;
+        DContextEntry entry = beans.get(type.getTypeName());
+        if (entry != null) {
+          DContextEntryBean suppliedBean = entry.supplied(qualifierName);
+          if (suppliedBean != null && types.length > 1) {
+            addSuppliedFor(type, types, suppliedBean);
+            return true;
+          }
         }
       }
     }
     return false;
   }
 
-  private boolean isSuppliedType(String qualifierName, Type type) {
-    DContextEntry entry = beans.get(type.getTypeName());
-    return entry != null && entry.isSupplied(qualifierName);
+  /**
+   * Register the suppliedBean entry with other types (like other interfaces)
+   * IF those types don't already have a registered entry.
+   */
+  private void addSuppliedFor(Type matchType, Type[] types, DContextEntryBean suppliedBean) {
+    for (Type type : types) {
+      if (type != matchType) {
+        beans.computeIfAbsent(type.getTypeName(), s -> new DContextEntry()).add(suppliedBean);
+      }
+    }
   }
 
   /**

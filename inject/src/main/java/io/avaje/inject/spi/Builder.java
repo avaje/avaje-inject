@@ -100,32 +100,32 @@ public interface Builder {
   /**
    * Get an optional dependency.
    */
-  <T> Optional<T> getOptional(Class<T> cls);
+  <T> Optional<T> getOptional(Type cls);
 
   /**
    * Get an optional named dependency.
    */
-  <T> Optional<T> getOptional(Class<T> cls, String name);
+  <T> Optional<T> getOptional(Type cls, String name);
 
   /**
    * Get an optional dependency potentially returning null.
    */
-  <T> T getNullable(Class<T> cls);
+  <T> T getNullable(Type cls);
 
   /**
    * Get an optional named dependency potentially returning null.
    */
-  <T> T getNullable(Class<T> cls, String name);
+  <T> T getNullable(Type cls, String name);
 
   /**
    * Return Provider of T given the type.
    */
-  <T> Provider<T> getProvider(Class<T> cls);
+  <T> Provider<T> getProvider(Type cls);
 
   /**
    * Return Provider of T given the type and name.
    */
-  <T> Provider<T> getProvider(Class<T> cls, String name);
+  <T> Provider<T> getProvider(Type cls, String name);
 
   /**
    * Return Provider for a generic interface type.
@@ -138,22 +138,22 @@ public interface Builder {
   /**
    * Get a dependency.
    */
-  <T> T get(Class<T> cls);
+  <T> T get(Type cls);
 
   /**
    * Get a named dependency.
    */
-  <T> T get(Class<T> cls, String name);
+  <T> T get(Type cls, String name);
 
   /**
    * Get a list of dependencies for the interface type .
    */
-  <T> List<T> list(Class<T> interfaceType);
+  <T> List<T> list(Type interfaceType);
 
   /**
    * Get a set of dependencies for the interface type .
    */
-  <T> Set<T> set(Class<T> interfaceType);
+  <T> Set<T> set(Type interfaceType);
 
   /**
    * Build and return the bean scope.

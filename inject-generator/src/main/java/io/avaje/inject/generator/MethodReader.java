@@ -72,6 +72,12 @@ class MethodReader {
     }
   }
 
+  void addDependsOnGeneric(Set<GenericType> set) {
+    for (MethodParam param : params) {
+      param.addDependsOnGeneric(set);
+    }
+  }
+
   MethodReader read() {
     List<? extends VariableElement> ps = element.getParameters();
     for (VariableElement p : ps) {
@@ -110,8 +116,7 @@ class MethodReader {
     return String.format("      %s factory = builder.get(%s.class);", factoryShortName, factoryShortName);
   }
 
-  String builderBuildBean() {
-    StringBuilder sb = new StringBuilder();
+  Append builderBuildBean(Append sb) {
     sb.append("      ");
     if (isVoid) {
       sb.append(String.format("factory.%s(", methodName));
@@ -125,10 +130,10 @@ class MethodReader {
       if (i > 0) {
         sb.append(", ");
       }
-      sb.append(params.get(i).builderGetDependency("builder", true));
+      params.get(i).builderGetDependency(sb, "builder", true);
     }
     sb.append(");");
-    return sb.toString();
+    return sb;
   }
 
   public void builderAddProtoBean(Append writer) {
@@ -149,7 +154,7 @@ class MethodReader {
       if (i > 0) {
         writer.append(", ");
       }
-      writer.append(params.get(i).builderGetDependency("builder", true));
+      params.get(i).builderGetDependency(writer, "builder", true);
     }
     writer.append(");").eol();
     writer.append(indent).append("  });").eol();
@@ -283,23 +288,6 @@ class MethodReader {
     }
   }
 
-  void writeAspectBefore(Append writer, String targetName) {
-    writer.append("    // %s.%s( ... ", targetName, methodName);
-    for (int i = 0, size = params.size(); i < size; i++) {
-      if (i > 0) {
-        writer.append(", ");
-      }
-      params.get(i).writeConstructorInit(writer);
-    }
-    writer.append(");", targetName, methodName);
-    writer.eol();
-  }
-
-  void writeAspectAround(Append writer, String targetName) {
-    writer.append("    // %s %s aroundAspect", targetName, methodName);
-    writer.eol();
-  }
-
   static class MethodParam {
 
     private final String named;
@@ -321,20 +309,23 @@ class MethodReader {
       this.genericType = GenericType.maybe(paramType);
     }
 
-    String builderGetDependency(String builderName, boolean forFactory) {
-      StringBuilder sb = new StringBuilder();
-      if (!forFactory && isGenericParam()) {
-        // passed as provider to build method
-        sb.append("prov").append(providerIndex).append(".get(");
-      } else {
-        sb.append(builderName).append(".").append(utilType.getMethod(nullable));
+    void addDependsOnGeneric(Set<GenericType> set) {
+      if (genericType != null && !genericType.isProviderType()) {
+        set.add(genericType);
       }
+    }
+
+    Append builderGetDependency(Append sb, String builderName, boolean forFactory) {
+      sb.append(builderName).append(".").append(utilType.getMethod(nullable));
       if (genericType == null) {
         sb.append(Util.shortName(paramType)).append(".class");
       } else if (isProvider()) {
         sb.append(providerParam()).append(".class");
       } else if (forFactory) {
         sb.append(Util.shortName(genericType.topType())).append(".class");
+        sb.append(" /* RobForFactory */ ");
+      } else {
+        sb.append("TYPE_").append(genericType.shortName());
       }
       if (named != null && !named.isEmpty()) {
         sb.append(",\"").append(named).append("\"");
@@ -350,7 +341,7 @@ class MethodReader {
         sb.append("\"");
       }
       sb.append(")");
-      return sb.toString();
+      return sb;
     }
 
     private String providerParam() {
@@ -403,19 +394,17 @@ class MethodReader {
 
     void writeRequestDependency(Append writer) {
       if (!requestParam) {
-        final String shortType = nm(paramType);
-        requestParamName = writer.nextName(shortType.toLowerCase());
+        GenericType type = GenericType.parse(paramType);
+        requestParamName = writer.nextName(Util.trimmedName(type));
         writer.append("  @Inject").eol();
-        writer.append("  %s %s;", shortType, requestParamName).eol().eol();
+        writer.append("  ");
+        type.writeShort(writer);
+        writer.append(" %s;", requestParamName).eol().eol();
       }
     }
 
     void writeRequestConstructor(Append writer) {
       writer.commaAppend(requestParamName);
-    }
-
-    private String nm(String raw) {
-      return Util.shortName(raw);
     }
 
     void writeMethodParam(Append writer) {

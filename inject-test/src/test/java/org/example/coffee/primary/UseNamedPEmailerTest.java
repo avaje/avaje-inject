@@ -12,6 +12,6 @@ class UseNamedPEmailerTest {
     UseNamedPEmailer bean = ApplicationScope.get(UseNamedPEmailer.class);
     assertThat(bean.emailNamed()).isEqualTo("other");
     assertThat(bean.emailOther()).isEqualTo("other");
-    assertThat(bean.emailOtherPEmailer()).isEqualTo("other");
+    assertThat(bean.emailOtherPEmailer()).isEqualTo("primary");
   }
 }

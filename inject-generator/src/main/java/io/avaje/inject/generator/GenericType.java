@@ -77,6 +77,14 @@ class GenericType {
     return raw != null ? raw : mainType + '<' + params + '>';
   }
 
+  boolean isGenericType() {
+    return !params.isEmpty();
+  }
+
+  boolean isProviderType() {
+    return raw.startsWith(Util.PROVIDER_PREFIX);
+  }
+
   /**
    * Return true if the type contains a type parameter like {@code <T>}.
    */
@@ -110,10 +118,8 @@ class GenericType {
    * Append the short version of the type (given the type and parameters are in imports).
    */
   void writeShort(Append writer) {
-
     String main = Util.shortName(trimExtends());
     writer.append(main);
-
     final int paramCount = params.size();
     if (paramCount > 0) {
       writer.append("<");

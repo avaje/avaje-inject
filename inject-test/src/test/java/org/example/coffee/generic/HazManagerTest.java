@@ -8,10 +8,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
-public class HazManagerTest {
+class HazManagerTest {
 
   @Test
-  public void find_when_allWired() {
+  void find_when_allWired() {
     HazManager hazManager = ApplicationScope.get(HazManager.class);
     Haz haz = hazManager.find(42L);
 
@@ -19,7 +19,7 @@ public class HazManagerTest {
   }
 
   @Test
-  public void find_with_mockHaz() {
+  void find_with_mockHaz() {
     try (BeanScope context = BeanScope.builder()
       .forTesting()
       .mock(HazRepo.class)
@@ -33,7 +33,7 @@ public class HazManagerTest {
   }
 
   @Test
-  public void find_with_stubHazUsingMockito() {
+  void find_with_stubHazUsingMockito() {
     try (BeanScope context = BeanScope.builder()
       .forTesting()
       .mock(HazRepo.class, hazRepo -> {
@@ -49,7 +49,7 @@ public class HazManagerTest {
   }
 
   @Test
-  public void withBean_usingGenericType() {
+  void withBean_usingGenericType() {
     TDFoo testDouble = new TDFoo();
 
     try (BeanScope context = BeanScope.builder()
@@ -64,7 +64,7 @@ public class HazManagerTest {
   }
 
   @Test
-  public void find_with_testDouble() {
+  void find_with_testDouble() {
     TDHazRepo testDouble = new TDHazRepo();
 
     try (BeanScope context = BeanScope.builder()
@@ -83,7 +83,6 @@ public class HazManagerTest {
       testDouble.id = 128L;
       haz = hazManager.find(42L);
       assertThat(haz.id).isEqualTo(128L);
-
     }
   }
 

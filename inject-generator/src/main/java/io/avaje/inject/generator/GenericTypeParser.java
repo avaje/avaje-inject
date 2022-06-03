@@ -2,12 +2,10 @@ package io.avaje.inject.generator;
 
 import java.util.Stack;
 
-class GenericTypeParser {
+final class GenericTypeParser {
 
   private final String raw;
-
   private StringBuilder buf = new StringBuilder();
-
   private final Stack<GenericType> stack = new Stack<>();
 
   GenericTypeParser(String raw) {
@@ -16,12 +14,9 @@ class GenericTypeParser {
   }
 
   GenericType parse() {
-    int len = raw.length();
-    for (int i = 0; i < len; i++) {
-      char ch = raw.charAt(i);
-      processChar(ch);
+    for (int i = 0, len = raw.length(); i < len; i++) {
+      processChar(raw.charAt(i));
     }
-
     return stack.peek();
   }
 

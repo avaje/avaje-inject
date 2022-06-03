@@ -34,6 +34,7 @@ class BeanReader {
   private boolean writtenToFile;
   private boolean suppressBuilderImport;
   private boolean suppressGeneratedImport;
+  private Set<GenericType> allGenericTypes;
 
   BeanReader(TypeElement beanType, ProcessingContext context, boolean factory) {
     this.beanType = beanType;
@@ -79,13 +80,13 @@ class BeanReader {
       constructor.addImports(importTypes);
       constructor.checkRequest(requestParams);
     }
-    for (FieldReader fields : injectFields) {
-      fields.addImports(importTypes);
-      fields.checkRequest(requestParams);
+    for (FieldReader field : injectFields) {
+      field.addImports(importTypes);
+      field.checkRequest(requestParams);
     }
-    for (MethodReader methods : injectMethods) {
-      methods.addImports(importTypes);
-      methods.checkRequest(requestParams);
+    for (MethodReader method : injectMethods) {
+      method.addImports(importTypes);
+      method.checkRequest(requestParams);
     }
     for (MethodReader factoryMethod : factoryMethods) {
       factoryMethod.addImports(importTypes);
@@ -113,6 +114,26 @@ class BeanReader {
 
   Set<GenericType> getGenericTypes() {
     return typeReader.getGenericTypes();
+  }
+
+  Set<GenericType> allGenericTypes() {
+    if (allGenericTypes != null) {
+      return allGenericTypes;
+    }
+    allGenericTypes = new LinkedHashSet<>(typeReader.getGenericTypes());
+    for (FieldReader field : injectFields) {
+      field.addDependsOnGeneric(allGenericTypes);
+    }
+    for (MethodReader method : injectMethods) {
+      method.addDependsOnGeneric(allGenericTypes);
+    }
+    if (constructor != null) {
+      constructor.addDependsOnGeneric(allGenericTypes);
+    }
+    for (MethodReader factoryMethod : getFactoryMethods()) {
+      allGenericTypes.addAll(factoryMethod.getGenericTypes());
+    }
+    return allGenericTypes;
   }
 
   /**
@@ -259,6 +280,10 @@ class BeanReader {
   }
 
   void writeImports(Append writer) {
+    if (!allGenericTypes().isEmpty()) {
+      importTypes.add(Constants.TYPE);
+      importTypes.add(Constants.GENERICTYPE);
+    }
     for (String importType : importTypes()) {
       if (Util.validImportType(importType)) {
         writer.append("import %s;", importType).eol();

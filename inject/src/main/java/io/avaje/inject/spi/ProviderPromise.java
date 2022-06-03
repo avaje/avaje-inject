@@ -1,6 +1,8 @@
 package io.avaje.inject.spi;
 
 import jakarta.inject.Provider;
+
+import java.lang.reflect.Type;
 import java.util.function.Consumer;
 
 /**
@@ -8,12 +10,12 @@ import java.util.function.Consumer;
  */
 final class ProviderPromise<T> implements Provider<T>, Consumer<Builder> {
 
-  private final Class<T> type;
+  private final Type type;
   private final String name;
   private final DBuilder builder;
   private Provider<T> provider;
 
-  ProviderPromise(Class<T> type, String name, DBuilder builder) {
+  ProviderPromise(Type type, String name, DBuilder builder) {
     this.type = type;
     this.name = name;
     this.builder = builder;

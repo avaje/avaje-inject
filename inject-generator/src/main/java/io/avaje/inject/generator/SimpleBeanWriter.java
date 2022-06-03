@@ -4,7 +4,6 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -86,13 +85,7 @@ class SimpleBeanWriter {
 
   private void writeGenericTypeFields() {
     // collect all types to prevent duplicates
-    Set<GenericType> genericTypes = new HashSet<>();
-    if (beanReader.getGenericTypes()!=null) {
-      genericTypes.addAll(beanReader.getGenericTypes());
-    }
-    for (MethodReader factoryMethod : beanReader.getFactoryMethods()) {
-      genericTypes.addAll(factoryMethod.getGenericTypes());
-    }
+    Set<GenericType> genericTypes = beanReader.allGenericTypes();
     if (!genericTypes.isEmpty()) {
       for (GenericType type : genericTypes) {
         writer.append("  public static final Type TYPE_%s = new GenericType<", type.shortName());
@@ -125,7 +118,7 @@ class SimpleBeanWriter {
     if (method.isProtoType()) {
       method.builderAddProtoBean(writer);
     } else {
-      writer.append(method.builderBuildBean()).eol();
+      method.builderBuildBean(writer).eol();
       method.builderBuildAddBean(writer);
       writer.append("    }").eol();
     }
@@ -176,11 +169,6 @@ class SimpleBeanWriter {
       writer.append(CODE_COMMENT_BUILD, shortName).eol();
     }
     writer.append("  public static void build(%s builder", beanReader.builderType());
-    for (MethodReader.MethodParam param : constructor.getParams()) {
-      if (param.isGenericParam()) {
-        param.addProviderParam(writer, providerIndex++);
-      }
-    }
     for (MethodReader methodReader : beanReader.getInjectMethods()) {
       for (MethodReader.MethodParam param : methodReader.getParams()) {
         if (param.isGenericParam()) {
@@ -235,7 +223,7 @@ class SimpleBeanWriter {
       if (i > 0) {
         writer.append(", ");
       }
-      writer.append(methodParams.get(i).builderGetDependency(builderRef, false));
+      methodParams.get(i).builderGetDependency(writer, builderRef, false);
     }
     writer.append(");").eol();
   }
