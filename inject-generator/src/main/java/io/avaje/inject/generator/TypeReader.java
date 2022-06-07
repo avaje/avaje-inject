@@ -104,8 +104,7 @@ class TypeReader {
   private void initRegistrationTypes() {
     TypeAppender appender = new TypeAppender(importTypes);
     appender.add(extendsReader.getBaseType());
-    appender.add(extendsReader.getExtendsTypes());
-    appender.add(extendsReader.getInterfaceTypes());
+    appender.add(extendsReader.getProvides());
     if (forBean) {
       appender.add(annotationReader.getAnnotationTypes());
     }

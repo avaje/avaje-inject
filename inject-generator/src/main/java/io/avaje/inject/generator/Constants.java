@@ -6,6 +6,7 @@ class Constants {
 
   static final String FACTORY = "$Factory";
   static final String DI = "$DI";
+  static final String OBJECT = "java.lang.Object";
   static final String IO_CLOSEABLE = "java.io.Closeable";
   static final String AUTO_CLOSEABLE = "java.lang.AutoCloseable";
   static final String OPTIONAL = "java.util.Optional";

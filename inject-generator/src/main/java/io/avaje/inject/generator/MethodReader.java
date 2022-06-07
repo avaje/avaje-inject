@@ -72,6 +72,14 @@ class MethodReader {
     }
   }
 
+  @Override
+  public String toString() {
+    return "MethodReader{" +
+      "element=" + element +
+      ", params=" + params +
+      '}';
+  }
+
   void addDependsOnGeneric(Set<GenericType> set) {
     for (MethodParam param : params) {
       param.addDependsOnGeneric(set);
@@ -293,6 +301,12 @@ class MethodReader {
     }
   }
 
+  void removeFromProvides(List<String> provides) {
+    for (MethodParam param : params) {
+      param.removeFromProvides(provides);
+    }
+  }
+
   static class MethodParam {
 
     private final String named;
@@ -311,6 +325,13 @@ class MethodReader {
       this.utilType = Util.determineType(param.asType());
       this.paramType = utilType.rawType();
       this.genericType = GenericType.parse(paramType);
+    }
+
+    @Override
+    public String toString() {
+      return "MethodParam{" +
+        "genericType=" + genericType +
+        '}';
     }
 
     void addDependsOnGeneric(Set<GenericType> set) {
@@ -413,6 +434,10 @@ class MethodReader {
 
     void writeConstructorInit(Append writer) {
       writer.append(simpleName);
+    }
+
+    void removeFromProvides(List<String> provides) {
+      provides.remove(genericType.toString());
     }
   }
 }

@@ -1,4 +1,4 @@
-package org.example.request;
+package org.example.generic;
 
 import io.avaje.inject.Component;
 

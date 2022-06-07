@@ -115,6 +115,10 @@ class ProcessingContext {
     return elementUtils.getTypeElement(rawType);
   }
 
+  Types types() {
+    return typeUtils;
+  }
+
   TypeElement elementMaybe(String rawType) {
     if (rawType == null) {
       return null;

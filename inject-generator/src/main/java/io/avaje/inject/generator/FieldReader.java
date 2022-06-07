@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import javax.lang.model.element.Element;
+import java.util.List;
 import java.util.Set;
 
 class FieldReader {
@@ -54,6 +55,10 @@ class FieldReader {
     }
     sb.append(")");
     return sb.toString();
+  }
+
+  void removeFromProvides(List<String> provides) {
+    provides.remove(type.toString());
   }
 
   /**

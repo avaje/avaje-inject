@@ -3,6 +3,8 @@ package org.example.request;
 import io.avaje.http.api.Controller;
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
+import org.example.generic.MyObj;
+import org.example.generic.ReadService;
 
 /**
  * Controller with request scoped dependencies and generic parameter.
@@ -10,7 +12,7 @@ import io.helidon.webserver.ServerResponse;
 @Controller
 public class CController {
 
-  final ReadService<MyObj, Integer>  readService;
+  final ReadService<MyObj, Integer> readService;
   final ServerRequest request;
   final ServerResponse response;
 

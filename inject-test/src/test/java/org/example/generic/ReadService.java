@@ -1,4 +1,4 @@
-package org.example.request;
+package org.example.generic;
 
 import java.util.Optional;
 

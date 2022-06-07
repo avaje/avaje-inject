@@ -156,6 +156,19 @@ class TypeExtendsInjection {
     return aspectMethods.isEmpty() ? BeanAspects.EMPTY : new BeanAspects(aspectMethods);
   }
 
+  void removeFromProvides(List<String> provides) {
+    MethodReader constructor = getConstructor();
+    if (constructor != null) {
+      constructor.removeFromProvides(provides);
+    }
+    for (FieldReader injectField : injectFields) {
+      injectField.removeFromProvides(provides);
+    }
+    for (MethodReader injectMethod : injectMethods.values()) {
+      injectMethod.removeFromProvides(provides);
+    }
+  }
+
   List<FieldReader> getInjectFields() {
     List<FieldReader> list = new ArrayList<>(injectFields);
     Collections.reverse(list);
