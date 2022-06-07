@@ -18,19 +18,19 @@ class TypeReader {
   private Set<GenericType> genericTypes;
   private String typesRegister;
 
-  TypeReader(TypeElement beanType, ProcessingContext context, Set<String> importTypes, boolean factory) {
-    this(true, beanType, context, importTypes, factory);
+  TypeReader(GenericType genericType, TypeElement beanType, ProcessingContext context, Set<String> importTypes, boolean factory) {
+    this(genericType, true, beanType, context, importTypes, factory);
   }
 
-  TypeReader(TypeElement returnElement, ProcessingContext context) {
-    this(false, returnElement, context, new LinkedHashSet<>(), false);
+  TypeReader(GenericType genericType, TypeElement returnElement, ProcessingContext context) {
+    this(genericType, false, returnElement, context, new LinkedHashSet<>(), false);
   }
 
-  private TypeReader(boolean forBean, TypeElement beanType, ProcessingContext context, Set<String> importTypes, boolean factory) {
+  private TypeReader(GenericType genericType, boolean forBean, TypeElement beanType, ProcessingContext context, Set<String> importTypes, boolean factory) {
     this.forBean = forBean;
     this.beanType = beanType;
     this.importTypes = importTypes;
-    this.extendsReader = new TypeExtendsReader(beanType, context, factory);
+    this.extendsReader = new TypeExtendsReader(genericType, beanType, context, factory);
     this.annotationReader = new TypeAnnotationReader(beanType, context);
   }
 

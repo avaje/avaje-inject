@@ -60,27 +60,11 @@ class SimpleBeanWriter {
       writeRequestCreate();
     } else {
       writeGenericTypeFields();
-      writeGenericProviders();
       writeStaticFactoryMethod();
       writeStaticFactoryBeanMethods();
     }
     writeClassEnd();
     writer.close();
-  }
-
-  private void writeGenericProviders() {
-    final Set<GenericType> genericTypes = beanReader.getGenericTypes();
-    if (genericTypes != null && !genericTypes.isEmpty()) {
-      for (GenericType type : genericTypes) {
-        final String sn = type.shortName();
-        writer.append("  public static Provider<");
-        type.writeShort(writer);
-        writer.append("> provider%s(Builder builder) {", sn).eol();
-        writer.append("    return builder.getProviderFor(%s.class, TYPE_%s);", shortName, sn).eol();
-        writer.append("  }").eol();
-      }
-      writer.eol();
-    }
   }
 
   private void writeGenericTypeFields() {
@@ -118,7 +102,7 @@ class SimpleBeanWriter {
     if (method.isProtoType()) {
       method.builderAddProtoBean(writer);
     } else {
-      method.builderBuildBean(writer).eol();
+      method.builderBuildBean(writer);
       method.builderBuildAddBean(writer);
       writer.append("    }").eol();
     }

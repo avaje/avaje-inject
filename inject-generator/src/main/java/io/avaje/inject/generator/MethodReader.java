@@ -58,13 +58,13 @@ class MethodReader {
     String initMethod = (bean == null) ? null : bean.initMethod();
     String destroyMethod = (bean == null) ? null : bean.destroyMethod();
     this.name = (named == null) ? null : named.value().toLowerCase();
-    TypeElement returnElement = context.element(topType);
+    TypeElement returnElement = (TypeElement)context.asElement(returnMirror);
     if (returnElement == null) {
       this.typeReader = null;
       this.initMethod = initMethod;
       this.destroyMethod = destroyMethod;
     } else {
-      this.typeReader = new TypeReader(returnElement, context);
+      this.typeReader = new TypeReader(genericType, returnElement, context);
       typeReader.process();
       MethodLifecycleReader lifecycleReader = new MethodLifecycleReader(returnElement, initMethod, destroyMethod);
       this.initMethod = lifecycleReader.initMethod();
@@ -75,6 +75,12 @@ class MethodReader {
   void addDependsOnGeneric(Set<GenericType> set) {
     for (MethodParam param : params) {
       param.addDependsOnGeneric(set);
+    }
+    if (genericType.isGenericType()) {
+      set.add(genericType);
+    }
+    if (typeReader != null) {
+      set.addAll(typeReader.getGenericTypes());
     }
   }
 
@@ -116,24 +122,23 @@ class MethodReader {
     return String.format("      %s factory = builder.get(%s.class);", factoryShortName, factoryShortName);
   }
 
-  Append builderBuildBean(Append sb) {
-    sb.append("      ");
+  void builderBuildBean(Append writer) {
+    writer.append("      ");
     if (isVoid) {
-      sb.append(String.format("factory.%s(", methodName));
+      writer.append(String.format("factory.%s(", methodName));
     } else {
       String beanType = optionalType ? String.format("Optional<%s>", shortName) : shortName;
       String beanName = optionalType ? "optionalBean" : "bean";
-      sb.append(beanType);
-      sb.append(String.format(" %s = factory.%s(", beanName, methodName));
+      writer.append(beanType);
+      writer.append(String.format(" %s = factory.%s(", beanName, methodName));
     }
     for (int i = 0; i < params.size(); i++) {
       if (i > 0) {
-        sb.append(", ");
+        writer.append(", ");
       }
-      params.get(i).builderGetDependency(sb, "builder", true);
+      params.get(i).builderGetDependency(writer, "builder", true);
     }
-    sb.append(");");
-    return sb;
+    writer.append(");").eol();
   }
 
   public void builderAddProtoBean(Append writer) {
@@ -320,9 +325,6 @@ class MethodReader {
         writer.append(Util.shortName(paramType)).append(".class");
       } else if (isProvider()) {
         writer.append(providerParam()).append(".class");
-      } else if (forFactory) {
-        writer.append(Util.shortName(genericType.topType())).append(".class");
-        writer.append(" /* RobForFactory */ ");
       } else {
         writer.append("TYPE_").append(genericType.shortName());
       }

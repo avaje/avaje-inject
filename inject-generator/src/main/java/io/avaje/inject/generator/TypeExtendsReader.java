@@ -13,28 +13,31 @@ import java.util.List;
 class TypeExtendsReader {
 
   private static final String JAVA_LANG_OBJECT = "java.lang.Object";
+  private final GenericType baseGenericType;
   private final TypeElement baseType;
   private final ProcessingContext context;
   private final List<String> extendsTypes = new ArrayList<>();
   private final TypeExtendsInjection extendsInjection;
   private final List<String> interfaceTypes = new ArrayList<>();
   private final String beanSimpleName;
+  private final String baseTypeRaw;
   private boolean closeable;
   /**
    * The implied qualifier name based on naming convention.
    */
   private String qualifierName;
-  private String baseTypeRaw;
 
-  TypeExtendsReader(TypeElement baseType, ProcessingContext context, boolean factory) {
+  TypeExtendsReader(GenericType baseGenericType, TypeElement baseType, ProcessingContext context, boolean factory) {
+    this.baseGenericType = baseGenericType;
     this.baseType = baseType;
     this.context = context;
     this.extendsInjection = new TypeExtendsInjection(baseType, context, factory);
     this.beanSimpleName = baseType.getSimpleName().toString();
+    this.baseTypeRaw = Util.unwrapProvider(baseGenericType.toString());
   }
 
-  String getBaseType() {
-    return baseTypeRaw;
+  GenericType getBaseType() {
+    return baseGenericType;
   }
 
   List<String> getExtendsTypes() {
@@ -90,13 +93,9 @@ class TypeExtendsReader {
   }
 
   void process(boolean forBean) {
-    String base = Util.unwrapProvider(baseType.getQualifiedName().toString());
-    if (!GenericType.isGeneric(base)) {
-      baseTypeRaw = base;
-      extendsTypes.add(base);
-      if (forBean) {
-        extendsInjection.read(baseType);
-      }
+    extendsTypes.add(baseTypeRaw);
+    if (forBean) {
+      extendsInjection.read(baseType);
     }
     readInterfaces(baseType);
     TypeElement superElement = superOf(baseType);
@@ -117,13 +116,11 @@ class TypeExtendsReader {
     String fullName = element.getQualifiedName().toString();
     if (!fullName.equals(JAVA_LANG_OBJECT)) {
       String type = Util.unwrapProvider(fullName);
-      if (!GenericType.isGeneric(type)) {
-        if (isPublic(element)) {
-          extendsTypes.add(type);
-          extendsInjection.read(element);
-        }
-        addSuperType(superOf(element));
+      if (isPublic(element)) {
+        extendsTypes.add(type);
+        extendsInjection.read(element);
       }
+      addSuperType(superOf(element));
     }
   }
 
@@ -141,16 +138,16 @@ class TypeExtendsReader {
         } else if (Constants.AUTO_CLOSEABLE.equals(rawType) || Constants.IO_CLOSEABLE.equals(rawType)) {
           closeable = true;
         } else {
-          rawType = GenericType.removeParameter(rawType);
+          String mainType = GenericType.removeParameter(rawType);
           if (qualifierName == null) {
-            final String iShortName = Util.shortName(rawType);
+            final String iShortName = Util.shortName(mainType);
             if (beanSimpleName.endsWith(iShortName)) {
               // derived qualifier name based on prefix to interface short name
               qualifierName = beanSimpleName.substring(0, beanSimpleName.length() - iShortName.length()).toLowerCase();
             }
           }
           interfaceTypes.add(rawType);
-          readExtendedInterfaces(rawType);
+          readExtendedInterfaces(mainType);
         }
       }
     }

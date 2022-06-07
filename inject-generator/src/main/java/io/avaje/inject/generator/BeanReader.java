@@ -44,8 +44,7 @@ class BeanReader {
     this.primary = (beanType.getAnnotation(Primary.class) != null);
     this.secondary = !primary && (beanType.getAnnotation(Secondary.class) != null);
     this.proxy = (beanType.getAnnotation(Proxy.class) != null);
-    this.typeReader = new TypeReader(beanType, context, importTypes, factory);
-
+    this.typeReader = new TypeReader(GenericType.parse(type), beanType, context, importTypes, factory);
     typeReader.process();
     this.requestParams = new BeanRequestParams(type);
     this.name = typeReader.getName();
@@ -131,7 +130,7 @@ class BeanReader {
       constructor.addDependsOnGeneric(allGenericTypes);
     }
     for (MethodReader factoryMethod : getFactoryMethods()) {
-      allGenericTypes.addAll(factoryMethod.getGenericTypes());
+      factoryMethod.addDependsOnGeneric(allGenericTypes);
     }
     return allGenericTypes;
   }

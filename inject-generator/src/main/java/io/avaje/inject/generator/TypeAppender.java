@@ -17,19 +17,32 @@ class TypeAppender {
     this.importTypes = importTypes;
   }
 
-  void add(String classType) {
+  void add(GenericType type) {
+    if (type.isGenericType()) {
+      addGenericType(type);
+    } else {
+      addSimpleType(type.topType());
+    }
+  }
+
+  void add(List<String> sourceTypes) {
+    for (String type : sourceTypes) {
+      if (GenericType.isGeneric(type)) {
+        addGenericType(GenericType.parse(type));
+      } else {
+        addSimpleType(type);
+      }
+    }
+  }
+
+  void addSimpleType(String classType) {
     importTypes.add(classType);
     types.add(Util.shortName(classType) + ".class");
   }
 
-  void add(List<String> types) {
-    for (String type : types) {
-      if (GenericType.isGeneric(type)) {
-        genericTypes.add(GenericType.parse(type));
-      } else {
-        add(type);
-      }
-    }
+  private void addGenericType(GenericType genericType) {
+    genericTypes.add(genericType);
+    types.add("TYPE_" + genericType.shortName());
   }
 
   Set<GenericType> genericTypes() {
@@ -37,12 +50,6 @@ class TypeAppender {
   }
 
   String asString() {
-    if (!genericTypes.isEmpty()) {
-      for (GenericType genericType : genericTypes) {
-        types.add("TYPE_" + genericType.shortName());
-      }
-    }
-
     int count = 0;
     final StringBuilder sb = new StringBuilder();
     for (String type : types) {
