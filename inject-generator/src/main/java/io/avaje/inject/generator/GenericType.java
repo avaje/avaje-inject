@@ -82,12 +82,6 @@ class GenericType {
     return type.topType();
   }
 
-  /**
-   * Parse and return as GenericType or null if it is not generic.
-   */
-  static GenericType maybe(String paramType) {
-    return isGeneric(paramType) ? parse(paramType) : null;
-  }
 
   @Override
   public String toString() {

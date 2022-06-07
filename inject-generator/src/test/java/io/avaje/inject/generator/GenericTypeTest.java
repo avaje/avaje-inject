@@ -39,11 +39,6 @@ class GenericTypeTest {
     assertTrue(GenericType.isGeneric("java.lang.List<org.Foo>"));
   }
 
-  @Test
-  void maybe() {
-    assertThat(GenericType.maybe("java.lang.List<Foo>").topType()).isEqualTo("java.lang.List");
-    assertThat(GenericType.maybe("java.lang.List")).isNull();
-  }
 
   @Test
   void parse() {

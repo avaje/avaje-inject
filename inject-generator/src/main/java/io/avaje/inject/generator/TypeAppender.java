@@ -27,10 +27,11 @@ class TypeAppender {
 
   void add(List<String> sourceTypes) {
     for (String type : sourceTypes) {
-      if (GenericType.isGeneric(type)) {
-        addGenericType(GenericType.parse(type));
+      GenericType genericType = GenericType.parse(type);
+      if (genericType.isGenericType()) {
+        addGenericType(genericType);
       } else {
-        addSimpleType(type);
+        addSimpleType(genericType.topType());
       }
     }
   }

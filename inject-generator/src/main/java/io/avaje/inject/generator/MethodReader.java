@@ -310,19 +310,19 @@ class MethodReader {
       this.nullable = Util.isNullable(param);
       this.utilType = Util.determineType(param.asType());
       this.paramType = utilType.rawType();
-      this.genericType = GenericType.maybe(paramType);
+      this.genericType = GenericType.parse(paramType);
     }
 
     void addDependsOnGeneric(Set<GenericType> set) {
-      if (genericType != null && !genericType.isProviderType()) {
+      if (genericType.isGenericType() && !genericType.isProviderType()) {
         set.add(genericType);
       }
     }
 
     void builderGetDependency(Append writer, String builderName, boolean forFactory) {
       writer.append(builderName).append(".").append(utilType.getMethod(nullable));
-      if (genericType == null) {
-        writer.append(Util.shortName(paramType)).append(".class");
+      if (!genericType.isGenericType()) {
+        writer.append(Util.shortName(genericType.topType())).append(".class");
       } else if (isProvider()) {
         writer.append(providerParam()).append(".class");
       } else {
@@ -357,7 +357,7 @@ class MethodReader {
     }
 
     boolean isGenericType() {
-      return genericType != null;
+      return genericType.isGenericType();
     }
 
     boolean isGenericParam() {
@@ -369,11 +369,11 @@ class MethodReader {
     }
 
     void addImports(Set<String> importTypes) {
-      if (genericType != null) {
+      if (genericType.isGenericType()) {
         importTypes.add(Constants.PROVIDER);
         genericType.addImports(importTypes);
       } else {
-        importTypes.add(paramType);
+        genericType.addImports(importTypes);
       }
     }
 
@@ -386,11 +386,10 @@ class MethodReader {
 
     void writeRequestDependency(Append writer) {
       if (!requestParam) {
-        GenericType type = GenericType.parse(paramType);
-        requestParamName = writer.nextName(Util.trimmedName(type));
+        requestParamName = writer.nextName(Util.trimmedName(genericType));
         writer.append("  @Inject").eol();
         writer.append("  ");
-        type.writeShort(writer);
+        genericType.writeShort(writer);
         writer.append(" %s;", requestParamName).eol().eol();
       }
     }
@@ -400,21 +399,16 @@ class MethodReader {
     }
 
     void writeMethodParam(Append writer) {
-      if (genericType != null) {
+      if (genericType.isGenericType()) {
         genericType.writeShort(writer);
       } else {
-        writer.append(Util.shortName(paramType));
+        writer.append(Util.shortName(genericType.topType()));
       }
       writer.append(" ").append(simpleName);
     }
 
     void writeMethodParamType(Append writer) {
-      if (genericType != null) {
-        // for getDeclaredMethod only need top level main type
-        writer.append(genericType.getMainType());
-      } else {
-        writer.append(Util.shortName(paramType));
-      }
+      writer.append(Util.shortName(genericType.topType()));
     }
 
     void writeConstructorInit(Append writer) {
