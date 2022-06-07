@@ -13,15 +13,35 @@ import static org.junit.jupiter.api.Assertions.*;
 class GenericTypeTest {
 
   @Test
+  void equals() {
+    GenericType t0 = GenericType.parse("java.lang.List");
+    GenericType t1 = GenericType.parse("java.lang.List");
+    assertThat(t0).isEqualTo(t1);
+
+    GenericType t2 = GenericType.parse("java.lang.List<?>");
+    assertThat(t0).isEqualTo(t2);
+    GenericType t3 = GenericType.parse("java.lang.List<T>");
+    assertThat(t0).isEqualTo(t3);
+
+    Set<GenericType> set = new LinkedHashSet<>();
+    set.add(t0);
+    set.add(t1);
+    set.add(t2);
+    set.add(t3);
+    assertThat(set).hasSize(1);
+  }
+
+  @Test
   void isGeneric() {
     assertFalse(GenericType.isGeneric("java.lang.List"));
     assertTrue(GenericType.isGeneric("java.lang.List<Foo>"));
     assertTrue(GenericType.isGeneric("java.lang.List<?>"));
+    assertTrue(GenericType.isGeneric("java.lang.List<org.Foo>"));
   }
 
   @Test
   void maybe() {
-    assertThat(GenericType.maybe("java.lang.List<Foo>").getMainType()).isEqualTo("java.lang.List");
+    assertThat(GenericType.maybe("java.lang.List<Foo>").topType()).isEqualTo("java.lang.List");
     assertThat(GenericType.maybe("java.lang.List")).isNull();
   }
 
@@ -61,7 +81,20 @@ class GenericTypeTest {
 
   @Test
   void parse_genericWildcard() {
-    GenericType type = GenericType.parse("my.exa.Repo<?>");
+    assertsForRepo(GenericType.parse("my.exa.Repo<?>"));
+  }
+
+  @Test
+  void parse_genericTypeParam() {
+    assertsForRepo(GenericType.parse("my.exa.Repo<Something>"));
+  }
+
+  @Test
+  void parse_genericTypeParams() {
+    assertsForRepo(GenericType.parse("my.exa.Repo<Something,T,X>"));
+  }
+
+  private void assertsForRepo(GenericType type) {
     assertThat(type.shortName()).isEqualTo("Repo");
     assertThat(type.topType()).isEqualTo("my.exa.Repo");
     assertThat(type.getMainType()).isNull();
@@ -147,16 +180,12 @@ class GenericTypeTest {
 
   @Test
   void shortName() {
-    assertThat(GenericType.parse("java.lang.List<Foo>").shortName()).isEqualTo("ListFoo");
+    assertThat(GenericType.parse("java.lang.List<T>").shortName()).isEqualTo("List");
+    assertThat(GenericType.parse("java.lang.List<Foo>").shortName()).isEqualTo("List");
+    assertThat(GenericType.parse("java.lang.List<FOO>").shortName()).isEqualTo("List");
     assertThat(GenericType.parse("java.lang.List<org.Foo<com.Bar>>").shortName()).isEqualTo("ListFooBar");
   }
 
-  @Test
-  void hasParameter() {
-    assertThat(GenericType.parse("java.lang.List<T>").hasParameter()).isTrue();
-    assertThat(GenericType.parse("java.lang.List<org.Foo<TYPE>").hasParameter()).isTrue();
-    assertThat(GenericType.parse("java.lang.List<org.Foo<com.Bar>>").hasParameter()).isFalse();
-  }
 
   @Test
   void removeParameter() {
@@ -164,7 +193,7 @@ class GenericTypeTest {
     assertThat(GenericType.removeParameter("java.lang.List<org.Foo<T>>")).isEqualTo("java.lang.List");
     assertThat(GenericType.removeParameter("java.lang.List<org.Foo<TYPE>>")).isEqualTo("java.lang.List");
     assertThat(GenericType.removeParameter("face.FaceParam<T>")).isEqualTo("face.FaceParam");
-    assertThat(GenericType.removeParameter("java.lang.List<org.Foo<com.Bar>>")).isEqualTo("java.lang.List<org.Foo<com.Bar>>");
+    assertThat(GenericType.removeParameter("java.lang.List<org.Foo<com.Bar>>")).isEqualTo("java.lang.List");
   }
 
   @Test
@@ -172,6 +201,16 @@ class GenericTypeTest {
     assertEquals("my.exa.Repo", GenericType.trimWildcard("my.exa.Repo<?>"));
     assertEquals("my.exa.Repo", GenericType.trimWildcard("my.exa.Repo"));
     assertEquals("my.exa.Repo<my.Other>", GenericType.trimWildcard("my.exa.Repo<my.Other>"));
+  }
+
+  @Test
+  void trimGenericParams() {
+    assertEquals("my.exa.Repo", GenericType.trimGenericParams("my.exa.Repo<?>"));
+    assertEquals("my.exa.Repo", GenericType.trimWildcard("my.exa.Repo<T>"));
+    assertEquals("my.exa.Repo", GenericType.trimWildcard("my.exa.Repo<A,B>"));
+    assertEquals("my.exa.Repo", GenericType.trimWildcard("my.exa.Repo<MyParam,OtherParam,More>"));
+    assertEquals("my.exa.Repo<my.Other>", GenericType.trimWildcard("my.exa.Repo<my.Other>"));
+    assertEquals("my.exa.Repo<unexpected", GenericType.trimWildcard("my.exa.Repo<unexpected"));
   }
 
   @Test

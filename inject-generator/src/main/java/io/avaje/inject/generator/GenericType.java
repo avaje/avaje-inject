@@ -2,6 +2,7 @@ package io.avaje.inject.generator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -16,8 +17,24 @@ class GenericType {
     if (rawType.endsWith("<?>")) {
       return rawType.substring(0, rawType.length() - 3);
     } else {
-      return rawType;
+      return trimGenericParams(rawType);
     }
+  }
+
+  /**
+   * Trim off generic type parameters.
+   */
+  static String trimGenericParams(String rawType) {
+    int start = rawType.indexOf('<');
+    if (start > 0) {
+      // no package for any generic parameter types
+      if (rawType.indexOf('.', start) == -1) {
+        if (rawType.lastIndexOf('>') > -1) {
+          return rawType.substring(0, start);
+        }
+      }
+    }
+    return rawType;
   }
 
   private final String raw;
@@ -62,7 +79,7 @@ class GenericType {
    */
   static String removeParameter(String raw) {
     final GenericType type = parse(raw);
-    return type.hasParameter() ? type.getMainType() : raw;
+    return type.topType();
   }
 
   /**
@@ -85,20 +102,6 @@ class GenericType {
     return raw.startsWith(Util.PROVIDER_PREFIX);
   }
 
-  /**
-   * Return true if the type contains a type parameter like {@code <T>}.
-   */
-  boolean hasParameter() {
-    if (mainType != null && mainType.indexOf('.') == -1) {
-      return true;
-    }
-    for (GenericType param : params) {
-      if (param.hasParameter()) {
-        return true;
-      }
-    }
-    return false;
-  }
 
   void addImports(Set<String> importTypes) {
     final String type = trimExtends();
@@ -148,7 +151,7 @@ class GenericType {
 
   private String trimExtends() {
     String type = topType();
-    if (type != null &&  type.startsWith("? extends ")) {
+    if (type != null && type.startsWith("? extends ")) {
       return type.substring(10);
     }
     return type;
@@ -180,4 +183,17 @@ class GenericType {
     params.add(param);
   }
 
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    GenericType that = (GenericType) o;
+    return raw.equals(that.raw);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(raw);
+  }
 }
