@@ -133,7 +133,7 @@ class TypeExtendsReader {
 
   private void readInterfacesOf(TypeMirror anInterface) {
     String rawType = Util.unwrapProvider(anInterface.toString());
-    if (Constants.OBJECT.equals(rawType)) {
+    if (JAVA_LANG_OBJECT.equals(rawType)) {
       return;
     }
     if (rawType.indexOf('.') == -1) {

@@ -35,6 +35,11 @@ class UtilTest {
   }
 
   @Test
+  void unwrapProvider() {
+    assertEquals(Util.unwrapProvider("jakarta.inject.Provider<org.Foo<com.Bazz>>"), "org.Foo<com.Bazz>");
+  }
+
+  @Test
   void extractList() {
     assertEquals("Foo", Util.extractList("List<? extends Foo>"));
     assertEquals("org.foo.Bar", Util.extractList("List<? extends org.foo.Bar>"));
