@@ -132,17 +132,8 @@ class MetaData {
   void addImportTypes(Set<String> importTypes) {
     if (hasMethod()) {
       importTypes.add(Util.classOfMethod(method));
-
     } else {
       importTypes.add(type + Constants.DI);
-    }
-    if (provides != null) {
-      for (String provide : provides) {
-        if (GenericType.isGeneric(provide)) {
-          // provide implementation of generic interface
-          importTypes.add(type);
-        }
-      }
     }
   }
 
