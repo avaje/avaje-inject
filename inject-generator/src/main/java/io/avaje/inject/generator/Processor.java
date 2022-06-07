@@ -17,7 +17,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -61,8 +60,8 @@ public class Processor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-    readScopes(roundEnv.getElementsAnnotatedWith(Scope.class));
     readModule(roundEnv);
+    readScopes(roundEnv.getElementsAnnotatedWith(Scope.class));
     readChangedBeans(roundEnv.getElementsAnnotatedWith(Factory.class), true);
     if (defaultScope.includeSingleton()) {
       readChangedBeans(roundEnv.getElementsAnnotatedWith(Singleton.class), false);
@@ -166,18 +165,13 @@ public class Processor extends AbstractProcessor {
    */
   private void readInjectModule(RoundEnvironment roundEnv) {
     // read other that are annotated with InjectModule
-    Set<? extends Element> elementsAnnotatedWith = roundEnv.getElementsAnnotatedWith(InjectModule.class);
-    if (!elementsAnnotatedWith.isEmpty()) {
-      Iterator<? extends Element> iterator = elementsAnnotatedWith.iterator();
-      if (iterator.hasNext()) {
-        Element element = iterator.next();
-        Scope scope = element.getAnnotation(Scope.class);
-        if (scope == null) {
-          // it it not a custom scope annotation
-          InjectModule annotation = element.getAnnotation(InjectModule.class);
-          if (annotation != null) {
-            defaultScope.details(annotation.name(), element);
-          }
+    for (Element element : roundEnv.getElementsAnnotatedWith(InjectModule.class)) {
+      Scope scope = element.getAnnotation(Scope.class);
+      if (scope == null) {
+        // it it not a custom scope annotation
+        InjectModule annotation = element.getAnnotation(InjectModule.class);
+        if (annotation != null) {
+          defaultScope.details(annotation.name(), element);
         }
       }
     }

@@ -398,7 +398,6 @@ class ScopeInfo {
   }
 
   void readModuleMetaData(TypeElement moduleType) {
-    context.logDebug("Reading module info for " + moduleType);
     InjectModule module = moduleType.getAnnotation(InjectModule.class);
     details(module.name(), moduleType);
     readFactoryMetaData(moduleType);
