@@ -29,7 +29,7 @@ public class GenericType<T> implements Type {
 
   @Override
   public String getTypeName() {
-    return type.toString();
+    return type.getTypeName();
   }
 
   @Override
