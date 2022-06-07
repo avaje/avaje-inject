@@ -74,7 +74,7 @@ class SimpleBeanWriter {
       for (GenericType type : genericTypes) {
         writer.append("  public static final Type TYPE_%s = new GenericType<", type.shortName());
         type.writeShort(writer);
-        writer.append(">(){};").eol();
+        writer.append(">(){}.type();").eol();
       }
       writer.eol();
     }
