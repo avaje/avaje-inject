@@ -3,7 +3,9 @@ package io.avaje.inject.spi;
 import jakarta.inject.Provider;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Entry for a given key (bean class, interface class or annotation class).
@@ -60,6 +62,22 @@ class DContextEntry {
       list.add(entry.bean());
     }
     return list;
+  }
+
+  /**
+   * Return a map of beans keyed by qualifier name.
+   */
+  Map<String, Object> map() {
+    Map<String, Object> map = new LinkedHashMap<>();
+    for (DContextEntryBean entry : entries) {
+      Object bean = entry.bean();
+      String nm = entry.name();
+      if (nm == null) {
+        nm = "$Unnamed-" + System.identityHashCode(bean) + "-" + bean;
+      }
+      map.put(nm, bean);
+    }
+    return map;
   }
 
   /**

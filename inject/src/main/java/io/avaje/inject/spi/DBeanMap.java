@@ -1,5 +1,6 @@
 package io.avaje.inject.spi;
 
+import io.avaje.inject.BeanScope;
 import jakarta.inject.Provider;
 
 import java.lang.reflect.Type;
@@ -116,6 +117,23 @@ class DBeanMap {
   List<Object> all(Type type) {
     DContextEntry entry = beans.get(type.getTypeName());
     return entry != null ? entry.all() : Collections.emptyList();
+  }
+
+  /**
+   * Return a map of bean instances keyed by qualifier name.
+   */
+  Map<String, Object> map(Type type, BeanScope parent) {
+    if (parent == null) {
+      return map(type);
+    }
+    Map<String, Object> result = parent.map(type);
+    result.putAll(map(type));
+    return result;
+  }
+
+  private Map<String, Object> map(Type type) {
+    DContextEntry entry = beans.get(type.getTypeName());
+    return entry != null ? entry.map() : Collections.emptyMap();
   }
 
   /**

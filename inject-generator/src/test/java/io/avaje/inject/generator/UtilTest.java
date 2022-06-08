@@ -40,15 +40,25 @@ class UtilTest {
   }
 
   @Test
+  void extractMap() {
+    assertEquals("Foo", Util.extractMap("java.util.Map<java.lang.String,? extends Foo>"));
+    assertEquals("org.foo.Bar", Util.extractMap("java.util.Map<java.lang.String,? extends org.foo.Bar>"));
+    assertEquals("org.foo.Bar", Util.extractMap("java.util.Map<java.lang.String,org.foo.Bar>"));
+  }
+
+  @Test
   void extractList() {
-    assertEquals("Foo", Util.extractList("List<? extends Foo>"));
-    assertEquals("org.foo.Bar", Util.extractList("List<? extends org.foo.Bar>"));
+    assertEquals("Foo", Util.extractList("java.util.List<? extends Foo>"));
+    assertEquals("org.foo.Bar", Util.extractList("java.util.List<? extends org.foo.Bar>"));
+    assertEquals("org.foo.Bar", Util.extractList("java.util.List<org.foo.Bar>"));
+
   }
 
   @Test
   void extractSet() {
-    assertEquals("Foo", Util.extractSet("Set<? extends Foo>"));
-    assertEquals("org.foo.Bar", Util.extractSet("Set<? extends org.foo.Bar>"));
+    assertEquals("Foo", Util.extractSet("java.util.Set<? extends Foo>"));
+    assertEquals("org.foo.Bar", Util.extractSet("java.util.Set<? extends org.foo.Bar>"));
+    assertEquals("org.foo.Bar", Util.extractSet("java.util.Set<org.foo.Bar>"));
   }
 
   @Test

@@ -6,6 +6,7 @@ import io.avaje.lang.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -187,7 +188,7 @@ public interface BeanScope extends AutoCloseable {
   List<Object> listByAnnotation(Class<?> annotation);
 
   /**
-   * Return the list of beans that implement the interface.
+   * Return the list of beans for a given type.
    *
    * <pre>{@code
    *
@@ -197,19 +198,19 @@ public interface BeanScope extends AutoCloseable {
    *
    * }</pre>
    *
-   * @param interfaceType An interface class.
+   * @param type The type of beans to return.
    */
-  <T> List<T> list(Class<T> interfaceType);
+  <T> List<T> list(Class<T> type);
 
   /**
    * Return the list of beans that implement the given type.
    */
-  <T> List<T> list(Type interfaceType);
+  <T> List<T> list(Type type);
 
   /**
    * Return the list of beans that implement the interface sorting by priority.
    */
-  <T> List<T> listByPriority(Class<T> interfaceType);
+  <T> List<T> listByPriority(Class<T> type);
 
   /**
    * Return the beans that implement the interface sorting by the priority annotation used.
@@ -217,10 +218,17 @@ public interface BeanScope extends AutoCloseable {
    * The priority annotation will typically be either <code>javax.annotation.Priority</code>
    * or <code>jakarta.annotation.Priority</code>.
    *
-   * @param interfaceType The interface type of the beans to return
-   * @param priority      The priority annotation used to sort the beans
+   * @param type     The interface type of the beans to return
+   * @param priority The priority annotation used to sort the beans
    */
-  <T> List<T> listByPriority(Class<T> interfaceType, Class<? extends Annotation> priority);
+  <T> List<T> listByPriority(Class<T> type, Class<? extends Annotation> priority);
+
+  /**
+   * Return the beans for this type mapped by their qualifier name.
+   * <p>
+   * Beans with no qualifier name get a generated unique key to use instead.
+   */
+  <T> Map<String, T> map(Type type);
 
   /**
    * Return all the bean entries from the scope.

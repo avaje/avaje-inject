@@ -6,7 +6,6 @@ import io.avaje.inject.Priority;
 import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
 
-
 import java.lang.System.Logger.Level;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -84,7 +83,7 @@ class DBeanScope implements BeanScope {
     return getByType(type, name);
   }
 
-  private  <T> T getByType(Type type, @Nullable String name) {
+  private <T> T getByType(Type type, @Nullable String name) {
     final T bean = beans.get(type, name);
     if (bean != null) {
       return bean;
@@ -107,7 +106,7 @@ class DBeanScope implements BeanScope {
       }
     }
     if (parent instanceof DBeanScope) {
-      DBeanScope dParent = (DBeanScope)parent;
+      DBeanScope dParent = (DBeanScope) parent;
       return dParent.getStrict(name, types);
     }
     return null;
@@ -134,23 +133,29 @@ class DBeanScope implements BeanScope {
     return parent.getOptional(type, name);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public <T> List<T> list(Class<T> interfaceType) {
-    return listOf(interfaceType);
+  public <T> Map<String, T> map(Type type) {
+    return (Map<String, T>) beans.map(type, parent);
   }
 
   @Override
-  public <T> List<T> list(Type interfaceType) {
-    return listOf(interfaceType);
+  public <T> List<T> list(Class<T> type) {
+    return listOf(type);
+  }
+
+  @Override
+  public <T> List<T> list(Type type) {
+    return listOf(type);
   }
 
   @SuppressWarnings("unchecked")
-  private  <T> List<T> listOf(Type interfaceType) {
-    List<T> values = (List<T>) beans.all(interfaceType);
+  private <T> List<T> listOf(Type type) {
+    List<T> values = (List<T>) beans.all(type);
     if (parent == null) {
       return values;
     }
-    return combine(values, parent.list(interfaceType));
+    return combine(values, parent.list(type));
   }
 
   static <T> List<T> combine(List<T> values, List<T> parentValues) {
@@ -165,13 +170,13 @@ class DBeanScope implements BeanScope {
   }
 
   @Override
-  public <T> List<T> listByPriority(Class<T> interfaceType) {
-    return listByPriority(interfaceType, Priority.class);
+  public <T> List<T> listByPriority(Class<T> type) {
+    return listByPriority(type, Priority.class);
   }
 
   @Override
-  public <T> List<T> listByPriority(Class<T> interfaceType, Class<? extends Annotation> priorityAnnotation) {
-    List<T> list = list(interfaceType);
+  public <T> List<T> listByPriority(Class<T> type, Class<? extends Annotation> priorityAnnotation) {
+    List<T> list = list(type);
     return list.size() > 1 ? sortByPriority(list, priorityAnnotation) : list;
   }
 

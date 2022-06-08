@@ -8,6 +8,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -268,23 +269,28 @@ class BeanScopeBuilderTest {
     }
 
     @Override
-    public <T> List<T> list(Class<T> interfaceType) {
+    public <T> List<T> list(Class<T> type) {
       return null;
     }
 
     @Override
-    public <T> List<T> list(Type interfaceType) {
+    public <T> List<T> list(Type type) {
       return null;
     }
 
     @Override
-    public <T> List<T> listByPriority(Class<T> interfaceType) {
+    public <T> List<T> listByPriority(Class<T> type) {
       return null;
     }
 
     @Override
-    public <T> List<T> listByPriority(Class<T> interfaceType, Class<? extends Annotation> priority) {
+    public <T> List<T> listByPriority(Class<T> type, Class<? extends Annotation> priority) {
       return null;
+    }
+
+    @Override
+    public <T> Map<String, T> map(Type type) {
+      return Collections.emptyMap();
     }
 
     @Override

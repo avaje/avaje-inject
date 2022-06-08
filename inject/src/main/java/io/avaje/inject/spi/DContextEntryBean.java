@@ -30,7 +30,7 @@ class DContextEntryBean {
   }
 
   protected final Object source;
-  private final String name;
+  protected final String name;
   private final int flag;
 
   private DContextEntryBean(Object source, String name, int flag) {
@@ -71,6 +71,10 @@ class DContextEntryBean {
    */
   Object beanIfNameMatch(String name) {
     return isNameMatch(name) ? bean() : null;
+  }
+
+  String name() {
+    return name;
   }
 
   Object bean() {

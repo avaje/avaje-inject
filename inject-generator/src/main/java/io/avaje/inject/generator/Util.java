@@ -129,6 +129,14 @@ class Util {
     return setType;
   }
 
+  static String extractMap(String rawType) {
+    String valType = rawType.substring(31, rawType.length() - 1);
+    if (valType.startsWith("? extends")) {
+      return valType.substring(10);
+    }
+    return valType;
+  }
+
   static UtilType determineType(TypeMirror rawType) {
     return UtilType.of(rawType.toString());
   }

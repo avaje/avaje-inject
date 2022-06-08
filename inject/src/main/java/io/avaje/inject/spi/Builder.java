@@ -5,6 +5,7 @@ import jakarta.inject.Provider;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -146,14 +147,19 @@ public interface Builder {
   <T> T get(Type cls, String name);
 
   /**
-   * Get a list of dependencies for the interface type .
+   * Get a list of dependencies for the type.
    */
   <T> List<T> list(Type interfaceType);
 
   /**
-   * Get a set of dependencies for the interface type .
+   * Get a set of dependencies for the type.
    */
   <T> Set<T> set(Type interfaceType);
+
+  /**
+   * Return a map of dependencies keyed by qualifier name.
+   */
+  <T> Map<String, T> map(Type interfaceType);
 
   /**
    * Build and return the bean scope.

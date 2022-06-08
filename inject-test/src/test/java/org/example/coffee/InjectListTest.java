@@ -1,6 +1,7 @@
 package org.example.coffee;
 
 import io.avaje.inject.BeanScope;
+import org.example.coffee.list.CombinedMapSomei;
 import org.example.coffee.list.CombinedSetSomei;
 import org.example.coffee.list.CombinedSomei;
 import org.example.coffee.list.SomeInterfaceConsumer;
@@ -27,6 +28,17 @@ class InjectListTest {
       CombinedSetSomei bean = context.get(CombinedSetSomei.class);
       List<String> somes = bean.lotsOfSomes();
       assertThat(somes).containsOnly("a", "b", "a2");
+    }
+  }
+
+  @Test
+  void test_map() {
+    try (BeanScope context = BeanScope.builder().build()) {
+      CombinedMapSomei bean = context.get(CombinedMapSomei.class);
+      List<String> keys = bean.someKeys();
+      assertThat(keys).containsOnly("a", "b", "a2");
+      List<String> vals = bean.someVals();
+      assertThat(vals).containsOnly("a", "b", "a2");
     }
   }
 

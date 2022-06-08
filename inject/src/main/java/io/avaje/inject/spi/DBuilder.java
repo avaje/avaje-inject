@@ -116,6 +116,12 @@ class DBuilder implements Builder {
     return combine(values, parent.list(interfaceType));
   }
 
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T> Map<String, T> map(Type type) {
+    return (Map<String, T>) beanMap.map(type, parent);
+  }
+
   private <T> T getMaybe(Type type, String name) {
     T bean = beanMap.get(type, name);
     if (bean != null) {

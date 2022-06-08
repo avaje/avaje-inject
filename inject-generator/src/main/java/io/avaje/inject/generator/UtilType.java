@@ -5,6 +5,7 @@ class UtilType {
   private enum Type {
     LIST,
     SET,
+    MAP,
     OPTIONAL,
     PROVIDER,
     OTHER
@@ -23,6 +24,8 @@ class UtilType {
       return new UtilType(Type.LIST, rawType);
     } else if (rawType.startsWith("java.util.Set<")) {
       return new UtilType(Type.SET, rawType);
+    } else if (rawType.startsWith("java.util.Map<java.lang.String,")) {
+      return new UtilType(Type.MAP, rawType);
     } else if (rawType.startsWith("java.util.Optional<")) {
       return new UtilType(Type.OPTIONAL, rawType);
     } else if (Util.isProvider(rawType)) {
@@ -49,6 +52,8 @@ class UtilType {
         return Util.extractSet(rawType);
       case LIST:
         return Util.extractList(rawType);
+      case MAP:
+        return Util.extractMap(rawType);
       case OPTIONAL:
         return Util.extractOptionalType(rawType);
       default:
@@ -62,6 +67,8 @@ class UtilType {
         return "set(";
       case LIST:
         return "list(";
+      case MAP:
+        return "map(";
       case OPTIONAL:
         return "getOptional(";
       case PROVIDER:
