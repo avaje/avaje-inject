@@ -3,7 +3,6 @@ package io.avaje.inject.generator;
 import io.avaje.inject.Bean;
 import io.avaje.inject.Prototype;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -146,10 +145,9 @@ class TypeExtendsInjection {
 
 
   private void addFactoryMethod(ExecutableElement methodElement, Bean bean) {
-    // Not yet reading Qualifier annotations, Named only at this stage
-    Named named = methodElement.getAnnotation(Named.class);
+    String qualifierName = Util.getNamed(methodElement);
     boolean prototype = methodElement.getAnnotation(Prototype.class) != null;
-    factoryMethods.add(new MethodReader(context, methodElement, baseType, bean, named, prototype).read());
+    factoryMethods.add(new MethodReader(context, methodElement, baseType, bean, qualifierName, prototype).read());
   }
 
   BeanAspects hasAspects() {

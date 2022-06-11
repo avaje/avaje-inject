@@ -1,9 +1,11 @@
 package io.avaje.inject.generator;
 
 import io.avaje.inject.Bean;
-import jakarta.inject.Named;
 
-import javax.lang.model.element.*;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,7 +37,7 @@ class MethodReader {
     this(context, element, beanType, null, null, false);
   }
 
-  MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType, Bean bean, Named named, boolean prototype) {
+  MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType, Bean bean, String qualifierName, boolean prototype) {
     this.isFactory = bean != null;
     this.prototype = prototype;
     this.element = element;
@@ -57,7 +59,7 @@ class MethodReader {
     this.isVoid = Util.isVoid(topType);
     String initMethod = (bean == null) ? null : bean.initMethod();
     String destroyMethod = (bean == null) ? null : bean.destroyMethod();
-    this.name = (named == null) ? null : named.value().toLowerCase();
+    this.name = qualifierName;
     TypeElement returnElement = (TypeElement)context.asElement(returnMirror);
     if (returnElement == null) {
       this.typeReader = null;

@@ -9,7 +9,7 @@ import java.util.Optional;
 @Factory
 class OptFactory {
 
-  @Named("frodo")
+  @Frodo
   @Bean
   Que frodoQueue() {
     return new BasicQue("frodo");
