@@ -97,7 +97,11 @@ class BeanReader {
     List<Dependency> list = new ArrayList<>();
     if (constructor != null) {
       for (MethodReader.MethodParam param : constructor.getParams()) {
-        list.add(param.getDependsOn());
+        Dependency dependsOn = param.getDependsOn();
+        // BeanScope is always injectable with no impact on injection ordering
+        if (!dependsOn.dependsOn().equals(Constants.BEANSCOPE)) {
+          list.add(dependsOn);
+        }
       }
     }
     return list;

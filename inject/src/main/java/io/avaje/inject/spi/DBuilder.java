@@ -17,34 +17,29 @@ class DBuilder implements Builder {
    */
   private final List<Runnable> postConstruct = new ArrayList<>();
   private final List<AutoCloseable> preDestroy = new ArrayList<>();
-
   /**
    * List of field injection closures.
    */
   private final List<Consumer<Builder>> injectors = new ArrayList<>();
-
   /**
    * The beans created and added to the scope during building.
    */
   protected final DBeanMap beanMap = new DBeanMap();
-
   protected final BeanScope parent;
   protected final boolean parentOverride;
-
   /**
    * Bean provided by the parent scope that we are not overriding.
    */
   protected Object parentMatch;
-
   /**
    * Debug of the current bean being wired - used in injection errors.
    */
   private Type injectTarget;
-
   /**
    * Flag set when we are running post construct injection.
    */
   private boolean runningPostConstruct;
+  private DBeanScopeProxy beanScopeProxy;
 
   DBuilder(BeanScope parent, boolean parentOverride) {
     this.parent = parent;
@@ -253,11 +248,22 @@ class DBuilder implements Builder {
 
   @Override
   public <T> T get(Type cls, String name) {
+    if (BeanScope.class.equals(cls)) {
+      return injectBeanScope();
+    }
     T bean = getMaybe(cls, name);
     if (bean == null) {
       throw new IllegalStateException(errorInjectingNull(cls, name));
     }
     return bean;
+  }
+
+  @SuppressWarnings("unchecked")
+  private <T> T injectBeanScope() {
+    if (beanScopeProxy == null) {
+      beanScopeProxy = new DBeanScopeProxy();
+    }
+    return (T) beanScopeProxy;
   }
 
   private <T> String errorInjectingNull(Type cls, String name) {
@@ -284,6 +290,10 @@ class DBuilder implements Builder {
 
   public BeanScope build(boolean withShutdownHook) {
     runInjectors();
-    return new DBeanScope(withShutdownHook, preDestroy, postConstruct, beanMap, parent).start();
+    var scope = new DBeanScope(withShutdownHook, preDestroy, postConstruct, beanMap, parent);
+    if (beanScopeProxy != null) {
+      beanScopeProxy.inject(scope);
+    }
+    return scope.start();
   }
 }
