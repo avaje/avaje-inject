@@ -15,6 +15,13 @@ class ScopeUtilTest {
   }
 
   @Test
+  void initName_inject() {
+    // resulting module can't be InjectModule as that clashes with @InjectModule
+    assertEquals("DInject", ScopeUtil.initName("org.example.inject"));
+    assertEquals("Foo", ScopeUtil.initName("org.example.foo"));
+  }
+
+  @Test
   void name_withSpace() {
     assertEquals("ExAmple", ScopeUtil.name("org.ex ample"));
     assertEquals("ExAmple", ScopeUtil.name("org.ex_ample"));

@@ -60,6 +60,11 @@ class ScopeUtil {
     return requiresList;
   }
 
+  static String initName(String name) {
+    name = name(name);
+    return name.equals("Inject") ? "DInject" : name;
+  }
+
   static String name(String name) {
     if (name == null) {
       return null;

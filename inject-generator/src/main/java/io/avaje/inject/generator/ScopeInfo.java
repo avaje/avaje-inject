@@ -116,7 +116,7 @@ class ScopeInfo {
 
   private String initName(String topPackage) {
     if (name == null || name.isEmpty()) {
-      name = ScopeUtil.name(topPackage);
+      name = ScopeUtil.initName(topPackage);
     }
     return name;
   }
