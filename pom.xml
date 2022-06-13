@@ -9,7 +9,7 @@
 
   <groupId>io.avaje</groupId>
   <artifactId>avaje-inject-parent</artifactId>
-  <version>8.6</version>
+  <version>8.7</version>
   <packaging>pom</packaging>
   <name>avaje inject parent</name>
   <description>parent pom for avaje inject library</description>
