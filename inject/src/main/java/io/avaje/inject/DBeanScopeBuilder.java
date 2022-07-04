@@ -4,6 +4,7 @@ import io.avaje.inject.spi.Builder;
 import io.avaje.inject.spi.EnrichBean;
 import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.SuppliedBean;
+import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
 
 import java.lang.System.Logger.Level;
@@ -14,21 +15,20 @@ import java.util.function.Consumer;
 /**
  * Build a bean scope with options for shutdown hook and supplying test doubles.
  */
+@NonNullApi
 class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   private static final System.Logger log = System.getLogger("io.avaje.inject");
 
   @SuppressWarnings("rawtypes")
   private final List<SuppliedBean> suppliedBeans = new ArrayList<>();
-
   @SuppressWarnings("rawtypes")
   private final List<EnrichBean> enrichBeans = new ArrayList<>();
-
   private final Set<Module> includeModules = new LinkedHashSet<>();
-
   private BeanScope parent;
   private boolean parentOverride = true;
   private boolean shutdownHook;
+  private ClassLoader classLoader;
 
   /**
    * Create a BeanScopeBuilder to ultimately load and return a new BeanScope.
@@ -80,6 +80,12 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   @Override
   public <D> BeanScopeBuilder bean(@Nullable String name, Type type, D bean) {
     suppliedBeans.add(SuppliedBean.ofType(name, type, bean));
+    return this;
+  }
+
+  @Override
+  public BeanScopeBuilder classLoader(ClassLoader classLoader) {
+    this.classLoader = classLoader;
     return this;
   }
 
@@ -139,7 +145,8 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     // sort factories by dependsOn
     FactoryOrder factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
     if (factoryOrder.isEmpty()) {
-      ServiceLoader.load(Module.class).forEach(factoryOrder::add);
+      var loader = classLoader != null ? classLoader : Thread.currentThread().getContextClassLoader();
+      ServiceLoader.load(Module.class, loader).forEach(factoryOrder::add);
     }
 
     Set<String> moduleNames = factoryOrder.orderFactories();
@@ -277,7 +284,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         }
         sb.append(" - none of the loaded modules ").append(moduleNames).append(" have this in their @InjectModule( provides = ... ). ");
         if (parent != null) {
-          sb.append("The parent BeanScope " + parent + " also does not provide this dependency. ");
+          sb.append("The parent BeanScope ").append(parent).append(" also does not provide this dependency. ");
         }
         sb.append("Either @InjectModule requires/provides are not aligned? or add external dependencies via BeanScopeBuilder.bean()?");
         throw new IllegalStateException(sb.toString());

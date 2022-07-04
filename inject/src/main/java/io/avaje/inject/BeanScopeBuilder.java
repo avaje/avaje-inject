@@ -213,6 +213,13 @@ public interface BeanScopeBuilder {
   }
 
   /**
+   * Set the ClassLoader to use when loading modules.
+   *
+   * @param classLoader The ClassLoader to use
+   */
+  BeanScopeBuilder classLoader(ClassLoader classLoader);
+
+  /**
    * Use the given BeanScope as the parent. This becomes an additional
    * source of beans that can be wired and accessed in this scope.
    *
