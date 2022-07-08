@@ -22,13 +22,13 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-lang</artifactId>
-      <version>1.0</version>
+      <version>1.1</version>
     </dependency>
 
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>4.6.0</version>
+      <version>4.6.1</version>
       <optional>true</optional>
     </dependency>
 

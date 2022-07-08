@@ -1,8 +1,15 @@
 package io.avaje.inject.spi;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
- * Hold bean dependency meta data intended for internal use by code generation (Java annotation processing).
+ * Hold bean dependency metadata intended for internal use by code generation (Java annotation processing).
  */
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.CLASS)
 public @interface DependencyMeta {
 
   /**

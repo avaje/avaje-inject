@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * Marks source code that has been generated.
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.CLASS)
 public @interface Generated {
 
   /**
