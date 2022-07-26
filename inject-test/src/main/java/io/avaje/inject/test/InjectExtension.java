@@ -1,5 +1,6 @@
 package io.avaje.inject.test;
 
+import io.avaje.applog.AppLog;
 import io.avaje.inject.BeanScope;
 import org.junit.jupiter.api.extension.*;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
@@ -15,7 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class InjectExtension implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback, ExtensionContext.Store.CloseableResource {
 
-  private static final System.Logger log = System.getLogger("io.avaje.inject");
+  private static final System.Logger log = AppLog.getLogger("io.avaje.inject");
   private static final Namespace INJECT_NS = Namespace.create("io.avaje.inject.InjectTest");
   private static final String BEAN_SCOPE = "BEAN_SCOPE";
   private static final String META = "META";

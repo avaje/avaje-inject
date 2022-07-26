@@ -1,5 +1,6 @@
 package io.avaje.inject;
 
+import io.avaje.applog.AppLog;
 import io.avaje.inject.spi.Builder;
 import io.avaje.inject.spi.EnrichBean;
 import io.avaje.inject.spi.Module;
@@ -18,7 +19,7 @@ import java.util.function.Consumer;
 @NonNullApi
 class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
-  private static final System.Logger log = System.getLogger("io.avaje.inject");
+  private static final System.Logger log = AppLog.getLogger("io.avaje.inject");
 
   @SuppressWarnings("rawtypes")
   private final List<SuppliedBean> suppliedBeans = new ArrayList<>();

@@ -1,5 +1,6 @@
 package io.avaje.inject.spi;
 
+import io.avaje.applog.AppLog;
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.Priority;
@@ -15,7 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @NonNullApi
 class DBeanScope implements BeanScope {
 
-  private static final System.Logger log = System.getLogger("io.avaje.inject");
+  private static final System.Logger log = AppLog.getLogger("io.avaje.inject");
 
   private final ReentrantLock lock = new ReentrantLock();
   private final List<Runnable> postConstruct;
