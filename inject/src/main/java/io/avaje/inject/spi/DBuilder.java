@@ -47,7 +47,7 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public boolean isAddBeanFor(Type... types) {
+  public final boolean isAddBeanFor(Type... types) {
     return isAddBeanFor(null, types);
   }
 
@@ -73,7 +73,7 @@ class DBuilder implements Builder {
    * For the purposes of supplied beans (typically test doubles) we are not
    * interested in annotation types.
    */
-  protected Type[] removeAnnotations(Type[] source) {
+  protected final Type[] removeAnnotations(Type[] source) {
     for (int i = 1, end = source.length; i < end; i++) {
       if (isAnnotationType(source[i])) {
         // the annotation types are always at the tail so just return leading types
@@ -87,7 +87,7 @@ class DBuilder implements Builder {
     return type instanceof Class && ((Class<?>) type).isAnnotation();
   }
 
-  protected void next(String name, Type... types) {
+  protected final void next(String name, Type... types) {
     injectTarget = firstOf(types);
     beanMap.nextBean(name, types);
   }
@@ -97,23 +97,46 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public <T> Set<T> set(Type interfaceType) {
-    return new LinkedHashSet<>(list(interfaceType));
+  public final <T> Set<T> set(Class<T> type) {
+    return new LinkedHashSet<>(listOf(type));
+  }
+
+  @Override
+  public final <T> List<T> list(Class<T> type) {
+    return listOf(type);
+  }
+
+  @Override
+  public final <T> Set<T> set(Type type) {
+    return new LinkedHashSet<>(listOf(type));
+  }
+
+  @Override
+  public final <T> List<T> list(Type type) {
+    return listOf(type);
   }
 
   @SuppressWarnings({"unchecked"})
-  @Override
-  public <T> List<T> list(Type interfaceType) {
-    List<T> values = (List<T>) beanMap.all(interfaceType);
+  private <T> List<T> listOf(Type type) {
+    List<T> values = (List<T>) beanMap.all(type);
     if (parent == null) {
       return values;
     }
-    return combine(values, parent.list(interfaceType));
+    return combine(values, parent.list(type));
   }
 
   @Override
+  public final <T> Map<String, T> map(Class<T> type) {
+    return mapOf(type);
+  }
+
+  @Override
+  public final <T> Map<String, T> map(Type type) {
+    return mapOf(type);
+  }
+
   @SuppressWarnings("unchecked")
-  public <T> Map<String, T> map(Type type) {
+  private <T> Map<String, T> mapOf(Type type) {
     return (Map<String, T>) beanMap.map(type, parent);
   }
 
@@ -134,17 +157,17 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public <T> T register(T bean) {
+  public final <T> T register(T bean) {
     return register(BeanEntry.NORMAL, bean);
   }
 
   @Override
-  public <T> T registerPrimary(T bean) {
+  public final <T> T registerPrimary(T bean) {
     return register(BeanEntry.PRIMARY, bean);
   }
 
   @Override
-  public <T> T registerSecondary(T bean) {
+  public final <T> T registerSecondary(T bean) {
     return register(BeanEntry.SECONDARY, bean);
   }
 
@@ -155,65 +178,102 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public <T> void registerProvider(Provider<T> provider) {
+  public final <T> void registerProvider(Provider<T> provider) {
     // no enrichment
     beanMap.register(BeanEntry.NORMAL, provider);
   }
 
   @Override
-  public <T> void withBean(Class<T> type, T bean) {
+  public final <T> void withBean(Class<T> type, T bean) {
     next(null, type);
     beanMap.register(BeanEntry.SUPPLIED, bean);
   }
 
   @Override
-  public void addPostConstruct(Runnable invoke) {
+  public final void addPostConstruct(Runnable invoke) {
     postConstruct.add(invoke);
   }
 
   @Override
-  public void addPreDestroy(AutoCloseable invoke) {
+  public final void addPreDestroy(AutoCloseable invoke) {
     preDestroy.add(invoke);
   }
 
   @Override
-  public void addInjector(Consumer<Builder> injector) {
+  public final void addInjector(Consumer<Builder> injector) {
     injectors.add(injector);
   }
 
   @Override
-  public <T> Optional<T> getOptional(Type cls) {
-    return getOptional(cls, null);
+  public final <T> Optional<T> getOptional(Class<T> type) {
+    return optional(type, null);
   }
 
   @Override
-  public <T> Optional<T> getOptional(Type cls, String name) {
-    T bean = getMaybe(cls, name);
-    return Optional.ofNullable(bean);
+  public final <T> Optional<T> getOptional(Class<T> type, String name) {
+    return optional(type, name);
   }
 
   @Override
-  public <T> T getNullable(Type cls) {
-    return getNullable(cls, null);
+  public final <T> Optional<T> getOptional(Type type) {
+    return optional(type, null);
   }
 
   @Override
-  public <T> T getNullable(Type cls, String name) {
-    return getMaybe(cls, name);
+  public final <T> Optional<T> getOptional(Type type, String name) {
+    return optional(type, name);
+  }
+
+  private <T> Optional<T> optional(Type type, String name) {
+    return Optional.ofNullable(getMaybe(type, name));
   }
 
   @Override
-  public <T> Provider<T> getProvider(Type cls) {
-    return getProvider(cls, null);
+  public final <T> T getNullable(Class<T> type) {
+    return getMaybe(type, null);
   }
 
   @Override
-  public <T> Provider<T> getProvider(Type cls, String name) {
+  public final <T> T getNullable(Class<T> type, String name) {
+    return getMaybe(type, name);
+  }
+
+  @Override
+  public final <T> T getNullable(Type type) {
+    return getMaybe(type, null);
+  }
+
+  @Override
+  public final <T> T getNullable(Type type, String name) {
+    return getMaybe(type, name);
+  }
+
+  @Override
+  public final <T> Provider<T> getProvider(Class<T> type) {
+    return provider(type, null);
+  }
+
+  @Override
+  public final <T> Provider<T> getProvider(Class<T> type, String name) {
+    return provider(type, name);
+  }
+
+  @Override
+  public final <T> Provider<T> getProvider(Type type) {
+    return provider(type, null);
+  }
+
+  @Override
+  public final <T> Provider<T> getProvider(Type type, String name) {
+    return provider(type, name);
+  }
+
+  private <T> Provider<T> provider(Type type, String name) {
     if (runningPostConstruct) {
-      return obtainProvider(cls, name);
+      return obtainProvider(type, name);
     }
     // use injectors to delay obtaining the provider until end of build
-    ProviderPromise<T> promise = new ProviderPromise<>(cls, name, this);
+    ProviderPromise<T> promise = new ProviderPromise<>(type, name, this);
     injectors.add(promise);
     return promise;
   }
@@ -227,7 +287,7 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public <T> Provider<T> getProviderFor(Class<?> cls, Type type) {
+  public final <T> Provider<T> getProviderFor(Class<?> cls, Type type) {
     return () -> {
       T bean = getMaybe(cls, null);
       if (bean == null) {
@@ -242,18 +302,32 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public <T> T get(Type cls) {
-    return get(cls, null);
+  public final <T> T get(Class<T> type) {
+    return getBean(type, null);
   }
 
   @Override
-  public <T> T get(Type cls, String name) {
-    if (BeanScope.class.equals(cls)) {
+  public final <T> T get(Class<T> type, String name) {
+    return getBean(type, name);
+  }
+
+  @Override
+  public final <T> T get(Type type) {
+    return getBean(type, null);
+  }
+
+  @Override
+  public final <T> T get(Type type, String name) {
+    return getBean(type, name);
+  }
+
+  private <T> T getBean(Type type, String name) {
+    if (BeanScope.class.equals(type)) {
       return injectBeanScope();
     }
-    T bean = getMaybe(cls, name);
+    T bean = getMaybe(type, name);
     if (bean == null) {
-      throw new IllegalStateException(errorInjectingNull(cls, name));
+      throw new IllegalStateException(errorInjectingNull(type, name));
     }
     return bean;
   }
@@ -266,12 +340,12 @@ class DBuilder implements Builder {
     return (T) beanScopeProxy;
   }
 
-  private <T> String errorInjectingNull(Type cls, String name) {
-    String msg = "Injecting null for " + cls.getTypeName();
+  private <T> String errorInjectingNull(Type type, String name) {
+    String msg = "Injecting null for " + type.getTypeName();
     if (name != null) {
       msg += " name:" + name;
     }
-    List<T> beanList = list(cls);
+    List<T> beanList = list(type);
     msg += " when creating " + injectTarget + " - potential beans to inject: " + beanList;
     if (!beanList.isEmpty()) {
       msg += ". Check @Named or Qualifier being used";
@@ -288,7 +362,7 @@ class DBuilder implements Builder {
     }
   }
 
-  public BeanScope build(boolean withShutdownHook) {
+  public final BeanScope build(boolean withShutdownHook) {
     runInjectors();
     var scope = new DBeanScope(withShutdownHook, preDestroy, postConstruct, beanMap, parent);
     if (beanScopeProxy != null) {

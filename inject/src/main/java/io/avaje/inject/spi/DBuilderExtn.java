@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * Extended builder that supports supplied beans (mocks) and enriching beans (spy).
  */
-class DBuilderExtn extends DBuilder {
+final class DBuilderExtn extends DBuilder {
 
   @SuppressWarnings("rawtypes")
   private final Map<String, EnrichBean> enrichMap = new HashMap<>();
