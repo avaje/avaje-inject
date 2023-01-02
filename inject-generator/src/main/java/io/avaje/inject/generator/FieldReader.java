@@ -22,6 +22,8 @@ class FieldReader {
     this.utype = Util.determineType(element.asType());
     this.fieldType = Util.unwrapProvider(utype.rawType());
     this.type = GenericType.parse(utype.rawType());
+    if (nullable || element.asType().toString().startsWith("java.util.Optional<"))
+      ProcessingContext.getOptionalTypes().add(fieldType);
   }
 
   boolean isGenericParam() {
