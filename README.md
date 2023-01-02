@@ -6,8 +6,63 @@
 # [avaje-inject](https://avaje.io/inject)
 APT based dependency injection for server side developers - https://avaje.io/inject
 
-### Example module use
+## Quick Start
+### 1. Add avaje-inject as a dependency.
+```xml
+<dependency>
+  <groupId>io.avaje</groupId>
+  <artifactId>avaje-inject</artifactId>
+  <version>${avaje.inject.version}</version>
+</dependency>
+```
+### 2. Add avaje-inject-generator annotation processor as a dependency with provided scope.
+```xml
+<dependency>
+  <groupId>io.avaje</groupId>
+  <artifactId>avaje-inject-generator</artifactId>
+  <version>${avaje.inject.version}</version>
+  <scope>provided</scope>
+</dependency>
+```
+If there are other annotation processors and they are specified via `maven-compiler-plugin`, then we add avaje-inject-generator there instead.
+```xml
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-compiler-plugin</artifactId>
+  <configuration>
+    <annotationProcessorPaths> <!-- All annotation processors specified here -->
+      <path>
+          <groupId>io.avaje</groupId>
+          <artifactId>avaje-inject-generator</artifactId>
+          <version>${avaje.inject.version}</version>
+      </path>
+      <path>
+          ... other annotation processor ...
+      </path>
+    </annotationProcessorPaths>
+  </configuration>
+</plugin>
+```
+### 3. Create a Class annotated with @Singleton
+```java
+@Singleton
+public class Example {
 
+  DependencyClass d;
+  // dependencyClass must be annotated with singleton,
+  // or else be provided from another class annotated with @Factory
+  public Example(DependencyClass d) {
+    this.d = d;
+  }
+}
+```
+### 4. Use BeanScope to wire and retrieve the bean and use however you wish.
+```java
+BeanScope beanScope = BeanScope.builder().build()
+Example ex = beanScope.get(Example.class);
+```
+
+### Example module use
 ```java
 module org.example {
 
