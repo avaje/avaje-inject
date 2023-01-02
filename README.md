@@ -3,11 +3,11 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/avaje/avaje-inject/blob/master/LICENSE)
 [![Maven Central : avaje-inject](https://maven-badges.herokuapp.com/maven-central/io.avaje/avaje-inject/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.avaje/avaje-inject)
 
-# [avaje-inject](https://avaje.io/inject)
+# [Avaje-Inject](https://avaje.io/inject)
 APT based dependency injection for server side developers - https://avaje.io/inject
 
 ## Quick Start
-### 1. Add avaje-inject as a dependency.
+#### 1. Add avaje-inject as a dependency.
 ```xml
 <dependency>
   <groupId>io.avaje</groupId>
@@ -15,7 +15,7 @@ APT based dependency injection for server side developers - https://avaje.io/inj
   <version>${avaje.inject.version}</version>
 </dependency>
 ```
-### 2. Add avaje-inject-generator annotation processor as a dependency with provided scope.
+#### 2. Add avaje-inject-generator annotation processor as a dependency with provided scope.
 ```xml
 <dependency>
   <groupId>io.avaje</groupId>
@@ -43,20 +43,34 @@ If there are other annotation processors and they are specified via `maven-compi
   </configuration>
 </plugin>
 ```
-### 3. Create a Class annotated with @Singleton
+#### 3. Create a Bean Class annotated with @Singleton
 ```java
 @Singleton
 public class Example {
 
-  DependencyClass d;
-  // dependencyClass must be annotated with singleton,
+  DependencyClass d1;
+  DependencyClass2 d2;
+  
+  // Dependencies must be annotated with singleton,
   // or else be provided from another class annotated with @Factory
-  public Example(DependencyClass d) {
-    this.d = d;
+  public Example(DependencyClass d, DependencyClass d2) {
+    this.d1 = d1;
+    this.d2 = d2;
   }
 }
 ```
-### 4. Use BeanScope to wire and retrieve the bean and use however you wish.
+Example factory class:
+```java
+@Factory
+public class ExampleFactory {
+  @Bean
+  public DependencyClass2() {
+    return new DependencyClass2();
+  }
+}
+```
+
+#### 4. Use BeanScope to wire and retrieve the beans and use however you wish.
 ```java
 BeanScope beanScope = BeanScope.builder().build()
 Example ex = beanScope.get(Example.class);
@@ -77,7 +91,7 @@ module org.example {
 - Uses Java annotation processing for dependency injection
 - Generates source code
 - Avoids any use of reflection or classpath scanning (so low overhead and fast startup)
-- A `Library only` (a DI library and that's it ~25k in size)
+- A `Library only` (a DI library and that's it. ~25k in size)
 
 
 ## Differences to Dagger
