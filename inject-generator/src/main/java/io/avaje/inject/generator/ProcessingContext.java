@@ -28,6 +28,7 @@ class ProcessingContext {
   private final Elements elementUtils;
   private final Types typeUtils;
   private final Set<String> uniqueModuleNames = new HashSet<>();
+  private static final Set<String> optionalTypes = new LinkedHashSet<>();
 
   ProcessingContext(ProcessingEnvironment processingEnv) {
     this.processingEnv = processingEnv;
@@ -141,4 +142,7 @@ class ProcessingContext {
     return uniqueModuleNames.contains(moduleFullName);
   }
 
+  public static Set<String> getOptionalTypes() {
+    return optionalTypes;
+  }
 }
