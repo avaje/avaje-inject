@@ -1,17 +1,5 @@
 package io.avaje.inject.generator;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.LineNumberReader;
-import java.io.Reader;
-import java.nio.file.NoSuchFileException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.FilerException;
 import javax.annotation.processing.Messager;
@@ -25,6 +13,12 @@ import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.LineNumberReader;
+import java.io.Reader;
+import java.nio.file.NoSuchFileException;
+import java.util.*;
 
 class ProcessingContext {
 
@@ -64,7 +58,7 @@ class ProcessingContext {
   }
 
   String loadMetaInfServices() {
-    final var lines = loadMetaInf(Constants.META_INF_MODULE);
+    final List<String> lines = loadMetaInf(Constants.META_INF_MODULE);
     return lines.isEmpty() ? null : lines.get(0);
   }
 
@@ -74,11 +68,11 @@ class ProcessingContext {
 
   private List<String> loadMetaInf(String fullName) {
     try {
-      final var fileObject = processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", fullName);
+      FileObject fileObject = processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", fullName);
       if (fileObject != null) {
-        final List<String> lines = new ArrayList<>();
-        final var reader = fileObject.openReader(true);
-        final var lineReader = new LineNumberReader(reader);
+        List<String> lines = new ArrayList<>();
+        Reader reader = fileObject.openReader(true);
+        LineNumberReader lineReader = new LineNumberReader(reader);
         String line;
         while ((line = lineReader.readLine()) != null) {
           line = line.trim();
@@ -92,10 +86,10 @@ class ProcessingContext {
     } catch (FileNotFoundException | NoSuchFileException e) {
       // logDebug("no services file yet");
 
-    } catch (final FilerException e) {
+    } catch (FilerException e) {
       logDebug("FilerException reading services file");
 
-    } catch (final Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
       logWarn("Error reading services file: " + e.getMessage());
     }
@@ -110,7 +104,7 @@ class ProcessingContext {
   }
 
   FileObject createMetaInfWriter(ScopeInfo.Type scopeType) throws IOException {
-    final var serviceName = scopeType == ScopeInfo.Type.DEFAULT ? Constants.META_INF_MODULE : Constants.META_INF_TESTMODULE;
+    String serviceName = scopeType == ScopeInfo.Type.DEFAULT ? Constants.META_INF_MODULE : Constants.META_INF_TESTMODULE;
     return createMetaInfWriterFor(serviceName);
   }
 
