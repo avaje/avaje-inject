@@ -48,12 +48,12 @@ If there are other annotation processors and they are specified via `maven-compi
 @Singleton
 public class Example {
 
-  DependencyClass d1;
-  DependencyClass2 d2;
+ private DependencyClass d1;
+ private DependencyClass2 d2;
   
   // Dependencies must be annotated with singleton,
   // or else be provided from another class annotated with @Factory
-  public Example(DependencyClass d, DependencyClass d2) {
+  public Example(DependencyClass d1, DependencyClass2 d2) {
     this.d1 = d1;
     this.d2 = d2;
   }
