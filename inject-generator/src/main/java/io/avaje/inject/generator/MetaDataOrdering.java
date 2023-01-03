@@ -17,13 +17,11 @@ class MetaDataOrdering {
   private final Map<String, ProviderList> providers = new HashMap<>();
   private final List<DependencyLink> circularDependencies = new ArrayList<>();
   private final Set<String> missingDependencyTypes = new LinkedHashSet<>();
-  private final Set<String> optionalTypes;
 
   MetaDataOrdering(Collection<MetaData> values, ProcessingContext context, ScopeInfo scopeInfo) {
     this.context = context;
     this.scopeInfo = scopeInfo;
-    this.optionalTypes = ProcessingContext.getOptionalTypes();
-    for (final MetaData metaData : values) {
+    for (MetaData metaData : values) {
       if (metaData.noDepends()) {
         orderedList.add(metaData);
         metaData.setWired();
@@ -122,11 +120,9 @@ class MetaDataOrdering {
   }
 
   private void checkMissingDependencies(MetaData metaData) {
-    for (final Dependency dependency : metaData.getDependsOn()) {
-      if (providers.get(dependency.getName()) == null
-          && !scopeInfo.providedByOtherModule(dependency.getName())
-          && !optionalTypes.contains(dependency.getName())) {
-        final var element = context.elementMaybe(metaData.getType());
+    for (Dependency dependency : metaData.getDependsOn()) {
+      if (providers.get(dependency.getName()) == null && !scopeInfo.providedByOtherModule(dependency.getName())) {
+        TypeElement element = context.elementMaybe(metaData.getType());
         context.logError(element, "No dependency provided for " + dependency + " on " + metaData.getType());
         missingDependencyTypes.add(dependency.getName());
       }

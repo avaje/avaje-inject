@@ -327,8 +327,6 @@ class MethodReader {
       this.utilType = Util.determineType(param.asType());
       this.paramType = utilType.rawType();
       this.genericType = GenericType.parse(paramType);
-      if (nullable || param.asType().toString().startsWith("java.util.Optional<"))
-        ProcessingContext.getOptionalTypes().add(paramType);
     }
 
     @Override
