@@ -3,3 +3,11 @@ build/
 .idea/
 *.iml
 .gradle
+*.prefs
+*.class*
+*.factorypath
+*.project
+*.processors
+*/bin/
+*.editorconfig
+*.Module

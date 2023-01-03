@@ -136,10 +136,10 @@ class TypeExtendsInjection {
     }
     int nameIndex = methodNameIndex(methodElement.getSimpleName().toString());
     List<AspectPair> aspectPairs = new AspectAnnotationReader(context, baseType, methodElement).read();
+    aspectPairs.addAll(typeAspects);
+
     if (!aspectPairs.isEmpty()) {
       aspectMethods.add(new AspectMethod(nameIndex, aspectPairs, methodElement));
-    } else if (!typeAspects.isEmpty()) {
-      aspectMethods.add(new AspectMethod(nameIndex, typeAspects, methodElement));
     }
   }
 
