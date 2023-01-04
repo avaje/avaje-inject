@@ -3,6 +3,7 @@ package io.avaje.inject.spi;
 import io.avaje.inject.BeanScope;
 import jakarta.inject.Provider;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -145,8 +146,10 @@ class DBeanMap {
         DContextEntry entry = beans.get(type.getTypeName());
         if (entry != null) {
           DContextEntryBean suppliedBean = entry.supplied(qualifierName);
-          if (suppliedBean != null && types.length > 1) {
-            addSuppliedFor(type, types, suppliedBean);
+          if (suppliedBean != null) {
+            if (types.length > 1) {
+              addSuppliedFor(type, types, suppliedBean);
+            }
             return true;
           }
         }
@@ -156,12 +159,12 @@ class DBeanMap {
   }
 
   /**
-   * Register the suppliedBean entry with other types (like other interfaces)
-   * IF those types don't already have a registered entry.
+   * Register the suppliedBean entry with parameterized types IF those types
+   * don't already have a registered entry.
    */
   private void addSuppliedFor(Type matchType, Type[] types, DContextEntryBean suppliedBean) {
     for (Type type : types) {
-      if (type != matchType) {
+      if (type != matchType && type instanceof ParameterizedType) {
         beans.computeIfAbsent(type.getTypeName(), s -> new DContextEntry()).add(suppliedBean);
       }
     }
