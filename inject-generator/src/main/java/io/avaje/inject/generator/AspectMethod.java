@@ -68,7 +68,7 @@ class AspectMethod {
       if (i > 0) {
         writer.append(", ");
       }
-      params.get(i).writeMethodParam(writer);
+      params.get(i).writeMethodParamAspect(writer);
     }
     writer.append(")");
     writeThrowsClause(writer);
@@ -118,7 +118,7 @@ class AspectMethod {
     writer.append("      %s = %s.class.getDeclaredMethod(\"%s\"", localName, shortName, simpleName);
     for (MethodReader.MethodParam param : params) {
       writer.append(", ");
-      param.writeMethodParamType(writer);
+      param.writeMethodParamTypeAspect(writer);
       writer.append(".class");
     }
     writer.append(");").eol();

@@ -8,6 +8,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -392,11 +393,11 @@ class MethodReader {
     }
 
     void addImports(Set<String> importTypes) {
+    	
+      importTypes.addAll(Arrays.asList(utilType.full().split("[<|>|,]")));
+      
       if (genericType.isGenericType()) {
         importTypes.add(Constants.PROVIDER);
-        genericType.addImports(importTypes);
-      } else {
-        genericType.addImports(importTypes);
       }
     }
 
@@ -432,6 +433,21 @@ class MethodReader {
 
     void writeMethodParamType(Append writer) {
       writer.append(Util.shortName(genericType.topType()));
+    }
+
+    void writeMethodParamAspect(Append writer) {
+      final var type = GenericType.parse(utilType.full());
+      if (type.isGenericType()) {
+        type.writeShort(writer);
+      } else {
+        writer.append(Util.shortName(type.topType()));
+      }
+      writer.append(" ").append(simpleName);
+    }
+
+    void writeMethodParamTypeAspect(Append writer) {
+      final var type = GenericType.parse(utilType.full());
+      writer.append(Util.shortName(type.topType()));
     }
 
     void writeConstructorInit(Append writer) {

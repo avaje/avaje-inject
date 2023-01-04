@@ -77,4 +77,7 @@ class UtilType {
     return nullable ? "getNullable(" : "get(";
   }
 
+  public String full() {
+    return rawType;
+  }
 }
