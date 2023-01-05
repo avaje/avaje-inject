@@ -316,6 +316,7 @@ class MethodReader {
     private final UtilType utilType;
     private final String paramType;
     private final GenericType genericType;
+    private final GenericType fullGenericType;
     private final boolean nullable;
     private final String simpleName;
     private boolean requestParam;
@@ -328,13 +329,12 @@ class MethodReader {
       this.utilType = Util.determineType(param.asType());
       this.paramType = utilType.rawType();
       this.genericType = GenericType.parse(paramType);
+      this.fullGenericType = GenericType.parse(utilType.full());
     }
 
     @Override
     public String toString() {
-      return "MethodParam{" +
-        "genericType=" + genericType +
-        '}';
+      return "MethodParam{" + fullGenericType + '}';
     }
 
     void addDependsOnGeneric(Set<GenericType> set) {
@@ -393,9 +393,7 @@ class MethodReader {
     }
 
     void addImports(Set<String> importTypes) {
-    	
-      importTypes.addAll(Arrays.asList(utilType.full().split("[<|>|,]")));
-      
+      fullGenericType.addImports(importTypes);
       if (genericType.isGenericType()) {
         importTypes.add(Constants.PROVIDER);
       }
@@ -431,23 +429,17 @@ class MethodReader {
       writer.append(" ").append(simpleName);
     }
 
-    void writeMethodParamType(Append writer) {
-      writer.append(Util.shortName(genericType.topType()));
-    }
-
     void writeMethodParamAspect(Append writer) {
-      final var type = GenericType.parse(utilType.full());
-      if (type.isGenericType()) {
-        type.writeShort(writer);
+      if (fullGenericType.isGenericType()) {
+        fullGenericType.writeShort(writer);
       } else {
-        writer.append(Util.shortName(type.topType()));
+        writer.append(Util.shortName(fullGenericType.topType()));
       }
       writer.append(" ").append(simpleName);
     }
 
     void writeMethodParamTypeAspect(Append writer) {
-      final var type = GenericType.parse(utilType.full());
-      writer.append(Util.shortName(type.topType()));
+      writer.append(Util.shortName(fullGenericType.topType()));
     }
 
     void writeConstructorInit(Append writer) {

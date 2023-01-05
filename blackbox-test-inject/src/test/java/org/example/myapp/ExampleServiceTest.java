@@ -3,6 +3,7 @@ package org.example.myapp;
 import io.avaje.inject.BeanScope;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -17,6 +18,7 @@ class ExampleServiceTest {
       exampleService.runOnly("foo");
       exampleService.withParamAtomic(new AtomicLong(42));
       exampleService.withParamImport(new ConcurrentHashMap<>());
+      exampleService.withListString(List.of("a", "b"));
     }
   }
 }

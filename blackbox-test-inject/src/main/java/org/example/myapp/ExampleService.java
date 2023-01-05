@@ -3,6 +3,7 @@ package org.example.myapp;
 import jakarta.inject.Singleton;
 import org.example.myapp.aspect.MyTimed;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -30,5 +31,9 @@ public class ExampleService {
 
   public void withParamImport(ConcurrentHashMap<String, String> param0) {
     System.out.println("withParamAtomic " + param0);
+  }
+
+  public void withListString(List<String> param0) {
+    System.out.println("withListString " + param0);
   }
 }

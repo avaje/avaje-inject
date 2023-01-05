@@ -46,6 +46,10 @@ class UtilType {
     return type == Type.LIST || type == Type.SET;
   }
 
+  String full() {
+    return rawType;
+  }
+
   String rawType() {
     switch (type) {
       case SET:
@@ -77,7 +81,4 @@ class UtilType {
     return nullable ? "getNullable(" : "get(";
   }
 
-  public String full() {
-    return rawType;
-  }
 }
