@@ -11,8 +11,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.avaje.inject.BeanEntry.SUPPLIED;
-
 /**
  * Map of types (class types, interfaces and annotations) to a DContextEntry where the
  * entry holds a list of bean instances for that type.
@@ -45,17 +43,15 @@ final class DBeanMap {
   /**
    * Add test double supplied beans.
    */
-  @SuppressWarnings("rawtypes")
   void add(List<SuppliedBean> suppliedBeans) {
     for (SuppliedBean suppliedBean : suppliedBeans) {
       addSuppliedBean(suppliedBean);
     }
   }
 
-  @SuppressWarnings("rawtypes")
   private void addSuppliedBean(SuppliedBean supplied) {
     Type suppliedType = supplied.type();
-    DContextEntryBean entryBean = DContextEntryBean.of(supplied.bean(), supplied.name(), SUPPLIED);
+    DContextEntryBean entryBean = DContextEntryBean.of(supplied.source(), supplied.name(), supplied.priority());
     beans.computeIfAbsent(suppliedType.getTypeName(), s -> new DContextEntry()).add(entryBean);
     for (Class<?> anInterface : supplied.interfaces()) {
       beans.computeIfAbsent(anInterface.getTypeName(), s -> new DContextEntry()).add(entryBean);

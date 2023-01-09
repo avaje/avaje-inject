@@ -118,7 +118,7 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   private <D> BeanScopeBuilder.ForTesting mock(Class<D> type, @Nullable String name, @Nullable Consumer<D> consumer) {
-    suppliedBeans.add(SuppliedBean.of(name, type, null, consumer));
+    suppliedBeans.add(SuppliedBean.of(name, type, consumer));
     return this;
   }
 

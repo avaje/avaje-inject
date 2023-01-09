@@ -1,8 +1,8 @@
 package io.avaje.inject.spi;
 
-import org.mockito.Mockito;
-
+import io.avaje.inject.BeanEntry;
 import jakarta.inject.Named;
+import org.mockito.Mockito;
 
 import java.lang.reflect.Type;
 import java.util.function.Consumer;
@@ -12,135 +12,120 @@ import java.util.function.Consumer;
  * <p>
  * These can be externally supplied dependencies or test doubles for testing purposes.
  */
-public abstract class SuppliedBean<B> {
+public class SuppliedBean {
 
-  protected final String name;
-  protected final Type type;
-  protected B bean;
+  private static final Class<?>[] NO_INTERFACES = new Class[0];
+
+  private final String name;
+  private final Type type;
+  private final int priority;
+  protected Object source;
 
   /**
    * Create with a class type and bean instance.
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
-  public static SuppliedBean of(Class<?> type, Object bean) {
-    return new SuppliedBean.ForClass(null, type, bean, null);
+  public static SuppliedBean of(Class<?> type, Object source) {
+    return new SuppliedBean.ForClass(null, type, source, null);
   }
 
   /**
    * Create for a class type with a consumer that runs once when the bean is obtained.
    */
-  public static <B> SuppliedBean<B> of(String name, Class<B> type, B bean, Consumer<B> consumer) {
-    return new SuppliedBean.ForClass<>(name, type, bean, consumer);
+  public static <B> SuppliedBean of(String name, Class<B> type, Consumer<B> consumer) {
+    return new SuppliedBean.ForClass<>(name, type, null, consumer);
   }
 
   /**
    * Create for a class type with name.
    */
-  public static <B> SuppliedBean<B> of(String name, Class<B> type, B bean) {
-    return new SuppliedBean.ForClass<>(name, type, bean, null);
+  public static <B> SuppliedBean of(String name, Class<B> type, B source) {
+    return new SuppliedBean.ForClass<>(name, type, source, null);
   }
 
   /**
    * Create a supplied bean for a generic type.
    */
-  public static <B> SuppliedBean<B> ofType(String name, Type type, B bean) {
-    return new SuppliedBean.ForType<>(name, type, bean);
+  public static SuppliedBean ofType(String name, Type type, Object source) {
+    return new SuppliedBean(BeanEntry.SUPPLIED, name, type, source);
   }
 
-  private SuppliedBean(String name, Type type, B bean) {
+  private SuppliedBean(int priority, String name, Type type, Object source) {
+    this.priority = priority;
     this.name = name;
     this.type = type;
-    this.bean = bean;
+    this.source = source;
   }
 
-  private SuppliedBean(String name, Class<B> type, B bean) {
-    this.name = initName(name, type);
-    this.type = type;
-    this.bean = bean;
+  /**
+   * Return the bean instance or provider to use for injection.
+   */
+  public Object source() {
+    return source;
   }
 
-
-  String initName(String name, Class<?> type) {
-    if (name != null) {
-      return name;
-    }
-    Named annotation = type.getAnnotation(Named.class);
-    return (annotation == null) ? null : annotation.value();
+  /**
+   * Return the associated priority.
+   */
+  public final int priority() {
+    return priority;
   }
 
   /**
    * Return the dependency injection target type.
    */
-  public Type type() {
+  public final Type type() {
     return type;
   }
 
   /**
    * Return the qualifier name of the supplied bean.
    */
-  public String name() {
-    return name;
+  public final String name() {
+    if (name != null) {
+      return name;
+    }
+    if (type instanceof Class<?>) {
+      Named annotation = ((Class<?>) type).getAnnotation(Named.class);
+      return (annotation == null) ? null : annotation.value();
+    }
+    return null;
   }
-
-  /**
-   * Return the bean instance to use for injection.
-   */
-  public abstract B bean();
 
   /**
    * Return the interfaces to additionally register along with the type.
    */
-  public abstract Class<?>[] interfaces();
-
-  /**
-   * Type based supplied bean.
-   */
-  private static class ForType<B> extends SuppliedBean<B> {
-
-    private ForType(String name, Type type, B bean) {
-      super(name, type, bean);
+  public final Class<?>[] interfaces() {
+    if (type instanceof Class<?>) {
+      return ((Class<?>) type).getInterfaces();
     }
-
-    @Override
-    public B bean() {
-      return bean;
-    }
-
-    @Override
-    public Class<?>[] interfaces() {
-      return new Class[0];
-    }
+    return NO_INTERFACES;
   }
 
   /**
    * Class based supplied bean.
    */
-  private static class ForClass<B> extends SuppliedBean<B> {
+  private static final class ForClass<B> extends SuppliedBean {
 
     private final Consumer<B> consumer;
     private final Class<B> classType;
 
-    ForClass(String name, Class<B> type, B bean, Consumer<B> consumer) {
-      super(name, type, bean);
+    ForClass(String name, Class<B> type, Object source, Consumer<B> consumer) {
+      super(BeanEntry.SUPPLIED, name, type, source);
       this.classType = type;
       this.consumer = consumer;
     }
 
     @Override
-    public B bean() {
-      if (bean == null) {
-        // should extract a SPI for this
-        bean = Mockito.mock(classType);
+    public Object source() {
+      if (source == null) {
+        var mock = Mockito.mock(classType);
+        if (consumer != null) {
+          consumer.accept(mock);
+        }
+        source = mock;
       }
-      if (consumer != null) {
-        consumer.accept(bean);
-      }
-      return bean;
-    }
-
-    @Override
-    public Class<?>[] interfaces() {
-      return classType.getInterfaces();
+      return source;
     }
   }
 }

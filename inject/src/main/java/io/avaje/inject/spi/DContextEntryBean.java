@@ -13,15 +13,15 @@ class DContextEntryBean {
   /**
    * Create taking into account if it is a Provider or the bean itself.
    *
-   * @param bean The bean itself or provider of the bean
+   * @param source The bean itself or provider of the bean
    * @param name The optional name for the bean
    * @param flag The flag for primary, secondary or normal
    */
-  static DContextEntryBean of(Object bean, String name, int flag) {
-    if (bean instanceof Provider) {
-      return new ProtoProvider((Provider<?>)bean, name, flag);
+  static DContextEntryBean of(Object source, String name, int flag) {
+    if (source instanceof Provider) {
+      return new ProtoProvider((Provider<?>)source, name, flag);
     } else {
-      return new DContextEntryBean(bean, name, flag);
+      return new DContextEntryBean(source, name, flag);
     }
   }
 
