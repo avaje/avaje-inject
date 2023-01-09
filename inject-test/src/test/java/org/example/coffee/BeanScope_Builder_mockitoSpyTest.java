@@ -209,6 +209,9 @@ class BeanScope_Builder_mockitoSpyTest {
       Grinder grinder = context.get(Grinder.class);
       assertThat(grinder).isSameAs(mock.get());
 
+      Grinder grinderByName = context.get(Grinder.class, "theGrinder");
+      assertThat(grinderByName).isSameAs(grinder);
+
       CoffeeMaker coffeeMaker = context.get(CoffeeMaker.class);
       assertThat(coffeeMaker).isNotNull();
       coffeeMaker.makeIt();

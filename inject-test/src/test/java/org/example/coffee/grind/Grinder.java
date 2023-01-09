@@ -1,5 +1,6 @@
 package org.example.coffee.grind;
 
+import jakarta.inject.Named;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -19,6 +20,7 @@ import jakarta.inject.Singleton;
 @Setter
 @Slf4j
 @Singleton
+@Named("theGrinder")
 public class Grinder {
 
   final AMusher aMusher;
