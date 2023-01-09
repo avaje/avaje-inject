@@ -1,6 +1,9 @@
 package io.avaje.inject.generator;
 
 import io.avaje.inject.Bean;
+import io.avaje.inject.Primary;
+import io.avaje.inject.Prototype;
+import io.avaje.inject.Secondary;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -8,7 +11,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +23,8 @@ class MethodReader {
   private final String factoryType;
   private final String methodName;
   private final boolean prototype;
+  private final boolean primary;
+  private final boolean secondary;
   private final String returnTypeRaw;
   private final GenericType genericType;
   private final String shortName;
@@ -35,13 +39,21 @@ class MethodReader {
   private final boolean optionalType;
 
   MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType) {
-    this(context, element, beanType, null, null, false);
+    this(context, element, beanType, null, null);
   }
 
-  MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType, Bean bean, String qualifierName, boolean prototype) {
+  MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType, Bean bean, String qualifierName) {
     this.isFactory = bean != null;
-    this.prototype = prototype;
     this.element = element;
+    if (isFactory) {
+      prototype = element.getAnnotation(Prototype.class) != null;
+      primary = element.getAnnotation(Primary.class) != null;
+      secondary = element.getAnnotation(Secondary.class) != null;
+    } else {
+      prototype = false;
+      primary = false;
+      secondary = false;
+    }
     this.methodName = element.getSimpleName().toString();
     TypeMirror returnMirror = element.getReturnType();
     String raw = returnMirror.toString();
@@ -152,7 +164,7 @@ class MethodReader {
     writer.append(");").eol();
   }
 
-  public void builderAddProtoBean(Append writer) {
+  public void builderAddBeanProvider(Append writer) {
     if (isVoid) {
       writer.append("Error - void @Prototype method ?").eol();
       return;
@@ -162,8 +174,11 @@ class MethodReader {
       return;
     }
     String indent = "    ";
-    writer.append(indent).append("  // prototype scope bean method").eol();
-    writer.append(indent).append("  builder.registerProvider(() -> {").eol();
+    if (prototype) {
+      writer.append(indent).append("  builder.asPrototype().registerProvider(() -> {").eol();
+    } else {
+      writer.append(indent).append("  builder.asSecondary().registerProvider(() -> {").eol();
+    }
     writer.append("%s    return ", indent);
     writer.append(String.format("factory.%s(", methodName));
     for (int i = 0; i < params.size(); i++) {
@@ -188,7 +203,13 @@ class MethodReader {
       if (hasLifecycleMethods()) {
         writer.append("%s $bean = ", shortName);
       }
-      writer.append("builder.register(bean);").eol();
+      writer.append("builder");
+      if (primary) {
+        writer.append(".asPrimary()");
+      } else if (secondary) {
+        writer.append(".asSecondary()");
+      }
+      writer.append(".register(bean);").eol();
       if (notEmpty(initMethod)) {
         writer.append(indent).append("builder.addPostConstruct($bean::%s);", initMethod).eol();
       }
@@ -278,6 +299,10 @@ class MethodReader {
 
   boolean isProtoType() {
     return prototype;
+  }
+
+  boolean isUseProviderForSecondary() {
+    return secondary && !optionalType;
   }
 
   boolean isPublic() {

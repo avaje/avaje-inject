@@ -54,6 +54,23 @@ public interface Builder {
   boolean isAddBeanFor(Type... types);
 
   /**
+   * Register the next bean as having Primary priority.
+   * Highest priority, will be used over any other matching beans.
+   */
+  Builder asPrimary();
+
+  /**
+   * Register the next bean as having Secondary priority.
+   * Lowest priority, only used if no other matching beans are available.
+   */
+  Builder asSecondary();
+
+  /**
+   * Register the next bean as having Prototype scope.
+   */
+  Builder asPrototype();
+
+  /**
    * Register the provider into the context.
    */
   <T> void registerProvider(Provider<T> provider);
@@ -64,16 +81,6 @@ public interface Builder {
    * @param bean The bean instance that has been created.
    */
   <T> T register(T bean);
-
-  /**
-   * Register the bean as a Primary bean.
-   */
-  <T> T registerPrimary(T bean);
-
-  /**
-   * Register the bean as a secondary bean.
-   */
-  <T> T registerSecondary(T bean);
 
   /**
    * Register the externally provided bean.

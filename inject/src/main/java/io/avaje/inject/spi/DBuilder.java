@@ -158,35 +158,40 @@ class DBuilder implements Builder {
 
   @Override
   public final <T> T register(T bean) {
-    return register(BeanEntry.NORMAL, bean);
-  }
-
-  @Override
-  public final <T> T registerPrimary(T bean) {
-    return register(BeanEntry.PRIMARY, bean);
-  }
-
-  @Override
-  public final <T> T registerSecondary(T bean) {
-    return register(BeanEntry.SECONDARY, bean);
-  }
-
-  private <T> T register(int flag, T bean) {
     bean = enrich(bean, beanMap.next());
-    beanMap.register(flag, bean);
+    beanMap.register(bean);
     return bean;
+  }
+
+  @Override
+  public Builder asPrimary() {
+    beanMap.nextPriority(BeanEntry.PRIMARY);
+    return this;
+  }
+
+  @Override
+  public Builder asSecondary() {
+    beanMap.nextPriority(BeanEntry.SECONDARY);
+    return this;
+  }
+
+  @Override
+  public Builder asPrototype() {
+    beanMap.nextPrototype();
+    return this;
   }
 
   @Override
   public final <T> void registerProvider(Provider<T> provider) {
     // no enrichment
-    beanMap.register(BeanEntry.NORMAL, provider);
+    beanMap.register(provider);
   }
 
   @Override
   public final <T> void withBean(Class<T> type, T bean) {
     next(null, type);
-    beanMap.register(BeanEntry.SUPPLIED, bean);
+    beanMap.nextPriority(BeanEntry.SUPPLIED);
+    beanMap.register(bean);
   }
 
   @Override

@@ -52,7 +52,8 @@ final class DBuilderExtn extends DBuilder {
     if (parentMatch != null && !enrichMap.isEmpty()) {
       Object enrichedBean = enrich(parentMatch, beanMap.next());
       if (enrichedBean != parentMatch) {
-        beanMap.register(BeanEntry.SUPPLIED, enrichedBean);
+        beanMap.nextPriority(BeanEntry.SUPPLIED);
+        beanMap.register(enrichedBean);
       }
     }
   }

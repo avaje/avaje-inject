@@ -207,8 +207,13 @@ class BeanReader {
     if (isExtraInjectionRequired() || hasLifecycleMethods()) {
       writer.append("%s $bean = ", shortName);
     }
-    String flags = primary ? "Primary" : secondary ? "Secondary" : "";
-    writer.append("builder.register%s(bean);", flags).eol();
+    writer.append("builder.");
+    if (primary) {
+      writer.append("asPrimary().");
+    } else if (secondary) {
+      writer.append("asSecondary().");
+    }
+    writer.append("register(bean);").eol();
   }
 
   void addLifecycleCallbacks(Append writer, String indent) {

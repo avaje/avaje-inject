@@ -100,7 +100,9 @@ class SimpleBeanWriter {
     method.buildAddFor(writer);
     writer.append(method.builderGetFactory()).eol();
     if (method.isProtoType()) {
-      method.builderAddProtoBean(writer);
+      method.builderAddBeanProvider(writer);
+    } else if (method.isUseProviderForSecondary()) {
+      method.builderAddBeanProvider(writer);
     } else {
       method.builderBuildBean(writer);
       method.builderBuildAddBean(writer);
@@ -128,8 +130,7 @@ class SimpleBeanWriter {
     beanReader.buildAddFor(writer);
     if (beanReader.prototype()) {
       indent += "  ";
-      writer.append("      // prototype scope so register provider").eol();
-      writer.append("      builder.registerProvider(() -> {", shortName, shortName).eol();
+      writer.append("      builder.asPrototype().registerProvider(() -> {", shortName, shortName).eol();
     }
     writeCreateBean(constructor);
     beanReader.buildRegister(writer);

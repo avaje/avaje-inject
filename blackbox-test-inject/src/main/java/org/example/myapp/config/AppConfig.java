@@ -1,12 +1,12 @@
 package org.example.myapp.config;
 
-import io.avaje.inject.Bean;
-import io.avaje.inject.Component;
-import io.avaje.inject.Factory;
-import io.avaje.inject.Prototype;
+import io.avaje.inject.*;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.inject.Provider;
 import org.example.myapp.HelloData;
+
+import java.util.Optional;
 
 @Factory
 public class AppConfig {
@@ -35,10 +35,47 @@ public class AppConfig {
     return new Generated();
   }
 
+  @Secondary
+  @Bean
+  public MySecType generalSecondary() {
+    return new MySecType();
+  }
+
+  @Secondary
+  @Bean
+  public Optional<MySecOptType> optionalSecondary() {
+    return Optional.of(new MySecOptType());
+  }
+
+  @Primary
+  @Bean
+  public MyPrim primaryBean() {
+    return new MyPrim("prime");
+  }
+
+  @Named("notPrimary")
+  @Bean
+  public MyPrim notPrimaryBean() {
+    return new MyPrim("notPrimary");
+  }
+
   public static class Builder {
   }
 
   public static class Generated {
+  }
+
+  public static class MySecType {
+  }
+
+  public static class MySecOptType {
+  }
+
+  public static class MyPrim {
+    public final String val;
+    public MyPrim(String val) {
+      this.val = val;
+    }
   }
 
   @Component
