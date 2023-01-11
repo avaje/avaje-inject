@@ -205,7 +205,7 @@ class BeanReader {
     }
     writer.append("      ");
     if (isExtraInjectionRequired() || hasLifecycleMethods()) {
-      writer.append("%s $bean = ", shortName);
+      writer.append("var $bean = ");
     }
     writer.append("builder.");
     if (primary) {
@@ -253,10 +253,7 @@ class BeanReader {
       if (!genericTypes.isEmpty()) {
         importTypes.add(Constants.TYPE);
         importTypes.add(Constants.GENERICTYPE);
-        importTypes.add(Constants.PROVIDER);
-        for (GenericType genericType : genericTypes) {
-          genericType.addImports(importTypes);
-        }
+        // TYPE_ generic types are fully qualified
       }
     }
     checkImports();
@@ -348,7 +345,7 @@ class BeanReader {
     }
     requestParams.writeRequestCreate(writer);
     writer.resetNextName();
-    writer.append("    %s bean = new %s(", shortName, shortName);
+    writer.append("    var bean = new %s(", shortName);
     if (constructor != null) {
       constructor.writeRequestConstructor(writer);
     }

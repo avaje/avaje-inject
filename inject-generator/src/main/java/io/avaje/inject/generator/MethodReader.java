@@ -142,18 +142,16 @@ class MethodReader {
   }
 
   String builderGetFactory() {
-    return String.format("      %s factory = builder.get(%s.class);", factoryShortName, factoryShortName);
+    return String.format("      var factory = builder.get(%s.class);", factoryShortName);
   }
 
   void builderBuildBean(Append writer) {
     writer.append("      ");
     if (isVoid) {
-      writer.append(String.format("factory.%s(", methodName));
+      writer.append("factory.%s(", methodName);
     } else {
-      String beanType = optionalType ? String.format("Optional<%s>", shortName) : shortName;
       String beanName = optionalType ? "optionalBean" : "bean";
-      writer.append(beanType);
-      writer.append(String.format(" %s = factory.%s(", beanName, methodName));
+      writer.append("var %s = factory.%s(", beanName, methodName);
     }
     for (int i = 0; i < params.size(); i++) {
       if (i > 0) {
@@ -197,11 +195,11 @@ class MethodReader {
       String indent = optionalType ? "        " : "      ";
       if (optionalType) {
         writer.append("      if (optionalBean.isPresent()) {").eol();
-        writer.append("        %s bean = optionalBean.get();", shortName).eol();
+        writer.append("        var bean = optionalBean.get();").eol();
       }
       writer.append(indent);
       if (hasLifecycleMethods()) {
-        writer.append("%s $bean = ", shortName);
+        writer.append("var $bean = ");
       }
       writer.append("builder");
       if (primary) {
@@ -236,9 +234,7 @@ class MethodReader {
     for (MethodParam param : params) {
       param.addImports(importTypes);
     }
-    if (isFactory) {
-      genericType.addImports(importTypes);
-    }
+    // TYPE_ generic types are fully qualified
     if (optionalType) {
       importTypes.add(Constants.OPTIONAL);
     }

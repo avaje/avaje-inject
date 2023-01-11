@@ -73,7 +73,8 @@ class SimpleBeanWriter {
     if (!genericTypes.isEmpty()) {
       for (GenericType type : genericTypes) {
         writer.append("  public static final Type TYPE_%s = new GenericType<", type.shortName());
-        type.writeShort(writer);
+        // use fully qualified types here rather than use type.writeShort(writer)
+        writer.append(type.toString());
         writer.append(">(){}.type();").eol();
       }
       writer.eol();
@@ -157,7 +158,7 @@ class SimpleBeanWriter {
 
   String indent = "     ";
   private void writeCreateBean(MethodReader constructor) {
-    writer.append("%s %s bean = new %s(", indent, shortName, shortName);
+    writer.append(indent).append(" var bean = new %s(", shortName);
     // add constructor dependencies
     writeMethodParams("builder", constructor);
   }

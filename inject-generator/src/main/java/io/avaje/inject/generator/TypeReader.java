@@ -116,10 +116,7 @@ class TypeReader {
     if (!genericTypes.isEmpty()) {
       importTypes.add(Constants.TYPE);
       importTypes.add(Constants.GENERICTYPE);
-      importTypes.add(Constants.PROVIDER);
-      for (GenericType type : genericTypes) {
-        type.addImports(importTypes);
-      }
+      // TYPE_ generic types are fully qualified
     }
   }
 }
