@@ -3,7 +3,6 @@ package org.example.myapp.config;
 import io.avaje.inject.*;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import jakarta.inject.Provider;
 import org.example.myapp.HelloData;
 
 import java.util.Optional;
@@ -59,6 +58,16 @@ public class AppConfig {
     return new MyPrim("notPrimary");
   }
 
+  @Bean
+  public Provider provider() {
+    return new Provider();
+  }
+
+  @Bean
+  public MyGen<String> myGen() {
+    return new MyGen<String>();
+  }
+
   public static class Builder {
   }
 
@@ -71,6 +80,14 @@ public class AppConfig {
   public static class MySecOptType {
   }
 
+  public static class Provider {
+
+  }
+
+  public static class MyGen<T> {
+
+  }
+
   public static class MyPrim {
     public final String val;
     public MyPrim(String val) {
@@ -81,10 +98,10 @@ public class AppConfig {
   @Component
   public static class BuilderUser {
 
-    final Provider<Builder> builderProvider;
+    final jakarta.inject.Provider<Builder> builderProvider;
 
     @Inject
-    public BuilderUser(Provider<Builder> builderProvider) {
+    public BuilderUser(jakarta.inject.Provider<Builder> builderProvider) {
       this.builderProvider = builderProvider;
     }
 
