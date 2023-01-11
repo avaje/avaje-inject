@@ -108,7 +108,7 @@ class SimpleBeanProxyWriter {
   private void writeClassStart() {
     writer.append(Constants.AT_PROXY).eol();
     writer.append(Constants.AT_GENERATED).eol();
-    writer.append("public class %s%s extends %s {", shortName, suffix, shortName).eol().eol();
+    writer.append("public final class %s%s extends %s {", shortName, suffix, shortName).eol().eol();
   }
 
   private Writer createFileWriter() throws IOException {

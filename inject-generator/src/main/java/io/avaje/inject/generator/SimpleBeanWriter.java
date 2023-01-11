@@ -227,7 +227,7 @@ class SimpleBeanWriter {
     if (beanReader.getBeanType().getNestingKind().isNested()) {
       shortName = shortName.replace(".", "$");
     }
-    writer.append("public class ").append(shortName).append(suffix).append(" ");
+    writer.append("public final class ").append(shortName).append(suffix).append(" ");
     if (beanReader.isRequestScopedController()) {
       writer.append("implements ");
       beanReader.factoryInterface(writer);
