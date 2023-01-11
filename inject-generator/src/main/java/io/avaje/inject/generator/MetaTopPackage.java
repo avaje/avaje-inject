@@ -2,7 +2,7 @@ package io.avaje.inject.generator;
 
 import java.util.Collection;
 
-class MetaTopPackage {
+final class MetaTopPackage {
 
   private String topPackage;
 

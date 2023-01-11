@@ -20,7 +20,7 @@ import java.io.Reader;
 import java.nio.file.NoSuchFileException;
 import java.util.*;
 
-class ProcessingContext {
+final class ProcessingContext {
 
   private final ProcessingEnvironment processingEnv;
   private final Messager messager;

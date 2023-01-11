@@ -3,7 +3,7 @@ package io.avaje.inject.generator;
 import javax.lang.model.element.TypeElement;
 import java.util.*;
 
-class MetaDataOrdering {
+final class MetaDataOrdering {
 
   private static final String CIRC_ERR_MSG =
     "To handle circular dependencies consider using field injection " +

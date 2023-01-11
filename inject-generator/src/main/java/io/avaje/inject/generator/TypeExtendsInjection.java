@@ -13,7 +13,7 @@ import java.util.*;
  * Read points for field injection and method injection
  * on baseType plus inherited injection points.
  */
-class TypeExtendsInjection {
+final class TypeExtendsInjection {
 
   private MethodReader injectConstructor;
   private final List<MethodReader> otherConstructors = new ArrayList<>();

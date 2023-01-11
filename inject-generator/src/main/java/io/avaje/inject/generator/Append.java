@@ -6,7 +6,7 @@ import java.io.Writer;
 /**
  * Helper that wraps a writer with some useful methods to append content.
  */
-class Append {
+final class Append {
 
   private final Writer writer;
   private int nameIndex;

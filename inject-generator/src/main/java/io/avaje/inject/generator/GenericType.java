@@ -8,7 +8,7 @@ import java.util.Set;
 /**
  * A type with generic parameters and potentially nested.
  */
-class GenericType {
+final class GenericType {
 
   /**
    * Trim off generic wildcard from the raw type if present.

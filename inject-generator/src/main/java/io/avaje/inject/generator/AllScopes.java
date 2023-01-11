@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class AllScopes {
+final class AllScopes {
 
   private final Map<String, Data> scopeAnnotations = new HashMap<>();
   private final ProcessingContext context;

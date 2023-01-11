@@ -2,7 +2,7 @@ package io.avaje.inject.generator;
 
 import javax.lang.model.element.Element;
 
-class AspectPair implements Comparable<AspectPair> {
+final class AspectPair implements Comparable<AspectPair> {
 
   private final String target;
   private final int ordering;

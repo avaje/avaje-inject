@@ -3,7 +3,7 @@ package io.avaje.inject.generator;
 import java.util.HashSet;
 import java.util.Set;
 
-class IncludeAnnotations {
+final class IncludeAnnotations {
 
   private static final String[] EXCLUDED_PREFIX = {"javax.annotation.", "javax.inject.", "jakarta.annotation.", "jakarta.inject.", "io.avaje.inject.", "lombok."};
   private static final String[] EXCLUDED_SUFFIX = {".PostConstruct", ".PreDestroy", ".Generated"};

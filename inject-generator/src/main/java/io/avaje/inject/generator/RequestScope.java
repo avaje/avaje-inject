@@ -7,7 +7,7 @@ import java.util.Set;
 /**
  * Handling detection of request scoped dependencies and appropriate BeanFactory generation.
  */
-class RequestScope {
+final class RequestScope {
 
   private static final String JEX_CONTEXT = "io.avaje.jex.Context";
   private static final String JAVALIN_CONTEXT = "io.javalin.http.Context";

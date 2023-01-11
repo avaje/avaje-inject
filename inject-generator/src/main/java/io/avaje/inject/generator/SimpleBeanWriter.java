@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * Write the source code for the bean.
  */
-class SimpleBeanWriter {
+final class SimpleBeanWriter {
 
   private static final String CODE_COMMENT = "/**\n * Generated source - dependency injection builder for %s.\n */";
   private static final String CODE_COMMENT_FACTORY = "/**\n * Generated source - dependency injection factory for request scoped %s.\n */";

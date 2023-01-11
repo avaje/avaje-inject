@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-class ScopeUtil {
+final class ScopeUtil {
 
   private static final String INJECT_MODULE = "io.avaje.inject.InjectModule";
 

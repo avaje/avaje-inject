@@ -4,7 +4,7 @@ package io.avaje.inject.generator;
 /**
  * Holds detection and details of request scoped dependencies.
  */
-class BeanRequestParams {
+final class BeanRequestParams {
 
   private final String parentType;
   private RequestScope.Handler reqScopeHandler;

@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Read the annotations on the type.
  */
-class AspectAnnotationReader {
+final class AspectAnnotationReader {
 
   private static final String ASPECT = Constants.ASPECT;
   private final TypeElement baseType;

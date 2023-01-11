@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Read the annotations on the type.
  */
-class TypeAnnotationReader {
+final class TypeAnnotationReader {
 
   private final TypeElement beanType;
   private final ProcessingContext context;

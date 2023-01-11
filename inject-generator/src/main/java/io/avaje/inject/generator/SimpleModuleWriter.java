@@ -13,7 +13,7 @@ import java.util.TreeSet;
 /**
  * Write the source code for the factory.
  */
-class SimpleModuleWriter {
+final class SimpleModuleWriter {
 
   private static final String CODE_COMMENT_FACTORY =
     "/**\n" +

@@ -3,7 +3,7 @@ package io.avaje.inject.generator;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 
-class AnnotationUtil {
+final class AnnotationUtil {
 
   static boolean hasAnnotationWithName(Element element, String matchShortName) {
     for (AnnotationMirror mirror : element.getAnnotationMirrors()) {

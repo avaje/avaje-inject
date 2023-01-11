@@ -7,7 +7,7 @@ import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.Set;
 
-class TypeReader {
+final class TypeReader {
 
   private final boolean forBean;
   private final TypeElement beanType;

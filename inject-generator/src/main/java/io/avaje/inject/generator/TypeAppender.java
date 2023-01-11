@@ -7,7 +7,7 @@ import java.util.Set;
 /**
  * Helper for building the registration types.
  */
-class TypeAppender {
+final class TypeAppender {
 
   private final ImportTypeMap importTypes;
   private final Set<String> types = new LinkedHashSet<>();

@@ -12,7 +12,7 @@ import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.util.*;
 
-class ScopeInfo {
+final class ScopeInfo {
 
   enum Type {
     /**

@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 /**
  * Holds the data as per <code>@DependencyMeta</code>
  */
-class MetaData {
+final class MetaData {
 
   private static final String NEWLINE = "\n";
 

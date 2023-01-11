@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Read the inheritance types for a given bean type.
  */
-class TypeExtendsReader {
+final class TypeExtendsReader {
 
   private static final String JAVA_LANG_OBJECT = "java.lang.Object";
   private final GenericType baseGenericType;

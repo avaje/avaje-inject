@@ -5,7 +5,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-class BeanAspects {
+final class BeanAspects {
 
   static final BeanAspects EMPTY = new BeanAspects();
 

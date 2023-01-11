@@ -1,6 +1,6 @@
 package io.avaje.inject.generator;
 
-class UtilType {
+final class UtilType {
 
   private enum Type {
     LIST,

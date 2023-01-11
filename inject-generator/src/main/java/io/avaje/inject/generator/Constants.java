@@ -1,6 +1,6 @@
 package io.avaje.inject.generator;
 
-class Constants {
+final class Constants {
 
   static final int ORDERING_DEFAULT = 1000;
 

@@ -20,7 +20,7 @@ import javax.lang.model.util.Elements;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-public class Processor extends AbstractProcessor {
+public final class Processor extends AbstractProcessor {
 
   private ProcessingContext context;
   private Elements elementUtils;

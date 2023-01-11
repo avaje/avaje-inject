@@ -7,7 +7,7 @@ import javax.lang.model.element.TypeElement;
 /**
  * Looks for lifecycle annotations on methods.
  */
-class MethodLifecycleReader {
+final class MethodLifecycleReader {
 
   private final String initMethod;
   private final String destroyMethod;

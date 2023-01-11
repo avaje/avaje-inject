@@ -9,7 +9,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.*;
 
-class BeanReader {
+final class BeanReader {
 
   private final TypeElement beanType;
   private final String shortName;

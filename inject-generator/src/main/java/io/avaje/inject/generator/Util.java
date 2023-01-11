@@ -7,7 +7,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
-class Util {
+final class Util {
 
   static final String PROVIDER_PREFIX = "jakarta.inject.Provider<";
   private static final String OPTIONAL_PREFIX = "java.util.Optional<";
