@@ -4,7 +4,6 @@ import jakarta.inject.Named;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -12,25 +11,25 @@ class TypeReader {
 
   private final boolean forBean;
   private final TypeElement beanType;
-  private final Set<String> importTypes;
+  private final ImportTypeMap importTypes;
   private final TypeExtendsReader extendsReader;
   private final TypeAnnotationReader annotationReader;
   private Set<GenericType> genericTypes;
   private String typesRegister;
 
-  TypeReader(GenericType genericType, TypeElement beanType, ProcessingContext context, Set<String> importTypes, boolean factory) {
+  TypeReader(GenericType genericType, TypeElement beanType, ProcessingContext context, ImportTypeMap importTypes, boolean factory) {
     this(genericType, true, beanType, context, importTypes, factory);
   }
 
-  TypeReader(GenericType genericType, TypeElement returnElement, ProcessingContext context) {
-    this(genericType, false, returnElement, context, new LinkedHashSet<>(), false);
+  TypeReader(GenericType genericType, TypeElement returnElement, ProcessingContext context, ImportTypeMap importTypes) {
+    this(genericType, false, returnElement, context, importTypes, false);
   }
 
-  private TypeReader(GenericType genericType, boolean forBean, TypeElement beanType, ProcessingContext context, Set<String> importTypes, boolean factory) {
+  private TypeReader(GenericType genericType, boolean forBean, TypeElement beanType, ProcessingContext context, ImportTypeMap importTypes, boolean factory) {
     this.forBean = forBean;
     this.beanType = beanType;
     this.importTypes = importTypes;
-    this.extendsReader = new TypeExtendsReader(genericType, beanType, context, factory);
+    this.extendsReader = new TypeExtendsReader(genericType, beanType, context, factory, importTypes);
     this.annotationReader = new TypeAnnotationReader(beanType, context);
   }
 
@@ -44,10 +43,6 @@ class TypeReader {
 
   boolean isClosable() {
     return extendsReader.isCloseable();
-  }
-
-  void addImports(Set<String> importTypes) {
-    importTypes.addAll(this.importTypes);
   }
 
   BeanAspects hasAspects() {
@@ -112,7 +107,7 @@ class TypeReader {
     this.typesRegister = appender.asString();
   }
 
-  void extraImports(Set<String> importTypes) {
+  void extraImports(ImportTypeMap importTypes) {
     if (!genericTypes.isEmpty()) {
       importTypes.add(Constants.TYPE);
       importTypes.add(Constants.GENERICTYPE);

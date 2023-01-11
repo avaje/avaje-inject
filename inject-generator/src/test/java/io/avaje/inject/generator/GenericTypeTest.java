@@ -3,7 +3,6 @@ package io.avaje.inject.generator;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -60,10 +59,11 @@ class GenericTypeTest {
     assertThat(type.isGenericType()).isFalse();
     assertThat(type.isProviderType()).isFalse();
 
-    Set<String> importSet = new HashSet<>();
+    ImportTypeMap importSet = new ImportTypeMap();
     type.addImports(importSet);
-    assertThat(importSet).hasSize(1);
-    assertThat(importSet).containsOnly("my.exa.Repo");
+    Set<String> forImport = importSet.forImport();
+    assertThat(forImport).hasSize(1);
+    assertThat(forImport).containsOnly("my.exa.Repo");
   }
 
   @Test
@@ -96,10 +96,11 @@ class GenericTypeTest {
     assertThat(type.getParams()).isEmpty();
     assertThat(type.isGenericType()).isFalse();
 
-    Set<String> importSet = new HashSet<>();
+    ImportTypeMap importSet = new ImportTypeMap();
     type.addImports(importSet);
-    assertThat(importSet).hasSize(1);
-    assertThat(importSet).containsOnly("my.exa.Repo");
+    Set<String> forImport = importSet.forImport();
+    assertThat(forImport).hasSize(1);
+    assertThat(forImport).containsOnly("my.exa.Repo");
   }
 
   @Test
@@ -112,10 +113,11 @@ class GenericTypeTest {
     assertThat(type.getParams()).hasSize(1);
     assertThat(type.getParams().get(0).getMainType()).isEqualTo("my.Other");
 
-    Set<String> importSet = new HashSet<>();
+    ImportTypeMap importSet = new ImportTypeMap();
     type.addImports(importSet);
-    assertThat(importSet).hasSize(2);
-    assertThat(importSet).contains("my.exa.Repo", "my.Other");
+    Set<String> forImport = importSet.forImport();
+    assertThat(forImport).hasSize(2);
+    assertThat(forImport).contains("my.exa.Repo", "my.Other");
   }
 
   @Test
@@ -139,11 +141,11 @@ class GenericTypeTest {
     assertThat(type.getParams().get(0).getMainType()).isEqualTo("java.lang.String");
     assertThat(type.getParams().get(1).getMainType()).isEqualTo("my.d.Has");
 
-    LinkedHashSet<String> importTypes = new LinkedHashSet<>();
-    type.addImports(importTypes);
-
-    assertThat(importTypes).hasSize(2);
-    assertThat(importTypes).containsExactly("java.util.concurrent.ConcurrentMap", "my.d.Has");
+    ImportTypeMap importSet = new ImportTypeMap();
+    type.addImports(importSet);
+    Set<String> forImport = importSet.forImport();
+    assertThat(forImport).hasSize(2);
+    assertThat(forImport).containsExactly("java.util.concurrent.ConcurrentMap", "my.d.Has");
   }
 
   @Test

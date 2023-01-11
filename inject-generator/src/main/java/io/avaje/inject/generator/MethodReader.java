@@ -38,11 +38,11 @@ class MethodReader {
   private final TypeReader typeReader;
   private final boolean optionalType;
 
-  MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType) {
-    this(context, element, beanType, null, null);
+  MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType, ImportTypeMap importTypes) {
+    this(context, element, beanType, null, null, importTypes);
   }
 
-  MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType, Bean bean, String qualifierName) {
+  MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType, Bean bean, String qualifierName, ImportTypeMap importTypes) {
     this.isFactory = bean != null;
     this.element = element;
     if (isFactory) {
@@ -79,7 +79,7 @@ class MethodReader {
       this.initMethod = initMethod;
       this.destroyMethod = destroyMethod;
     } else {
-      this.typeReader = new TypeReader(genericType, returnElement, context);
+      this.typeReader = new TypeReader(genericType, returnElement, context, importTypes);
       typeReader.process();
       MethodLifecycleReader lifecycleReader = new MethodLifecycleReader(returnElement, initMethod, destroyMethod);
       this.initMethod = lifecycleReader.initMethod();
@@ -230,16 +230,13 @@ class MethodReader {
     return value != null && !value.isEmpty();
   }
 
-  void addImports(Set<String> importTypes) {
+  void addImports(ImportTypeMap importTypes) {
     for (MethodParam param : params) {
       param.addImports(importTypes);
     }
     // TYPE_ generic types are fully qualified
     if (optionalType) {
       importTypes.add(Constants.OPTIONAL);
-    }
-    if (typeReader != null) {
-      typeReader.addImports(importTypes);
     }
   }
 
@@ -413,11 +410,8 @@ class MethodReader {
       return new Dependency(paramType, utilType.isCollection());
     }
 
-    void addImports(Set<String> importTypes) {
+    void addImports(ImportTypeMap importTypes) {
       fullGenericType.addImports(importTypes);
-      if (genericType.isGenericType()) {
-        importTypes.add(Constants.PROVIDER);
-      }
     }
 
     void checkRequest(BeanRequestParams requestParams) {

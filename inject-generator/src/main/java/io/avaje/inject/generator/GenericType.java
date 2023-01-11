@@ -97,7 +97,7 @@ class GenericType {
   }
 
 
-  void addImports(Set<String> importTypes) {
+  void addImports(ImportTypeMap importTypes) {
     final String type = trimExtends();
     if (includeInImports(type)) {
       importTypes.add(type);

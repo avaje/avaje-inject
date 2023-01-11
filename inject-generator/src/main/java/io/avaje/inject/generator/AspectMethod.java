@@ -49,7 +49,7 @@ class AspectMethod {
     return rawReturn.equals("void");
   }
 
-  void addImports(Set<String> importTypes) {
+  void addImports(ImportTypeMap importTypes) {
     for (AspectPair aspect : aspectPairs) {
       aspect.addImports(importTypes);
     }

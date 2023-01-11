@@ -30,7 +30,7 @@ class BeanAspects {
     return targets;
   }
 
-  void extraImports(Set<String> importTypes) {
+  void extraImports(ImportTypeMap importTypes) {
     for (AspectMethod aspectMethod : aspectMethods) {
       aspectMethod.addImports(importTypes);
     }

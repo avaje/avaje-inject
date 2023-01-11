@@ -24,6 +24,7 @@ class TypeExtendsInjection {
   private final List<AspectMethod> aspectMethods = new ArrayList<>();
   private final Map<String, Integer> nameIndex = new HashMap<>();
 
+  private final ImportTypeMap importTypes;
   private final TypeElement baseType;
   private final ProcessingContext context;
   private final boolean factory;
@@ -31,7 +32,8 @@ class TypeExtendsInjection {
   private Element postConstructMethod;
   private Element preDestroyMethod;
 
-  TypeExtendsInjection(TypeElement baseType, ProcessingContext context, boolean factory) {
+  TypeExtendsInjection(TypeElement baseType, ProcessingContext context, boolean factory, ImportTypeMap importTypes) {
+    this.importTypes = importTypes;
     this.baseType = baseType;
     this.context = context;
     this.factory = factory;
@@ -70,7 +72,7 @@ class TypeExtendsInjection {
     }
 
     ExecutableElement ex = (ExecutableElement) element;
-    MethodReader methodReader = new MethodReader(context, ex, baseType).read();
+    MethodReader methodReader = new MethodReader(context, ex, baseType, importTypes).read();
     Inject inject = element.getAnnotation(Inject.class);
     if (inject != null) {
       injectConstructor = methodReader;
@@ -95,7 +97,7 @@ class TypeExtendsInjection {
     final String methodKey = methodElement.getSimpleName().toString();
     if (inject != null && !notInjectMethods.contains(methodKey)) {
       if (!injectMethods.containsKey(methodKey)) {
-        MethodReader methodReader = new MethodReader(context, methodElement, type).read();
+        MethodReader methodReader = new MethodReader(context, methodElement, type, importTypes).read();
         if (methodReader.isNotPrivate()) {
           injectMethods.put(methodKey, methodReader);
           checkAspect = false;
@@ -145,7 +147,7 @@ class TypeExtendsInjection {
 
   private void addFactoryMethod(ExecutableElement methodElement, Bean bean) {
     String qualifierName = Util.getNamed(methodElement);
-    factoryMethods.add(new MethodReader(context, methodElement, baseType, bean, qualifierName).read());
+    factoryMethods.add(new MethodReader(context, methodElement, baseType, bean, qualifierName, importTypes).read());
   }
 
   BeanAspects hasAspects() {

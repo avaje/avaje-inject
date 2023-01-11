@@ -23,7 +23,7 @@ class BeanReader {
   private final Element postConstructMethod;
   private final Element preDestroyMethod;
 
-  private final Set<String> importTypes = new TreeSet<>();
+  private final ImportTypeMap importTypes = new ImportTypeMap();
   private final BeanRequestParams requestParams;
   private final TypeReader typeReader;
   private final boolean prototype;
@@ -263,17 +263,12 @@ class BeanReader {
     if (!suppressBuilderImport) {
       importTypes.add(Constants.BUILDER);
     }
-    return importTypes;
+    return importTypes.forImport();
   }
 
   private void checkImports() {
-    for (String type : importTypes) {
-      if (type.endsWith(".Builder")) {
-        suppressBuilderImport = true;
-      } else if (type.endsWith(".Generated")) {
-        suppressGeneratedImport = true;
-      }
-    }
+    suppressBuilderImport = importTypes.containsShortName("Builder");
+    suppressGeneratedImport = importTypes.containsShortName("Generated");
   }
 
   String builderType() {

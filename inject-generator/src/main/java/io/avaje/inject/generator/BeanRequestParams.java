@@ -1,8 +1,6 @@
 package io.avaje.inject.generator;
 
 
-import java.util.Set;
-
 /**
  * Holds detection and details of request scoped dependencies.
  */
@@ -39,7 +37,7 @@ class BeanRequestParams {
     reqScopeHandler.factoryInterface(writer, nm(parentType));
   }
 
-  void addImports(Set<String> importTypes) {
+  void addImports(ImportTypeMap importTypes) {
     if (reqScopeHandler != null) {
       importTypes.add(Constants.SINGLETON);
       importTypes.add(Constants.INJECT);
