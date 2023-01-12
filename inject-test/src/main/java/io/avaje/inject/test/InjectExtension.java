@@ -7,65 +7,30 @@ import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 
 import java.lang.System.Logger.Level;
 import java.lang.reflect.Method;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Junit 5 extension for avaje inject.
  * <p>
  * Supports injection for fields annotated with <code>@Mock, @Spy, @Captor, @Inject</code>.
  */
-public class InjectExtension implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback, ExtensionContext.Store.CloseableResource {
+public final class InjectExtension implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback {
 
   private static final System.Logger log = AppLog.getLogger("io.avaje.inject");
   private static final Namespace INJECT_NS = Namespace.create("io.avaje.inject.InjectTest");
   private static final String BEAN_SCOPE = "BEAN_SCOPE";
   private static final String META = "META";
-  private static final ReentrantLock lock = new ReentrantLock();
-  private static boolean started;
-  private static BeanScope globalTestScope;
+  private static final GlobalTestScope GLOBAL = new GlobalTestScope();
 
-  /**
-   * Global shutdown of JUnit.
-   */
-  @Override
-  public void close() {
-    lock.lock();
-    try {
-      if (globalTestScope != null) {
-        log.log(Level.DEBUG, "Closing global test BeanScope");
-        globalTestScope.close();
-      }
-    } finally {
-      lock.unlock();
-    }
-  }
-
-  private void initialiseGlobalTestScope(ExtensionContext context) {
-    globalTestScope = TestBeanScope.init(false);
-    if (globalTestScope != null) {
-      log.log(Level.TRACE, "register global test BeanScope with beans {0}", globalTestScope);
-      context.getRoot().getStore(Namespace.GLOBAL).put(InjectExtension.class.getCanonicalName(), this);
-    }
-  }
+  private BeanScope globalBeanScope;
 
   @Override
   public void beforeAll(ExtensionContext context) {
-    lock.lock();
-    try {
-      if (!started) {
-        initialiseGlobalTestScope(context);
-        started = true;
-      }
+    globalBeanScope = GLOBAL.obtain(context);
 
-      final MetaInfo metaInfo = createMetaInfo(context);
-      putMetaInfo(context, metaInfo);
-
-      if (metaInfo.hasStaticInjection()) {
-        MetaInfo.Scope testClassBeanScope = metaInfo.buildForClass(globalTestScope);
-        putClassScope(context, testClassBeanScope);
-      }
-    } finally {
-      lock.unlock();
+    final MetaInfo metaInfo = createMetaInfo(context);
+    putMetaInfo(context, metaInfo);
+    if (metaInfo.hasStaticInjection()) {
+      putClassScope(context, metaInfo.buildForClass(globalBeanScope));
     }
   }
 
@@ -96,10 +61,10 @@ public class InjectExtension implements BeforeAllCallback, AfterAllCallback, Bef
   @Override
   public void beforeEach(final ExtensionContext context) {
     final MetaInfo metaInfo = getMetaInfo(context);
-    if (metaInfo.hasNormalInjection()) {
+    if (metaInfo.hasInstanceInjection()) {
 
       // if (static fields) then (class scope) else (globalTestScope)
-      final BeanScope parent = metaInfo.hasStaticInjection() ? getClassScope(context) : globalTestScope;
+      final BeanScope parent = metaInfo.hasStaticInjection() ? getClassScope(context) : globalBeanScope;
 
       AutoCloseable beanScope = metaInfo.buildForInstance(parent, context.getRequiredTestInstance());
 

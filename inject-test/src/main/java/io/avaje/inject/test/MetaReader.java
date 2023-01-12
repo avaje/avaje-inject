@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.internal.configuration.plugins.Plugins;
 import org.mockito.internal.util.reflection.GenericMaster;
-import org.mockito.plugins.MemberAccessor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -19,8 +18,9 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-class MetaReader {
+final class MetaReader {
 
+  private final SetupMethods methodFinder;
   final List<Field> captors = new ArrayList<>();
   final List<FieldTarget> mocks = new ArrayList<>();
   final List<FieldTarget> spies = new ArrayList<>();
@@ -37,17 +37,18 @@ class MetaReader {
 
   MetaReader(Class<?> testClass, Plugin plugin) {
     this.plugin = plugin;
+    this.methodFinder = new SetupMethods(testClass);
     for (Field field : testClass.getDeclaredFields()) {
       readField(field);
     }
   }
 
   boolean hasClassInjection() {
-    return classInjection;
+    return classInjection || methodFinder.hasStaticMethods();
   }
 
   boolean hasInstanceInjection() {
-    return instanceInjection;
+    return instanceInjection || methodFinder.hasInstanceMethods();
   }
 
   @Override
@@ -197,35 +198,69 @@ class MetaReader {
 
   void build(BeanScopeBuilder builder, Object testInstance) {
     if (testInstance != null) {
-      buildForInstance(builder);
+      buildForInstance(builder, testInstance);
     } else {
       buildForStatics(builder);
     }
   }
 
-  void buildForInstance(BeanScopeBuilder builder) {
-    final BeanScopeBuilder.ForTesting forTesting = builder.forTesting();
+  void buildForInstance(BeanScopeBuilder builder, Object testInstance) {
     for (FieldTarget target : mocks) {
-      forTesting.mock(target.type(), target.name());
+      registerMock(testInstance, builder, target);
     }
     for (FieldTarget target : spies) {
-      forTesting.spy(target.type(), target.name());
+      registerSpy(testInstance, builder, target);
     }
+    for (FieldTarget target : injection) {
+      Object existingValue = target.get(testInstance);
+      if (existingValue != null) {
+        registerAsTestDouble(builder, target, existingValue);
+      }
+    }
+    methodFinder.invokeInstance(builder, testInstance);
   }
 
   void buildForStatics(BeanScopeBuilder builder) {
-    final BeanScopeBuilder.ForTesting forTesting = builder.forTesting();
     for (FieldTarget target : staticMocks) {
-      forTesting.mock(target.type(), target.name());
+      registerMock(null, builder, target);
     }
     for (FieldTarget target : staticSpies) {
-      forTesting.spy(target.type(), target.name());
+      registerSpy(null, builder, target);
+    }
+    for (FieldTarget target : staticInjection) {
+      Object existingValue = target.get(null);
+      if (existingValue != null) {
+        registerAsTestDouble(builder, target, existingValue);
+      }
+    }
+    methodFinder.invokeStatics(builder);
+  }
+
+  private static void registerMock(Object testInstance, BeanScopeBuilder builder, FieldTarget target) {
+    Object existingValue = target.get(testInstance);
+    if (existingValue != null) {
+      registerAsTestDouble(builder, target, existingValue);
+    } else {
+      builder.forTesting().mock(target.type(), target.name());
     }
   }
 
+  private static void registerSpy(Object testInstance, BeanScopeBuilder builder, FieldTarget target) {
+    Object existingValue = target.get(testInstance);
+    if (existingValue != null) {
+      registerAsTestDouble(builder, target, existingValue);
+    } else {
+      builder.forTesting().spy(target.type(), target.name());
+    }
+  }
+
+  private static void registerAsTestDouble(BeanScopeBuilder builder, FieldTarget target, Object value) {
+    target.markAsProvided();
+    builder.bean(target.name(), target.type(), value);
+  }
+
   void set(Field field, Object val, Object testInstance) throws IllegalAccessException {
-    final MemberAccessor memberAccessor = Plugins.getMemberAccessor();
-    memberAccessor.set(field, testInstance, val);
+    Plugins.getMemberAccessor().set(field, testInstance, val);
   }
 
   class FieldTarget {
@@ -234,6 +269,7 @@ class MetaReader {
     private final String name;
     private final boolean isStatic;
     private boolean pluginInjection;
+    private boolean valueAlreadyProvided;
 
     FieldTarget(Field field, String name) {
       this.field = field;
@@ -258,8 +294,18 @@ class MetaReader {
       return isStatic;
     }
 
+    Object get(Object instance) {
+      try {
+        return Plugins.getMemberAccessor().get(field, instance);
+      } catch (IllegalAccessException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
     void setFromScope(BeanScope beanScope, Object testInstance) throws IllegalAccessException {
-      set(field, beanScope.get(type(), name), testInstance);
+      if (!valueAlreadyProvided) {
+        set(field, beanScope.get(type(), name), testInstance);
+      }
     }
 
     void setFromPlugin(Object value, Object testInstance) throws IllegalAccessException {
@@ -268,6 +314,10 @@ class MetaReader {
 
     void markForPluginInjection() {
       pluginInjection = true;
+    }
+
+    void markAsProvided() {
+      valueAlreadyProvided = true;
     }
   }
 

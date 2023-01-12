@@ -6,14 +6,14 @@ import java.util.ServiceLoader;
 
 final class PluginInitialise {
 
-  static final Plugin plugin = init();
+  private static final Plugin plugin = init();
 
-  static Plugin init() {
+  private static Plugin init() {
     return ServiceLoader.load(Plugin.class).findFirst().orElse(null);
   }
 
   @Nullable
   static Plugin plugin() {
-    return plugin == null ? null : plugin;
+    return plugin;
   }
 }

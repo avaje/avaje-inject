@@ -6,7 +6,7 @@ import io.avaje.inject.BeanScopeBuilder;
 /**
  * Wraps the underlying metadata (fields with annotations @Mock, @Spy, @Inject, @Captor).
  */
-class MetaInfo {
+final class MetaInfo {
 
   private final MetaReader reader;
 
@@ -18,7 +18,7 @@ class MetaInfo {
     return reader.hasClassInjection();
   }
 
-  boolean hasNormalInjection() {
+  boolean hasInstanceInjection() {
     return reader.hasInstanceInjection();
   }
 
