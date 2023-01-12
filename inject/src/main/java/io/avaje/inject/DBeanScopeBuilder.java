@@ -1,12 +1,11 @@
 package io.avaje.inject;
 
 import io.avaje.applog.AppLog;
-import io.avaje.inject.spi.Builder;
-import io.avaje.inject.spi.EnrichBean;
+import io.avaje.inject.spi.*;
 import io.avaje.inject.spi.Module;
-import io.avaje.inject.spi.SuppliedBean;
 import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
+import jakarta.inject.Provider;
 
 import java.lang.System.Logger.Level;
 import java.lang.reflect.Type;
@@ -17,11 +16,10 @@ import java.util.function.Consumer;
  * Build a bean scope with options for shutdown hook and supplying test doubles.
  */
 @NonNullApi
-class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
+final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   private static final System.Logger log = AppLog.getLogger("io.avaje.inject");
 
-  @SuppressWarnings("rawtypes")
   private final List<SuppliedBean> suppliedBeans = new ArrayList<>();
   @SuppressWarnings("rawtypes")
   private final List<EnrichBean> enrichBeans = new ArrayList<>();
@@ -85,6 +83,12 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
+  public <D> BeanScopeBuilder provideDefault(String name, Type type, Provider<D> provider) {
+    suppliedBeans.add(SuppliedBean.secondary(name, type, provider));
+    return this;
+  }
+
+  @Override
   public BeanScopeBuilder classLoader(ClassLoader classLoader) {
     this.classLoader = classLoader;
     return this;
@@ -143,10 +147,12 @@ class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   @Override
   public BeanScope build() {
+    // load and apply plugins first
+    var loader = classLoader != null ? classLoader : Thread.currentThread().getContextClassLoader();
+    ServiceLoader.load(Plugin.class, loader).forEach(plugin -> plugin.apply(this));
     // sort factories by dependsOn
     FactoryOrder factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
     if (factoryOrder.isEmpty()) {
-      var loader = classLoader != null ? classLoader : Thread.currentThread().getContextClassLoader();
       ServiceLoader.load(Module.class, loader).forEach(factoryOrder::add);
     }
 

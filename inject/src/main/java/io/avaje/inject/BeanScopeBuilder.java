@@ -2,6 +2,8 @@ package io.avaje.inject;
 
 import io.avaje.inject.spi.Module;
 import io.avaje.lang.NonNullApi;
+import io.avaje.lang.Nullable;
+import jakarta.inject.Provider;
 
 import java.lang.reflect.Type;
 import java.util.function.Consumer;
@@ -205,6 +207,31 @@ public interface BeanScopeBuilder {
   <D> BeanScopeBuilder bean(Type type, D bean);
 
   /**
+   * Add a supplied bean provider that acts as a default fallback for a dependency.
+   * <p>
+   * This provider is only called if nothing else provides the dependency. It effectively
+   * uses `@Secondary` priority.
+   *
+   * @param type     The type of the dependency
+   * @param provider The provider of the dependency.
+   */
+  default <D> BeanScopeBuilder provideDefault(Type type, Provider<D> provider) {
+    return provideDefault(null, type, provider);
+  }
+
+  /**
+   * Add a supplied bean provider that acts as a default fallback for a dependency.
+   * <p>
+   * This provider is only called if nothing else provides the dependency. It effectively
+   * uses `@Secondary` priority.
+   *
+   * @param name     The name qualifier
+   * @param type     The type of the dependency
+   * @param provider The provider of the dependency.
+   */
+  <D> BeanScopeBuilder provideDefault(@Nullable String name, Type type, Provider<D> provider);
+
+  /**
    * Deprecated - migrate to bean().
    */
   @Deprecated
@@ -314,7 +341,7 @@ public interface BeanScopeBuilder {
      */
     @Deprecated
     default BeanScopeBuilder.ForTesting withMock(Class<?> type) {
-      return  mock(type);
+      return mock(type);
     }
 
     /**

@@ -29,9 +29,9 @@ final class MetaDataOrdering {
         queue.add(metaData);
       }
       // register into map keyed by provider
-      providers.computeIfAbsent(metaData.getType(), s -> new ProviderList()).add(metaData);
+      providerAdd(metaData.getType()).add(metaData);
       for (String provide : metaData.getProvides()) {
-        providers.computeIfAbsent(provide, s -> new ProviderList()).add(metaData);
+        providerAdd(provide).add(metaData);
       }
     }
     externallyRequiredDependencies();
@@ -42,8 +42,15 @@ final class MetaDataOrdering {
    */
   private void externallyRequiredDependencies() {
     for (String requireType : scopeInfo.requires()) {
-      providers.computeIfAbsent(requireType, s -> new ProviderList());
+      providerAdd(requireType);
     }
+    for (String requireType : scopeInfo.pluginProvided()) {
+      providerAdd(requireType);
+    }
+  }
+
+  private ProviderList providerAdd(String requireType) {
+    return providers.computeIfAbsent(requireType, s -> new ProviderList());
   }
 
   int processQueue() {

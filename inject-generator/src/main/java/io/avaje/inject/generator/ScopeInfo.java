@@ -45,6 +45,7 @@ final class ScopeInfo {
   private final List<BeanReader> beanReaders = new ArrayList<>();
   private final Set<String> readBeans = new HashSet<>();
   private final ProcessingContext context;
+  private final Set<String> pluginProvided = new HashSet<>();
   private final Set<String> requires = new LinkedHashSet<>();
   private final Set<String> provides = new LinkedHashSet<>();
   private final Set<String> requiresPackages = new LinkedHashSet<>();
@@ -88,6 +89,10 @@ final class ScopeInfo {
       "name=" + name +
       ", metaData=" + metaData +
       '}';
+  }
+
+  void pluginProvided(String pluginProvides) {
+    pluginProvided.add(pluginProvides);
   }
 
   boolean includeSingleton() {
@@ -170,6 +175,10 @@ final class ScopeInfo {
 
   Set<String> requires() {
     return requires;
+  }
+
+  Set<String> pluginProvided() {
+    return pluginProvided;
   }
 
   void writeBeanHelpers() {
@@ -453,7 +462,7 @@ final class ScopeInfo {
    * Return true if this module provides the dependency (non-recursive, local only).
    */
   boolean providesDependencyLocally(String dependency) {
-    if (requires.contains(dependency)) {
+    if (requires.contains(dependency) || pluginProvided.contains(dependency)) {
       return true;
     }
     for (MetaData meta : metaData.values()) {

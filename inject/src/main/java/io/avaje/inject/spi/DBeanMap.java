@@ -51,7 +51,7 @@ final class DBeanMap {
 
   private void addSuppliedBean(SuppliedBean supplied) {
     Type suppliedType = supplied.type();
-    DContextEntryBean entryBean = DContextEntryBean.of(supplied.source(), supplied.name(), supplied.priority());
+    DContextEntryBean entryBean = DContextEntryBean.supplied(supplied.source(), supplied.name(), supplied.priority());
     beans.computeIfAbsent(suppliedType.getTypeName(), s -> new DContextEntry()).add(entryBean);
     for (Class<?> anInterface : supplied.interfaces()) {
       beans.computeIfAbsent(anInterface.getTypeName(), s -> new DContextEntry()).add(entryBean);

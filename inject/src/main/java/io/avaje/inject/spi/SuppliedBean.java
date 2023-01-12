@@ -50,6 +50,14 @@ public class SuppliedBean {
     return new SuppliedBean(BeanEntry.SUPPLIED, name, type, source);
   }
 
+  /**
+   * Create a supplied bean with SECONDARY priority as a default fallback dependency that is
+   * only used when no other matching one is provided.
+   */
+  public static SuppliedBean secondary(String name, Type type, Object source) {
+    return new SuppliedBean(BeanEntry.SECONDARY, name, type, source);
+  }
+
   private SuppliedBean(int priority, String name, Type type, Object source) {
     this.priority = priority;
     this.name = name;

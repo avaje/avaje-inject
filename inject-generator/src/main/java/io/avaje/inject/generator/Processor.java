@@ -4,6 +4,7 @@ import io.avaje.inject.Component;
 import io.avaje.inject.Factory;
 import io.avaje.inject.InjectModule;
 import io.avaje.inject.Prototype;
+import io.avaje.inject.spi.Plugin;
 import io.avaje.inject.spi.Proxy;
 import jakarta.inject.Scope;
 import jakarta.inject.Singleton;
@@ -18,6 +19,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import java.util.LinkedHashSet;
+import java.util.ServiceLoader;
 import java.util.Set;
 
 public final class Processor extends AbstractProcessor {
@@ -43,6 +45,19 @@ public final class Processor extends AbstractProcessor {
     this.elementUtils = processingEnv.getElementUtils();
     this.allScopes = new AllScopes(context);
     this.defaultScope = allScopes.defaultScope();
+    registerPluginProvidedTypes();
+  }
+
+  /**
+   * Register types provided by the plugin so no compiler error when we have a dependency
+   * on these types and the only thing providing them is the plugin.
+   */
+  private void registerPluginProvidedTypes() {
+    for (Plugin plugin : ServiceLoader.load(Plugin.class)) {
+      for (Class<?> provide : plugin.provides()) {
+        defaultScope.pluginProvided(provide.getCanonicalName());
+      }
+    }
   }
 
   @Override
