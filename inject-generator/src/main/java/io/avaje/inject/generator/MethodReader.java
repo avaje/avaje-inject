@@ -103,7 +103,7 @@ final class MethodReader {
       set.add(genericType);
     }
     if (typeReader != null) {
-      set.addAll(typeReader.getGenericTypes());
+      set.addAll(typeReader.genericTypes());
     }
   }
 
@@ -115,11 +115,11 @@ final class MethodReader {
     return this;
   }
 
-  String getName() {
+  String name() {
     return methodName;
   }
 
-  List<MethodParam> getParams() {
+  List<MethodParam> params() {
     return params;
   }
 
@@ -133,7 +133,7 @@ final class MethodReader {
       dependsOn.add(GenericType.trimWildcard(param.paramType));
     }
     metaData.setDependsOn(dependsOn);
-    metaData.setProvides(typeReader == null ? Collections.emptyList() : typeReader.getProvides());
+    metaData.setProvides(typeReader == null ? Collections.emptyList() : typeReader.provides());
     metaData.setAutoProvides(typeReader == null ? null : typeReader.autoProvides());
     return metaData;
   }
@@ -163,7 +163,7 @@ final class MethodReader {
     writer.append(");").eol();
   }
 
-  public void builderAddBeanProvider(Append writer) {
+  void builderAddBeanProvider(Append writer) {
     if (isVoid) {
       writer.append("Error - void @Prototype method ?").eol();
       return;
@@ -241,8 +241,8 @@ final class MethodReader {
     }
   }
 
-  Set<GenericType> getGenericTypes() {
-    return typeReader == null ? Collections.emptySet() : typeReader.getGenericTypes();
+  Set<GenericType> genericTypes() {
+    return typeReader == null ? Collections.emptySet() : typeReader.genericTypes();
   }
 
   void buildAddFor(Append writer) {
@@ -254,7 +254,7 @@ final class MethodReader {
         writer.append("\"%s\", ", name);
       }
       if (typeReader != null) {
-        writer.append(typeReader.getTypesRegister());
+        writer.append(typeReader.typesRegister());
       }
     }
     writer.append(")) {").eol();
@@ -407,7 +407,7 @@ final class MethodReader {
       return isGenericType() && !isProvider();
     }
 
-    Dependency getDependsOn() {
+    Dependency dependsOn() {
       return new Dependency(paramType, utilType.isCollection());
     }
 

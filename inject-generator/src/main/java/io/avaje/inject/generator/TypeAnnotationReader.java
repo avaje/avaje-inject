@@ -23,7 +23,7 @@ final class TypeAnnotationReader {
     this.context = context;
   }
 
-  List<String> getAnnotationTypes() {
+  List<String> annotationTypes() {
     return annotationTypes;
   }
 
@@ -31,7 +31,7 @@ final class TypeAnnotationReader {
     return qualifierName != null;
   }
 
-  String getQualifierName() {
+  String qualifierName() {
     return qualifierName;
   }
 

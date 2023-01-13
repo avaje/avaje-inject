@@ -43,10 +43,10 @@ class GenericTypeTest {
   void parse() {
     GenericType type = new GenericTypeParser("my.exa.Repo<T,K>").parse();
 
-    assertThat(type.getMainType()).isEqualTo("my.exa.Repo");
-    assertThat(type.getParams()).hasSize(2);
-    assertThat(type.getParams().get(0).getMainType()).isEqualTo("T");
-    assertThat(type.getParams().get(1).getMainType()).isEqualTo("K");
+    assertThat(type.mainType()).isEqualTo("my.exa.Repo");
+    assertThat(type.params()).hasSize(2);
+    assertThat(type.params().get(0).mainType()).isEqualTo("T");
+    assertThat(type.params().get(1).mainType()).isEqualTo("K");
   }
 
   @Test
@@ -54,8 +54,8 @@ class GenericTypeTest {
     GenericType type = GenericType.parse("my.exa.Repo");
     assertThat(type.shortName()).isEqualTo("Repo");
     assertThat(type.topType()).isEqualTo("my.exa.Repo");
-    assertThat(type.getMainType()).isNull();
-    assertThat(type.getParams()).isEmpty();
+    assertThat(type.mainType()).isNull();
+    assertThat(type.params()).isEmpty();
     assertThat(type.isGenericType()).isFalse();
     assertThat(type.isProviderType()).isFalse();
 
@@ -92,8 +92,8 @@ class GenericTypeTest {
   private void assertsForRepo(GenericType type) {
     assertThat(type.shortName()).isEqualTo("Repo");
     assertThat(type.topType()).isEqualTo("my.exa.Repo");
-    assertThat(type.getMainType()).isNull();
-    assertThat(type.getParams()).isEmpty();
+    assertThat(type.mainType()).isNull();
+    assertThat(type.params()).isEmpty();
     assertThat(type.isGenericType()).isFalse();
 
     ImportTypeMap importSet = new ImportTypeMap();
@@ -108,10 +108,10 @@ class GenericTypeTest {
     GenericType type = GenericType.parse("my.exa.Repo<my.Other>");
     assertThat(type.shortName()).isEqualTo("RepoOther");
     assertThat(type.topType()).isEqualTo("my.exa.Repo");
-    assertThat(type.getMainType()).isEqualTo("my.exa.Repo");
+    assertThat(type.mainType()).isEqualTo("my.exa.Repo");
     assertThat(type.isGenericType()).isTrue();
-    assertThat(type.getParams()).hasSize(1);
-    assertThat(type.getParams().get(0).getMainType()).isEqualTo("my.Other");
+    assertThat(type.params()).hasSize(1);
+    assertThat(type.params().get(0).mainType()).isEqualTo("my.Other");
 
     ImportTypeMap importSet = new ImportTypeMap();
     type.addImports(importSet);
@@ -124,22 +124,22 @@ class GenericTypeTest {
   void parse_withParams() {
     GenericType type = GenericType.parse("my.exa.Repo<my.d.Haz,java.lang.Long>");
 
-    assertThat(type.getMainType()).isEqualTo("my.exa.Repo");
+    assertThat(type.mainType()).isEqualTo("my.exa.Repo");
     assertThat(type.isGenericType()).isTrue();
-    assertThat(type.getParams()).hasSize(2);
-    assertThat(type.getParams().get(0).getMainType()).isEqualTo("my.d.Haz");
-    assertThat(type.getParams().get(1).getMainType()).isEqualTo("java.lang.Long");
+    assertThat(type.params()).hasSize(2);
+    assertThat(type.params().get(0).mainType()).isEqualTo("my.d.Haz");
+    assertThat(type.params().get(1).mainType()).isEqualTo("java.lang.Long");
   }
 
   @Test
   void parse_withParams2() {
     GenericType type = GenericType.parse("java.util.concurrent.ConcurrentMap<java.lang.String,my.d.Has>");
 
-    assertThat(type.getMainType()).isEqualTo("java.util.concurrent.ConcurrentMap");
+    assertThat(type.mainType()).isEqualTo("java.util.concurrent.ConcurrentMap");
     assertThat(type.isGenericType()).isTrue();
-    assertThat(type.getParams()).hasSize(2);
-    assertThat(type.getParams().get(0).getMainType()).isEqualTo("java.lang.String");
-    assertThat(type.getParams().get(1).getMainType()).isEqualTo("my.d.Has");
+    assertThat(type.params()).hasSize(2);
+    assertThat(type.params().get(0).mainType()).isEqualTo("java.lang.String");
+    assertThat(type.params().get(1).mainType()).isEqualTo("my.d.Has");
 
     ImportTypeMap importSet = new ImportTypeMap();
     type.addImports(importSet);
@@ -152,27 +152,27 @@ class GenericTypeTest {
   void parse_withExtendsParams() {
     GenericType type = new GenericTypeParser("my.exa.Repo<? extends my.d.Haz,java.lang.Long>").parse();
 
-    assertThat(type.getMainType()).isEqualTo("my.exa.Repo");
+    assertThat(type.mainType()).isEqualTo("my.exa.Repo");
     assertThat(type.isGenericType()).isTrue();
-    assertThat(type.getParams()).hasSize(2);
-    assertThat(type.getParams().get(0).getMainType()).isEqualTo("? extends my.d.Haz");
-    assertThat(type.getParams().get(1).getMainType()).isEqualTo("java.lang.Long");
+    assertThat(type.params()).hasSize(2);
+    assertThat(type.params().get(0).mainType()).isEqualTo("? extends my.d.Haz");
+    assertThat(type.params().get(1).mainType()).isEqualTo("java.lang.Long");
   }
 
   @Test
   void parse_withNestedParams() {
     GenericType type = new GenericTypeParser("my.exa.Repo<my.a.Prov<my.b.Haz>,my.a.Key<java.util.UUID>>").parse();
 
-    assertThat(type.getMainType()).isEqualTo("my.exa.Repo");
+    assertThat(type.mainType()).isEqualTo("my.exa.Repo");
     assertThat(type.isGenericType()).isTrue();
-    assertThat(type.getParams()).hasSize(2);
-    assertThat(type.getParams().get(0).getMainType()).isEqualTo("my.a.Prov");
-    assertThat(type.getParams().get(0).getParams()).hasSize(1);
-    assertThat(type.getParams().get(0).getParams().get(0).getMainType()).isEqualTo("my.b.Haz");
+    assertThat(type.params()).hasSize(2);
+    assertThat(type.params().get(0).mainType()).isEqualTo("my.a.Prov");
+    assertThat(type.params().get(0).params()).hasSize(1);
+    assertThat(type.params().get(0).params().get(0).mainType()).isEqualTo("my.b.Haz");
 
-    assertThat(type.getParams().get(1).getMainType()).isEqualTo("my.a.Key");
-    assertThat(type.getParams().get(1).getParams()).hasSize(1);
-    assertThat(type.getParams().get(1).getParams().get(0).getMainType()).isEqualTo("java.util.UUID");
+    assertThat(type.params().get(1).mainType()).isEqualTo("my.a.Key");
+    assertThat(type.params().get(1).params()).hasSize(1);
+    assertThat(type.params().get(1).params().get(0).mainType()).isEqualTo("java.util.UUID");
   }
 
   @Test

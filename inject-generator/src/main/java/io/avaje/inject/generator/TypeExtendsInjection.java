@@ -155,7 +155,7 @@ final class TypeExtendsInjection {
   }
 
   void removeFromProvides(List<String> provides) {
-    MethodReader constructor = getConstructor();
+    MethodReader constructor = constructor();
     if (constructor != null) {
       constructor.removeFromProvides(provides);
     }
@@ -167,31 +167,31 @@ final class TypeExtendsInjection {
     }
   }
 
-  List<FieldReader> getInjectFields() {
+  List<FieldReader> injectFields() {
     List<FieldReader> list = new ArrayList<>(injectFields);
     Collections.reverse(list);
     return list;
   }
 
-  List<MethodReader> getInjectMethods() {
+  List<MethodReader> injectMethods() {
     List<MethodReader> list = new ArrayList<>(injectMethods.values());
     Collections.reverse(list);
     return list;
   }
 
-  List<MethodReader> getFactoryMethods() {
+  List<MethodReader> factoryMethods() {
     return factoryMethods;
   }
 
-  Element getPostConstructMethod() {
+  Element postConstructMethod() {
     return postConstructMethod;
   }
 
-  Element getPreDestroyMethod() {
+  Element preDestroyMethod() {
     return preDestroyMethod;
   }
 
-  MethodReader getConstructor() {
+  MethodReader constructor() {
     if (injectConstructor != null) {
       return injectConstructor;
     }

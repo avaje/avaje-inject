@@ -34,7 +34,7 @@ final class FieldReader {
     }
   }
 
-  String getFieldName() {
+  String fieldName() {
     return element.getSimpleName().toString();
   }
 
@@ -77,7 +77,7 @@ final class FieldReader {
   void writeRequestDependency(Append writer) {
     if (!requestParam) {
       // just add as field dependency
-      requestParamName = writer.nextName(getFieldName().toLowerCase());
+      requestParamName = writer.nextName(fieldName().toLowerCase());
       writer.append("  @Inject").eol().append("  ");
       type.writeShort(writer);
       writer.append(" %s;", requestParamName).eol().eol();
@@ -88,7 +88,7 @@ final class FieldReader {
    * Generate code to set bean field dependencies as part of BeanFactory create().
    */
   void writeRequestInject(Append writer) {
-    writer.append("    bean.%s = %s;", getFieldName(), requestParamName).eol();
+    writer.append("    bean.%s = %s;", fieldName(), requestParamName).eol();
   }
 
 }

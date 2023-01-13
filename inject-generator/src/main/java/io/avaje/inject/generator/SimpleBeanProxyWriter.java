@@ -20,7 +20,7 @@ final class SimpleBeanProxyWriter {
     this.beanReader = beanReader;
     this.context = context;
 
-    TypeElement origin = beanReader.getBeanType();
+    TypeElement origin = beanReader.beanType();
     this.originName = origin.getQualifiedName().toString();
     this.shortName = origin.getSimpleName().toString();
     this.packageName = Util.packageOf(originName);

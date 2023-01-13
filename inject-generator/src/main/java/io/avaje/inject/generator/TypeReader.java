@@ -33,12 +33,12 @@ final class TypeReader {
     this.annotationReader = new TypeAnnotationReader(beanType, context);
   }
 
-  String getTypesRegister() {
+  String typesRegister() {
     return typesRegister;
   }
 
-  List<String> getProvides() {
-    return extendsReader.getProvides();
+  List<String> provides() {
+    return extendsReader.provides();
   }
 
   String autoProvides() {
@@ -53,31 +53,31 @@ final class TypeReader {
     return extendsReader.hasAspects();
   }
 
-  List<FieldReader> getInjectFields() {
-    return extendsReader.getInjectFields();
+  List<FieldReader> injectFields() {
+    return extendsReader.injectFields();
   }
 
-  List<MethodReader> getInjectMethods() {
-    return extendsReader.getInjectMethods();
+  List<MethodReader> injectMethods() {
+    return extendsReader.injectMethods();
   }
 
-  List<MethodReader> getFactoryMethods() {
-    return extendsReader.getFactoryMethods();
+  List<MethodReader> factoryMethods() {
+    return extendsReader.factoryMethods();
   }
 
-  Element getPostConstructMethod() {
-    return extendsReader.getPostConstructMethod();
+  Element postConstructMethod() {
+    return extendsReader.postConstructMethod();
   }
 
-  Element getPreDestroyMethod() {
-    return extendsReader.getPreDestroyMethod();
+  Element preDestroyMethod() {
+    return extendsReader.preDestroyMethod();
   }
 
-  MethodReader getConstructor() {
-    return extendsReader.getConstructor();
+  MethodReader constructor() {
+    return extendsReader.constructor();
   }
 
-  Set<GenericType> getGenericTypes() {
+  Set<GenericType> genericTypes() {
     return genericTypes;
   }
 
@@ -89,23 +89,23 @@ final class TypeReader {
     initRegistrationTypes();
   }
 
-  String getName() {
+  String name() {
     Named named = beanType.getAnnotation(Named.class);
     if (named != null) {
       return named.value().toLowerCase();
     }
     if (annotationReader.hasQualifierName()) {
-      return annotationReader.getQualifierName();
+      return annotationReader.qualifierName();
     }
-    return extendsReader.getQualifierName();
+    return extendsReader.qualifierName();
   }
 
   private void initRegistrationTypes() {
     TypeAppender appender = new TypeAppender(importTypes);
-    appender.add(extendsReader.getBaseType());
-    appender.add(extendsReader.getProvides());
+    appender.add(extendsReader.baseType());
+    appender.add(extendsReader.provides());
     if (forBean) {
-      appender.add(annotationReader.getAnnotationTypes());
+      appender.add(annotationReader.annotationTypes());
     }
     this.genericTypes = appender.genericTypes();
     this.typesRegister = appender.asString();

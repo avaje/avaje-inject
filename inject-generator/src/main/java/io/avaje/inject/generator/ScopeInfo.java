@@ -137,10 +137,6 @@ final class ScopeInfo {
     }
   }
 
-  TypeElement annotationType() {
-    return annotationType;
-  }
-
   JavaFileObject moduleFile() {
     return moduleFile;
   }
@@ -155,10 +151,6 @@ final class ScopeInfo {
 
   String moduleShortName() {
     return moduleShortName;
-  }
-
-  boolean isDefaultScope() {
-    return defaultScope;
   }
 
   String name() {
@@ -195,11 +187,11 @@ final class ScopeInfo {
           beanReader.setWrittenToFile();
         }
       } catch (FilerException e) {
-        context.logWarn("FilerException to write $DI class " + beanReader.getBeanType() + " " + e.getMessage());
+        context.logWarn("FilerException to write $DI class " + beanReader.beanType() + " " + e.getMessage());
 
       } catch (IOException e) {
         e.printStackTrace();
-        context.logError(beanReader.getBeanType(), "Failed to write $DI class");
+        context.logError(beanReader.beanType(), "Failed to write $DI class");
       }
     }
   }
@@ -269,7 +261,7 @@ final class ScopeInfo {
   void mergeMetaData() {
     for (BeanReader beanReader : beanReaders) {
       if (!beanReader.isRequestScopedController()) {
-        MetaData metaData = this.metaData.get(beanReader.getMetaKey());
+        MetaData metaData = this.metaData.get(beanReader.metaKey());
         if (metaData == null) {
           addMeta(beanReader);
         } else {
@@ -284,9 +276,9 @@ final class ScopeInfo {
    */
   private void addMeta(BeanReader beanReader) {
     MetaData meta = beanReader.createMeta();
-    metaData.put(meta.getKey(), meta);
+    metaData.put(meta.key(), meta);
     for (MetaData methodMeta : beanReader.createFactoryMethodMeta()) {
-      metaData.put(methodMeta.getKey(), methodMeta);
+      metaData.put(methodMeta.key(), methodMeta);
     }
   }
 
@@ -317,7 +309,7 @@ final class ScopeInfo {
         context.logError("Missing @DependencyMeta on method " + simpleName);
       } else {
         final MetaData metaData = new MetaData(meta);
-        this.metaData.put(metaData.getKey(), metaData);
+        this.metaData.put(metaData.key(), metaData);
       }
     }
   }
@@ -482,10 +474,10 @@ final class ScopeInfo {
       return true;
     }
     for (MetaData meta : metaData.values()) {
-      if (dependency.equals(meta.getType())) {
+      if (dependency.equals(meta.type())) {
         return true;
       }
-      final List<String> provides = meta.getProvides();
+      final List<String> provides = meta.provides();
       if (provides != null && !provides.isEmpty()) {
         for (String provide : provides) {
           if (dependency.equals(provide)) {
@@ -508,8 +500,8 @@ final class ScopeInfo {
 
   boolean providedByOther(Dependency dependency) {
     return dependency.isSoftDependency()
-      || providedByPackage(dependency.getName())
-      || providedByOtherScope(dependency.getName());
+      || providedByPackage(dependency.name())
+      || providedByOtherScope(dependency.name());
   }
 
   Set<String> initModuleDependencies(Set<String> importTypes) {

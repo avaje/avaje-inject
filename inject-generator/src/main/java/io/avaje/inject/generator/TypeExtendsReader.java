@@ -40,11 +40,11 @@ final class TypeExtendsReader {
     this.baseTypeIsInterface = baseType.getKind() == ElementKind.INTERFACE;
   }
 
-  GenericType getBaseType() {
+  GenericType baseType() {
     return baseGenericType;
   }
 
-  String getQualifierName() {
+  String qualifierName() {
     return qualifierName;
   }
 
@@ -52,28 +52,28 @@ final class TypeExtendsReader {
     return extendsInjection.hasAspects();
   }
 
-  List<FieldReader> getInjectFields() {
-    return extendsInjection.getInjectFields();
+  List<FieldReader> injectFields() {
+    return extendsInjection.injectFields();
   }
 
-  List<MethodReader> getInjectMethods() {
-    return extendsInjection.getInjectMethods();
+  List<MethodReader> injectMethods() {
+    return extendsInjection.injectMethods();
   }
 
-  List<MethodReader> getFactoryMethods() {
-    return extendsInjection.getFactoryMethods();
+  List<MethodReader> factoryMethods() {
+    return extendsInjection.factoryMethods();
   }
 
-  Element getPostConstructMethod() {
-    return extendsInjection.getPostConstructMethod();
+  Element postConstructMethod() {
+    return extendsInjection.postConstructMethod();
   }
 
-  Element getPreDestroyMethod() {
-    return extendsInjection.getPreDestroyMethod();
+  Element preDestroyMethod() {
+    return extendsInjection.preDestroyMethod();
   }
 
-  MethodReader getConstructor() {
-    return extendsInjection.getConstructor();
+  MethodReader constructor() {
+    return extendsInjection.constructor();
   }
 
   String autoProvides() {
@@ -86,7 +86,7 @@ final class TypeExtendsReader {
     return null;
   }
 
-  List<String> getProvides() {
+  List<String> provides() {
     return providesTypes;
   }
 

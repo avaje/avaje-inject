@@ -74,7 +74,7 @@ final class MetaData {
     return "".equals(name) ? null : name;
   }
 
-  String getBuildName() {
+  String buildName() {
     if (Util.isVoid(type)) {
       return "void_" + Util.trimMethod(method);
     } else {
@@ -87,7 +87,7 @@ final class MetaData {
     }
   }
 
-  public String getKey() {
+  public String key() {
     if (Util.isVoid(type)) {
       return "method:" + method;
     }
@@ -118,32 +118,32 @@ final class MetaData {
   }
 
   void update(BeanReader beanReader) {
-    this.provides = beanReader.getProvides();
-    this.dependsOn = beanReader.getDependsOn();
+    this.provides = beanReader.provides();
+    this.dependsOn = beanReader.dependsOn();
     this.autoProvides = beanReader.autoProvides();
     this.generateProxy = beanReader.isGenerateProxy();
   }
 
-  String getType() {
+  String type() {
     return type;
   }
 
-  List<String> getProvides() {
+  List<String> provides() {
     return provides;
   }
 
-  List<Dependency> getDependsOn() {
+  List<Dependency> dependsOn() {
     return dependsOn;
   }
 
-  String getAutoProvides() {
+  String autoProvides() {
     return autoProvides;
   }
 
   /**
    * Return the top level package for the bean and the interfaces it implements.
    */
-  String getTopPackage() {
+  String topPackage() {
     if (method == null || method.isEmpty()) {
       return Util.packageOf(type);
     }
@@ -183,7 +183,7 @@ final class MetaData {
       append.append(", autoProvides=\"").append(autoProvides).append("\"");
     }
     append.append(")").append(NEWLINE);
-    append.append("  private void build_").append(getBuildName()).append("() {").append(NEWLINE);
+    append.append("  private void build_").append(buildName()).append("() {").append(NEWLINE);
     if (hasMethod()) {
       append.append("    ").append(Util.shortMethod(method)).append("(builder");
     } else {

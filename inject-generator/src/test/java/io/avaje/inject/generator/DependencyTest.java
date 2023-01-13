@@ -11,13 +11,13 @@ class DependencyTest {
     Dependency dependency = new Dependency("org.foo.Bar", true);
 
     assertThat(dependency.isSoftDependency()).isTrue();
-    assertThat(dependency.getName()).isEqualTo("org.foo.Bar");
+    assertThat(dependency.name()).isEqualTo("org.foo.Bar");
     assertThat(dependency.dependsOn()).isEqualTo("soft:org.foo.Bar");
 
     Dependency dependencyFromMeta = new Dependency("soft:org.foo.Bar");
-    assertThat(dependencyFromMeta.getName()).isEqualTo("org.foo.Bar");
+    assertThat(dependencyFromMeta.name()).isEqualTo("org.foo.Bar");
     assertThat(dependencyFromMeta.isSoftDependency()).isTrue();
-    assertThat(dependencyFromMeta.getName()).isEqualTo(dependency.getName());
+    assertThat(dependencyFromMeta.name()).isEqualTo(dependency.name());
     assertThat(dependencyFromMeta.dependsOn()).isEqualTo(dependency.dependsOn());
   }
 
@@ -27,6 +27,6 @@ class DependencyTest {
 
     assertThat(dependency.dependsOn()).isEqualTo("org.foo.Bar");
     assertThat(dependency.isSoftDependency()).isFalse();
-    assertThat(dependency.getName()).isEqualTo("org.foo.Bar");
+    assertThat(dependency.name()).isEqualTo("org.foo.Bar");
   }
 }

@@ -95,7 +95,7 @@ final class SimpleModuleWriter {
     Set<String> autoProvides = new TreeSet<>();
 
     for (MetaData metaData : ordering.ordered()) {
-      String forExternal = metaData.getAutoProvides();
+      String forExternal = metaData.autoProvides();
       if (forExternal != null && !forExternal.isEmpty()) {
         if (Util.isAspectProvider(forExternal)) {
           autoProvidesAspects.add(Util.extractAspectType(forExternal));
@@ -134,7 +134,7 @@ final class SimpleModuleWriter {
   private Set<String> distinctPublicClasses() {
     Set<String> publicClasses = new LinkedHashSet<>();
     for (MetaData metaData : ordering.ordered()) {
-      String rawType = metaData.getType();
+      String rawType = metaData.type();
       if (!"void".equals(rawType)) {
         String type = GenericType.parse(rawType).topType();
         TypeElement element = context.element(type);
@@ -158,7 +158,7 @@ final class SimpleModuleWriter {
     writer.append("    // i.e. \"provides\" followed by \"dependsOn\"").eol();
     for (MetaData metaData : ordering.ordered()) {
       if (!metaData.isGenerateProxy()) {
-        writer.append("    build_%s();", metaData.getBuildName()).eol();
+        writer.append("    build_%s();", metaData.buildName()).eol();
       }
     }
     writer.append("  }").eol();

@@ -163,7 +163,6 @@ final class Util {
    * Return the common parent package.
    */
   static String commonParent(String currentTop, String aPackage) {
-
     if (aPackage == null) return currentTop;
     if (currentTop == null) return aPackage;
     if (aPackage.startsWith(currentTop)) {

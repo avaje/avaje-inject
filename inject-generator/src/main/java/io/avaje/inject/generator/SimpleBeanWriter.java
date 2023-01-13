@@ -29,7 +29,7 @@ final class SimpleBeanWriter {
   SimpleBeanWriter(BeanReader beanReader, ProcessingContext context) {
     this.beanReader = beanReader;
     this.context = context;
-    TypeElement origin = beanReader.getBeanType();
+    TypeElement origin = beanReader.beanType();
     this.originName = origin.getQualifiedName().toString();
     if (origin.getNestingKind().isNested()) {
       this.packageName = Util.nestedPackageOf(originName);
@@ -44,7 +44,7 @@ final class SimpleBeanWriter {
 
   private Writer createFileWriter() throws IOException {
     String originName = this.originName;
-    if (beanReader.getBeanType().getNestingKind().isNested()) {
+    if (beanReader.beanType().getNestingKind().isNested()) {
       originName = originName.replace(shortName, shortName.replace(".", "$"));
     }
     JavaFileObject jfo = context.createWriter(originName + suffix);
@@ -90,14 +90,14 @@ final class SimpleBeanWriter {
   }
 
   private void writeStaticFactoryBeanMethods() {
-    for (MethodReader factoryMethod : beanReader.getFactoryMethods()) {
+    for (MethodReader factoryMethod : beanReader.factoryMethods()) {
       writeFactoryBeanMethod(factoryMethod);
     }
   }
 
   private void writeFactoryBeanMethod(MethodReader method) {
     method.commentBuildMethod(writer);
-    writer.append("  public static void build_%s(%s builder) {", method.getName(), beanReader.builderType()).eol();
+    writer.append("  public static void build_%s(%s builder) {", method.name(), beanReader.builderType()).eol();
     method.buildAddFor(writer);
     writer.append(method.builderGetFactory()).eol();
     if (method.isProtoType()) {
@@ -113,9 +113,9 @@ final class SimpleBeanWriter {
   }
 
   private void writeStaticFactoryMethod() {
-    MethodReader constructor = beanReader.getConstructor();
+    MethodReader constructor = beanReader.constructor();
     if (constructor == null) {
-      context.logError(beanReader.getBeanType(), "Unable to determine constructor to use for %s? Add explicit @Inject to one of the constructors.", beanReader.getBeanType());
+      context.logError(beanReader.beanType(), "Unable to determine constructor to use for %s? Add explicit @Inject to one of the constructors.", beanReader.beanType());
       return;
     }
     writeBuildMethodStart();
@@ -178,8 +178,8 @@ final class SimpleBeanWriter {
   private void injectFields() {
     String bean = beanReader.prototype() ? "bean" : "$bean";
     String builder = beanReader.prototype() ? "builder" : "b";
-    for (FieldReader fieldReader : beanReader.getInjectFields()) {
-      String fieldName = fieldReader.getFieldName();
+    for (FieldReader fieldReader : beanReader.injectFields()) {
+      String fieldName = fieldReader.fieldName();
       String getDependency = fieldReader.builderGetDependency(builder);
       writer.append("        %s.%s = %s;", bean, fieldName, getDependency).eol();
     }
@@ -188,14 +188,14 @@ final class SimpleBeanWriter {
   private void injectMethods() {
     String bean = beanReader.prototype() ? "bean" : "$bean";
     String builder = beanReader.prototype() ? "builder" : "b";
-    for (MethodReader methodReader : beanReader.getInjectMethods()) {
-      writer.append("        %s.%s(", bean, methodReader.getName());
+    for (MethodReader methodReader : beanReader.injectMethods()) {
+      writer.append("        %s.%s(", bean, methodReader.name());
       writeMethodParams(builder, methodReader);
     }
   }
 
   private void writeMethodParams(String builderRef, MethodReader methodReader) {
-    List<MethodReader.MethodParam> methodParams = methodReader.getParams();
+    List<MethodReader.MethodParam> methodParams = methodReader.params();
     for (int i = 0; i < methodParams.size(); i++) {
       if (i > 0) {
         writer.append(", ");
@@ -224,7 +224,7 @@ final class SimpleBeanWriter {
       writer.append(Constants.AT_SINGLETON).eol();
     }
     String shortName = this.shortName;
-    if (beanReader.getBeanType().getNestingKind().isNested()) {
+    if (beanReader.beanType().getNestingKind().isNested()) {
       shortName = shortName.replace(".", "$");
     }
     writer.append("public final class ").append(shortName).append(suffix).append(" ");

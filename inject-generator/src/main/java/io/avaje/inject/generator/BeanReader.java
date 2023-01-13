@@ -47,14 +47,14 @@ final class BeanReader {
     this.typeReader = new TypeReader(GenericType.parse(type), beanType, context, importTypes, factory);
     typeReader.process();
     this.requestParams = new BeanRequestParams(type);
-    this.name = typeReader.getName();
+    this.name = typeReader.name();
     this.aspects = typeReader.hasAspects();
-    this.injectMethods = typeReader.getInjectMethods();
-    this.injectFields = typeReader.getInjectFields();
-    this.factoryMethods = typeReader.getFactoryMethods();
-    this.postConstructMethod = typeReader.getPostConstructMethod();
-    this.preDestroyMethod = typeReader.getPreDestroyMethod();
-    this.constructor = typeReader.getConstructor();
+    this.injectMethods = typeReader.injectMethods();
+    this.injectFields = typeReader.injectFields();
+    this.factoryMethods = typeReader.factoryMethods();
+    this.postConstructMethod = typeReader.postConstructMethod();
+    this.preDestroyMethod = typeReader.preDestroyMethod();
+    this.constructor = typeReader.constructor();
   }
 
   @Override
@@ -62,7 +62,7 @@ final class BeanReader {
     return beanType.toString();
   }
 
-  TypeElement getBeanType() {
+  TypeElement beanType() {
     return beanType;
   }
 
@@ -93,11 +93,11 @@ final class BeanReader {
     return this;
   }
 
-  List<Dependency> getDependsOn() {
+  List<Dependency> dependsOn() {
     List<Dependency> list = new ArrayList<>();
     if (constructor != null) {
-      for (MethodReader.MethodParam param : constructor.getParams()) {
-        Dependency dependsOn = param.getDependsOn();
+      for (MethodReader.MethodParam param : constructor.params()) {
+        Dependency dependsOn = param.dependsOn();
         // BeanScope is always injectable with no impact on injection ordering
         if (!dependsOn.dependsOn().equals(Constants.BEANSCOPE)) {
           list.add(dependsOn);
@@ -107,27 +107,23 @@ final class BeanReader {
     return list;
   }
 
-  List<MethodReader> getFactoryMethods() {
+  List<MethodReader> factoryMethods() {
     return factoryMethods;
   }
 
-  List<String> getProvides() {
-    return typeReader.getProvides();
+  List<String> provides() {
+    return typeReader.provides();
   }
 
   String autoProvides() {
     return typeReader.autoProvides();
   }
 
-  Set<GenericType> getGenericTypes() {
-    return typeReader.getGenericTypes();
-  }
-
   Set<GenericType> allGenericTypes() {
     if (allGenericTypes != null) {
       return allGenericTypes;
     }
-    allGenericTypes = new LinkedHashSet<>(typeReader.getGenericTypes());
+    allGenericTypes = new LinkedHashSet<>(typeReader.genericTypes());
     for (FieldReader field : injectFields) {
       field.addDependsOnGeneric(allGenericTypes);
     }
@@ -137,7 +133,7 @@ final class BeanReader {
     if (constructor != null) {
       constructor.addDependsOnGeneric(allGenericTypes);
     }
-    for (MethodReader factoryMethod : getFactoryMethods()) {
+    for (MethodReader factoryMethod : factoryMethods()) {
       factoryMethod.addDependsOnGeneric(allGenericTypes);
     }
     return allGenericTypes;
@@ -153,7 +149,7 @@ final class BeanReader {
   /**
    * Return the key for meta data (type and name)
    */
-  String getMetaKey() {
+  String metaKey() {
     if (name != null) {
       return type + ":" + name;
     }
@@ -199,7 +195,7 @@ final class BeanReader {
     if (name != null && !name.isEmpty()) {
       writer.append("\"%s\", ", name);
     }
-    writer.append(typeReader.getTypesRegister());
+    writer.append(typeReader.typesRegister());
     writer.append(")) {").eol();
   }
 
@@ -253,7 +249,7 @@ final class BeanReader {
     aspects.extraImports(importTypes);
 
     for (MethodReader factoryMethod : factoryMethods) {
-      Set<GenericType> genericTypes = factoryMethod.getGenericTypes();
+      Set<GenericType> genericTypes = factoryMethod.genericTypes();
       if (!genericTypes.isEmpty()) {
         importTypes.add(Constants.TYPE);
         importTypes.add(Constants.GENERICTYPE);
@@ -296,7 +292,7 @@ final class BeanReader {
     writer.eol();
   }
 
-  MethodReader getConstructor() {
+  MethodReader constructor() {
     return constructor;
   }
 
@@ -353,7 +349,7 @@ final class BeanReader {
       field.writeRequestInject(writer);
     }
     for (MethodReader method : injectMethods) {
-      writer.append("    bean.%s(", method.getName());
+      writer.append("    bean.%s(", method.name());
       method.writeRequestConstructor(writer);
       writer.append(");").eol();
     }
@@ -361,12 +357,12 @@ final class BeanReader {
     writer.append("  }").eol();
   }
 
-  List<FieldReader> getInjectFields() {
-    return typeReader.getInjectFields();
+  List<FieldReader> injectFields() {
+    return typeReader.injectFields();
   }
 
-  List<MethodReader> getInjectMethods() {
-    return typeReader.getInjectMethods();
+  List<MethodReader> injectMethods() {
+    return typeReader.injectMethods();
   }
 
   boolean isGenerateProxy() {

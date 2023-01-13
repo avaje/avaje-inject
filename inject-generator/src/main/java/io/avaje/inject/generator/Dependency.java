@@ -25,7 +25,7 @@ final class Dependency {
     return softDependency ? "soft:" + name : name;
   }
 
-  String getName() {
+  String name() {
     return name;
   }
 

@@ -3,7 +3,6 @@ package io.avaje.inject.generator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * A type with generic parameters and potentially nested.
@@ -158,14 +157,14 @@ final class GenericType {
   /**
    * Return the main type.
    */
-  String getMainType() {
+  String mainType() {
     return mainType;
   }
 
   /**
    * Return the parameter types.
    */
-  List<GenericType> getParams() {
+  List<GenericType> params() {
     return params;
   }
 
