@@ -165,7 +165,7 @@ final class MetaData {
       appendProvides(append, "dependsOn", dependsOn.stream().map(Dependency::dependsOn).collect(Collectors.toList()));
     }
     append.append(")").append(NEWLINE);
-    append.append("  protected void build_").append(getBuildName()).append("() {").append(NEWLINE);
+    append.append("  private void build_").append(getBuildName()).append("() {").append(NEWLINE);
     if (hasMethod()) {
       append.append("    ").append(Util.shortMethod(method)).append("(builder");
     } else {
