@@ -31,6 +31,7 @@ final class MetaData {
    * The list of dependencies with optional and named.
    */
   private List<Dependency> dependsOn;
+  private boolean generateProxy;
 
   MetaData(DependencyMeta meta) {
     this.type = meta.type();
@@ -52,6 +53,14 @@ final class MetaData {
   @Override
   public String toString() {
     return (name == null) ? type : type + ":" + name;
+  }
+
+  /**
+   * Return true if this is a component with Aspects applied to it.
+   * This means this type doesn't have a $DI but instead we have the $Proxy$DI.
+   */
+  boolean isGenerateProxy() {
+    return generateProxy;
   }
 
   private String trimName(String name) {
@@ -104,6 +113,7 @@ final class MetaData {
   void update(BeanReader beanReader) {
     this.provides = beanReader.getProvides();
     this.dependsOn = beanReader.getDependsOn();
+    this.generateProxy = beanReader.isGenerateProxy();
   }
 
   String getType() {
@@ -132,43 +142,45 @@ final class MetaData {
   void addImportTypes(Set<String> importTypes) {
     if (hasMethod()) {
       importTypes.add(Util.classOfMethod(method));
-    } else {
+    } else if (!generateProxy) {
       importTypes.add(type + Constants.DI);
     }
   }
 
-  String buildMethod(MetaDataOrdering ordering) {
-    StringBuilder sb = new StringBuilder(200);
-    sb.append("  @DependencyMeta(type=\"").append(type).append("\"");
+  void buildMethod(Append append) {
+    if (generateProxy) {
+      return;
+    }
+    append.append("  @DependencyMeta(type=\"").append(type).append("\"");
     if (name != null) {
-      sb.append(", name=\"").append(name).append("\"");
+      append.append(", name=\"").append(name).append("\"");
     }
     if (hasMethod()) {
-      sb.append(", method=\"").append(method).append("\"");
+      append.append(", method=\"").append(method).append("\"");
     }
     if (!provides.isEmpty()) {
-      appendProvides(sb, "provides", provides);
+      appendProvides(append, "provides", provides);
     }
     if (!dependsOn.isEmpty()) {
-      appendProvides(sb, "dependsOn", dependsOn.stream().map(Dependency::dependsOn).collect(Collectors.toList()));
+      appendProvides(append, "dependsOn", dependsOn.stream().map(Dependency::dependsOn).collect(Collectors.toList()));
     }
-    sb.append(")").append(NEWLINE);
-    sb.append("  protected void build_").append(getBuildName()).append("() {").append(NEWLINE);
+    append.append(")").append(NEWLINE);
+    append.append("  protected void build_").append(getBuildName()).append("() {").append(NEWLINE);
     if (hasMethod()) {
-      sb.append("    ").append(Util.shortMethod(method)).append("(builder");
+      append.append("    ").append(Util.shortMethod(method)).append("(builder");
     } else {
-      sb.append("    ").append(shortType).append(Constants.DI).append(".build(builder");
+      append.append("    ").append(shortType).append(Constants.DI).append(".build(builder");
     }
-    sb.append(");").append(NEWLINE);
-    sb.append("  }").append(NEWLINE);
-    return sb.toString();
+    append.append(");").append(NEWLINE);
+    append.append("  }").append(NEWLINE);
+    append.eol();
   }
 
   private boolean hasMethod() {
     return method != null && !method.isEmpty();
   }
 
-  private void appendProvides(StringBuilder sb, String attribute, List<String> types) {
+  private void appendProvides(Append sb, String attribute, List<String> types) {
     sb.append(", ").append(attribute).append("={");
     for (int i = 0; i < types.size(); i++) {
       if (i > 0) {

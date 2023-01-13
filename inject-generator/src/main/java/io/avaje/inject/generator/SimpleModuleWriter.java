@@ -130,7 +130,9 @@ final class SimpleModuleWriter {
     writer.append("    // create beans in order based on constructor dependencies").eol();
     writer.append("    // i.e. \"provides\" followed by \"dependsOn\"").eol();
     for (MetaData metaData : ordering.ordered()) {
-      writer.append("    build_%s();", metaData.getBuildName()).eol();
+      if (!metaData.isGenerateProxy()) {
+        writer.append("    build_%s();", metaData.getBuildName()).eol();
+      }
     }
     writer.append("  }").eol();
     writer.eol();
@@ -138,7 +140,7 @@ final class SimpleModuleWriter {
 
   private void writeBuildMethods() {
     for (MetaData metaData : ordering.ordered()) {
-      writer.append(metaData.buildMethod(ordering)).eol();
+      metaData.buildMethod(writer);
     }
   }
 

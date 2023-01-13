@@ -185,11 +185,12 @@ final class ScopeInfo {
     for (BeanReader beanReader : beanReaders) {
       try {
         if (!beanReader.isWrittenToFile()) {
-          SimpleBeanWriter writer = new SimpleBeanWriter(beanReader, context);
-          writer.write();
           if (beanReader.isGenerateProxy()) {
             SimpleBeanProxyWriter proxyWriter = new SimpleBeanProxyWriter(beanReader, context);
             proxyWriter.write();
+          } else {
+            SimpleBeanWriter writer = new SimpleBeanWriter(beanReader, context);
+            writer.write();
           }
           beanReader.setWrittenToFile();
         }
