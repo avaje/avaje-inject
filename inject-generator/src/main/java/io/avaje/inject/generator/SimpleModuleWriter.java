@@ -94,7 +94,7 @@ final class SimpleModuleWriter {
     writer.append("  @Override").eol();
     writer.append("  public Class<?>[] classes() {").eol();
     writer.append("    return new Class<?>[]{").eol();
-    for (String rawType : allClasses) {
+    for (String rawType : new TreeSet<>(allClasses)) {
       writer.append("      %s.class,", rawType).eol();
     }
     writer.append("    };").eol();
