@@ -114,6 +114,12 @@ final class SimpleModuleWriter {
       writer.append("  public Class<?>[] autoProvidesAspects() {").eol();
       writeReturnClassArray(autoProvidesAspects);
     }
+    Set<String> autoRequires = ordering.autoRequires();
+    if (!autoRequires.isEmpty()) {
+      writer.append("  @Override").eol();
+      writer.append("  public Class<?>[] autoRequires() {").eol();
+      writeReturnClassArray(autoRequires);
+    }
   }
 
   private void writeClassesMethod() {

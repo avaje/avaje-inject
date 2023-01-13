@@ -453,11 +453,11 @@ final class ScopeInfo {
    * Return true if the scope is a custom scope and the dependency is provided
    * by the "default" module. We could/should move to be tighter here at some point.
    */
-  boolean providedByOtherModule(String dependency) {
+  boolean providedByOtherScope(String dependency) {
     if (defaultScope) {
       return false;
     }
-    if (scopes.providedByDefaultModule(dependency)) {
+    if (scopes.providedByDefaultScope(dependency)) {
       return true;
     }
     return providesDependencyRecursive(dependency);
@@ -519,7 +519,7 @@ final class ScopeInfo {
   boolean providedByOther(Dependency dependency) {
     return dependency.isSoftDependency()
       || providedByPackage(dependency.getName())
-      || providedByOtherModule(dependency.getName());
+      || providedByOtherScope(dependency.getName());
   }
 
   Set<String> initModuleDependencies(Set<String> importTypes) {

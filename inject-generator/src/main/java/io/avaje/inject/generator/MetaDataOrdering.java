@@ -17,6 +17,7 @@ final class MetaDataOrdering {
   private final Map<String, ProviderList> providers = new HashMap<>();
   private final List<DependencyLink> circularDependencies = new ArrayList<>();
   private final Set<String> missingDependencyTypes = new LinkedHashSet<>();
+  private final Set<String> autoRequires = new TreeSet<>();
 
   MetaDataOrdering(Collection<MetaData> values, ProcessingContext context, ScopeInfo scopeInfo) {
     this.context = context;
@@ -56,7 +57,12 @@ final class MetaDataOrdering {
   int processQueue() {
     int count;
     do {
-      count = processQueueRound();
+      // first run without external dependencies from other modules
+      count = processQueueRound(false);
+    } while (count > 0);
+    do {
+      // run again including externally provided dependencies from other modules
+      count = processQueueRound(true);
     } while (count > 0);
 
     int remaining = queue.size();
@@ -128,7 +134,7 @@ final class MetaDataOrdering {
 
   private void checkMissingDependencies(MetaData metaData) {
     for (Dependency dependency : metaData.getDependsOn()) {
-      if (providers.get(dependency.getName()) == null && !scopeInfo.providedByOtherModule(dependency.getName())) {
+      if (providers.get(dependency.getName()) == null && !scopeInfo.providedByOtherScope(dependency.getName())) {
         TypeElement element = context.elementMaybe(metaData.getType());
         context.logError(element, "No dependency provided for " + dependency + " on " + metaData.getType());
         missingDependencyTypes.add(dependency.getName());
@@ -160,13 +166,13 @@ final class MetaDataOrdering {
     }
   }
 
-  private int processQueueRound() {
+  private int processQueueRound(boolean includeExternal) {
     // loop queue looking for entry that has all provides marked as included
     int count = 0;
     Iterator<MetaData> iterator = queue.iterator();
     while (iterator.hasNext()) {
       MetaData queuedMeta = iterator.next();
-      if (allDependenciesWired(queuedMeta)) {
+      if (allDependenciesWired(queuedMeta, includeExternal)) {
         orderedList.add(queuedMeta);
         queuedMeta.setWired();
         iterator.remove();
@@ -176,14 +182,19 @@ final class MetaDataOrdering {
     return count;
   }
 
-  private boolean allDependenciesWired(MetaData queuedMeta) {
+  private boolean allDependenciesWired(MetaData queuedMeta, boolean includeExternal) {
     for (Dependency dependency : queuedMeta.getDependsOn()) {
       if (!Util.isProvider(dependency.getName())) {
         // check non-provider dependency is satisfied
         ProviderList providerList = providers.get(dependency.getName());
         if (providerList == null) {
           if (!scopeInfo.providedByOther(dependency)) {
-            return false;
+            if (includeExternal && context.externallyProvided(dependency.getName())) {
+              autoRequires.add(dependency.getName());
+              queuedMeta.markWithExternalDependency();
+            } else {
+              return false;
+            }
           }
         } else {
           if (!providerList.isAllWired()) {
@@ -193,6 +204,10 @@ final class MetaDataOrdering {
       }
     }
     return true;
+  }
+
+  Set<String> autoRequires() {
+    return autoRequires;
   }
 
   List<MetaData> ordered() {

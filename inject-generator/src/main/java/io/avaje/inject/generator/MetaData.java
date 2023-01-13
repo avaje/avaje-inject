@@ -37,6 +37,7 @@ final class MetaData {
    */
   private String autoProvides;
   private boolean generateProxy;
+  private boolean usesExternalDependency;
 
   MetaData(DependencyMeta meta) {
     this.type = meta.type();
@@ -162,6 +163,9 @@ final class MetaData {
     if (generateProxy) {
       return;
     }
+    if (usesExternalDependency) {
+      append.append("  // uses external dependency").append(NEWLINE);
+    }
     append.append("  @DependencyMeta(type=\"").append(type).append("\"");
     if (name != null) {
       append.append(", name=\"").append(name).append("\"");
@@ -221,5 +225,12 @@ final class MetaData {
 
   void setAutoProvides(String autoProvides) {
     this.autoProvides = autoProvides;
+  }
+
+  /**
+   * This depends on a dependency that comes from another module in the classpath.
+   */
+  void markWithExternalDependency() {
+    usesExternalDependency = true;
   }
 }

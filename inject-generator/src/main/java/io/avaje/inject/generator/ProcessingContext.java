@@ -28,6 +28,7 @@ final class ProcessingContext {
   private final Elements elementUtils;
   private final Types typeUtils;
   private final Set<String> uniqueModuleNames = new HashSet<>();
+  private final ExternalProvide externalProvide = new ExternalProvide();
 
   ProcessingContext(ProcessingEnvironment processingEnv) {
     this.processingEnv = processingEnv;
@@ -35,6 +36,7 @@ final class ProcessingContext {
     this.filer = processingEnv.getFiler();
     this.elementUtils = processingEnv.getElementUtils();
     this.typeUtils = processingEnv.getTypeUtils();
+    externalProvide.init();
   }
 
   /**
@@ -141,4 +143,7 @@ final class ProcessingContext {
     return uniqueModuleNames.contains(moduleFullName);
   }
 
+  boolean externallyProvided(String type) {
+    return externalProvide.provides(type);
+  }
 }

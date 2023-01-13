@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static io.avaje.inject.spi.Module.EMPTY_CLASSES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -20,7 +21,7 @@ class BeanScopeBuilderTest {
   @Test
   void depends_providedByParent() {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(new TDBeanScope(MyFeature.class), Collections.emptySet(), false);
-    factoryOrder.add(bc("1", null, of(MyFeature.class)));
+    factoryOrder.add(bc("1", EMPTY_CLASSES, of(MyFeature.class)));
     factoryOrder.orderFactories();
 
     assertThat(names(factoryOrder.factories())).containsExactly("1");
@@ -29,7 +30,7 @@ class BeanScopeBuilderTest {
   @Test
   void depends_notProvidedByParent_expect_IllegalStateException() {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(new TDBeanScope(FeatureA.class), Collections.emptySet(), false);
-    factoryOrder.add(bc("1", null, of(MyFeature.class)));
+    factoryOrder.add(bc("1", EMPTY_CLASSES, of(MyFeature.class)));
     assertThatThrownBy(factoryOrder::orderFactories)
       .isInstanceOf(IllegalStateException.class)
       .hasMessageContaining("Module [io.avaje.inject.BeanScopeBuilderTest$TDModule] has unsatisfied requires [io.avaje.inject.BeanScopeBuilderTest$MyFeature]");
@@ -38,19 +39,29 @@ class BeanScopeBuilderTest {
   @Test
   void noDepends() {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
-    factoryOrder.add(bc("1", null, null));
-    factoryOrder.add(bc("2", null, null));
-    factoryOrder.add(bc("3", null, null));
+    factoryOrder.add(bc("1", EMPTY_CLASSES, EMPTY_CLASSES));
+    factoryOrder.add(bc("2", EMPTY_CLASSES, EMPTY_CLASSES));
+    factoryOrder.add(bc("3", EMPTY_CLASSES, EMPTY_CLASSES));
     factoryOrder.orderFactories();
 
     assertThat(names(factoryOrder.factories())).containsExactly("1", "2", "3");
   }
 
   @Test
+  void providedFirst() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
+    factoryOrder.add(bc("two", EMPTY_CLASSES, EMPTY_CLASSES));
+    factoryOrder.add(bc("one", of(Mod3.class), EMPTY_CLASSES));
+    factoryOrder.orderFactories();
+
+    assertThat(names(factoryOrder.factories())).containsExactly("one", "two");
+  }
+
+  @Test
   void name_depends() {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
-    factoryOrder.add(bc("two", null, of(Mod3.class)));
-    factoryOrder.add(bc("one", null, null));
+    factoryOrder.add(bc("two", EMPTY_CLASSES, of(Mod3.class)));
+    factoryOrder.add(bc("one", EMPTY_CLASSES, EMPTY_CLASSES));
     factoryOrder.orderFactories();
 
     assertThat(names(factoryOrder.factories())).containsExactly("one", "two");
@@ -59,8 +70,8 @@ class BeanScopeBuilderTest {
   @Test
   void name_depends4() {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
-    factoryOrder.add(bc("1", null, of(Mod3.class)));
-    factoryOrder.add(bc("2", null, of(Mod4.class)));
+    factoryOrder.add(bc("1", EMPTY_CLASSES, of(Mod3.class)));
+    factoryOrder.add(bc("2", EMPTY_CLASSES, of(Mod4.class)));
     factoryOrder.add(bc("3", of(Mod3.class), of(Mod4.class)));
     factoryOrder.add(bc("4", of(Mod4.class), null));
 
@@ -73,7 +84,7 @@ class BeanScopeBuilderTest {
   void nameFeature_depends() {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
     factoryOrder.add(bc("1", of(FeatureA.class), of(Mod3.class)));
-    factoryOrder.add(bc("2", null, of(Mod4.class, FeatureA.class)));
+    factoryOrder.add(bc("2", EMPTY_CLASSES, of(Mod4.class, FeatureA.class)));
     factoryOrder.add(bc("3", of(Mod3.class), of(Mod4.class)));
     factoryOrder.add(bc("4", of(Mod4.class), null));
 
@@ -85,7 +96,7 @@ class BeanScopeBuilderTest {
   @Test
   void feature_depends() {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
-    factoryOrder.add(bc("two", null, of(MyFeature.class)));
+    factoryOrder.add(bc("two", EMPTY_CLASSES, of(MyFeature.class)));
     factoryOrder.add(bc("one", of(MyFeature.class), null));
     factoryOrder.orderFactories();
 
@@ -95,9 +106,9 @@ class BeanScopeBuilderTest {
   @Test
   void feature_depends2() {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
-    factoryOrder.add(bc("two", null, of(MyFeature.class)));
-    factoryOrder.add(bc("one", of(MyFeature.class), null));
-    factoryOrder.add(bc("three", of(MyFeature.class), null));
+    factoryOrder.add(bc("two", EMPTY_CLASSES, of(MyFeature.class)));
+    factoryOrder.add(bc("one", of(MyFeature.class), EMPTY_CLASSES));
+    factoryOrder.add(bc("three", of(MyFeature.class), EMPTY_CLASSES));
     factoryOrder.orderFactories();
 
     assertThat(names(factoryOrder.factories())).containsExactly("one", "three", "two");
@@ -106,8 +117,8 @@ class BeanScopeBuilderTest {
   @Test
   void name_requiresPackage() {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
-    factoryOrder.add(bc("1", null, new Class[0], of(Mod3.class)));
-    factoryOrder.add(bc("2", null, new Class[0], of(Mod4.class)));
+    factoryOrder.add(bc("1", EMPTY_CLASSES, new Class[0], of(Mod3.class)));
+    factoryOrder.add(bc("2", EMPTY_CLASSES, new Class[0], of(Mod4.class)));
     factoryOrder.add(bc("3", of(Mod3.class), new Class[0], of(Mod4.class)));
     factoryOrder.add(bc("4", of(Mod4.class), new Class[0]));
 
@@ -119,8 +130,8 @@ class BeanScopeBuilderTest {
   @Test
   void name_requiresPackage_mixed() {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
-    factoryOrder.add(bc("1", null, new Class[0], of(Mod3.class)));
-    factoryOrder.add(bc("2", null, of(Mod4.class), new Class[0]));
+    factoryOrder.add(bc("1", EMPTY_CLASSES, new Class[0], of(Mod3.class)));
+    factoryOrder.add(bc("2", EMPTY_CLASSES, of(Mod4.class), new Class[0]));
     factoryOrder.add(bc("3", of(Mod3.class), new Class[0], of(Mod4.class)));
     factoryOrder.add(bc("4", of(Mod4.class), new Class[0]));
 
@@ -132,8 +143,8 @@ class BeanScopeBuilderTest {
   @Test
   void missingRequiresPackage_expect_unsatisfiedRequiresPackages() {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), false);
-    factoryOrder.add(bc("1", null, new Class[0], of(Mod3.class)));
-    factoryOrder.add(bc("2", null, of(Mod4.class), new Class[0]));
+    factoryOrder.add(bc("1", EMPTY_CLASSES, new Class[0], of(Mod3.class)));
+    factoryOrder.add(bc("2", EMPTY_CLASSES, of(Mod4.class), new Class[0]));
     factoryOrder.add(bc("4", of(Mod4.class), new Class[0]));
 
     assertThatThrownBy(factoryOrder::orderFactories)
@@ -144,8 +155,8 @@ class BeanScopeBuilderTest {
   @Test
   void missingRequires_expect_unsatisfiedRequires() {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), false);
-    factoryOrder.add(bc("1", null, of(Mod3.class), new Class[0]));
-    factoryOrder.add(bc("2", null, of(Mod4.class), new Class[0]));
+    factoryOrder.add(bc("1", EMPTY_CLASSES, of(Mod3.class), new Class[0]));
+    factoryOrder.add(bc("2", EMPTY_CLASSES, of(Mod4.class), new Class[0]));
     factoryOrder.add(bc("4", of(Mod4.class), new Class[0]));
 
     assertThatThrownBy(factoryOrder::orderFactories)

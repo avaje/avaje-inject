@@ -35,7 +35,7 @@ final class AllScopes {
     return data.scopeInfo;
   }
 
-  boolean providedByDefaultModule(String dependency) {
+  boolean providedByDefaultScope(String dependency) {
     return defaultScope.providesDependencyLocally(dependency);
   }
 
