@@ -65,7 +65,7 @@ final class SimpleModuleWriter {
     writer = new Append(createFileWriter());
     writePackage();
     writeStartClass();
-    writeAutoProvides();
+    writeProvides();
     writeClassesMethod();
     writeBuildMethod();
     writeBuildMethods();
@@ -90,7 +90,7 @@ final class SimpleModuleWriter {
     }
   }
 
-  private void writeAutoProvides() {
+  private void writeProvides() {
     Set<String> autoProvidesAspects = new TreeSet<>();
     Set<String> autoProvides = new TreeSet<>();
 
@@ -105,20 +105,14 @@ final class SimpleModuleWriter {
       }
     }
     if (!autoProvides.isEmpty()) {
-      writer.append("  @Override").eol();
-      writer.append("  public Class<?>[] autoProvides() {").eol();
-      writeReturnClassArray(autoProvides);
+      scopeInfo.buildAutoProvides(writer, autoProvides);
     }
     if (!autoProvidesAspects.isEmpty()) {
-      writer.append("  @Override").eol();
-      writer.append("  public Class<?>[] autoProvidesAspects() {").eol();
-      writeReturnClassArray(autoProvidesAspects);
+      scopeInfo.buildAutoProvidesAspects(writer, autoProvidesAspects);
     }
     Set<String> autoRequires = ordering.autoRequires();
     if (!autoRequires.isEmpty()) {
-      writer.append("  @Override").eol();
-      writer.append("  public Class<?>[] autoRequires() {").eol();
-      writeReturnClassArray(autoRequires);
+      scopeInfo.buildAutoRequires(writer, autoRequires);
     }
   }
 
@@ -126,12 +120,8 @@ final class SimpleModuleWriter {
     Set<String> allClasses = distinctPublicClasses();
     writer.append("  @Override").eol();
     writer.append("  public Class<?>[] classes() {").eol();
-    writeReturnClassArray(new TreeSet<>(allClasses));
-  }
-
-  private void writeReturnClassArray(Set<String> types) {
     writer.append("    return new Class<?>[]{").eol();
-    for (String rawType : types) {
+    for (String rawType : new TreeSet<>(allClasses)) {
       writer.append("      %s.class,", rawType).eol();
     }
     writer.append("    };").eol();
@@ -211,7 +201,7 @@ final class SimpleModuleWriter {
 
     String interfaceType = scopeInfo.type().type();
     writer.append("public final class %s implements %s {", shortName, interfaceType).eol().eol();
-    scopeInfo.buildFields(writer);
+    writer.append("  private Builder builder;").eol().eol();
     if (scopeInfo.addModuleConstructor()) {
       writeConstructor();
     }

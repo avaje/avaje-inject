@@ -379,57 +379,47 @@ final class ScopeInfo {
     writer.append("}");
   }
 
-  private void buildClassArray(Append writer, Set<String> values) {
-    writer.append("new Class<?>[]");
-    writer.append("{");
-    if (!values.isEmpty()) {
-      int c = 0;
-      for (String value : values) {
-        if (c++ > 0) {
-          writer.append(",");
-        }
-        writer.append(value).append(".class");
-      }
-    }
-    writer.append("}");
-  }
-
-  void buildFields(Append writer) {
-    if (!provides.isEmpty()) {
-      writer.append("  private final Class<?>[] provides = ");
-      buildClassArray(writer, provides);
-      writer.append(";").eol();
-    }
-    if (!requires.isEmpty()) {
-      writer.append("  private final Class<?>[] requires = ");
-      buildClassArray(writer, requires);
-      writer.append(";").eol();
-    }
-    if (!requiresPackages.isEmpty()) {
-      writer.append("  private final Class<?>[] requiresPackages = ");
-      buildClassArray(writer, requiresPackages);
-      writer.append(";").eol();
-    }
-    writer.append("  private Builder builder;").eol().eol();
-  }
-
   void buildProvides(Append writer) {
     if (!provides.isEmpty()) {
-      buildProvidesMethod(writer, "provides");
+      buildProvidesMethod(writer, "provides", provides);
     }
     if (!requires.isEmpty()) {
-      buildProvidesMethod(writer, "requires");
+      buildProvidesMethod(writer, "requires", requires);
     }
     if (!requiresPackages.isEmpty()) {
-      buildProvidesMethod(writer, "requiresPackages");
+      buildProvidesMethod(writer, "requiresPackages", requiresPackages);
     }
   }
 
-  private void buildProvidesMethod(Append writer, String fieldName) {
+  private void buildProvidesMethod(Append writer, String fieldName, Set<String> types) {
     writer.append("  @Override").eol();
-    writer.append("  public Class<?>[] %s() {", fieldName).eol();
-    writer.append("    return %s;", fieldName).eol();
-    writer.append("  }").eol().eol();
+    writer.append("  public Class<?>[] %s() { return %s; }", fieldName, fieldName).eol();
+    writer.append("  private final Class<?>[] %s = new Class<?>[]{", fieldName).eol();
+    for (String rawType : types) {
+      writer.append("    %s.class,", rawType).eol();
+    }
+    writer.append("  };").eol().eol();
+  }
+
+  void buildAutoProvides(Append writer, Set<String> autoProvides) {
+    autoProvides.removeAll(provides);
+    if (!autoProvides.isEmpty()) {
+      buildProvidesMethod(writer, "autoProvides", autoProvides);
+    }
+  }
+
+  void buildAutoProvidesAspects(Append writer, Set<String> autoProvidesAspects) {
+    autoProvidesAspects.removeAll(provides);
+    if (!autoProvidesAspects.isEmpty()) {
+      buildProvidesMethod(writer, "autoProvidesAspects", autoProvidesAspects);
+    }
+  }
+
+  void buildAutoRequires(Append writer, Set<String> autoRequires) {
+    autoRequires.removeAll(requires);
+    if (!autoRequires.isEmpty()) {
+      buildProvidesMethod(writer, "autoRequires", autoRequires);
+    }
   }
 
   void readModuleMetaData(TypeElement moduleType) {
