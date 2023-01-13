@@ -35,6 +35,26 @@ class UtilTest {
   }
 
   @Test
+  void isAspectProvider() {
+    assertTrue(Util.isAspectProvider("io.avaje.inject.aop.AspectProvider<org.Foo>"));
+    assertTrue(Util.isAspectProvider("io.avaje.inject.aop.AspectProvider<org.one.Bar"));
+  }
+
+  @Test
+  void isAspectProvider_not() {
+    assertFalse(Util.isAspectProvider("not.avaje.inject.aop.AspectProvider<org.Foo>"));
+    assertFalse(Util.isAspectProvider("io.avaje.inject.not.AspectProvider<org.one.Bar"));
+    assertFalse(Util.isAspectProvider("io.avaje.inject.aop.NotAspectProvider<org.one.Bar"));
+    assertFalse(Util.isAspectProvider("io.avaje.inject.aop.NotAspectProvider"));
+  }
+
+  @Test
+  void extractAspectType() {
+    assertEquals(Util.extractAspectType("io.avaje.inject.aop.AspectProvider<org.Foo>"), "org.Foo");
+    assertEquals(Util.extractAspectType("io.avaje.inject.aop.AspectProvider<org.one.Bar>"), "org.one.Bar");
+  }
+
+  @Test
   void unwrapProvider() {
     assertEquals(Util.unwrapProvider("jakarta.inject.Provider<org.Foo<com.Bazz>>"), "org.Foo<com.Bazz>");
   }

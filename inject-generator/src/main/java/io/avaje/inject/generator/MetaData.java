@@ -31,6 +31,11 @@ final class MetaData {
    * The list of dependencies with optional and named.
    */
   private List<Dependency> dependsOn;
+
+  /**
+   * Type deemed to be candidate for providing to another external module.
+   */
+  private String autoProvides;
   private boolean generateProxy;
 
   MetaData(DependencyMeta meta) {
@@ -40,6 +45,7 @@ final class MetaData {
     this.method = meta.method();
     this.provides = asList(meta.provides());
     this.dependsOn = Stream.of(meta.dependsOn()).map(Dependency::new).collect(Collectors.toList());
+    this.autoProvides = meta.autoProvides();
   }
 
   MetaData(String type, String name) {
@@ -113,6 +119,7 @@ final class MetaData {
   void update(BeanReader beanReader) {
     this.provides = beanReader.getProvides();
     this.dependsOn = beanReader.getDependsOn();
+    this.autoProvides = beanReader.autoProvides();
     this.generateProxy = beanReader.isGenerateProxy();
   }
 
@@ -126,6 +133,10 @@ final class MetaData {
 
   List<Dependency> getDependsOn() {
     return dependsOn;
+  }
+
+  String getAutoProvides() {
+    return autoProvides;
   }
 
   /**
@@ -163,6 +174,9 @@ final class MetaData {
     }
     if (!dependsOn.isEmpty()) {
       appendProvides(append, "dependsOn", dependsOn.stream().map(Dependency::dependsOn).collect(Collectors.toList()));
+    }
+    if (autoProvides != null && !autoProvides.isEmpty()) {
+      append.append(", autoProvides=\"").append(autoProvides).append("\"");
     }
     append.append(")").append(NEWLINE);
     append.append("  private void build_").append(getBuildName()).append("() {").append(NEWLINE);
@@ -205,4 +219,7 @@ final class MetaData {
     this.method = method;
   }
 
+  void setAutoProvides(String autoProvides) {
+    this.autoProvides = autoProvides;
+  }
 }

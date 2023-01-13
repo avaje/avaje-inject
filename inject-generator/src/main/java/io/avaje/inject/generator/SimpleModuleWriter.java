@@ -65,6 +65,7 @@ final class SimpleModuleWriter {
     writer = new Append(createFileWriter());
     writePackage();
     writeStartClass();
+    writeAutoProvides();
     writeClassesMethod();
     writeBuildMethod();
     writeBuildMethods();
@@ -89,12 +90,42 @@ final class SimpleModuleWriter {
     }
   }
 
+  private void writeAutoProvides() {
+    Set<String> autoProvidesAspects = new TreeSet<>();
+    Set<String> autoProvides = new TreeSet<>();
+
+    for (MetaData metaData : ordering.ordered()) {
+      String forExternal = metaData.getAutoProvides();
+      if (forExternal != null && !forExternal.isEmpty()) {
+        if (Util.isAspectProvider(forExternal)) {
+          autoProvidesAspects.add(Util.extractAspectType(forExternal));
+        } else if (!forExternal.contains("<")) {
+          autoProvides.add(forExternal);
+        }
+      }
+    }
+    if (!autoProvides.isEmpty()) {
+      writer.append("  @Override").eol();
+      writer.append("  public Class<?>[] autoProvides() {").eol();
+      writeReturnClassArray(autoProvides);
+    }
+    if (!autoProvidesAspects.isEmpty()) {
+      writer.append("  @Override").eol();
+      writer.append("  public Class<?>[] autoProvidesAspects() {").eol();
+      writeReturnClassArray(autoProvidesAspects);
+    }
+  }
+
   private void writeClassesMethod() {
     Set<String> allClasses = distinctPublicClasses();
     writer.append("  @Override").eol();
     writer.append("  public Class<?>[] classes() {").eol();
+    writeReturnClassArray(new TreeSet<>(allClasses));
+  }
+
+  private void writeReturnClassArray(Set<String> types) {
     writer.append("    return new Class<?>[]{").eol();
-    for (String rawType : new TreeSet<>(allClasses)) {
+    for (String rawType : types) {
       writer.append("      %s.class,", rawType).eol();
     }
     writer.append("    };").eol();
@@ -178,20 +209,7 @@ final class SimpleModuleWriter {
     if (scopeInfo.addModuleConstructor()) {
       writeConstructor();
     }
-    writer.append("  @Override").eol();
-    writer.append("  public Class<?>[] provides() {").eol();
-    writer.append("    return provides;").eol();
-    writer.append("  }").eol().eol();
-
-    writer.append("  @Override").eol();
-    writer.append("  public Class<?>[] requires() {").eol();
-    writer.append("    return requires;").eol();
-    writer.append("  }").eol().eol();
-
-    writer.append("  @Override").eol();
-    writer.append("  public Class<?>[] requiresPackages() {").eol();
-    writer.append("    return requiresPackages;").eol();
-    writer.append("  }").eol().eol();
+    scopeInfo.buildProvides(writer);
   }
 
   private void writeWithBeans() {

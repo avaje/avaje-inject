@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -22,6 +23,7 @@ final class TypeExtendsReader {
   private final List<String> providesTypes = new ArrayList<>();
   private final String beanSimpleName;
   private final String baseTypeRaw;
+  private final boolean baseTypeIsInterface;
   private boolean closeable;
   /**
    * The implied qualifier name based on naming convention.
@@ -35,6 +37,7 @@ final class TypeExtendsReader {
     this.extendsInjection = new TypeExtendsInjection(baseType, context, factory, importTypes);
     this.beanSimpleName = baseType.getSimpleName().toString();
     this.baseTypeRaw = Util.unwrapProvider(baseGenericType.toString());
+    this.baseTypeIsInterface = baseType.getKind() == ElementKind.INTERFACE;
   }
 
   GenericType getBaseType() {
@@ -71,6 +74,16 @@ final class TypeExtendsReader {
 
   MethodReader getConstructor() {
     return extendsInjection.getConstructor();
+  }
+
+  String autoProvides() {
+    if (baseTypeIsInterface) {
+      return baseTypeRaw;
+    }
+    if (!interfaceTypes.isEmpty()) {
+      return interfaceTypes.get(0);
+    }
+    return null;
   }
 
   List<String> getProvides() {

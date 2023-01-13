@@ -395,16 +395,41 @@ final class ScopeInfo {
   }
 
   void buildFields(Append writer) {
-    writer.append("  private final Class<?>[] provides = ");
-    buildClassArray(writer, provides);
-    writer.append(";").eol();
-    writer.append("  private final Class<?>[] requires = ");
-    buildClassArray(writer, requires);
-    writer.append(";").eol();
-    writer.append("  private final Class<?>[] requiresPackages = ");
-    buildClassArray(writer, requiresPackages);
-    writer.append(";").eol();
+    if (!provides.isEmpty()) {
+      writer.append("  private final Class<?>[] provides = ");
+      buildClassArray(writer, provides);
+      writer.append(";").eol();
+    }
+    if (!requires.isEmpty()) {
+      writer.append("  private final Class<?>[] requires = ");
+      buildClassArray(writer, requires);
+      writer.append(";").eol();
+    }
+    if (!requiresPackages.isEmpty()) {
+      writer.append("  private final Class<?>[] requiresPackages = ");
+      buildClassArray(writer, requiresPackages);
+      writer.append(";").eol();
+    }
     writer.append("  private Builder builder;").eol().eol();
+  }
+
+  void buildProvides(Append writer) {
+    if (!provides.isEmpty()) {
+      buildProvidesMethod(writer, "provides");
+    }
+    if (!requires.isEmpty()) {
+      buildProvidesMethod(writer, "requires");
+    }
+    if (!requiresPackages.isEmpty()) {
+      buildProvidesMethod(writer, "requiresPackages");
+    }
+  }
+
+  private void buildProvidesMethod(Append writer, String fieldName) {
+    writer.append("  @Override").eol();
+    writer.append("  public Class<?>[] %s() {", fieldName).eol();
+    writer.append("    return %s;", fieldName).eol();
+    writer.append("  }").eol().eol();
   }
 
   void readModuleMetaData(TypeElement moduleType) {

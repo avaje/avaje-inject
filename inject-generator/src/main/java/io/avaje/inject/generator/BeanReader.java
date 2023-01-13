@@ -115,6 +115,10 @@ final class BeanReader {
     return typeReader.getProvides();
   }
 
+  String autoProvides() {
+    return typeReader.autoProvides();
+  }
+
   Set<GenericType> getGenericTypes() {
     return typeReader.getGenericTypes();
   }

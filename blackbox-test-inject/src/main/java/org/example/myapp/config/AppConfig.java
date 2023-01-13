@@ -65,7 +65,12 @@ public class AppConfig {
 
   @Bean
   public MyGen<String> myGen() {
-    return new MyGen<String>();
+    return new MyGen<>();
+  }
+
+  @Bean
+  MyInterface myInterface2() {
+    return new MyInterface() {};
   }
 
   public static class Builder {
@@ -85,6 +90,10 @@ public class AppConfig {
   }
 
   public static class MyGen<T> {
+
+  }
+
+  public interface MyInterface {
 
   }
 

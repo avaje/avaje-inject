@@ -41,6 +41,10 @@ final class TypeReader {
     return extendsReader.getProvides();
   }
 
+  String autoProvides() {
+    return extendsReader.autoProvides();
+  }
+
   boolean isClosable() {
     return extendsReader.isCloseable();
   }

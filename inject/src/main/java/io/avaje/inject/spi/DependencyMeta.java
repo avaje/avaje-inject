@@ -37,4 +37,11 @@ public @interface DependencyMeta {
    */
   String[] dependsOn() default {};
 
+  /**
+   * Type deemed to be reasonable to provide to external module.
+   * <p>
+   * Used to support multiple module wiring automatically (as alternative to using explicit InjectModule annotation).
+   */
+  String autoProvides() default "";
+
 }
