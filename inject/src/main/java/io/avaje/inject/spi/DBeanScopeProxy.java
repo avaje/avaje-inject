@@ -12,7 +12,7 @@ import java.util.Optional;
 /**
  * Proxy used when injecting the BeanScope.
  */
-class DBeanScopeProxy implements BeanScope {
+final class DBeanScopeProxy implements BeanScope {
 
   private BeanScope delegate;
 

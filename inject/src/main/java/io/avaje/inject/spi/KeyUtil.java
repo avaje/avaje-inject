@@ -5,7 +5,7 @@ import java.lang.reflect.Type;
 /**
  * Build a "flat key" combining type and name.
  */
-class KeyUtil {
+final class KeyUtil {
 
   static String lower(String name) {
     return name == null ? null : name.toLowerCase();

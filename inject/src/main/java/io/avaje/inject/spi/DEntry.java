@@ -7,7 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @NonNullApi
-class DEntry implements BeanEntry {
+final class DEntry implements BeanEntry {
 
   private final String qualifierName;
   private final int priority;

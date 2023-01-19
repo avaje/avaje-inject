@@ -12,7 +12,7 @@ import java.util.Map;
  * <p>
  * This holds a list of managed beans (which might be named).
  */
-class DContextEntry {
+final class DContextEntry {
 
   private final List<DContextEntryBean> entries = new ArrayList<>(5);
 

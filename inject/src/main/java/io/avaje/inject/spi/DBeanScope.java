@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 @NonNullApi
-class DBeanScope implements BeanScope {
+final class DBeanScope implements BeanScope {
 
   private static final System.Logger log = AppLog.getLogger("io.avaje.inject");
 
