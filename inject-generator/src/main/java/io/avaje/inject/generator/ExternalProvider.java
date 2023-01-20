@@ -11,13 +11,14 @@ import java.util.Set;
  * <p>
  * When we depend on these types they add to the module autoRequires() classes.
  */
-final class ExternalProvide {
+final class ExternalProvider {
 
   private final Set<String> providedTypes = new HashSet<>();
 
   void init() {
-    for (Module module : ServiceLoader.load(Module.class)) {
-      for (Class<?> provide : module.provides()) {
+    for (final Module module :
+        ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader())) {
+      for (final Class<?> provide : module.provides()) {
         providedTypes.add(provide.getCanonicalName());
       }
       for (Class<?> provide : module.autoProvides()) {

@@ -53,8 +53,8 @@ public final class Processor extends AbstractProcessor {
    * on these types and the only thing providing them is the plugin.
    */
   private void registerPluginProvidedTypes() {
-    for (Plugin plugin : ServiceLoader.load(Plugin.class)) {
-      for (Class<?> provide : plugin.provides()) {
+    for (final Plugin plugin : ServiceLoader.load(Plugin.class, Processor.class.getClassLoader())) {
+      for (final Class<?> provide : plugin.provides()) {
         defaultScope.pluginProvided(provide.getCanonicalName());
       }
     }

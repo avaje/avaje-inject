@@ -28,7 +28,7 @@ final class ProcessingContext {
   private final Elements elementUtils;
   private final Types typeUtils;
   private final Set<String> uniqueModuleNames = new HashSet<>();
-  private final ExternalProvide externalProvide = new ExternalProvide();
+  private final ExternalProvider externalProvide = new ExternalProvider();
 
   ProcessingContext(ProcessingEnvironment processingEnv) {
     this.processingEnv = processingEnv;
