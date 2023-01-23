@@ -92,17 +92,13 @@ final class SimpleModuleWriter {
   }
 
   private void writeProvides() {
-    Set<String> autoProvidesAspects = new TreeSet<>();
     Set<String> autoProvides = new TreeSet<>();
 
     for (MetaData metaData : ordering.ordered()) {
       String forExternal = metaData.autoProvides();
       if (forExternal != null && !forExternal.isEmpty()) {
         if (Util.isAspectProvider(forExternal)) {
-          autoProvidesAspects.add(Util.extractAspectType(forExternal));
-          context
-              .getAspectTarget(forExternal)
-              .ifPresent(autoProvides::add);
+          context.getAspectTarget(forExternal).ifPresent(autoProvides::add);
         } else if (!forExternal.contains("<")) {
           autoProvides.add(forExternal);
         }
