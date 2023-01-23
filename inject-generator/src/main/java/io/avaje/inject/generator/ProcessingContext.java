@@ -1,11 +1,24 @@
 package io.avaje.inject.generator;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.LineNumberReader;
+import java.io.Reader;
+import java.nio.file.NoSuchFileException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.FilerException;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -13,12 +26,8 @@ import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.LineNumberReader;
-import java.io.Reader;
-import java.nio.file.NoSuchFileException;
-import java.util.*;
+
+import io.avaje.inject.aop.Aspect;
 
 final class ProcessingContext {
 
@@ -145,5 +154,22 @@ final class ProcessingContext {
 
   boolean externallyProvided(String type) {
     return externalProvide.provides(type);
+  }
+
+  Optional<String> getAspectTarget(String aspect) {
+    return Optional.ofNullable(elementUtils.getTypeElement(Util.extractAspectType(aspect)))
+        .map(e -> e.getAnnotation(Aspect.class))
+        .flatMap(Optional::ofNullable)
+        .map(
+            a -> {
+              TypeMirror target = null;
+              try {
+                // will always throw
+                a.target();
+              } catch (final MirroredTypeException mte) {
+                target = mte.getTypeMirror();
+              }
+              return target.toString();
+            });
   }
 }

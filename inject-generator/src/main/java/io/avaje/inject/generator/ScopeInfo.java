@@ -400,13 +400,6 @@ final class ScopeInfo {
     }
   }
 
-  void buildAutoProvidesAspects(Append writer, Set<String> autoProvidesAspects) {
-    autoProvidesAspects.removeAll(provides);
-    if (!autoProvidesAspects.isEmpty()) {
-      buildProvidesMethod(writer, "autoProvidesAspects", autoProvidesAspects);
-    }
-  }
-
   void buildAutoRequires(Append writer, Set<String> autoRequires) {
     autoRequires.removeAll(requires);
     if (!autoRequires.isEmpty()) {

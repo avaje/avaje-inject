@@ -1,14 +1,15 @@
 package io.avaje.inject.generator;
 
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.tools.FileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.tools.FileObject;
 
 /**
  * Write the source code for the factory.
@@ -99,6 +100,9 @@ final class SimpleModuleWriter {
       if (forExternal != null && !forExternal.isEmpty()) {
         if (Util.isAspectProvider(forExternal)) {
           autoProvidesAspects.add(Util.extractAspectType(forExternal));
+          context
+              .getAspectTarget(forExternal)
+              .ifPresent(autoProvides::add);
         } else if (!forExternal.contains("<")) {
           autoProvides.add(forExternal);
         }
@@ -107,10 +111,8 @@ final class SimpleModuleWriter {
     if (!autoProvides.isEmpty()) {
       scopeInfo.buildAutoProvides(writer, autoProvides);
     }
-    if (!autoProvidesAspects.isEmpty()) {
-      scopeInfo.buildAutoProvidesAspects(writer, autoProvidesAspects);
-    }
-    Set<String> autoRequires = ordering.autoRequires();
+ 
+    final var autoRequires = ordering.autoRequires();
     if (!autoRequires.isEmpty()) {
       scopeInfo.buildAutoRequires(writer, autoRequires);
     }
