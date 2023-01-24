@@ -20,7 +20,7 @@ public @interface Aspect {
   /**
    * Specify the {@link AspectProvider} for this aspect.
    */
-  Class<?> target();
+  Class<? extends AspectProvider> target();
 
   /**
    * Specify the priority ordering when multiple aspects are on a method.
