@@ -1,16 +1,18 @@
 package io.avaje.inject.generator;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Read the inheritance types for a given bean type.
- */
+import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
+
+import io.avaje.inject.Factory;
+import io.avaje.inject.spi.Proxy;
+
+/** Read the inheritance types for a given bean type. */
 final class TypeExtendsReader {
 
   private static final String JAVA_LANG_OBJECT = "java.lang.Object";
@@ -23,11 +25,9 @@ final class TypeExtendsReader {
   private final List<String> providesTypes = new ArrayList<>();
   private final String beanSimpleName;
   private final String baseTypeRaw;
-  private final boolean baseTypeIsInterface;
+  private final boolean dontAutoProvide;
   private boolean closeable;
-  /**
-   * The implied qualifier name based on naming convention.
-   */
+  /** The implied qualifier name based on naming convention. */
   private String qualifierName;
 
   TypeExtendsReader(GenericType baseGenericType, TypeElement baseType, ProcessingContext context, boolean factory, ImportTypeMap importTypes) {
@@ -37,7 +37,24 @@ final class TypeExtendsReader {
     this.extendsInjection = new TypeExtendsInjection(baseType, context, factory, importTypes);
     this.beanSimpleName = baseType.getSimpleName().toString();
     this.baseTypeRaw = Util.unwrapProvider(baseGenericType.toString());
-    this.baseTypeIsInterface = baseType.getKind() == ElementKind.INTERFACE;
+
+    this.dontAutoProvide = autoProvide();
+  }
+
+  private boolean autoProvide() {
+
+    boolean controller;
+
+    try {
+      final var c = (Class<Annotation>) Class.forName(Constants.CONTROLLER);
+      controller = baseType.getAnnotation(c) != null;
+    } catch (final ClassNotFoundException e) {
+      controller = false;
+    }
+
+    return baseType.getAnnotation(Factory.class) != null
+        || baseType.getAnnotation(Proxy.class) != null
+        || controller;
   }
 
   GenericType baseType() {
@@ -77,13 +94,20 @@ final class TypeExtendsReader {
   }
 
   String autoProvides() {
-    if (baseTypeIsInterface) {
-      return baseTypeRaw;
+
+    if (dontAutoProvide) {
+      return null;
     }
+
     if (!interfaceTypes.isEmpty()) {
       return interfaceTypes.get(0);
     }
-    return null;
+
+    if (!extendsTypes.isEmpty()) {
+      return extendsTypes.get(extendsTypes.size() - 1);
+    }
+
+    return baseTypeRaw;
   }
 
   List<String> provides() {
