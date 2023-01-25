@@ -104,27 +104,13 @@ final class TypeExtendsReader {
     }
 
     if (!interfaceTypes.isEmpty()) {
-      for (var i = 0; i <= interfaceTypes.size(); i++) {
 
-        final var superType = interfaceTypes.get(i);
-
-        if (context.element(Util.trimGenerics(superType)).getModifiers().contains(Modifier.PUBLIC))
-          return superType;
-      }
-      return null;
+      return interfaceTypes.get(0);
     }
 
     if (!extendsTypes.isEmpty()) {
 
-      for (var i = extendsTypes.size() - 1; i >= 0; i--) {
-
-        final var superType = extendsTypes.get(i);
-
-        if (context.element(Util.trimGenerics(superType)).getModifiers().contains(Modifier.PUBLIC))
-          return superType;
-      }
-
-      return null;
+      return extendsTypes.get(extendsTypes.size()-1);
     }
 
     return baseTypeRaw;
