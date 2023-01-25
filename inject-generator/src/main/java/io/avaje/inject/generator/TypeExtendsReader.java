@@ -26,7 +26,7 @@ final class TypeExtendsReader {
   private final List<String> providesTypes = new ArrayList<>();
   private final String beanSimpleName;
   private final String baseTypeRaw;
-  private final boolean dontAutoProvide;
+  private final boolean autoProvide;
   private boolean closeable;
   /** The implied qualifier name based on naming convention. */
   private String qualifierName;
@@ -38,24 +38,23 @@ final class TypeExtendsReader {
     this.extendsInjection = new TypeExtendsInjection(baseType, context, factory, importTypes);
     this.beanSimpleName = baseType.getSimpleName().toString();
     this.baseTypeRaw = Util.unwrapProvider(baseGenericType.toString());
-
-    this.dontAutoProvide = autoProvide();
+    this.autoProvide = autoProvide();
   }
 
   private boolean autoProvide() {
 
-    boolean controller;
+    boolean isController;
 
     try {
-      final var c = (Class<Annotation>) Class.forName(Constants.CONTROLLER);
-      controller = baseType.getAnnotation(c) != null;
+      isController =
+          baseType.getAnnotation((Class<Annotation>) Class.forName(Constants.CONTROLLER)) != null;
     } catch (final ClassNotFoundException e) {
       controller = false;
     }
-    return baseType.getAnnotation(Factory.class) != null
-        || baseType.getAnnotation(Proxy.class) != null
-        || controller
-        || !context
+    return baseType.getAnnotation(Factory.class) == null
+        && baseType.getAnnotation(Proxy.class) == null
+        && !isController
+        && context
             .element(Util.trimGenerics(baseTypeRaw))
             .getModifiers()
             .contains(Modifier.PUBLIC);
@@ -99,7 +98,7 @@ final class TypeExtendsReader {
 
   String autoProvides() {
 
-    if (dontAutoProvide) {
+    if (!autoProvide) {
       return null;
     }
 
