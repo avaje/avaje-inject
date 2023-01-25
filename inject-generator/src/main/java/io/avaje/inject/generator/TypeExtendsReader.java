@@ -49,7 +49,7 @@ final class TypeExtendsReader {
       isController =
           baseType.getAnnotation((Class<Annotation>) Class.forName(Constants.CONTROLLER)) != null;
     } catch (final ClassNotFoundException e) {
-      controller = false;
+      isController = false;
     }
     return baseType.getAnnotation(Factory.class) == null
         && baseType.getAnnotation(Proxy.class) == null
