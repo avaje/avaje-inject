@@ -52,10 +52,13 @@ final class TypeExtendsReader {
     } catch (final ClassNotFoundException e) {
       controller = false;
     }
-
     return baseType.getAnnotation(Factory.class) != null
         || baseType.getAnnotation(Proxy.class) != null
-        || controller;
+        || controller
+        || !context
+            .element(Util.trimGenerics(baseTypeRaw))
+            .getModifiers()
+            .contains(Modifier.PUBLIC);
   }
 
   GenericType baseType() {
@@ -101,11 +104,27 @@ final class TypeExtendsReader {
     }
 
     if (!interfaceTypes.isEmpty()) {
-      return interfaceTypes.get(0);
+      for (var i = 0; i <= interfaceTypes.size(); i++) {
+
+        final var superType = interfaceTypes.get(i);
+
+        if (context.element(Util.trimGenerics(superType)).getModifiers().contains(Modifier.PUBLIC))
+          return superType;
+      }
+      return null;
     }
 
     if (!extendsTypes.isEmpty()) {
-      return extendsTypes.get(extendsTypes.size() - 1);
+
+      for (var i = extendsTypes.size() - 1; i >= 0; i--) {
+
+        final var superType = extendsTypes.get(i);
+
+        if (context.element(Util.trimGenerics(superType)).getModifiers().contains(Modifier.PUBLIC))
+          return superType;
+      }
+
+      return null;
     }
 
     return baseTypeRaw;
@@ -146,10 +165,9 @@ final class TypeExtendsReader {
 
   private void addSuperType(TypeElement element) {
     readInterfaces(element);
-    String fullName = element.getQualifiedName().toString();
-    if (!fullName.equals(JAVA_LANG_OBJECT)) {
-      String type = Util.unwrapProvider(fullName);
-    if (!JAVA_LANG_OBJECT.equals(fullName) || !JAVA_LANG_RECORD.equals(fullName)) {
+    final var fullName = element.getQualifiedName().toString();
+    if (!JAVA_LANG_OBJECT.equals(fullName) && !JAVA_LANG_RECORD.equals(fullName)) {
+      final var type = Util.unwrapProvider(fullName);
       if (isPublic(element)) {
         extendsTypes.add(type);
         extendsInjection.read(element);
