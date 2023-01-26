@@ -213,7 +213,6 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       providesMap.computeIfAbsent(module.getClass().getTypeName(), s -> new FactoryList()).add(factoryState);
       addFactoryProvides(factoryState, module.provides());
       addFactoryProvides(factoryState, module.autoProvides());
-      addFactoryProvides(factoryState, module.autoProvidesAspects());
 
       if (factoryState.isRequiresEmpty()) {
         if (factoryState.explicitlyProvides()) {

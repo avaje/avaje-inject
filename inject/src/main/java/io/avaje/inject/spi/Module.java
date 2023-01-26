@@ -44,16 +44,6 @@ public interface Module {
   }
 
   /**
-   * Return the aspects that this module provides.
-   * <p>
-   * This is a convenience when using multiple modules that we otherwise manually specify via
-   * {@link InjectModule#provides()}.
-   */
-  default Class<?>[] autoProvidesAspects() {
-    return EMPTY_CLASSES;
-  }
-
-  /**
    * These are the classes that this module requires for wiring that are provided by other
    * external modules (that are in the classpath at compile time).
    * <p>
