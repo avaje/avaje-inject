@@ -60,13 +60,19 @@ public @interface InjectModule {
   Class<?>[] provides() default {};
 
   /**
-   * The dependencies that are provided externally or by other modules and that are required
-   * when wiring this module.
-   * <p>
-   * This effectively tells the annotation processor that these types are expected to be
-   * provided and to not treat them as missing dependencies. If we don't do this the annotation
-   * processor thinks the dependency is missing and will error the compilation saying there is
-   * a missing dependency.
+   * Set autoprovide strategy. By default will only expose the top level interfaces/classes to other
+   * modules
+   */
+  AutoProvideLevel autoProvideLv() default AutoProvideLevel.TOP_LEVEL_CLASSES;
+
+  /**
+   * The dependencies that are provided externally or by other modules and that are required when
+   * wiring this module.
+   *
+   * <p>This effectively tells the annotation processor that these types are expected to be provided
+   * and to not treat them as missing dependencies. If we don't do this the annotation processor
+   * thinks the dependency is missing and will error the compilation saying there is a missing
+   * dependency.
    */
   Class<?>[] requires() default {};
 
@@ -89,4 +95,13 @@ public @interface InjectModule {
    */
   String customScopeType() default "";
 
+  public enum AutoProvideLevel {
+
+    /** Autoprovide only the top level interfaces/classes of this modules beans. */
+    TOP_LEVEL_CLASSES,
+    /** Autoprovide all the beans of this module as they are defined. */
+    ALL,
+    /** Disable AutoProvide. */
+    NONE
+  }
 }

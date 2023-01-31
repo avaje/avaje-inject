@@ -10,6 +10,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
 import io.avaje.inject.Factory;
+import io.avaje.inject.InjectModule.AutoProvideLevel;
 import io.avaje.inject.spi.Generated;
 import io.avaje.inject.spi.Proxy;
 
@@ -29,16 +30,26 @@ final class TypeExtendsReader {
   private final String baseTypeRaw;
   private final boolean autoProvide;
   private boolean closeable;
-  /** The implied qualifier name based on naming convention. */
+  /**
+   * The implied qualifier name based on naming convention.
+   */
   private String qualifierName;
 
-  TypeExtendsReader(GenericType baseGenericType, TypeElement baseType, ProcessingContext context, boolean factory, ImportTypeMap importTypes) {
+  private final AutoProvideLevel autoProvideLv;
+
+  TypeExtendsReader(
+      GenericType baseGenericType,
+      TypeElement baseType,
+      ProcessingContext context,
+      boolean factory,
+      ImportTypeMap importTypes) {
     this.baseGenericType = baseGenericType;
     this.baseType = baseType;
     this.context = context;
     this.extendsInjection = new TypeExtendsInjection(baseType, context, factory, importTypes);
     this.beanSimpleName = baseType.getSimpleName().toString();
     this.baseTypeRaw = Util.unwrapProvider(baseGenericType.toString());
+    this.autoProvideLv = context.autoProvideLv();
     this.autoProvide = autoProvide();
   }
 
@@ -52,7 +63,9 @@ final class TypeExtendsReader {
     } catch (final ClassNotFoundException e) {
       isController = false;
     }
-    return baseType.getAnnotation(Factory.class) == null
+
+    return autoProvideLv != AutoProvideLevel.NONE
+        && baseType.getAnnotation(Factory.class) == null
         && baseType.getAnnotation(Proxy.class) == null
         && baseType.getAnnotation(Generated.class) == null
         && !isController
@@ -99,19 +112,22 @@ final class TypeExtendsReader {
 
     if (!autoProvide) {
       return null;
-    }
 
-    if (!interfaceTypes.isEmpty()) {
+    } else if (autoProvideLv == AutoProvideLevel.ALL) {
+
+      return interfaceTypes.stream().filter(Util::isAspectProvider).findFirst().orElse(baseTypeRaw);
+
+    } else if (!interfaceTypes.isEmpty()) {
 
       return interfaceTypes.get(0);
-    }
 
-    if (!extendsTypes.isEmpty()) {
+    } else if (!extendsTypes.isEmpty()) {
 
       return extendsTypes.get(extendsTypes.size() - 1);
-    }
 
-    return baseTypeRaw;
+    } else {
+      return null;
+    }
   }
 
   List<String> provides() {

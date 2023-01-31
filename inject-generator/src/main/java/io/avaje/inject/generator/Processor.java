@@ -30,9 +30,6 @@ public final class Processor extends AbstractProcessor {
   private AllScopes allScopes;
   private boolean readModuleInfo;
 
-  public Processor() {
-  }
-
   @Override
   public SourceVersion getSupportedSourceVersion() {
     return SourceVersion.latest();
@@ -186,6 +183,7 @@ public final class Processor extends AbstractProcessor {
         // it it not a custom scope annotation
         InjectModule annotation = element.getAnnotation(InjectModule.class);
         if (annotation != null) {
+          context.setAutoProvideLv(annotation.autoProvideLv());
           defaultScope.details(annotation.name(), element);
         }
       }
