@@ -52,7 +52,8 @@ final class TypeExtendsReader {
     } catch (final ClassNotFoundException e) {
       isController = false;
     }
-    return baseType.getAnnotation(Factory.class) == null
+    return !baseType.toString().startsWith("java.lang")
+        && baseType.getAnnotation(Factory.class) == null
         && baseType.getAnnotation(Proxy.class) == null
         && baseType.getAnnotation(Generated.class) == null
         && !isController
