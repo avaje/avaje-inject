@@ -107,10 +107,10 @@ final class AspectMethod {
   }
 
   void writeSetupFields(Append writer) {
-    writer.append("  private Method %s;", localName).eol();
+    writer.append("  private final Method %s;", localName).eol();
     for (AspectPair aspectPair : aspectPairs) {
       String sn = aspectPair.annotationShortName();
-      writer.append("  private MethodInterceptor %s%s;", localName, sn).eol();
+      writer.append("  private final MethodInterceptor %s%s;", localName, sn).eol();
     }
   }
 
