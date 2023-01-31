@@ -25,7 +25,7 @@ import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
 
-import io.avaje.inject.InjectModule.AutoProvideLevel;
+import io.avaje.inject.InjectModule.AutoProvideStrategy;
 
 final class ProcessingContext {
 
@@ -36,7 +36,7 @@ final class ProcessingContext {
   private final Types typeUtils;
   private final Set<String> uniqueModuleNames = new HashSet<>();
   private final ExternalProvider externalProvide = new ExternalProvider();
-  private AutoProvideLevel autoProvideLv;
+  private AutoProvideStrategy autoProvideStrategy;
 
   ProcessingContext(ProcessingEnvironment processingEnv) {
     this.processingEnv = processingEnv;
@@ -155,11 +155,11 @@ final class ProcessingContext {
     return externalProvide.provides(type);
   }
 
-  public void setAutoProvideLv(AutoProvideLevel autoProvideScope) {
-    this.autoProvideLv = autoProvideScope;
+  public void setAutoProvideStrategy(AutoProvideStrategy autoProvideScope) {
+    this.autoProvideStrategy = autoProvideScope;
   }
 
-  public AutoProvideLevel autoProvideLv() {
-    return autoProvideLv;
+  public AutoProvideStrategy autoProvideStrategy() {
+    return autoProvideStrategy;
   }
 }

@@ -63,7 +63,7 @@ public @interface InjectModule {
    * Set autoprovide strategy. By default will only expose the top level interfaces/classes to other
    * modules
    */
-  AutoProvideLevel autoProvideLv() default AutoProvideLevel.TOP_LEVEL_CLASSES;
+  AutoProvideStrategy autoProvideStrategy() default AutoProvideStrategy.TOP_LEVEL_CLASSES;
 
   /**
    * The dependencies that are provided externally or by other modules and that are required when
@@ -95,13 +95,13 @@ public @interface InjectModule {
    */
   String customScopeType() default "";
 
-  public enum AutoProvideLevel {
+  public enum AutoProvideStrategy {
 
-    /** Autoprovide only the top level interfaces/classes of this modules beans. */
+    /** Auto provide only the top level interfaces/classes of this module's beans. */
     TOP_LEVEL_CLASSES,
-    /** Autoprovide all the beans of this module as they are defined. */
+    /** Auto provide all the beans of this module as they are defined. */
     ALL,
-    /** Disable AutoProvide. */
+    /** Disable Auto Provide. */
     NONE
   }
 }

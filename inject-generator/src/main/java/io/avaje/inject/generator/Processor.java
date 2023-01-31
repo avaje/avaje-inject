@@ -183,7 +183,7 @@ public final class Processor extends AbstractProcessor {
         // it it not a custom scope annotation
         InjectModule annotation = element.getAnnotation(InjectModule.class);
         if (annotation != null) {
-          context.setAutoProvideLv(annotation.autoProvideLv());
+          context.setAutoProvideStrategy(annotation.autoProvideStrategy());
           defaultScope.details(annotation.name(), element);
         }
       }

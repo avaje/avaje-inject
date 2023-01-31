@@ -10,7 +10,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
 import io.avaje.inject.Factory;
-import io.avaje.inject.InjectModule.AutoProvideLevel;
+import io.avaje.inject.InjectModule.AutoProvideStrategy;
 import io.avaje.inject.spi.Generated;
 import io.avaje.inject.spi.Proxy;
 
@@ -35,7 +35,7 @@ final class TypeExtendsReader {
    */
   private String qualifierName;
 
-  private final AutoProvideLevel autoProvideLv;
+  private final AutoProvideStrategy autoProvideLv;
 
   TypeExtendsReader(
       GenericType baseGenericType,
@@ -49,7 +49,7 @@ final class TypeExtendsReader {
     this.extendsInjection = new TypeExtendsInjection(baseType, context, factory, importTypes);
     this.beanSimpleName = baseType.getSimpleName().toString();
     this.baseTypeRaw = Util.unwrapProvider(baseGenericType.toString());
-    this.autoProvideLv = context.autoProvideLv();
+    this.autoProvideLv = context.autoProvideStrategy();
     this.autoProvide = autoProvide();
   }
 
@@ -64,7 +64,7 @@ final class TypeExtendsReader {
       isController = false;
     }
 
-    return autoProvideLv != AutoProvideLevel.NONE
+    return autoProvideLv != AutoProvideStrategy.NONE
         && baseType.getAnnotation(Factory.class) == null
         && baseType.getAnnotation(Proxy.class) == null
         && baseType.getAnnotation(Generated.class) == null
@@ -113,7 +113,7 @@ final class TypeExtendsReader {
     if (!autoProvide) {
       return null;
 
-    } else if (autoProvideLv == AutoProvideLevel.ALL) {
+    } else if (autoProvideLv == AutoProvideStrategy.ALL) {
 
       return interfaceTypes.stream().filter(Util::isAspectProvider).findFirst().orElse(baseTypeRaw);
 
