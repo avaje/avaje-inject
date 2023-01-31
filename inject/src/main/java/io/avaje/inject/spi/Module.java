@@ -10,7 +10,7 @@ public interface Module {
   /**
    * Empty array of classes.
    */
-  Class<?>[] EMPTY_CLASSES = new Class<?>[]{};
+  Class<?>[] EMPTY_CLASSES = {};
 
   /**
    * Return the set of types this module explicitly provides to other modules.
@@ -64,13 +64,10 @@ public interface Module {
     return EMPTY_CLASSES;
   }
   /**
-   * These are the classes that this module requires for wiring that are provided by other external
+   * These are the apects that this module requires whose implementations are provided by other external
    * modules (that are in the classpath at compile time).
    *
-   * <p>This is a convenience when using multiple modules that is otherwise controlled manually by
-   * explicitly using {@link InjectModule#requires()} or {@link InjectModule#requiresPackages()}.
    */
-
   default Class<?>[] autoRequiresAspects() {
     return EMPTY_CLASSES;
   }
