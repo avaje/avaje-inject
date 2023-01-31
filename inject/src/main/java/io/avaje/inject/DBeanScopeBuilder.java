@@ -338,13 +338,27 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
      */
     private boolean satisfiedDependencies(FactoryState factory) {
       return satisfiedDependencies(factory.requires())
-        && satisfiedDependencies(factory.requiresPackages())
-        && satisfiedDependencies(factory.autoRequires());
+          && satisfiedDependencies(factory.requiresPackages())
+          && satisfiedAspectDependencies(factory.autoRequiresAspects())
+          && satisfiedDependencies(factory.autoRequires());
     }
 
     private boolean satisfiedDependencies(Class<?>[] requires) {
-      for (Class<?> dependency : requires) {
-        if (notProvided(dependency.getTypeName())) {
+      for (final Class<?> dependency : requires) {
+          if (notProvided(dependency.getTypeName())) {
+              return false;
+            }
+      }
+      return true;
+    }
+
+    private boolean satisfiedAspectDependencies(Class<?>[] requiresAspects) {
+      for (final Class<?> dependency : requiresAspects) {
+
+        if (notProvided(
+            "interface io.avaje.inject.aop.AspectProvider<"
+                + dependency.getCanonicalName()
+                + ">")) {
           return false;
         }
       }
@@ -393,6 +407,10 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
     Class<?>[] autoRequires() {
       return factory.autoRequires();
+    }
+
+    Class<?>[] autoRequiresAspects() {
+      return factory.autoRequiresAspects();
     }
 
     @Override

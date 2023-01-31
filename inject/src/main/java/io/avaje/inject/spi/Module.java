@@ -63,6 +63,17 @@ public interface Module {
   default Class<?>[] autoRequires() {
     return EMPTY_CLASSES;
   }
+  /**
+   * These are the classes that this module requires for wiring that are provided by other external
+   * modules (that are in the classpath at compile time).
+   *
+   * <p>This is a convenience when using multiple modules that is otherwise controlled manually by
+   * explicitly using {@link InjectModule#requires()} or {@link InjectModule#requiresPackages()}.
+   */
+
+  default Class<?>[] autoRequiresAspects() {
+    return EMPTY_CLASSES;
+  }
 
   /**
    * Return public classes of the beans that would be registered by this module.
