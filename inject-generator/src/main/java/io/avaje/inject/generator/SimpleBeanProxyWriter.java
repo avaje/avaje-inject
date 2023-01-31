@@ -47,7 +47,6 @@ final class SimpleBeanProxyWriter {
   }
 
   private void writeFields() {
-    aspects.writeFields(writer);
     for (AspectMethod method : aspects.methods()) {
       method.writeSetupFields(writer);
     }
@@ -68,10 +67,6 @@ final class SimpleBeanProxyWriter {
     beanReader.writeConstructorParams(writer);
     writer.append(") {").eol();
     beanReader.writeConstructorInit(writer);
-    for (final String target : aspects.aspectNames()) {
-      final var name = Util.initLower(target);
-      writer.append("    this.%s = %s;", name, name).eol();
-    }
     writeSetupForMethods();
     writer.append("  }").eol();
   }

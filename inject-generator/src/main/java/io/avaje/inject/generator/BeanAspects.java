@@ -44,15 +44,6 @@ final class BeanAspects {
     return targets;
   }
 
-  void writeFields(Append writer) {
-    for (final String aspectName : aspectNames) {
-      final var type = "AspectProvider<" + aspectName + ">";
-      final var name = Util.initLower(aspectName);
-      writer.append("  private final %s %s;", type, name).eol();
-    }
-    writer.eol();
-  }
-
   List<AspectMethod> methods() {
     return aspectMethods;
   }
