@@ -31,7 +31,7 @@ final class AspectAnnotationReader {
       if (aspect != null) {
         Meta meta = readTarget(anElement);
         if (meta != null) {
-          aspects.add(new AspectPair(anElement, meta.target, meta.ordering));
+          aspects.add(new AspectPair(anElement, meta.ordering));
         }
       }
     }

@@ -33,6 +33,7 @@ final class Constants {
 
   static final String REFLECT_METHOD = "java.lang.reflect.Method";
   static final String ASPECT = "io.avaje.inject.aop.Aspect";
+  static final String ASPECT_PROVIDER ="io.avaje.inject.aop.AspectProvider";
   static final String INVOCATION = "io.avaje.inject.aop.Invocation";
   static final String INVOCATION_EXCEPTION = "io.avaje.inject.aop.InvocationException";
   static final String METHOD_INTERCEPTOR = "io.avaje.inject.aop.MethodInterceptor";
