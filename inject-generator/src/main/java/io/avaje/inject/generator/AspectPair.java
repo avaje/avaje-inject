@@ -21,7 +21,7 @@ final class AspectPair implements Comparable<AspectPair> {
   }
 
   void addImports(ImportTypeMap importTypes) {
-    importTypes.add(target);
+    importTypes.add("io.avaje.inject.aop.AspectProvider");
     importTypes.add(annotationFullName);
   }
 
