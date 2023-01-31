@@ -111,7 +111,7 @@ final class TypeExtendsReader {
       return extendsTypes.get(extendsTypes.size() - 1);
     }
 
-    return baseTypeRaw;
+    return null;
   }
 
   List<String> provides() {
