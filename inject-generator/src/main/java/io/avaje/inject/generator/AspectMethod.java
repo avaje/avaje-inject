@@ -41,7 +41,7 @@ final class AspectMethod {
 
   void addTargets(Set<String> targets) {
     for (AspectPair aspectPair : aspectPairs) {
-      targets.add(aspectPair.target());
+      targets.add(aspectPair.annotationShortName());
     }
   }
 
@@ -123,8 +123,7 @@ final class AspectMethod {
     }
     writer.append(");").eol();
     for (AspectPair aspect : aspectPairs) {
-      String target = aspect.target();
-      String name = aspectTargetShortName(target);
+      String name = Util.initLower(aspect.annotationShortName());
       String sn = aspect.annotationShortName();
       writer.append("      %s%s = %s.interceptor(%s, %s.getAnnotation(%s.class));", localName, sn, name, localName, localName, sn).eol();
     }

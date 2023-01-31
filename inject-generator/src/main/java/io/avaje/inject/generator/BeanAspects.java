@@ -10,44 +10,44 @@ final class BeanAspects {
   static final BeanAspects EMPTY = new BeanAspects();
 
   private final List<AspectMethod> aspectMethods;
-  private final Set<String> targets;
+  private final Set<String> aspectNames;
 
   private BeanAspects() {
     this.aspectMethods = Collections.emptyList();
-    this.targets = Collections.emptySet();
+    this.aspectNames = Collections.emptySet();
   }
 
   BeanAspects(List<AspectMethod> aspectMethods) {
     this.aspectMethods = aspectMethods;
-    this.targets = initTargets();
+    this.aspectNames = initAspectNames();
   }
 
   boolean hasAspects() {
     return !aspectMethods.isEmpty();
   }
 
-  Set<String> targets() {
-    return targets;
+  Set<String> aspectNames() {
+    return aspectNames;
   }
 
   void extraImports(ImportTypeMap importTypes) {
-    for (AspectMethod aspectMethod : aspectMethods) {
+    for (final AspectMethod aspectMethod : aspectMethods) {
       aspectMethod.addImports(importTypes);
     }
   }
 
-  Set<String> initTargets() {
-    Set<String> targets = new LinkedHashSet<>();
-    for (AspectMethod aspectMethod : aspectMethods) {
+  Set<String> initAspectNames() {
+    final Set<String> targets = new LinkedHashSet<>();
+    for (final AspectMethod aspectMethod : aspectMethods) {
       aspectMethod.addTargets(targets);
     }
     return targets;
   }
 
   void writeFields(Append writer) {
-    for (String target : targets) {
-      String type = Util.shortName(target);
-      String name = Util.initLower(type);
+    for (final String aspectName : aspectNames) {
+      final var type = "AspectProvider<" + aspectName + ">";
+      final var name = Util.initLower(aspectName);
       writer.append("  private final %s %s;", type, name).eol();
     }
     writer.eol();
@@ -56,5 +56,4 @@ final class BeanAspects {
   List<AspectMethod> methods() {
     return aspectMethods;
   }
-
 }

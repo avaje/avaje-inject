@@ -57,19 +57,19 @@ final class SimpleBeanProxyWriter {
   private void writeConstructor() {
     writer.append("  public %s%s(", shortName, suffix);
     int count = 0;
-    for (String target : aspects.targets()) {
+    for (final String aspectName : aspects.aspectNames()) {
       if (count++ > 0) {
         writer.append(", ");
       }
-      final String type = Util.shortName(target);
-      String name = Util.initLower(type);
+      final var type = "AspectProvider<" + aspectName + ">";
+      final var name = Util.initLower(aspectName);
       writer.append(type).append(" ").append(name);
     }
     beanReader.writeConstructorParams(writer);
     writer.append(") {").eol();
     beanReader.writeConstructorInit(writer);
-    for (String target : aspects.targets()) {
-      String name = AspectMethod.aspectTargetShortName(target);
+    for (final String target : aspects.aspectNames()) {
+      final var name = Util.initLower(target);
       writer.append("    this.%s = %s;", name, name).eol();
     }
     writeSetupForMethods();
