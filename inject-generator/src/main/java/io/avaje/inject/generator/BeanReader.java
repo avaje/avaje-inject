@@ -119,6 +119,10 @@ final class BeanReader {
     return typeReader.autoProvides();
   }
 
+  String providesAspect() {
+    return typeReader.providesAspect();
+  }
+
   Set<GenericType> allGenericTypes() {
     if (allGenericTypes != null) {
       return allGenericTypes;

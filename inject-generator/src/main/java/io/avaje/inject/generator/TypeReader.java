@@ -45,6 +45,10 @@ final class TypeReader {
     return extendsReader.autoProvides();
   }
 
+  String providesAspect() {
+    return extendsReader.providesAspect();
+  }
+
   boolean isClosable() {
     return extendsReader.isCloseable();
   }

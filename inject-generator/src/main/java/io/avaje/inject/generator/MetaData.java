@@ -21,6 +21,7 @@ final class MetaData {
   private final String name;
   private String method;
   private boolean wired;
+  private String providesAspect;
 
   /**
    * The interfaces and class annotations the bean has (to register into lists).
@@ -38,12 +39,14 @@ final class MetaData {
   private String autoProvides;
   private boolean generateProxy;
   private boolean usesExternalDependency;
+  private String externalDependency;
 
   MetaData(DependencyMeta meta) {
     this.type = meta.type();
     this.name = trimName(meta.name());
     this.shortType = Util.shortName(type);
     this.method = meta.method();
+    this.providesAspect = meta.providesAspect();
     this.provides = asList(meta.provides());
     this.dependsOn = Stream.of(meta.dependsOn()).map(Dependency::new).collect(Collectors.toList());
     this.autoProvides = meta.autoProvides();
@@ -120,6 +123,7 @@ final class MetaData {
   void update(BeanReader beanReader) {
     this.provides = beanReader.provides();
     this.dependsOn = beanReader.dependsOn();
+    this.providesAspect = beanReader.providesAspect();
     this.autoProvides = beanReader.autoProvides();
     this.generateProxy = beanReader.isGenerateProxy();
   }
@@ -138,6 +142,10 @@ final class MetaData {
 
   String autoProvides() {
     return autoProvides;
+  }
+
+  String providesAspect() {
+    return providesAspect;
   }
 
   /**
@@ -164,7 +172,7 @@ final class MetaData {
       return;
     }
     if (usesExternalDependency) {
-      append.append("  // uses external dependency").append(NEWLINE);
+      append.append("  // uses external dependency ").append(externalDependency).append(NEWLINE);
     }
     append.append("  @DependencyMeta(type=\"").append(type).append("\"");
     if (name != null) {
@@ -173,7 +181,9 @@ final class MetaData {
     if (hasMethod()) {
       append.append(", method=\"").append(method).append("\"");
     }
-    if (!provides.isEmpty()) {
+    if (!providesAspect.isEmpty()) {
+      append.append(", providesAspect=\"").append(providesAspect).append("\"");
+    } else if (!provides.isEmpty()) {
       appendProvides(append, "provides", provides);
     }
     if (!dependsOn.isEmpty()) {
@@ -227,10 +237,15 @@ final class MetaData {
     this.autoProvides = autoProvides;
   }
 
+  void setProvidesAspect(String providesAspect) {
+    this.providesAspect = providesAspect;
+  }
+
   /**
    * This depends on a dependency that comes from another module in the classpath.
    */
-  void markWithExternalDependency() {
+  void markWithExternalDependency(String name) {
     usesExternalDependency = true;
+    externalDependency = name;
   }
 }

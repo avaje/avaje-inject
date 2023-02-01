@@ -91,17 +91,17 @@ final class SimpleModuleWriter {
   }
 
   private void writeProvides() {
-    Set<String> autoProvidesAspects = new TreeSet<>();
-    Set<String> autoProvides = new TreeSet<>();
+    final Set<String> autoProvidesAspects = new TreeSet<>();
+    final Set<String> autoProvides = new TreeSet<>();
 
     for (MetaData metaData : ordering.ordered()) {
-      String forExternal = metaData.autoProvides();
-      if (forExternal != null && !forExternal.isEmpty()) {
-        if (Util.isAspectProvider(forExternal)) {
-          autoProvidesAspects.add(Util.extractAspectType(forExternal));
-        } else if (!forExternal.contains("<")) {
-          autoProvides.add(forExternal);
-        }
+      final String aspect = metaData.providesAspect();
+      if (aspect != null && !aspect.isEmpty()) {
+        autoProvidesAspects.add(aspect);
+      }
+      final String forExternal = metaData.autoProvides();
+      if (forExternal != null && !forExternal.isEmpty() && !forExternal.contains("<")) {
+        autoProvides.add(forExternal);
       }
     }
     if (!autoProvides.isEmpty()) {
@@ -114,9 +114,8 @@ final class SimpleModuleWriter {
     if (!autoRequires.isEmpty()) {
       scopeInfo.buildAutoRequires(writer, autoRequires);
     }
-
     Set<String> autoRequiresAspects = ordering.autoRequiresAspects();
-    if (!autoRequires.isEmpty()) {
+    if (!autoRequiresAspects.isEmpty()) {
       scopeInfo.buildAutoRequiresAspects(writer, autoRequiresAspects);
     }
   }

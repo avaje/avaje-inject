@@ -29,6 +29,7 @@ final class TypeExtendsReader {
    * The implied qualifier name based on naming convention.
    */
   private String qualifierName;
+  private String providesAspect = "";
 
   TypeExtendsReader(GenericType baseGenericType, TypeElement baseType, ProcessingContext context, boolean factory, ImportTypeMap importTypes) {
     this.baseGenericType = baseGenericType;
@@ -76,7 +77,14 @@ final class TypeExtendsReader {
     return extendsInjection.constructor();
   }
 
+  String providesAspect() {
+    return providesAspect;
+  }
+
   String autoProvides() {
+    if (!providesAspect.isEmpty()) {
+      return null;
+    }
     if (baseTypeIsInterface) {
       return baseTypeRaw;
     }
@@ -117,6 +125,16 @@ final class TypeExtendsReader {
     providesTypes.remove(baseTypeRaw);
     // we can't provide a type that is getting injected
     extendsInjection.removeFromProvides(providesTypes);
+    providesAspect = initProvidesAspect();
+  }
+
+  private String initProvidesAspect() {
+    for (String providesType : providesTypes) {
+      if (Util.isAspectProvider(providesType)) {
+        return Util.extractAspectType(providesType);
+      }
+    }
+    return "";
   }
 
   private void addSuperType(TypeElement element) {

@@ -28,6 +28,11 @@ public @interface DependencyMeta {
   String method() default "";
 
   /**
+   * The aspect this component provides.
+   */
+  String providesAspect() default "";
+
+  /**
    * The interfaces the bean implements.
    */
   String[] provides() default {};

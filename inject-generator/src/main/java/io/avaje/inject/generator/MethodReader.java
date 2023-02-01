@@ -135,6 +135,7 @@ final class MethodReader {
     metaData.setDependsOn(dependsOn);
     metaData.setProvides(typeReader == null ? Collections.emptyList() : typeReader.provides());
     metaData.setAutoProvides(typeReader == null ? null : typeReader.autoProvides());
+    metaData.setProvidesAspect(typeReader == null ? "" : typeReader.providesAspect());
     return metaData;
   }
 

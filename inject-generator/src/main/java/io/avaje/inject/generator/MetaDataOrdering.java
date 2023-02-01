@@ -17,9 +17,8 @@ final class MetaDataOrdering {
   private final Map<String, ProviderList> providers = new HashMap<>();
   private final List<DependencyLink> circularDependencies = new ArrayList<>();
   private final Set<String> missingDependencyTypes = new LinkedHashSet<>();
-  private final Set<String> autoRequires = new TreeSet<>();  
+  private final Set<String> autoRequires = new TreeSet<>();
   private final Set<String> autoRequiresAspects = new TreeSet<>();
-  
 
   MetaDataOrdering(Collection<MetaData> values, ProcessingContext context, ScopeInfo scopeInfo) {
     this.context = context;
@@ -186,18 +185,19 @@ final class MetaDataOrdering {
 
   private boolean allDependenciesWired(MetaData queuedMeta, boolean includeExternal) {
     for (Dependency dependency : queuedMeta.dependsOn()) {
-      if (!Util.isProvider(dependency.name())) {
+      final var dependencyName = dependency.name();
+      if (!Util.isProvider(dependencyName)) {
         // check non-provider dependency is satisfied
-        ProviderList providerList = providers.get(dependency.name());
+        ProviderList providerList = providers.get(dependencyName);
         if (providerList == null) {
           if (!scopeInfo.providedByOther(dependency)) {
-            if (includeExternal && context.externallyProvided(dependency.name())) {
-              if (Util.isAspectProvider(dependency.name())) {
-                autoRequiresAspects.add(Util.extractAspectType(dependency.name()));
+            if (includeExternal && context.externallyProvided(dependencyName)) {
+              if (Util.isAspectProvider(dependencyName)) {
+                autoRequiresAspects.add(Util.extractAspectType(dependencyName));
               } else {
-                autoRequires.add(dependency.name());
+                autoRequires.add(dependencyName);
               }
-              queuedMeta.markWithExternalDependency();
+              queuedMeta.markWithExternalDependency(dependencyName);
             } else {
               return false;
             }
