@@ -26,7 +26,7 @@ final class ExternalProvider {
           providedTypes.add(provide.getCanonicalName());
         }
         for (final Class<?> provide : module.autoProvidesAspects()) {
-          providedTypes.add(Constants.ASPECT_PROVIDER + "<" + provide.getCanonicalName() + ">");
+          providedTypes.add(Util.wrapAspect(provide.getCanonicalName()));
         }
       } catch (ServiceConfigurationError expected) {
         // ignore expected error reading the module that we are also writing
