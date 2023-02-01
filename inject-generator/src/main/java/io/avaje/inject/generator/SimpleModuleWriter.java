@@ -114,6 +114,11 @@ final class SimpleModuleWriter {
     if (!autoRequires.isEmpty()) {
       scopeInfo.buildAutoRequires(writer, autoRequires);
     }
+
+    Set<String> autoRequiresAspects = ordering.autoRequiresAspects();
+    if (!autoRequires.isEmpty()) {
+      scopeInfo.buildAutoRequiresAspects(writer, autoRequiresAspects);
+    }
   }
 
   private void writeClassesMethod() {

@@ -21,8 +21,11 @@ final class ExternalProvider {
       for (final Class<?> provide : module.provides()) {
         providedTypes.add(provide.getCanonicalName());
       }
-      for (Class<?> provide : module.autoProvides()) {
+      for (final Class<?> provide : module.autoProvides()) {
         providedTypes.add(provide.getCanonicalName());
+      }
+      for (final Class<?> provide : module.autoProvidesAspects()) {
+        providedTypes.add(Constants.ASPECT_PROVIDER + "<" + provide.getCanonicalName() + ">");
       }
     }
   }

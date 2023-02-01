@@ -17,7 +17,9 @@ final class MetaDataOrdering {
   private final Map<String, ProviderList> providers = new HashMap<>();
   private final List<DependencyLink> circularDependencies = new ArrayList<>();
   private final Set<String> missingDependencyTypes = new LinkedHashSet<>();
-  private final Set<String> autoRequires = new TreeSet<>();
+  private final Set<String> autoRequires = new TreeSet<>();  
+  private final Set<String> autoRequiresAspects = new TreeSet<>();
+  
 
   MetaDataOrdering(Collection<MetaData> values, ProcessingContext context, ScopeInfo scopeInfo) {
     this.context = context;
@@ -190,17 +192,19 @@ final class MetaDataOrdering {
         if (providerList == null) {
           if (!scopeInfo.providedByOther(dependency)) {
             if (includeExternal && context.externallyProvided(dependency.name())) {
-              autoRequires.add(dependency.name());
+              if (Util.isAspectProvider(dependency.name())) {
+                autoRequiresAspects.add(Util.extractAspectType(dependency.name()));
+              } else {
+                autoRequires.add(dependency.name());
+              }
               queuedMeta.markWithExternalDependency();
             } else {
               return false;
             }
           }
-        } else {
-          if (!providerList.isAllWired()) {
-            return false;
-          }
-        }
+        } else if (!providerList.isAllWired()) {
+        return false;
+      }
       }
     }
     return true;
@@ -208,6 +212,10 @@ final class MetaDataOrdering {
 
   Set<String> autoRequires() {
     return autoRequires;
+  }
+
+  Set<String> autoRequiresAspects() {
+    return autoRequiresAspects;
   }
 
   List<MetaData> ordered() {

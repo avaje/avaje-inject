@@ -414,6 +414,13 @@ final class ScopeInfo {
     }
   }
 
+  void buildAutoRequiresAspects(Append writer, Set<String> autoRequires) {
+    autoRequires.removeAll(requires);
+    if (!autoRequires.isEmpty()) {
+      buildProvidesMethod(writer, "autoRequiresAspects", autoRequires);
+    }
+  }
+
   void readModuleMetaData(TypeElement moduleType) {
     InjectModule module = moduleType.getAnnotation(InjectModule.class);
     details(module.name(), moduleType);
