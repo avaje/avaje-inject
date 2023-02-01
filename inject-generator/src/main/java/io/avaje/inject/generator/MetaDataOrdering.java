@@ -35,6 +35,10 @@ final class MetaDataOrdering {
       for (String provide : metaData.provides()) {
         providerAdd(provide).add(metaData);
       }
+      final String aspect = metaData.providesAspect();
+      if (aspect != null && !aspect.isEmpty()) {
+        providerAdd(Util.wrapAspect(aspect)).add(metaData);
+      }
     }
     externallyRequiredDependencies();
   }

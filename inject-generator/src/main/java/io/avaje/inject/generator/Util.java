@@ -159,6 +159,10 @@ final class Util {
     return rawType.substring(ASPECT_PROVIDER_LENGTH, rawType.length() - 1);
   }
 
+  static String wrapAspect(String aspect) {
+    return Constants.ASPECT_PROVIDER + "<" + aspect + ">";
+  }
+
   /**
    * Return the common parent package.
    */
