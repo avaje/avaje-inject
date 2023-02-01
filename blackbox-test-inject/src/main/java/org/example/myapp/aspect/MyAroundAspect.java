@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.List;
 
 @Singleton
-//@Aspect(target = MyAround.class)
 public class MyAroundAspect implements AspectProvider<MyAround>, MethodInterceptor {
 
   private final List<String> trace = new ArrayList<>();

@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 @Component
-public class MyAspectImplementation implements AspectProvider<MyExternalAspect>, MethodInterceptor {
+class MyAspectImplementation implements AspectProvider<MyExternalAspect>, MethodInterceptor {
 
   @Override
   public MethodInterceptor interceptor(Method method, MyExternalAspect aspectAnnotation) {

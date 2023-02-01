@@ -18,9 +18,10 @@ import java.lang.annotation.Target;
 public @interface Aspect {
 
   /**
-   * Specify the {@link AspectProvider} for this aspect.
+   * Deprecated - the target() attribute is no longer required and should be removed.
    */
-  Class<? extends AspectProvider> target();
+  @Deprecated
+  Class<?> target() default Void.class;
 
   /**
    * Specify the priority ordering when multiple aspects are on a method.

@@ -44,9 +44,7 @@ final class AspectAnnotationReader {
         Meta meta = new Meta();
         for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : annotationMirror.getElementValues().entrySet()) {
           String key = entry.getKey().toString();
-          if (key.equals("target()")) {
-            meta.target(entry.getValue().getValue().toString());
-          } else if (key.equals("ordering()")) {
+          if (key.equals("ordering()")) {
             meta.ordering(Integer.parseInt(entry.getValue().getValue().toString()));
           }
         }
@@ -59,13 +57,7 @@ final class AspectAnnotationReader {
 
   private static class Meta {
 
-    String target;
-
     int ordering = Constants.ORDERING_DEFAULT;
-
-    void target(String target) {
-      this.target = target;
-    }
 
     void ordering(int ordering) {
       this.ordering = ordering;
@@ -73,7 +65,7 @@ final class AspectAnnotationReader {
 
     @Override
     public String toString() {
-      return "Meta(target=" + target + ", ordering=" + ordering + ')';
+      return "Meta(ordering=" + ordering + ')';
     }
   }
 }
