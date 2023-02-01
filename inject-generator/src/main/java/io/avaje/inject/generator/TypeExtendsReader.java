@@ -14,6 +14,7 @@ import java.util.List;
 final class TypeExtendsReader {
 
   private static final String JAVA_LANG_OBJECT = "java.lang.Object";
+  private static final String JAVA_LANG_RECORD = "java.lang.Record";
   private final GenericType baseGenericType;
   private final TypeElement baseType;
   private final ProcessingContext context;
@@ -139,9 +140,9 @@ final class TypeExtendsReader {
 
   private void addSuperType(TypeElement element) {
     readInterfaces(element);
-    String fullName = element.getQualifiedName().toString();
-    if (!fullName.equals(JAVA_LANG_OBJECT)) {
-      String type = Util.unwrapProvider(fullName);
+    final String fullName = element.getQualifiedName().toString();
+    if (!fullName.equals(JAVA_LANG_OBJECT) && !fullName.equals(JAVA_LANG_RECORD)) {
+      final String type = Util.unwrapProvider(fullName);
       if (isPublic(element)) {
         extendsTypes.add(type);
         extendsInjection.read(element);
