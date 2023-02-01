@@ -1,10 +1,15 @@
 package io.avaje.inject.generator;
 
+import io.avaje.inject.Factory;
+import io.avaje.inject.spi.Generated;
+import io.avaje.inject.spi.Proxy;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +30,8 @@ final class TypeExtendsReader {
   private final String beanSimpleName;
   private final String baseTypeRaw;
   private final boolean baseTypeIsInterface;
+  private final boolean publicAccess;
+  private final boolean autoProvide;
   private boolean closeable;
   /**
    * The implied qualifier name based on naming convention.
@@ -40,6 +47,24 @@ final class TypeExtendsReader {
     this.beanSimpleName = baseType.getSimpleName().toString();
     this.baseTypeRaw = Util.unwrapProvider(baseGenericType.toString());
     this.baseTypeIsInterface = baseType.getKind() == ElementKind.INTERFACE;
+    this.publicAccess = baseType.getModifiers().contains(Modifier.PUBLIC);
+    this.autoProvide = autoProvide();
+  }
+
+  private boolean autoProvide() {
+    return publicAccess
+      && baseType.getAnnotation(Factory.class) == null
+      && baseType.getAnnotation(Proxy.class) == null
+      && baseType.getAnnotation(Generated.class) == null
+      && !isController();
+  }
+
+  private boolean isController() {
+    try {
+      return baseType.getAnnotation((Class<Annotation>) Class.forName(Constants.CONTROLLER)) != null;
+    } catch (final ClassNotFoundException e) {
+      return false;
+    }
   }
 
   GenericType baseType() {
@@ -83,16 +108,13 @@ final class TypeExtendsReader {
   }
 
   String autoProvides() {
-    if (!providesAspect.isEmpty()) {
+    if (!autoProvide || !providesAspect.isEmpty()) {
       return null;
     }
-    if (baseTypeIsInterface) {
+    if (baseTypeIsInterface || interfaceTypes.isEmpty()) {
       return baseTypeRaw;
     }
-    if (!interfaceTypes.isEmpty()) {
-      return interfaceTypes.get(0);
-    }
-    return null;
+    return interfaceTypes.get(0);
   }
 
   List<String> provides() {

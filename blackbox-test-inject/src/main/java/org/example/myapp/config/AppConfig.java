@@ -73,6 +73,11 @@ public class AppConfig {
     return new MyInterface() {};
   }
 
+  @Bean
+  MyAbstract myAbstract() {
+    return new MyAbstract() {};
+  }
+
   public static class Builder {
   }
 
@@ -102,6 +107,10 @@ public class AppConfig {
     public MyPrim(String val) {
       this.val = val;
     }
+  }
+
+  public abstract class MyAbstract {
+
   }
 
   @Component
