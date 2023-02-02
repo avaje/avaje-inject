@@ -42,14 +42,6 @@
       <version>1.7.1</version>
     </dependency>
 
-    <!-- annotation processor -->
-    <dependency>
-      <groupId>io.avaje</groupId>
-      <artifactId>avaje-inject-generator</artifactId>
-      <version>${project.version}</version>
-      <scope>provided</scope>
-    </dependency>
-
     <!-- test dependencies -->
     <dependency>
       <groupId>io.avaje</groupId>
@@ -73,5 +65,22 @@
     </dependency>
 
   </dependencies>
-
+	<build>
+		<plugins>
+			<!-- Add Compiler args for loom and errorprone -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>io.avaje</groupId>
+							<artifactId>avaje-inject-generator</artifactId>
+							<version>${project.version}</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
