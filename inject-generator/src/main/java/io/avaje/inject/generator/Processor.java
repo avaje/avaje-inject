@@ -2,7 +2,6 @@ package io.avaje.inject.generator;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.HashSet;
@@ -61,37 +60,31 @@ public final class Processor extends AbstractProcessor {
   void loadProvidedFiles(Filer filer) {
 
     try {
-      var resource =
-            filer
+      final var resource =
+          filer
               .getResource(StandardLocation.CLASS_OUTPUT, "", "target/avaje-plugin-provides.txt")
               .toUri()
               .toString()
               .replace("/target/classes", "");
-      try (InputStream inputStream = new URL(resource).openStream();
-          BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-        String line;
-        while ((line = reader.readLine()) != null) {
-          pluginFileProvided.add(line);
-        }
+      try (var inputStream = new URL(resource).openStream();
+          var reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        reader.lines().forEach(moduleFileProvided::add);
       }
-    } catch (IOException e2) {
+    } catch (final IOException e2) {
     }
 
     try {
-      var resource =
-            filer
+      final var resource =
+          filer
               .getResource(StandardLocation.CLASS_OUTPUT, "", "target/avaje-module-provides.txt")
               .toUri()
               .toString()
               .replace("/target/classes", "");
-      try (InputStream inputStream = new URL(resource).openStream();
-          BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-        String line;
-        while ((line = reader.readLine()) != null) {
-          moduleFileProvided.add(line);
-        }
+      try (var inputStream = new URL(resource).openStream();
+          var reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        reader.lines().forEach(moduleFileProvided::add);
       }
-    } catch (IOException e2) {
+    } catch (final IOException e2) {
     }
   }
 
