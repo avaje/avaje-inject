@@ -62,8 +62,7 @@ public final class Processor extends AbstractProcessor {
 
     try {
       var resource =
-          processingEnv
-              .getFiler()
+            filer
               .getResource(StandardLocation.CLASS_OUTPUT, "", "target/avaje-plugin-provides.txt")
               .toUri()
               .toString()
@@ -80,8 +79,7 @@ public final class Processor extends AbstractProcessor {
 
     try {
       var resource =
-          processingEnv
-              .getFiler()
+            filer
               .getResource(StandardLocation.CLASS_OUTPUT, "", "target/avaje-module-provides.txt")
               .toUri()
               .toString()
