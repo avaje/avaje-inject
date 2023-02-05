@@ -81,7 +81,7 @@
 				<version>1.0-SNAPSHOT</version>
 				<executions>
 					<execution>
-						<phase>process-resources</phase>
+						<phase>process-sources</phase>
 						<goals>
 							<goal>load-spi</goal>
 						</goals>
