@@ -17,7 +17,7 @@ final class ExternalProvider {
   private final Set<String> providedTypes = new HashSet<>();
 
   void init(Set<String> moduleFileProvided) {
-    moduleFileProvided.forEach(System.out::println);
+
     providedTypes.addAll(moduleFileProvided);
 
     for (final Module module :
