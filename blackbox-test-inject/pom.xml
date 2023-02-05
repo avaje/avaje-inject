@@ -73,5 +73,35 @@
     </dependency>
 
   </dependencies>
-
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>io.avaje</groupId>
+				<artifactId>avaje-autorequire-plugin</artifactId>
+				<version>1.0-SNAPSHOT</version>
+				<executions>
+					<execution>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>find-modules</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Add Compiler args for loom and errorprone -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>io.avaje</groupId>
+							<artifactId>avaje-inject-generator</artifactId>
+							<version>${project.version}</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

@@ -1,34 +1,38 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.spi.Module;
+import java.util.HashSet;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
+import java.util.Set;
 
-import java.util.*;
+import io.avaje.inject.spi.Module;
 
 /**
  * The types provided by other modules in the classpath at compile time.
- * <p>
- * When we depend on these types they add to the module autoRequires() classes.
+ *
+ * <p>When we depend on these types they add to the module autoRequires() classes.
  */
 final class ExternalProvider {
 
   private final Set<String> providedTypes = new HashSet<>();
 
-  void init() {
-    ServiceLoader<Module> load = ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader());
-    Iterator<Module> iterator = load.iterator();
-    while (iterator.hasNext()) {
+  void init(Set<String> moduleFileProvided) {
+    moduleFileProvided.forEach(System.out::println);
+    providedTypes.addAll(moduleFileProvided);
+
+    for (final Module module :
+        ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader())) {
       try {
-        Module module = iterator.next();
         for (final Class<?> provide : module.provides()) {
           providedTypes.add(provide.getCanonicalName());
         }
-        for (Class<?> provide : module.autoProvides()) {
+        for (final Class<?> provide : module.autoProvides()) {
           providedTypes.add(provide.getCanonicalName());
         }
         for (final Class<?> provide : module.autoProvidesAspects()) {
           providedTypes.add(Util.wrapAspect(provide.getCanonicalName()));
         }
-      } catch (ServiceConfigurationError expected) {
+      } catch (final ServiceConfigurationError expected) {
         // ignore expected error reading the module that we are also writing
       }
     }
