@@ -1,9 +1,6 @@
 package io.avaje.inject.generator;
 
-import java.util.HashSet;
-import java.util.ServiceConfigurationError;
-import java.util.ServiceLoader;
-import java.util.Set;
+import java.util.*;
 
 import io.avaje.inject.spi.Module;
 
@@ -19,9 +16,12 @@ final class ExternalProvider {
   void init(Set<String> moduleFileProvided) {
 
     providedTypes.addAll(moduleFileProvided);
-
-    for (final Module module :
-        ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader())) {
+    ServiceLoader<Module> load =
+        ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader());
+    Iterator<Module> iterator = load.iterator();
+    
+    while (iterator.hasNext()) {
+      Module module = iterator.next();
       try {
         for (final Class<?> provide : module.provides()) {
           providedTypes.add(provide.getCanonicalName());
@@ -39,8 +39,8 @@ final class ExternalProvider {
   }
 
   /**
-   * Return true if this type is provided by another module in the classpath.
-   * We will add it to autoRequires().
+   * Return true if this type is provided by another module in the classpath. We will add it to
+   * autoRequires().
    */
   boolean provides(String type) {
     return providedTypes.contains(type);
