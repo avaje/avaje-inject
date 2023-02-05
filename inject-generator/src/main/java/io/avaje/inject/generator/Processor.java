@@ -1,8 +1,10 @@
 package io.avaje.inject.generator;
 
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.ServiceLoader;
@@ -59,31 +61,37 @@ public final class Processor extends AbstractProcessor {
   void loadProvidedFiles(Filer filer) {
 
     try {
-      final var resource =
-          filer
+      var resource =
+            filer
               .getResource(StandardLocation.CLASS_OUTPUT, "", "target/avaje-plugin-provides.txt")
               .toUri()
               .toString()
               .replace("/target/classes", "");
-      try (var lines = Files.lines(Paths.get(new URI(resource)))) {
-        lines.forEach(pluginFileProvided::add);
+      try (InputStream inputStream = new URL(resource).openStream();
+          BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+          pluginFileProvided.add(line);
+        }
       }
-    } catch (final Exception e) {
-      // could not find avaje-plugin-provides.txt
+    } catch (IOException e2) {
     }
 
     try {
-      final var resource =
-          filer
+      var resource =
+            filer
               .getResource(StandardLocation.CLASS_OUTPUT, "", "target/avaje-module-provides.txt")
               .toUri()
               .toString()
               .replace("/target/classes", "");
-      try (var lines = Files.lines(Paths.get(new URI(resource)))) {
-        lines.forEach(pluginFileProvided::add);
+      try (InputStream inputStream = new URL(resource).openStream();
+          BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+          moduleFileProvided.add(line);
+        }
       }
-    } catch (final Exception e2) {
-      // could not find avaje-module-provides.txt
+    } catch (IOException e2) {
     }
   }
 
