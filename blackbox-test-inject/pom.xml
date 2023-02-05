@@ -77,18 +77,17 @@
 		<plugins>
 			<plugin>
 				<groupId>io.avaje</groupId>
-				<artifactId>avaje-autorequire-plugin</artifactId>
+				<artifactId>auto-require-plugin</artifactId>
 				<version>1.0-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<phase>process-resources</phase>
 						<goals>
-							<goal>find-modules</goal>
+							<goal>load-spi</goal>
 						</goals>
 					</execution>
 				</executions>
 			</plugin>
-			<!-- Add Compiler args for loom and errorprone -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
