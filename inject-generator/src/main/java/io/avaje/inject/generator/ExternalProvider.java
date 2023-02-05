@@ -19,10 +19,10 @@ final class ExternalProvider {
     ServiceLoader<Module> load =
         ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader());
     Iterator<Module> iterator = load.iterator();
-    
+
     while (iterator.hasNext()) {
-      Module module = iterator.next();
       try {
+        Module module = iterator.next();
         for (final Class<?> provide : module.provides()) {
           providedTypes.add(provide.getCanonicalName());
         }
