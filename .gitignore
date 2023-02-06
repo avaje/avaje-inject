@@ -9,5 +9,4 @@ build/
 *.project
 *.processors
 */bin/
-*.editorconfig
-*.Module
+
