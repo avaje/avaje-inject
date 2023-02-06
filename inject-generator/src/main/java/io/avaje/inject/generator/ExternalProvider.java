@@ -1,8 +1,8 @@
 package io.avaje.inject.generator;
 
-import java.util.*;
-
 import io.avaje.inject.spi.Module;
+
+import java.util.*;
 
 /**
  * The types provided by other modules in the classpath at compile time.
@@ -14,12 +14,9 @@ final class ExternalProvider {
   private final Set<String> providedTypes = new HashSet<>();
 
   void init(Set<String> moduleFileProvided) {
-
     providedTypes.addAll(moduleFileProvided);
-    ServiceLoader<Module> load =
-        ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader());
+    ServiceLoader<Module> load = ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader());
     Iterator<Module> iterator = load.iterator();
-
     while (iterator.hasNext()) {
       try {
         Module module = iterator.next();
