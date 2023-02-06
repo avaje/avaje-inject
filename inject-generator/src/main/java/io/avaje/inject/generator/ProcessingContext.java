@@ -30,13 +30,13 @@ final class ProcessingContext {
   private final Set<String> uniqueModuleNames = new HashSet<>();
   private final ExternalProvider externalProvide = new ExternalProvider();
 
-  ProcessingContext(ProcessingEnvironment processingEnv) {
+  ProcessingContext(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
     this.processingEnv = processingEnv;
     this.messager = processingEnv.getMessager();
     this.filer = processingEnv.getFiler();
     this.elementUtils = processingEnv.getElementUtils();
     this.typeUtils = processingEnv.getTypeUtils();
-    externalProvide.init();
+    externalProvide.init(moduleFileProvided);
   }
 
   /**
