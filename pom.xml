@@ -39,6 +39,7 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
+        <module>auto-requires-plugin</module>
         <module>blackbox-other</module>
         <module>blackbox-aspect</module>
         <module>blackbox-test-inject</module>

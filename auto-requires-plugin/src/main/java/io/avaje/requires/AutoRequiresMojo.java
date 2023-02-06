@@ -1,17 +1,7 @@
 package io.avaje.requires;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ServiceLoader;
-import java.util.Set;
-
+import io.avaje.inject.spi.Module;
+import io.avaje.inject.spi.Plugin;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
 import org.apache.maven.plugin.AbstractMojo;
@@ -22,8 +12,13 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
-import io.avaje.inject.spi.Module;
-import io.avaje.inject.spi.Plugin;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.*;
 
 @Mojo(
     name = "load-spi",
@@ -36,8 +31,7 @@ public class AutoRequiresMojo extends AbstractMojo {
 
   @Override
   public void execute() throws MojoExecutionException {
-
-    final var listUrl = getCompileDependencies();
+    final var listUrl = compileDependencies();
 
     final var directory = new File(project.getBuild().getDirectory());
     if (!directory.exists()) {
@@ -56,17 +50,14 @@ public class AutoRequiresMojo extends AbstractMojo {
     }
   }
 
-  private List<URL> getCompileDependencies() throws MojoExecutionException {
-
+  private List<URL> compileDependencies() throws MojoExecutionException {
     final List<URL> listUrl = new ArrayList<>();
     project.setArtifactFilter(new ScopeArtifactFilter("compile"));
     final var deps = project.getArtifacts();
 
     for (final Artifact artifact : deps) {
       try {
-        URL url;
-        url = artifact.getFile().toURI().toURL();
-        listUrl.add(url);
+        listUrl.add(artifact.getFile().toURI().toURL());
       } catch (final MalformedURLException e) {
         throw new MojoExecutionException("Failed to get compile dependencies", e);
       }
@@ -87,7 +78,6 @@ public class AutoRequiresMojo extends AbstractMojo {
       throws IOException {
     for (final var plugin : ServiceLoader.load(Plugin.class, newClassLoader)) {
       for (final Class<?> providedType : plugin.provides()) {
-
         pluginWriter.write(providedType.getCanonicalName());
         pluginWriter.write("\n");
       }
@@ -99,7 +89,6 @@ public class AutoRequiresMojo extends AbstractMojo {
     final Set<String> providedTypes = new HashSet<>();
 
     for (final Module module : ServiceLoader.load(Module.class, newClassLoader)) {
-
       for (final Class<?> provide : module.provides()) {
         providedTypes.add(provide.getCanonicalName());
       }
@@ -117,7 +106,7 @@ public class AutoRequiresMojo extends AbstractMojo {
     }
   }
 
-  static String wrapAspect(String aspect) {
+  private static String wrapAspect(String aspect) {
     return "io.avaje.inject.aop.AspectProvider<" + aspect + ">";
   }
 }
