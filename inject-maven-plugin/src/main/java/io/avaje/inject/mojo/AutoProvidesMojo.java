@@ -1,4 +1,4 @@
-package io.avaje.requires;
+package io.avaje.inject.mojo;
 
 import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.Plugin;
@@ -20,11 +20,19 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
 
+/**
+ * Plugin that generates <code>target/avaje-module-provides.txt</code> and <code>
+ * target/avaje-plugin-provides.txt</code> based on the avaje-inject modules and plugins in the
+ * classpath.
+ *
+ * <p>This allows the avaje-inject-generator annotation processor to be aware of all the components
+ * and plugins provided by other modules in the classpath at compile time.
+ */
 @Mojo(
-    name = "load-spi",
+    name = "provides",
     defaultPhase = LifecyclePhase.PROCESS_SOURCES,
     requiresDependencyResolution = ResolutionScope.COMPILE)
-public class AutoRequiresMojo extends AbstractMojo {
+public class AutoProvidesMojo extends AbstractMojo {
 
   @Parameter(defaultValue = "${project}", readonly = true, required = true)
   private MavenProject project;

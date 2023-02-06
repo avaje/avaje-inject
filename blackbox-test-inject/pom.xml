@@ -89,13 +89,13 @@
 		<plugins>
 			<plugin>
 				<groupId>io.avaje</groupId>
-				<artifactId>auto-require-plugin</artifactId>
+				<artifactId>avaje-inject-maven-plugin</artifactId>
 				<version>1.0-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<phase>process-sources</phase>
 						<goals>
-							<goal>load-spi</goal>
+							<goal>provides</goal>
 						</goals>
 					</execution>
 				</executions>
