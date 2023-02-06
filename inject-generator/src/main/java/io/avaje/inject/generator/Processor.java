@@ -66,6 +66,7 @@ public final class Processor extends AbstractProcessor {
     annotations.add(InjectModule.class.getCanonicalName());
     annotations.add(Factory.class.getCanonicalName());
     annotations.add(Singleton.class.getCanonicalName());
+    annotations.add(Component.class.getCanonicalName());
     annotations.add(Prototype.class.getCanonicalName());
     annotations.add(Scope.class.getCanonicalName());
     annotations.add(Constants.TESTSCOPE);
