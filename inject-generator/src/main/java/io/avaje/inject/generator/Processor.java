@@ -68,7 +68,7 @@ public final class Processor extends AbstractProcessor {
               .replace("/target/classes", "");
       try (var inputStream = new URL(resource).openStream();
           var reader = new BufferedReader(new InputStreamReader(inputStream))) {
-        reader.lines().forEach(moduleFileProvided::add);
+        reader.lines().forEach(pluginFileProvided::add);
       }
     } catch (final IOException e2) {
     }
