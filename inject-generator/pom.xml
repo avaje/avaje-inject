@@ -20,7 +20,7 @@
       <artifactId>avaje-inject</artifactId>
       <version>8.12-RC4</version>
       <!-- <optional>true</optional> -->
-      <!-- <scope>provided</scope> -->
+      <scope>provided</scope>
     </dependency>
 <dependency>
 	<groupId>com.jolira</groupId>
