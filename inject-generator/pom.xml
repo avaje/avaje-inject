@@ -10,14 +10,17 @@
   <artifactId>avaje-inject-generator</artifactId>
   <name>avaje inject generator</name>
   <description>annotation processor generating di as source code</description>
-
+	<properties>
+		<prism.directory>${project.build.directory}/generated-sources/prims</prism.directory>
+	</properties>
   <dependencies>
 
     <dependency>
       <groupId>io.avaje</groupId>
-      <artifactId>avaje-inject</artifactId>
-      <version>8.12-RC4</version>
+      <artifactId>avaje-inject-prism</artifactId>
+      <version>${project.version}</version>
     </dependency>
+    
 
     <!-- test dependencies -->
     <dependency>
@@ -40,7 +43,6 @@
         <configuration>
           <source>11</source>
           <target>11</target>
-          <!-- Turn off annotation processing for building -->
           <compilerArgument>-proc:none</compilerArgument>
         </configuration>
       </plugin>
@@ -55,6 +57,55 @@
         </configuration>
       </plugin>
 
+
+<!--
+			<plugin>
+				<groupId>org.bsc.maven</groupId>
+				<artifactId>maven-processor-plugin</artifactId>
+         <version>4.0-rc1</version>
+				<configuration>
+					<defaultOutputDirectory>${prism.directory}</defaultOutputDirectory>
+					<processors>
+						<processor>net.java.dev.hickory.prism.internal.PrismGenerator</processor>
+					</processors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>process</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>process</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>com.jolira</groupId>
+						<artifactId>hickory</artifactId>
+						<version>1.0.0</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.3.0</version>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${prism.directory}</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			-->
     </plugins>
   </build>
 

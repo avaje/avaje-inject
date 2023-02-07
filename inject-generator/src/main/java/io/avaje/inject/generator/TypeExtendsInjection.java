@@ -1,7 +1,7 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.Bean;
-import jakarta.inject.Inject;
+import io.avaje.inject.prism.BeanPrism;
+import io.avaje.inject.prism.InjectPrism;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -59,7 +59,7 @@ final class TypeExtendsInjection {
   }
 
   private void readField(Element element) {
-    Inject inject = element.getAnnotation(Inject.class);
+    InjectPrism inject = InjectPrism.getInstanceOn(element);
     if (inject != null) {
       injectFields.add(new FieldReader(element));
     }
@@ -73,7 +73,7 @@ final class TypeExtendsInjection {
 
     ExecutableElement ex = (ExecutableElement) element;
     MethodReader methodReader = new MethodReader(context, ex, baseType, importTypes).read();
-    Inject inject = element.getAnnotation(Inject.class);
+    InjectPrism inject = InjectPrism.getInstanceOn(element);
     if (inject != null) {
       injectConstructor = methodReader;
     } else {
@@ -87,13 +87,13 @@ final class TypeExtendsInjection {
     boolean checkAspect = true;
     ExecutableElement methodElement = (ExecutableElement) element;
     if (factory) {
-      Bean bean = element.getAnnotation(Bean.class);
+      BeanPrism bean = BeanPrism.getInstanceOn(element);
       if (bean != null) {
         addFactoryMethod(methodElement, bean);
         checkAspect = false;
       }
     }
-    Inject inject = element.getAnnotation(Inject.class);
+    InjectPrism inject = InjectPrism.getInstanceOn(element);
     final String methodKey = methodElement.getSimpleName().toString();
     if (inject != null && !notInjectMethods.contains(methodKey)) {
       if (!injectMethods.containsKey(methodKey)) {
@@ -145,7 +145,7 @@ final class TypeExtendsInjection {
   }
 
 
-  private void addFactoryMethod(ExecutableElement methodElement, Bean bean) {
+  private void addFactoryMethod(ExecutableElement methodElement, BeanPrism bean) {
     String qualifierName = Util.getNamed(methodElement);
     factoryMethods.add(new MethodReader(context, methodElement, baseType, bean, qualifierName, importTypes).read());
   }
