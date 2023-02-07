@@ -1,7 +1,7 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.InjectModule;
-import io.avaje.inject.spi.DependencyMeta;
+import io.avaje.inject.prism.DependencyMetaPrism;
+import io.avaje.inject.prism.InjectModulePrism;
 
 import javax.annotation.processing.FilerException;
 import javax.lang.model.element.Element;
@@ -304,7 +304,7 @@ final class ScopeInfo {
     Name simpleName = element.getSimpleName();
     if (simpleName.toString().startsWith("build_")) {
       // read a build method - DependencyMeta
-      DependencyMeta meta = element.getAnnotation(DependencyMeta.class);
+      DependencyMetaPrism meta = DependencyMetaPrism.getInstanceOn(element);
       if (meta == null) {
         context.logError("Missing @DependencyMeta on method " + simpleName);
       } else {
@@ -422,7 +422,7 @@ final class ScopeInfo {
   }
 
   void readModuleMetaData(TypeElement moduleType) {
-    InjectModule module = moduleType.getAnnotation(InjectModule.class);
+    InjectModulePrism module = InjectModulePrism.getInstanceOn(moduleType);
     details(module.name(), moduleType);
     readFactoryMetaData(moduleType);
   }
