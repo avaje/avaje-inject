@@ -1,10 +1,14 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.prism.InjectModulePrism;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+
+import io.avaje.inject.prism.InjectModulePrism;
 
 final class AllScopes {
 
