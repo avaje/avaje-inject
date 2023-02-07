@@ -65,7 +65,7 @@
       </plugin>
 
 
-			<!-- <plugin>
+			<plugin>
 				<groupId>org.bsc.maven</groupId>
 				<artifactId>maven-processor-plugin</artifactId>
          <version>4.0-rc1</version>
@@ -110,7 +110,7 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin> -->
+			</plugin>
     </plugins>
   </build>
 
