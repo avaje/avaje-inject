@@ -50,7 +50,7 @@
         <configuration>
           <source>11</source>
           <target>11</target>
-          <!-- <compilerArgument>-proc:none</compilerArgument> -->
+          <compilerArgument>-proc:none</compilerArgument>
         </configuration>
       </plugin>
 
