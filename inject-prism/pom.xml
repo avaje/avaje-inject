@@ -3,14 +3,70 @@
   <parent>
     <groupId>io.avaje</groupId>
     <artifactId>avaje-inject-parent</artifactId>
-    <version>8.12-RC5</version>
+    <version>8.12-RC4</version>
   </parent>
   <artifactId>avaje-inject-prism</artifactId>
+  <build>
+    <plugins>
+    <!--
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-jar</id>
+            <configuration>
+              <archive>
+                <manifestEntries>
+                  <Automatic-Module-Name>io.avaje.inject.prism</Automatic-Module-Name>
+                </manifestEntries>
+              </archive>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      -->
+       <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <annotationProcessorPaths>
+            <annotationProcessorPath>
+              <groupId>com.jolira</groupId>
+              <artifactId>hickory</artifactId>
+              <version>1.0.0</version>
+            </annotationProcessorPath>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.moditect</groupId>
+        <artifactId>moditect-maven-plugin</artifactId>
+        <version>1.0.0.RC2</version>
+        <executions>
+          <execution>
+            <id>add-module-infos</id>
+            <phase>package</phase>
+            <goals>
+              <goal>add-module-info</goal>
+            </goals>
+            <configuration>
+              <overwriteExistingFiles>true</overwriteExistingFiles>
+              <module>
+                <moduleInfoFile>
+                  src/main/java/module-info.moditect
+                </moduleInfoFile>
+              </module>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
   <dependencies>
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-inject</artifactId>
-      <version>${project.version}</version>
+      <version>8.12-RC4</version>
       <optional>true</optional>
       <scope>provided</scope>
     </dependency>
