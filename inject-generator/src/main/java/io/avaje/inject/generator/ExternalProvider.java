@@ -1,5 +1,6 @@
 package io.avaje.inject.generator;
 
+import java.util.Iterator;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.Set;
@@ -32,10 +33,13 @@ final class ExternalProvider {
 
     if (!injectAvailable) return Set.of();
 
-    final ServiceLoader<Module> load =
-        ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader());
-    for (final Module module : load) {
+    Iterator<Module> iterator =
+        ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader()).iterator();
+    
+    while (iterator.hasNext()) {
+    	
       try {
+    	  Module module = iterator.next();
         for (final Class<?> provide : module.provides()) {
           providedTypes.add(provide.getCanonicalName());
         }
