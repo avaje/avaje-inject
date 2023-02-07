@@ -10,9 +10,6 @@
   <artifactId>avaje-inject-generator</artifactId>
   <name>avaje inject generator</name>
   <description>annotation processor generating di as source code</description>
-	<properties>
-		<prism.directory>${project.build.directory}/generated-sources/prims</prism.directory>
-	</properties>
   <dependencies>
 
     <dependency>

@@ -31,7 +31,7 @@ public class IncludeAnnotationsTest {
     assertFalse(include("foo.Generated"));
     assertFalse(include(Constants.SINGLETON));
     assertFalse(include("jakarta.inject.Named"));
-    assertFalse(include("io.avaje.inject.Factory"));
+    assertFalse(include(Constants.INJECT_FACTORY));
     assertFalse(include("io.avaje.inject.Primary"));
     assertFalse(include("io.avaje.inject.Secondary"));
     assertFalse(include(Constants.PATH));
