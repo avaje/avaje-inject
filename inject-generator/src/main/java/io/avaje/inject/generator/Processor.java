@@ -22,6 +22,9 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.tools.StandardLocation;
+import io.avaje.inject.prism.InjectModulePrism;
+import io.avaje.inject.prism.ScopePrism;
+
 
 @SupportedAnnotationTypes({
   Constants.INJECTMODULE,
@@ -184,8 +187,7 @@ public final class Processor extends AbstractProcessor {
   /** Read InjectModule for things like package-info etc (not for custom scopes) */
   private void readInjectModule(RoundEnvironment roundEnv) {
     // read other that are annotated with InjectModule
-    for (final Element element :
-        roundEnv.getElementsAnnotatedWith(context.element(Constants.INJECTMODULE))) {
+    for (final Element element : roundEnv.getElementsAnnotatedWith(context.element(Constants.INJECTMODULE))) {
 
       final var scope = ScopePrism.getInstanceOn(element);
       if (scope == null) {

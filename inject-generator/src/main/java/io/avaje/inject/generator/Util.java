@@ -5,6 +5,9 @@ import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
+import io.avaje.inject.prism.NamedPrism;
+import io.avaje.inject.prism.QualifierPrism;
+
 final class Util {
 
   static final String ASPECT_PROVIDER_PREFIX = "io.avaje.inject.aop.AspectProvider<";
@@ -188,13 +191,13 @@ final class Util {
    * Return the name via <code>@Named</code> or a Qualifier annotation.
    */
   public static String getNamed(Element p) {
-    var named = NamedPrism.getInstanceOn(p);
+    NamedPrism named = NamedPrism.getInstanceOn(p);
     if (named != null) {
       return named.value().toLowerCase();
     }
     for (AnnotationMirror annotationMirror : p.getAnnotationMirrors()) {
       DeclaredType annotationType = annotationMirror.getAnnotationType();
-      var qualifier = QualifierPrism.getInstance(annotationMirror) ;
+      QualifierPrism qualifier = QualifierPrism.getInstanceOn(annotationType.asElement());
       if (qualifier != null) {
         return Util.shortName(annotationType.toString()).toLowerCase();
       }

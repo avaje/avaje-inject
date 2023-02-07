@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.avaje.inject.prism.DependencyMetaPrism;
+
 /**
  * Holds the data as per <code>@DependencyMeta</code>
  */

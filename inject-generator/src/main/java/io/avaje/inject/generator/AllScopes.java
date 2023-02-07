@@ -1,8 +1,6 @@
 package io.avaje.inject.generator;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import io.avaje.inject.prism.InjectModulePrism;
 
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
@@ -58,7 +56,7 @@ final class AllScopes {
     for (String customScopeModule : customScopeModules) {
       final TypeElement module = context.element(customScopeModule);
       if (module != null) {
-        final var injectModule = InjectModulePrism.getInstanceOn(module);
+        InjectModulePrism injectModule = InjectModulePrism.getInstanceOn(module);
         if (injectModule != null) {
           final String customScopeType = injectModule.customScopeType();
           final TypeElement scopeType = context.element(customScopeType);

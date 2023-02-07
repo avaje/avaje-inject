@@ -11,6 +11,11 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 
+import io.avaje.inject.prism.BeanPrism;
+import io.avaje.inject.prism.PrimaryPrism;
+import io.avaje.inject.prism.PrototypePrism;
+import io.avaje.inject.prism.SecondaryPrism;
+
 final class MethodReader {
 
   private static final String CODE_COMMENT_BUILD_FACTORYBEAN = "  /**\n   * Create and register %s via factory bean method %s#%s().\n   */";
@@ -42,9 +47,9 @@ final class MethodReader {
     this.isFactory = bean != null;
     this.element = element;
     if (isFactory) {
-      this.prototype = (PrototypePrism.getInstanceOn(beanType) != null);
-      this.primary = (PrimaryPrism.getInstanceOn(beanType) != null);
-      this.secondary = !primary && (SecondaryPrism.getInstanceOn(beanType) != null);
+      prototype = PrototypePrism.getInstanceOn(element) != null;
+      primary = PrimaryPrism.getInstanceOn(element) != null;
+      secondary = SecondaryPrism.getInstanceOn(element) != null;
     } else {
       prototype = false;
       primary = false;

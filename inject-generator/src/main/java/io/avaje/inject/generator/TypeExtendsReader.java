@@ -11,6 +11,10 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
+import io.avaje.inject.prism.FactoryPrism;
+import io.avaje.inject.prism.GeneratedPrism;
+import io.avaje.inject.prism.ProxyPrism;
+
 /**
  * Read the inheritance types for a given bean type.
  */
@@ -51,9 +55,9 @@ final class TypeExtendsReader {
 
   private boolean autoProvide() {
     return publicAccess
-      && FactoryPrism.getInstanceOn(baseType) == null
-      && ProxyPrism.getInstanceOn(baseType) == null
-      && GeneratedPrism.getInstanceOn(baseType) == null
+        && FactoryPrism.getInstanceOn(baseType) == null
+        && ProxyPrism.getInstanceOn(baseType) == null
+        && GeneratedPrism.getInstanceOn(baseType) == null
       && !isController();
   }
 
@@ -129,11 +133,11 @@ final class TypeExtendsReader {
       extendsInjection.read(baseType);
     }
     readInterfaces(baseType);
-    final var superElement = superOf(baseType);
+    TypeElement superElement = superOf(baseType);
     if (superElement != null) {
       if (qualifierName == null) {
-        final var baseName = baseType.getSimpleName().toString();
-        final var superName = superElement.getSimpleName().toString();
+        String baseName = baseType.getSimpleName().toString();
+        String superName = superElement.getSimpleName().toString();
         if (baseName.endsWith(superName)) {
           qualifierName = baseName.substring(0, baseName.length() - superName.length()).toLowerCase();
         }
@@ -150,7 +154,7 @@ final class TypeExtendsReader {
   }
 
   private String initProvidesAspect() {
-    for (final String providesType : providesTypes) {
+    for (String providesType : providesTypes) {
       if (Util.isAspectProvider(providesType)) {
         return Util.extractAspectType(providesType);
       }
@@ -160,9 +164,9 @@ final class TypeExtendsReader {
 
   private void addSuperType(TypeElement element) {
     readInterfaces(element);
-    final var fullName = element.getQualifiedName().toString();
-    if (!JAVA_LANG_OBJECT.equals(fullName) && !JAVA_LANG_RECORD.equals(fullName)) {
-      final var type = Util.unwrapProvider(fullName);
+    final String fullName = element.getQualifiedName().toString();
+    if (!fullName.equals(JAVA_LANG_OBJECT) && !fullName.equals(JAVA_LANG_RECORD)) {
+      final String type = Util.unwrapProvider(fullName);
       if (isPublic(element)) {
         extendsTypes.add(type);
         extendsInjection.read(element);

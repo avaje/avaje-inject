@@ -1,5 +1,8 @@
 package io.avaje.inject.generator;
 
+import io.avaje.inject.prism.BeanPrism;
+import io.avaje.inject.prism.InjectPrism;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -56,7 +59,7 @@ final class TypeExtendsInjection {
   }
 
   private void readField(Element element) {
-    var inject = InjectPrism.getInstanceOn(element);
+    InjectPrism inject = InjectPrism.getInstanceOn(element);
     if (inject != null) {
       injectFields.add(new FieldReader(element));
     }
@@ -70,7 +73,7 @@ final class TypeExtendsInjection {
 
     ExecutableElement ex = (ExecutableElement) element;
     MethodReader methodReader = new MethodReader(context, ex, baseType, importTypes).read();
-    var inject = InjectPrism.getInstanceOn(element);
+    InjectPrism inject = InjectPrism.getInstanceOn(element);
     if (inject != null) {
       injectConstructor = methodReader;
     } else {
@@ -84,13 +87,13 @@ final class TypeExtendsInjection {
     boolean checkAspect = true;
     ExecutableElement methodElement = (ExecutableElement) element;
     if (factory) {
-      var bean = BeanPrism.getInstanceOn(element);
+      BeanPrism bean = BeanPrism.getInstanceOn(element);
       if (bean != null) {
         addFactoryMethod(methodElement, bean);
         checkAspect = false;
       }
     }
-    var inject = InjectPrism.getInstanceOn(element);
+    InjectPrism inject = InjectPrism.getInstanceOn(element);
     final String methodKey = methodElement.getSimpleName().toString();
     if (inject != null && !notInjectMethods.contains(methodKey)) {
       if (!injectMethods.containsKey(methodKey)) {

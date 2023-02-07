@@ -1,10 +1,13 @@
 package io.avaje.inject.generator;
 
-import java.util.List;
-import java.util.Set;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+
+import io.avaje.inject.prism.NamedPrism;
+
+import java.util.List;
+import java.util.Set;
 
 final class TypeReader {
 
@@ -93,7 +96,7 @@ final class TypeReader {
   }
 
   String name() {
-    final var named = NamedPrism.getInstanceOn(beanType);
+    NamedPrism named = NamedPrism.getInstanceOn(beanType);
     if (named != null) {
       return named.value().toLowerCase();
     }

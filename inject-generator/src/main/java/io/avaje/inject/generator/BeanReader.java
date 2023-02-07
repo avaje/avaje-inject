@@ -1,8 +1,18 @@
 package io.avaje.inject.generator;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import java.util.*;
+
+import io.avaje.inject.prism.PrimaryPrism;
+import io.avaje.inject.prism.PrototypePrism;
+import io.avaje.inject.prism.ProxyPrism;
+import io.avaje.inject.prism.SecondaryPrism;
 
 final class BeanReader {
 
