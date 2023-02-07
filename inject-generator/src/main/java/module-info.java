@@ -2,7 +2,7 @@ module io.avaje.inject.generator {
 
   requires java.compiler;
   requires io.avaje.inject;
-  requires avaje.inject.prism;
+  requires io.avaje.inject.prism;
 
   uses io.avaje.inject.spi.Plugin;
   uses io.avaje.inject.spi.Module;
