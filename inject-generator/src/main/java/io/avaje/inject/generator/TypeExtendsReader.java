@@ -1,17 +1,15 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.Factory;
-import io.avaje.inject.spi.Generated;
-import io.avaje.inject.spi.Proxy;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Read the inheritance types for a given bean type.
@@ -53,9 +51,9 @@ final class TypeExtendsReader {
 
   private boolean autoProvide() {
     return publicAccess
-      && baseType.getAnnotation(Factory.class) == null
-      && baseType.getAnnotation(Proxy.class) == null
-      && baseType.getAnnotation(Generated.class) == null
+      && FactoryPrism.getInstanceOn(baseType) == null
+      && ProxyPrism.getInstanceOn(baseType) == null
+      && GeneratedPrism.getInstanceOn(baseType) == null
       && !isController();
   }
 
@@ -131,11 +129,11 @@ final class TypeExtendsReader {
       extendsInjection.read(baseType);
     }
     readInterfaces(baseType);
-    TypeElement superElement = superOf(baseType);
+    final var superElement = superOf(baseType);
     if (superElement != null) {
       if (qualifierName == null) {
-        String baseName = baseType.getSimpleName().toString();
-        String superName = superElement.getSimpleName().toString();
+        final var baseName = baseType.getSimpleName().toString();
+        final var superName = superElement.getSimpleName().toString();
         if (baseName.endsWith(superName)) {
           qualifierName = baseName.substring(0, baseName.length() - superName.length()).toLowerCase();
         }
@@ -152,7 +150,7 @@ final class TypeExtendsReader {
   }
 
   private String initProvidesAspect() {
-    for (String providesType : providesTypes) {
+    for (final String providesType : providesTypes) {
       if (Util.isAspectProvider(providesType)) {
         return Util.extractAspectType(providesType);
       }
@@ -162,9 +160,9 @@ final class TypeExtendsReader {
 
   private void addSuperType(TypeElement element) {
     readInterfaces(element);
-    final String fullName = element.getQualifiedName().toString();
-    if (!fullName.equals(JAVA_LANG_OBJECT) && !fullName.equals(JAVA_LANG_RECORD)) {
-      final String type = Util.unwrapProvider(fullName);
+    final var fullName = element.getQualifiedName().toString();
+    if (!JAVA_LANG_OBJECT.equals(fullName) && !JAVA_LANG_RECORD.equals(fullName)) {
+      final var type = Util.unwrapProvider(fullName);
       if (isPublic(element)) {
         extendsTypes.add(type);
         extendsInjection.read(element);

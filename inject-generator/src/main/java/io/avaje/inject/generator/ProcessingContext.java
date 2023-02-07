@@ -1,5 +1,16 @@
 package io.avaje.inject.generator;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.LineNumberReader;
+import java.io.Reader;
+import java.nio.file.NoSuchFileException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.FilerException;
 import javax.annotation.processing.Messager;
@@ -13,12 +24,6 @@ import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.LineNumberReader;
-import java.io.Reader;
-import java.nio.file.NoSuchFileException;
-import java.util.*;
 
 final class ProcessingContext {
 
@@ -28,7 +33,7 @@ final class ProcessingContext {
   private final Elements elementUtils;
   private final Types typeUtils;
   private final Set<String> uniqueModuleNames = new HashSet<>();
-  private final ExternalProvider externalProvide = new ExternalProvider();
+  private final Set<String> providedTypes = new HashSet<>();
 
   ProcessingContext(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
     this.processingEnv = processingEnv;
@@ -36,7 +41,7 @@ final class ProcessingContext {
     this.filer = processingEnv.getFiler();
     this.elementUtils = processingEnv.getElementUtils();
     this.typeUtils = processingEnv.getTypeUtils();
-    externalProvide.init(moduleFileProvided);
+    providedTypes.addAll(moduleFileProvided);
   }
 
   /**
@@ -144,6 +149,6 @@ final class ProcessingContext {
   }
 
   boolean externallyProvided(String type) {
-    return externalProvide.provides(type);
+    return providedTypes.contains(type);
   }
 }

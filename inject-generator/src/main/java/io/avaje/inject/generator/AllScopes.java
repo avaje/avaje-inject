@@ -1,13 +1,12 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.InjectModule;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 final class AllScopes {
 
@@ -59,7 +58,7 @@ final class AllScopes {
     for (String customScopeModule : customScopeModules) {
       final TypeElement module = context.element(customScopeModule);
       if (module != null) {
-        final InjectModule injectModule = module.getAnnotation(InjectModule.class);
+        final var injectModule = InjectModulePrism.getInstanceOn(module);
         if (injectModule != null) {
           final String customScopeType = injectModule.customScopeType();
           final TypeElement scopeType = context.element(customScopeType);

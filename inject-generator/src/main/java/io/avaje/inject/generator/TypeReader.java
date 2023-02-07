@@ -1,11 +1,10 @@
 package io.avaje.inject.generator;
 
-import jakarta.inject.Named;
+import java.util.List;
+import java.util.Set;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import java.util.List;
-import java.util.Set;
 
 final class TypeReader {
 
@@ -94,7 +93,7 @@ final class TypeReader {
   }
 
   String name() {
-    Named named = beanType.getAnnotation(Named.class);
+    final var named = NamedPrism.getInstanceOn(beanType);
     if (named != null) {
       return named.value().toLowerCase();
     }

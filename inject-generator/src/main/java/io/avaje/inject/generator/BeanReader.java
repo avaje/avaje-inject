@@ -1,10 +1,5 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.Primary;
-import io.avaje.inject.Prototype;
-import io.avaje.inject.Secondary;
-import io.avaje.inject.spi.Proxy;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.*;
@@ -40,10 +35,10 @@ final class BeanReader {
     this.beanType = beanType;
     this.type = beanType.getQualifiedName().toString();
     this.shortName = shortName(beanType);
-    this.prototype = (beanType.getAnnotation(Prototype.class) != null);
-    this.primary = (beanType.getAnnotation(Primary.class) != null);
-    this.secondary = !primary && (beanType.getAnnotation(Secondary.class) != null);
-    this.proxy = (beanType.getAnnotation(Proxy.class) != null);
+    this.prototype = (PrototypePrism.getInstanceOn(beanType) != null);
+    this.primary = (PrimaryPrism.getInstanceOn(beanType) != null);
+    this.secondary = !primary && (SecondaryPrism.getInstanceOn(beanType) != null);
+    this.proxy = (ProxyPrism.getInstanceOn(beanType) != null);
     this.typeReader = new TypeReader(GenericType.parse(type), beanType, context, importTypes, factory);
     typeReader.process();
     this.requestParams = new BeanRequestParams(type);

@@ -1,19 +1,15 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.Bean;
-import io.avaje.inject.Primary;
-import io.avaje.inject.Prototype;
-import io.avaje.inject.Secondary;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 
 final class MethodReader {
 
@@ -42,13 +38,13 @@ final class MethodReader {
     this(context, element, beanType, null, null, importTypes);
   }
 
-  MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType, Bean bean, String qualifierName, ImportTypeMap importTypes) {
+  MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType, BeanPrism bean, String qualifierName, ImportTypeMap importTypes) {
     this.isFactory = bean != null;
     this.element = element;
     if (isFactory) {
-      prototype = element.getAnnotation(Prototype.class) != null;
-      primary = element.getAnnotation(Primary.class) != null;
-      secondary = element.getAnnotation(Secondary.class) != null;
+      this.prototype = (PrototypePrism.getInstanceOn(beanType) != null);
+      this.primary = (PrimaryPrism.getInstanceOn(beanType) != null);
+      this.secondary = !primary && (SecondaryPrism.getInstanceOn(beanType) != null);
     } else {
       prototype = false;
       primary = false;

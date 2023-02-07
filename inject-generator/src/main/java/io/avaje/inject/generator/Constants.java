@@ -48,10 +48,7 @@ final class Constants {
   static final String GENERICTYPE = "io.avaje.inject.spi.GenericType";
 
   static final String COMPONENT = "io.avaje.inject.Component";
-
   static final String PROTOTYPE = "io.avaje.inject.Prototype";
-
   static final String SCOPE = "jakarta.inject.Scope";
-
   static final String INJECT_FACTORY = "io.avaje.inject.Factory";
 }
