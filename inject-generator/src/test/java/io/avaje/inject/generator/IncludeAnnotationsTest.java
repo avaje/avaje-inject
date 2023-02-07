@@ -1,11 +1,10 @@
 package io.avaje.inject.generator;
 
-import org.junit.jupiter.api.Test;
-
-
 import static io.avaje.inject.generator.IncludeAnnotations.include;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
 
 public class IncludeAnnotationsTest {
 
@@ -32,7 +31,7 @@ public class IncludeAnnotationsTest {
     assertFalse(include("foo.Generated"));
     assertFalse(include(Constants.SINGLETON));
     assertFalse(include("jakarta.inject.Named"));
-    assertFalse(include(Constants.FACTORY));
+    assertFalse(include("io.avaje.inject.Factory"));
     assertFalse(include("io.avaje.inject.Primary"));
     assertFalse(include("io.avaje.inject.Secondary"));
     assertFalse(include(Constants.PATH));
