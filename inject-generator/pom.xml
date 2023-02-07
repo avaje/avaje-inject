@@ -19,9 +19,9 @@
       <groupId>io.avaje</groupId>
       <artifactId>avaje-inject</artifactId>
       <version>8.12-RC4</version>
-     <optional>true</optional>
       <scope>provided</scope>
     </dependency>
+
 <dependency>
 	<groupId>com.jolira</groupId>
 	<artifactId>hickory</artifactId>
@@ -50,7 +50,7 @@
         <configuration>
           <source>11</source>
           <target>11</target>
-          <compilerArgument>-proc:none</compilerArgument>
+          <!-- <compilerArgument>-proc:none</compilerArgument> -->
         </configuration>
       </plugin>
 
@@ -65,7 +65,7 @@
       </plugin>
 
 
-			<plugin>
+			<!-- <plugin>
 				<groupId>org.bsc.maven</groupId>
 				<artifactId>maven-processor-plugin</artifactId>
          <version>4.0-rc1</version>
@@ -110,7 +110,7 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin> -->
     </plugins>
   </build>
 

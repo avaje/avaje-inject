@@ -56,6 +56,7 @@ public final class Processor extends AbstractProcessor {
     this.elementUtils = processingEnv.getElementUtils();
     this.allScopes = new AllScopes(context);
     this.defaultScope = allScopes.defaultScope();
+    ExternalProvider.registerPluginProvidedTypes(defaultScope);
     pluginFileProvided.forEach(defaultScope::pluginProvided);
   }
 
