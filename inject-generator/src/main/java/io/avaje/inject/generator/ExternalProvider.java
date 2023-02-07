@@ -14,7 +14,7 @@ import io.avaje.inject.spi.Plugin;
  */
 final class ExternalProvider {
 
-  private static final boolean moduleLoaded = moduleCP();
+  private static final boolean injectAvailable = moduleCP();
 
   private ExternalProvider() {}
 
@@ -30,7 +30,7 @@ final class ExternalProvider {
 
   public static Set<String> registerModuleProvidedTypes(Set<String> providedTypes) {
 
-    if (!moduleLoaded) return Set.of();
+    if (!injectAvailable) return Set.of();
 
     final ServiceLoader<Module> load =
         ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader());
@@ -60,7 +60,7 @@ final class ExternalProvider {
    */
   public static void registerPluginProvidedTypes(ScopeInfo defaultScope) {
 
-    if (!moduleLoaded) return;
+    if (!injectAvailable) return;
 
     for (final Plugin plugin : ServiceLoader.load(Plugin.class, Processor.class.getClassLoader())) {
       for (final Class<?> provide : plugin.provides()) {

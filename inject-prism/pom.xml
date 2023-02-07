@@ -3,14 +3,14 @@
   <parent>
     <groupId>io.avaje</groupId>
     <artifactId>avaje-inject-parent</artifactId>
-    <version>8.12-RC4</version>
+    <version>8.12-RC5</version>
   </parent>
   <artifactId>avaje-inject-prism</artifactId>
   <dependencies>
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-inject</artifactId>
-      <version>8.12-RC4</version>
+      <version>${project.version}</version>
       <optional>true</optional>
       <scope>provided</scope>
     </dependency>
@@ -22,37 +22,4 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <phase>none</phase>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-jar</id>
-            <configuration>
-              <archive>
-                <manifestEntries>
-                  <Automatic-Module-Name>io.avaje.inject.prism</Automatic-Module-Name>
-                </manifestEntries>
-              </archive>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
 </project>
