@@ -5,9 +5,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
-import io.avaje.inject.prism.NamedPrism;
-import io.avaje.inject.prism.QualifierPrism;
-
 final class Util {
 
   static final String ASPECT_PROVIDER_PREFIX = "io.avaje.inject.aop.AspectProvider<";

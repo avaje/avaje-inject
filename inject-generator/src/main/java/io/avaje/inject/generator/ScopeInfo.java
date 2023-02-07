@@ -17,8 +17,6 @@ import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 
-import io.avaje.inject.prism.DependencyMetaPrism;
-import io.avaje.inject.prism.InjectModulePrism;
 
 final class ScopeInfo {
 

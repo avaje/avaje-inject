@@ -22,8 +22,6 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.tools.StandardLocation;
-import io.avaje.inject.prism.InjectModulePrism;
-import io.avaje.inject.prism.ScopePrism;
 
 
 @SupportedAnnotationTypes({

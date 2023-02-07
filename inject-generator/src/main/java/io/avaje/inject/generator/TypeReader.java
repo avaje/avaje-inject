@@ -4,8 +4,6 @@ package io.avaje.inject.generator;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
-import io.avaje.inject.prism.NamedPrism;
-
 import java.util.List;
 import java.util.Set;
 

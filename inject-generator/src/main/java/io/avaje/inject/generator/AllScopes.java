@@ -8,7 +8,6 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
-import io.avaje.inject.prism.InjectModulePrism;
 
 final class AllScopes {
 

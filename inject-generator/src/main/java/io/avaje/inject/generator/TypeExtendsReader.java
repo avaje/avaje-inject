@@ -11,10 +11,6 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
-import io.avaje.inject.prism.FactoryPrism;
-import io.avaje.inject.prism.GeneratedPrism;
-import io.avaje.inject.prism.ProxyPrism;
-
 /**
  * Read the inheritance types for a given bean type.
  */

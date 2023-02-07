@@ -19,12 +19,13 @@
       <scope>provided</scope>
     </dependency>
 
-    <dependency>
-      <groupId>io.avaje</groupId>
-      <artifactId>avaje-inject-prism</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
+		<dependency>
+			<groupId>com.jolira</groupId>
+			<artifactId>hickory</artifactId>
+			<version>1.0.0</version>
+			<optional>true</optional>
+			<scope>provided</scope>
+		</dependency>
 
     <!-- test dependencies -->
     <dependency>
@@ -47,9 +48,15 @@
         <configuration>
           <source>11</source>
           <target>11</target>
-          <compilerArgument>-proc:none</compilerArgument>
-        </configuration>
-      </plugin>
+		  <annotationProcessorPaths>
+		  	<annotationProcessorPath>
+		  		<groupId>com.jolira</groupId>
+				<artifactId>hickory</artifactId>
+				<version>1.0.0</version>
+		  	</annotationProcessorPath>
+		  </annotationProcessorPaths>
+		</configuration>
+	  </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

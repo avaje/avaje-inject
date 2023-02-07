@@ -11,10 +11,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 
-import io.avaje.inject.prism.BeanPrism;
-import io.avaje.inject.prism.PrimaryPrism;
-import io.avaje.inject.prism.PrototypePrism;
-import io.avaje.inject.prism.SecondaryPrism;
 
 final class MethodReader {
 

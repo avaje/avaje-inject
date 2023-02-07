@@ -3,8 +3,6 @@ package io.avaje.inject.generator;
 
 import javax.lang.model.element.*;
 
-import io.avaje.inject.prism.AspectPrism;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

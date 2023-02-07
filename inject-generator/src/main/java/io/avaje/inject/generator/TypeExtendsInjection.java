@@ -1,8 +1,5 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.prism.BeanPrism;
-import io.avaje.inject.prism.InjectPrism;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;

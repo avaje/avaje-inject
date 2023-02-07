@@ -25,7 +25,6 @@
 
   <modules>
     <module>inject</module>
-    <module>inject-prism</module>
     <module>inject-generator</module>
     <module>inject-test</module>
   </modules>

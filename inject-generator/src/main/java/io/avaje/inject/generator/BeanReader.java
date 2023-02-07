@@ -9,10 +9,6 @@ import java.util.Set;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
-import io.avaje.inject.prism.PrimaryPrism;
-import io.avaje.inject.prism.PrototypePrism;
-import io.avaje.inject.prism.ProxyPrism;
-import io.avaje.inject.prism.SecondaryPrism;
 
 final class BeanReader {
 
