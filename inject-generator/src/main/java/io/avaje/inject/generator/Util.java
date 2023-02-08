@@ -1,10 +1,7 @@
 package io.avaje.inject.generator;
 
-import jakarta.inject.Named;
-import jakarta.inject.Qualifier;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 final class Util {
@@ -184,24 +181,6 @@ final class Util {
     } while (next > -1);
 
     return currentTop;
-  }
-
-  /**
-   * Return the name via <code>@Named</code> or a Qualifier annotation.
-   */
-  public static String getNamed(Element p) {
-    Named named = p.getAnnotation(Named.class);
-    if (named != null) {
-      return named.value().toLowerCase();
-    }
-    for (AnnotationMirror annotationMirror : p.getAnnotationMirrors()) {
-      DeclaredType annotationType = annotationMirror.getAnnotationType();
-      Qualifier qualifier = annotationType.asElement().getAnnotation(Qualifier.class);
-      if (qualifier != null) {
-        return Util.shortName(annotationType.toString()).toLowerCase();
-      }
-    }
-    return null;
   }
 
   /**

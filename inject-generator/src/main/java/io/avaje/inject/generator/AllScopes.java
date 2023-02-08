@@ -1,8 +1,7 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.InjectModule;
-
 import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.HashMap;
@@ -59,9 +58,9 @@ final class AllScopes {
     for (String customScopeModule : customScopeModules) {
       final TypeElement module = context.element(customScopeModule);
       if (module != null) {
-        final InjectModule injectModule = module.getAnnotation(InjectModule.class);
+        AnnotationMirror injectModule = context.annotation(module, Constants.INJECTMODULE);
         if (injectModule != null) {
-          final String customScopeType = injectModule.customScopeType();
+          final String customScopeType = context.readAttribute(injectModule, "customScopeType");
           final TypeElement scopeType = context.element(customScopeType);
           if (scopeType == null) {
             context.logError(module, "customScopeType [" + customScopeType + "] is invalid? on " + module);

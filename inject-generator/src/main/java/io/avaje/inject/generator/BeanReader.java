@@ -1,10 +1,5 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.Primary;
-import io.avaje.inject.Prototype;
-import io.avaje.inject.Secondary;
-import io.avaje.inject.spi.Proxy;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.*;
@@ -40,10 +35,10 @@ final class BeanReader {
     this.beanType = beanType;
     this.type = beanType.getQualifiedName().toString();
     this.shortName = shortName(beanType);
-    this.prototype = (beanType.getAnnotation(Prototype.class) != null);
-    this.primary = (beanType.getAnnotation(Primary.class) != null);
-    this.secondary = !primary && (beanType.getAnnotation(Secondary.class) != null);
-    this.proxy = (beanType.getAnnotation(Proxy.class) != null);
+    this.prototype = context.hasAnnotation(beanType, Constants.PROTOTYPE);
+    this.primary = context.hasAnnotation(beanType, Constants.PRIMARY);
+    this.secondary = !primary && context.hasAnnotation(beanType, Constants.SECONDARY);
+    this.proxy = context.hasAnnotation(beanType, Constants.PROXY);
     this.typeReader = new TypeReader(GenericType.parse(type), beanType, context, importTypes, factory);
     typeReader.process();
     this.requestParams = new BeanRequestParams(type);
@@ -319,7 +314,7 @@ final class BeanReader {
   }
 
   String suffix() {
-    return isRequestScopedController() ? Constants.FACTORY : Constants.DI;
+    return isRequestScopedController() ? Constants.DOLLAR_FACTORY : Constants.DI;
   }
 
   /**

@@ -1,24 +1,14 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.Bean;
-import io.avaje.inject.Primary;
-import io.avaje.inject.Prototype;
-import io.avaje.inject.Secondary;
-
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 final class MethodReader {
 
   private static final String CODE_COMMENT_BUILD_FACTORYBEAN = "  /**\n   * Create and register %s via factory bean method %s#%s().\n   */";
 
+  private final ProcessingContext context;
   private final ExecutableElement element;
   private final String factoryType;
   private final String methodName;
@@ -42,13 +32,14 @@ final class MethodReader {
     this(context, element, beanType, null, null, importTypes);
   }
 
-  MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType, Bean bean, String qualifierName, ImportTypeMap importTypes) {
+  MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType, AnnotationMirror bean, String qualifierName, ImportTypeMap importTypes) {
+    this.context = context;
     this.isFactory = bean != null;
     this.element = element;
     if (isFactory) {
-      prototype = element.getAnnotation(Prototype.class) != null;
-      primary = element.getAnnotation(Primary.class) != null;
-      secondary = element.getAnnotation(Secondary.class) != null;
+      prototype = context.hasAnnotation(element, Constants.PROTOTYPE);
+      primary = context.hasAnnotation(element, Constants.PRIMARY);
+      secondary = context.hasAnnotation(element, Constants.SECONDARY);
     } else {
       prototype = false;
       primary = false;
@@ -70,10 +61,10 @@ final class MethodReader {
     this.factoryType = beanType.getQualifiedName().toString();
     this.factoryShortName = Util.shortName(factoryType);
     this.isVoid = Util.isVoid(topType);
-    String initMethod = (bean == null) ? null : bean.initMethod();
-    String destroyMethod = (bean == null) ? null : bean.destroyMethod();
+    String initMethod = (bean == null) ? null : context.readAttribute(bean, "initMethod");
+    String destroyMethod = (bean == null) ? null : context.readAttribute(bean, "destroyMethod");
     this.name = qualifierName;
-    TypeElement returnElement = (TypeElement)context.asElement(returnMirror);
+    TypeElement returnElement = (TypeElement) context.asElement(returnMirror);
     if (returnElement == null) {
       this.typeReader = null;
       this.initMethod = initMethod;
@@ -110,7 +101,7 @@ final class MethodReader {
   MethodReader read() {
     List<? extends VariableElement> ps = element.getParameters();
     for (VariableElement p : ps) {
-      params.add(new MethodParam(p));
+      params.add(new MethodParam(context, p));
     }
     return this;
   }
@@ -342,9 +333,9 @@ final class MethodReader {
     private boolean requestParam;
     private String requestParamName;
 
-    MethodParam(VariableElement param) {
+    MethodParam(ProcessingContext context, VariableElement param) {
       this.simpleName = param.getSimpleName().toString();
-      this.named = Util.getNamed(param);
+      this.named = context.namedQualifier(param);
       this.nullable = Util.isNullable(param);
       this.utilType = Util.determineType(param.asType());
       this.paramType = utilType.rawType();

@@ -4,8 +4,8 @@ import javax.annotation.processing.Filer;
 import javax.annotation.processing.FilerException;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -145,5 +145,98 @@ final class ProcessingContext {
 
   boolean externallyProvided(String type) {
     return externalProvide.provides(type);
+  }
+
+  /**
+   * Return the name via <code>@Named</code> only.
+   */
+  static String named(Element p) {
+    AnnotationMirror named = annotation(p, Constants.NAMED);
+    if (named != null) {
+      for (AnnotationValue value : named.getElementValues().values()) {
+        return value.getValue().toString().toLowerCase();
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Return the name via <code>@Named</code> or a Qualifier annotation.
+   */
+  public static String namedQualifier(Element p) {
+    String named = named(p);
+    if (named != null) {
+      return named;
+    }
+    for (AnnotationMirror annotationMirror : p.getAnnotationMirrors()) {
+      DeclaredType annotationType = annotationMirror.getAnnotationType();
+      AnnotationMirror qualifier = annotation(annotationType.asElement(), Constants.QUALIFIER);
+      if (qualifier != null) {
+        return Util.shortName(annotationType.toString()).toLowerCase();
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Read the annotation attribute as a String value.
+   */
+  String readAttribute(AnnotationMirror annotation, String attrName) {
+    for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : annotation.getElementValues().entrySet()) {
+      if (attrName.equals(entry.getKey().getSimpleName().toString())) {
+        return entry.getValue().getValue().toString();
+      }
+    }
+    return "";
+  }
+
+  /**
+   * Return the AnnotationMirror on the element for the given annotation type.
+   */
+  static AnnotationMirror annotation(Element element, String annotationType) {
+    final List<? extends AnnotationMirror> mirrors = element.getAnnotationMirrors();
+    for (AnnotationMirror mirror : mirrors) {
+      final String name = mirror.getAnnotationType().asElement().toString();
+      if (annotationType.equals(name)) {
+        return mirror;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Return true if the element has the given annotation.
+   */
+  boolean hasAnnotation(Element element, String annotationType) {
+    AnnotationMirror annotation = annotation(element, annotationType);
+    return annotation != null;
+  }
+
+  TypeElement typeScope() {
+    return elementUtils.getTypeElement(Constants.SCOPE);
+  }
+
+  TypeElement typeFactory() {
+    return elementUtils.getTypeElement(Constants.FACTORY);
+  }
+
+  TypeElement typeSingleton() {
+    return elementUtils.getTypeElement(Constants.SINGLETON);
+  }
+
+  TypeElement typeComponent() {
+    return elementUtils.getTypeElement(Constants.COMPONENT);
+  }
+
+  TypeElement typePrototype() {
+    return elementUtils.getTypeElement(Constants.PROTOTYPE);
+  }
+
+  TypeElement typeProxy() {
+    return elementUtils.getTypeElement(Constants.PROXY);
+  }
+
+  TypeElement typeInjectModule() {
+    return elementUtils.getTypeElement(Constants.INJECTMODULE);
   }
 }

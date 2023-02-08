@@ -15,9 +15,9 @@ final class FieldReader {
   private boolean requestParam;
   private String requestParamName;
 
-  FieldReader(Element element) {
+  FieldReader(ProcessingContext context, Element element) {
     this.element = element;
-    this.name = Util.getNamed(element);
+    this.name = context.namedQualifier(element);
     this.nullable = Util.isNullable(element);
     this.utype = Util.determineType(element.asType());
     this.fieldType = Util.unwrapProvider(utype.rawType());

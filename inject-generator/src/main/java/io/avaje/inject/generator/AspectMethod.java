@@ -8,6 +8,7 @@ import java.util.*;
 
 final class AspectMethod {
 
+  private final ProcessingContext context;
   private final List<AspectPair> aspectPairs;
   private final ExecutableElement method;
   private final List<MethodReader.MethodParam> params;
@@ -16,7 +17,8 @@ final class AspectMethod {
   private final List<? extends TypeMirror> thrownTypes;
   private final String localName;
 
-  AspectMethod(int nameIndex, List<AspectPair> aspectPairs, ExecutableElement method) {
+  AspectMethod(ProcessingContext context, int nameIndex, List<AspectPair> aspectPairs, ExecutableElement method) {
+    this.context = context;
     this.aspectPairs = sort(aspectPairs);
     this.method = method;
     this.simpleName = method.getSimpleName().toString();
@@ -34,7 +36,7 @@ final class AspectMethod {
   List<MethodReader.MethodParam> initParams(List<? extends VariableElement> parameters) {
     List<MethodReader.MethodParam> mps = new ArrayList<>(parameters.size());
     for (VariableElement var : parameters) {
-      mps.add(new MethodReader.MethodParam(var));
+      mps.add(new MethodReader.MethodParam(context, var));
     }
     return mps;
   }

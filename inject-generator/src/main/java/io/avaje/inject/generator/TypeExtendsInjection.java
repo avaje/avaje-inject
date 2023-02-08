@@ -1,12 +1,6 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.Bean;
-import jakarta.inject.Inject;
-
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import java.util.*;
 
 /**
@@ -59,9 +53,8 @@ final class TypeExtendsInjection {
   }
 
   private void readField(Element element) {
-    Inject inject = element.getAnnotation(Inject.class);
-    if (inject != null) {
-      injectFields.add(new FieldReader(element));
+    if (context.hasAnnotation(element, Constants.INJECT)) {
+      injectFields.add(new FieldReader(context, element));
     }
   }
 
@@ -73,8 +66,7 @@ final class TypeExtendsInjection {
 
     ExecutableElement ex = (ExecutableElement) element;
     MethodReader methodReader = new MethodReader(context, ex, baseType, importTypes).read();
-    Inject inject = element.getAnnotation(Inject.class);
-    if (inject != null) {
+    if (context.hasAnnotation(element, Constants.INJECT)) {
       injectConstructor = methodReader;
     } else {
       if (methodReader.isNotPrivate()) {
@@ -87,15 +79,15 @@ final class TypeExtendsInjection {
     boolean checkAspect = true;
     ExecutableElement methodElement = (ExecutableElement) element;
     if (factory) {
-      Bean bean = element.getAnnotation(Bean.class);
+      AnnotationMirror bean = context.annotation(element, Constants.BEAN);
       if (bean != null) {
         addFactoryMethod(methodElement, bean);
         checkAspect = false;
       }
     }
-    Inject inject = element.getAnnotation(Inject.class);
+    boolean hasInject = context.hasAnnotation(element, Constants.INJECT);
     final String methodKey = methodElement.getSimpleName().toString();
-    if (inject != null && !notInjectMethods.contains(methodKey)) {
+    if (hasInject && !notInjectMethods.contains(methodKey)) {
       if (!injectMethods.containsKey(methodKey)) {
         MethodReader methodReader = new MethodReader(context, methodElement, type, importTypes).read();
         if (methodReader.isNotPrivate()) {
@@ -140,13 +132,13 @@ final class TypeExtendsInjection {
     aspectPairs.addAll(typeAspects);
 
     if (!aspectPairs.isEmpty()) {
-      aspectMethods.add(new AspectMethod(nameIndex, aspectPairs, methodElement));
+      aspectMethods.add(new AspectMethod(context, nameIndex, aspectPairs, methodElement));
     }
   }
 
 
-  private void addFactoryMethod(ExecutableElement methodElement, Bean bean) {
-    String qualifierName = Util.getNamed(methodElement);
+  private void addFactoryMethod(ExecutableElement methodElement, AnnotationMirror bean) {
+    String qualifierName = context.namedQualifier(methodElement);
     factoryMethods.add(new MethodReader(context, methodElement, baseType, bean, qualifierName, importTypes).read());
   }
 

@@ -1,13 +1,7 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.InjectModule;
-import io.avaje.inject.spi.DependencyMeta;
-
 import javax.annotation.processing.FilerException;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.Name;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.util.*;
@@ -91,8 +85,8 @@ final class ScopeInfo {
       '}';
   }
 
-  void pluginProvided(String pluginProvides) {
-    pluginProvided.add(pluginProvides);
+  void pluginProvided(Collection<String> pluginProvides) {
+    pluginProvided.addAll(pluginProvides);
   }
 
   boolean includeSingleton() {
@@ -304,11 +298,11 @@ final class ScopeInfo {
     Name simpleName = element.getSimpleName();
     if (simpleName.toString().startsWith("build_")) {
       // read a build method - DependencyMeta
-      DependencyMeta meta = element.getAnnotation(DependencyMeta.class);
+      AnnotationMirror meta = context.annotation(element, Constants.DEPENDENCYMETA);
       if (meta == null) {
         context.logError("Missing @DependencyMeta on method " + simpleName);
       } else {
-        final MetaData metaData = new MetaData(meta);
+        final MetaData metaData = new MetaData(new ReadDependencyMeta(meta));
         this.metaData.put(metaData.key(), metaData);
       }
     }
@@ -422,8 +416,9 @@ final class ScopeInfo {
   }
 
   void readModuleMetaData(TypeElement moduleType) {
-    InjectModule module = moduleType.getAnnotation(InjectModule.class);
-    details(module.name(), moduleType);
+    AnnotationMirror injectModule = context.annotation(moduleType, Constants.INJECTMODULE);
+    String name = context.readAttribute(injectModule, "name");
+    details(name, moduleType);
     readFactoryMetaData(moduleType);
   }
 

@@ -1,9 +1,5 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.Factory;
-import io.avaje.inject.spi.Generated;
-import io.avaje.inject.spi.Proxy;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
@@ -53,18 +49,10 @@ final class TypeExtendsReader {
 
   private boolean autoProvide() {
     return publicAccess
-      && baseType.getAnnotation(Factory.class) == null
-      && baseType.getAnnotation(Proxy.class) == null
-      && baseType.getAnnotation(Generated.class) == null
-      && !isController();
-  }
-
-  private boolean isController() {
-    try {
-      return baseType.getAnnotation((Class<Annotation>) Class.forName(Constants.CONTROLLER)) != null;
-    } catch (final ClassNotFoundException e) {
-      return false;
-    }
+      && !context.hasAnnotation(baseType, Constants.FACTORY)
+      && !context.hasAnnotation(baseType, Constants.PROXY)
+      && !context.hasAnnotation(baseType, Constants.GENERATED)
+      && !context.hasAnnotation(baseType, Constants.CONTROLLER);
   }
 
   GenericType baseType() {

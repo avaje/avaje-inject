@@ -1,12 +1,6 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.Factory;
-import io.avaje.inject.Primary;
-import io.avaje.inject.Secondary;
 import org.junit.jupiter.api.Test;
-
-import jakarta.inject.Named;
-import jakarta.inject.Singleton;
 
 import static io.avaje.inject.generator.IncludeAnnotations.include;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -35,11 +29,11 @@ public class IncludeAnnotationsTest {
   public void exclude_di_annotations() {
     assertFalse(include("javax.annotation.Generated"));
     assertFalse(include("foo.Generated"));
-    assertFalse(include(Singleton.class.getName()));
-    assertFalse(include(Named.class.getName()));
-    assertFalse(include(Factory.class.getName()));
-    assertFalse(include(Primary.class.getName()));
-    assertFalse(include(Secondary.class.getName()));
+    assertFalse(include(Constants.SINGLETON));
+    assertFalse(include(Constants.NAMED));
+    assertFalse(include(Constants.FACTORY));
+    assertFalse(include(Constants.PRIMARY));
+    assertFalse(include(Constants.SECONDARY));
     assertFalse(include(Constants.PATH));
   }
 

@@ -1,7 +1,5 @@
 package io.avaje.inject.generator;
 
-import jakarta.inject.Named;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
@@ -9,6 +7,7 @@ import java.util.Set;
 
 final class TypeReader {
 
+  private final ProcessingContext context;
   private final boolean forBean;
   private final TypeElement beanType;
   private final ImportTypeMap importTypes;
@@ -26,6 +25,7 @@ final class TypeReader {
   }
 
   private TypeReader(GenericType genericType, boolean forBean, TypeElement beanType, ProcessingContext context, ImportTypeMap importTypes, boolean factory) {
+    this.context = context;
     this.forBean = forBean;
     this.beanType = beanType;
     this.importTypes = importTypes;
@@ -94,9 +94,9 @@ final class TypeReader {
   }
 
   String name() {
-    Named named = beanType.getAnnotation(Named.class);
+    String named = context.named(beanType);
     if (named != null) {
-      return named.value().toLowerCase();
+      return named;
     }
     if (annotationReader.hasQualifierName()) {
       return annotationReader.qualifierName();

@@ -14,6 +14,7 @@
 
   <properties>
     <java.version>11</java.version>
+    <surefire.useModulePath>false</surefire.useModulePath>
   </properties>
 
   <dependencies>
@@ -33,7 +34,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-jsonb</artifactId>
-      <version>1.2-RC2</version>
+      <version>1.2-RC3</version>
     </dependency>
 
     <dependency>

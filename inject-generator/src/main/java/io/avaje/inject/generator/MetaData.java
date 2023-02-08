@@ -1,13 +1,9 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.spi.DependencyMeta;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Holds the data as per <code>@DependencyMeta</code>
@@ -41,14 +37,14 @@ final class MetaData {
   private boolean usesExternalDependency;
   private String externalDependency;
 
-  MetaData(DependencyMeta meta) {
+  MetaData(ReadDependencyMeta meta) {
     this.type = meta.type();
     this.name = trimName(meta.name());
     this.shortType = Util.shortName(type);
     this.method = meta.method();
     this.providesAspect = meta.providesAspect();
-    this.provides = asList(meta.provides());
-    this.dependsOn = Stream.of(meta.dependsOn()).map(Dependency::new).collect(Collectors.toList());
+    this.provides = meta.provides();
+    this.dependsOn = meta.dependsOn().stream().map(Dependency::new).collect(Collectors.toList());
     this.autoProvides = meta.autoProvides();
   }
 
@@ -111,13 +107,6 @@ final class MetaData {
 
   void setWired() {
     this.wired = true;
-  }
-
-  private List<String> asList(String[] content) {
-    if (content == null || content.length == 0) {
-      return new ArrayList<>();
-    }
-    return Arrays.asList(content);
   }
 
   void update(BeanReader beanReader) {

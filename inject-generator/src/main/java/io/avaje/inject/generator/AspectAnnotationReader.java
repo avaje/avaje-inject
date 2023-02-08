@@ -1,7 +1,5 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.aop.Aspect;
-
 import javax.lang.model.element.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +25,7 @@ final class AspectAnnotationReader {
     List<AspectPair> aspects = new ArrayList<>();
     for (AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
       Element anElement = annotationMirror.getAnnotationType().asElement();
-      Aspect aspect = anElement.getAnnotation(Aspect.class);
-      if (aspect != null) {
+      if (context.hasAnnotation(anElement, Constants.ASPECT)) {
         Meta meta = readTarget(anElement);
         if (meta != null) {
           aspects.add(new AspectPair(anElement, meta.ordering));
