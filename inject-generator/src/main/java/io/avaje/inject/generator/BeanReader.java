@@ -320,7 +320,7 @@ final class BeanReader {
   }
 
   String suffix() {
-    return isRequestScopedController() ? Constants.FACTORY : Constants.DI;
+    return isRequestScopedController() ? Constants.DOLLAR_FACTORY : Constants.DI;
   }
 
   /**

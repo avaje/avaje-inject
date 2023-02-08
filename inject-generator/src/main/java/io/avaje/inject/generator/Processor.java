@@ -26,7 +26,7 @@ import javax.tools.StandardLocation;
 
 @SupportedAnnotationTypes({
   Constants.INJECTMODULE,
-  Constants.INJECT_FACTORY,
+  Constants.FACTORY,
   Constants.SINGLETON,
   Constants.COMPONENT,
   Constants.PROTOTYPE,
@@ -93,7 +93,7 @@ public final class Processor extends AbstractProcessor {
     readModule(roundEnv);
     readScopes(roundEnv.getElementsAnnotatedWith(context.element(Constants.SCOPE)));
     readChangedBeans(
-        roundEnv.getElementsAnnotatedWith(context.element(Constants.INJECT_FACTORY)), true);
+        roundEnv.getElementsAnnotatedWith(context.element(Constants.FACTORY)), true);
     if (defaultScope.includeSingleton()) {
       readChangedBeans(
           roundEnv.getElementsAnnotatedWith(context.element(Constants.SINGLETON)), false);

@@ -30,10 +30,10 @@ public class IncludeAnnotationsTest {
     assertFalse(include("javax.annotation.Generated"));
     assertFalse(include("foo.Generated"));
     assertFalse(include(Constants.SINGLETON));
-    assertFalse(include("jakarta.inject.Named"));
-    assertFalse(include(Constants.INJECT_FACTORY));
-    assertFalse(include("io.avaje.inject.Primary"));
-    assertFalse(include("io.avaje.inject.Secondary"));
+    assertFalse(include(Constants.NAMED));
+    assertFalse(include(Constants.FACTORY));
+    assertFalse(include(Constants.PRIMARY));
+    assertFalse(include(Constants.SECONDARY));
     assertFalse(include(Constants.PATH));
   }
 

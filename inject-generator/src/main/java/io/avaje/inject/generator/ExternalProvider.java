@@ -29,17 +29,17 @@ final class ExternalProvider {
     }
   }
 
-  public static Set<String> registerModuleProvidedTypes(Set<String> providedTypes) {
+  public static void registerModuleProvidedTypes(Set<String> providedTypes) {
 
-    if (!injectAvailable) return Set.of();
+    if (!injectAvailable) return;
 
     Iterator<Module> iterator =
         ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader()).iterator();
-    
+
     while (iterator.hasNext()) {
-    	
+
       try {
-    	  Module module = iterator.next();
+        Module module = iterator.next();
         for (final Class<?> provide : module.provides()) {
           providedTypes.add(provide.getCanonicalName());
         }
@@ -53,7 +53,6 @@ final class ExternalProvider {
         // ignore expected error reading the module that we are also writing
       }
     }
-    return providedTypes;
   }
 
   /**
