@@ -1,6 +1,5 @@
 package io.avaje.inject.generator;
 
-import jakarta.inject.Qualifier;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
@@ -38,7 +37,7 @@ final class TypeAnnotationReader {
   void process() {
     for (AnnotationMirror annotationMirror : beanType.getAnnotationMirrors()) {
       DeclaredType annotationType = annotationMirror.getAnnotationType();
-      Qualifier qualifier = annotationType.asElement().getAnnotation(Qualifier.class);
+      QualifierPrism qualifier = QualifierPrism.getInstanceOn(annotationType.asElement());
       String annType = annotationType.toString();
       if (qualifier != null) {
         qualifierName = Util.shortName(annType).toLowerCase();
