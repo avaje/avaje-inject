@@ -1,8 +1,12 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.spi.Module;
+import java.util.Iterator;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
+import java.util.Set;
 
-import java.util.*;
+import io.avaje.inject.spi.Module;
+import io.avaje.inject.spi.Plugin;
 
 /**
  * The types provided by other modules in the classpath at compile time.
@@ -11,13 +15,29 @@ import java.util.*;
  */
 final class ExternalProvider {
 
-  private final Set<String> providedTypes = new HashSet<>();
+  private static final boolean injectAvailable = moduleCP();
 
-  void init(Set<String> moduleFileProvided) {
-    providedTypes.addAll(moduleFileProvided);
-    ServiceLoader<Module> load = ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader());
-    Iterator<Module> iterator = load.iterator();
+  private ExternalProvider() {}
+
+  private static boolean moduleCP() {
+    try {
+      Class.forName(Constants.MODULE);
+      return true;
+    } catch (final ClassNotFoundException e) {
+
+      return false;
+    }
+  }
+
+  public static void registerModuleProvidedTypes(Set<String> providedTypes) {
+
+    if (!injectAvailable) return;
+
+    Iterator<Module> iterator =
+        ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader()).iterator();
+
     while (iterator.hasNext()) {
+
       try {
         Module module = iterator.next();
         for (final Class<?> provide : module.provides()) {
@@ -36,10 +56,19 @@ final class ExternalProvider {
   }
 
   /**
-   * Return true if this type is provided by another module in the classpath. We will add it to
-   * autoRequires().
+   * Register types provided by the plugin so no compiler error when we have a dependency on these
+   * types and the only thing providing them is the plugin.
+   *
+   * @param defaultScope
    */
-  boolean provides(String type) {
-    return providedTypes.contains(type);
+  public static void registerPluginProvidedTypes(ScopeInfo defaultScope) {
+
+    if (!injectAvailable) return;
+
+    for (final Plugin plugin : ServiceLoader.load(Plugin.class, Processor.class.getClassLoader())) {
+      for (final Class<?> provide : plugin.provides()) {
+        defaultScope.pluginProvided(provide.getCanonicalName());
+      }
+    }
   }
 }

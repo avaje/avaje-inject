@@ -4,7 +4,7 @@ final class Constants {
 
   static final int ORDERING_DEFAULT = 1000;
 
-  static final String FACTORY = "$Factory";
+  static final String DOLLAR_FACTORY = "$Factory";
   static final String DI = "$DI";
   static final String IO_CLOSEABLE = "java.io.Closeable";
   static final String AUTO_CLOSEABLE = "java.lang.AutoCloseable";
@@ -12,9 +12,11 @@ final class Constants {
   static final String KOTLIN_METADATA = "kotlin.Metadata";
   static final String TYPE = "java.lang.reflect.Type";
 
-  static final String PROVIDER = "jakarta.inject.Provider";
   static final String SINGLETON = "jakarta.inject.Singleton";
   static final String INJECT = "jakarta.inject.Inject";
+  static final String SCOPE = "jakarta.inject.Scope";
+  static final String QUALIFIER = "jakarta.inject.Qualifier";
+  static final String NAMED = "jakarta.inject.Named";
 
   static final String PATH = "io.avaje.http.api.Path";
   static final String CONTROLLER = "io.avaje.http.api.Controller";
@@ -30,10 +32,16 @@ final class Constants {
   static final String BEANSCOPE = "io.avaje.inject.BeanScope";
   static final String INJECTMODULE = "io.avaje.inject.InjectModule";
   static final String TESTSCOPE = "io.avaje.inject.test.TestScope";
+  static final String PRIMARY = "io.avaje.inject.Primary";
+  static final String SECONDARY = "io.avaje.inject.Secondary";
+  static final String PROTOTYPE = "io.avaje.inject.Prototype";
+  static final String COMPONENT = "io.avaje.inject.Component";
+  static final String FACTORY = "io.avaje.inject.Factory";
+  static final String BEAN = "io.avaje.inject.Bean";
 
   static final String REFLECT_METHOD = "java.lang.reflect.Method";
   static final String ASPECT = "io.avaje.inject.aop.Aspect";
-  static final String ASPECT_PROVIDER ="io.avaje.inject.aop.AspectProvider";
+  static final String ASPECT_PROVIDER = "io.avaje.inject.aop.AspectProvider";
   static final String INVOCATION = "io.avaje.inject.aop.Invocation";
   static final String INVOCATION_EXCEPTION = "io.avaje.inject.aop.InvocationException";
   static final String METHOD_INTERCEPTOR = "io.avaje.inject.aop.MethodInterceptor";
@@ -46,5 +54,4 @@ final class Constants {
   static final String DEPENDENCYMETA = "io.avaje.inject.spi.DependencyMeta";
   static final String MODULE = "io.avaje.inject.spi.Module";
   static final String GENERICTYPE = "io.avaje.inject.spi.GenericType";
-
 }

@@ -1,7 +1,14 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.InjectModule;
-import io.avaje.inject.spi.DependencyMeta;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.processing.FilerException;
 import javax.lang.model.element.Element;
@@ -9,8 +16,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
-import java.io.IOException;
-import java.util.*;
+
 
 final class ScopeInfo {
 
@@ -110,13 +116,20 @@ final class ScopeInfo {
   }
 
   private void read(Element element) {
-    ignoreSingleton = ScopeUtil.readIgnoreSingleton(element);
-    requires(ScopeUtil.readRequires(element));
-    provides(ScopeUtil.readProvides(element));
-    for (String require : ScopeUtil.readRequiresPackages(element)) {
-      requiresPackages.add(require);
-      requirePkg.add(Util.packageOf(require) + ".");
+    final var injectModule = InjectModulePrism.getInstanceOn(element);
+    if (injectModule == null) {
+      return;
     }
+    ignoreSingleton = injectModule.ignoreSingleton();
+    injectModule.requires().stream().map(Object::toString).forEach(requires::add);
+    injectModule.provides().stream().map(Object::toString).forEach(provides::add);
+    injectModule.requiresPackages().stream()
+        .map(Object::toString)
+        .forEach(
+            require -> {
+              requiresPackages.add(require);
+              requirePkg.add(Util.packageOf(require) + ".");
+            });
   }
 
   private String initName(String topPackage) {
@@ -304,7 +317,7 @@ final class ScopeInfo {
     Name simpleName = element.getSimpleName();
     if (simpleName.toString().startsWith("build_")) {
       // read a build method - DependencyMeta
-      DependencyMeta meta = element.getAnnotation(DependencyMeta.class);
+      DependencyMetaPrism meta = DependencyMetaPrism.getInstanceOn(element);
       if (meta == null) {
         context.logError("Missing @DependencyMeta on method " + simpleName);
       } else {
@@ -422,7 +435,7 @@ final class ScopeInfo {
   }
 
   void readModuleMetaData(TypeElement moduleType) {
-    InjectModule module = moduleType.getAnnotation(InjectModule.class);
+    InjectModulePrism module = InjectModulePrism.getInstanceOn(moduleType);
     details(module.name(), moduleType);
     readFactoryMetaData(moduleType);
   }
