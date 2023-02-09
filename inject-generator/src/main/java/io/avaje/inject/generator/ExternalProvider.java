@@ -24,20 +24,17 @@ final class ExternalProvider {
       Class.forName(Constants.MODULE);
       return true;
     } catch (final ClassNotFoundException e) {
-
       return false;
     }
   }
 
-  public static void registerModuleProvidedTypes(Set<String> providedTypes) {
+  static void registerModuleProvidedTypes(Set<String> providedTypes) {
+    if (!injectAvailable) {
+      return;
+    }
 
-    if (!injectAvailable) return;
-
-    Iterator<Module> iterator =
-        ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader()).iterator();
-
+    Iterator<Module> iterator = ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader()).iterator();
     while (iterator.hasNext()) {
-
       try {
         Module module = iterator.next();
         for (final Class<?> provide : module.provides()) {
@@ -58,13 +55,11 @@ final class ExternalProvider {
   /**
    * Register types provided by the plugin so no compiler error when we have a dependency on these
    * types and the only thing providing them is the plugin.
-   *
-   * @param defaultScope
    */
-  public static void registerPluginProvidedTypes(ScopeInfo defaultScope) {
-
-    if (!injectAvailable) return;
-
+  static void registerPluginProvidedTypes(ScopeInfo defaultScope) {
+    if (!injectAvailable) {
+      return;
+    }
     for (final Plugin plugin : ServiceLoader.load(Plugin.class, Processor.class.getClassLoader())) {
       for (final Class<?> provide : plugin.provides()) {
         defaultScope.pluginProvided(provide.getCanonicalName());

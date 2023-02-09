@@ -42,7 +42,6 @@ final class ProcessingContext {
     this.typeUtils = processingEnv.getTypeUtils();
 
     ExternalProvider.registerModuleProvidedTypes(providedTypes);
-
     providedTypes.addAll(moduleFileProvided);
   }
 
