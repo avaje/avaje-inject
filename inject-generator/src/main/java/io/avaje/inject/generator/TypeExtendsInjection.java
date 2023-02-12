@@ -1,5 +1,6 @@
 package io.avaje.inject.generator;
 
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -34,9 +35,7 @@ final class TypeExtendsInjection {
     this.baseType = baseType;
     this.context = context;
     this.factory = factory;
-
-    AspectAnnotationReader reader = new AspectAnnotationReader(context, baseType, baseType);
-    this.typeAspects = reader.read();
+    this.typeAspects = readAspects(baseType);
   }
 
   void read(TypeElement type) {
@@ -53,6 +52,19 @@ final class TypeExtendsInjection {
           break;
       }
     }
+  }
+
+  /** Read the annotations on the type. */
+  List<AspectPair> readAspects(Element element) {
+    final List<AspectPair> aspects = new ArrayList<>();
+    for (final AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
+      final var anElement = annotationMirror.getAnnotationType().asElement();
+      final var aspect = AspectPrism.getInstanceOn(anElement);
+      if (aspect != null) {
+        aspects.add(new AspectPair(anElement, aspect.ordering()));
+      }
+    }
+    return aspects;
   }
 
   private void readField(Element element) {
@@ -133,7 +145,7 @@ final class TypeExtendsInjection {
       return;
     }
     int nameIndex = methodNameIndex(methodElement.getSimpleName().toString());
-    List<AspectPair> aspectPairs = new AspectAnnotationReader(context, baseType, methodElement).read();
+    List<AspectPair> aspectPairs = readAspects(methodElement);
     aspectPairs.addAll(typeAspects);
 
     if (!aspectPairs.isEmpty()) {
