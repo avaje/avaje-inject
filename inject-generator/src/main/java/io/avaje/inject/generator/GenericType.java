@@ -147,7 +147,7 @@ final class GenericType {
     if (type != null && type.startsWith("? extends ")) {
       return type.substring(10);
     } else if ("?".equals(type)) {
-      return "";
+      return "Wildcard";
     }
     return type;
   }
