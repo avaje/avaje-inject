@@ -146,6 +146,8 @@ final class GenericType {
     String type = topType();
     if (type != null && type.startsWith("? extends ")) {
       return type.substring(10);
+    } else if ("?".equals(type)) {
+      return "_Wildcard";
     }
     return type;
   }
