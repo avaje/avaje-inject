@@ -1,6 +1,7 @@
 package org.example.coffee;
 
 import org.example.coffee.grind.Grinder;
+import org.jetbrains.annotations.NotNull;
 
 import jakarta.inject.Singleton;
 
@@ -12,7 +13,7 @@ public class CoffeeMaker {
 
   private final Grinder grinder;
 
-  public CoffeeMaker(Pump pump, Grinder grinder) {
+  public CoffeeMaker(@NotNull Pump pump, Grinder grinder) {
     this.pump = pump;
     this.grinder = grinder;
   }
