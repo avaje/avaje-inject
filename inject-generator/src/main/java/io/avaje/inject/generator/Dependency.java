@@ -8,15 +8,15 @@ final class Dependency {
   Dependency(String name) {
     if (name.startsWith("soft:")) {
       this.softDependency = true;
-      this.name = name.substring(5);
+      this.name = Util.trimAnnotations(name.substring(5));
     } else {
       this.softDependency = false;
-      this.name = name;
+      this.name = Util.trimAnnotations(name);
     }
   }
 
   Dependency(String name, boolean softDependency) {
-    this.name = name;
+    this.name = Util.trimAnnotations(name);
     this.softDependency = softDependency;
   }
 
