@@ -185,7 +185,7 @@ public interface BeanScope extends AutoCloseable {
    *
    * @param annotation An annotation class.
    */
-  List<Object> listByAnnotation(Class<?> annotation);
+  List<Object> listByAnnotation(Class<? extends Annotation> annotation);
 
   /**
    * Return the list of beans for a given type.
@@ -252,5 +252,6 @@ public interface BeanScope extends AutoCloseable {
   /**
    * Close the scope firing any <code>@PreDestroy</code> lifecycle methods.
    */
-  void close();
+  @Override
+void close();
 }

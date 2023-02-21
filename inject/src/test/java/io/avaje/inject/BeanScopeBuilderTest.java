@@ -275,7 +275,7 @@ class BeanScopeBuilderTest {
     }
 
     @Override
-    public List<Object> listByAnnotation(Class<?> annotation) {
+    public List<Object> listByAnnotation(Class<? extends Annotation> annotation) {
       return null;
     }
 

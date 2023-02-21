@@ -2,6 +2,7 @@ package io.avaje.inject.xtra;
 
 import io.avaje.inject.BeanScope;
 
+import java.lang.annotation.Annotation;
 import java.util.List;
 
 /**
@@ -135,7 +136,7 @@ public class ApplicationScope {
    *
    * @param annotation An annotation class.
    */
-  public static List<Object> listByAnnotation(Class<?> annotation) {
+  public static List<Object> listByAnnotation(Class<? extends Annotation> annotation) {
     return appScope.listByAnnotation(annotation);
   }
 

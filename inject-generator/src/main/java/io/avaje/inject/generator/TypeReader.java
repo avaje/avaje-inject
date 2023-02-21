@@ -108,9 +108,6 @@ final class TypeReader {
     TypeAppender appender = new TypeAppender(importTypes);
     appender.add(extendsReader.baseType());
     appender.add(extendsReader.provides());
-    if (forBean) {
-      appender.add(annotationReader.annotationTypes());
-    }
     this.genericTypes = appender.genericTypes();
     this.typesRegister = appender.asString();
   }

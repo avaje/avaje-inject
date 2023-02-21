@@ -12,6 +12,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 @NonNullApi
 final class DBeanScope implements BeanScope {
@@ -205,8 +206,11 @@ final class DBeanScope implements BeanScope {
   }
 
   @Override
-  public List<Object> listByAnnotation(Class<?> annotation) {
-    final List<Object> values = beans.all(annotation);
+  public List<Object> listByAnnotation(Class<? extends Annotation> annotation) {
+    final List<Object> values = all().stream()
+    	      .filter(entry -> entry.type().isAnnotationPresent(annotation))
+    	      .map(BeanEntry::bean)
+    	      .collect(Collectors.toList());
     if (parent == null) {
       return values;
     }
