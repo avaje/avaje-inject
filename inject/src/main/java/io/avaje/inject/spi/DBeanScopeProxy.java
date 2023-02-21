@@ -51,7 +51,7 @@ final class DBeanScopeProxy implements BeanScope {
   }
 
   @Override
-  public List<Object> listByAnnotation(Class<?> annotation) {
+  public List<Object> listByAnnotation(Class<? extends Annotation> annotation) {
     return delegate.listByAnnotation(annotation);
   }
 

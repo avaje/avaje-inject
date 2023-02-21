@@ -66,6 +66,7 @@ final class GenericType {
    * Parse and return as GenericType.
    */
   static GenericType parse(String raw) {
+    raw = Util.trimAnnotations(raw);
     raw = trimWildcard(raw);
     if (raw.indexOf('<') == -1) {
       return new GenericType(raw);

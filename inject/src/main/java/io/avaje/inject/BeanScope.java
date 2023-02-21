@@ -172,7 +172,7 @@ public interface BeanScope extends AutoCloseable {
   <T> Optional<T> getOptional(Type type, @Nullable String name);
 
   /**
-   * Return the list of beans that have an annotation.
+   * Return the list of beans that have an annotation. The annotation must have a @Retention policy of RUNTIME
    *
    * <pre>{@code
    *
@@ -185,7 +185,7 @@ public interface BeanScope extends AutoCloseable {
    *
    * @param annotation An annotation class.
    */
-  List<Object> listByAnnotation(Class<?> annotation);
+  List<Object> listByAnnotation(Class<? extends Annotation> annotation);
 
   /**
    * Return the list of beans for a given type.
@@ -252,5 +252,6 @@ public interface BeanScope extends AutoCloseable {
   /**
    * Close the scope firing any <code>@PreDestroy</code> lifecycle methods.
    */
+  @Override
   void close();
 }

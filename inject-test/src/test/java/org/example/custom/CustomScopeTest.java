@@ -92,7 +92,7 @@ class CustomScopeTest {
       assertThat(customBeanEntry.get().bean()).isSameAs(customBean);
       assertThat(customBeanEntry.get().qualifierName()).isEqualTo("hello");
       assertThat(customBeanEntry.get().priority()).isEqualTo(0);
-      assertThat(customBeanEntry.get().keys()).containsExactly(CustomBean.class.getCanonicalName(), MyCustomScope.class.getCanonicalName());
+      assertThat(customBeanEntry.get().keys()).containsExactly(CustomBean.class.getCanonicalName());
 
 
       final Optional<BeanEntry> fooCustomEntry = all.stream()
@@ -104,7 +104,7 @@ class CustomScopeTest {
 
       // only the beans with MyCustomScope annotation
       final List<BeanEntry> myCustomScopeBeans = all.stream()
-        .filter(beanEntry -> beanEntry.hasKey(MyCustomScope.class))
+        .filter(beanEntry -> beanEntry.type().isAnnotationPresent(MyCustomScope.class))
         .collect(toList());
       assertThat(myCustomScopeBeans).hasSize(3);
 
