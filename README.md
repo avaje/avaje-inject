@@ -2,10 +2,10 @@
 [![JDK EA](https://github.com/avaje/avaje-inject/actions/workflows/jdk-ea.yml/badge.svg)](https://github.com/avaje/avaje-inject/actions/workflows/jdk-ea.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/avaje/avaje-inject/blob/master/LICENSE)
 [![Maven Central : avaje-inject](https://maven-badges.herokuapp.com/maven-central/io.avaje/avaje-inject/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.avaje/avaje-inject)
+[![Discord](https://img.shields.io/discord/1074074312421683250?color=%237289da&label=discord)](https://discord.gg/kzew4q8A)
 
 # [Avaje-Inject](https://avaje.io/inject)
 APT based dependency injection for server side developers - https://avaje.io/inject
-
 ## Quick Start
 #### 1. Add avaje-inject as a dependency.
 ```xml
