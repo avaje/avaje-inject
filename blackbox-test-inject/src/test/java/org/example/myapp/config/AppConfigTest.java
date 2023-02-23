@@ -33,4 +33,14 @@ class AppConfigTest {
       assertThat(list).hasSize(2);
     }
   }
+
+  @Test
+  void beanWithAutoCloseable() {
+    try (BeanScope testScope = BeanScope.builder().build()) {
+      final var someInterface = testScope.get(AppConfig.SomeInterface.class);
+      assertThat(someInterface).isInstanceOf(AutoCloseable.class);
+      assertThat(AppConfig.BEAN_AUTO_CLOSED.get()).isFalse();
+    }
+    assertThat(AppConfig.BEAN_AUTO_CLOSED.get()).isTrue();
+  }
 }
