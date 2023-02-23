@@ -30,7 +30,7 @@ final class TypeExtendsReader {
   private final boolean baseTypeIsInterface;
   private final boolean publicAccess;
   private final boolean autoProvide;
-
+  private boolean closeable;
   /**
    * The implied qualifier name based on naming convention.
    */
@@ -119,6 +119,10 @@ final class TypeExtendsReader {
     return providesTypes;
   }
 
+  boolean isCloseable() {
+    return closeable;
+  }
+
   void process(boolean forBean) {
     extendsTypes.add(baseTypeRaw);
     if (forBean) {
@@ -187,7 +191,7 @@ final class TypeExtendsReader {
     if (rawType.indexOf('.') == -1) {
       context.logWarn("skip when no package on interface " + rawType);
     } else if (Constants.AUTO_CLOSEABLE.equals(rawType) || Constants.IO_CLOSEABLE.equals(rawType)) {
-     
+      closeable = true;
     } else {
       if (qualifierName == null) {
         String mainType = GenericType.removeParameter(rawType);
