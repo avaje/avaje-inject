@@ -52,7 +52,7 @@ public @interface Bean {
   String destroyMethod() default "";
 
   /**
-   * Specify if the concrete instance of the bean is an AutoCloseable. Use if your bean interface
+   * Specify that the concrete instance of the bean is an AutoCloseable. Use if your bean interface
    * doesn't extend AutoCloseable but the concrete class implements it.
    */
   boolean autoCloseable() default false;
