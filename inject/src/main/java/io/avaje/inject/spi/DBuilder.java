@@ -168,8 +168,7 @@ class DBuilder implements Builder {
     beanMap.register(bean);
     
     if (bean instanceof AutoCloseable) {
-      var close = (AutoCloseable) bean;
-      this.addPreDestroy(close::close);
+      addPreDestroy((AutoCloseable) bean);
     }
 
     return bean;
