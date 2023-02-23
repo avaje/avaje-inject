@@ -50,4 +50,10 @@ public @interface Bean {
    * Specify a method to be treated like a <code>@PreDestroy</code>
    */
   String destroyMethod() default "";
+
+  /**
+   * Specify if the concrete instance of the bean is an AutoCloseable. Use if your bean interface
+   * doesn't extend AutoCloseable but the concrete class implements it.
+   */
+  boolean autoCloseable() default false;
 }
