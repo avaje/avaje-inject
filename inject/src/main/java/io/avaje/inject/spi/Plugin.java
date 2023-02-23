@@ -8,7 +8,7 @@ import java.lang.reflect.Type;
 /**
  * A Plugin that can be applied when creating a bean scope.
  * <p>
- * Typically, a plugin might provide a default dependency via {@link BeanScopeBuilder#provideDefault(Type, Provider)}.
+ * Typically, a plugin might provide a default dependency via {@link BeanScopeBuilder#provideDefault(Type, java.util.function.Supplier)}.
  */
 public interface Plugin {
 
