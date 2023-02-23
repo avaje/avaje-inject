@@ -49,10 +49,6 @@ final class TypeReader {
     return extendsReader.providesAspect();
   }
 
-  boolean isClosable() {
-    return extendsReader.isCloseable();
-  }
-
   BeanAspects hasAspects() {
     return extendsReader.hasAspects();
   }

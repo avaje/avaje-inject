@@ -1,14 +1,20 @@
 package io.avaje.inject.spi;
 
+import static io.avaje.inject.spi.DBeanScope.combine;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
+
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
 import jakarta.inject.Provider;
-
-import java.lang.reflect.Type;
-import java.util.*;
-import java.util.function.Consumer;
-
-import static io.avaje.inject.spi.DBeanScope.combine;
 
 class DBuilder implements Builder {
 
@@ -160,6 +166,12 @@ class DBuilder implements Builder {
   public final <T> T register(T bean) {
     bean = enrich(bean, beanMap.next());
     beanMap.register(bean);
+    
+    if (bean instanceof AutoCloseable) {
+      var close = (AutoCloseable) bean;
+      this.addPreDestroy(close::close);
+    }
+
     return bean;
   }
 
