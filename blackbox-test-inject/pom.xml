@@ -55,12 +55,6 @@
     </dependency>
 
     <!-- annotation processor -->
-    <dependency>
-      <groupId>io.avaje</groupId>
-      <artifactId>avaje-inject-generator</artifactId>
-      <version>${project.version}</version>
-      <scope>provided</scope>
-    </dependency>
 
     <!-- test dependencies -->
     <dependency>

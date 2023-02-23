@@ -101,6 +101,13 @@ public interface Builder {
   void addPreDestroy(AutoCloseable closeable);
 
   /**
+   * Check if the instance is AutoCloseable and if so register it with PreDestroy.
+   *
+   * @param maybeAutoCloseable An instance that might be AutoCloseable
+   */
+  void addAutoClosable(Object maybeAutoCloseable);
+
+  /**
    * Add field and method injection.
    */
   void addInjector(Consumer<Builder> injector);

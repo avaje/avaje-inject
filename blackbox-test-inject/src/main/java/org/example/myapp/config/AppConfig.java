@@ -6,9 +6,17 @@ import jakarta.inject.Named;
 import org.example.myapp.HelloData;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Factory
 public class AppConfig {
+
+  public static AtomicBoolean BEAN_AUTO_CLOSED = new AtomicBoolean();
+
+  @Bean(autoCloseable = true)
+  SomeInterface someInterface() {
+    return new SomeInterfaceWithClose();
+  }
 
   @Bean
   HelloData data() {
@@ -101,6 +109,23 @@ public class AppConfig {
   public interface MyInterface {
 
   }
+
+  public interface SomeInterface {
+
+  }
+
+  private static class SomeInterfaceWithClose implements SomeInterface, AutoCloseable {
+
+    SomeInterfaceWithClose() {
+      BEAN_AUTO_CLOSED.set(false);
+    }
+
+    @Override
+    public void close() {
+      BEAN_AUTO_CLOSED.set(true);
+    }
+  }
+
 
   public static class MyPrim {
     public final String val;

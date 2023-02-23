@@ -217,10 +217,7 @@ final class MethodReader {
       } else if (typeReader != null && typeReader.isClosable()) {
         writer.append(indent).append("builder.addPreDestroy($bean::close);").eol();
       } else if (beanCloseable) {
-        writer.append(indent).append("if ($bean instanceof AutoCloseable) {").eol();
-        writer.append(indent).append("   AutoCloseable closeable = (AutoCloseable) $bean;").eol();
-        writer.append(indent).append("   builder.addPreDestroy(closeable::close);").eol();
-        writer.append(indent).append("}").eol();
+        writer.append(indent).append("builder.addAutoClosable($bean);").eol();
       }
       if (optionalType) {
         writer.append("      }").eol();

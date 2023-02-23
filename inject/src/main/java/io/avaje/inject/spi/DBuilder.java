@@ -205,6 +205,13 @@ class DBuilder implements Builder {
   }
 
   @Override
+  public final void addAutoClosable(Object maybeAutoCloseable) {
+    if (maybeAutoCloseable instanceof AutoCloseable) {
+      preDestroy.add((AutoCloseable)maybeAutoCloseable);
+    }
+  }
+
+  @Override
   public final void addInjector(Consumer<Builder> injector) {
     injectors.add(injector);
   }
