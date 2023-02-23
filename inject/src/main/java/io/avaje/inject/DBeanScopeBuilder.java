@@ -11,6 +11,7 @@ import java.lang.System.Logger.Level;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Build a bean scope with options for shutdown hook and supplying test doubles.
@@ -83,7 +84,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  public <D> BeanScopeBuilder provideDefault(String name, Type type, Provider<D> provider) {
+  public <D> BeanScopeBuilder provideDefault(String name, Type type, Supplier<D> supplier) {
+    final Provider<D> provider = supplier::get;
     suppliedBeans.add(SuppliedBean.secondary(name, type, provider));
     return this;
   }

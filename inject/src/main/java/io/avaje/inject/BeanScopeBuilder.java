@@ -7,6 +7,7 @@ import jakarta.inject.Provider;
 
 import java.lang.reflect.Type;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Build a bean scope with options for shutdown hook and supplying external dependencies.
@@ -207,6 +208,17 @@ public interface BeanScopeBuilder {
   <D> BeanScopeBuilder bean(Type type, D bean);
 
   /**
+   * Deprecated - migrate to use Supplier rather than Provider.
+   * <p>
+   * Doing this deprecation so that plugins can be used with both the jakarta and javax versions of avaje-inject
+   * so we need to use Supplier instead of Provider.
+   */
+  @Deprecated
+  default <D> BeanScopeBuilder provideDefault(Type type, Provider<D> provider) {
+    return provideDefault(null, type, provider::get);
+  }
+
+  /**
    * Add a supplied bean provider that acts as a default fallback for a dependency.
    * <p>
    * This provider is only called if nothing else provides the dependency. It effectively
@@ -215,7 +227,7 @@ public interface BeanScopeBuilder {
    * @param type     The type of the dependency
    * @param provider The provider of the dependency.
    */
-  default <D> BeanScopeBuilder provideDefault(Type type, Provider<D> provider) {
+  default <D> BeanScopeBuilder provideDefault(Type type, Supplier<D> provider) {
     return provideDefault(null, type, provider);
   }
 
@@ -229,7 +241,7 @@ public interface BeanScopeBuilder {
    * @param type     The type of the dependency
    * @param provider The provider of the dependency.
    */
-  <D> BeanScopeBuilder provideDefault(@Nullable String name, Type type, Provider<D> provider);
+  <D> BeanScopeBuilder provideDefault(@Nullable String name, Type type, Supplier<D> provider);
 
   /**
    * Deprecated - migrate to bean().
