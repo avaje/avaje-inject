@@ -68,8 +68,7 @@ final class TypeExtendsInjection {
   }
 
   private void readField(Element element) {
-    InjectPrism inject = InjectPrism.getInstanceOn(element);
-    if (inject != null) {
+    if (InjectPrism.isPresent(element)) {
       injectFields.add(new FieldReader(element));
     }
   }
@@ -82,8 +81,8 @@ final class TypeExtendsInjection {
 
     ExecutableElement ex = (ExecutableElement) element;
     MethodReader methodReader = new MethodReader(context, ex, baseType, importTypes).read();
-    InjectPrism inject = InjectPrism.getInstanceOn(element);
-    if (inject != null) {
+
+    if (InjectPrism.isPresent(element)) {
       injectConstructor = methodReader;
     } else {
       if (methodReader.isNotPrivate()) {
@@ -102,9 +101,9 @@ final class TypeExtendsInjection {
         checkAspect = false;
       }
     }
-    InjectPrism inject = InjectPrism.getInstanceOn(element);
+    var inject = InjectPrism.isPresent(element);
     final String methodKey = methodElement.getSimpleName().toString();
-    if (inject != null && !notInjectMethods.contains(methodKey)) {
+    if (inject && !notInjectMethods.contains(methodKey)) {
       if (!injectMethods.containsKey(methodKey)) {
         MethodReader methodReader = new MethodReader(context, methodElement, type, importTypes).read();
         if (methodReader.isNotPrivate()) {
