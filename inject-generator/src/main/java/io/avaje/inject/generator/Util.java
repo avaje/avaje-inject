@@ -204,8 +204,8 @@ final class Util {
     }
     for (AnnotationMirror annotationMirror : p.getAnnotationMirrors()) {
       DeclaredType annotationType = annotationMirror.getAnnotationType();
-      QualifierPrism qualifier = QualifierPrism.getInstanceOn(annotationType.asElement());
-      if (qualifier != null) {
+      var hasQualifier = QualifierPrism.isPresent(annotationType.asElement());
+      if (hasQualifier) {
         return Util.shortName(annotationType.toString()).toLowerCase();
       }
     }

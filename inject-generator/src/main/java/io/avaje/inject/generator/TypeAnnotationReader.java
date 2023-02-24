@@ -37,9 +37,9 @@ final class TypeAnnotationReader {
   void process() {
     for (AnnotationMirror annotationMirror : beanType.getAnnotationMirrors()) {
       DeclaredType annotationType = annotationMirror.getAnnotationType();
-      QualifierPrism qualifier = QualifierPrism.getInstanceOn(annotationType.asElement());
       String annType = annotationType.toString();
-      if (qualifier != null) {
+      
+      if (QualifierPrism.isPresent(annotationType.asElement())) {
         qualifierName = Util.shortName(annType).toLowerCase();
       } else if (annType.indexOf('.') == -1) {
         context.logWarn("skip when no package on annotation " + annType);

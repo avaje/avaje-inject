@@ -44,9 +44,9 @@ final class MethodReader {
     this.isFactory = bean != null;
     this.element = element;
     if (isFactory) {
-      prototype = PrototypePrism.getInstanceOn(element) != null;
-      primary = PrimaryPrism.getInstanceOn(element) != null;
-      secondary = SecondaryPrism.getInstanceOn(element) != null;
+      prototype = PrototypePrism.isPresent(element);
+      primary = PrimaryPrism.isPresent(element);
+      secondary = SecondaryPrism.isPresent(element);
     } else {
       prototype = false;
       primary = false;

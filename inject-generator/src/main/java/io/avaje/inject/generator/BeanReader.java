@@ -41,10 +41,10 @@ final class BeanReader {
     this.beanType = beanType;
     this.type = beanType.getQualifiedName().toString();
     this.shortName = shortName(beanType);
-    this.prototype = (PrototypePrism.getInstanceOn(beanType) != null);
-    this.primary = (PrimaryPrism.getInstanceOn(beanType) != null);
-    this.secondary = !primary && (SecondaryPrism.getInstanceOn(beanType) != null);
-    this.proxy = (ProxyPrism.getInstanceOn(beanType) != null);
+    this.prototype = PrototypePrism.isPresent(beanType);
+    this.primary = PrimaryPrism.isPresent(beanType);
+    this.secondary = !primary && SecondaryPrism.isPresent(beanType);
+    this.proxy = ProxyPrism.isPresent(beanType);
     this.typeReader = new TypeReader(GenericType.parse(type), beanType, context, importTypes, factory);
     typeReader.process();
     this.requestParams = new BeanRequestParams(type);

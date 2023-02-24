@@ -51,10 +51,10 @@ final class TypeExtendsReader {
 
   private boolean autoProvide() {
     return publicAccess
-        && FactoryPrism.getInstanceOn(baseType) == null
-        && ProxyPrism.getInstanceOn(baseType) == null
-        && GeneratedPrism.getInstanceOn(baseType) == null
-      && !isController();
+        && !FactoryPrism.isPresent(baseType)
+        && !ProxyPrism.isPresent(baseType)
+        && !GeneratedPrism.isPresent(baseType)
+        && !isController();
   }
 
   private boolean isController() {
