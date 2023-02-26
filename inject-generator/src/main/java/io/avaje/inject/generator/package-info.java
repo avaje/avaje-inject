@@ -1,21 +1,20 @@
-@io.avaje.prism.GeneratePrisms({
-  @GeneratePrism(value = InjectModule.class),
-  @GeneratePrism(value = Factory.class),
-  @GeneratePrism(value = Singleton.class),
-  @GeneratePrism(value = Component.class),
-  @GeneratePrism(value = Prototype.class),
-  @GeneratePrism(value = Scope.class),
-  @GeneratePrism(value = Qualifier.class),
-  @GeneratePrism(value = Named.class),
-  @GeneratePrism(value = Inject.class),
-  @GeneratePrism(value = Aspect.class),
-  @GeneratePrism(value = Primary.class),
-  @GeneratePrism(value = Secondary.class),
-  @GeneratePrism(value = Proxy.class),
-  @GeneratePrism(value = DependencyMeta.class),
-  @GeneratePrism(value = Bean.class),
-  @GeneratePrism(value = io.avaje.inject.spi.Generated.class),
-})
+@GeneratePrism(InjectModule.class)
+@GeneratePrism(Factory.class)
+@GeneratePrism(Singleton.class)
+@GeneratePrism(Component.class)
+@GeneratePrism(Component.Import.class)
+@GeneratePrism(Prototype.class)
+@GeneratePrism(Scope.class)
+@GeneratePrism(Qualifier.class)
+@GeneratePrism(Named.class)
+@GeneratePrism(Inject.class)
+@GeneratePrism(Aspect.class)
+@GeneratePrism(Primary.class)
+@GeneratePrism(Secondary.class)
+@GeneratePrism(Proxy.class)
+@GeneratePrism(DependencyMeta.class)
+@GeneratePrism(Bean.class)
+@GeneratePrism(Generated.class)
 package io.avaje.inject.generator;
 
 import io.avaje.inject.Bean;
@@ -27,6 +26,7 @@ import io.avaje.inject.Prototype;
 import io.avaje.inject.Secondary;
 import io.avaje.inject.aop.Aspect;
 import io.avaje.inject.spi.DependencyMeta;
+import io.avaje.inject.spi.Generated;
 import io.avaje.inject.spi.Proxy;
 import io.avaje.prism.GeneratePrism;
 import jakarta.inject.Inject;
