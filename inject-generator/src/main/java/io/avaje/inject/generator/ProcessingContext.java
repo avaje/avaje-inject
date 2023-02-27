@@ -136,7 +136,10 @@ final class ProcessingContext {
   }
 
   Element asElement(TypeMirror returnType) {
-    return typeUtils.asElement(returnType);
+
+    var wrapper = PrimitiveUtil.wrap(returnType.toString());
+    
+    return wrapper == null ? typeUtils.asElement(returnType) : element(wrapper);
   }
 
   void addModule(String moduleFullName) {
