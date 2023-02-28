@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 /**
  * Test for Aspect that sets result and never invokes underlying method.
  */
-@Aspect(target = MySkipAspect.class)
+@Aspect
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MySkip {

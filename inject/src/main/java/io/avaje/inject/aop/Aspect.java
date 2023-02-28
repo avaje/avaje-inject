@@ -18,12 +18,6 @@ import java.lang.annotation.Target;
 public @interface Aspect {
 
   /**
-   * Deprecated - the target() attribute is no longer required and should be removed.
-   */
-  @Deprecated
-  Class<?> target() default Void.class;
-
-  /**
    * Specify the priority ordering when multiple aspects are on a method.
    * <p>
    * When multiple aspects are on a method they are nested. The highest
