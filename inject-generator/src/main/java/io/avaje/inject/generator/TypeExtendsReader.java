@@ -186,9 +186,7 @@ final class TypeExtendsReader {
   private void readInterfacesOf(TypeMirror anInterface) {
     String rawType = Util.unwrapProvider(anInterface.toString());
     if (JAVA_LANG_OBJECT.equals(rawType)) {
-      return;
-    }
-    if (rawType.indexOf('.') == -1) {
+    } else if (rawType.indexOf('.') == -1) {
       context.logWarn("skip when no package on interface " + rawType);
     } else if (Constants.AUTO_CLOSEABLE.equals(rawType) || Constants.IO_CLOSEABLE.equals(rawType)) {
       closeable = true;
@@ -202,8 +200,11 @@ final class TypeExtendsReader {
         }
       }
       interfaceTypes.add(rawType);
-      for (TypeMirror supertype : context.types().directSupertypes(anInterface)) {
-        readInterfacesOf(supertype);
+      if (!rawType.startsWith("java.lang.")) {
+
+        for (TypeMirror supertype : context.types().directSupertypes(anInterface)) {
+          readInterfacesOf(supertype);
+        }
       }
     }
   }
