@@ -2,6 +2,7 @@
 @GeneratePrism(Factory.class)
 @GeneratePrism(Singleton.class)
 @GeneratePrism(Component.class)
+@GeneratePrism(Component.Import.class)
 @GeneratePrism(Prototype.class)
 @GeneratePrism(Scope.class)
 @GeneratePrism(Qualifier.class)

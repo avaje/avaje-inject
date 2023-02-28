@@ -23,7 +23,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.tools.StandardLocation;
 
-
 @SupportedAnnotationTypes({
   Constants.INJECTMODULE,
   Constants.FACTORY,
@@ -33,6 +32,7 @@ import javax.tools.StandardLocation;
   Constants.SCOPE,
   Constants.TESTSCOPE,
   Constants.CONTROLLER,
+  ImportPrism.PRISM_TYPE
 })
 public final class Processor extends AbstractProcessor {
 
@@ -97,6 +97,19 @@ public final class Processor extends AbstractProcessor {
     }
     readChangedBeans(roundEnv.getElementsAnnotatedWith(context.element(Constants.COMPONENT)), false);
     readChangedBeans(roundEnv.getElementsAnnotatedWith(context.element(Constants.PROTOTYPE)), false);
+   
+    final var importedElements =
+        roundEnv.getElementsAnnotatedWith(context.element(ImportPrism.PRISM_TYPE)).stream()
+            .map(ImportPrism::getInstanceOn)
+            .flatMap(p -> p.value().stream())
+            .map(context::asElement)
+            .map(TypeElement.class::cast)
+            .collect(Collectors.toSet());
+
+    readChangedBeans(importedElements, false);
+
+    readChangedBeans(
+        roundEnv.getElementsAnnotatedWith(context.element(Constants.PROTOTYPE)), false);
     final var typeElement = elementUtils.getTypeElement(Constants.CONTROLLER);
     if (typeElement != null) {
       readChangedBeans(roundEnv.getElementsAnnotatedWith(typeElement), false);

@@ -1,5 +1,7 @@
 package io.avaje.inject;
 
+import static java.lang.annotation.RetentionPolicy.CLASS;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -46,4 +48,26 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Component {
+
+  /**
+   * Specify types to generate DI classes for.
+   *
+   * <p>These types are typically in an external project / dependency or otherwise types that we
+   * can't or don't want to explicitly annotate with {@code @Singleton}/{@code @Component}.
+   *
+   * <p>Typically, we put this annotation on a package.
+   *
+   * <pre>{@code
+   * Component.Import({Customer.class, Product.class, ...})
+   * package org.example.processor;
+   *
+   * }</pre>
+   */
+  @Retention(CLASS)
+  @Target({ElementType.TYPE, ElementType.PACKAGE})
+  @interface Import {
+
+    /** Specify types to generate DI classes for. */
+    Class<?>[] value();
+  }
 }

@@ -1,9 +1,11 @@
 package org.example.autonamed;
 
+import io.avaje.inject.Component;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 
 @Singleton
+@Component.Import(MyAutoB2.class)
 public class MyAutoB2Explicit {
 
   final AutoB2 one;
