@@ -96,7 +96,6 @@ public final class Processor extends AbstractProcessor {
       readChangedBeans(roundEnv.getElementsAnnotatedWith(context.element(Constants.SINGLETON)), false);
     }
     readChangedBeans(roundEnv.getElementsAnnotatedWith(context.element(Constants.COMPONENT)), false);
-    readChangedBeans(roundEnv.getElementsAnnotatedWith(context.element(ImportPrism.PRISM_TYPE)), false);
     readChangedBeans(roundEnv.getElementsAnnotatedWith(context.element(Constants.PROTOTYPE)), false);
    
     final var importedElements =
