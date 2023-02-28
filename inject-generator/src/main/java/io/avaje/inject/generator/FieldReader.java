@@ -14,14 +14,16 @@ final class FieldReader {
   private final GenericType type;
   private boolean requestParam;
   private String requestParamName;
+  private final boolean isBeanMap;
 
   FieldReader(Element element) {
     this.element = element;
     this.name = Util.getNamed(element);
     this.nullable = Util.isNullable(element);
     this.utype = Util.determineType(element.asType());
-    this.fieldType = Util.unwrapProvider(utype.rawType());
-    this.type = GenericType.parse(utype.rawType());
+    this.isBeanMap = QualifiedMapPrism.isPresent(element);
+    this.fieldType = Util.unwrapProvider(utype.rawType(isBeanMap));
+    this.type = GenericType.parse(utype.rawType(isBeanMap));
   }
 
   boolean isGenericParam() {
@@ -44,7 +46,7 @@ final class FieldReader {
 
   String builderGetDependency(String builder) {
     StringBuilder sb = new StringBuilder();
-    sb.append(builder).append(".").append(utype.getMethod(nullable));
+    sb.append(builder).append(".").append(utype.getMethod(nullable, isBeanMap));
     if (isGenericParam()) {
       sb.append("TYPE_").append(type.shortName());
     } else {
@@ -65,9 +67,9 @@ final class FieldReader {
    * Check for request scoped dependency.
    */
   void checkRequest(BeanRequestParams requestParams) {
-    requestParam = requestParams.check(utype.rawType());
+    requestParam = requestParams.check(utype.rawType(isBeanMap));
     if (requestParam) {
-      requestParamName = requestParams.argumentName(utype.rawType());
+      requestParamName = requestParams.argumentName(utype.rawType(isBeanMap));
     }
   }
 

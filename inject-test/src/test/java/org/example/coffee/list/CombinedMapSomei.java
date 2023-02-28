@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.avaje.inject.QualifiedMap;
+
 @Singleton
 public class CombinedMapSomei {
 
@@ -17,7 +19,7 @@ public class CombinedMapSomei {
    * Inject map of beans keyed by qualifier name.
    */
   @Inject
-  public CombinedMapSomei(Map<String, Somei> somes) {
+  public CombinedMapSomei(@QualifiedMap Map<String, Somei> somes) {
     this.somes = somes;
   }
 
