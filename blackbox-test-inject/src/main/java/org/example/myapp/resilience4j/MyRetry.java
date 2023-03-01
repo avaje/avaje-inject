@@ -5,8 +5,8 @@ import io.avaje.inject.aop.Aspect;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+@Aspect
 @Retention(RetentionPolicy.RUNTIME)
-@Aspect(target = RetryProvider.class)
 public @interface MyRetry {
 
   String fallbackMethod() default "";
