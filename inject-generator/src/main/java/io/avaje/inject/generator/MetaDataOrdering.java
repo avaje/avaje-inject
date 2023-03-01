@@ -1,5 +1,6 @@
 package io.avaje.inject.generator;
 
+import static io.avaje.inject.generator.ProcessingContext.*;
 import javax.lang.model.element.TypeElement;
 import java.util.*;
 
@@ -10,7 +11,6 @@ final class MetaDataOrdering {
       "rather than constructor injection on one of the dependencies. " +
       "\n See https://avaje.io/inject/#circular";
 
-  private final ProcessingContext context;
   private final ScopeInfo scopeInfo;
   private final List<MetaData> orderedList = new ArrayList<>();
   private final List<MetaData> queue = new ArrayList<>();
@@ -20,8 +20,7 @@ final class MetaDataOrdering {
   private final Set<String> autoRequires = new TreeSet<>();
   private final Set<String> autoRequiresAspects = new TreeSet<>();
 
-  MetaDataOrdering(Collection<MetaData> values, ProcessingContext context, ScopeInfo scopeInfo) {
-    this.context = context;
+  MetaDataOrdering(Collection<MetaData> values, ScopeInfo scopeInfo) {
     this.scopeInfo = scopeInfo;
     for (MetaData metaData : values) {
       if (metaData.noDepends()) {
@@ -118,9 +117,9 @@ final class MetaDataOrdering {
    * Log a reasonable compile error for detected circular dependencies.
    */
   private void errorOnCircularDependencies() {
-    context.logError("Circular dependencies detected with beans %s  %s", circularDependencies, CIRC_ERR_MSG);
+    logError("Circular dependencies detected with beans %s  %s", circularDependencies, CIRC_ERR_MSG);
     for (DependencyLink link : circularDependencies) {
-      context.logError("Circular dependency - %s dependsOn %s for %s", link.metaData, link.provider, link.dependency);
+      logError("Circular dependency - %s dependsOn %s for %s", link.metaData, link.provider, link.dependency);
     }
   }
 
@@ -140,8 +139,8 @@ final class MetaDataOrdering {
   private void checkMissingDependencies(MetaData metaData) {
     for (Dependency dependency : metaData.dependsOn()) {
       if (providers.get(dependency.name()) == null && !scopeInfo.providedByOtherScope(dependency.name())) {
-        TypeElement element = context.elementMaybe(metaData.type());
-        context.logError(element, "No dependency provided for " + dependency + " on " + metaData.type());
+        TypeElement element = elementMaybe(metaData.type());
+        logError(element, "No dependency provided for " + dependency + " on " + metaData.type());
         missingDependencyTypes.add(dependency.name());
       }
     }
@@ -152,12 +151,12 @@ final class MetaDataOrdering {
    */
   private void warnOnDependencies() {
     if (!missingDependencyTypes.isEmpty()) {
-      context.logError("Dependencies %s are not provided - missing @Singleton, @Component, @Factory/@Bean or specify external dependency via @InjectModule requires attribute", missingDependencyTypes);
+      logError("Dependencies %s are not provided - missing @Singleton, @Component, @Factory/@Bean or specify external dependency via @InjectModule requires attribute", missingDependencyTypes);
     } else {
       if (!queue.isEmpty()) {
-        context.logWarn("There are " + queue.size() + " beans with unsatisfied dependencies (assuming external dependencies)");
+        logWarn("There are " + queue.size() + " beans with unsatisfied dependencies (assuming external dependencies)");
         for (MetaData m : queue) {
-          context.logWarn("Unsatisfied dependencies on %s dependsOn %s", m, m.dependsOn());
+          logWarn("Unsatisfied dependencies on %s dependsOn %s", m, m.dependsOn());
         }
       }
     }
@@ -195,7 +194,7 @@ final class MetaDataOrdering {
         ProviderList providerList = providers.get(dependencyName);
         if (providerList == null) {
           if (!scopeInfo.providedByOther(dependency)) {
-            if (includeExternal && context.externallyProvided(dependencyName)) {
+            if (includeExternal && externallyProvided(dependencyName)) {
               if (Util.isAspectProvider(dependencyName)) {
                 autoRequiresAspects.add(Util.extractAspectType(dependencyName));
               } else {

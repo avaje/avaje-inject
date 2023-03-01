@@ -1,11 +1,14 @@
 package io.avaje.inject.generator;
 
 
+import static io.avaje.inject.generator.ProcessingContext.logWarn;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Read the annotations on the type.
@@ -13,13 +16,11 @@ import java.util.List;
 final class TypeAnnotationReader {
 
   private final TypeElement beanType;
-  private final ProcessingContext context;
   private final List<String> annotationTypes = new ArrayList<>();
   private String qualifierName;
 
-  TypeAnnotationReader(TypeElement beanType, ProcessingContext context) {
+  TypeAnnotationReader(TypeElement beanType) {
     this.beanType = beanType;
-    this.context = context;
   }
 
   List<String> annotationTypes() {
@@ -42,7 +43,7 @@ final class TypeAnnotationReader {
       if (QualifierPrism.isPresent(annotationType.asElement())) {
         qualifierName = Util.shortName(annType).toLowerCase();
       } else if (annType.indexOf('.') == -1) {
-        context.logWarn("skip when no package on annotation " + annType);
+        logWarn("skip when no package on annotation " + annType);
       } else if (IncludeAnnotations.include(annType)) {
         annotationTypes.add(annType);
       }

@@ -1,6 +1,6 @@
 package io.avaje.inject.generator;
 
-
+import static io.avaje.inject.generator.ProcessingContext.*;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,6 @@ final class TypeExtendsReader {
   private static final String JAVA_LANG_RECORD = "java.lang.Record";
   private final GenericType baseGenericType;
   private final TypeElement baseType;
-  private final ProcessingContext context;
   private final TypeExtendsInjection extendsInjection;
   private final List<String> extendsTypes = new ArrayList<>();
   private final List<String> interfaceTypes = new ArrayList<>();
@@ -37,11 +36,10 @@ final class TypeExtendsReader {
   private String qualifierName;
   private String providesAspect = "";
 
-  TypeExtendsReader(GenericType baseGenericType, TypeElement baseType, ProcessingContext context, boolean factory, ImportTypeMap importTypes) {
+  TypeExtendsReader(GenericType baseGenericType, TypeElement baseType, boolean factory, ImportTypeMap importTypes) {
     this.baseGenericType = baseGenericType;
     this.baseType = baseType;
-    this.context = context;
-    this.extendsInjection = new TypeExtendsInjection(baseType, context, factory, importTypes);
+    this.extendsInjection = new TypeExtendsInjection(baseType, factory, importTypes);
     this.beanSimpleName = baseType.getSimpleName().toString();
     this.baseTypeRaw = Util.unwrapProvider(baseGenericType.toString());
     this.baseTypeIsInterface = baseType.getKind() == ElementKind.INTERFACE;
@@ -172,12 +170,12 @@ final class TypeExtendsReader {
   }
 
   private TypeElement superOf(TypeElement element) {
-    return (TypeElement) context.asElement(element.getSuperclass());
+    return (TypeElement) asElement(element.getSuperclass());
   }
 
   private void readInterfaces(TypeElement type) {
     for (TypeMirror anInterface : type.getInterfaces()) {
-      if (isPublic(context.asElement(anInterface))) {
+      if (isPublic(asElement(anInterface))) {
         readInterfacesOf(anInterface);
       }
     }
@@ -187,7 +185,7 @@ final class TypeExtendsReader {
     String rawType = Util.unwrapProvider(anInterface.toString());
     if (JAVA_LANG_OBJECT.equals(rawType)) {
     } else if (rawType.indexOf('.') == -1) {
-      context.logWarn("skip when no package on interface " + rawType);
+      logWarn("skip when no package on interface " + rawType);
     } else if (Constants.AUTO_CLOSEABLE.equals(rawType) || Constants.IO_CLOSEABLE.equals(rawType)) {
       closeable = true;
     } else {
@@ -202,7 +200,7 @@ final class TypeExtendsReader {
       interfaceTypes.add(rawType);
       if (!rawType.startsWith("java.lang.")) {
 
-        for (TypeMirror supertype : context.types().directSupertypes(anInterface)) {
+        for (TypeMirror supertype : types().directSupertypes(anInterface)) {
           readInterfacesOf(supertype);
         }
       }

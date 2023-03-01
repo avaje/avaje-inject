@@ -1,14 +1,16 @@
 package io.avaje.inject.generator;
 
-import javax.lang.model.element.TypeElement;
-import javax.tools.JavaFileObject;
+import static io.avaje.inject.generator.ProcessingContext.createWriter;
+
 import java.io.IOException;
 import java.io.Writer;
+
+import javax.lang.model.element.TypeElement;
+import javax.tools.JavaFileObject;
 
 final class SimpleBeanProxyWriter {
 
   private final BeanReader beanReader;
-  private final ProcessingContext context;
   private final String originName;
   private final String suffix;
   private final String shortName;
@@ -16,9 +18,8 @@ final class SimpleBeanProxyWriter {
   private final BeanAspects aspects;
   private Append writer;
 
-  SimpleBeanProxyWriter(BeanReader beanReader, ProcessingContext context) {
+  SimpleBeanProxyWriter(BeanReader beanReader) {
     this.beanReader = beanReader;
-    this.context = context;
 
     TypeElement origin = beanReader.beanType();
     this.originName = origin.getQualifiedName().toString();
@@ -107,7 +108,7 @@ final class SimpleBeanProxyWriter {
   }
 
   private Writer createFileWriter() throws IOException {
-    JavaFileObject jfo = context.createWriter(originName + suffix);
+    JavaFileObject jfo = createWriter(originName + suffix);
     return jfo.openWriter();
   }
 

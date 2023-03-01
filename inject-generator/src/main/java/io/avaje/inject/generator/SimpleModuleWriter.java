@@ -1,5 +1,6 @@
 package io.avaje.inject.generator;
 
+import static io.avaje.inject.generator.ProcessingContext.*;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
@@ -43,7 +44,6 @@ final class SimpleModuleWriter {
       "   * field injection, method injection and lifecycle support.\n" +
       "   */";
 
-  private final ProcessingContext context;
   private final String modulePackage;
   private final String shortName;
   private final String fullName;
@@ -52,9 +52,8 @@ final class SimpleModuleWriter {
 
   private Append writer;
 
-  SimpleModuleWriter(MetaDataOrdering ordering, ProcessingContext context, ScopeInfo scopeInfo) {
+  SimpleModuleWriter(MetaDataOrdering ordering, ScopeInfo scopeInfo) {
     this.ordering = ordering;
-    this.context = context;
     this.scopeInfo = scopeInfo;
     this.modulePackage = scopeInfo.modulePackage();
     this.shortName = scopeInfo.moduleShortName();
@@ -78,7 +77,7 @@ final class SimpleModuleWriter {
 
   private void writeServicesFile(ScopeInfo.Type scopeType) {
     try {
-      FileObject jfo = context.createMetaInfWriter(scopeType);
+      FileObject jfo = createMetaInfWriter(scopeType);
       if (jfo != null) {
         Writer writer = jfo.openWriter();
         writer.write(fullName);
@@ -86,7 +85,7 @@ final class SimpleModuleWriter {
       }
     } catch (IOException e) {
       e.printStackTrace();
-      context.logError("Failed to write services file " + e.getMessage());
+      logError("Failed to write services file " + e.getMessage());
     }
   }
 
@@ -141,7 +140,7 @@ final class SimpleModuleWriter {
       String rawType = metaData.type();
       if (!"void".equals(rawType)) {
         String type = GenericType.parse(rawType).topType();
-        TypeElement element = context.element(type);
+        TypeElement element = element(type);
         if (element != null && element.getModifiers().contains(Modifier.PUBLIC)) {
           publicClasses.add(type);
         }

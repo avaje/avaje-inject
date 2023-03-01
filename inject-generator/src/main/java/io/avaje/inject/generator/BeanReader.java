@@ -37,7 +37,7 @@ final class BeanReader {
   private boolean suppressGeneratedImport;
   private Set<GenericType> allGenericTypes;
 
-  BeanReader(TypeElement beanType, ProcessingContext context, boolean factory) {
+  BeanReader(TypeElement beanType, boolean factory) {
     this.beanType = beanType;
     this.type = beanType.getQualifiedName().toString();
     this.shortName = shortName(beanType);
@@ -45,7 +45,7 @@ final class BeanReader {
     this.primary = PrimaryPrism.isPresent(beanType);
     this.secondary = !primary && SecondaryPrism.isPresent(beanType);
     this.proxy = ProxyPrism.isPresent(beanType);
-    this.typeReader = new TypeReader(GenericType.parse(type), beanType, context, importTypes, factory);
+    this.typeReader = new TypeReader(GenericType.parse(type), beanType, importTypes, factory);
     typeReader.process();
     this.requestParams = new BeanRequestParams(type);
     this.name = typeReader.name();

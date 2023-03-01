@@ -26,20 +26,20 @@ import javax.tools.StandardLocation;
 
 final class ProcessingContext {
 
-  private final ProcessingEnvironment processingEnv;
-  private final Messager messager;
-  private final Filer filer;
-  private final Elements elementUtils;
-  private final Types typeUtils;
-  private final Set<String> uniqueModuleNames = new HashSet<>();
-  private final Set<String> providedTypes = new HashSet<>();
+  private static ProcessingEnvironment processingEnv;
+  private static Messager messager;
+  private static Filer filer;
+  private static Elements elementUtils;
+  private static Types typeUtils;
+  private static Set<String> uniqueModuleNames = new HashSet<>();
+  private static Set<String> providedTypes = new HashSet<>();
 
-  ProcessingContext(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
-    this.processingEnv = processingEnv;
-    this.messager = processingEnv.getMessager();
-    this.filer = processingEnv.getFiler();
-    this.elementUtils = processingEnv.getElementUtils();
-    this.typeUtils = processingEnv.getTypeUtils();
+ static void init(ProcessingEnvironment env, Set<String> moduleFileProvided) {
+    processingEnv = env;
+    messager = processingEnv.getMessager();
+    filer = processingEnv.getFiler();
+    elementUtils = processingEnv.getElementUtils();
+    typeUtils = processingEnv.getTypeUtils();
 
     ExternalProvider.registerModuleProvidedTypes(providedTypes);
     providedTypes.addAll(moduleFileProvided);
@@ -48,32 +48,32 @@ final class ProcessingContext {
   /**
    * Log an error message.
    */
-  void logError(Element e, String msg, Object... args) {
+ static void logError(Element e, String msg, Object... args) {
     messager.printMessage(Diagnostic.Kind.ERROR, String.format(msg, args), e);
   }
 
-  void logError(String msg, Object... args) {
+ static void logError(String msg, Object... args) {
     messager.printMessage(Diagnostic.Kind.ERROR, String.format(msg, args));
   }
 
-  void logWarn(String msg, Object... args) {
+ static void logWarn(String msg, Object... args) {
     messager.printMessage(Diagnostic.Kind.WARNING, String.format(msg, args));
   }
 
-  void logDebug(String msg, Object... args) {
+ static void logDebug(String msg, Object... args) {
     messager.printMessage(Diagnostic.Kind.NOTE, String.format(msg, args));
   }
 
-  String loadMetaInfServices() {
+ static String loadMetaInfServices() {
     final var lines = loadMetaInf(Constants.META_INF_MODULE);
     return lines.isEmpty() ? null : lines.get(0);
   }
 
-  List<String> loadMetaInfCustom() {
+ static List<String> loadMetaInfCustom() {
     return loadMetaInf(Constants.META_INF_CUSTOM);
   }
 
-  private List<String> loadMetaInf(String fullName) {
+ static private List<String> loadMetaInf(String fullName) {
     try {
       final var fileObject = processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", fullName);
       if (fileObject != null) {
@@ -106,28 +106,28 @@ final class ProcessingContext {
   /**
    * Create a file writer for the given class name.
    */
-  JavaFileObject createWriter(String cls) throws IOException {
+ static JavaFileObject createWriter(String cls) throws IOException {
     return filer.createSourceFile(cls);
   }
 
-  FileObject createMetaInfWriter(ScopeInfo.Type scopeType) throws IOException {
+ static FileObject createMetaInfWriter(ScopeInfo.Type scopeType) throws IOException {
     final var serviceName = scopeType == ScopeInfo.Type.DEFAULT ? Constants.META_INF_MODULE : Constants.META_INF_TESTMODULE;
     return createMetaInfWriterFor(serviceName);
   }
 
-  private FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
+ static private FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
     return filer.createResource(StandardLocation.CLASS_OUTPUT, "", interfaceType);
   }
 
-  TypeElement element(String rawType) {
+ static TypeElement element(String rawType) {
     return elementUtils.getTypeElement(rawType);
   }
 
-  Types types() {
+ static Types types() {
     return typeUtils;
   }
 
-  TypeElement elementMaybe(String rawType) {
+ static TypeElement elementMaybe(String rawType) {
     if (rawType == null) {
       return null;
     } else {
@@ -135,24 +135,24 @@ final class ProcessingContext {
     }
   }
 
-  Element asElement(TypeMirror returnType) {
+ static Element asElement(TypeMirror returnType) {
 
     var wrapper = PrimitiveUtil.wrap(returnType.toString());
     
     return wrapper == null ? typeUtils.asElement(returnType) : element(wrapper);
   }
 
-  void addModule(String moduleFullName) {
+ static void addModule(String moduleFullName) {
     if (moduleFullName != null) {
       uniqueModuleNames.add(moduleFullName);
     }
   }
 
-  boolean isDuplicateModule(String moduleFullName) {
+ static boolean isDuplicateModule(String moduleFullName) {
     return uniqueModuleNames.contains(moduleFullName);
   }
 
-  boolean externallyProvided(String type) {
+ static boolean externallyProvided(String type) {
     return providedTypes.contains(type);
   }
 }

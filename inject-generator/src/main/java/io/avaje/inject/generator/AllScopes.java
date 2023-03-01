@@ -1,5 +1,6 @@
 package io.avaje.inject.generator;
 
+import static io.avaje.inject.generator.ProcessingContext.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,12 +13,11 @@ import javax.lang.model.element.TypeElement;
 final class AllScopes {
 
   private final Map<String, Data> scopeAnnotations = new HashMap<>();
-  private final ProcessingContext context;
+
   private final ScopeInfo defaultScope;
 
-  AllScopes(ProcessingContext context) {
-    this.context = context;
-    this.defaultScope = new ScopeInfo(context);
+  AllScopes() {
+    this.defaultScope = new ScopeInfo();
   }
 
   ScopeInfo defaultScope() {
@@ -30,7 +30,7 @@ final class AllScopes {
     if (existing != null) {
       return existing.scopeInfo;
     }
-    final Data data = new Data(type, context, this);
+    final Data data = new Data(type, this);
     scopeAnnotations.put(key, data);
     return data.scopeInfo;
   }
@@ -57,14 +57,14 @@ final class AllScopes {
 
   void readModules(List<String> customScopeModules) {
     for (String customScopeModule : customScopeModules) {
-      final TypeElement module = context.element(customScopeModule);
+      final TypeElement module = element(customScopeModule);
       if (module != null) {
         InjectModulePrism injectModule = InjectModulePrism.getInstanceOn(module);
         if (injectModule != null) {
           final String customScopeType = injectModule.customScopeType();
-          final TypeElement scopeType = context.element(customScopeType);
+          final TypeElement scopeType = element(customScopeType);
           if (scopeType == null) {
-            context.logError(module, "customScopeType [" + customScopeType + "] is invalid? on " + module);
+            logError(module, "customScopeType [" + customScopeType + "] is invalid? on " + module);
           } else {
             final ScopeInfo scopeInfo = addScopeAnnotation(scopeType);
             scopeInfo.readModuleMetaData(module);
@@ -86,9 +86,9 @@ final class AllScopes {
     final TypeElement type;
     final ScopeInfo scopeInfo;
 
-    Data(TypeElement type, ProcessingContext context, AllScopes allScopes) {
+    Data(TypeElement type, AllScopes allScopes) {
       this.type = type;
-      this.scopeInfo = new ScopeInfo(context, type, allScopes);
+      this.scopeInfo = new ScopeInfo(type, allScopes);
       this.scopeInfo.details(null, type);
     }
 

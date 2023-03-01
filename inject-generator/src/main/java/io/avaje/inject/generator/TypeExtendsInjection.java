@@ -24,16 +24,14 @@ final class TypeExtendsInjection {
 
   private final ImportTypeMap importTypes;
   private final TypeElement baseType;
-  private final ProcessingContext context;
   private final boolean factory;
   private final List<AspectPair> typeAspects;
   private Element postConstructMethod;
   private Element preDestroyMethod;
 
-  TypeExtendsInjection(TypeElement baseType, ProcessingContext context, boolean factory, ImportTypeMap importTypes) {
+  TypeExtendsInjection(TypeElement baseType, boolean factory, ImportTypeMap importTypes) {
     this.importTypes = importTypes;
     this.baseType = baseType;
-    this.context = context;
     this.factory = factory;
     this.typeAspects = readAspects(baseType);
   }
@@ -80,7 +78,7 @@ final class TypeExtendsInjection {
     }
 
     ExecutableElement ex = (ExecutableElement) element;
-    MethodReader methodReader = new MethodReader(context, ex, baseType, importTypes).read();
+    MethodReader methodReader = new MethodReader(ex, baseType, importTypes).read();
 
     if (InjectPrism.isPresent(element)) {
       injectConstructor = methodReader;
@@ -105,7 +103,7 @@ final class TypeExtendsInjection {
     final String methodKey = methodElement.getSimpleName().toString();
     if (inject && !notInjectMethods.contains(methodKey)) {
       if (!injectMethods.containsKey(methodKey)) {
-        MethodReader methodReader = new MethodReader(context, methodElement, type, importTypes).read();
+        MethodReader methodReader = new MethodReader(methodElement, type, importTypes).read();
         if (methodReader.isNotPrivate()) {
           injectMethods.put(methodKey, methodReader);
           checkAspect = false;
@@ -155,7 +153,7 @@ final class TypeExtendsInjection {
 
   private void addFactoryMethod(ExecutableElement methodElement, BeanPrism bean) {
     String qualifierName = Util.getNamed(methodElement);
-    factoryMethods.add(new MethodReader(context, methodElement, baseType, bean, qualifierName, importTypes).read());
+    factoryMethods.add(new MethodReader(methodElement, baseType, bean, qualifierName, importTypes).read());
   }
 
   BeanAspects hasAspects() {

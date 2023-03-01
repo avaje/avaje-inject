@@ -1,5 +1,7 @@
 package io.avaje.inject.generator;
 
+import static io.avaje.inject.generator.ProcessingContext.asElement;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,11 +38,11 @@ final class MethodReader {
   private final TypeReader typeReader;
   private final boolean optionalType;
 
-  MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType, ImportTypeMap importTypes) {
-    this(context, element, beanType, null, null, importTypes);
+  MethodReader(ExecutableElement element, TypeElement beanType, ImportTypeMap importTypes) {
+    this(element, beanType, null, null, importTypes);
   }
 
-  MethodReader(ProcessingContext context, ExecutableElement element, TypeElement beanType, BeanPrism bean, String qualifierName, ImportTypeMap importTypes) {
+  MethodReader(ExecutableElement element, TypeElement beanType, BeanPrism bean, String qualifierName, ImportTypeMap importTypes) {
     this.isFactory = bean != null;
     this.element = element;
     if (isFactory) {
@@ -72,13 +74,13 @@ final class MethodReader {
     String destroyMethod = (bean == null) ? null : bean.destroyMethod();
     this.beanCloseable = (bean != null) && bean.autoCloseable();
     this.name = qualifierName;
-    TypeElement returnElement = (TypeElement)context.asElement(returnMirror);
+    TypeElement returnElement = (TypeElement) asElement(returnMirror);
     if (returnElement == null) {
       this.typeReader = null;
       this.initMethod = initMethod;
       this.destroyMethod = destroyMethod;
     } else {
-      this.typeReader = new TypeReader(genericType, returnElement, context, importTypes);
+      this.typeReader = new TypeReader(genericType, returnElement, importTypes);
       typeReader.process();
       MethodLifecycleReader lifecycleReader = new MethodLifecycleReader(returnElement, initMethod, destroyMethod);
       this.initMethod = lifecycleReader.initMethod();
