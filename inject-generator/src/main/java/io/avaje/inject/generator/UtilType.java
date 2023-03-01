@@ -50,14 +50,17 @@ final class UtilType {
     return rawType;
   }
 
-  String rawType() {
+  String rawType(boolean beanMap) {
     switch (type) {
       case SET:
         return Util.extractSet(rawType);
       case LIST:
         return Util.extractList(rawType);
       case MAP:
-        return Util.extractMap(rawType);
+        if (beanMap) {
+          return Util.extractMap(rawType);
+        }
+        return rawType;
       case OPTIONAL:
         return Util.extractOptionalType(rawType);
       default:
@@ -65,14 +68,17 @@ final class UtilType {
     }
   }
 
-  String getMethod(boolean nullable) {
+  String getMethod(boolean nullable, boolean beanMap) {
     switch (type) {
       case SET:
         return "set(";
       case LIST:
         return "list(";
       case MAP:
-        return "map(";
+        if (beanMap) {
+          return "map(";
+        }
+        break;
       case OPTIONAL:
         return "getOptional(";
       case PROVIDER:

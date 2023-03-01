@@ -342,13 +342,15 @@ final class MethodReader {
     private final String simpleName;
     private boolean requestParam;
     private String requestParamName;
+    private final boolean isBeanMap;
 
     MethodParam(VariableElement param) {
       this.simpleName = param.getSimpleName().toString();
       this.named = Util.getNamed(param);
       this.nullable = Util.isNullable(param);
       this.utilType = Util.determineType(param.asType());
-      this.paramType = utilType.rawType();
+      this.isBeanMap = QualifiedMapPrism.isPresent(param);
+      this.paramType = utilType.rawType(isBeanMap);
       this.genericType = GenericType.parse(paramType);
       this.fullGenericType = GenericType.parse(utilType.full());
     }
@@ -365,7 +367,7 @@ final class MethodReader {
     }
 
     void builderGetDependency(Append writer, String builderName, boolean forFactory) {
-      writer.append(builderName).append(".").append(utilType.getMethod(nullable));
+      writer.append(builderName).append(".").append(utilType.getMethod(nullable, isBeanMap));
       if (!genericType.isGenericType()) {
         writer.append(Util.shortName(genericType.topType())).append(".class");
       } else if (isProvider()) {
