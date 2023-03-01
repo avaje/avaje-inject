@@ -109,14 +109,6 @@ public interface BeanScope extends AutoCloseable {
   }
 
   /**
-   * Deprecated - migrate to builder().
-   */
-  @Deprecated
-  static BeanScopeBuilder newBuilder() {
-    return builder();
-  }
-
-  /**
    * Return a single bean given the type.
    *
    * <pre>{@code
