@@ -137,8 +137,8 @@ final class DBeanScope implements BeanScope {
 
   @SuppressWarnings("unchecked")
   @Override
-  public <T> Map<String, T> map(Type type) {
-    return (Map<String, T>) beans.map(type, parent);
+  public <T> Map<String, List<T>> map(Type type) {
+    return beans.map(type, parent);
   }
 
   @Override

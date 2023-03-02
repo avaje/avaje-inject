@@ -300,7 +300,7 @@ class BeanScopeBuilderTest {
     }
 
     @Override
-    public <T> Map<String, T> map(Type type) {
+    public <T> Map<String, List<T>> map(Type type) {
       return Collections.emptyMap();
     }
 

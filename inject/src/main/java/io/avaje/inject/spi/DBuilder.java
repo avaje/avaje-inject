@@ -126,12 +126,12 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public final <T> Map<String, T> map(Class<T> type) {
+  public final <T> Map<String, List<T>> map(Class<T> type) {
     return mapOf(type);
   }
 
   @Override
-  public final <T> Map<String, T> map(Type type) {
+  public final <T> Map<String, List<T>> map(Type type) {
     return mapOf(type);
   }
 

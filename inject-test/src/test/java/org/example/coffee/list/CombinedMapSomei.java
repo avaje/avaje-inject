@@ -13,13 +13,13 @@ import io.avaje.inject.QualifiedMap;
 @Singleton
 public class CombinedMapSomei {
 
-  private final Map<String, Somei> somes;
+  private final Map<String, List<Somei>> somes;
 
   /**
    * Inject map of beans keyed by qualifier name.
    */
   @Inject
-  public CombinedMapSomei(@QualifiedMap Map<String, Somei> somes) {
+  public CombinedMapSomei(@QualifiedMap Map<String, List<Somei>> somes) {
     this.somes = somes;
   }
 
@@ -29,7 +29,8 @@ public class CombinedMapSomei {
 
   public List<String> someVals() {
     return somes.values().stream()
-      .map(Somei::some)
-      .collect(Collectors.toList());
+        .flatMap(List::stream)
+        .map(Somei::some)
+        .collect(Collectors.toList());
   }
 }

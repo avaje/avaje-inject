@@ -127,7 +127,7 @@ final class DBeanScopeProxy implements BeanScope {
   }
 
   @Override
-  public <T> Map<String, T> map(Type type) {
+  public <T> Map<String, List<T>> map(Type type) {
 
     if (delegate != null) {
       return delegate.map(type);

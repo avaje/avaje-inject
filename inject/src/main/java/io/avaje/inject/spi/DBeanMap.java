@@ -120,16 +120,16 @@ final class DBeanMap {
   /**
    * Return a map of bean instances keyed by qualifier name.
    */
-  Map<String, Object> map(Type type, BeanScope parent) {
+ <T> Map<String, List<T>> map(Type type, BeanScope parent) {
     if (parent == null) {
       return map(type);
     }
-    Map<String, Object> result = parent.map(type);
+    Map<String, List<T>> result = parent.map(type);
     result.putAll(map(type));
     return result;
   }
 
-  private Map<String, Object> map(Type type) {
+  private <T> Map<String, List<T>> map(Type type) {
     DContextEntry entry = beans.get(type.getTypeName());
     return entry != null ? entry.map() : Collections.emptyMap();
   }

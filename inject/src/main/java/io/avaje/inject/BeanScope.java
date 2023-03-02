@@ -1,13 +1,13 @@
 package io.avaje.inject;
 
-import io.avaje.lang.NonNullApi;
-import io.avaje.lang.Nullable;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import io.avaje.lang.NonNullApi;
+import io.avaje.lang.Nullable;
 
 /**
  * Holds beans created by dependency injection.
@@ -220,7 +220,7 @@ public interface BeanScope extends AutoCloseable {
    * <p>
    * Beans with no qualifier name get a generated unique key to use instead.
    */
-  <T> Map<String, T> map(Type type);
+  <T> Map<String, List<T>> map(Type type);
 
   /**
    * Return all the bean entries from the scope.

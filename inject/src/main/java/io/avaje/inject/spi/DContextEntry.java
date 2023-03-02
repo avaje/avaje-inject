@@ -64,18 +64,17 @@ final class DContextEntry {
     return list;
   }
 
-  /**
-   * Return a map of beans keyed by qualifier name.
-   */
-  Map<String, Object> map() {
-    Map<String, Object> map = new LinkedHashMap<>();
+  /** Return a map of beans keyed by qualifier name. */
+  @SuppressWarnings("unchecked")
+  <T> Map<String, List<T>> map() {
+    Map<String, List<T>> map = new LinkedHashMap<>();
     for (DContextEntryBean entry : entries) {
       Object bean = entry.bean();
       String nm = entry.name();
       if (nm == null) {
         nm = "$Unnamed-" + System.identityHashCode(bean) + "-" + bean;
       }
-      map.put(nm, bean);
+      map.computeIfAbsent(nm, k -> new ArrayList<>()).add((T) bean);
     }
     return map;
   }

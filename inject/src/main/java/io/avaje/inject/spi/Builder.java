@@ -223,12 +223,12 @@ public interface Builder {
   /**
    * Return a map of dependencies for the type keyed by qualifier name.
    */
-  <T> Map<String, T> map(Class<T> type);
+  <T> Map<String, List<T>> map(Class<T> type);
 
   /**
    * Return a map of dependencies for the generic type keyed by qualifier name.
    */
-  <T> Map<String, T> map(Type type);
+  <T> Map<String, List<T>> map(Type type);
 
   /**
    * Build and return the bean scope.

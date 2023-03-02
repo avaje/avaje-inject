@@ -58,7 +58,12 @@ final class UtilType {
         return Util.extractList(rawType);
       case MAP:
         if (beanMap) {
-          return Util.extractMap(rawType);
+          var listType = Util.extractMap(rawType);
+          if (!listType.startsWith("java.util.List<")) {
+            throw new IllegalStateException(
+                "Qualified Maps must be in the form Map<String, List<T>>");
+          }
+          return Util.extractList(listType);
         }
         return rawType;
       case OPTIONAL:
