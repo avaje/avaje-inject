@@ -1,6 +1,7 @@
 package org.example.coffee.factory;
 
 import io.avaje.inject.Bean;
+import io.avaje.inject.BeanScope;
 import io.avaje.inject.Factory;
 import org.example.coffee.factory.other.Something;
 
@@ -69,6 +70,12 @@ public class MyFactory {
   DesEngi buildEngi2() {
     methods += "|buildEngi2";
     return new MyEngi();
+  }
+
+  @Bean
+  @Named("coolNumber")
+  public int coolNumber(BeanScope scope) {
+    return 15;
   }
 
   @Bean
