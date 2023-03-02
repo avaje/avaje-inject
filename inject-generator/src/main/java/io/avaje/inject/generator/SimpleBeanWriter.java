@@ -1,11 +1,15 @@
 package io.avaje.inject.generator;
 
-import javax.lang.model.element.TypeElement;
-import javax.tools.JavaFileObject;
+import static io.avaje.inject.generator.ProcessingContext.createWriter;
+import static io.avaje.inject.generator.ProcessingContext.logError;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 import java.util.Set;
+
+import javax.lang.model.element.TypeElement;
+import javax.tools.JavaFileObject;
 
 /**
  * Write the source code for the bean.
@@ -18,7 +22,6 @@ final class SimpleBeanWriter {
   private static final String CODE_COMMENT_BUILD_PROVIDER = "  /**\n   * Register %s provider.\n   */";
 
   private final BeanReader beanReader;
-  private final ProcessingContext context;
   private final String originName;
   private final String shortName;
   private final String packageName;
@@ -26,9 +29,8 @@ final class SimpleBeanWriter {
   private final boolean proxied;
   private Append writer;
 
-  SimpleBeanWriter(BeanReader beanReader, ProcessingContext context) {
+  SimpleBeanWriter(BeanReader beanReader) {
     this.beanReader = beanReader;
-    this.context = context;
     TypeElement origin = beanReader.beanType();
     this.originName = origin.getQualifiedName().toString();
     if (origin.getNestingKind().isNested()) {
@@ -47,7 +49,7 @@ final class SimpleBeanWriter {
     if (beanReader.beanType().getNestingKind().isNested()) {
       originName = originName.replace(shortName, shortName.replace(".", "$"));
     }
-    JavaFileObject jfo = context.createWriter(originName + suffix);
+    JavaFileObject jfo = createWriter(originName + suffix);
     return jfo.openWriter();
   }
 
@@ -115,7 +117,7 @@ final class SimpleBeanWriter {
   private void writeStaticFactoryMethod() {
     MethodReader constructor = beanReader.constructor();
     if (constructor == null) {
-      context.logError(beanReader.beanType(), "Unable to determine constructor to use for %s? Add explicit @Inject to one of the constructors.", beanReader.beanType());
+      logError(beanReader.beanType(), "Unable to determine constructor to use for %s? Add explicit @Inject to one of the constructors.", beanReader.beanType());
       return;
     }
     writeBuildMethodStart();

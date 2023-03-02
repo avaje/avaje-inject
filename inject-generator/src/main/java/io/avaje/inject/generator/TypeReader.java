@@ -17,20 +17,20 @@ final class TypeReader {
   private Set<GenericType> genericTypes;
   private String typesRegister;
 
-  TypeReader(GenericType genericType, TypeElement beanType, ProcessingContext context, ImportTypeMap importTypes, boolean factory) {
-    this(genericType, true, beanType, context, importTypes, factory);
+  TypeReader(GenericType genericType, TypeElement beanType, ImportTypeMap importTypes, boolean factory) {
+    this(genericType, true, beanType, importTypes, factory);
   }
 
-  TypeReader(GenericType genericType, TypeElement returnElement, ProcessingContext context, ImportTypeMap importTypes) {
-    this(genericType, false, returnElement, context, importTypes, false);
+  TypeReader(GenericType genericType, TypeElement returnElement, ImportTypeMap importTypes) {
+    this(genericType, false, returnElement, importTypes, false);
   }
 
-  private TypeReader(GenericType genericType, boolean forBean, TypeElement beanType, ProcessingContext context, ImportTypeMap importTypes, boolean factory) {
+  private TypeReader(GenericType genericType, boolean forBean, TypeElement beanType, ImportTypeMap importTypes, boolean factory) {
     this.forBean = forBean;
     this.beanType = beanType;
     this.importTypes = importTypes;
-    this.extendsReader = new TypeExtendsReader(genericType, beanType, context, factory, importTypes);
-    this.annotationReader = new TypeAnnotationReader(beanType, context);
+    this.extendsReader = new TypeExtendsReader(genericType, beanType, factory, importTypes);
+    this.annotationReader = new TypeAnnotationReader(beanType);
   }
 
   String typesRegister() {

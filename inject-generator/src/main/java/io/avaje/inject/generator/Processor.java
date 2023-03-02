@@ -1,5 +1,6 @@
 package io.avaje.inject.generator;
 
+import static io.avaje.inject.generator.ProcessingContext.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -36,7 +37,6 @@ import javax.tools.StandardLocation;
 })
 public final class Processor extends AbstractProcessor {
 
-  private ProcessingContext context;
   private Elements elementUtils;
   private ScopeInfo defaultScope;
   private AllScopes allScopes;
@@ -53,9 +53,9 @@ public final class Processor extends AbstractProcessor {
   public synchronized void init(ProcessingEnvironment processingEnv) {
     super.init(processingEnv);
     loadProvidedFiles(processingEnv.getFiler());
-    this.context = new ProcessingContext(processingEnv, moduleFileProvided);
+    ProcessingContext.init(processingEnv, moduleFileProvided);
     this.elementUtils = processingEnv.getElementUtils();
-    this.allScopes = new AllScopes(context);
+    this.allScopes = new AllScopes();
     this.defaultScope = allScopes.defaultScope();
     ExternalProvider.registerPluginProvidedTypes(defaultScope);
     pluginFileProvided.forEach(defaultScope::pluginProvided);
@@ -90,31 +90,31 @@ public final class Processor extends AbstractProcessor {
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
     readModule(roundEnv);
-    readScopes(roundEnv.getElementsAnnotatedWith(context.element(Constants.SCOPE)));
-    readChangedBeans(roundEnv.getElementsAnnotatedWith(context.element(Constants.FACTORY)), true);
+    readScopes(roundEnv.getElementsAnnotatedWith(element(Constants.SCOPE)));
+    readChangedBeans(roundEnv.getElementsAnnotatedWith(element(Constants.FACTORY)), true);
     if (defaultScope.includeSingleton()) {
-      readChangedBeans(roundEnv.getElementsAnnotatedWith(context.element(Constants.SINGLETON)), false);
+      readChangedBeans(roundEnv.getElementsAnnotatedWith(element(Constants.SINGLETON)), false);
     }
-    readChangedBeans(roundEnv.getElementsAnnotatedWith(context.element(Constants.COMPONENT)), false);
-    readChangedBeans(roundEnv.getElementsAnnotatedWith(context.element(Constants.PROTOTYPE)), false);
+    readChangedBeans(roundEnv.getElementsAnnotatedWith(element(Constants.COMPONENT)), false);
+    readChangedBeans(roundEnv.getElementsAnnotatedWith(element(Constants.PROTOTYPE)), false);
    
     final var importedElements =
-        roundEnv.getElementsAnnotatedWith(context.element(ImportPrism.PRISM_TYPE)).stream()
+        roundEnv.getElementsAnnotatedWith(element(ImportPrism.PRISM_TYPE)).stream()
             .map(ImportPrism::getInstanceOn)
             .flatMap(p -> p.value().stream())
-            .map(context::asElement)
+            .map(ProcessingContext::asElement)
             .map(TypeElement.class::cast)
             .collect(Collectors.toSet());
 
     readChangedBeans(importedElements, false);
 
     readChangedBeans(
-        roundEnv.getElementsAnnotatedWith(context.element(Constants.PROTOTYPE)), false);
+        roundEnv.getElementsAnnotatedWith(element(Constants.PROTOTYPE)), false);
     final var typeElement = elementUtils.getTypeElement(Constants.CONTROLLER);
     if (typeElement != null) {
       readChangedBeans(roundEnv.getElementsAnnotatedWith(typeElement), false);
     }
-    readChangedBeans(roundEnv.getElementsAnnotatedWith(context.element(Constants.PROXY)), false);
+    readChangedBeans(roundEnv.getElementsAnnotatedWith(element(Constants.PROXY)), false);
     allScopes.readBeans(roundEnv);
     defaultScope.write(roundEnv.processingOver());
     allScopes.write(roundEnv.processingOver());
@@ -152,7 +152,7 @@ public final class Processor extends AbstractProcessor {
             defaultScope.read(typeElement, false);
           }
         } else if (scope != null) {
-          // context.logWarn("Adding factory to custom scope "+element+" scope: "+scope);
+          // logWarn("Adding factory to custom scope "+element+" scope: "+scope);
           scope.read(typeElement, true);
         } else {
           defaultScope.read(typeElement, true);
@@ -179,21 +179,21 @@ public final class Processor extends AbstractProcessor {
       return;
     }
     readModuleInfo = true;
-    final var factory = context.loadMetaInfServices();
+    final var factory = loadMetaInfServices();
     if (factory != null) {
       final var moduleType = elementUtils.getTypeElement(factory);
       if (moduleType != null) {
         defaultScope.readModuleMetaData(moduleType);
       }
     }
-    allScopes.readModules(context.loadMetaInfCustom());
+    allScopes.readModules(loadMetaInfCustom());
     readInjectModule(roundEnv);
   }
 
   /** Read InjectModule for things like package-info etc (not for custom scopes) */
   private void readInjectModule(RoundEnvironment roundEnv) {
     // read other that are annotated with InjectModule
-    for (final Element element : roundEnv.getElementsAnnotatedWith(context.element(Constants.INJECTMODULE))) {
+    for (final Element element : roundEnv.getElementsAnnotatedWith(element(Constants.INJECTMODULE))) {
       final var scope = ScopePrism.getInstanceOn(element);
       if (scope == null) {
         // it it not a custom scope annotation
