@@ -347,7 +347,7 @@ class DBuilder implements Builder {
   @SuppressWarnings("unchecked")
   private <T> T injectBeanScope() {
     if (beanScopeProxy == null) {
-      beanScopeProxy = new DBeanScopeProxy();
+      beanScopeProxy = new DBeanScopeProxy(this);
     }
     return (T) beanScopeProxy;
   }

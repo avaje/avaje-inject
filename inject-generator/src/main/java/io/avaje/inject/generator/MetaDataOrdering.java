@@ -189,7 +189,7 @@ final class MetaDataOrdering {
   private boolean allDependenciesWired(MetaData queuedMeta, boolean includeExternal) {
     for (Dependency dependency : queuedMeta.dependsOn()) {
       final var dependencyName = dependency.name();
-      if (!Util.isProvider(dependencyName)) {
+      if (!Util.isProvider(dependencyName) && !Constants.BEANSCOPE.equals(dependency.name())) {
         // check non-provider dependency is satisfied
         ProviderList providerList = providers.get(dependencyName);
         if (providerList == null) {
