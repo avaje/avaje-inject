@@ -1,20 +1,26 @@
 package io.avaje.inject.spi;
 
-import io.avaje.inject.BeanEntry;
-import io.avaje.inject.BeanScope;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * Proxy used when injecting the BeanScope.
- */
+import io.avaje.inject.BeanEntry;
+import io.avaje.inject.BeanScope;
+
+/** Proxy used when injecting the BeanScope. */
 final class DBeanScopeProxy implements BeanScope {
 
+  private Builder builder;
   private BeanScope delegate;
+
+  /**
+   * Will use the builder as a delegate until the scope is fully built;
+   */
+  public DBeanScopeProxy(Builder builder) {
+    this.builder = builder;
+  }
 
   /**
    * This happens just before the BeanScope is started.
@@ -23,80 +29,150 @@ final class DBeanScopeProxy implements BeanScope {
    */
   void inject(BeanScope delegate) {
     this.delegate = delegate;
+    builder = null;
   }
 
   @Override
   public <T> T get(Class<T> type) {
-    return delegate.get(type);
+    if (delegate != null) {
+      return delegate.get(type);
+    } else {
+      return builder.get(type);
+    }
   }
 
   @Override
   public <T> T get(Class<T> type, String name) {
-    return delegate.get(type, name);
+    if (delegate != null) {
+      return delegate.get(type, name);
+    } else {
+      return builder.get(type, name);
+    }
   }
 
   @Override
   public <T> T get(Type type, String name) {
-    return delegate.get(type, name);
+    if (delegate != null) {
+      return delegate.get(type, name);
+    } else {
+      return builder.get(type, name);
+    }
   }
 
   @Override
   public <T> Optional<T> getOptional(Class<T> type) {
-    return delegate.getOptional(type);
+    if (delegate != null) {
+      return delegate.getOptional(type);
+    } else {
+      return builder.getOptional(type);
+    }
   }
 
   @Override
   public <T> Optional<T> getOptional(Type type, String name) {
-    return delegate.getOptional(type, name);
+    if (delegate != null) {
+      return delegate.getOptional(type, name);
+    } else {
+      return builder.getOptional(type, name);
+    }
   }
 
   @Override
   public List<Object> listByAnnotation(Class<? extends Annotation> annotation) {
-    return delegate.listByAnnotation(annotation);
+    if (delegate != null) {
+      return delegate.listByAnnotation(annotation);
+    } else {
+      throw new IllegalStateException(
+          "Proxy BeanScope can't use listByAnnotation while scope is being built");
+    }
   }
 
   @Override
   public <T> List<T> list(Class<T> type) {
-    return delegate.list(type);
+
+    if (delegate != null) {
+      return delegate.list(type);
+    } else {
+      return builder.list(type);
+    }
   }
 
   @Override
   public <T> List<T> list(Type type) {
-    return delegate.list(type);
+    if (delegate != null) {
+      return delegate.list(type);
+    } else {
+      return builder.list(type);
+    }
   }
 
   @Override
   public <T> List<T> listByPriority(Class<T> type) {
-    return delegate.listByPriority(type);
+    if (delegate != null) {
+      return delegate.listByPriority(type);
+    } else {
+      throw new IllegalStateException(
+          "Proxy BeanScope can't use listByPriority while scope is being built");
+    }
   }
 
   @Override
   public <T> List<T> listByPriority(Class<T> type, Class<? extends Annotation> priority) {
-    return delegate.listByPriority(type, priority);
+    if (delegate != null) {
+      return delegate.listByPriority(type, priority);
+    } else {
+      throw new IllegalStateException(
+          "Proxy BeanScope can't use listByPriority while scope is being built");
+    }
   }
 
   @Override
   public <T> Map<String, T> map(Type type) {
-    return delegate.map(type);
+
+    if (delegate != null) {
+      return delegate.map(type);
+    } else {
+      return builder.map(type);
+    }
   }
 
   @Override
   public List<BeanEntry> all() {
-    return delegate.all();
+    if (delegate != null) {
+      return delegate.all();
+    } else {
+      throw new IllegalStateException("Proxy BeanScope can't use all() while scope is being built");
+    }
   }
 
   @Override
   public boolean contains(Type type) {
-    return delegate.contains(type);
+    if (delegate != null) {
+      return delegate.contains(type);
+    } else {
+      throw new IllegalStateException(
+          "Proxy BeanScope can't use contains() while scope is being built, try get(T) != null");
+    }
   }
 
   @Override
   public boolean contains(String type) {
-    return delegate.contains(type);
+    if (delegate != null) {
+      return delegate.contains(type);
+    } else {
+      throw new IllegalStateException(
+          "Proxy BeanScope can't use contains() while scope is being built, try get(T) != null");
+    }
   }
 
   @Override
   public void close() {
-    delegate.close();
+    if (delegate != null) {
+      delegate.close();
+    } else {
+      throw new IllegalStateException(
+          "Proxy BeanScope can't use close() while scope is being built");
+    }
   }
+
 }
