@@ -82,8 +82,7 @@ final class DBeanScopeProxy implements BeanScope {
     if (delegate != null) {
       return delegate.listByAnnotation(annotation);
     } else {
-      throw new IllegalStateException(
-          "Proxy BeanScope can't use listByAnnotation while scope is being built");
+      return builder.listByAnnotation(annotation);
     }
   }
 

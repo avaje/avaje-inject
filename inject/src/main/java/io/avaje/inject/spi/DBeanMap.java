@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Map of types (class types, interfaces and annotations) to a DContextEntry where the
@@ -115,6 +116,14 @@ final class DBeanMap {
   List<Object> all(Type type) {
     DContextEntry entry = beans.get(type.getTypeName());
     return entry != null ? entry.all() : Collections.emptyList();
+  }
+
+  List<DContextEntryBean> all() {
+	  
+    return beans.values().stream()
+        .map(DContextEntry::entries)
+        .flatMap(List::stream)
+        .collect(Collectors.toList());
   }
 
   /**

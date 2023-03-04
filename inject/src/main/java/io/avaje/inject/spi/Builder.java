@@ -1,14 +1,15 @@
 package io.avaje.inject.spi;
 
-import io.avaje.inject.BeanScope;
-import jakarta.inject.Provider;
-
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+
+import io.avaje.inject.BeanScope;
+import jakarta.inject.Provider;
 
 /**
  * Mutable builder object used when building a bean scope.
@@ -209,6 +210,11 @@ public interface Builder {
    * Get a list of dependencies for the generic type.
    */
   <T> List<T> list(Type type);
+
+  /**
+   * Return the list of beans that have an annotation. The annotation must have a @Retention policy of RUNTIME
+   */
+  List<Object> listByAnnotation(Class<? extends Annotation> annotation);
 
   /**
    * Get a set of dependencies for the type.

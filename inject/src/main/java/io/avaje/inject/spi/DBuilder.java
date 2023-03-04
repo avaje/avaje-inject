@@ -4,9 +4,11 @@ import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
 import jakarta.inject.Provider;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static io.avaje.inject.spi.DBeanScope.combine;
 
@@ -114,6 +116,19 @@ class DBuilder implements Builder {
   @Override
   public final <T> List<T> list(Type type) {
     return listOf(type);
+  }
+
+  @Override
+  public List<Object> listByAnnotation(Class<? extends Annotation> annotation) {
+    final List<Object> values =
+        beanMap.all().stream()
+            .filter(entry -> entry.entry().type().isAnnotationPresent(annotation))
+            .map(DContextEntryBean::bean)
+            .collect(Collectors.toList());
+    if (parent == null) {
+      return values;
+    }
+    return combine(values, parent.listByAnnotation(annotation));
   }
 
   @SuppressWarnings({"unchecked"})
