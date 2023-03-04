@@ -99,10 +99,7 @@ final class BeanReader {
     if (constructor != null) {
       for (MethodReader.MethodParam param : constructor.params()) {
         Dependency dependsOn = param.dependsOn();
-        // BeanScope is always injectable with no impact on injection ordering
-        if (!dependsOn.dependsOn().equals(Constants.BEANSCOPE)) {
-          list.add(dependsOn);
-        }
+        list.add(dependsOn);
       }
     }
     return list;

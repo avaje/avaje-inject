@@ -12,7 +12,7 @@ final class MetaDataOrdering {
       "\n See https://avaje.io/inject/#circular";
 
   private final ScopeInfo scopeInfo;
-  private final List<MetaData> orderedList = new ArrayList<>();
+  private List<MetaData> orderedList = new ArrayList<>();
   private final List<MetaData> queue = new ArrayList<>();
   private final Map<String, ProviderList> providers = new HashMap<>();
   private final List<DependencyLink> circularDependencies = new ArrayList<>();
@@ -74,6 +74,35 @@ final class MetaDataOrdering {
       missingDependencies();
       orderedList.addAll(queue);
     }
+
+    final var list = new ArrayList<MetaData>();
+    final Set<MetaData> metaDataSet = new HashSet<>();
+    // change order to wire beanScope as late as possible
+    for (final MetaData e : orderedList) {
+
+      final var scopeData =
+          metaDataSet.stream()
+              .filter(
+                  m ->
+                      e.dependsOn().stream()
+                          .map(Dependency::dependsOn)
+                          .anyMatch(d -> m.provides().contains(d) || d.equals(m.toString())))
+              .findFirst()
+              .orElse(null);
+
+      if (e.dependsOn().stream().anyMatch(d -> Constants.BEANSCOPE.equals(d.dependsOn()))) {
+        metaDataSet.add(e);
+      } else {
+        if (scopeData != null) {
+          list.add(scopeData);
+          metaDataSet.remove(scopeData);
+        }
+        list.add(e);
+      }
+    }
+
+    list.addAll(metaDataSet);
+    orderedList = list;
     return remaining;
   }
 
