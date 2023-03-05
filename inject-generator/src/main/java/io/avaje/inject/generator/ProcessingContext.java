@@ -158,8 +158,6 @@ final class ProcessingContext {
     return providedTypes.contains(type) || optionalTypes.contains(type);
   }
 
-  static Set<String> getOptionalTypes() {
-    return optionalTypes;
  static void addOptionalType(String paramType) {
     if (!providedTypes.contains(paramType)) {
       optionalTypes.add(paramType);
