@@ -355,6 +355,11 @@ final class MethodReader {
       this.paramType = utilType.rawType(isBeanMap);
       this.genericType = GenericType.parse(paramType);
       this.fullGenericType = GenericType.parse(utilType.full());
+   
+      if (nullable || param.asType().toString().startsWith("java.util.Optional<")) {
+        ProcessingContext.getOptionalTypes().add(paramType);
+      }
+      
     }
 
     @Override

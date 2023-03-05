@@ -7,6 +7,7 @@ import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -33,7 +34,8 @@ final class ProcessingContext {
   private static Types typeUtils;
   private static Set<String> uniqueModuleNames = new HashSet<>();
   private static Set<String> providedTypes = new HashSet<>();
-
+  private static final Set<String> optionalTypes = new LinkedHashSet<>();
+  
  static void init(ProcessingEnvironment env, Set<String> moduleFileProvided) {
     processingEnv = env;
     messager = processingEnv.getMessager();
@@ -154,5 +156,9 @@ final class ProcessingContext {
 
  static boolean externallyProvided(String type) {
     return providedTypes.contains(type);
+  }
+
+  static Set<String> getOptionalTypes() {
+    return optionalTypes;
   }
 }
