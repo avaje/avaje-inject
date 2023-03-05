@@ -19,8 +19,7 @@ final class MetaDataOrdering {
   private final Set<String> missingDependencyTypes = new LinkedHashSet<>();
   private final Set<String> autoRequires = new TreeSet<>();
   private final Set<String> autoRequiresAspects = new TreeSet<>();
-  private final Set<String> optionalTypes = ProcessingContext.getOptionalTypes();
-  
+
   MetaDataOrdering(Collection<MetaData> values, ScopeInfo scopeInfo) {
     this.scopeInfo = scopeInfo;
     for (MetaData metaData : values) {
@@ -202,10 +201,6 @@ final class MetaDataOrdering {
                 autoRequires.add(dependencyName);
               }
               queuedMeta.markWithExternalDependency(dependencyName);
-            } else if (!optionalTypes.contains(dependencyName)) {
-              logWarn(
-                  "No modules in the classPath provide %s's optional dependency: %s. Add a module that provides it or proceed at your own peril.",
-                  queuedMeta.toString(), dependencyName);
             } else {
               return false;
             }

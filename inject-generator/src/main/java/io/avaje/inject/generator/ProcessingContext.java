@@ -35,7 +35,7 @@ final class ProcessingContext {
   private static Set<String> uniqueModuleNames = new HashSet<>();
   private static Set<String> providedTypes = new HashSet<>();
   private static final Set<String> optionalTypes = new LinkedHashSet<>();
-  
+
  static void init(ProcessingEnvironment env, Set<String> moduleFileProvided) {
     processingEnv = env;
     messager = processingEnv.getMessager();
@@ -75,7 +75,7 @@ final class ProcessingContext {
     return loadMetaInf(Constants.META_INF_CUSTOM);
   }
 
- static private List<String> loadMetaInf(String fullName) {
+ private static List<String> loadMetaInf(String fullName) {
     try {
       final var fileObject = processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", fullName);
       if (fileObject != null) {
@@ -117,7 +117,7 @@ final class ProcessingContext {
     return createMetaInfWriterFor(serviceName);
   }
 
- static private FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
+ private static FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
     return filer.createResource(StandardLocation.CLASS_OUTPUT, "", interfaceType);
   }
 
@@ -155,10 +155,15 @@ final class ProcessingContext {
   }
 
  static boolean externallyProvided(String type) {
-    return providedTypes.contains(type);
+    return providedTypes.contains(type) || optionalTypes.contains(type);
   }
 
   static Set<String> getOptionalTypes() {
     return optionalTypes;
+ static void addOptionalType(String paramType) {
+    if (!providedTypes.contains(paramType)) {
+      optionalTypes.add(paramType);
+    }
   }
+
 }
