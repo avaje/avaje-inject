@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Map of types (class types, interfaces and annotations) to a DContextEntry where the
@@ -59,6 +60,9 @@ final class DBeanMap {
   }
 
   void register(Object bean) {
+    if (bean == null || Optional.empty().equals(bean)) {
+      return;
+    }
     DContextEntryBean entryBean = DContextEntryBean.of(bean, nextBean.name, nextBean.priority);
     for (Type type : nextBean.types) {
       beans.computeIfAbsent(type.getTypeName(), s -> new DContextEntry()).add(entryBean);

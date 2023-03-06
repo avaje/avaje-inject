@@ -4,6 +4,7 @@ import static io.avaje.inject.generator.ProcessingContext.asElement;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -37,6 +38,8 @@ final class MethodReader {
   private final String name;
   private final TypeReader typeReader;
   private final boolean optionalType;
+  private final Set<String> conditionTypes = new HashSet<>();
+  private final Set<String> conditionNames = new HashSet<>();
 
   MethodReader(ExecutableElement element, TypeElement beanType, ImportTypeMap importTypes) {
     this(element, beanType, null, null, importTypes);
@@ -49,6 +52,12 @@ final class MethodReader {
       prototype = PrototypePrism.isPresent(element);
       primary = PrimaryPrism.isPresent(element);
       secondary = SecondaryPrism.isPresent(element);
+      ConditionalOnBeanPrism.getOptionalOn(element)
+          .ifPresent(
+              p -> {
+                p.value().forEach(t -> conditionTypes.add(t.toString()));
+                conditionNames.addAll(p.name());
+              });
     } else {
       prototype = false;
       primary = false;
@@ -130,7 +139,9 @@ final class MethodReader {
 
     List<String> dependsOn = new ArrayList<>(params.size() + 1);
     dependsOn.add(factoryType);
-    for (MethodParam param : params) {
+
+    conditionTypes.stream().map(t -> "con:" + t).forEach(dependsOn::add);
+    for (final MethodParam param : params) {
       dependsOn.add(GenericType.trimWildcard(param.paramType));
     }
     metaData.setDependsOn(dependsOn);
@@ -145,7 +156,7 @@ final class MethodReader {
   }
 
   String builderGetFactory() {
-    return String.format("      var factory = builder.get(%s.class);", factoryShortName);
+    return String.format("      var factory = builder.getNullable(%s.class); %n      if(factory == null) return;", factoryShortName);
   }
 
   void builderBuildBean(Append writer) {
@@ -243,10 +254,44 @@ final class MethodReader {
     if (optionalType) {
       importTypes.add(Constants.OPTIONAL);
     }
+    conditionTypes.forEach(importTypes::add);
   }
 
   Set<GenericType> genericTypes() {
     return typeReader == null ? Collections.emptySet() : typeReader.genericTypes();
+  }
+
+  void buildConditional(Append writer) {
+    if (!conditionTypes.isEmpty() || !conditionNames.isEmpty()) {
+
+      writer.append("    if (");
+      var first = true;
+      for (final var conditionType : conditionTypes) {
+
+        if (first) {
+
+          writer.append("!builder.contains(%s.class)", Util.shortName(conditionType));
+          first = false;
+          continue;
+        }
+
+        writer.append(" || !builder.contains(%s.class)", Util.shortName(conditionType));
+      }
+
+      for (final var conditionName : conditionNames) {
+
+        if (first) {
+
+          writer.append("!builder.contains(\"%s\")", conditionName);
+          first = false;
+          continue;
+        }
+
+        writer.append(" || !builder.contains(\"%s\")", conditionName);
+      }
+
+      writer.append(")").eol().append("     return;").eol().eol();
+    }
   }
 
   void buildAddFor(Append writer) {

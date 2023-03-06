@@ -2,6 +2,7 @@ package io.avaje.inject.generator;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +37,8 @@ final class BeanReader {
   private boolean suppressBuilderImport;
   private boolean suppressGeneratedImport;
   private Set<GenericType> allGenericTypes;
+  private final Set<String> conditionTypes = new HashSet<>();
+  private final Set<String> conditionNames = new HashSet<>();
 
   BeanReader(TypeElement beanType, boolean factory) {
     this.beanType = beanType;
@@ -46,6 +49,14 @@ final class BeanReader {
     this.secondary = !primary && SecondaryPrism.isPresent(beanType);
     this.proxy = ProxyPrism.isPresent(beanType);
     this.typeReader = new TypeReader(GenericType.parse(type), beanType, importTypes, factory);
+
+    ConditionalOnBeanPrism.getOptionalOn(beanType)
+        .ifPresent(
+            p -> {
+              p.value().forEach(t -> conditionTypes.add(t.toString()));
+              conditionNames.addAll(p.name());
+            });
+
     typeReader.process();
     this.requestParams = new BeanRequestParams(type);
     this.name = typeReader.name();
@@ -105,6 +116,7 @@ final class BeanReader {
         }
       }
     }
+    conditionTypes.stream().map(t -> new Dependency("con:" + t)).forEach(list::add);
     return list;
   }
 
@@ -193,6 +205,39 @@ final class BeanReader {
 
   boolean isExtraInjectionRequired() {
     return !injectFields.isEmpty() || !injectMethods.isEmpty();
+  }
+
+  void buildConditional(Append writer) {
+    if (!conditionTypes.isEmpty() || !conditionNames.isEmpty()) {
+
+      writer.append("    if (");
+      var first = true;
+      for (final var conditionType : conditionTypes) {
+
+        if (first) {
+
+          writer.append("!builder.contains(%s.class)", Util.shortName(conditionType));
+          first = false;
+          continue;
+        }
+
+        writer.append(" || !builder.contains(%s.class)", Util.shortName(conditionType));
+      }
+
+      for (final var conditionName : conditionNames) {
+
+        if (first) {
+
+          writer.append("!builder.contains(\"%s\")", conditionName);
+          first = false;
+          continue;
+        }
+
+        writer.append(" || !builder.contains(\"%s\")", conditionName);
+      }
+
+      writer.append(")").eol().append("     return;").eol().eol();
+    }
   }
 
   void buildAddFor(Append writer) {

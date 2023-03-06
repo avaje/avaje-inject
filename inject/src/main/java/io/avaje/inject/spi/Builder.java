@@ -228,7 +228,17 @@ public interface Builder {
   /**
    * Return a map of dependencies for the generic type keyed by qualifier name.
    */
-  <T> Map<String, T> map(Type type);
+  <T> Map<String, T> map(Type type); 
+  
+  /**
+   * Return true if the builder contains the given type.
+   */
+  boolean contains(Type type);
+
+  /**
+   * Return true if the builder contains the given type.
+   */
+  boolean contains(String type);
 
   /**
    * Build and return the bean scope.

@@ -150,8 +150,7 @@ final class DBeanScopeProxy implements BeanScope {
     if (delegate != null) {
       return delegate.contains(type);
     } else {
-      throw new IllegalStateException(
-          "Proxy BeanScope can't use contains() while scope is being built, try get(T) != null");
+      return builder.contains(type);
     }
   }
 
@@ -160,8 +159,7 @@ final class DBeanScopeProxy implements BeanScope {
     if (delegate != null) {
       return delegate.contains(type);
     } else {
-      throw new IllegalStateException(
-          "Proxy BeanScope can't use contains() while scope is being built, try get(T) != null");
+      return builder.contains(type);
     }
   }
 
