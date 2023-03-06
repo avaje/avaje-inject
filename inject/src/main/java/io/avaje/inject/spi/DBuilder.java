@@ -145,7 +145,7 @@ class DBuilder implements Builder {
     if (bean != null) {
       return bean;
     }
-    return (parent == null) ? null : parent.get(type, name);
+    return parent == null ? null : parent.<T>getOptional(type, name).orElse(null);
   }
 
   /**

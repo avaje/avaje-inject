@@ -1,5 +1,7 @@
 package io.avaje.inject.generator;
 
+import java.util.Optional;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
@@ -222,6 +224,15 @@ final class Util {
       }
     }
     return false;
+  }
+
+  public static Optional<DeclaredType> getNullableAnnotation(Element p) {
+    for (AnnotationMirror mirror : p.getAnnotationMirrors()) {
+      if (NULLABLE.equals(shortName(mirror.getAnnotationType().toString()))) {
+        return Optional.of(mirror.getAnnotationType());
+      }
+    }
+    return Optional.empty();
   }
 
   public static String addForInterface(String interfaceType) {
