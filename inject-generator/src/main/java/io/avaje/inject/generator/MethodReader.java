@@ -335,6 +335,7 @@ final class MethodReader {
 
   static class MethodParam {
 
+    private VariableElement element;
     private final String named;
     private final UtilType utilType;
     private final String paramType;
@@ -347,6 +348,7 @@ final class MethodReader {
     private final boolean isBeanMap;
 
     MethodParam(VariableElement param) {
+      this.element = param;
       this.simpleName = param.getSimpleName().toString();
       this.named = Util.getNamed(param);
       this.nullable = Util.isNullable(param);
@@ -355,6 +357,11 @@ final class MethodReader {
       this.paramType = utilType.rawType(isBeanMap);
       this.genericType = GenericType.parse(paramType);
       this.fullGenericType = GenericType.parse(utilType.full());
+   
+      if (nullable || param.asType().toString().startsWith("java.util.Optional<")) {
+        ProcessingContext.addOptionalType(paramType);
+      }
+      
     }
 
     @Override
@@ -419,6 +426,7 @@ final class MethodReader {
 
     void addImports(ImportTypeMap importTypes) {
       fullGenericType.addImports(importTypes);
+      Util.getNullableAnnotation(element).map(Object::toString).ifPresent(importTypes::add);
     }
 
     void checkRequest(BeanRequestParams requestParams) {
@@ -443,6 +451,11 @@ final class MethodReader {
     }
 
     void writeMethodParam(Append writer) {
+
+      if (nullable) {
+        writer.append("@Nullable ");
+      }
+
       if (genericType.isGenericType()) {
         genericType.writeShort(writer);
       } else {
