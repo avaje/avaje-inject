@@ -241,6 +241,11 @@ public interface Builder {
   boolean contains(String type);
 
   /**
+   * Return true if the builder contains a bean with the given name.
+   */
+  boolean containsQualifier(String type);
+
+  /**
    * Build and return the bean scope.
    */
   BeanScope build(boolean withShutdownHook);

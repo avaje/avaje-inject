@@ -39,6 +39,7 @@ final class MethodReader {
   private final TypeReader typeReader;
   private final boolean optionalType;
   private final Set<String> conditionTypes = new HashSet<>();
+  private final Set<String> conditionTypesString = new HashSet<>();
   private final Set<String> conditionNames = new HashSet<>();
 
   MethodReader(ExecutableElement element, TypeElement beanType, ImportTypeMap importTypes) {
@@ -57,6 +58,7 @@ final class MethodReader {
               p -> {
                 p.value().forEach(t -> conditionTypes.add(t.toString()));
                 conditionNames.addAll(p.name());
+                conditionTypesString.addAll(p.type());
               });
     } else {
       prototype = false;
@@ -141,6 +143,7 @@ final class MethodReader {
     dependsOn.add(factoryType);
 
     conditionTypes.stream().map(t -> "con:" + t).forEach(dependsOn::add);
+    conditionTypesString.stream().map(t -> "con:" + t).forEach(dependsOn::add);
     for (final MethodParam param : params) {
       dependsOn.add(GenericType.trimWildcard(param.paramType));
     }
@@ -262,7 +265,7 @@ final class MethodReader {
   }
 
   void buildConditional(Append writer) {
-    if (!conditionTypes.isEmpty() || !conditionNames.isEmpty()) {
+    if (!conditionTypes.isEmpty() || !conditionNames.isEmpty() || !conditionTypesString.isEmpty()) {
 
       writer.append("    if (");
       var first = true;
@@ -278,16 +281,27 @@ final class MethodReader {
         writer.append(" || !builder.contains(%s.class)", Util.shortName(conditionType));
       }
 
-      for (final var conditionName : conditionNames) {
+      for (final var typeName : conditionTypesString) {
 
         if (first) {
 
-          writer.append("!builder.contains(\"%s\")", conditionName);
+          writer.append("!builder.contains(\"%s\")", typeName);
           first = false;
           continue;
         }
 
-        writer.append(" || !builder.contains(\"%s\")", conditionName);
+        writer.append(" || !builder.contains(\"%s\")", typeName);
+      }
+      for (final var beanName : conditionNames) {
+
+        if (first) {
+
+          writer.append("!builder.containsQualifier(\"%s\")", beanName);
+          first = false;
+          continue;
+        }
+
+        writer.append(" || !builder.containsQualifier(\"%s\")", beanName);
       }
 
       writer.append(")").eol().append("     return;").eol().eol();

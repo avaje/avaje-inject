@@ -42,6 +42,14 @@ public @interface ConditionalOnBean {
   Class<?>[] value() default {};
 
   /**
+   * The class type names of beans that should be registered. The condition matches when beans of all
+   * classes specified are contained in the {@link BeanScope}.
+   *
+   * @return the class type names of beans to check
+   */
+  String[] type() default {};
+
+  /**
    * The qualifying name of beans that should be registered. The condition matches when all bean with each
    * name specified is contained in the {@link BeanScope}.
    *
