@@ -55,7 +55,7 @@ final class BeanReader {
         .ifPresent(
             p -> {
               p.value().forEach(t -> conditionTypes.add(t.toString()));
-              conditionNames.addAll(p.qualifers());
+              conditionNames.addAll(p.qualifier());
               conditionTypesString.addAll(p.type());
             });
 

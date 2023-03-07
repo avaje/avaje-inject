@@ -57,7 +57,7 @@ final class MethodReader {
       .ifPresent(
           p -> {
             p.value().forEach(t -> conditionTypes.add(t.toString()));
-            qualifierNames.addAll(p.qualifers());
+            qualifierNames.addAll(p.qualifier());
             conditionTypesString.addAll(p.type());
           });
     } else {

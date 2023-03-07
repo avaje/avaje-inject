@@ -54,5 +54,5 @@ public @interface Requires {
    *
    * @return the names of beans to check
    */
-  String[] qualifers() default {};
+  String[] qualifier() default {};
 }
