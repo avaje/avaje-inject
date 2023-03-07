@@ -40,7 +40,7 @@ final class MethodReader {
   private final boolean optionalType;
   private final Set<String> conditionTypes = new HashSet<>();
   private final Set<String> conditionTypesString = new HashSet<>();
-  private final Set<String> conditionNames = new HashSet<>();
+  private final Set<String> qualifierNames = new HashSet<>();
 
   MethodReader(ExecutableElement element, TypeElement beanType, ImportTypeMap importTypes) {
     this(element, beanType, null, null, importTypes);
@@ -53,13 +53,13 @@ final class MethodReader {
       prototype = PrototypePrism.isPresent(element);
       primary = PrimaryPrism.isPresent(element);
       secondary = SecondaryPrism.isPresent(element);
-      ConditionalOnBeanPrism.getOptionalOn(element)
-          .ifPresent(
-              p -> {
-                p.value().forEach(t -> conditionTypes.add(t.toString()));
-                conditionNames.addAll(p.name());
-                conditionTypesString.addAll(p.type());
-              });
+      RequiresPrism.getOptionalOn(beanType)
+      .ifPresent(
+          p -> {
+            p.value().forEach(t -> conditionTypes.add(t.toString()));
+            qualifierNames.addAll(p.qualifers());
+            conditionTypesString.addAll(p.type());
+          });
     } else {
       prototype = false;
       primary = false;
@@ -265,7 +265,7 @@ final class MethodReader {
   }
 
   void buildConditional(Append writer) {
-    if (!conditionTypes.isEmpty() || !conditionNames.isEmpty() || !conditionTypesString.isEmpty()) {
+    if (!conditionTypes.isEmpty() || !qualifierNames.isEmpty() || !conditionTypesString.isEmpty()) {
 
       writer.append("    if (");
       var first = true;
@@ -292,7 +292,7 @@ final class MethodReader {
 
         writer.append(" || !builder.contains(\"%s\")", typeName);
       }
-      for (final var beanName : conditionNames) {
+      for (final var beanName : qualifierNames) {
 
         if (first) {
 

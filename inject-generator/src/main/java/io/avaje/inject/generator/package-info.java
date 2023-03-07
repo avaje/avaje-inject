@@ -16,12 +16,12 @@
 @GeneratePrism(Bean.class)
 @GeneratePrism(QualifiedMap.class)
 @GeneratePrism(Generated.class)
-@GeneratePrism(ConditionalOnBean.class)
+@GeneratePrism(Requires.class)
 package io.avaje.inject.generator;
 
 import io.avaje.inject.Bean;
 import io.avaje.inject.Component;
-import io.avaje.inject.ConditionalOnBean;
+import io.avaje.inject.Requires;
 import io.avaje.inject.Factory;
 import io.avaje.inject.InjectModule;
 import io.avaje.inject.Primary;

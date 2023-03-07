@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  * &#064;Configuration
  * public class MyAutoConfiguration {
  *
- *     &#064;ConditionalOnBean(value=OtherService.class)
+ *     &#064;Requires(value=OtherService.class)
  *     &#064;Bean
  *     public MyService myService() {
  *         ...
@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ConditionalOnBean {
+public @interface Requires {
 
   /**
    * The class types of beans that should be registered. The condition matches when all beans of each
@@ -50,10 +50,9 @@ public @interface ConditionalOnBean {
   String[] type() default {};
 
   /**
-   * The qualifying name of beans that should be registered. The condition matches when all bean with each
-   * name specified is contained in the {@link BeanScope}.
+   * The qualifiers that should be registered. The condition matches when all qualifier specified are registered in the {@link BeanScope}.
    *
    * @return the names of beans to check
    */
-  String[] name() default {};
+  String[] qualifers() default {};
 }
