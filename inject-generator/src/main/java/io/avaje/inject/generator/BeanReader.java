@@ -38,8 +38,8 @@ final class BeanReader {
   private boolean suppressGeneratedImport;
   private Set<GenericType> allGenericTypes;
   private final Set<String> conditionTypes = new HashSet<>();
-  private final Set<String> conditionTypesString = new HashSet<>();
-  private final Set<String> conditionNames = new HashSet<>();
+  private final Set<String> missingTypes = new HashSet<>();
+  private final Set<String> qualifierNames = new HashSet<>();
 
   BeanReader(TypeElement beanType, boolean factory) {
     this.beanType = beanType;
@@ -55,8 +55,8 @@ final class BeanReader {
         .forEach(
             p -> {
               p.beans().forEach(t -> conditionTypes.add(t.toString()));
-              conditionNames.addAll(p.qualifiers());
-//              conditionTypesString.addAll(p.type());
+              p.missingBeans().forEach(t -> missingTypes.add(t.toString()));
+              qualifierNames.addAll(p.qualifiers());
             });
 
     typeReader.process();
@@ -104,6 +104,9 @@ final class BeanReader {
     for (MethodReader factoryMethod : factoryMethods) {
       factoryMethod.addImports(importTypes);
     }
+
+    conditionTypes.forEach(importTypes::add);
+    missingTypes.forEach(importTypes::add);
     return this;
   }
 
@@ -119,6 +122,7 @@ final class BeanReader {
       }
     }
     conditionTypes.stream().map(t -> new Dependency("con:" + t)).forEach(list::add);
+    missingTypes.stream().map(t -> new Dependency("con:" + t)).forEach(list::add);
     return list;
   }
 
@@ -210,47 +214,7 @@ final class BeanReader {
   }
 
   void buildConditional(Append writer) {
-    if (!conditionTypes.isEmpty() || !conditionNames.isEmpty() || !conditionTypesString.isEmpty()) {
-
-      writer.append("    if (");
-      var first = true;
-      for (final var conditionType : conditionTypes) {
-
-        if (first) {
-
-          writer.append("!builder.contains(%s.class)", Util.shortName(conditionType));
-          first = false;
-          continue;
-        }
-
-        writer.append(" || !builder.contains(%s.class)", Util.shortName(conditionType));
-      }
-
-      for (final var typeName : conditionTypesString) {
-
-        if (first) {
-
-          writer.append("!builder.contains(\"%s\")", typeName);
-          first = false;
-          continue;
-        }
-
-        writer.append(" || !builder.contains(\"%s\")", typeName);
-      }
-      for (final var beanName : conditionNames) {
-
-        if (first) {
-
-          writer.append("!builder.containsQualifier(\"%s\")", beanName);
-          first = false;
-          continue;
-        }
-
-        writer.append(" || !builder.containsQualifier(\"%s\")", beanName);
-      }
-
-      writer.append(")").eol().append("     return;").eol().eol();
-    }
+    Util.buildConditional(writer, conditionTypes, missingTypes, qualifierNames);
   }
 
   void buildAddFor(Append writer) {

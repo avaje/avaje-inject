@@ -1,6 +1,8 @@
 package io.avaje.inject.generator;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -246,5 +248,54 @@ final class Util {
     return shortMethod(method)
       .replace('.', '_')
       .replace(Constants.DI, "");
+  }
+
+  public static void buildConditional(
+      Append writer,
+      Set<String> conditionTypes,
+      Set<String> missingTypes,
+      Set<String> qualifierNames) {
+    if (!conditionTypes.isEmpty() || !qualifierNames.isEmpty() || !missingTypes.isEmpty()) {
+
+      writer.append("    if (");
+      var first = true;
+      for (final var conditionType : conditionTypes) {
+
+        if (first) {
+
+          writer.append("!builder.contains(%s.class)", Util.shortName(conditionType));
+          first = false;
+          continue;
+        }
+
+        writer.append(" || !builder.contains(%s.class)", Util.shortName(conditionType));
+      }
+      
+      for (final var missing : missingTypes) {
+
+        if (first) {
+
+          writer.append("builder.contains(%s.class)", Util.shortName(missing));
+          first = false;
+          continue;
+        }
+
+        writer.append(" || builder.contains(%s.class)", Util.shortName(missing));
+      }
+
+      for (final var qualifier : qualifierNames) {
+
+        if (first) {
+
+          writer.append("!builder.containsQualifier(\"%s\")", qualifier);
+          first = false;
+          continue;
+        }
+
+        writer.append(" || !builder.containsQualifier(\"%s\")", qualifier);
+      }
+
+      writer.append(")").eol().append("     return;").eol().eol();
+    }
   }
 }

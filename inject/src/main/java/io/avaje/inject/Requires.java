@@ -13,15 +13,15 @@ import java.lang.annotation.Target;
  * &#064;Configuration
  * public class MyAutoConfiguration {
  *
- *     &#064;Requires(beans=OtherService.class)
  *     &#064;Bean
+ *     &#064;Requires(beans = OtherService.class)
  *     public MyService myService() {
  *         ...
  *     }
  *
  * }</pre>
  *
- * <p>In the sample above the MyService bean will get wired if a bean of type {@code OtherService}
+ * <p>In the sample above the MyService bean will get wired only if a bean of type {@code OtherService}
  * is already registered in the {@link BeanScope}.
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
@@ -35,6 +35,13 @@ public @interface Requires {
    * @return the class types of beans to check
    */
   Class<?>[] beans() default {};
+
+  /**
+   * Expresses that beans of the given types should not be available in the {@link BeanScope}.
+   *
+   * @return the class types of beans to check
+   */
+  Class<?>[] missingBeans() default {};
 
   /**
    * The qualifiers that should be registered. The condition matches when all qualifier specified
