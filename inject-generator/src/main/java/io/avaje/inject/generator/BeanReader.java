@@ -51,12 +51,12 @@ final class BeanReader {
     this.proxy = ProxyPrism.isPresent(beanType);
     this.typeReader = new TypeReader(GenericType.parse(type), beanType, importTypes, factory);
 
-    RequiresPrism.getOptionalOn(beanType)
-        .ifPresent(
+    RequiresPrism.getAllInstancesOn(beanType)
+        .forEach(
             p -> {
-              p.value().forEach(t -> conditionTypes.add(t.toString()));
-              conditionNames.addAll(p.qualifier());
-              conditionTypesString.addAll(p.type());
+              p.beans().forEach(t -> conditionTypes.add(t.toString()));
+              conditionNames.addAll(p.qualifiers());
+//              conditionTypesString.addAll(p.type());
             });
 
     typeReader.process();

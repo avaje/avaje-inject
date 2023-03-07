@@ -53,13 +53,13 @@ final class MethodReader {
       prototype = PrototypePrism.isPresent(element);
       primary = PrimaryPrism.isPresent(element);
       secondary = SecondaryPrism.isPresent(element);
-      RequiresPrism.getOptionalOn(beanType)
-      .ifPresent(
-          p -> {
-            p.value().forEach(t -> conditionTypes.add(t.toString()));
-            qualifierNames.addAll(p.qualifier());
-            conditionTypesString.addAll(p.type());
-          });
+      RequiresPrism.getAllInstancesOn(element)
+          .forEach(
+              p -> {
+                p.beans().forEach(t -> conditionTypes.add(t.toString()));
+                qualifierNames.addAll(p.qualifiers());
+                //                conditionTypesString.addAll(p.types());
+              });
     } else {
       prototype = false;
       primary = false;
