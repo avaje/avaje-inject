@@ -34,3 +34,5 @@ jobs:
       run: mvn --version
     - name: Build with Maven
       run: mvn clean test
+    - name: Build with Maven (javax)
+      run: ./jakarta-to-javax.sh && mvn clean test && ./javax-to-jakarta.sh
