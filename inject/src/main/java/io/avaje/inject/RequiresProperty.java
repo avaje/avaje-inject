@@ -14,15 +14,14 @@ import java.lang.annotation.Target;
  * public class MyAutoConfiguration {
  *
  *     &#064;Bean
- *     &#064;Requires(beans = OtherService.class)
+ *     &#064;RequiresProperty("use.service")
  *     public MyService myService() {
  *         ...
  *     }
  *
  * }</pre>
  *
- * <p>In the sample above the MyService bean will get wired only if a bean of type {@code
- * OtherService} is already registered in the {@link BeanScope}.
+ * <p>In the sample above the MyService bean will get wired only if use.service is set in Java system properties / Avaje Config.
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -30,14 +29,14 @@ import java.lang.annotation.Target;
 public @interface RequiresProperty {
 
   /**
-   * Expresses that beans of the given types should be available in the {@link BeanScope}.
+   * Expresses that the given property should be set for the bean to load.
    *
-   * @return the class types of beans to check
+   * @return the property to check
    */
   String value() default "";
 
   /**
-   * Expresses that the bean or configuration will only be registered if the given properties is
+   * Expresses that the bean or configuration will only be registered if the given properties are
    * missing.
    *
    * @return the properties to check
@@ -45,17 +44,16 @@ public @interface RequiresProperty {
   String[] missingProperties() default {};
 
   /**
-   * Expresses that a {@link @Named} or {@link @Qualifier} marker of the given name should be
-   * available in the {@link BeanScope}.
+   * Used in combination with value() to express the required value of the property.
    *
-   * @return the names of beans to check
+   * @return the value the property should be
    */
   String equalTo() default "";
 
   /**
-   * Expresses that beans of the given types should not be available in the {@link BeanScope}.
+   * Constraint a property to not equal the given value.
    *
-   * @return the class types of beans to check
+   * @return the value the property should not be
    */
   String notEqualTo() default "";
 }
