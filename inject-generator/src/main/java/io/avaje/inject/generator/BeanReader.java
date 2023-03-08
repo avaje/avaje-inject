@@ -241,7 +241,8 @@ final class BeanReader {
 
   private void prototypeNotSupported(Append writer, String lifecycle) {
     if (prototype) {
-      writer.append("        // @Prototype scoped bean does not support %s lifecycle method", lifecycle).eol();
+      throw new IllegalStateException(
+          String.format("@Prototype scoped bean does not support %s lifecycle method", lifecycle));
     }
   }
 
