@@ -7,11 +7,12 @@ import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
 import jakarta.inject.Provider;
 
-import java.lang.System.Logger.Level;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import static java.lang.System.Logger.Level.DEBUG;
 
 /**
  * Build a bean scope with options for shutdown hook and supplying test doubles.
@@ -149,9 +150,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   @Override
   public BeanScope build() {
-	  
-    var start = System.currentTimeMillis();
-    
+	  var start = System.currentTimeMillis();
+
     // load and apply plugins first
     var loader = classLoader != null ? classLoader : Thread.currentThread().getContextClassLoader();
     ServiceLoader.load(Plugin.class, loader).forEach(plugin -> plugin.apply(this));
@@ -169,13 +169,12 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         " Review IntelliJ Settings / Build / Build tools / Gradle - 'Build and run using' value and set that to 'Gradle'. " +
         " Refer to https://avaje.io/inject#gradle");
     }
-    log.log(Level.DEBUG, "building with modules {0}", moduleNames);
+    log.log(DEBUG, "building with modules {0}", moduleNames);
     Builder builder = Builder.newBuilder(suppliedBeans, enrichBeans, parent, parentOverride);
     for (Module factory : factoryOrder.factories()) {
       factory.build(builder);
     }
-    log.log(Level.INFO, "Wired all beans in " + (System.currentTimeMillis() - start) + "ms");
-    return builder.build(shutdownHook);
+    return builder.build(shutdownHook, start);
   }
 
   /**

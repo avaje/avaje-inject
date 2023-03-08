@@ -14,6 +14,9 @@ import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
+import static java.lang.System.Logger.Level.INFO;
+import static java.lang.System.Logger.Level.TRACE;
+
 @NonNullApi
 final class DBeanScope implements BeanScope {
 
@@ -217,16 +220,17 @@ final class DBeanScope implements BeanScope {
     return combine(values, parent.listByAnnotation(annotation));
   }
 
-  DBeanScope start() {
+  DBeanScope start(long start) {
     lock.lock();
     try {
-      log.log(Level.TRACE, "firing postConstruct");
+      log.log(TRACE, "firing postConstruct");
       for (Runnable invoke : postConstruct) {
         invoke.run();
       }
     } finally {
       lock.unlock();
     }
+    log.log(INFO, "Wired beans in {0}ms", (System.currentTimeMillis() - start));
     return this;
   }
 
@@ -240,7 +244,7 @@ final class DBeanScope implements BeanScope {
       if (!closed) {
         // we only allow one call to preDestroy
         closed = true;
-        log.log(Level.TRACE, "firing preDestroy");
+        log.log(TRACE, "firing preDestroy");
         for (AutoCloseable closeable : preDestroy) {
           try {
             closeable.close();
