@@ -166,7 +166,10 @@ final class MethodReader {
     dependsOn.add(factoryType);
 
     conditionTypes.stream().map(t -> "con:" + t).forEach(dependsOn::add);
-    missingTypes.stream().map(t -> "con:" + t).forEach(dependsOn::add);
+    missingTypes.stream()
+        .filter(t -> !t.equals(returnTypeRaw))
+        .map(t -> "con:" + t)
+        .forEach(dependsOn::add);
     for (final MethodParam param : params) {
       dependsOn.add(GenericType.trimWildcard(param.paramType));
     }

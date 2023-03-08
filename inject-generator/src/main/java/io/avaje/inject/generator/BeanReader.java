@@ -151,7 +151,10 @@ final class BeanReader {
       }
     }
     conditionTypes.stream().map(t -> new Dependency("con:" + t)).forEach(list::add);
-    missingTypes.stream().map(t -> new Dependency("con:" + t)).forEach(list::add);
+    missingTypes.stream()
+        .filter(t -> !t.equals(type))
+        .map(t -> new Dependency("con:" + t))
+        .forEach(list::add);
     return list;
   }
 
