@@ -1,7 +1,6 @@
 package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanScopeBuilder;
-import jakarta.inject.Provider;
 
 import java.lang.reflect.Type;
 

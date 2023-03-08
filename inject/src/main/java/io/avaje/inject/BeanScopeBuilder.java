@@ -3,7 +3,6 @@ package io.avaje.inject;
 import io.avaje.inject.spi.Module;
 import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
-import jakarta.inject.Provider;
 
 import java.lang.reflect.Type;
 import java.util.function.Consumer;

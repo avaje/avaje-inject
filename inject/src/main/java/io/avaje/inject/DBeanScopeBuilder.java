@@ -149,6 +149,9 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   @Override
   public BeanScope build() {
+	  
+    var start = System.currentTimeMillis();
+    
     // load and apply plugins first
     var loader = classLoader != null ? classLoader : Thread.currentThread().getContextClassLoader();
     ServiceLoader.load(Plugin.class, loader).forEach(plugin -> plugin.apply(this));
@@ -171,6 +174,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     for (Module factory : factoryOrder.factories()) {
       factory.build(builder);
     }
+    log.log(Level.INFO, "Wired all beans in " + (System.currentTimeMillis() - start) + "ms");
     return builder.build(shutdownHook);
   }
 
