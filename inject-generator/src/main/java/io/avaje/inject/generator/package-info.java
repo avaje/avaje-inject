@@ -16,17 +16,19 @@
 @GeneratePrism(Bean.class)
 @GeneratePrism(QualifiedMap.class)
 @GeneratePrism(Generated.class)
-@GeneratePrism(Requires.class)
+@GeneratePrism(RequiresBean.class)
+@GeneratePrism(RequiresProperty.class)
 package io.avaje.inject.generator;
 
 import io.avaje.inject.Bean;
 import io.avaje.inject.Component;
-import io.avaje.inject.Requires;
 import io.avaje.inject.Factory;
 import io.avaje.inject.InjectModule;
 import io.avaje.inject.Primary;
 import io.avaje.inject.Prototype;
 import io.avaje.inject.QualifiedMap;
+import io.avaje.inject.RequiresBean;
+import io.avaje.inject.RequiresProperty;
 import io.avaje.inject.Secondary;
 import io.avaje.inject.aop.Aspect;
 import io.avaje.inject.spi.DependencyMeta;

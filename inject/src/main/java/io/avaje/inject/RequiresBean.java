@@ -21,20 +21,20 @@ import java.lang.annotation.Target;
  *
  * }</pre>
  *
- * <p>In the sample above the MyService bean will get wired only if a bean of type {@code OtherService}
- * is already registered in the {@link BeanScope}.
+ * <p>In the sample above the MyService bean will get wired only if a bean of type {@code
+ * OtherService} is already registered in the {@link BeanScope}.
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@Repeatable(value = Requirements.class)
-public @interface Requires {
+@Repeatable(RequireBeans.class)
+public @interface RequiresBean {
 
   /**
    * Expresses that beans of the given types should be available in the {@link BeanScope}.
    *
    * @return the class types of beans to check
    */
-  Class<?>[] beans() default {};
+  Class<?>[] value() default {};
 
   /**
    * Expresses that beans of the given types should not be available in the {@link BeanScope}.
@@ -44,8 +44,8 @@ public @interface Requires {
   Class<?>[] missingBeans() default {};
 
   /**
-   * The qualifiers that should be registered. The condition matches when all qualifier specified
-   * are registered in the {@link BeanScope}.
+   * Expresses that a {@link @Named} or {@link @Qualifier} marker of the given name should be
+   * available in the {@link BeanScope}.
    *
    * @return the names of beans to check
    */

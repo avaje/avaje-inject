@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -250,12 +251,14 @@ final class Util {
       .replace(Constants.DI, "");
   }
 
-  public static void buildConditional(
+  public static void buildBeanConditional(
       Append writer,
       Set<String> conditionTypes,
       Set<String> missingTypes,
       Set<String> qualifierNames) {
-    if (!conditionTypes.isEmpty() || !qualifierNames.isEmpty() || !missingTypes.isEmpty()) {
+    if (!conditionTypes.isEmpty()
+        || !qualifierNames.isEmpty()
+        || !missingTypes.isEmpty()) {
 
       writer.append("    if (");
       var first = true;
@@ -270,7 +273,7 @@ final class Util {
 
         writer.append(" || !builder.contains(%s.class)", Util.shortName(conditionType));
       }
-      
+
       for (final var missing : missingTypes) {
 
         if (first) {
@@ -293,6 +296,76 @@ final class Util {
         }
 
         writer.append(" || !builder.containsQualifier(\"%s\")", qualifier);
+      }
+
+      writer.append(")").eol().append("     return;").eol().eol();
+    }
+  }
+
+  public static void buildPropertyConditional(
+      Append writer,
+      Set<String> containsProps,
+      Set<String> missingProps,
+      Map<String, String> propertyEquals,
+      Map<String, String> propertyNotEquals) {
+
+    final var propertyGetter =
+        ProcessingContext.useAvajeConfig()
+            ? "Config.getOptional(\"%s\")"
+            : "Optional.ofNullable(System.getProperty(\"%s\"))";
+
+    if (!containsProps.isEmpty()
+        || !missingProps.isEmpty()
+        || !propertyEquals.isEmpty()
+        || !propertyNotEquals.isEmpty()) {
+
+      writer.append("    if (");
+      var first = true;
+
+      for (final var props : containsProps) {
+
+        if (first) {
+          writer.append(propertyGetter + ".isEmpty()", props);
+
+          first = false;
+        } else {
+          writer.append(" || " + propertyGetter + ".isEmpty()", props);
+        }
+      }
+
+      for (final var props : missingProps) {
+
+        if (first) {
+          writer.append(propertyGetter + ".isPresent()", props);
+
+          first = false;
+        } else {
+          writer.append(" || " + propertyGetter + ".isPresent()", props);
+        }
+      }
+
+      for (final var props : propertyEquals.entrySet()) {
+
+        if (first) {
+
+          writer.append(propertyGetter + ".filter(\"%s\"::equals).isEmpty()", props);
+
+          first = false;
+        } else {
+          writer.append(" || " + propertyGetter + ".filter(\"%s\"::equals).isEmpty()", props);
+        }
+      }
+
+      for (final var props : propertyEquals.entrySet()) {
+
+        if (first) {
+
+          writer.append(propertyGetter + ".filter(\"%s\"::equals).isPresent()", props);
+
+          first = false;
+        } else {
+          writer.append(" || " + propertyGetter + ".filter(\"%s\"::equals).isPresent()", props);
+        }
       }
 
       writer.append(")").eol().append("     return;").eol().eol();

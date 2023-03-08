@@ -2,9 +2,11 @@ package io.avaje.inject.generator;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.lang.model.element.Element;
@@ -39,7 +41,11 @@ final class BeanReader {
   private Set<GenericType> allGenericTypes;
   private final Set<String> conditionTypes = new HashSet<>();
   private final Set<String> missingTypes = new HashSet<>();
-  private final Set<String> qualifierNames = new HashSet<>();
+  private final Set<String> qualifierNames = new HashSet<>();  
+  private final Set<String> containsProps = new HashSet<>();;
+  private final Set<String> missingProps = new HashSet<>();
+  private final Map<String, String> propertyEquals = new HashMap<>();
+  private final Map<String, String> propertyNotEquals = new HashMap<>();
 
   BeanReader(TypeElement beanType, boolean factory) {
     this.beanType = beanType;
@@ -51,12 +57,27 @@ final class BeanReader {
     this.proxy = ProxyPrism.isPresent(beanType);
     this.typeReader = new TypeReader(GenericType.parse(type), beanType, importTypes, factory);
 
-    RequiresPrism.getAllInstancesOn(beanType)
+    RequiresBeanPrism.getAllInstancesOn(beanType)
         .forEach(
             p -> {
-              p.beans().forEach(t -> conditionTypes.add(t.toString()));
+              p.value().forEach(t -> conditionTypes.add(t.toString()));
               p.missingBeans().forEach(t -> missingTypes.add(t.toString()));
               qualifierNames.addAll(p.qualifiers());
+            });
+    RequiresPropertyPrism.getAllInstancesOn(beanType)
+        .forEach(
+            p -> {
+              if (!p.value().isBlank()) {
+                if (!p.notEqualTo().isBlank()) {
+                  propertyNotEquals.put(p.value(), p.notEqualTo());
+                } else if (!p.equalTo().isBlank()) {
+                  propertyEquals.put(p.value(), p.equalTo());
+                } else {
+                  containsProps.add(p.value());
+                }
+              }
+
+              missingProps.addAll(p.missingProperties());
             });
 
     typeReader.process();
@@ -107,6 +128,14 @@ final class BeanReader {
 
     conditionTypes.forEach(importTypes::add);
     missingTypes.forEach(importTypes::add);
+    if (!containsProps.isEmpty()
+        || !missingProps.isEmpty()
+        || !propertyEquals.isEmpty()
+        || !propertyNotEquals.isEmpty()) {
+      importTypes.add(
+          ProcessingContext.useAvajeConfig() ? "io.avaje.config.Config" : "java.util.Optional");
+    }
+
     return this;
   }
 
@@ -214,7 +243,9 @@ final class BeanReader {
   }
 
   void buildConditional(Append writer) {
-    Util.buildConditional(writer, conditionTypes, missingTypes, qualifierNames);
+    Util.buildBeanConditional(writer, conditionTypes, missingTypes, qualifierNames);
+    Util.buildPropertyConditional(
+        writer, containsProps, missingProps, propertyEquals, propertyNotEquals);
   }
 
   void buildAddFor(Append writer) {
