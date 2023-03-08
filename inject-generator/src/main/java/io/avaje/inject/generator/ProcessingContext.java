@@ -27,6 +27,8 @@ import javax.tools.StandardLocation;
 
 final class ProcessingContext {
 
+  private ProcessingContext() {}
+
   private static ProcessingEnvironment processingEnv;
   private static Messager messager;
   private static Filer filer;
