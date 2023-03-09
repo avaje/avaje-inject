@@ -168,14 +168,6 @@ final class ScopeInfo {
     return name;
   }
 
-  private void provides(List<String> provides) {
-    this.provides.addAll(provides);
-  }
-
-  private void requires(List<String> contextRequires) {
-    this.requires.addAll(contextRequires);
-  }
-
   Set<String> requires() {
     return requires;
   }

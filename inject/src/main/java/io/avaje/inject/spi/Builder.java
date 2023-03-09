@@ -248,5 +248,5 @@ public interface Builder {
   /**
    * Build and return the bean scope.
    */
-  BeanScope build(boolean withShutdownHook);
+  BeanScope build(boolean withShutdownHook, long start);
 }

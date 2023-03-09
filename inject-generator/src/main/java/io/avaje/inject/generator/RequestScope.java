@@ -2,7 +2,6 @@ package io.avaje.inject.generator;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Handling detection of request scoped dependencies and appropriate BeanFactory generation.

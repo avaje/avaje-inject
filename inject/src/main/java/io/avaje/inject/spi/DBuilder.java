@@ -389,12 +389,13 @@ class DBuilder implements Builder {
     }
   }
 
-  public final BeanScope build(boolean withShutdownHook) {
+  @Override
+  public final BeanScope build(boolean withShutdownHook, long start) {
     runInjectors();
     var scope = new DBeanScope(withShutdownHook, preDestroy, postConstruct, beanMap, parent);
     if (beanScopeProxy != null) {
       beanScopeProxy.inject(scope);
     }
-    return scope.start();
+    return scope.start(start);
   }
 }
