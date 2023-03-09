@@ -309,10 +309,7 @@ final class Util {
       Map<String, String> propertyEquals,
       Map<String, String> propertyNotEquals) {
 
-    final var propertyGetter =
-        ProcessingContext.useAvajeConfig()
-            ? "Config.getOptional(\"%s\")"
-            : "Optional.ofNullable(System.getProperty(\"%s\"))";
+    final var propertyGetter = "Config.getOptional(\"%s\")";
 
     if (!containsProps.isEmpty()
         || !missingProps.isEmpty()

@@ -87,6 +87,11 @@ final class BeanReader {
   }
 
   void processPropertyPrism(RequiresPropertyPrism prism) {
+
+    if (!ProcessingContext.useAvajeConfig()) {
+      throw new IllegalStateException(
+          "RequiresProperty functionality only works with Avaje Config");
+    }
     if (!prism.value().isBlank()) {
       if (!prism.notEqualTo().isBlank()) {
         propertyNotEquals.put(prism.value(), prism.notEqualTo());
