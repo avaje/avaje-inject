@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
@@ -41,8 +42,8 @@ final class BeanReader {
   private Set<GenericType> allGenericTypes;
   private final Set<String> conditionTypes = new HashSet<>();
   private final Set<String> missingTypes = new HashSet<>();
-  private final Set<String> qualifierNames = new HashSet<>();  
-  private final Set<String> containsProps = new HashSet<>();;
+  private final Set<String> qualifierNames = new HashSet<>();
+  private final Set<String> containsProps = new HashSet<>();
   private final Set<String> missingProps = new HashSet<>();
   private final Map<String, String> propertyEquals = new HashMap<>();
   private final Map<String, String> propertyNotEquals = new HashMap<>();
@@ -57,28 +58,10 @@ final class BeanReader {
     this.proxy = ProxyPrism.isPresent(beanType);
     this.typeReader = new TypeReader(GenericType.parse(type), beanType, importTypes, factory);
 
-    RequiresBeanPrism.getAllInstancesOn(beanType)
-        .forEach(
-            p -> {
-              p.value().forEach(t -> conditionTypes.add(t.toString()));
-              p.missingBeans().forEach(t -> missingTypes.add(t.toString()));
-              qualifierNames.addAll(p.qualifiers());
-            });
-    RequiresPropertyPrism.getAllInstancesOn(beanType)
-        .forEach(
-            p -> {
-              if (!p.value().isBlank()) {
-                if (!p.notEqualTo().isBlank()) {
-                  propertyNotEquals.put(p.value(), p.notEqualTo());
-                } else if (!p.equalTo().isBlank()) {
-                  propertyEquals.put(p.value(), p.equalTo());
-                } else {
-                  containsProps.add(p.value());
-                }
-              }
+    beanType.getAnnotationMirrors().forEach(this::findRequiresOnAnnotation);
 
-              missingProps.addAll(p.missingProperties());
-            });
+    RequiresBeanPrism.getAllInstancesOn(beanType).forEach(this::processBeanPrism);
+    RequiresPropertyPrism.getAllInstancesOn(beanType).forEach(this::processPropertyPrism);
 
     typeReader.process();
     this.requestParams = new BeanRequestParams(type);
@@ -95,6 +78,34 @@ final class BeanReader {
   @Override
   public String toString() {
     return beanType.toString();
+  }
+
+  void processBeanPrism(RequiresBeanPrism prism) {
+    prism.value().forEach(t -> conditionTypes.add(t.toString()));
+    prism.missingBeans().forEach(t -> missingTypes.add(t.toString()));
+    qualifierNames.addAll(prism.qualifiers());
+  }
+
+  void processPropertyPrism(RequiresPropertyPrism prism) {
+    if (!prism.value().isBlank()) {
+      if (!prism.notEqualTo().isBlank()) {
+        propertyNotEquals.put(prism.value(), prism.notEqualTo());
+      } else if (!prism.equalTo().isBlank()) {
+        propertyEquals.put(prism.value(), prism.equalTo());
+      } else {
+        containsProps.add(prism.value());
+      }
+    }
+
+    missingProps.addAll(prism.missingProperties());
+  }
+
+  private void findRequiresOnAnnotation(AnnotationMirror a) {
+
+    final var annotationElement = a.getAnnotationType().asElement();
+
+    RequiresBeanPrism.getAllInstancesOn(annotationElement).forEach(this::processBeanPrism);
+    RequiresPropertyPrism.getAllInstancesOn(annotationElement).forEach(this::processPropertyPrism);
   }
 
   TypeElement beanType() {

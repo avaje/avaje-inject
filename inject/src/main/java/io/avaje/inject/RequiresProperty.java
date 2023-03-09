@@ -1,9 +1,12 @@
 package io.avaje.inject;
 
-import java.lang.annotation.ElementType;
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
@@ -21,11 +24,12 @@ import java.lang.annotation.Target;
  *
  * }</pre>
  *
- * <p>In the sample above the MyService bean will get wired only if use.service is set in Java system properties / Avaje Config.
+ * <p>In the sample above the MyService bean will get wired only if use.service is set in Java
+ * system properties / Avaje Config.
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RUNTIME)
 @Repeatable(RequireConfigs.class)
+@Target({TYPE, METHOD, ANNOTATION_TYPE})
 public @interface RequiresProperty {
 
   /**

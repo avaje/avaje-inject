@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -60,28 +61,10 @@ final class MethodReader {
       prototype = PrototypePrism.isPresent(element);
       primary = PrimaryPrism.isPresent(element);
       secondary = SecondaryPrism.isPresent(element);
-      RequiresBeanPrism.getAllInstancesOn(element)
-          .forEach(
-              p -> {
-                p.value().forEach(t -> conditionTypes.add(t.toString()));
-                p.missingBeans().forEach(t -> missingTypes.add(t.toString()));
-                qualifierNames.addAll(p.qualifiers());
-              });
-      RequiresPropertyPrism.getAllInstancesOn(element)
-          .forEach(
-              p -> {
-                if (!p.value().isBlank()) {
-                  if (!p.notEqualTo().isBlank()) {
-                    propertyNotEquals.put(p.value(), p.notEqualTo());
-                  } else if (!p.equalTo().isBlank()) {
-                    propertyEquals.put(p.value(), p.equalTo());
-                  } else {
-                    containsProps.add(p.value());
-                  }
-                }
 
-                missingProps.addAll(p.missingProperties());
-              });
+      element.getAnnotationMirrors().forEach(this::findRequiresOnAnnotation);
+      RequiresBeanPrism.getAllInstancesOn(beanType).forEach(this::processBeanPrism);
+      RequiresPropertyPrism.getAllInstancesOn(beanType).forEach(this::processPropertyPrism);
 
     } else {
       prototype = false;
@@ -128,6 +111,34 @@ final class MethodReader {
       "element=" + element +
       ", params=" + params +
       '}';
+  }
+
+  void processBeanPrism(RequiresBeanPrism prism) {
+    prism.value().forEach(t -> conditionTypes.add(t.toString()));
+    prism.missingBeans().forEach(t -> missingTypes.add(t.toString()));
+    qualifierNames.addAll(prism.qualifiers());
+  }
+
+  void processPropertyPrism(RequiresPropertyPrism prism) {
+    if (!prism.value().isBlank()) {
+      if (!prism.notEqualTo().isBlank()) {
+        propertyNotEquals.put(prism.value(), prism.notEqualTo());
+      } else if (!prism.equalTo().isBlank()) {
+        propertyEquals.put(prism.value(), prism.equalTo());
+      } else {
+        containsProps.add(prism.value());
+      }
+    }
+
+    missingProps.addAll(prism.missingProperties());
+  }
+
+  private void findRequiresOnAnnotation(AnnotationMirror a) {
+
+    final var annotationElement = a.getAnnotationType().asElement();
+
+    RequiresBeanPrism.getAllInstancesOn(annotationElement).forEach(this::processBeanPrism);
+    RequiresPropertyPrism.getAllInstancesOn(annotationElement).forEach(this::processPropertyPrism);
   }
 
   void addDependsOnGeneric(Set<GenericType> set) {
