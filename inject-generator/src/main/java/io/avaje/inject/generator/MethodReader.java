@@ -120,12 +120,6 @@ final class MethodReader {
   }
 
   void processPropertyPrism(RequiresPropertyPrism prism) {
-
-    if (!ProcessingContext.useAvajeConfig()) {
-      throw new IllegalStateException(
-          "RequiresProperty functionality only works with Avaje Config");
-    }
-
     if (!prism.value().isBlank()) {
       if (!prism.notEqualTo().isBlank()) {
         propertyNotEquals.put(prism.value(), prism.notEqualTo());
@@ -135,7 +129,6 @@ final class MethodReader {
         containsProps.add(prism.value());
       }
     }
-
     missingProps.addAll(prism.missingProperties());
   }
 
@@ -302,13 +295,6 @@ final class MethodReader {
     }
     conditionTypes.forEach(importTypes::add);
     missingTypes.forEach(importTypes::add);
-    if (!containsProps.isEmpty()
-        || !missingProps.isEmpty()
-        || !propertyEquals.isEmpty()
-        || !propertyNotEquals.isEmpty()) {
-      importTypes.add(
-          ProcessingContext.useAvajeConfig() ? "io.avaje.config.Config" : "java.util.Optional");
-    }
   }
 
   Set<GenericType> genericTypes() {
@@ -429,11 +415,11 @@ final class MethodReader {
       this.paramType = utilType.rawType(isBeanMap);
       this.genericType = GenericType.parse(paramType);
       this.fullGenericType = GenericType.parse(utilType.full());
-   
+
       if (nullable || param.asType().toString().startsWith("java.util.Optional<")) {
         ProcessingContext.addOptionalType(paramType);
       }
-      
+
     }
 
     @Override

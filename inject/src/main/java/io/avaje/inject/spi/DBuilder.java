@@ -12,6 +12,7 @@ import static io.avaje.inject.spi.DBeanScope.combine;
 
 class DBuilder implements Builder {
 
+  private final PropertyRequiresPlugin propertyRequires;
   /**
    * List of Lifecycle methods.
    */
@@ -41,7 +42,8 @@ class DBuilder implements Builder {
   private boolean runningPostConstruct;
   private DBeanScopeProxy beanScopeProxy;
 
-  DBuilder(BeanScope parent, boolean parentOverride) {
+  DBuilder(PropertyRequiresPlugin propertyRequires, BeanScope parent, boolean parentOverride) {
+    this.propertyRequires = propertyRequires;
     this.parent = parent;
     this.parentOverride = parentOverride;
   }
@@ -332,7 +334,7 @@ class DBuilder implements Builder {
   public final <T> T get(Type type, String name) {
     return getBean(type, name);
   }
-  
+
   @Override
   public boolean contains(String type) {
     return beanMap.contains(type);
@@ -346,6 +348,11 @@ class DBuilder implements Builder {
   @Override
   public boolean containsQualifier(String name) {
     return beanMap.containsQualifier(name);
+  }
+
+  @Override
+  public PropertyRequiresPlugin property() {
+    return propertyRequires;
   }
 
   private <T> T getBean(Type type, String name) {

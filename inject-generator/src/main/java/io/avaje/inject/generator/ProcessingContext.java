@@ -37,7 +37,6 @@ final class ProcessingContext {
   private static final Set<String> uniqueModuleNames = new HashSet<>();
   private static final Set<String> providedTypes = new HashSet<>();
   private static final Set<String> optionalTypes = new LinkedHashSet<>();
-  private static boolean useAvajeConfig;
 
  static void init(ProcessingEnvironment env, Set<String> moduleFileProvided) {
     processingEnv = env;
@@ -47,7 +46,6 @@ final class ProcessingContext {
     typeUtils = processingEnv.getTypeUtils();
     ExternalProvider.registerModuleProvidedTypes(providedTypes);
     providedTypes.addAll(moduleFileProvided);
-    useAvajeConfig =  element("io.avaje.config.Config") != null;
   }
 
   /**
@@ -143,7 +141,7 @@ final class ProcessingContext {
  static Element asElement(TypeMirror returnType) {
 
     var wrapper = PrimitiveUtil.wrap(returnType.toString());
-    
+
     return wrapper == null ? typeUtils.asElement(returnType) : element(wrapper);
   }
 
@@ -165,9 +163,5 @@ final class ProcessingContext {
     if (!providedTypes.contains(paramType)) {
       optionalTypes.add(paramType);
     }
-  }
-
- static boolean useAvajeConfig() {
-    return useAvajeConfig;
   }
 }

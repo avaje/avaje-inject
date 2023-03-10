@@ -1,6 +1,5 @@
 package io.avaje.inject.generator;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -51,7 +50,7 @@ final class Util {
     return type.substring(0, i);
   }
 
-  
+
   /** Trim off annotations from the raw type if present. */
   public static String trimAnnotations(String type) {
     int pos = type.indexOf(".@");
@@ -60,7 +59,7 @@ final class Util {
     }
     return type.substring(0, pos + 1) + type.substring(type.lastIndexOf(' ') + 1);
   }
-  
+
   static String nestedPackageOf(String cls) {
     int pos = cls.lastIndexOf('.');
     if (pos < 0) {
@@ -309,8 +308,6 @@ final class Util {
       Map<String, String> propertyEquals,
       Map<String, String> propertyNotEquals) {
 
-    final var propertyGetter = "Config.getOptional(\"%s\")";
-
     if (!containsProps.isEmpty()
         || !missingProps.isEmpty()
         || !propertyEquals.isEmpty()
@@ -318,63 +315,40 @@ final class Util {
 
       writer.append("    if (");
       var first = true;
-
       for (final var props : containsProps) {
-
         if (first) {
-          writer.append(propertyGetter + ".isEmpty()", props);
-
           first = false;
         } else {
-          writer.append(" || " + propertyGetter + ".isEmpty()", props);
+          writer.append(" || ");
         }
+        writer.append("!builder.property().contains(\"%s\")", props);
       }
 
       for (final var props : missingProps) {
-
         if (first) {
-          writer.append(propertyGetter + ".isPresent()", props);
-
           first = false;
         } else {
-          writer.append(" || " + propertyGetter + ".isPresent()", props);
+          writer.append(" || ");
         }
+        writer.append("!builder.property().missing(\"%s\")", props);
       }
 
       for (final var props : propertyEquals.entrySet()) {
-
         if (first) {
-
-          writer.append(
-              propertyGetter + ".filter(\"%s\"::equals).isEmpty()",
-              props.getKey(),
-              props.getValue());
-
           first = false;
         } else {
-          writer.append(
-              " || " + propertyGetter + ".filter(\"%s\"::equals).isEmpty()",
-              props.getKey(),
-              props.getValue());
+          writer.append(" || ");
         }
+        writer.append("!builder.property().equalTo(\"%s\", \"%s\")", props.getKey(), props.getValue());
       }
 
       for (final var props : propertyNotEquals.entrySet()) {
-
         if (first) {
-
-          writer.append(
-              propertyGetter + ".filter(\"%s\"::equals).isPresent()",
-              props.getKey(),
-              props.getValue());
-
           first = false;
         } else {
-          writer.append(
-              " || " + propertyGetter + ".filter(\"%s\"::equals).isPresent()",
-              props.getKey(),
-              props.getValue());
+          writer.append(" || ");
         }
+        writer.append("!builder.property().notEqualTo(\"%s\", \"%s\")", props.getKey(), props.getValue());
       }
 
       writer.append(")").eol().append("     return;").eol().eol();
