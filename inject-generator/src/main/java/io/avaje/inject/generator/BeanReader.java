@@ -223,7 +223,7 @@ final class BeanReader {
   }
 
   void buildConditional(Append writer) {
-    Util.buildBeanConditional(writer, conditions);
+    new ConditionalWriter(writer, conditions).write();
   }
 
   void buildAddFor(Append writer) {
