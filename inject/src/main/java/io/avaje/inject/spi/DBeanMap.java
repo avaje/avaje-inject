@@ -21,7 +21,7 @@ import java.util.Set;
 final class DBeanMap {
 
   private final Map<String, DContextEntry> beans = new LinkedHashMap<>();
-  private final Set<String> names = new HashSet<>();
+  private final Set<String> qualifiers = new HashSet<>();
 
   private NextBean nextBean;
 
@@ -67,7 +67,7 @@ final class DBeanMap {
       return;
     }
     var name = nextBean.name;
-    names.add(name);
+    qualifiers.add(name);
     DContextEntryBean entryBean = DContextEntryBean.of(bean, name, nextBean.priority);
     for (Type type : nextBean.types) {
       beans.computeIfAbsent(type.getTypeName(), s -> new DContextEntry()).add(entryBean);
@@ -100,8 +100,8 @@ final class DBeanMap {
     return beans.containsKey(type.getTypeName());
   }
 
-  boolean containsName(String type) {
-    return names.contains(type);
+  boolean containsQualifier(String type) {
+    return qualifiers.contains(type);
   }
 
   @SuppressWarnings("unchecked")

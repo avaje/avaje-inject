@@ -345,7 +345,7 @@ class DBuilder implements Builder {
 
   @Override
   public boolean containsQualifier(String name) {
-    return beanMap.containsName(name);
+    return beanMap.containsQualifier(name);
   }
 
   private <T> T getBean(Type type, String name) {
