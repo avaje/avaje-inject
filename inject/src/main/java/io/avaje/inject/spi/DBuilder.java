@@ -332,6 +332,21 @@ class DBuilder implements Builder {
   public final <T> T get(Type type, String name) {
     return getBean(type, name);
   }
+  
+  @Override
+  public boolean contains(String type) {
+    return beanMap.contains(type);
+  }
+
+  @Override
+  public boolean contains(Type type) {
+    return beanMap.contains(type);
+  }
+
+  @Override
+  public boolean containsQualifier(String name) {
+    return beanMap.containsQualifier(name);
+  }
 
   private <T> T getBean(Type type, String name) {
     if (BeanScope.class.equals(type)) {

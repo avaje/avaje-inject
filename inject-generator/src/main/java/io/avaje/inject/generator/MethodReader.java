@@ -4,9 +4,13 @@ import static io.avaje.inject.generator.ProcessingContext.asElement;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -37,6 +41,14 @@ final class MethodReader {
   private final String name;
   private final TypeReader typeReader;
   private final boolean optionalType;
+  private final Set<String> conditionTypes = new HashSet<>();
+  private final Set<String> missingTypes = new HashSet<>();
+  private final Set<String> qualifierNames = new HashSet<>();
+  private final Set<String> missingProps = new HashSet<>();
+  private final Set<String> containsProps = new HashSet<>();
+  private final Map<String, String> propertyEquals = new HashMap<>();
+  private final Map<String, String> propertyNotEquals = new HashMap<>();
+
 
   MethodReader(ExecutableElement element, TypeElement beanType, ImportTypeMap importTypes) {
     this(element, beanType, null, null, importTypes);
@@ -49,6 +61,11 @@ final class MethodReader {
       prototype = PrototypePrism.isPresent(element);
       primary = PrimaryPrism.isPresent(element);
       secondary = SecondaryPrism.isPresent(element);
+
+      element.getAnnotationMirrors().forEach(this::findRequiresOnAnnotation);
+      RequiresBeanPrism.getAllInstancesOn(element).forEach(this::processBeanPrism);
+      RequiresPropertyPrism.getAllInstancesOn(element).forEach(this::processPropertyPrism);
+
     } else {
       prototype = false;
       primary = false;
@@ -96,6 +113,40 @@ final class MethodReader {
       '}';
   }
 
+  void processBeanPrism(RequiresBeanPrism prism) {
+    prism.value().forEach(t -> conditionTypes.add(t.toString()));
+    prism.missingBeans().forEach(t -> missingTypes.add(t.toString()));
+    qualifierNames.addAll(prism.qualifiers());
+  }
+
+  void processPropertyPrism(RequiresPropertyPrism prism) {
+
+    if (!ProcessingContext.useAvajeConfig()) {
+      throw new IllegalStateException(
+          "RequiresProperty functionality only works with Avaje Config");
+    }
+
+    if (!prism.value().isBlank()) {
+      if (!prism.notEqualTo().isBlank()) {
+        propertyNotEquals.put(prism.value(), prism.notEqualTo());
+      } else if (!prism.equalTo().isBlank()) {
+        propertyEquals.put(prism.value(), prism.equalTo());
+      } else {
+        containsProps.add(prism.value());
+      }
+    }
+
+    missingProps.addAll(prism.missingProperties());
+  }
+
+  private void findRequiresOnAnnotation(AnnotationMirror a) {
+
+    final var annotationElement = a.getAnnotationType().asElement();
+
+    RequiresBeanPrism.getAllInstancesOn(annotationElement).forEach(this::processBeanPrism);
+    RequiresPropertyPrism.getAllInstancesOn(annotationElement).forEach(this::processPropertyPrism);
+  }
+
   void addDependsOnGeneric(Set<GenericType> set) {
     for (MethodParam param : params) {
       param.addDependsOnGeneric(set);
@@ -130,7 +181,13 @@ final class MethodReader {
 
     List<String> dependsOn = new ArrayList<>(params.size() + 1);
     dependsOn.add(factoryType);
-    for (MethodParam param : params) {
+
+    conditionTypes.stream().map(t -> "con:" + t).forEach(dependsOn::add);
+    missingTypes.stream()
+        .filter(t -> !t.equals(returnTypeRaw))
+        .map(t -> "con:" + t)
+        .forEach(dependsOn::add);
+    for (final MethodParam param : params) {
       dependsOn.add(GenericType.trimWildcard(param.paramType));
     }
     metaData.setDependsOn(dependsOn);
@@ -145,7 +202,7 @@ final class MethodReader {
   }
 
   String builderGetFactory() {
-    return String.format("      var factory = builder.get(%s.class);", factoryShortName);
+    return String.format("      var factory = builder.getNullable(%s.class); %n      if(factory == null) return;", factoryShortName);
   }
 
   void builderBuildBean(Append writer) {
@@ -243,10 +300,25 @@ final class MethodReader {
     if (optionalType) {
       importTypes.add(Constants.OPTIONAL);
     }
+    conditionTypes.forEach(importTypes::add);
+    missingTypes.forEach(importTypes::add);
+    if (!containsProps.isEmpty()
+        || !missingProps.isEmpty()
+        || !propertyEquals.isEmpty()
+        || !propertyNotEquals.isEmpty()) {
+      importTypes.add(
+          ProcessingContext.useAvajeConfig() ? "io.avaje.config.Config" : "java.util.Optional");
+    }
   }
 
   Set<GenericType> genericTypes() {
     return typeReader == null ? Collections.emptySet() : typeReader.genericTypes();
+  }
+
+  void buildConditional(Append writer) {
+    Util.buildBeanConditional(writer, conditionTypes, missingTypes, qualifierNames);
+    Util.buildPropertyConditional(
+        writer, containsProps, missingProps, propertyEquals, propertyNotEquals);
   }
 
   void buildAddFor(Append writer) {

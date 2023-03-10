@@ -34,9 +34,10 @@ final class ProcessingContext {
   private static Filer filer;
   private static Elements elementUtils;
   private static Types typeUtils;
-  private static Set<String> uniqueModuleNames = new HashSet<>();
-  private static Set<String> providedTypes = new HashSet<>();
+  private static final Set<String> uniqueModuleNames = new HashSet<>();
+  private static final Set<String> providedTypes = new HashSet<>();
   private static final Set<String> optionalTypes = new LinkedHashSet<>();
+  private static boolean useAvajeConfig;
 
  static void init(ProcessingEnvironment env, Set<String> moduleFileProvided) {
     processingEnv = env;
@@ -44,9 +45,9 @@ final class ProcessingContext {
     filer = processingEnv.getFiler();
     elementUtils = processingEnv.getElementUtils();
     typeUtils = processingEnv.getTypeUtils();
-
     ExternalProvider.registerModuleProvidedTypes(providedTypes);
     providedTypes.addAll(moduleFileProvided);
+    useAvajeConfig =  element("io.avaje.config.Config") != null;
   }
 
   /**
@@ -166,4 +167,7 @@ final class ProcessingContext {
     }
   }
 
+ static boolean useAvajeConfig() {
+    return useAvajeConfig;
+  }
 }

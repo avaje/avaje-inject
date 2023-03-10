@@ -100,6 +100,7 @@ final class SimpleBeanWriter {
   private void writeFactoryBeanMethod(MethodReader method) {
     method.commentBuildMethod(writer);
     writer.append("  public static void build_%s(%s builder) {", method.name(), beanReader.builderType()).eol();
+    method.buildConditional(writer);
     method.buildAddFor(writer);
     writer.append(method.builderGetFactory()).eol();
     if (method.isProtoType()) {
@@ -130,6 +131,7 @@ final class SimpleBeanWriter {
   }
 
   private void writeAddFor(MethodReader constructor) {
+    beanReader.buildConditional(writer);
     beanReader.buildAddFor(writer);
     if (beanReader.prototype()) {
       indent += "  ";

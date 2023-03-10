@@ -7,9 +7,12 @@ import jakarta.inject.Provider;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Map of types (class types, interfaces and annotations) to a DContextEntry where the
@@ -18,6 +21,7 @@ import java.util.Map;
 final class DBeanMap {
 
   private final Map<String, DContextEntry> beans = new LinkedHashMap<>();
+  private final Set<String> qualifiers = new HashSet<>();
 
   private NextBean nextBean;
 
@@ -51,6 +55,7 @@ final class DBeanMap {
 
   private void addSuppliedBean(SuppliedBean supplied) {
     Type suppliedType = supplied.type();
+    qualifiers.add(supplied.name());
     DContextEntryBean entryBean = DContextEntryBean.supplied(supplied.source(), supplied.name(), supplied.priority());
     beans.computeIfAbsent(suppliedType.getTypeName(), s -> new DContextEntry()).add(entryBean);
     for (Class<?> anInterface : supplied.interfaces()) {
@@ -59,13 +64,20 @@ final class DBeanMap {
   }
 
   void register(Object bean) {
-    DContextEntryBean entryBean = DContextEntryBean.of(bean, nextBean.name, nextBean.priority);
+    if (bean == null || Optional.empty().equals(bean)) {
+      return;
+    }
+    var name = nextBean.name;
+    qualifiers.add(name);
+    DContextEntryBean entryBean = DContextEntryBean.of(bean, name, nextBean.priority);
     for (Type type : nextBean.types) {
       beans.computeIfAbsent(type.getTypeName(), s -> new DContextEntry()).add(entryBean);
     }
   }
 
   void register(Provider<?> provider) {
+
+	qualifiers.add(nextBean.name);
     DContextEntryBean entryBean = DContextEntryBean.provider(nextBean.prototype, provider, nextBean.name, nextBean.priority);
     for (Type type : nextBean.types) {
       beans.computeIfAbsent(type.getTypeName(), s -> new DContextEntry()).add(entryBean);
@@ -89,6 +101,10 @@ final class DBeanMap {
 
   boolean contains(Type type) {
     return beans.containsKey(type.getTypeName());
+  }
+
+  boolean containsQualifier(String type) {
+    return qualifiers.contains(type);
   }
 
   @SuppressWarnings("unchecked")
