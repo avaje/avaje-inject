@@ -9,7 +9,7 @@ import io.avaje.inject.RequiresProperty;
 import io.avaje.inject.Secondary;
 
 @Factory
-@RequiresProperty(value = "factory", equalTo = "bird")
+@RequiresProperty(value = "factory", equalTo = "bird", missingProperties = "neverExisted")
 public class BirdFactory {
 
   @Bean

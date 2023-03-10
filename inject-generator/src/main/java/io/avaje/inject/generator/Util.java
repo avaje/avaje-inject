@@ -321,7 +321,7 @@ final class Util {
         } else {
           writer.append(" || ");
         }
-        writer.append("!builder.property().contains(\"%s\")", props);
+        writer.append("builder.property().missing(\"%s\")", props);
       }
 
       for (final var props : missingProps) {
@@ -330,7 +330,7 @@ final class Util {
         } else {
           writer.append(" || ");
         }
-        writer.append("!builder.property().missing(\"%s\")", props);
+        writer.append("builder.property().contains(\"%s\")", props);
       }
 
       for (final var props : propertyEquals.entrySet()) {
@@ -339,7 +339,7 @@ final class Util {
         } else {
           writer.append(" || ");
         }
-        writer.append("!builder.property().equalTo(\"%s\", \"%s\")", props.getKey(), props.getValue());
+        writer.append("builder.property().notEqualTo(\"%s\", \"%s\")", props.getKey(), props.getValue());
       }
 
       for (final var props : propertyNotEquals.entrySet()) {
@@ -348,7 +348,7 @@ final class Util {
         } else {
           writer.append(" || ");
         }
-        writer.append("!builder.property().notEqualTo(\"%s\", \"%s\")", props.getKey(), props.getValue());
+        writer.append("builder.property().equalTo(\"%s\", \"%s\")", props.getKey(), props.getValue());
       }
 
       writer.append(")").eol().append("     return;").eol().eol();
