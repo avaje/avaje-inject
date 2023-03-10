@@ -10,6 +10,7 @@ import io.avaje.inject.Secondary;
 
 @Factory
 @RequiresProperty(value = "factory", equalTo = "bird", missingProperties = "neverExisted")
+@RequiresProperty(value = "somethingElse", notEqualTo = "testRepeatable")
 public class BirdFactory {
 
   @Bean

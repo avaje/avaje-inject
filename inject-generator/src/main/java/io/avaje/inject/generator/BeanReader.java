@@ -44,10 +44,7 @@ final class BeanReader {
     this.proxy = ProxyPrism.isPresent(beanType);
     this.typeReader = new TypeReader(GenericType.parse(type), beanType, importTypes, factory);
 
-    beanType.getAnnotationMirrors().forEach(this::findRequiresOnAnnotation);
-
-    RequiresBeanPrism.getAllInstancesOn(beanType).forEach(this::processBeanPrism);
-    RequiresPropertyPrism.getAllInstancesOn(beanType).forEach(this::processPropertyPrism);
+    conditions.readAll(beanType);
 
     typeReader.process();
     this.requestParams = new BeanRequestParams(type);
@@ -64,21 +61,6 @@ final class BeanReader {
   @Override
   public String toString() {
     return beanType.toString();
-  }
-
-  void processBeanPrism(RequiresBeanPrism prism) {
-    conditions.read(prism);
-  }
-
-  void processPropertyPrism(RequiresPropertyPrism prism) {
-    conditions.read(prism);
-  }
-
-  private void findRequiresOnAnnotation(AnnotationMirror a) {
-    final var annotationElement = a.getAnnotationType().asElement();
-
-    RequiresBeanPrism.getAllInstancesOn(annotationElement).forEach(this::processBeanPrism);
-    RequiresPropertyPrism.getAllInstancesOn(annotationElement).forEach(this::processPropertyPrism);
   }
 
   TypeElement beanType() {

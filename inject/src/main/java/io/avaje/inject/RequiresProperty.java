@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 /**
  * Expresses a requirement for a bean to be wired/registered into the {@link BeanScope}.
  *
- * <pre class="code">{@code
+ * <pre>{@code
  *
  *   @Configuration
  *   public class MyAutoConfiguration {
@@ -25,11 +25,21 @@ import java.lang.annotation.*;
  *
  * }</pre>
  *
- * <p>In the sample above the MyService bean will get wired only if use.service is set in Java
- * system properties / Avaje Config.
+ * <p>
+ * In the sample above the MyService bean will get wired only if <code>use.service</code>
+ * is set in Java system properties / Avaje Config.
+ * <p>
+ * {@link io.avaje.inject.spi.PropertyRequiresPlugin} is used to test the property
+ * conditions and is loaded via {@link java.util.ServiceLoader}.
+ * <p>
+ * Avaje Config provides an implementation and if it is included in the classpath then
+ * Avaje Config will be used to test the property conditions.
+ * <p>
+ * If no PropertyRequiresPlugin is found then the default implementation is used which uses
+ * {@link System#getProperty(String)} and {@link System#getenv(String)}.
  */
 @Retention(RUNTIME)
-@Repeatable(RequiresProperty.RequireProperties.class)
+@Repeatable(RequiresProperty.Container.class)
 @Target({TYPE, METHOD, ANNOTATION_TYPE})
 public @interface RequiresProperty {
 
@@ -64,7 +74,7 @@ public @interface RequiresProperty {
 
   @Retention(RetentionPolicy.RUNTIME)
   @Target({ElementType.TYPE, ElementType.METHOD})
-  @interface RequireProperties {
+  @interface Container {
 
     /** @return The required dependencies */
     RequiresProperty[] value();

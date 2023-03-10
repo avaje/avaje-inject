@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 /**
  * Expresses a requirement for a bean to be wired/registered into the {@link BeanScope}.
  *
- * <pre class="code">{@code
+ * <pre>{@code
  *
  *   @Configuration
  *   public class MyAutoConfiguration {
@@ -28,7 +28,7 @@ import java.lang.annotation.*;
  * OtherService} is already registered in the {@link BeanScope}.
  */
 @Retention(RUNTIME)
-@Repeatable(RequiresBean.RequireBeans.class)
+@Repeatable(RequiresBean.Container.class)
 @Target({TYPE, METHOD, ANNOTATION_TYPE})
 public @interface RequiresBean {
 
@@ -55,7 +55,7 @@ public @interface RequiresBean {
   String[] qualifiers() default {};
   @Retention(RetentionPolicy.RUNTIME)
   @Target({ElementType.TYPE, ElementType.METHOD})
-  @interface RequireBeans {
+  @interface Container {
 
     /** @return The required dependencies */
     RequiresBean[] value();
