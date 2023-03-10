@@ -1,6 +1,7 @@
 package org.example.myapp.conditional;
 
 import org.example.myapp.conditional.Bird.BlueJay;
+import org.example.myapp.conditional.Bird.Cassowary;
 
 import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
