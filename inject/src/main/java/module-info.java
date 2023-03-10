@@ -11,5 +11,6 @@ module io.avaje.inject {
 
   uses io.avaje.inject.spi.Module;
   uses io.avaje.inject.spi.Plugin;
+  uses io.avaje.inject.spi.PropertyRequiresPlugin;
 
 }

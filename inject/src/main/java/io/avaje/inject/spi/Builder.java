@@ -24,12 +24,12 @@ public interface Builder {
    * @param parentOverride When false do not add beans that already exist on the parent
    */
   @SuppressWarnings("rawtypes")
-  static Builder newBuilder(List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans, BeanScope parent, boolean parentOverride) {
+  static Builder newBuilder(PropertyRequiresPlugin plugin, List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans, BeanScope parent, boolean parentOverride) {
     if (suppliedBeans.isEmpty() && enrichBeans.isEmpty()) {
       // simple case, no mocks or spies
-      return new DBuilder(parent, parentOverride);
+      return new DBuilder(plugin, parent, parentOverride);
     }
-    return new DBuilderExtn(parent, parentOverride, suppliedBeans, enrichBeans);
+    return new DBuilderExtn(plugin, parent, parentOverride, suppliedBeans, enrichBeans);
   }
 
   /**
@@ -229,6 +229,26 @@ public interface Builder {
    * Return a map of dependencies for the generic type keyed by qualifier name.
    */
   <T> Map<String, T> map(Type type);
+
+  /**
+   * Return true if the builder contains the given type.
+   */
+  boolean contains(Type type);
+
+  /**
+   * Return true if the builder contains the given type.
+   */
+  boolean contains(String type);
+
+  /**
+   * Return true if the builder contains a bean with the given name.
+   */
+  boolean containsQualifier(String name);
+
+  /**
+   * Return the plugin for required properties.
+   */
+  PropertyRequiresPlugin property();
 
   /**
    * Build and return the bean scope.

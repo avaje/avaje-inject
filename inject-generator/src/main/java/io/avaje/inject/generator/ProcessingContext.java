@@ -34,8 +34,8 @@ final class ProcessingContext {
   private static Filer filer;
   private static Elements elementUtils;
   private static Types typeUtils;
-  private static Set<String> uniqueModuleNames = new HashSet<>();
-  private static Set<String> providedTypes = new HashSet<>();
+  private static final Set<String> uniqueModuleNames = new HashSet<>();
+  private static final Set<String> providedTypes = new HashSet<>();
   private static final Set<String> optionalTypes = new LinkedHashSet<>();
 
  static void init(ProcessingEnvironment env, Set<String> moduleFileProvided) {
@@ -44,7 +44,6 @@ final class ProcessingContext {
     filer = processingEnv.getFiler();
     elementUtils = processingEnv.getElementUtils();
     typeUtils = processingEnv.getTypeUtils();
-
     ExternalProvider.registerModuleProvidedTypes(providedTypes);
     providedTypes.addAll(moduleFileProvided);
   }
@@ -142,7 +141,7 @@ final class ProcessingContext {
  static Element asElement(TypeMirror returnType) {
 
     var wrapper = PrimitiveUtil.wrap(returnType.toString());
-    
+
     return wrapper == null ? typeUtils.asElement(returnType) : element(wrapper);
   }
 
@@ -165,5 +164,4 @@ final class ProcessingContext {
       optionalTypes.add(paramType);
     }
   }
-
 }

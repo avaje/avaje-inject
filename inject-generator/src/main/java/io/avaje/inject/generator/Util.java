@@ -48,7 +48,7 @@ final class Util {
     return type.substring(0, i);
   }
 
-  
+
   /** Trim off annotations from the raw type if present. */
   public static String trimAnnotations(String type) {
     int pos = type.indexOf(".@");
@@ -57,7 +57,7 @@ final class Util {
     }
     return type.substring(0, pos + 1) + type.substring(type.lastIndexOf(' ') + 1);
   }
-  
+
   static String nestedPackageOf(String cls) {
     int pos = cls.lastIndexOf('.');
     if (pos < 0) {
@@ -247,4 +247,5 @@ final class Util {
       .replace('.', '_')
       .replace(Constants.DI, "");
   }
+
 }

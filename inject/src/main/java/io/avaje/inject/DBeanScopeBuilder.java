@@ -170,7 +170,11 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         " Refer to https://avaje.io/inject#gradle");
     }
     log.log(DEBUG, "building with modules {0}", moduleNames);
-    Builder builder = Builder.newBuilder(suppliedBeans, enrichBeans, parent, parentOverride);
+    final var propertyRequiresPlugin = ServiceLoader.load(PropertyRequiresPlugin.class, loader)
+      .findFirst()
+      .orElse(new DSystemProps());
+
+    Builder builder = Builder.newBuilder(propertyRequiresPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
     for (Module factory : factoryOrder.factories()) {
       factory.build(builder);
     }

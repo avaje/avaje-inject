@@ -1,17 +1,13 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.ProcessingContext.asElement;
-
+import javax.lang.model.element.*;
+import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeMirror;
+import static io.avaje.inject.generator.ProcessingContext.asElement;
 
 
 final class MethodReader {
@@ -37,6 +33,7 @@ final class MethodReader {
   private final String name;
   private final TypeReader typeReader;
   private final boolean optionalType;
+  private final BeanConditions conditions = new BeanConditions();
 
   MethodReader(ExecutableElement element, TypeElement beanType, ImportTypeMap importTypes) {
     this(element, beanType, null, null, importTypes);
@@ -49,6 +46,11 @@ final class MethodReader {
       prototype = PrototypePrism.isPresent(element);
       primary = PrimaryPrism.isPresent(element);
       secondary = SecondaryPrism.isPresent(element);
+
+      element.getAnnotationMirrors().forEach(this::findRequiresOnAnnotation);
+      RequiresBeanPrism.getAllInstancesOn(element).forEach(this::processBeanPrism);
+      RequiresPropertyPrism.getAllInstancesOn(element).forEach(this::processPropertyPrism);
+
     } else {
       prototype = false;
       primary = false;
@@ -96,6 +98,21 @@ final class MethodReader {
       '}';
   }
 
+  void processBeanPrism(RequiresBeanPrism prism) {
+    conditions.read(prism);
+  }
+
+  void processPropertyPrism(RequiresPropertyPrism prism) {
+    conditions.read(prism);
+  }
+
+  private void findRequiresOnAnnotation(AnnotationMirror a) {
+    final var annotationElement = a.getAnnotationType().asElement();
+
+    RequiresBeanPrism.getAllInstancesOn(annotationElement).forEach(this::processBeanPrism);
+    RequiresPropertyPrism.getAllInstancesOn(annotationElement).forEach(this::processPropertyPrism);
+  }
+
   void addDependsOnGeneric(Set<GenericType> set) {
     for (MethodParam param : params) {
       param.addDependsOnGeneric(set);
@@ -130,7 +147,15 @@ final class MethodReader {
 
     List<String> dependsOn = new ArrayList<>(params.size() + 1);
     dependsOn.add(factoryType);
-    for (MethodParam param : params) {
+
+    conditions.requireTypes.stream()
+      .map(t -> "con:" + t)
+      .forEach(dependsOn::add);
+    conditions.missingTypes.stream()
+        .filter(t -> !t.equals(returnTypeRaw))
+        .map(t -> "con:" + t)
+        .forEach(dependsOn::add);
+    for (final MethodParam param : params) {
       dependsOn.add(GenericType.trimWildcard(param.paramType));
     }
     metaData.setDependsOn(dependsOn);
@@ -145,7 +170,7 @@ final class MethodReader {
   }
 
   String builderGetFactory() {
-    return String.format("      var factory = builder.get(%s.class);", factoryShortName);
+    return String.format("      var factory = builder.getNullable(%s.class); %n      if (factory == null) return;", factoryShortName);
   }
 
   void builderBuildBean(Append writer) {
@@ -243,10 +268,15 @@ final class MethodReader {
     if (optionalType) {
       importTypes.add(Constants.OPTIONAL);
     }
+    conditions.addImports(importTypes);
   }
 
   Set<GenericType> genericTypes() {
     return typeReader == null ? Collections.emptySet() : typeReader.genericTypes();
+  }
+
+  void buildConditional(Append writer) {
+    new ConditionalWriter(writer, conditions).write();
   }
 
   void buildAddFor(Append writer) {
@@ -357,11 +387,11 @@ final class MethodReader {
       this.paramType = utilType.rawType(isBeanMap);
       this.genericType = GenericType.parse(paramType);
       this.fullGenericType = GenericType.parse(utilType.full());
-   
+
       if (nullable || param.asType().toString().startsWith("java.util.Optional<")) {
         ProcessingContext.addOptionalType(paramType);
       }
-      
+
     }
 
     @Override

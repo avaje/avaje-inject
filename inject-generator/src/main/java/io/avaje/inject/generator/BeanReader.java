@@ -1,13 +1,9 @@
 package io.avaje.inject.generator;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import java.util.*;
 
 
 final class BeanReader {
@@ -32,6 +28,7 @@ final class BeanReader {
   private final boolean secondary;
   private final boolean proxy;
   private final BeanAspects aspects;
+  private final BeanConditions conditions = new BeanConditions();
   private boolean writtenToFile;
   private boolean suppressBuilderImport;
   private boolean suppressGeneratedImport;
@@ -46,6 +43,12 @@ final class BeanReader {
     this.secondary = !primary && SecondaryPrism.isPresent(beanType);
     this.proxy = ProxyPrism.isPresent(beanType);
     this.typeReader = new TypeReader(GenericType.parse(type), beanType, importTypes, factory);
+
+    beanType.getAnnotationMirrors().forEach(this::findRequiresOnAnnotation);
+
+    RequiresBeanPrism.getAllInstancesOn(beanType).forEach(this::processBeanPrism);
+    RequiresPropertyPrism.getAllInstancesOn(beanType).forEach(this::processPropertyPrism);
+
     typeReader.process();
     this.requestParams = new BeanRequestParams(type);
     this.name = typeReader.name();
@@ -61,6 +64,21 @@ final class BeanReader {
   @Override
   public String toString() {
     return beanType.toString();
+  }
+
+  void processBeanPrism(RequiresBeanPrism prism) {
+    conditions.read(prism);
+  }
+
+  void processPropertyPrism(RequiresPropertyPrism prism) {
+    conditions.read(prism);
+  }
+
+  private void findRequiresOnAnnotation(AnnotationMirror a) {
+    final var annotationElement = a.getAnnotationType().asElement();
+
+    RequiresBeanPrism.getAllInstancesOn(annotationElement).forEach(this::processBeanPrism);
+    RequiresPropertyPrism.getAllInstancesOn(annotationElement).forEach(this::processPropertyPrism);
   }
 
   TypeElement beanType() {
@@ -91,6 +109,8 @@ final class BeanReader {
     for (MethodReader factoryMethod : factoryMethods) {
       factoryMethod.addImports(importTypes);
     }
+
+    conditions.addImports(importTypes);
     return this;
   }
 
@@ -105,6 +125,13 @@ final class BeanReader {
         }
       }
     }
+    conditions.requireTypes.stream()
+      .map(t -> new Dependency("con:" + t))
+      .forEach(list::add);
+    conditions.missingTypes.stream()
+      .filter(t -> !t.equals(type))
+      .map(t -> new Dependency("con:" + t))
+      .forEach(list::add);
     return list;
   }
 
@@ -193,6 +220,10 @@ final class BeanReader {
 
   boolean isExtraInjectionRequired() {
     return !injectFields.isEmpty() || !injectMethods.isEmpty();
+  }
+
+  void buildConditional(Append writer) {
+    new ConditionalWriter(writer, conditions).write();
   }
 
   void buildAddFor(Append writer) {

@@ -19,8 +19,8 @@ final class DBuilderExtn extends DBuilder {
   private final boolean hasSuppliedBeans;
 
   @SuppressWarnings("rawtypes")
-  DBuilderExtn(BeanScope parent, boolean parentOverride, List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans) {
-    super(parent, parentOverride);
+  DBuilderExtn(PropertyRequiresPlugin plugin, BeanScope parent, boolean parentOverride, List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans) {
+    super(plugin, parent, parentOverride);
     this.hasSuppliedBeans = (suppliedBeans != null && !suppliedBeans.isEmpty());
     if (hasSuppliedBeans) {
       beanMap.add(suppliedBeans);
