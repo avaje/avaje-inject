@@ -63,8 +63,8 @@ final class MethodReader {
       secondary = SecondaryPrism.isPresent(element);
 
       element.getAnnotationMirrors().forEach(this::findRequiresOnAnnotation);
-      RequiresBeanPrism.getAllInstancesOn(beanType).forEach(this::processBeanPrism);
-      RequiresPropertyPrism.getAllInstancesOn(beanType).forEach(this::processPropertyPrism);
+      RequiresBeanPrism.getAllInstancesOn(element).forEach(this::processBeanPrism);
+      RequiresPropertyPrism.getAllInstancesOn(element).forEach(this::processPropertyPrism);
 
     } else {
       prototype = false;

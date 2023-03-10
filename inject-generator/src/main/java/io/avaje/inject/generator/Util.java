@@ -341,7 +341,7 @@ final class Util {
         }
       }
 
-      for (final var props : propertyEquals.entrySet()) {
+      for (final var props : propertyNotEquals.entrySet()) {
 
         if (first) {
 
