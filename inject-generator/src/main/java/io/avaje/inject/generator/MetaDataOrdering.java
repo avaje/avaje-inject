@@ -193,31 +193,22 @@ final class MetaDataOrdering {
         // check non-provider dependency is satisfied
         ProviderList providerList = providers.get(dependencyName);
         if (providerList == null) {
-          if (!nullProvider(queuedMeta, includeExternal, dependency)) return false;
+          if (!scopeInfo.providedByOther(dependency)) {
+            if (includeExternal && externallyProvided(dependencyName)) {
+              if (Util.isAspectProvider(dependencyName)) {
+                autoRequiresAspects.add(Util.extractAspectType(dependencyName));
+              } else {
+                autoRequires.add(dependencyName);
+              }
+              queuedMeta.markWithExternalDependency(dependencyName);
+            } else {
+              return false;
+            }
+          }
         } else if (!providerList.isAllWired()) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  private boolean nullProvider(
-      MetaData queuedMeta, boolean includeExternal, Dependency dependency) {
-    final var dependencyName = dependency.name();
-    if (!scopeInfo.providedByOther(dependency)) {
-      if (includeExternal && externallyProvided(dependencyName)) {
-        if (Util.isAspectProvider(dependencyName)) {
-          autoRequiresAspects.add(Util.extractAspectType(dependencyName));
-        } else {
-          autoRequires.add(dependencyName);
-        }
-        queuedMeta.markWithExternalDependency(dependencyName);
-      } else {
         return false;
       }
-    } else if (dependency.isConditionalDependency()) {
-      autoRequires.add(dependencyName);
+      }
     }
     return true;
   }
