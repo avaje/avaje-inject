@@ -2,13 +2,13 @@
 
 ## adjust pom dependencies
 
-sed -i '0,/<version>[^<]*\(-SNAPSHOT\)\{0,1\}<\/version>/ s/<version>\([^<]*\)\(-SNAPSHOT\)\{0,1\}<\/version>/<version>\1-javax\2<\/version>/' pom.xml
-sed -i '0,/<version>[^<]*\(-SNAPSHOT\)\{0,1\}<\/version>/ s/<version>\([^<]*\)\(-SNAPSHOT\)\{0,1\}<\/version>/<version>\1-javax\2<\/version>/' inject/pom.xml
-sed -i '0,/<version>[^<]*\(-SNAPSHOT\)\{0,1\}<\/version>/ s/<version>\([^<]*\)\(-SNAPSHOT\)\{0,1\}<\/version>/<version>\1-javax\2<\/version>/' inject-generator/pom.xml
-sed -i '0,/<version>[^<]*\(-SNAPSHOT\)\{0,1\}<\/version>/ s/<version>\([^<]*\)\(-SNAPSHOT\)\{0,1\}<\/version>/<version>\1-javax\2<\/version>/' inject-test/pom.xml
-sed -i '0,/<version>[^<]*\(-SNAPSHOT\)\{0,1\}<\/version>/ s/<version>\([^<]*\)\(-SNAPSHOT\)\{0,1\}<\/version>/<version>\1-javax\2<\/version>/' blackbox-aspect/pom.xml
-sed -i '0,/<version>[^<]*\(-SNAPSHOT\)\{0,1\}<\/version>/ s/<version>\([^<]*\)\(-SNAPSHOT\)\{0,1\}<\/version>/<version>\1-javax\2<\/version>/' blackbox-other/pom.xml
-sed -i '0,/<version>[^<]*\(-SNAPSHOT\)\{0,1\}<\/version>/ s/<version>\([^<]*\)\(-SNAPSHOT\)\{0,1\}<\/version>/<version>\1-javax\2<\/version>/' blackbox-test-inject/pom.xml
+sed -i -E '0,/<version>[^<]*<\/version>/ s/<version>([^-]*)-?([^<]*)(<\/version>)/<version>\1-javax-\2\3/' pom.xml
+sed -i -E '0,/<version>[^<]*<\/version>/ s/<version>([^-]*)-?([^<]*)(<\/version>)/<version>\1-javax-\2\3/' inject/pom.xml
+sed -i -E '0,/<version>[^<]*<\/version>/ s/<version>([^-]*)-?([^<]*)(<\/version>)/<version>\1-javax-\2\3/' inject-generator/pom.xml
+sed -i -E '0,/<version>[^<]*<\/version>/ s/<version>([^-]*)-?([^<]*)(<\/version>)/<version>\1-javax-\2\3/' inject-test/pom.xml
+sed -i -E '0,/<version>[^<]*<\/version>/ s/<version>([^-]*)-?([^<]*)(<\/version>)/<version>\1-javax-\2\3/' blackbox-aspect/pom.xml
+sed -i -E '0,/<version>[^<]*<\/version>/ s/<version>([^-]*)-?([^<]*)(<\/version>)/<version>\1-javax-\2\3/' blackbox-other/pom.xml
+sed -i -E '0,/<version>[^<]*<\/version>/ s/<version>([^-]*)-?([^<]*)(<\/version>)/<version>\1-javax-\2\3/' blackbox-test-inject/pom.xml
 
 sed -i'' -e 's|<version>2\.0\.1</version> <!-- jakarta -->|<version>1\.0\.5</version> <!-- javax -->|g' inject/pom.xml
 
