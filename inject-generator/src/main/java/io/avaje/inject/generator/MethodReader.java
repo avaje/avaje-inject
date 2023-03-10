@@ -1,21 +1,13 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.ProcessingContext.asElement;
-
+import javax.lang.model.element.*;
+import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeMirror;
+import static io.avaje.inject.generator.ProcessingContext.asElement;
 
 
 final class MethodReader {
@@ -41,14 +33,7 @@ final class MethodReader {
   private final String name;
   private final TypeReader typeReader;
   private final boolean optionalType;
-  private final Set<String> conditionTypes = new HashSet<>();
-  private final Set<String> missingTypes = new HashSet<>();
-  private final Set<String> qualifierNames = new HashSet<>();
-  private final Set<String> missingProps = new HashSet<>();
-  private final Set<String> containsProps = new HashSet<>();
-  private final Map<String, String> propertyEquals = new HashMap<>();
-  private final Map<String, String> propertyNotEquals = new HashMap<>();
-
+  private final BeanConditions conditions = new BeanConditions();
 
   MethodReader(ExecutableElement element, TypeElement beanType, ImportTypeMap importTypes) {
     this(element, beanType, null, null, importTypes);
@@ -114,26 +99,14 @@ final class MethodReader {
   }
 
   void processBeanPrism(RequiresBeanPrism prism) {
-    prism.value().forEach(t -> conditionTypes.add(t.toString()));
-    prism.missingBeans().forEach(t -> missingTypes.add(t.toString()));
-    qualifierNames.addAll(prism.qualifiers());
+    conditions.read(prism);
   }
 
   void processPropertyPrism(RequiresPropertyPrism prism) {
-    if (!prism.value().isBlank()) {
-      if (!prism.notEqualTo().isBlank()) {
-        propertyNotEquals.put(prism.value(), prism.notEqualTo());
-      } else if (!prism.equalTo().isBlank()) {
-        propertyEquals.put(prism.value(), prism.equalTo());
-      } else {
-        containsProps.add(prism.value());
-      }
-    }
-    missingProps.addAll(prism.missingProperties());
+    conditions.read(prism);
   }
 
   private void findRequiresOnAnnotation(AnnotationMirror a) {
-
     final var annotationElement = a.getAnnotationType().asElement();
 
     RequiresBeanPrism.getAllInstancesOn(annotationElement).forEach(this::processBeanPrism);
@@ -175,8 +148,10 @@ final class MethodReader {
     List<String> dependsOn = new ArrayList<>(params.size() + 1);
     dependsOn.add(factoryType);
 
-    conditionTypes.stream().map(t -> "con:" + t).forEach(dependsOn::add);
-    missingTypes.stream()
+    conditions.requireTypes.stream()
+      .map(t -> "con:" + t)
+      .forEach(dependsOn::add);
+    conditions.missingTypes.stream()
         .filter(t -> !t.equals(returnTypeRaw))
         .map(t -> "con:" + t)
         .forEach(dependsOn::add);
@@ -195,7 +170,7 @@ final class MethodReader {
   }
 
   String builderGetFactory() {
-    return String.format("      var factory = builder.getNullable(%s.class); %n      if(factory == null) return;", factoryShortName);
+    return String.format("      var factory = builder.getNullable(%s.class); %n      if (factory == null) return;", factoryShortName);
   }
 
   void builderBuildBean(Append writer) {
@@ -293,8 +268,7 @@ final class MethodReader {
     if (optionalType) {
       importTypes.add(Constants.OPTIONAL);
     }
-    conditionTypes.forEach(importTypes::add);
-    missingTypes.forEach(importTypes::add);
+    conditions.addImports(importTypes);
   }
 
   Set<GenericType> genericTypes() {
@@ -302,9 +276,7 @@ final class MethodReader {
   }
 
   void buildConditional(Append writer) {
-    Util.buildBeanConditional(writer, conditionTypes, missingTypes, qualifierNames);
-    Util.buildPropertyConditional(
-        writer, containsProps, missingProps, propertyEquals, propertyNotEquals);
+    Util.buildBeanConditional(writer, conditions);
   }
 
   void buildAddFor(Append writer) {

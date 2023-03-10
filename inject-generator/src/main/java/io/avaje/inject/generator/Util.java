@@ -1,8 +1,6 @@
 package io.avaje.inject.generator;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -250,108 +248,64 @@ final class Util {
       .replace(Constants.DI, "");
   }
 
-  public static void buildBeanConditional(
-      Append writer,
-      Set<String> conditionTypes,
-      Set<String> missingTypes,
-      Set<String> qualifierNames) {
-    if (!conditionTypes.isEmpty()
-        || !qualifierNames.isEmpty()
-        || !missingTypes.isEmpty()) {
-
-      writer.append("    if (");
-      var first = true;
-      for (final var conditionType : conditionTypes) {
-
-        if (first) {
-
-          writer.append("!builder.contains(%s.class)", Util.shortName(conditionType));
-          first = false;
-          continue;
-        }
-
-        writer.append(" || !builder.contains(%s.class)", Util.shortName(conditionType));
-      }
-
-      for (final var missing : missingTypes) {
-
-        if (first) {
-
-          writer.append("builder.contains(%s.class)", Util.shortName(missing));
-          first = false;
-          continue;
-        }
-
-        writer.append(" || builder.contains(%s.class)", Util.shortName(missing));
-      }
-
-      for (final var qualifier : qualifierNames) {
-
-        if (first) {
-
-          writer.append("!builder.containsQualifier(\"%s\")", qualifier);
-          first = false;
-          continue;
-        }
-
-        writer.append(" || !builder.containsQualifier(\"%s\")", qualifier);
-      }
-
-      writer.append(")").eol().append("     return;").eol().eol();
+  public static void buildBeanConditional(Append writer, BeanConditions conditions) {
+    if (conditions.isEmpty()) {
+      return;
     }
+    new ConditionalWriter(writer, conditions).write();
   }
 
-  public static void buildPropertyConditional(
-      Append writer,
-      Set<String> containsProps,
-      Set<String> missingProps,
-      Map<String, String> propertyEquals,
-      Map<String, String> propertyNotEquals) {
+  private static final class ConditionalWriter {
+    private final Append writer;
+    private final BeanConditions conditions;
 
-    if (!containsProps.isEmpty()
-        || !missingProps.isEmpty()
-        || !propertyEquals.isEmpty()
-        || !propertyNotEquals.isEmpty()) {
+    private boolean first = true;
 
+    private ConditionalWriter(Append writer, BeanConditions conditions) {
+      this.writer = writer;
+      this.conditions = conditions;
+    }
+
+    public void write() {
       writer.append("    if (");
-      var first = true;
-      for (final var props : containsProps) {
-        if (first) {
-          first = false;
-        } else {
-          writer.append(" || ");
-        }
+
+      for (final var requireType : conditions.requireTypes) {
+        prefix();
+        writer.append("!builder.contains(%s.class)", Util.shortName(requireType));
+      }
+      for (final var missing : conditions.missingTypes) {
+        prefix();
+        writer.append("builder.contains(%s.class)", Util.shortName(missing));
+      }
+      for (final var qualifier : conditions.qualifierNames) {
+        prefix();
+        writer.append("!builder.containsQualifier(\"%s\")", qualifier);
+      }
+      for (final var props : conditions.containsProps) {
+        prefix();
         writer.append("builder.property().missing(\"%s\")", props);
       }
-
-      for (final var props : missingProps) {
-        if (first) {
-          first = false;
-        } else {
-          writer.append(" || ");
-        }
+      for (final var props : conditions.missingProps) {
+        prefix();
         writer.append("builder.property().contains(\"%s\")", props);
       }
-
-      for (final var props : propertyEquals.entrySet()) {
-        if (first) {
-          first = false;
-        } else {
-          writer.append(" || ");
-        }
+      for (final var props : conditions.propertyEquals.entrySet()) {
+        prefix();
         writer.append("builder.property().notEqualTo(\"%s\", \"%s\")", props.getKey(), props.getValue());
       }
-
-      for (final var props : propertyNotEquals.entrySet()) {
-        if (first) {
-          first = false;
-        } else {
-          writer.append(" || ");
-        }
+      for (final var props : conditions.propertyNotEquals.entrySet()) {
+        prefix();
         writer.append("builder.property().equalTo(\"%s\", \"%s\")", props.getKey(), props.getValue());
       }
+      writer.append(") {").eol().append("      return;").eol().append("    }").eol().eol();
+    }
 
-      writer.append(")").eol().append("     return;").eol().eol();
+    private void prefix() {
+      if (first) {
+        first = false;
+      } else {
+        writer.eol().append("      || ");
+      }
     }
   }
 }
