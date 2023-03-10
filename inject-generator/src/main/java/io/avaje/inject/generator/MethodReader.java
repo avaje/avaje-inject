@@ -47,9 +47,7 @@ final class MethodReader {
       primary = PrimaryPrism.isPresent(element);
       secondary = SecondaryPrism.isPresent(element);
 
-      element.getAnnotationMirrors().forEach(this::findRequiresOnAnnotation);
-      RequiresBeanPrism.getAllInstancesOn(element).forEach(this::processBeanPrism);
-      RequiresPropertyPrism.getAllInstancesOn(element).forEach(this::processPropertyPrism);
+      conditions.readAll(element);
 
     } else {
       prototype = false;
@@ -96,21 +94,6 @@ final class MethodReader {
       "element=" + element +
       ", params=" + params +
       '}';
-  }
-
-  void processBeanPrism(RequiresBeanPrism prism) {
-    conditions.read(prism);
-  }
-
-  void processPropertyPrism(RequiresPropertyPrism prism) {
-    conditions.read(prism);
-  }
-
-  private void findRequiresOnAnnotation(AnnotationMirror a) {
-    final var annotationElement = a.getAnnotationType().asElement();
-
-    RequiresBeanPrism.getAllInstancesOn(annotationElement).forEach(this::processBeanPrism);
-    RequiresPropertyPrism.getAllInstancesOn(annotationElement).forEach(this::processPropertyPrism);
   }
 
   void addDependsOnGeneric(Set<GenericType> set) {

@@ -29,7 +29,7 @@ import java.lang.annotation.*;
  * system properties / Avaje Config.
  */
 @Retention(RUNTIME)
-@Repeatable(RequiresProperty.RequireProperties.class)
+@Repeatable(RequiresProperty.Container.class)
 @Target({TYPE, METHOD, ANNOTATION_TYPE})
 public @interface RequiresProperty {
 
@@ -64,7 +64,7 @@ public @interface RequiresProperty {
 
   @Retention(RetentionPolicy.RUNTIME)
   @Target({ElementType.TYPE, ElementType.METHOD})
-  @interface RequireProperties {
+  @interface Container {
 
     /** @return The required dependencies */
     RequiresProperty[] value();

@@ -18,18 +18,11 @@
 @GeneratePrism(Generated.class)
 @GeneratePrism(RequiresBean.class)
 @GeneratePrism(RequiresProperty.class)
+@GeneratePrism(value = RequiresBean.Container.class, name = "RequiresBeanContainerPrism")
+@GeneratePrism(value = RequiresProperty.Container.class, name = "RequiresPropertyContainerPrism")
 package io.avaje.inject.generator;
 
-import io.avaje.inject.Bean;
-import io.avaje.inject.Component;
-import io.avaje.inject.Factory;
-import io.avaje.inject.InjectModule;
-import io.avaje.inject.Primary;
-import io.avaje.inject.Prototype;
-import io.avaje.inject.QualifiedMap;
-import io.avaje.inject.RequiresBean;
-import io.avaje.inject.RequiresProperty;
-import io.avaje.inject.Secondary;
+import io.avaje.inject.*;
 import io.avaje.inject.aop.Aspect;
 import io.avaje.inject.spi.DependencyMeta;
 import io.avaje.inject.spi.Generated;
