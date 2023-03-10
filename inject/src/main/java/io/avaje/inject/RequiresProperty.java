@@ -5,22 +5,23 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import java.lang.annotation.Repeatable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Expresses a requirement for a bean to be wired/registered into the {@link BeanScope}.
  *
- * <pre class="code">
- * &#064;Configuration
- * public class MyAutoConfiguration {
+ * <pre class="code">{@code
  *
- *     &#064;Bean
- *     &#064;RequiresProperty("use.service")
+ *   @Configuration
+ *   public class MyAutoConfiguration {
+ *
+ *     @Bean
+ *     @RequiresProperty("use.service")
  *     public MyService myService() {
  *         ...
  *     }
+ *
+ *   }
  *
  * }</pre>
  *
@@ -28,7 +29,7 @@ import java.lang.annotation.Target;
  * system properties / Avaje Config.
  */
 @Retention(RUNTIME)
-@Repeatable(RequireConfigs.class)
+@Repeatable(RequiresProperty.RequireProperties.class)
 @Target({TYPE, METHOD, ANNOTATION_TYPE})
 public @interface RequiresProperty {
 
@@ -60,4 +61,12 @@ public @interface RequiresProperty {
    * @return the value the property should not be
    */
   String notEqualTo() default "";
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.TYPE, ElementType.METHOD})
+  @interface RequireProperties {
+
+    /** @return The required dependencies */
+    RequiresProperty[] value();
+  }
 }

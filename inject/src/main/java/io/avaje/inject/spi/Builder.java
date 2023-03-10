@@ -243,7 +243,7 @@ public interface Builder {
   /**
    * Return true if the builder contains a bean with the given name.
    */
-  boolean containsQualifier(String type);
+  boolean containsQualifier(String name);
 
   PropertyRequiresPlugin property();
 

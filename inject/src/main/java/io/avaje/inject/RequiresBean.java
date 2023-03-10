@@ -5,22 +5,22 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import java.lang.annotation.Repeatable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Expresses a requirement for a bean to be wired/registered into the {@link BeanScope}.
  *
- * <pre class="code">
- * &#064;Configuration
- * public class MyAutoConfiguration {
+ * <pre class="code">{@code
  *
- *     &#064;Bean
- *     &#064;Requires(beans = OtherService.class)
+ *   @Configuration
+ *   public class MyAutoConfiguration {
+ *
+ *     @Bean
+ *     @Requires(beans = OtherService.class)
  *     public MyService myService() {
  *         ...
  *     }
+ *   }
  *
  * }</pre>
  *
@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  * OtherService} is already registered in the {@link BeanScope}.
  */
 @Retention(RUNTIME)
-@Repeatable(RequireBeans.class)
+@Repeatable(RequiresBean.RequireBeans.class)
 @Target({TYPE, METHOD, ANNOTATION_TYPE})
 public @interface RequiresBean {
 
@@ -53,4 +53,11 @@ public @interface RequiresBean {
    * @return the names of beans to check
    */
   String[] qualifiers() default {};
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.TYPE, ElementType.METHOD})
+  @interface RequireBeans {
+
+    /** @return The required dependencies */
+    RequiresBean[] value();
+  }
 }
