@@ -345,11 +345,17 @@ final class Util {
 
         if (first) {
 
-          writer.append(propertyGetter + ".filter(\"%s\"::equals).isEmpty()", props);
+          writer.append(
+              propertyGetter + ".filter(\"%s\"::equals).isEmpty()",
+              props.getKey(),
+              props.getValue());
 
           first = false;
         } else {
-          writer.append(" || " + propertyGetter + ".filter(\"%s\"::equals).isEmpty()", props);
+          writer.append(
+              " || " + propertyGetter + ".filter(\"%s\"::equals).isEmpty()",
+              props.getKey(),
+              props.getValue());
         }
       }
 
@@ -357,11 +363,17 @@ final class Util {
 
         if (first) {
 
-          writer.append(propertyGetter + ".filter(\"%s\"::equals).isPresent()", props);
+          writer.append(
+              propertyGetter + ".filter(\"%s\"::equals).isPresent()",
+              props.getKey(),
+              props.getValue());
 
           first = false;
         } else {
-          writer.append(" || " + propertyGetter + ".filter(\"%s\"::equals).isPresent()", props);
+          writer.append(
+              " || " + propertyGetter + ".filter(\"%s\"::equals).isPresent()",
+              props.getKey(),
+              props.getValue());
         }
       }
 
