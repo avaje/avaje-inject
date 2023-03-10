@@ -64,6 +64,9 @@ final class DBeanMap {
   }
 
   void register(Object bean) {
+    if (bean == null || Optional.empty().equals(bean)) {
+      return;
+    }
     var name = nextBean.name;
     qualifiers.add(name);
     DContextEntryBean entryBean = DContextEntryBean.of(bean, name, nextBean.priority);
