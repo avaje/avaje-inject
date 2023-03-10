@@ -1,15 +1,16 @@
 package org.example.myapp;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
 import org.example.myapp.conditional.Bird;
-import org.example.myapp.conditional.Bird.Jay;
+import org.example.myapp.conditional.Bird.BlueJay;
+import org.example.myapp.conditional.Bird.StrawberryFinch;
 import org.example.myapp.conditional.BirdFactory;
 import org.example.myapp.conditional.BirdWatcher;
-import org.example.myapp.conditional.Fruit.Apple;
-import org.example.myapp.conditional.FruitNinja;
+import org.example.myapp.conditional.QualifiedBirdWatcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +45,8 @@ class ConditionalTests {
     final BeanScope beanScope = BeanScope.builder().build();
 
     assertTrue(beanScope.getOptional(BirdFactory.class).isPresent());
-    assertTrue(beanScope.getOptional(Jay.class).isPresent());
+    assertTrue(beanScope.getOptional(BlueJay.class).isPresent());
+    assertTrue(beanScope.getOptional(BirdWatcher.class).isEmpty());
   }
 
   @Test
@@ -59,37 +61,27 @@ class ConditionalTests {
   }
 
   @Test
-  void fruitWatch() throws IOException {
+  void missingBeans() throws IOException {
 
-    Config.setProperty("factory", "fruit");
-    Config.setProperty("watcher", "fruit");
-
-    final BeanScope beanScope = BeanScope.builder().build();
-
-    assertTrue(beanScope.getOptional(FruitNinja.class).isPresent());
-  }
-
-  @Test
-  void wrongFactory() throws IOException {
-
-    Config.setProperty("factory", "bird");
-    Config.setProperty("watcher", "fruit");
+    Config.setProperty("watcher", "bird");
 
     final BeanScope beanScope = BeanScope.builder().build();
 
-    assertTrue(beanScope.getOptional(FruitNinja.class).isEmpty());
+    assertTrue(beanScope.getOptional(BirdWatcher.class).isEmpty());
   }
 
   @Test
   void noFactory() throws IOException {
 
     Config.setProperty("kiwi", "somethin");
-    Config.setProperty("watcher", "fruit");
+    Config.setProperty("watcher", "bird");
 
     final BeanScope beanScope = BeanScope.builder().build();
 
-    assertTrue(beanScope.getOptional(FruitNinja.class).isPresent());
-    assertTrue(beanScope.getOptional(Apple.class).isEmpty());
+    assertTrue(beanScope.getOptional(BirdFactory.class).isEmpty());
+    assertTrue(beanScope.getOptional(BlueJay.class).isEmpty());
+    assertTrue(beanScope.getOptional(BirdWatcher.class).isPresent());
+    assertEquals("Kiwi", beanScope.get(Bird.class).toString());
   }
 
   @Test
@@ -101,8 +93,7 @@ class ConditionalTests {
 
     final BeanScope beanScope = BeanScope.builder().build();
     assertTrue(beanScope.getOptional(BirdWatcher.class).isPresent());
-
-    assertTrue(beanScope.get(Bird.class).toString().equals("Kiwi"));
+    assertEquals("Kiwi", beanScope.get(Bird.class).toString());
   }
 
   @Test
@@ -114,7 +105,14 @@ class ConditionalTests {
 
     final BeanScope beanScope = BeanScope.builder().build();
     assertTrue(beanScope.getOptional(BirdWatcher.class).isPresent());
+    assertEquals("Cassowary", beanScope.get(Bird.class).toString());
+  }
 
-    assertTrue(beanScope.get(Bird.class).toString().equals("Cassowary"));
+  @Test
+  void qualifierTest() throws IOException {
+
+    final BeanScope beanScope =
+        BeanScope.builder().bean("finch", Bird.class, new StrawberryFinch()).build();
+    assertTrue(beanScope.getOptional(QualifiedBirdWatcher.class).isPresent());
   }
 }

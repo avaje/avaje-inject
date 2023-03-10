@@ -1,14 +1,15 @@
 package org.example.myapp.conditional;
 
+import io.avaje.inject.RequiresBean;
 import jakarta.inject.Singleton;
 
 @Singleton
-@RequiresBird
-public class BirdWatcher {
+@RequiresBean(qualifiers = "finch")
+public class QualifiedBirdWatcher {
 
   private final Bird bird;
 
-  BirdWatcher(Bird bird) {
+  QualifiedBirdWatcher(Bird bird) {
     this.bird = bird;
   }
 

@@ -10,12 +10,19 @@ public interface Bird {
     }
   }
 
-  public class Jay implements Bird {
+  public class BlueJay implements Bird {
 
     @Override
     public String toString() {
-      return "Blue Jay";
+      return "BlueJay";
     }
   }
 
+  public class StrawberryFinch implements Bird {
+
+    @Override
+    public String toString() {
+      return "StrawBerryFinch";
+    }
+  }
 }

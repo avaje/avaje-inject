@@ -55,6 +55,7 @@ final class DBeanMap {
 
   private void addSuppliedBean(SuppliedBean supplied) {
     Type suppliedType = supplied.type();
+    qualifiers.add(supplied.name());
     DContextEntryBean entryBean = DContextEntryBean.supplied(supplied.source(), supplied.name(), supplied.priority());
     beans.computeIfAbsent(suppliedType.getTypeName(), s -> new DContextEntry()).add(entryBean);
     for (Class<?> anInterface : supplied.interfaces()) {
@@ -75,6 +76,8 @@ final class DBeanMap {
   }
 
   void register(Provider<?> provider) {
+
+	qualifiers.add(nextBean.name);
     DContextEntryBean entryBean = DContextEntryBean.provider(nextBean.prototype, provider, nextBean.name, nextBean.priority);
     for (Type type : nextBean.types) {
       beans.computeIfAbsent(type.getTypeName(), s -> new DContextEntry()).add(entryBean);

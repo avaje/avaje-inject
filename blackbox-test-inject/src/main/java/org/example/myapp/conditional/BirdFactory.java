@@ -1,6 +1,6 @@
 package org.example.myapp.conditional;
 
-import org.example.myapp.conditional.Bird.Jay;
+import org.example.myapp.conditional.Bird.BlueJay;
 
 import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
@@ -13,8 +13,8 @@ public class BirdFactory {
 
   @Bean
   @NoKiwi
-  public Jay jay() {
-    return new Jay();
+  public BlueJay jay() {
+    return new BlueJay();
   }
 
   @Bean
@@ -22,4 +22,5 @@ public class BirdFactory {
   public Cassowary dinosaur() {
     return new Cassowary();
   }
+
 }
