@@ -245,6 +245,9 @@ public interface Builder {
    */
   boolean containsQualifier(String name);
 
+  /**
+   * Return the plugin for required properties.
+   */
   PropertyRequiresPlugin property();
 
   /**

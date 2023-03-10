@@ -64,9 +64,6 @@ final class DBeanMap {
   }
 
   void register(Object bean) {
-    if (bean == null || Optional.empty().equals(bean)) {
-      return;
-    }
     var name = nextBean.name;
     qualifiers.add(name);
     DContextEntryBean entryBean = DContextEntryBean.of(bean, name, nextBean.priority);
@@ -76,8 +73,7 @@ final class DBeanMap {
   }
 
   void register(Provider<?> provider) {
-
-	qualifiers.add(nextBean.name);
+    qualifiers.add(nextBean.name);
     DContextEntryBean entryBean = DContextEntryBean.provider(nextBean.prototype, provider, nextBean.name, nextBean.priority);
     for (Type type : nextBean.types) {
       beans.computeIfAbsent(type.getTypeName(), s -> new DContextEntry()).add(entryBean);
