@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 /**
  * Expresses a requirement for a bean to be wired/registered into the {@link BeanScope}.
  *
- * <pre class="code">{@code
+ * <pre>{@code
  *
  *   @Configuration
  *   public class MyAutoConfiguration {
