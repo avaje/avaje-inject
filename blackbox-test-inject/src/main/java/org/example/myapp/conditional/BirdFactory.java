@@ -16,6 +16,7 @@ public class BirdFactory {
 
   @Bean
   @NoKiwi
+  @RequiresProperty(missing = "finch-time")
   public BlueJay jay() {
     return new BlueJay();
   }
@@ -27,7 +28,7 @@ public class BirdFactory {
   }
 
   @Bean
-  @NoFinches
+  @Finches
   public StrawberryFinch finch() {
     return new StrawberryFinch();
   }
