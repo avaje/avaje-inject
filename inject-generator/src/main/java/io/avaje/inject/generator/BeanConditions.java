@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 
 final class BeanConditions {
@@ -18,29 +17,35 @@ final class BeanConditions {
   final Map<String, String> propertyEquals = new HashMap<>();
   final Map<String, String> propertyNotEquals = new HashMap<>();
 
-
   void readAll(Element element) {
-    readMetaAnnotations(element);
     readAllDirect(element);
+    readMetaAnnotations(element);
   }
 
   private void readAllDirect(Element element) {
     RequiresBeanPrism.getAllInstancesOn(element).forEach(this::read);
-    RequiresBeanContainerPrism.getOptionalOn(element).ifPresent( container -> {
-      container.value().forEach(this::read);
-    });
+    RequiresBeanContainerPrism.getOptionalOn(element)
+        .ifPresent(
+            container -> {
+              container.value().forEach(this::read);
+            });
     RequiresPropertyPrism.getAllInstancesOn(element).forEach(this::read);
-    RequiresPropertyContainerPrism.getOptionalOn(element).ifPresent( container -> {
-      container.value().forEach(this::read);
-    });
+    RequiresPropertyContainerPrism.getOptionalOn(element)
+        .ifPresent(
+            container -> {
+              container.value().forEach(this::read);
+            });
   }
 
   private void readMetaAnnotations(Element element) {
-    element.getAnnotationMirrors().forEach(this::findRequiresOnAnnotation);
-  }
-
-  private void findRequiresOnAnnotation(AnnotationMirror a) {
-    readAllDirect(a.getAnnotationType().asElement());
+    RequiresBeanPrism.getAllOnMetaAnnotations(element).forEach(this::read);
+    RequiresBeanContainerPrism.getAllOnMetaAnnotations(element).stream()
+        .flatMap(e -> e.value().stream())
+        .forEach(this::read);
+    RequiresPropertyPrism.getAllOnMetaAnnotations(element).forEach(this::read);
+    RequiresPropertyContainerPrism.getAllOnMetaAnnotations(element).stream()
+        .flatMap(e -> e.value().stream())
+        .forEach(this::read);
   }
 
   private void read(RequiresBeanPrism prism) {
