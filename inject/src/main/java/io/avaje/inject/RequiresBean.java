@@ -16,7 +16,7 @@ import java.lang.annotation.*;
  *   public class MyAutoConfiguration {
  *
  *     @Bean
- *     @Requires(OtherService.class)
+ *     @RequiresBean(OtherService.class)
  *     public MyService myService() {
  *         ...
  *     }
