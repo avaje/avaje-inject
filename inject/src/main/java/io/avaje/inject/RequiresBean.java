@@ -16,7 +16,7 @@ import java.lang.annotation.*;
  *   public class MyAutoConfiguration {
  *
  *     @Bean
- *     @Requires(beans = OtherService.class)
+ *     @Requires(OtherService.class)
  *     public MyService myService() {
  *         ...
  *     }
@@ -53,7 +53,7 @@ public @interface RequiresBean {
    * @return the names of beans to check
    */
   String[] qualifiers() default {};
-  
+
   @Retention(RetentionPolicy.RUNTIME)
   @Target({ElementType.TYPE, ElementType.METHOD})
   @interface Container {
