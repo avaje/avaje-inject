@@ -2,6 +2,7 @@ package org.example.myapp.conditional;
 
 import org.example.myapp.conditional.Bird.BlueJay;
 import org.example.myapp.conditional.Bird.Cassowary;
+import org.example.myapp.conditional.Bird.StrawberryFinch;
 
 import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
@@ -25,4 +26,9 @@ public class BirdFactory {
     return new Cassowary();
   }
 
+  @Bean
+  @NoFinches
+  public StrawberryFinch finch() {
+    return new StrawberryFinch();
+  }
 }
