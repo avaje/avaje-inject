@@ -44,7 +44,7 @@ public @interface RequiresBean {
    *
    * @return the class types of beans to check
    */
-  Class<?>[] missingBeans() default {};
+  Class<?>[] missing() default {};
 
   /**
    * Expresses that a {@link @Named} or {@link @Qualifier} annotation marker of the given name should be

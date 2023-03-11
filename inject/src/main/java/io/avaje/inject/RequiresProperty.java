@@ -55,7 +55,7 @@ public @interface RequiresProperty {
    *
    * @return the properties to check
    */
-  String[] missingProperties() default {};
+  String[] missing() default {};
 
   /**
    * Used in combination with value() to express the required value of the property.

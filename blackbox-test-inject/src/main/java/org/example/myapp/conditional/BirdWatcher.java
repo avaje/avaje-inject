@@ -7,8 +7,8 @@ import java.awt.*;
 import java.util.Properties;
 
 @Singleton
-@RequiresBean(missingBeans = Properties.class)
-@RequiresBean(missingBeans = SystemColor.class)
+@RequiresBean(missing = Properties.class)
+@RequiresBean(missing = SystemColor.class)
 @RequiresBird
 public class BirdWatcher {
 
