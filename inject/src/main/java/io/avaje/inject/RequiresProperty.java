@@ -12,7 +12,7 @@ import java.lang.annotation.*;
  *
  * <pre>{@code
  *
- *   @Configuration
+ *   @Factory
  *   public class MyAutoConfiguration {
  *
  *     @Bean
@@ -29,8 +29,7 @@ import java.lang.annotation.*;
  * In the sample above the MyService bean will get wired only if <code>use.service</code>
  * is set in Java system properties / Avaje Config.
  * <p>
- * {@link io.avaje.inject.spi.PropertyRequiresPlugin} is used to test the property
- * conditions and is loaded via {@link java.util.ServiceLoader}.
+ * {@link io.avaje.inject.spi.PropertyRequiresPlugin} is used to test the property conditions and is loaded via {@link java.util.ServiceLoader}.
  * <p>
  * Avaje Config provides an implementation and if it is included in the classpath then
  * Avaje Config will be used to test the property conditions.
@@ -56,7 +55,7 @@ public @interface RequiresProperty {
    *
    * @return the properties to check
    */
-  String[] missingProperties() default {};
+  String[] missing() default {};
 
   /**
    * Used in combination with value() to express the required value of the property.

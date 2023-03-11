@@ -12,11 +12,11 @@ import java.lang.annotation.*;
  *
  * <pre>{@code
  *
- *   @Configuration
+ *   @Factory
  *   public class MyAutoConfiguration {
  *
  *     @Bean
- *     @Requires(beans = OtherService.class)
+ *     @RequiresBean(OtherService.class)
  *     public MyService myService() {
  *         ...
  *     }
@@ -44,7 +44,7 @@ public @interface RequiresBean {
    *
    * @return the class types of beans to check
    */
-  Class<?>[] missingBeans() default {};
+  Class<?>[] missing() default {};
 
   /**
    * Expresses that a {@link @Named} or {@link @Qualifier} annotation marker of the given name should be
@@ -53,6 +53,7 @@ public @interface RequiresBean {
    * @return the names of beans to check
    */
   String[] qualifiers() default {};
+
   @Retention(RetentionPolicy.RUNTIME)
   @Target({ElementType.TYPE, ElementType.METHOD})
   @interface Container {

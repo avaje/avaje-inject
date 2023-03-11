@@ -1,8 +1,12 @@
 package io.avaje.inject.generator;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
-import java.util.*;
 
 final class BeanConditions {
 
@@ -41,7 +45,7 @@ final class BeanConditions {
 
   private void read(RequiresBeanPrism prism) {
     prism.value().forEach(t -> requireTypes.add(t.toString()));
-    prism.missingBeans().forEach(t -> missingTypes.add(t.toString()));
+    prism.missing().forEach(t -> missingTypes.add(t.toString()));
     qualifierNames.addAll(prism.qualifiers());
   }
 
@@ -55,7 +59,7 @@ final class BeanConditions {
         containsProps.add(prism.value());
       }
     }
-    missingProps.addAll(prism.missingProperties());
+    missingProps.addAll(prism.missing());
   }
 
   void addImports(ImportTypeMap importTypes) {
