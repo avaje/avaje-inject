@@ -2,13 +2,13 @@
 
 ## adjust pom dependencies
 
-sed -i 's/<version>\(.*\)-SNAPSHOT<\/version>/<version>\1-javax-SNAPSHOT<\/version>/' pom.xml
-sed -i 's/<version>\(.*\)-SNAPSHOT<\/version>/<version>\1-javax-SNAPSHOT<\/version>/' inject/pom.xml
-sed -i 's/<version>\(.*\)-SNAPSHOT<\/version>/<version>\1-javax-SNAPSHOT<\/version>/' inject-generator/pom.xml
-sed -i 's/<version>\(.*\)-SNAPSHOT<\/version>/<version>\1-javax-SNAPSHOT<\/version>/' inject-test/pom.xml
-sed -i 's/<version>\(.*\)-SNAPSHOT<\/version>/<version>\1-javax-SNAPSHOT<\/version>/' blackbox-aspect/pom.xml
-sed -i 's/<version>\(.*\)-SNAPSHOT<\/version>/<version>\1-javax-SNAPSHOT<\/version>/' blackbox-other/pom.xml
-sed -i 's/<version>\(.*\)-SNAPSHOT<\/version>/<version>\1-javax-SNAPSHOT<\/version>/' blackbox-test-inject/pom.xml
+sed -i -E '0,/<version>[^<]*<\/version>/ s/<version>([^-]*)-?([^<]*)(<\/version>)/<version>\1-javax-\2\3/' pom.xml
+sed -i -E '0,/<version>[^<]*<\/version>/ s/<version>([^-]*)-?([^<]*)(<\/version>)/<version>\1-javax-\2\3/' inject/pom.xml
+sed -i -E '0,/<version>[^<]*<\/version>/ s/<version>([^-]*)-?([^<]*)(<\/version>)/<version>\1-javax-\2\3/' inject-generator/pom.xml
+sed -i -E '0,/<version>[^<]*<\/version>/ s/<version>([^-]*)-?([^<]*)(<\/version>)/<version>\1-javax-\2\3/' inject-test/pom.xml
+sed -i -E '0,/<version>[^<]*<\/version>/ s/<version>([^-]*)-?([^<]*)(<\/version>)/<version>\1-javax-\2\3/' blackbox-aspect/pom.xml
+sed -i -E '0,/<version>[^<]*<\/version>/ s/<version>([^-]*)-?([^<]*)(<\/version>)/<version>\1-javax-\2\3/' blackbox-other/pom.xml
+sed -i -E '0,/<version>[^<]*<\/version>/ s/<version>([^-]*)-?([^<]*)(<\/version>)/<version>\1-javax-\2\3/' blackbox-test-inject/pom.xml
 
 sed -i'' -e 's|<version>2\.0\.1</version> <!-- jakarta -->|<version>1\.0\.5</version> <!-- javax -->|g' inject/pom.xml
 
