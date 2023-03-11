@@ -12,7 +12,7 @@ import java.lang.annotation.*;
  *
  * <pre>{@code
  *
- *   @Configuration
+ *   @Factory
  *   public class MyAutoConfiguration {
  *
  *     @Bean

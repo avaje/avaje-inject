@@ -12,7 +12,7 @@ import java.lang.annotation.*;
  *
  * <pre>{@code
  *
- *   @Configuration
+ *   @Factory
  *   public class MyAutoConfiguration {
  *
  *     @Bean
@@ -53,6 +53,7 @@ public @interface RequiresBean {
    * @return the names of beans to check
    */
   String[] qualifiers() default {};
+  
   @Retention(RetentionPolicy.RUNTIME)
   @Target({ElementType.TYPE, ElementType.METHOD})
   @interface Container {
