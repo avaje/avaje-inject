@@ -54,8 +54,8 @@ public @interface RequiresBean {
    */
   String[] qualifiers() default {};
 
-  @Retention(RetentionPolicy.RUNTIME)
-  @Target({ElementType.TYPE, ElementType.METHOD})
+  @Retention(RUNTIME)
+  @Target({TYPE, METHOD, ANNOTATION_TYPE})
   @interface Container {
 
     /** @return The required dependencies */

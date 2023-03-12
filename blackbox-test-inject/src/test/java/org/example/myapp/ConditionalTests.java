@@ -27,6 +27,7 @@ class ConditionalTests {
         .remove("factory")
         .remove("watcher")
         .remove("kiwi")
+        .remove("finch-time")
         .publish();
   }
 
@@ -114,5 +115,17 @@ class ConditionalTests {
     final BeanScope beanScope =
         BeanScope.builder().bean("finch", Bird.class, new StrawberryFinch()).build();
     assertTrue(beanScope.getOptional(QualifiedBirdWatcher.class).isPresent());
+  }
+
+  @Test
+  void metaMetaAnnotationTest() throws IOException {
+
+    Config.setProperty("finch-time", "somethin");
+    Config.setProperty("factory", "bird");
+    Config.setProperty("watcher", "bird");
+
+    final BeanScope beanScope = BeanScope.builder().build();
+    assertTrue(beanScope.getOptional(BirdWatcher.class).isPresent());
+    assertEquals("StrawBerryFinch", beanScope.get(Bird.class).toString());
   }
 }
