@@ -32,16 +32,14 @@ final class ProcessingContext {
   private static final ThreadLocal<Filer> FILER = new ThreadLocal<>();
   private static final ThreadLocal<Elements> ELEMENT_UTILS = new ThreadLocal<>();
   private static final ThreadLocal<Types> TYPE_UTILS = new ThreadLocal<>();
-  private static final ThreadLocal<Set<String>> UNIQUE_MODULE_NAMES =
-      ThreadLocal.withInitial(HashSet::new);
-  private static final ThreadLocal<Set<String>> PROVIDED_TYPES =
-      ThreadLocal.withInitial(HashSet::new);
-  private static final ThreadLocal<Set<String>> OPTIONAL_TYPES =
-      ThreadLocal.withInitial(LinkedHashSet::new);
+  private static final ThreadLocal<Set<String>> UNIQUE_MODULE_NAMES = ThreadLocal.withInitial(HashSet::new);
+  private static final ThreadLocal<Set<String>> PROVIDED_TYPES = ThreadLocal.withInitial(HashSet::new);
+  private static final ThreadLocal<Set<String>> OPTIONAL_TYPES = ThreadLocal.withInitial(LinkedHashSet::new);
 
-  private ProcessingContext() {}
+  private ProcessingContext() {
+  }
 
-  public static void init(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
+  static void init(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
     ENV.set(processingEnv);
     MESSAGER.set(processingEnv.getMessager());
     FILER.set(processingEnv.getFiler());
@@ -52,7 +50,9 @@ final class ProcessingContext {
     provided.addAll(moduleFileProvided);
   }
 
-  /** Log an error message. */
+  /**
+   * Log an error message.
+   */
   static void logError(Element e, String msg, Object... args) {
     MESSAGER.get().printMessage(Diagnostic.Kind.ERROR, String.format(msg, args), e);
   }
@@ -108,16 +108,15 @@ final class ProcessingContext {
     return Collections.emptyList();
   }
 
-  /** Create a file writer for the given class name. */
+  /**
+   * Create a file writer for the given class name.
+   */
   static JavaFileObject createWriter(String cls) throws IOException {
     return FILER.get().createSourceFile(cls);
   }
 
   static FileObject createMetaInfWriter(ScopeInfo.Type scopeType) throws IOException {
-    final var serviceName =
-        scopeType == ScopeInfo.Type.DEFAULT
-            ? Constants.META_INF_MODULE
-            : Constants.META_INF_TESTMODULE;
+    final var serviceName = scopeType == ScopeInfo.Type.DEFAULT ? Constants.META_INF_MODULE : Constants.META_INF_TESTMODULE;
     return createMetaInfWriterFor(serviceName);
   }
 
@@ -134,17 +133,11 @@ final class ProcessingContext {
   }
 
   static TypeElement elementMaybe(String rawType) {
-    if (rawType == null) {
-      return null;
-    } else {
-      return ELEMENT_UTILS.get().getTypeElement(rawType);
-    }
+    return rawType == null ? null : ELEMENT_UTILS.get().getTypeElement(rawType);
   }
 
   static Element asElement(TypeMirror returnType) {
-
     final var wrapper = PrimitiveUtil.wrap(returnType.toString());
-
     return wrapper == null ? TYPE_UTILS.get().asElement(returnType) : element(wrapper);
   }
 
@@ -168,7 +161,7 @@ final class ProcessingContext {
     }
   }
 
-  public static void clear() {
+  static void clear() {
     ENV.remove();
     MESSAGER.remove();
     FILER.remove();
