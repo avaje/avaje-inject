@@ -21,6 +21,8 @@
       <groupId>io.avaje</groupId>
       <artifactId>avaje-inject</artifactId>
       <version>${project.version}</version>
+      <optional>true</optional>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
