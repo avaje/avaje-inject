@@ -221,7 +221,6 @@ final class ScopeInfo {
 
   void writeModule() {
     if (moduleWritten) {
-      logError("already written module " + name);
       return;
     }
     final Collection<MetaData> meta = metaData.values();
@@ -322,6 +321,17 @@ final class ScopeInfo {
       readBeanMeta(element, factory);
     } else {
       logDebug("skipping already processed bean " + element);
+    }
+  }
+
+  /**
+   * Write Custom modules during processing (not last round) so that they are
+   * visible to code in src/main. This means that Custom scopes do NOT support
+   * other annotation processors generating beans that use those Custom scopes.
+   */
+  void writeCustomModule() {
+    if (type() == Type.CUSTOM && !metaData.isEmpty()) {
+      writeModule();
     }
   }
 

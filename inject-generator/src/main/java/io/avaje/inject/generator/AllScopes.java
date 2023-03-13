@@ -53,6 +53,11 @@ final class AllScopes {
     for (Data value : scopeAnnotations.values()) {
       value.write(processingOver);
     }
+    // after all scopes have read their meta-data write
+    // custom modules (not in last round of processing)
+    for (Data value : scopeAnnotations.values()) {
+      value.writeCustomModule();
+    }
   }
 
   void readModules(List<String> customScopeModules) {
@@ -94,6 +99,10 @@ final class AllScopes {
 
     void write(boolean processingOver) {
       scopeInfo.write(processingOver);
+    }
+
+    void writeCustomModule() {
+      scopeInfo.writeCustomModule();
     }
   }
 }
