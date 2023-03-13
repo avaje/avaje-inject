@@ -1,6 +1,9 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.ProcessingContext.*;
+import static io.avaje.inject.generator.ProcessingContext.element;
+import static io.avaje.inject.generator.ProcessingContext.loadMetaInfCustom;
+import static io.avaje.inject.generator.ProcessingContext.loadMetaInfServices;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -97,7 +100,7 @@ public final class Processor extends AbstractProcessor {
     }
     readChangedBeans(roundEnv.getElementsAnnotatedWith(element(Constants.COMPONENT)), false);
     readChangedBeans(roundEnv.getElementsAnnotatedWith(element(Constants.PROTOTYPE)), false);
-   
+
     final var importedElements =
         roundEnv.getElementsAnnotatedWith(element(ImportPrism.PRISM_TYPE)).stream()
             .map(ImportPrism::getInstanceOn)
@@ -118,6 +121,10 @@ public final class Processor extends AbstractProcessor {
     allScopes.readBeans(roundEnv);
     defaultScope.write(roundEnv.processingOver());
     allScopes.write(roundEnv.processingOver());
+
+    if (roundEnv.processingOver()) {
+      ProcessingContext.clear();
+    }
     return false;
   }
 
