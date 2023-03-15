@@ -27,46 +27,49 @@ import javax.tools.StandardLocation;
 
 final class ProcessingContext {
 
-  private static final ThreadLocal<ProcessingEnvironment> ENV = new ThreadLocal<>();
-  private static final ThreadLocal<Messager> MESSAGER = new ThreadLocal<>();
-  private static final ThreadLocal<Filer> FILER = new ThreadLocal<>();
-  private static final ThreadLocal<Elements> ELEMENT_UTILS = new ThreadLocal<>();
-  private static final ThreadLocal<Types> TYPE_UTILS = new ThreadLocal<>();
-  private static final ThreadLocal<Set<String>> UNIQUE_MODULE_NAMES = ThreadLocal.withInitial(HashSet::new);
-  private static final ThreadLocal<Set<String>> PROVIDED_TYPES = ThreadLocal.withInitial(HashSet::new);
-  private static final ThreadLocal<Set<String>> OPTIONAL_TYPES = ThreadLocal.withInitial(LinkedHashSet::new);
+  private static final ThreadLocal<Ctx> CTX = new ThreadLocal<>();
 
-  private ProcessingContext() {
+  private ProcessingContext() {}
+
+  static final class Ctx {
+    private final Messager messager;
+    private final Filer filer;
+    private final Elements elementUtils;
+    private final Types typeUtils;
+    private final Set<String> uniqueModuleNames = new HashSet<>();
+    private final Set<String> providedTypes = new HashSet<>();
+    private final Set<String> optionalTypes = new LinkedHashSet<>();
+
+    public Ctx(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
+
+      messager = processingEnv.getMessager();
+      filer = processingEnv.getFiler();
+      elementUtils = processingEnv.getElementUtils();
+      typeUtils = processingEnv.getTypeUtils();
+      ExternalProvider.registerModuleProvidedTypes(providedTypes);
+      providedTypes.addAll(moduleFileProvided);
+    }
   }
 
-  static void init(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
-    ENV.set(processingEnv);
-    MESSAGER.set(processingEnv.getMessager());
-    FILER.set(processingEnv.getFiler());
-    ELEMENT_UTILS.set(processingEnv.getElementUtils());
-    TYPE_UTILS.set(processingEnv.getTypeUtils());
-    final var provided = PROVIDED_TYPES.get();
-    ExternalProvider.registerModuleProvidedTypes(provided);
-    provided.addAll(moduleFileProvided);
+  public static void init(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
+    CTX.set(new Ctx(processingEnv, moduleFileProvided));
   }
 
-  /**
-   * Log an error message.
-   */
+  /** Log an error message. */
   static void logError(Element e, String msg, Object... args) {
-    MESSAGER.get().printMessage(Diagnostic.Kind.ERROR, String.format(msg, args), e);
+    CTX.get().messager.printMessage(Diagnostic.Kind.ERROR, String.format(msg, args), e);
   }
 
   static void logError(String msg, Object... args) {
-    MESSAGER.get().printMessage(Diagnostic.Kind.ERROR, String.format(msg, args));
+    CTX.get().messager.printMessage(Diagnostic.Kind.ERROR, String.format(msg, args));
   }
 
   static void logWarn(String msg, Object... args) {
-    MESSAGER.get().printMessage(Diagnostic.Kind.WARNING, String.format(msg, args));
+    CTX.get().messager.printMessage(Diagnostic.Kind.WARNING, String.format(msg, args));
   }
 
   static void logDebug(String msg, Object... args) {
-    MESSAGER.get().printMessage(Diagnostic.Kind.NOTE, String.format(msg, args));
+    CTX.get().messager.printMessage(Diagnostic.Kind.NOTE, String.format(msg, args));
   }
 
   static String loadMetaInfServices() {
@@ -80,7 +83,8 @@ final class ProcessingContext {
 
   private static List<String> loadMetaInf(String fullName) {
     try {
-      final var fileObject = FILER.get().getResource(StandardLocation.CLASS_OUTPUT, "", fullName);
+      final var fileObject =
+          CTX.get().filer.getResource(StandardLocation.CLASS_OUTPUT, "", fullName);
       if (fileObject != null) {
         final List<String> lines = new ArrayList<>();
         final var reader = fileObject.openReader(true);
@@ -108,67 +112,67 @@ final class ProcessingContext {
     return Collections.emptyList();
   }
 
-  /**
-   * Create a file writer for the given class name.
-   */
+  /** Create a file writer for the given class name. */
   static JavaFileObject createWriter(String cls) throws IOException {
-    return FILER.get().createSourceFile(cls);
+    return CTX.get().filer.createSourceFile(cls);
   }
 
   static FileObject createMetaInfWriter(ScopeInfo.Type scopeType) throws IOException {
-    final var serviceName = scopeType == ScopeInfo.Type.DEFAULT ? Constants.META_INF_MODULE : Constants.META_INF_TESTMODULE;
+    final var serviceName =
+        scopeType == ScopeInfo.Type.DEFAULT
+            ? Constants.META_INF_MODULE
+            : Constants.META_INF_TESTMODULE;
     return createMetaInfWriterFor(serviceName);
   }
 
   private static FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
-    return FILER.get().createResource(StandardLocation.CLASS_OUTPUT, "", interfaceType);
+    return CTX.get().filer.createResource(StandardLocation.CLASS_OUTPUT, "", interfaceType);
   }
 
   static TypeElement element(String rawType) {
-    return ELEMENT_UTILS.get().getTypeElement(rawType);
+    return CTX.get().elementUtils.getTypeElement(rawType);
   }
 
   static Types types() {
-    return TYPE_UTILS.get();
+    return CTX.get().typeUtils;
   }
 
   static TypeElement elementMaybe(String rawType) {
-    return rawType == null ? null : ELEMENT_UTILS.get().getTypeElement(rawType);
+    if (rawType == null) {
+      return null;
+    } else {
+      return CTX.get().elementUtils.getTypeElement(rawType);
+    }
   }
 
   static Element asElement(TypeMirror returnType) {
+
     final var wrapper = PrimitiveUtil.wrap(returnType.toString());
-    return wrapper == null ? TYPE_UTILS.get().asElement(returnType) : element(wrapper);
+
+    return wrapper == null ? CTX.get().typeUtils.asElement(returnType) : element(wrapper);
   }
 
   static void addModule(String moduleFullName) {
     if (moduleFullName != null) {
-      UNIQUE_MODULE_NAMES.get().add(moduleFullName);
+      CTX.get().uniqueModuleNames.add(moduleFullName);
     }
   }
 
   static boolean isDuplicateModule(String moduleFullName) {
-    return UNIQUE_MODULE_NAMES.get().contains(moduleFullName);
+    return CTX.get().uniqueModuleNames.contains(moduleFullName);
   }
 
   static boolean externallyProvided(String type) {
-    return PROVIDED_TYPES.get().contains(type) || OPTIONAL_TYPES.get().contains(type);
+    return CTX.get().providedTypes.contains(type) || CTX.get().optionalTypes.contains(type);
   }
 
   static void addOptionalType(String paramType) {
-    if (!PROVIDED_TYPES.get().contains(paramType)) {
-      OPTIONAL_TYPES.get().add(paramType);
+    if (!CTX.get().providedTypes.contains(paramType)) {
+      CTX.get().optionalTypes.add(paramType);
     }
   }
 
-  static void clear() {
-    ENV.remove();
-    MESSAGER.remove();
-    FILER.remove();
-    ELEMENT_UTILS.remove();
-    TYPE_UTILS.remove();
-    UNIQUE_MODULE_NAMES.remove();
-    PROVIDED_TYPES.remove();
-    OPTIONAL_TYPES.remove();
+  public static void clear() {
+    CTX.remove();
   }
 }
