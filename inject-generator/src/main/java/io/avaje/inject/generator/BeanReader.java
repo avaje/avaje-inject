@@ -1,6 +1,5 @@
 package io.avaje.inject.generator;
 
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.*;

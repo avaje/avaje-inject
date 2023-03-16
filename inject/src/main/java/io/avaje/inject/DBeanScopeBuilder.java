@@ -30,6 +30,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private boolean parentOverride = true;
   private boolean shutdownHook;
   private ClassLoader classLoader;
+  private PropertyRequiresPlugin propertyRequiresPlugin;
 
   /**
    * Create a BeanScopeBuilder to ultimately load and return a new BeanScope.
@@ -52,6 +53,24 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   public BeanScopeBuilder modules(Module... modules) {
     this.includeModules.addAll(Arrays.asList(modules));
     return this;
+  }
+  
+  @Override
+  public void propertyPlugin(PropertyRequiresPlugin propertyRequiresPlugin) {
+    this.propertyRequiresPlugin = propertyRequiresPlugin;
+  }
+  
+  @Override
+  public PropertyRequiresPlugin propertyPlugin() {
+    if (propertyRequiresPlugin == null) {
+      classLoader =
+          classLoader != null ? classLoader : Thread.currentThread().getContextClassLoader();
+      propertyRequiresPlugin =
+          ServiceLoader.load(PropertyRequiresPlugin.class, classLoader)
+              .findFirst()
+              .orElse(new DSystemProps());
+    }
+    return propertyRequiresPlugin;
   }
 
   @Override
@@ -150,15 +169,24 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   @Override
   public BeanScope build() {
-	  var start = System.currentTimeMillis();
+    var start = System.currentTimeMillis();
 
     // load and apply plugins first
-    var loader = classLoader != null ? classLoader : Thread.currentThread().getContextClassLoader();
-    ServiceLoader.load(Plugin.class, loader).forEach(plugin -> plugin.apply(this));
+    classLoader =
+        classLoader != null ? classLoader : Thread.currentThread().getContextClassLoader();
+    
+    if (propertyRequiresPlugin == null) {
+      propertyRequiresPlugin =
+          ServiceLoader.load(PropertyRequiresPlugin.class, classLoader)
+              .findFirst()
+              .orElse(new DSystemProps());
+    }
+    
+    ServiceLoader.load(Plugin.class, classLoader).forEach(plugin -> plugin.apply(this));
     // sort factories by dependsOn
     FactoryOrder factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
     if (factoryOrder.isEmpty()) {
-      ServiceLoader.load(Module.class, loader).forEach(factoryOrder::add);
+      ServiceLoader.load(Module.class, classLoader).forEach(factoryOrder::add);
     }
 
     Set<String> moduleNames = factoryOrder.orderFactories();
@@ -170,9 +198,6 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         " Refer to https://avaje.io/inject#gradle");
     }
     log.log(DEBUG, "building with modules {0}", moduleNames);
-    final var propertyRequiresPlugin = ServiceLoader.load(PropertyRequiresPlugin.class, loader)
-      .findFirst()
-      .orElse(new DSystemProps());
 
     Builder builder = Builder.newBuilder(propertyRequiresPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
     for (Module factory : factoryOrder.factories()) {
