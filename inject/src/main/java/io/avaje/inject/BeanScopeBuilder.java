@@ -1,12 +1,13 @@
 package io.avaje.inject;
 
-import io.avaje.inject.spi.Module;
-import io.avaje.lang.NonNullApi;
-import io.avaje.lang.Nullable;
-
 import java.lang.reflect.Type;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import io.avaje.inject.spi.Module;
+import io.avaje.inject.spi.PropertyRequiresPlugin;
+import io.avaje.lang.NonNullApi;
+import io.avaje.lang.Nullable;
 
 /**
  * Build a bean scope with options for shutdown hook and supplying external dependencies.
@@ -77,6 +78,21 @@ public interface BeanScopeBuilder {
    * @return This BeanScopeBuilder
    */
   BeanScopeBuilder modules(Module... modules);
+
+  /**
+   * Set the PropertyPlugin used for this scope. This is serviceloaded automatically of not set
+   *
+   * @param propertyRequiresPlugin
+   */
+  void propertyPlugin(PropertyRequiresPlugin propertyRequiresPlugin);
+
+  /**
+   * Retrieve the PropertyPlugin used for this scope. This is useful for plugins that want to use
+   * the scopes wiring properties.
+   *
+   * @param propertyRequiresPlugin
+   */
+  PropertyRequiresPlugin propertyPlugin();
 
   /**
    * Supply a bean to the scope that will be used instead of any
@@ -384,4 +400,5 @@ public interface BeanScopeBuilder {
      */
     <D> BeanScopeBuilder.ForTesting spy(Class<D> type, Consumer<D> consumer);
   }
+
 }
