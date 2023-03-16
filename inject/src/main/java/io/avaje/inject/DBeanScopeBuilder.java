@@ -54,21 +54,17 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     this.includeModules.addAll(Arrays.asList(modules));
     return this;
   }
-  
+
   @Override
   public void propertyPlugin(PropertyRequiresPlugin propertyRequiresPlugin) {
     this.propertyRequiresPlugin = propertyRequiresPlugin;
   }
-  
+
   @Override
   public PropertyRequiresPlugin propertyPlugin() {
     if (propertyRequiresPlugin == null) {
-      classLoader =
-          classLoader != null ? classLoader : Thread.currentThread().getContextClassLoader();
-      propertyRequiresPlugin =
-          ServiceLoader.load(PropertyRequiresPlugin.class, classLoader)
-              .findFirst()
-              .orElse(new DSystemProps());
+      initClassLoader();
+      initPropertyPlugin();
     }
     return propertyRequiresPlugin;
   }
@@ -167,21 +163,28 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     return this;
   }
 
+  private void initClassLoader() {
+    if (classLoader == null) {
+      classLoader = Thread.currentThread().getContextClassLoader();
+    }
+  }
+
+  private void initPropertyPlugin() {
+    propertyRequiresPlugin =
+      ServiceLoader.load(PropertyRequiresPlugin.class, classLoader)
+        .findFirst()
+        .orElse(new DSystemProps());
+  }
+
   @Override
   public BeanScope build() {
     var start = System.currentTimeMillis();
-
     // load and apply plugins first
-    classLoader =
-        classLoader != null ? classLoader : Thread.currentThread().getContextClassLoader();
-    
+    initClassLoader();
     if (propertyRequiresPlugin == null) {
-      propertyRequiresPlugin =
-          ServiceLoader.load(PropertyRequiresPlugin.class, classLoader)
-              .findFirst()
-              .orElse(new DSystemProps());
+      initPropertyPlugin();
     }
-    
+
     ServiceLoader.load(Plugin.class, classLoader).forEach(plugin -> plugin.apply(this));
     // sort factories by dependsOn
     FactoryOrder factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
