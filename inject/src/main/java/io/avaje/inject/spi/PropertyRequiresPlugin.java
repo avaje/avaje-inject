@@ -1,5 +1,7 @@
 package io.avaje.inject.spi;
 
+import java.util.Optional;
+
 /**
  * Plugin interface used with {@link io.avaje.inject.RequiresProperty}.
  * <p>
@@ -8,9 +10,10 @@ package io.avaje.inject.spi;
  */
 public interface PropertyRequiresPlugin {
 
-  /**
-   * Return true if the property is defined.
-   */
+  /** Return a configuration value that might not exist. */
+  Optional<String> get(String property);
+
+  /** Return true if the property is defined. */
   boolean contains(String property);
 
   /**
