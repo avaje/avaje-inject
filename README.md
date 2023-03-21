@@ -24,25 +24,6 @@ APT based dependency injection for server side developers - https://avaje.io/inj
   <scope>provided</scope>
 </dependency>
 ```
-If there are other annotation processors and they are specified via `maven-compiler-plugin`, then we add avaje-inject-generator there instead.
-```xml
-<plugin>
-  <groupId>org.apache.maven.plugins</groupId>
-  <artifactId>maven-compiler-plugin</artifactId>
-  <configuration>
-    <annotationProcessorPaths> <!-- All annotation processors specified here -->
-      <path>
-          <groupId>io.avaje</groupId>
-          <artifactId>avaje-inject-generator</artifactId>
-          <version>${avaje.inject.version}</version>
-      </path>
-      <path>
-          ... other annotation processor ...
-      </path>
-    </annotationProcessorPaths>
-  </configuration>
-</plugin>
-```
 #### 3. Create a Bean Class annotated with @Singleton
 ```java
 @Singleton
