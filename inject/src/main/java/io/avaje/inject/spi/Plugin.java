@@ -11,7 +11,7 @@ import java.lang.reflect.Type;
  */
 public interface Plugin {
 
-  /** 
+  /**
    * Return the classes that the plugin provides.
    */
   default Class<?>[] provides() {
