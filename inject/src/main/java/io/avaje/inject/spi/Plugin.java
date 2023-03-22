@@ -14,7 +14,9 @@ public interface Plugin {
   /**
    * Return the classes that the plugin provides.
    */
-  Class<?>[] provides();
+  default Class<?>[] provides() {
+    return new Class<?>[]{};
+  }
 
   /**
    * Apply the plugin to the scope builder.
