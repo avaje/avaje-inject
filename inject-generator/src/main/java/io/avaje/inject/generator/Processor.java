@@ -7,7 +7,7 @@ import static io.avaje.inject.generator.ProcessingContext.loadMetaInfServices;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -75,11 +75,11 @@ public final class Processor extends AbstractProcessor {
   private static List<String> targetProvidesLines(Filer filer, String relativeName) {
     try {
       final var resource = targetProvides(filer, relativeName);
-      try (var inputStream = new URL(resource).openStream();
-           var reader = new BufferedReader(new InputStreamReader(inputStream))) {
+      try (var inputStream = new URI(resource).toURL().openStream();
+          var reader = new BufferedReader(new InputStreamReader(inputStream))) {
         return reader.lines().collect(Collectors.toList());
       }
-    } catch (final IOException e) {
+    } catch (final Exception e) {
       return Collections.emptyList();
     }
   }
