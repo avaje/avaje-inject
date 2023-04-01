@@ -399,4 +399,8 @@ final class BeanReader {
       writer.append(");").eol();
     }
   }
+
+  boolean hasConditions() {
+    return !conditions.isEmpty();
+  }
 }
