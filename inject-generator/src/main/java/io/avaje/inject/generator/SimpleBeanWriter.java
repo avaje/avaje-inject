@@ -102,7 +102,7 @@ final class SimpleBeanWriter {
     writer.append("  public static void build_%s(%s builder) {", method.name(), beanReader.builderType()).eol();
     method.buildConditional(writer);
     method.buildAddFor(writer);
-    writer.append(method.builderGetFactory()).eol();
+    method.builderGetFactory(writer, beanReader.hasConditions());
     if (method.isProtoType()) {
       method.builderAddBeanProvider(writer);
     } else if (method.isUseProviderForSecondary()) {
@@ -160,7 +160,8 @@ final class SimpleBeanWriter {
     writer.append("  public static void build(%s builder) {", beanReader.builderType()).eol();
   }
 
-  String indent = "     ";
+  private String indent = "     ";
+
   private void writeCreateBean(MethodReader constructor) {
     writer.append(indent).append(" var bean = new %s(", shortName);
     // add constructor dependencies

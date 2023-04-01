@@ -135,9 +135,9 @@ final class MethodReader {
       .map(t -> "con:" + t)
       .forEach(dependsOn::add);
     conditions.missingTypes.stream()
-        .filter(t -> !t.equals(returnTypeRaw))
-        .map(t -> "con:" + t)
-        .forEach(dependsOn::add);
+      .filter(t -> !t.equals(returnTypeRaw))
+      .map(t -> "con:" + t)
+      .forEach(dependsOn::add);
     for (final MethodParam param : params) {
       dependsOn.add(GenericType.trimWildcard(param.paramType));
     }
@@ -152,8 +152,13 @@ final class MethodReader {
     return factoryType + Constants.DI + ".build_" + element.getSimpleName().toString();
   }
 
-  String builderGetFactory() {
-    return String.format("      var factory = builder.getNullable(%s.class); %n      if (factory == null) return;", factoryShortName);
+  void builderGetFactory(Append writer, boolean factoryHasConditions) {
+    if (factoryHasConditions) {
+      writer.append("      var factory = builder.getNullable(%s.class);", factoryShortName).eol();
+      writer.append("      if (factory == null) return;").eol();
+    } else {
+      writer.append("      var factory = builder.get(%s.class);", factoryShortName).eol();
+    }
   }
 
   void builderBuildBean(Append writer) {
