@@ -1,0 +1,42 @@
+
+plugins {
+  id 'java-gradle-plugin'
+  id 'com.gradle.plugin-publish' version '1.1.0'
+  id 'maven-publish'
+}
+
+group 'io.avaje.inject'
+version '0.1'
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+}
+
+dependencies {
+  implementation 'io.avaje:avaje-inject:9.0-RC3'
+  implementation gradleApi()
+  //implementation localGroovy()
+
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+  useJUnitPlatform()
+}
+
+gradlePlugin {
+//  website = 'https://avaje.io/inject/gradle'
+//  vcsUrl = 'https://github.com/avaje/avaje-inject'
+//  description = 'Avaje-Inject plugin'
+//  tags = ['Dependency Injection']
+  plugins {
+    avajeInject {
+      id = 'io.avaje.inject'
+      displayName = 'Avaje-Inject plugin'
+      implementationClass = 'io.avaje.inject.plugin.AvajeInjectPlugin'
+    }
+  }
+}
+
