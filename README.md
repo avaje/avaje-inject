@@ -59,11 +59,13 @@ Example ex = beanScope.get(Example.class);
 
 ### Example module use
 ```java
+import io.avaje.inject.spi.Module;
+
 module org.example {
 
   requires io.avaje.inject;
-
-  provides io.avaje.inject.spi.Module with org.example.ExampleModule;
+  // you must define the fully qualified class name of the generated classes. if you use an import statement, compilation will fail
+  provides Module with org.example.ExampleModule;
 }
 ```
 
