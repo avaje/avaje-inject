@@ -200,6 +200,21 @@ public interface BeanScopeBuilder {
   <D> BeanScopeBuilder provideDefault(@Nullable String name, Type type, Supplier<D> provider);
 
   /**
+   * Adds hooks that will execute after this scope is built.
+   *
+   * @param runnables the PostConstruct hooks to add to the bean scope
+   */
+  BeanScopeBuilder addPostConstructHooks(Runnable... runnables);
+
+  /**
+   * Adds hooks that will execute before this scope is destroyed.
+   *
+   * @param closables the PreDestroy hooks to add to the bean scope
+   */
+  BeanScopeBuilder addPreDestroyHooks(AutoCloseable... closables);
+
+
+  /**
    * Set the ClassLoader to use when loading modules.
    *
    * @param classLoader The ClassLoader to use

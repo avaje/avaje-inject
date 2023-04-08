@@ -26,6 +26,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   @SuppressWarnings("rawtypes")
   private final List<EnrichBean> enrichBeans = new ArrayList<>();
   private final Set<Module> includeModules = new LinkedHashSet<>();
+  private final List<Runnable> postConstructList = new ArrayList<>();
+  private final List<AutoCloseable> preDestroyList = new ArrayList<>();
   private BeanScope parent;
   private boolean parentOverride = true;
   private boolean shutdownHook;
@@ -107,6 +109,18 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
+  public BeanScopeBuilder addPostConstructHooks(Runnable... postConstructRunnable) {
+    Collections.addAll(this.postConstructList, postConstructRunnable);
+    return this;
+  }
+
+  @Override
+  public BeanScopeBuilder addPreDestroyHooks(AutoCloseable... closables) {
+    Collections.addAll(this.preDestroyList, closables);
+    return this;
+  }
+
+  @Override
   public BeanScopeBuilder classLoader(ClassLoader classLoader) {
     this.classLoader = classLoader;
     return this;
@@ -130,6 +144,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     return mock(type, null, null);
   }
 
+  @Override
   public BeanScopeBuilder.ForTesting mock(Class<?> type, String name) {
     return mock(type, name, null);
   }
@@ -149,7 +164,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     return spy(type, null, null);
   }
 
-  public BeanScopeBuilder.ForTesting spy(Class<?> type, String name) {
+  @Override
+public BeanScopeBuilder.ForTesting spy(Class<?> type, String name) {
     return spy(type, name, null);
   }
 
@@ -206,6 +222,9 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     for (Module factory : factoryOrder.factories()) {
       factory.build(builder);
     }
+
+    postConstructList.forEach(builder::addPostConstruct);
+    preDestroyList.forEach(builder::addPreDestroy);
     return builder.build(shutdownHook, start);
   }
 
