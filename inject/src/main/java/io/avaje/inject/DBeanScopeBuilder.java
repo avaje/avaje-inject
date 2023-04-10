@@ -165,7 +165,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-public BeanScopeBuilder.ForTesting spy(Class<?> type, String name) {
+  public BeanScopeBuilder.ForTesting spy(Class<?> type, String name) {
     return spy(type, name, null);
   }
 
@@ -394,9 +394,9 @@ public BeanScopeBuilder.ForTesting spy(Class<?> type, String name) {
      */
     private boolean satisfiedDependencies(FactoryState factory) {
       return satisfiedDependencies(factory.requires())
-          && satisfiedDependencies(factory.requiresPackages())
-          && satisfiedDependencies(factory.autoRequiresAspects())
-          && satisfiedDependencies(factory.autoRequires());
+        && satisfiedDependencies(factory.requiresPackages())
+        && satisfiedDependencies(factory.autoRequiresAspects())
+        && satisfiedDependencies(factory.autoRequires());
     }
 
     private boolean satisfiedDependencies(Class<?>[] requires) {

@@ -82,15 +82,13 @@ public interface BeanScopeBuilder {
   /**
    * Set the PropertyPlugin used for this scope. This is serviceloaded automatically of not set
    *
-   * @param propertyRequiresPlugin
+   * @param propertyRequiresPlugin The plugin for conditions based on properties
    */
   void propertyPlugin(PropertyRequiresPlugin propertyRequiresPlugin);
 
   /**
-   * Retrieve the PropertyPlugin used for this scope. This is useful for plugins that want to use
+   * Return the PropertyPlugin used for this scope. This is useful for plugins that want to use
    * the scopes wiring properties.
-   *
-   * @param propertyRequiresPlugin
    */
   PropertyRequiresPlugin propertyPlugin();
 
@@ -212,7 +210,6 @@ public interface BeanScopeBuilder {
    * @param closables the PreDestroy hooks to add to the bean scope
    */
   BeanScopeBuilder addPreDestroyHooks(AutoCloseable... closables);
-
 
   /**
    * Set the ClassLoader to use when loading modules.
@@ -385,6 +382,7 @@ public interface BeanScopeBuilder {
      * }</pre>
      */
     BeanScopeBuilder.ForTesting spy(Class<?> type, String name);
+
     /**
      * Use a mockito spy when injecting this bean type additionally
      * running setup on the spy instance.
