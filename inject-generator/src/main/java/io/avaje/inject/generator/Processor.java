@@ -1,5 +1,6 @@
 package io.avaje.inject.generator;
 
+import static io.avaje.inject.generator.ProcessingContext.addImportedAspects;
 import static io.avaje.inject.generator.ProcessingContext.element;
 import static io.avaje.inject.generator.ProcessingContext.loadMetaInfCustom;
 import static io.avaje.inject.generator.ProcessingContext.loadMetaInfServices;
@@ -36,7 +37,8 @@ import javax.tools.StandardLocation;
   Constants.SCOPE,
   Constants.TESTSCOPE,
   Constants.CONTROLLER,
-  ImportPrism.PRISM_TYPE
+  ImportPrism.PRISM_TYPE,
+  AspectImportPrism.PRISM_TYPE
 })
 public final class Processor extends AbstractProcessor {
 
@@ -97,6 +99,11 @@ public final class Processor extends AbstractProcessor {
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
     readModule(roundEnv);
+    final var importedAspects =
+        roundEnv.getElementsAnnotatedWith(element(AspectImportPrism.PRISM_TYPE)).stream()
+            .map(AspectImportPrism::getInstanceOn)
+            .collect(Collectors.toMap(p -> p.value().toString(), p -> p));
+    addImportedAspects(importedAspects);
     readScopes(roundEnv.getElementsAnnotatedWith(element(Constants.SCOPE)));
     readChangedBeans(roundEnv.getElementsAnnotatedWith(element(Constants.FACTORY)), true);
     if (defaultScope.includeSingleton()) {

@@ -1,5 +1,7 @@
 package io.avaje.inject.generator;
 
+import static io.avaje.inject.generator.ProcessingContext.getImportedAspect;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -60,6 +62,9 @@ final class TypeExtendsInjection {
       final var aspect = AspectPrism.getInstanceOn(anElement);
       if (aspect != null) {
         aspects.add(new AspectPair(anElement, aspect.ordering()));
+      } else {
+        getImportedAspect(anElement.asType().toString())
+            .ifPresent(p -> aspects.add(new AspectPair(anElement, p.ordering())));
       }
     }
     return aspects;

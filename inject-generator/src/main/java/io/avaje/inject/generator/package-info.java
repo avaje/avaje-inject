@@ -9,6 +9,7 @@
 @GeneratePrism(Named.class)
 @GeneratePrism(Inject.class)
 @GeneratePrism(Aspect.class)
+@GeneratePrism(value = Aspect.Import.class, name = "AspectImportPrism")
 @GeneratePrism(Primary.class)
 @GeneratePrism(Secondary.class)
 @GeneratePrism(Proxy.class)
