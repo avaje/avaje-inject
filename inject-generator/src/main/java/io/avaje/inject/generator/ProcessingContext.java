@@ -6,9 +6,12 @@ import java.io.LineNumberReader;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.processing.Filer;
@@ -39,6 +42,7 @@ final class ProcessingContext {
     private final Set<String> uniqueModuleNames = new HashSet<>();
     private final Set<String> providedTypes = new HashSet<>();
     private final Set<String> optionalTypes = new LinkedHashSet<>();
+    private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
 
     public Ctx(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
 
@@ -170,6 +174,14 @@ final class ProcessingContext {
     if (!CTX.get().providedTypes.contains(paramType)) {
       CTX.get().optionalTypes.add(paramType);
     }
+  }
+
+  static void addImportedAspects(Map<String, AspectImportPrism> importedMap) {
+    CTX.get().aspectImportPrisms.putAll(importedMap);
+  }
+
+  static Optional<AspectImportPrism> getImportedAspect(String type) {
+    return Optional.ofNullable(CTX.get().aspectImportPrisms.get(type));
   }
 
   public static void clear() {
