@@ -7,10 +7,14 @@ import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
 import jakarta.inject.Provider;
 
+import java.io.*;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.lang.System.Logger.Level.DEBUG;
 
@@ -187,7 +191,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   private void initPropertyPlugin() {
     propertyRequiresPlugin =
-      ServiceLoader.load(PropertyRequiresPlugin.class, classLoader)
+      serviceLoad(PropertyRequiresPlugin.class)
         .findFirst()
         .orElse(defaultPropertyPlugin());
   }
@@ -214,7 +218,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       initPropertyPlugin();
     }
 
-    ServiceLoader.load(Plugin.class, classLoader).forEach(plugin -> plugin.apply(this));
+    serviceLoad(Plugin.class).forEach(plugin -> plugin.apply(this));
     // sort factories by dependsOn
     FactoryOrder factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
     if (factoryOrder.isEmpty()) {
@@ -239,6 +243,32 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     postConstructList.forEach(builder::addPostConstruct);
     preDestroyList.forEach(builder::addPreDestroy);
     return builder.build(shutdownHook, start);
+  }
+
+  private <P> Stream<P> serviceLoad(Class<P> pluginClass) {
+      return classLoader
+        .resources("META-INF/services/" + pluginClass.getCanonicalName())
+        .flatMap(this::resourceLines)
+        .map(this::serviceInstance);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <P> P serviceInstance(String className) {
+    try {
+      final var clazz = classLoader.loadClass(className);
+      return (P) clazz.getDeclaredConstructor().newInstance();
+    } catch (Throwable e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private Stream<String> resourceLines(URL url) {
+    try (InputStream is = url.openStream()) {
+      final var reader = new LineNumberReader(new InputStreamReader(is));
+      return reader.lines().collect(Collectors.toList()).stream();
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   /**
