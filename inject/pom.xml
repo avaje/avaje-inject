@@ -32,6 +32,13 @@
     </dependency>
 
     <dependency>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-config</artifactId>
+      <version>3.2-SNAPSHOT</version>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <version>4.7.0</version>

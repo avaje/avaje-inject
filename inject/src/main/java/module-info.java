@@ -7,6 +7,7 @@ module io.avaje.inject {
   requires transitive io.avaje.lang;
   requires transitive io.avaje.applog;
   requires transitive jakarta.inject;
+  requires static io.avaje.config;
   requires static org.mockito;
 
   uses io.avaje.inject.spi.Module;

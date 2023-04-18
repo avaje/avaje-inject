@@ -102,7 +102,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  public <D> BeanScopeBuilder provideDefault(String name, Type type, Supplier<D> supplier) {
+  public <D> BeanScopeBuilder provideDefault(@Nullable String name, Type type, Supplier<D> supplier) {
     final Provider<D> provider = supplier::get;
     suppliedBeans.add(SuppliedBean.secondary(name, type, provider));
     return this;
@@ -189,7 +189,20 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     propertyRequiresPlugin =
       ServiceLoader.load(PropertyRequiresPlugin.class, classLoader)
         .findFirst()
-        .orElse(new DSystemProps());
+        .orElse(defaultPropertyPlugin());
+  }
+
+  private PropertyRequiresPlugin defaultPropertyPlugin() {
+    return detectAvajeConfig() ? new DConfigProps() : new DSystemProps();
+  }
+
+  private boolean detectAvajeConfig() {
+    try {
+      Class.forName("io.avaje.config.Configuration", false, classLoader);
+      return true;
+    } catch (ClassNotFoundException e) {
+      return false;
+    }
   }
 
   @Override
