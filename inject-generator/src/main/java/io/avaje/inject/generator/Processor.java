@@ -165,7 +165,6 @@ public final class Processor extends AbstractProcessor {
     for (final Element element : beans) {
       // ignore methods (e.g. factory methods with @Prototype on them)
       if (element instanceof TypeElement) {
-
         if (element.getKind() == ElementKind.INTERFACE) {
           continue;
         }
