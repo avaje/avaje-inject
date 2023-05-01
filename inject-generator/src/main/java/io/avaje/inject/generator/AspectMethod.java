@@ -1,10 +1,13 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.generator.MethodReader.MethodParam;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.joining;
+
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.*;
+import io.avaje.inject.generator.MethodReader.MethodParam;
 
 final class AspectMethod {
 
@@ -46,7 +49,7 @@ final class AspectMethod {
   }
 
   boolean isVoid() {
-    return rawReturn.equals("void");
+    return "void".equals(rawReturn);
   }
 
   void addImports(ImportTypeMap importTypes) {
@@ -170,8 +173,8 @@ final class AspectMethod {
     if (aspectCount > 1) {
       writer.append("      // outer-most aspect").eol();
     }
-    AspectPair outerAspect = aspectPairs.get(aspectCount - 1);
-    String sn = outerAspect.annotationShortName();
+    final AspectPair outerAspect = aspectPairs.get(aspectCount - 1);
+    final String sn = outerAspect.annotationShortName();
     writer.append("      %s%s.invoke(call);", localName, sn).eol();
 
     if (!isVoid()) {
@@ -179,22 +182,27 @@ final class AspectMethod {
     }
 
     writeThrowsCatch(writer);
-    writer.append("    } catch (Throwable e) {").eol();
-    writer.append("      throw new InvocationException(e);").eol();
+    writer.append("    } catch (RuntimeException ex) {").eol();
+    writer.append("      ex.addSuppressed(new InvocationException(\"%s proxy threw exception\"));", simpleName).eol();
+    writer.append("      throw ex;").eol();
+    writer.append("    } catch (Throwable t) {").eol();
+    writer.append("      throw new InvocationException(\"%s proxy threw exception\", t);", simpleName).eol();
     writer.append("    }").eol();
   }
 
   private void writeThrowsCatch(Append writer) {
-    writer.append("    } catch (");
+
     if (thrownTypes.isEmpty()) {
-      writer.append("InvocationException");
-    } else {
-      writer.append("InvocationException");
-      for (TypeMirror thrownType : thrownTypes) {
-        writer.append(" | ").append(Util.shortName(thrownType.toString()));
-      }
+      return;
     }
-    writer.append(" e) {").eol();
+    writer.append("    } catch (");
+    thrownTypes.stream()
+        .map(Object::toString)
+        .map(Util::shortName)
+        .collect(collectingAndThen(joining(" | "), writer::append))
+        .append(" e) {")
+        .eol(); 
+    writer.append("      e.addSuppressed(new InvocationException(\"%s proxy threw exception\"));", simpleName).eol();
     writer.append("      throw e;").eol();
   }
 }

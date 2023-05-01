@@ -70,12 +70,10 @@ class HelloServiceTest {
     BeanScope beanScope = BeanScope.builder().build();
 
     HelloService helloService = beanScope.get(HelloService.class);
-
     assertThatThrownBy(helloService::thisWillThrow)
-      .isInstanceOf(InvocationException.class)
-      .hasCauseInstanceOf(ArithmeticException.class)
-      .hasMessage("java.lang.ArithmeticException: my interceptor throws this")
-      .hasRootCauseMessage("my interceptor throws this");
+      .isInstanceOf(ArithmeticException.class)
+      .hasSuppressedException(new InvocationException("thisWillThrow proxy threw exception"))
+      .hasMessage("my interceptor throws this");
   }
 
   @Test
@@ -85,9 +83,8 @@ class HelloServiceTest {
     HelloService helloService = beanScope.get(HelloService.class);
 
     assertThatThrownBy(helloService::appCodeThrowsUnchecked)
-      .isInstanceOf(InvocationException.class)
-      .hasCauseInstanceOf(IllegalArgumentException.class)
-      .hasRootCauseMessage("appCodeUnchecked");
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("appCodeUnchecked");
   }
 
   @Test
