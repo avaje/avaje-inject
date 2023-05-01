@@ -7,8 +7,8 @@ import java.lang.reflect.Parameter;
 final class FallbackFinder {
 
   static Fallback find(String name, Method method) throws NoSuchMethodException {
-    Class<?> type = method.getDeclaringClass();
-    Parameter[] parameters = method.getParameters();
+    final Class<?> type = method.getDeclaringClass();
+    final Parameter[] parameters = method.getParameters();
     try {
       return new WithThrowable(type.getDeclaredMethod(name, paramTypesWithThrowable(parameters)));
     } catch (NoSuchMethodException e) {
@@ -17,7 +17,7 @@ final class FallbackFinder {
   }
 
   private static Class<?>[] paramTypes(Parameter[] parameters) {
-    Class<?>[] paramTypes = new Class[parameters.length];
+    final Class<?>[] paramTypes = new Class[parameters.length];
     for (int i = 0; i < parameters.length; i++) {
       paramTypes[i] = parameters[i].getType();
     }
@@ -25,7 +25,7 @@ final class FallbackFinder {
   }
 
   private static Class<?>[] paramTypesWithThrowable(Parameter[] parameters) {
-    Class<?>[] paramTypes = new Class[parameters.length + 1];
+    final Class<?>[] paramTypes = new Class[parameters.length + 1];
     for (int i = 0; i < parameters.length; i++) {
       paramTypes[i] = parameters[i].getType();
     }
@@ -33,7 +33,7 @@ final class FallbackFinder {
     return paramTypes;
   }
 
-  static class WithThrowable implements Fallback {
+  static final class WithThrowable implements Fallback {
 
     private final Method fallbackMethod;
 
@@ -53,7 +53,7 @@ final class FallbackFinder {
     }
   }
 
-  static class WithoutThrowable implements Fallback {
+  static final class WithoutThrowable implements Fallback {
 
     private final Method fallbackMethod;
 
