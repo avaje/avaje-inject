@@ -48,7 +48,7 @@ class InvocationFallbackRawTest {
 
   @Test
   void invokeFallback() throws Throwable {
-    Invocation.Build<String> call = new Invocation.Call<>(() -> this.doStuff(myArg))
+    Invocation.Base<String> call = new Invocation.Call<>(() -> this.doStuff(myArg))
       .with(this, doStuffMethod, myArg);
 
     MyInterceptor myInterceptor = new MyInterceptor();

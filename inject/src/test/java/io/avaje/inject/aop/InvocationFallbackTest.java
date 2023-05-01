@@ -51,7 +51,7 @@ class InvocationFallbackTest {
   void invokeWithFallback() throws Throwable {
     throwOnDoStuff = true;
 
-    Invocation.Build<String> call = new Invocation.Call<>(() -> this.doStuff(myArg))
+    Invocation.Base<String> call = new Invocation.Call<>(() -> this.doStuff(myArg))
       .with(this, doStuffMethod, myArg);
 
     Fallback fallback = Fallback.find("fallbackDoStuff", doStuffMethod);
@@ -70,7 +70,7 @@ class InvocationFallbackTest {
   void invokeWithNoFallback() throws Throwable {
     throwOnDoStuff = false;
 
-    Invocation.Build<String> call = new Invocation.Call<>(() -> this.doStuff(myArg))
+    Invocation.Base<String> call = new Invocation.Call<>(() -> this.doStuff(myArg))
       .with(this, doStuffMethod, myArg);
 
     Fallback fallback = Fallback.find("fallbackDoStuff", doStuffMethod);

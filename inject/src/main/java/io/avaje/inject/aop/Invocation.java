@@ -51,11 +51,11 @@ public interface Invocation {
   Object instance();
 
   /**
-   * Builds Invocation for both callable and runnable methods.
+   * Invocation base type for both callable and runnable methods.
    *
    * @param <T> The result type
    */
-  abstract class Build<T> implements Invocation {
+  abstract class Base<T> implements Invocation {
 
     protected Method method;
     protected Object[] args;
@@ -65,7 +65,7 @@ public interface Invocation {
     /**
      * Set the instance, method and arguments for the invocation.
      */
-    public Build<T> with(Object instance, Method method, Object... args) {
+    public Base<T> with(Object instance, Method method, Object... args) {
       this.instance = instance;
       this.method = method;
       this.args = args;
@@ -119,13 +119,13 @@ public interface Invocation {
      * @param methodInterceptor The method interceptor to use to wrap this call with
      * @return The wrapped call
      */
-    public abstract Build<T> wrap(MethodInterceptor methodInterceptor);
+    public abstract Base<T> wrap(MethodInterceptor methodInterceptor);
   }
 
   /**
    * Runnable based Invocation.
    */
-  final class Run extends Build<Void> {
+  final class Run extends Base<Void> {
 
     private final CheckedRunnable delegate;
 
@@ -143,7 +143,7 @@ public interface Invocation {
     }
 
     @Override
-    public Build<Void> wrap(MethodInterceptor methodInterceptor) {
+    public Base<Void> wrap(MethodInterceptor methodInterceptor) {
       return new Invocation.Run(() -> methodInterceptor.invoke(this))
         .with(instance, method, args);
     }
@@ -153,7 +153,7 @@ public interface Invocation {
   /**
    * Callable based Invocation with checked exceptions.
    */
-  final class Call<T> extends Build<T> {
+  final class Call<T> extends Base<T> {
 
     private final CheckedSupplier<T> delegate;
 
@@ -176,7 +176,7 @@ public interface Invocation {
     }
 
     @Override
-    public Build<T> wrap(MethodInterceptor methodInterceptor) {
+    public Base<T> wrap(MethodInterceptor methodInterceptor) {
       return new Invocation.Call<T>(() -> {
         final Call<T> delegate = this;
         methodInterceptor.invoke(delegate);
