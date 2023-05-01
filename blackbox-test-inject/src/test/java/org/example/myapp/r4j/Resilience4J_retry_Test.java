@@ -18,9 +18,8 @@ class Resilience4J_retry_Test {
       myExample = beanScope.get(MyExample.class);
 
       assertThatThrownBy(myExample::doingItWithRetry)
-        .isInstanceOf(InvocationException.class)
-        .hasCauseInstanceOf(IllegalArgumentException.class)
-        .hasMessage("java.lang.IllegalArgumentException: no");
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("no");
     }
 
     assertThat(myExample.barfCounter).isEqualTo(3);

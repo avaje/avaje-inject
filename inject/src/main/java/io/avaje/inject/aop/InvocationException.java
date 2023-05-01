@@ -11,6 +11,13 @@ public class InvocationException extends RuntimeException {
   /**
    * Create with a given cause.
    */
+  public InvocationException(String message) {
+    super(message);
+  }
+
+  /**
+   * Create with a given cause.
+   */
   public InvocationException(Throwable cause) {
     super(cause);
   }
@@ -21,5 +28,4 @@ public class InvocationException extends RuntimeException {
   public InvocationException(String message, Throwable cause) {
     super(message, cause);
   }
-
 }
