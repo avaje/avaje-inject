@@ -156,6 +156,12 @@ final class ProcessingContext {
     return wrapper == null ? CTX.get().typeUtils.asElement(returnType) : element(wrapper);
   }
 
+  static boolean isUncheckedException(TypeMirror returnType) {
+    final var types = CTX.get().typeUtils;
+    final var runtime = element("java.lang.RuntimeException").asType();
+    return types.isSubtype(returnType, runtime);
+  }
+
   static void addModule(String moduleFullName) {
     if (moduleFullName != null) {
       CTX.get().uniqueModuleNames.add(moduleFullName);

@@ -1,7 +1,8 @@
 package org.example.myapp.r4j;
 
-import io.avaje.inject.Component;
 import org.example.myapp.resilience4j.MyRetry;
+
+import io.avaje.inject.Component;
 
 @Component
 public class MyExample {
@@ -10,7 +11,7 @@ public class MyExample {
   public int retryWithFallbackCounter;
 
   @MyRetry
-  public void doingItWithRetry() {
+  public void doingItWithRetry() throws Throwable, IllegalStateException{
     barfCounter++;
     throw new IllegalArgumentException("no");
   }
