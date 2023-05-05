@@ -13,10 +13,27 @@ public interface Invocation {
 
   /**
    * Invoke the underlying method returning the result.
-   * <p>
-   * This will return null for void methods.
+   *
+   * @return The result of the method call. This will return null for void methods.
+   * @throws Throwable Exception thrown by underlying method
    */
   Object invoke() throws Throwable;
+
+  /**
+   * Invoke the underlying method returning the result. Checked exceptions will be caught and
+   * rethrown as {@code InvocationException}s.
+   *
+   * @return The result of the method call. This will return null for void methods.
+   */
+  default Object invokeUnchecked() {
+    try {
+      return invoke();
+    } catch (final RuntimeException e) {
+      throw e;
+    } catch (final Throwable e) {
+      throw new InvocationException(e);
+    }
+  }
 
   /**
    * Set the result that will be returned to the caller.
