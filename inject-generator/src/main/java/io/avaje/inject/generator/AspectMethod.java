@@ -181,22 +181,25 @@ final class AspectMethod {
       writer.append("      return call.finalResult();").eol();
     }
 
-    writeThrowsCatch(writer);
     writer.append("    } catch (RuntimeException ex) {").eol();
     writer.append("      ex.addSuppressed(new InvocationException(\"%s proxy threw exception\"));", simpleName).eol();
     writer.append("      throw ex;").eol();
-    writer.append("    } catch (Throwable t) {").eol();
-    writer.append("      throw new InvocationException(\"%s proxy threw exception\", t);", simpleName).eol();
+    writeThrowsCatch(writer);
+    if (thrownTypes.stream().map(Object::toString).noneMatch("java.lang.Throwable"::equals)) {
+      writer.append("    } catch (Throwable t) {").eol();
+      writer.append("      throw new InvocationException(\"%s proxy threw exception\", t);", simpleName).eol();
+    }
     writer.append("    }").eol();
   }
 
   private void writeThrowsCatch(Append writer) {
-
-    if (thrownTypes.isEmpty()) {
+    final var types = new ArrayList<>(thrownTypes);
+    types.removeIf(ProcessingContext::isUncheckedException);
+    if (types.isEmpty()) {
       return;
     }
     writer.append("    } catch (");
-    thrownTypes.stream()
+    types.stream()
         .map(Object::toString)
         .map(Util::shortName)
         .collect(collectingAndThen(joining(" | "), writer::append))
