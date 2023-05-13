@@ -93,30 +93,31 @@ public interface BeanScopeBuilder {
   PropertyRequiresPlugin propertyPlugin();
 
   /**
-   * Supply a bean to the scope that will be used instead of any
-   * similar bean in the scope.
-   * <p>
-   * This is typically expected to be used in tests and the bean
-   * supplied is typically a test double or mock.
-   * </p>
+   * Supply a bean to the scope that will be used instead of any similar bean in the scope.
+   *
+   * <p>This is typically expected to be used in tests and the bean supplied is typically a test
+   * double or mock.
+   *
+   * <p>If using this to provide a missing bean into the scope, Avaje will fail compilation unless
+   * it detects an {@code @InjectModule(requires)} including the missing class, or it detects a
+   * {@code @Nullable} annotation where the bean is wired.
    *
    * <pre>{@code
+   * // external dependencies
+   * Pump pump = ...
+   * Grinder grinder = ...
    *
-   *   // external dependencies
-   *   Pump pump = ...
-   *   Grinder grinder = ...
+   * BeanScope scope = BeanScope.builder()
+   *   .beans(pump, grinder)
+   *   .build();
    *
-   *   BeanScope scope = BeanScope.builder()
-   *     .beans(pump, grinder)
-   *     .build();
-   *
-   *   CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
-   *   coffeeMaker.makeIt();
+   * CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
+   * coffeeMaker.makeIt();
    *
    * }</pre>
    *
-   * @param beans Externally provided beans used when injecting a dependency
-   *              for the bean or the interface(s) it implements
+   * @param beans Externally provided beans used when injecting a dependency for the bean or the
+   *     interface(s) it implements
    * @return This BeanScopeBuilder
    */
   BeanScopeBuilder beans(Object... beans);
@@ -124,20 +125,23 @@ public interface BeanScopeBuilder {
   /**
    * Add a supplied bean instance with the given injection type (typically an interface type).
    *
+   * <p>If using this to provide a missing bean into the scope, Avaje will fail compilation unless
+   * it detects an {@code @InjectModule(requires)} including the missing class, or it detects a
+   * {@code @Nullable} annotation where the bean is wired.
+   *
    * <pre>{@code
+   * Pump externalDependency = ...
    *
-   *   Pump externalDependency = ...
+   * try (BeanScope scope = BeanScope.builder()
+   *   .bean(Pump.class, externalDependency)
+   *   .build()) {
    *
-   *   try (BeanScope scope = BeanScope.builder()
-   *     .bean(Pump.class, externalDependency)
-   *     .build()) {
+   *   CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
+   *   coffeeMaker.makeIt();
    *
-   *     CoffeeMaker coffeeMaker = scope.get(CoffeeMaker.class);
-   *     coffeeMaker.makeIt();
-   *
-   *     Pump pump = scope.get(Pump.class);
-   *     assertThat(pump).isSameAs(externalDependency);
-   *   }
+   *   Pump pump = scope.get(Pump.class);
+   *   assertThat(pump).isSameAs(externalDependency);
+   * }
    *
    * }</pre>
    *
@@ -149,6 +153,10 @@ public interface BeanScopeBuilder {
   /**
    * Add a supplied bean instance with the given name and injection type.
    *
+   * <p>If using this to provide a missing bean into the scope, Avaje will fail compilation unless
+   * it detects an {@code @InjectModule(requires)} including the missing class, or it detects a
+   * {@code @Nullable} annotation where the bean is wired.
+   *
    * @param name The name qualifier
    * @param type The dependency injection type this bean is target for
    * @param bean The supplied bean instance to use for injection
@@ -158,6 +166,10 @@ public interface BeanScopeBuilder {
   /**
    * Add a supplied bean instance with the given name and generic type.
    *
+   * <p>If using this to provide a missing bean into the scope, Avaje will fail compilation unless
+   * it detects an {@code @InjectModule(requires)} including the missing class, or it detects a
+   * {@code @Nullable} annotation where the bean is wired.
+   *
    * @param name The name qualifier
    * @param type The dependency injection type this bean is target for
    * @param bean The supplied bean instance to use for injection
@@ -166,6 +178,10 @@ public interface BeanScopeBuilder {
 
   /**
    * Add a supplied bean instance with a generic type.
+   *
+   * <p>If using this to provide a missing bean into the scope, Avaje will fail compilation unless
+   * it detects an {@code @InjectModule(requires)} including the missing class, or it detects a
+   * {@code @Nullable} annotation where the bean is wired.
    *
    * @param type The dependency injection type this bean is target for
    * @param bean The supplied bean instance to use for injection
