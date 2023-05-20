@@ -149,11 +149,11 @@ final class ProcessingContext {
     }
   }
 
-  static Element asElement(TypeMirror returnType) {
+  static TypeElement asElement(TypeMirror returnType) {
 
     final var wrapper = PrimitiveUtil.wrap(returnType.toString());
 
-    return wrapper == null ? CTX.get().typeUtils.asElement(returnType) : element(wrapper);
+    return wrapper == null ? (TypeElement) CTX.get().typeUtils.asElement(returnType) : element(wrapper);
   }
 
   static boolean isUncheckedException(TypeMirror returnType) {
