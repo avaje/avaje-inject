@@ -203,15 +203,15 @@ final class TypeExtendsReader {
     } else if (Constants.AUTO_CLOSEABLE.equals(rawType) || Constants.IO_CLOSEABLE.equals(rawType)) {
       closeable = true;
     } else {
+      final var genericType = GenericType.parse(rawType);
       if (qualifierName == null) {
-        final String mainType = GenericType.removeParameter(rawType);
+        final String mainType = genericType.topType();
         final String iShortName = Util.shortName(mainType);
         if (beanSimpleName.endsWith(iShortName)) {
           // derived qualifier name based on prefix to interface short name
           qualifierName = beanSimpleName.substring(0, beanSimpleName.length() - iShortName.length()).toLowerCase();
         }
       }
-      final var genericType = GenericType.parse(rawType);
       // check if any unknown generic types are in the parameters (T,T2, etc.)
       final var knownType =
           genericType.params().stream()
