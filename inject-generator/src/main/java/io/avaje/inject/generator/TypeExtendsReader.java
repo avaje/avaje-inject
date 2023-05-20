@@ -169,7 +169,15 @@ final class TypeExtendsReader {
     if (!JAVA_LANG_OBJECT.equals(fullName) && !JAVA_LANG_RECORD.equals(fullName)) {
       final String type = Util.unwrapProvider(fullName);
       if (isPublic(element)) {
-        extendsTypes.add(type);
+    	 final var genericType= GenericType.parse(type);
+        // check if any unknown generic types are in the parameters (T,T2, etc.)
+        final var knownType =
+        		genericType.params().stream()
+                .flatMap(g -> Stream.concat(Stream.of(g), g.params().stream()))
+                .noneMatch(g -> element(g.mainType()) == null);
+
+        extendsTypes.add(knownType ? type : genericType.topType());
+
         extendsInjection.read(element);
       }
 
@@ -203,9 +211,10 @@ final class TypeExtendsReader {
           qualifierName = beanSimpleName.substring(0, beanSimpleName.length() - iShortName.length()).toLowerCase();
         }
       }
+      final var genericType = GenericType.parse(rawType);
       // check if any unknown generic types are in the parameters (T,T2, etc.)
       final var knownType =
-          GenericType.parse(rawType).params().stream()
+          genericType.params().stream()
               .flatMap(g -> Stream.concat(Stream.of(g), g.params().stream()))
               .noneMatch(g -> element(g.mainType()) == null);
 
