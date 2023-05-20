@@ -132,7 +132,9 @@ final class TypeExtendsReader {
       extendsInjection.read(baseType);
     }
     readInterfaces(baseType);
-    final TypeElement superElement = superOf(baseType);
+    final var superMirror = baseType.getSuperclass();
+    final TypeElement superElement = asElement(superMirror);
+
     if (superElement != null) {
       if (qualifierName == null) {
         final String baseName = baseType.getSimpleName().toString();
@@ -141,7 +143,7 @@ final class TypeExtendsReader {
           qualifierName = baseName.substring(0, baseName.length() - superName.length()).toLowerCase();
         }
       }
-      addSuperType(superElement);
+      addSuperType(superElement,superMirror);
     }
 
     providesTypes.addAll(extendsTypes);
@@ -161,21 +163,20 @@ final class TypeExtendsReader {
     return "";
   }
 
-  private void addSuperType(TypeElement element) {
+  private void addSuperType(TypeElement element, TypeMirror mirror) {
     readInterfaces(element);
-    final String fullName = element.getQualifiedName().toString();
+    final String fullName = mirror.toString();
     if (!JAVA_LANG_OBJECT.equals(fullName) && !JAVA_LANG_RECORD.equals(fullName)) {
       final String type = Util.unwrapProvider(fullName);
       if (isPublic(element)) {
         extendsTypes.add(type);
         extendsInjection.read(element);
       }
-      addSuperType(superOf(element));
-    }
-  }
 
-  private TypeElement superOf(TypeElement element) {
-    return (TypeElement) asElement(element.getSuperclass());
+      final var superMirror = element.getSuperclass();
+      final TypeElement superElement = asElement(superMirror);
+      addSuperType(superElement, superMirror);
+    }
   }
 
   private void readInterfaces(TypeElement type) {
