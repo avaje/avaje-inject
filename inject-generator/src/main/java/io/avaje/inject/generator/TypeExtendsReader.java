@@ -60,6 +60,7 @@ final class TypeExtendsReader {
         && !isController();
   }
 
+  @SuppressWarnings("unchecked")
   private boolean isController() {
     try {
       return baseType.getAnnotation((Class<Annotation>) Class.forName(Constants.CONTROLLER)) != null;
@@ -169,15 +170,14 @@ final class TypeExtendsReader {
     if (!JAVA_LANG_OBJECT.equals(fullName) && !JAVA_LANG_RECORD.equals(fullName)) {
       final String type = Util.unwrapProvider(fullName);
       if (isPublic(element)) {
-    	 final var genericType= GenericType.parse(type);
+        final var genericType = GenericType.parse(type);
         // check if any unknown generic types are in the parameters (T,T2, etc.)
         final var knownType =
-        		genericType.params().stream()
-                .flatMap(g -> Stream.concat(Stream.of(g), g.params().stream()))
-                .noneMatch(g -> element(g.mainType()) == null);
+          genericType.params().stream()
+            .flatMap(g -> Stream.concat(Stream.of(g), g.params().stream()))
+            .noneMatch(g -> element(g.mainType()) == null);
 
         extendsTypes.add(knownType ? type : genericType.topType());
-
         extendsInjection.read(element);
       }
 
@@ -198,7 +198,10 @@ final class TypeExtendsReader {
   private void readInterfacesOf(TypeMirror anInterface) {
     final String rawType = Util.unwrapProvider(anInterface.toString());
     if (JAVA_LANG_OBJECT.equals(rawType)) {
-    } else if (rawType.indexOf('.') == -1) {
+      // we can stop
+      return;
+    }
+    if (rawType.indexOf('.') == -1) {
       logWarn("skip when no package on interface " + rawType);
     } else if (Constants.AUTO_CLOSEABLE.equals(rawType) || Constants.IO_CLOSEABLE.equals(rawType)) {
       closeable = true;
@@ -214,13 +217,12 @@ final class TypeExtendsReader {
       }
       // check if any unknown generic types are in the parameters (T,T2, etc.)
       final var knownType =
-          genericType.params().stream()
-              .flatMap(g -> Stream.concat(Stream.of(g), g.params().stream()))
-              .noneMatch(g -> element(g.mainType()) == null);
+        genericType.params().stream()
+          .flatMap(g -> Stream.concat(Stream.of(g), g.params().stream()))
+          .noneMatch(g -> element(g.mainType()) == null);
 
       interfaceTypes.add(knownType ? rawType : GenericType.removeParameter(rawType));
       if (!rawType.startsWith("java.lang.")) {
-
         for (final TypeMirror supertype : types().directSupertypes(anInterface)) {
           readInterfacesOf(supertype);
         }
