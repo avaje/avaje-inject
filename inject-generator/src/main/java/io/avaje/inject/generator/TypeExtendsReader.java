@@ -143,7 +143,7 @@ final class TypeExtendsReader {
           qualifierName = baseName.substring(0, baseName.length() - superName.length()).toLowerCase();
         }
       }
-      addSuperType(superElement,superMirror);
+      addSuperType(superElement, superMirror);
     }
 
     providesTypes.addAll(extendsTypes);
