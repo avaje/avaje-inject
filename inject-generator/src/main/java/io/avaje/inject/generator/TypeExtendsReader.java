@@ -54,10 +54,10 @@ final class TypeExtendsReader {
 
   private boolean autoProvide() {
     return publicAccess
-        && !FactoryPrism.isPresent(baseType)
-        && !ProxyPrism.isPresent(baseType)
-        && !GeneratedPrism.isPresent(baseType)
-        && !isController();
+      && !FactoryPrism.isPresent(baseType)
+      && !ProxyPrism.isPresent(baseType)
+      && !GeneratedPrism.isPresent(baseType)
+      && !isController();
   }
 
   @SuppressWarnings("unchecked")
@@ -135,7 +135,6 @@ final class TypeExtendsReader {
     readInterfaces(baseType);
     final var superMirror = baseType.getSuperclass();
     final TypeElement superElement = asElement(superMirror);
-
     if (superElement != null) {
       if (qualifierName == null) {
         final String baseName = baseType.getSimpleName().toString();
@@ -144,7 +143,7 @@ final class TypeExtendsReader {
           qualifierName = baseName.substring(0, baseName.length() - superName.length()).toLowerCase();
         }
       }
-      addSuperType(superElement,superMirror);
+      addSuperType(superElement, superMirror);
     }
 
     providesTypes.addAll(extendsTypes);
@@ -182,7 +181,7 @@ final class TypeExtendsReader {
       }
 
       final var superMirror = element.getSuperclass();
-      final TypeElement superElement = asElement(superMirror);
+      final var superElement = asElement(superMirror);
       addSuperType(superElement, superMirror);
     }
   }
