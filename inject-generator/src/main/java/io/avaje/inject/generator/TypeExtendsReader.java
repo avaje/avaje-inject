@@ -1,9 +1,14 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.ProcessingContext.*;
+import static io.avaje.inject.generator.ProcessingContext.asElement;
+import static io.avaje.inject.generator.ProcessingContext.element;
+import static io.avaje.inject.generator.ProcessingContext.logWarn;
+import static io.avaje.inject.generator.ProcessingContext.types;
+
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -127,16 +132,18 @@ final class TypeExtendsReader {
       extendsInjection.read(baseType);
     }
     readInterfaces(baseType);
-    TypeElement superElement = superOf(baseType);
+    final var superMirror = baseType.getSuperclass();
+    final TypeElement superElement = asElement(superMirror);
+
     if (superElement != null) {
       if (qualifierName == null) {
-        String baseName = baseType.getSimpleName().toString();
-        String superName = superElement.getSimpleName().toString();
+        final String baseName = baseType.getSimpleName().toString();
+        final String superName = superElement.getSimpleName().toString();
         if (baseName.endsWith(superName)) {
           qualifierName = baseName.substring(0, baseName.length() - superName.length()).toLowerCase();
         }
       }
-      addSuperType(superElement);
+      addSuperType(superElement,superMirror);
     }
 
     providesTypes.addAll(extendsTypes);
@@ -148,7 +155,7 @@ final class TypeExtendsReader {
   }
 
   private String initProvidesAspect() {
-    for (String providesType : providesTypes) {
+    for (final String providesType : providesTypes) {
       if (Util.isAspectProvider(providesType)) {
         return Util.extractAspectType(providesType);
       }
@@ -156,25 +163,32 @@ final class TypeExtendsReader {
     return "";
   }
 
-  private void addSuperType(TypeElement element) {
+  private void addSuperType(TypeElement element, TypeMirror mirror) {
     readInterfaces(element);
-    final String fullName = element.getQualifiedName().toString();
-    if (!fullName.equals(JAVA_LANG_OBJECT) && !fullName.equals(JAVA_LANG_RECORD)) {
+    final String fullName = mirror.toString();
+    if (!JAVA_LANG_OBJECT.equals(fullName) && !JAVA_LANG_RECORD.equals(fullName)) {
       final String type = Util.unwrapProvider(fullName);
       if (isPublic(element)) {
-        extendsTypes.add(type);
+    	 final var genericType= GenericType.parse(type);
+        // check if any unknown generic types are in the parameters (T,T2, etc.)
+        final var knownType =
+        		genericType.params().stream()
+                .flatMap(g -> Stream.concat(Stream.of(g), g.params().stream()))
+                .noneMatch(g -> element(g.mainType()) == null);
+
+        extendsTypes.add(knownType ? type : genericType.topType());
+
         extendsInjection.read(element);
       }
-      addSuperType(superOf(element));
+
+      final var superMirror = element.getSuperclass();
+      final TypeElement superElement = asElement(superMirror);
+      addSuperType(superElement, superMirror);
     }
   }
 
-  private TypeElement superOf(TypeElement element) {
-    return (TypeElement) asElement(element.getSuperclass());
-  }
-
   private void readInterfaces(TypeElement type) {
-    for (TypeMirror anInterface : type.getInterfaces()) {
+    for (final TypeMirror anInterface : type.getInterfaces()) {
       if (isPublic(asElement(anInterface))) {
         readInterfacesOf(anInterface);
       }
@@ -182,25 +196,32 @@ final class TypeExtendsReader {
   }
 
   private void readInterfacesOf(TypeMirror anInterface) {
-    String rawType = Util.unwrapProvider(anInterface.toString());
+    final String rawType = Util.unwrapProvider(anInterface.toString());
     if (JAVA_LANG_OBJECT.equals(rawType)) {
     } else if (rawType.indexOf('.') == -1) {
       logWarn("skip when no package on interface " + rawType);
     } else if (Constants.AUTO_CLOSEABLE.equals(rawType) || Constants.IO_CLOSEABLE.equals(rawType)) {
       closeable = true;
     } else {
+      final var genericType = GenericType.parse(rawType);
       if (qualifierName == null) {
-        String mainType = GenericType.removeParameter(rawType);
+        final String mainType = genericType.topType();
         final String iShortName = Util.shortName(mainType);
         if (beanSimpleName.endsWith(iShortName)) {
           // derived qualifier name based on prefix to interface short name
           qualifierName = beanSimpleName.substring(0, beanSimpleName.length() - iShortName.length()).toLowerCase();
         }
       }
-      interfaceTypes.add(rawType);
+      // check if any unknown generic types are in the parameters (T,T2, etc.)
+      final var knownType =
+          genericType.params().stream()
+              .flatMap(g -> Stream.concat(Stream.of(g), g.params().stream()))
+              .noneMatch(g -> element(g.mainType()) == null);
+
+      interfaceTypes.add(knownType ? rawType : GenericType.removeParameter(rawType));
       if (!rawType.startsWith("java.lang.")) {
 
-        for (TypeMirror supertype : types().directSupertypes(anInterface)) {
+        for (final TypeMirror supertype : types().directSupertypes(anInterface)) {
           readInterfacesOf(supertype);
         }
       }
