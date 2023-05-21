@@ -45,7 +45,6 @@ final class ProcessingContext {
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
 
     public Ctx(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
-
       messager = processingEnv.getMessager();
       filer = processingEnv.getFiler();
       elementUtils = processingEnv.getElementUtils();
@@ -87,8 +86,7 @@ final class ProcessingContext {
 
   private static List<String> loadMetaInf(String fullName) {
     try {
-      final var fileObject =
-          CTX.get().filer.getResource(StandardLocation.CLASS_OUTPUT, "", fullName);
+      final var fileObject = CTX.get().filer.getResource(StandardLocation.CLASS_OUTPUT, "", fullName);
       if (fileObject != null) {
         final List<String> lines = new ArrayList<>();
         final var reader = fileObject.openReader(true);
@@ -105,10 +103,8 @@ final class ProcessingContext {
 
     } catch (FileNotFoundException | NoSuchFileException e) {
       // logDebug("no services file yet");
-
     } catch (final FilerException e) {
       logDebug("FilerException reading services file");
-
     } catch (final Exception e) {
       e.printStackTrace();
       logWarn("Error reading services file: " + e.getMessage());
@@ -123,9 +119,9 @@ final class ProcessingContext {
 
   static FileObject createMetaInfWriter(ScopeInfo.Type scopeType) throws IOException {
     final var serviceName =
-        scopeType == ScopeInfo.Type.DEFAULT
-            ? Constants.META_INF_MODULE
-            : Constants.META_INF_TESTMODULE;
+      scopeType == ScopeInfo.Type.DEFAULT
+        ? Constants.META_INF_MODULE
+        : Constants.META_INF_TESTMODULE;
     return createMetaInfWriterFor(serviceName);
   }
 
@@ -150,9 +146,7 @@ final class ProcessingContext {
   }
 
   static TypeElement asElement(TypeMirror returnType) {
-
     final var wrapper = PrimitiveUtil.wrap(returnType.toString());
-
     return wrapper == null ? (TypeElement) CTX.get().typeUtils.asElement(returnType) : element(wrapper);
   }
 
