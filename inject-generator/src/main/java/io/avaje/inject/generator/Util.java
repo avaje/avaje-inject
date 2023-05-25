@@ -58,6 +58,17 @@ final class Util {
     return type.substring(0, pos + 1) + type.substring(type.lastIndexOf(' ') + 1);
   }
 
+  public static String sanitizeimports(String type) {
+    int pos = type.indexOf("@");
+    if (pos == -1) {
+      return type.replace("[]", "");
+    }
+
+    var start = pos == 0 ? type.substring(0, pos + 1) : "";
+
+    return start + type.substring(type.lastIndexOf(' ') + 1).replace("[]", "");
+  }
+
   static String nestedPackageOf(String cls) {
     int pos = cls.lastIndexOf('.');
     if (pos < 0) {
