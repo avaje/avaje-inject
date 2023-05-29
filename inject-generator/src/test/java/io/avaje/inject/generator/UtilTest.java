@@ -130,5 +130,7 @@ class UtilTest {
     assertEquals("my.Foo", Util.sanitizeImports("my.Foo[]"));
     assertEquals("my.Foo", Util.sanitizeImports("@annotationMcgee my.Foo[]"));
     assertEquals("my.Foo", Util.sanitizeImports("@annotationMcgee my.Foo"));
+    assertEquals("my.Foo", Util.sanitizeImports("@org.bar.annotationMcgee my.Foo[]"));
+    assertEquals("my.Foo", Util.sanitizeImports("@org.bar.annotationMcgee my.Foo"));
   }
 }
