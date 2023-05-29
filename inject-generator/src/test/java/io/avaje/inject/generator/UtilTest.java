@@ -123,4 +123,10 @@ class UtilTest {
   void trimMethod_when_genericType() {
     assertThat(Util.trimMethod("foo.bar.ProcessMe<java.lang.String>")).isEqualTo("bar_ProcessMe");
   }
+
+  @Test
+  void sanitizedType() {
+    assertEquals("my.Foo", Util.sanitizeimports("my.Foo"));
+    assertEquals("my.Foo", Util.sanitizeimports("@annotationMcgee my.Foo[]"));
+  }
 }

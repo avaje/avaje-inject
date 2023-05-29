@@ -64,7 +64,7 @@ final class Util {
       return type.replace("[]", "");
     }
 
-    var start = pos == 0 ? type.substring(0, pos + 1) : "";
+    var start = pos == 0 ? type.substring(0, pos) : "";
 
     return start + type.substring(type.lastIndexOf(' ') + 1).replace("[]", "");
   }
