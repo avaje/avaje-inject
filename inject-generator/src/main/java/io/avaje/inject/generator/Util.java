@@ -58,14 +58,12 @@ final class Util {
     return type.substring(0, pos + 1) + type.substring(type.lastIndexOf(' ') + 1);
   }
 
-  public static String sanitizeimports(String type) {
+  public static String sanitizeImports(String type) {
     int pos = type.indexOf("@");
     if (pos == -1) {
       return type.replace("[]", "");
     }
-
     var start = pos == 0 ? type.substring(0, pos) : "";
-
     return start + type.substring(type.lastIndexOf(' ') + 1).replace("[]", "");
   }
 
