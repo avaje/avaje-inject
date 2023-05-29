@@ -125,8 +125,10 @@ class UtilTest {
   }
 
   @Test
-  void sanitizedType() {
-    assertEquals("my.Foo", Util.sanitizeimports("my.Foo"));
-    assertEquals("my.Foo", Util.sanitizeimports("@annotationMcgee my.Foo[]"));
+  void sanitizeImports() {
+    assertEquals("my.Foo", Util.sanitizeImports("my.Foo"));
+    assertEquals("my.Foo", Util.sanitizeImports("my.Foo[]"));
+    assertEquals("my.Foo", Util.sanitizeImports("@annotationMcgee my.Foo[]"));
+    assertEquals("my.Foo", Util.sanitizeImports("@annotationMcgee my.Foo"));
   }
 }
