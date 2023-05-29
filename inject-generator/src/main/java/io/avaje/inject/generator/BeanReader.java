@@ -303,7 +303,7 @@ final class BeanReader {
     }
     for (String importType : importTypes()) {
       if (Util.validImportType(importType)) {
-        writer.append("import %s;", importType).eol();
+        writer.append("import %s;", Util.sanitizeimports(importType)).eol();
       }
     }
     writer.eol();
