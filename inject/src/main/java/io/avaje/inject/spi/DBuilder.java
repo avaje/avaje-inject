@@ -297,7 +297,7 @@ class DBuilder implements Builder {
     if (provider != null) {
       return provider;
     }
-    return ()-> this.get(type, name);
+    return () -> this.get(type, name);
   }
 
   @Override
