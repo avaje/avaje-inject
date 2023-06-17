@@ -1,1 +1,3 @@
-ignoreFiles=*/blackbox/**
+ignoreFiles="""
+*/blackbox/**
+"""
