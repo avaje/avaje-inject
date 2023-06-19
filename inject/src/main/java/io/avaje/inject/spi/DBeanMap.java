@@ -19,6 +19,7 @@ import java.util.Set;
  * entry holds a list of bean instances for that type.
  */
 final class DBeanMap {
+  private static final Optional<Object> EMPTY = Optional.empty();
   private final Map<String, DContextEntry> beans = new LinkedHashMap<>();
   private final Set<String> qualifiers = new HashSet<>();
 
@@ -63,7 +64,7 @@ final class DBeanMap {
   }
 
   void register(Object bean) {
-    if (bean == null || Optional.empty().equals(bean)) {
+    if (bean == null || EMPTY.equals(bean)) {
       return;
     }
     var name = nextBean.name;
