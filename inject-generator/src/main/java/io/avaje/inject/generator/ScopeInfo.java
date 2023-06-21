@@ -401,11 +401,14 @@ final class ScopeInfo {
     writer.append("  public Class<?>[] %s() { return %s; }", fieldName, fieldName).eol();
     writer.append("  private final Class<?>[] %s = new Class<?>[]{", fieldName).eol();
     for (final String rawType : types) {
-      final var pos = rawType.indexOf("<");
-      final var type = pos == -1 ? rawType : rawType.substring(0, pos);
-      writer.append("    %s.class,", type).eol();
+      writer.append("    %s.class,", trimGenerics(rawType)).eol();
     }
     writer.append("  };").eol().eol();
+  }
+
+  static String trimGenerics(String rawType) {
+    final var pos = rawType.indexOf("<");
+    return pos == -1 ? rawType : rawType.substring(0, pos);
   }
 
   void buildAutoProvides(Append writer, Set<String> autoProvides) {
