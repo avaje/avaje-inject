@@ -400,8 +400,10 @@ final class ScopeInfo {
     writer.append("  @Override").eol();
     writer.append("  public Class<?>[] %s() { return %s; }", fieldName, fieldName).eol();
     writer.append("  private final Class<?>[] %s = new Class<?>[]{", fieldName).eol();
-    for (String rawType : types) {
-      writer.append("    %s.class,", rawType).eol();
+    for (final String rawType : types) {
+      final var pos = rawType.indexOf("<");
+      final var type = pos == -1 ? rawType : rawType.substring(0, pos);
+      writer.append("    %s.class,", type).eol();
     }
     writer.append("  };").eol().eol();
   }
