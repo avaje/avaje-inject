@@ -42,6 +42,7 @@ final class ProcessingContext {
     private final Set<String> uniqueModuleNames = new HashSet<>();
     private final Set<String> providedTypes = new HashSet<>();
     private final Set<String> optionalTypes = new LinkedHashSet<>();
+    private final Set<String> importedTypes = new LinkedHashSet<>();
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
 
     public Ctx(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
@@ -52,10 +53,20 @@ final class ProcessingContext {
       ExternalProvider.registerModuleProvidedTypes(providedTypes);
       providedTypes.addAll(moduleFileProvided);
     }
+    public Ctx() {
+      this.messager = null;
+      this.filer = null;
+      this.elementUtils = null;
+      this.typeUtils = null;
+    }
   }
 
   public static void init(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
     CTX.set(new Ctx(processingEnv, moduleFileProvided));
+  }
+
+  public static void testInit() {
+    CTX.set(new Ctx());
   }
 
   /** Log an error message. */
@@ -178,6 +189,14 @@ final class ProcessingContext {
 
   static void addImportedAspects(Map<String, AspectImportPrism> importedMap) {
     CTX.get().aspectImportPrisms.putAll(importedMap);
+  }
+
+  static void addImportedType(String importedMap) {
+    CTX.get().importedTypes.add(importedMap);
+  }
+
+  static boolean isImportedType(String type) {
+    return CTX.get().importedTypes.contains(type);
   }
 
   static Optional<AspectImportPrism> getImportedAspect(String type) {

@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import java.util.Optional;
+import static io.avaje.inject.generator.ProcessingContext.isImportedType;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -73,7 +74,8 @@ final class Util {
       return "";
     }
     pos = cls.lastIndexOf('.', pos - 1);
-    return (pos == -1) ? "" : cls.substring(0, pos);
+    final var packageName = (pos == -1) ? "" : cls.substring(0, pos);
+    return isImportedType(cls) ? packageName + ".di" : packageName;
   }
 
   static String packageOf(String cls) {

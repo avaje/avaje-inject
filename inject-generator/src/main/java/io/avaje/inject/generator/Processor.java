@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.ProcessingContext.addImportedAspects;
+import static io.avaje.inject.generator.ProcessingContext.addImportedType;
 import static io.avaje.inject.generator.ProcessingContext.element;
 import static io.avaje.inject.generator.ProcessingContext.loadMetaInfCustom;
 import static io.avaje.inject.generator.ProcessingContext.loadMetaInfServices;
@@ -113,12 +114,16 @@ public final class Processor extends AbstractProcessor {
     readChangedBeans(roundEnv.getElementsAnnotatedWith(element(Constants.PROTOTYPE)), false);
 
     final var importedElements =
-      roundEnv.getElementsAnnotatedWith(element(ImportPrism.PRISM_TYPE)).stream()
-        .map(ImportPrism::getInstanceOn)
-        .flatMap(p -> p.value().stream())
-        .map(ProcessingContext::asElement)
-        .map(TypeElement.class::cast)
-        .collect(Collectors.toSet());
+        roundEnv.getElementsAnnotatedWith(element(ImportPrism.PRISM_TYPE)).stream()
+            .map(ImportPrism::getInstanceOn)
+            .flatMap(p -> p.value().stream())
+            .map(ProcessingContext::asElement)
+            .map(
+                e -> {
+                  addImportedType(e.getQualifiedName().toString());
+                  return e;
+                })
+            .collect(Collectors.toSet());
 
     readChangedBeans(importedElements, false);
 
