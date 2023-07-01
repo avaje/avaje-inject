@@ -66,9 +66,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <argLine>
-            --add-opens io.avaje.inject.generator/io.avaje.inject.generator=ALL-UNNAMED
-          </argLine>
+          <useModulePath>false</useModulePath>
         </configuration>
       </plugin>
     </plugins>

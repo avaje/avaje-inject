@@ -42,7 +42,7 @@ final class Util {
   }
 
   static String trimGenerics(String type) {
-    int i = type.indexOf('<');
+    final int i = type.indexOf('<');
     if (i == -1) {
       return type;
     }
@@ -52,7 +52,7 @@ final class Util {
 
   /** Trim off annotations from the raw type if present. */
   public static String trimAnnotations(String type) {
-    int pos = type.indexOf(".@");
+    final int pos = type.indexOf(".@");
     if (pos == -1) {
       return type;
     }
@@ -60,11 +60,11 @@ final class Util {
   }
 
   public static String sanitizeImports(String type) {
-    int pos = type.indexOf("@");
+    final int pos = type.indexOf("@");
     if (pos == -1) {
       return type.replace("[]", "");
     }
-    var start = pos == 0 ? type.substring(0, pos) : "";
+    final var start = pos == 0 ? type.substring(0, pos) : "";
     return start + type.substring(type.lastIndexOf(' ') + 1).replace("[]", "");
   }
 
@@ -79,8 +79,9 @@ final class Util {
   }
 
   static String packageOf(String cls) {
-    int pos = cls.lastIndexOf('.');
-    return (pos == -1) ? "" : cls.substring(0, pos);
+    final int pos = cls.lastIndexOf('.');
+    final var packageName = (pos == -1) ? "" : cls.substring(0, pos);
+    return isImportedType(cls) ? packageName + ".di" : packageName;
   }
 
   static String unwrapProvider(String maybeProvider) {
@@ -92,9 +93,9 @@ final class Util {
   }
 
   static String initLower(String name) {
-    StringBuilder sb = new StringBuilder(name.length());
+    final StringBuilder sb = new StringBuilder(name.length());
     boolean upper = true;
-    for (char ch : name.toCharArray()) {
+    for (final char ch : name.toCharArray()) {
       if (upper && Character.isUpperCase(ch)) {
         sb.append(Character.toLowerCase(ch));
       } else {
@@ -116,7 +117,7 @@ final class Util {
   }
 
   static String shortName(String fullType) {
-    int p = fullType.lastIndexOf('.');
+    final int p = fullType.lastIndexOf('.');
     if (p == -1) {
       return fullType;
     } else {
@@ -137,7 +138,7 @@ final class Util {
   }
 
   static String extractList(String rawType) {
-    String listType = rawType.substring(15, rawType.length() - 1);
+    final String listType = rawType.substring(15, rawType.length() - 1);
     if (listType.startsWith("? extends")) {
       return listType.substring(10);
     }
@@ -145,7 +146,7 @@ final class Util {
   }
 
   static String extractSet(String rawType) {
-    String setType = rawType.substring(14, rawType.length() - 1);
+    final String setType = rawType.substring(14, rawType.length() - 1);
     if (setType.startsWith("? extends")) {
       return setType.substring(10);
     }
@@ -153,7 +154,7 @@ final class Util {
   }
 
   static String extractMap(String rawType) {
-    String valType = rawType.substring(31, rawType.length() - 1);
+    final String valType = rawType.substring(31, rawType.length() - 1);
     if (valType.startsWith("? extends")) {
       return valType.substring(10);
     }
@@ -211,13 +212,13 @@ final class Util {
    * Return the name via <code>@Named</code> or a Qualifier annotation.
    */
   public static String getNamed(Element p) {
-    NamedPrism named = NamedPrism.getInstanceOn(p);
+    final NamedPrism named = NamedPrism.getInstanceOn(p);
     if (named != null) {
       return named.value().toLowerCase();
     }
-    for (AnnotationMirror annotationMirror : p.getAnnotationMirrors()) {
-      DeclaredType annotationType = annotationMirror.getAnnotationType();
-      var hasQualifier = QualifierPrism.isPresent(annotationType.asElement());
+    for (final AnnotationMirror annotationMirror : p.getAnnotationMirrors()) {
+      final DeclaredType annotationType = annotationMirror.getAnnotationType();
+      final var hasQualifier = QualifierPrism.isPresent(annotationType.asElement());
       if (hasQualifier) {
         return Util.shortName(annotationType.toString()).toLowerCase();
       }
@@ -229,7 +230,7 @@ final class Util {
    * Return true if the element has a Nullable annotation.
    */
   public static boolean isNullable(Element p) {
-    for (AnnotationMirror mirror : p.getAnnotationMirrors()) {
+    for (final AnnotationMirror mirror : p.getAnnotationMirrors()) {
       if (NULLABLE.equals(shortName(mirror.getAnnotationType().toString()))) {
         return true;
       }
@@ -238,7 +239,7 @@ final class Util {
   }
 
   public static Optional<DeclaredType> getNullableAnnotation(Element p) {
-    for (AnnotationMirror mirror : p.getAnnotationMirrors()) {
+    for (final AnnotationMirror mirror : p.getAnnotationMirrors()) {
       if (NULLABLE.equals(shortName(mirror.getAnnotationType().toString()))) {
         return Optional.of(mirror.getAnnotationType());
       }
