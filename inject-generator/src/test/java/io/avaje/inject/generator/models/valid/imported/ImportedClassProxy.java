@@ -5,5 +5,5 @@ import io.avaje.inject.generator.models.valid.Timed;
 public class ImportedClassProxy {
 
   @Timed
-  public void somethin() {}
+  public void somethin() throws RuntimeException {}
 }
