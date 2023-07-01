@@ -45,11 +45,11 @@ final class SimpleBeanWriter {
   }
 
   private Writer createFileWriter() throws IOException {
-    String originName = this.originName;
+    String originName = packageName + "." + shortName;
     if (beanReader.beanType().getNestingKind().isNested()) {
-      originName = originName.replace(shortName, shortName.replace(".", "$"));
+      originName = packageName + "." + shortName.replace(shortName, shortName.replace(".", "$"));
     }
-    JavaFileObject jfo = createWriter(originName + suffix);
+    final JavaFileObject jfo = createWriter(originName + suffix);
     return jfo.openWriter();
   }
 
