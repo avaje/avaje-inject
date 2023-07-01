@@ -57,7 +57,7 @@ class InjectProcessorTest {
 
     final CompilationTask task =
         compiler.getTask(
-            new PrintWriter(System.out), null, null, Arrays.asList("--release=17"), null, files);
+            new PrintWriter(System.out), null, null, Arrays.asList("--release=11"), null, files);
     task.setProcessors(Arrays.asList(new Processor()));
 
     assertThat(task.call()).isTrue();
