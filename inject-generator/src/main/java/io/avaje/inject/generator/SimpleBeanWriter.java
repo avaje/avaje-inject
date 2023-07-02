@@ -31,8 +31,8 @@ final class SimpleBeanWriter {
 
   SimpleBeanWriter(BeanReader beanReader) {
     this.beanReader = beanReader;
-    TypeElement origin = beanReader.beanType();
-    this.originName = origin.getQualifiedName().toString();
+    final TypeElement origin = beanReader.beanType();
+    final var originName = origin.getQualifiedName().toString();
     if (origin.getNestingKind().isNested()) {
       this.packageName = Util.nestedPackageOf(originName);
       this.shortName = Util.nestedShortName(originName);
@@ -42,6 +42,7 @@ final class SimpleBeanWriter {
     }
     this.suffix = beanReader.suffix();
     this.proxied = beanReader.isGenerateProxy();
+    this.originName = packageName + "." + shortName;
   }
 
   private Writer createFileWriter() throws IOException {
@@ -49,7 +50,7 @@ final class SimpleBeanWriter {
     if (beanReader.beanType().getNestingKind().isNested()) {
       originName = originName.replace(shortName, shortName.replace(".", "$"));
     }
-    JavaFileObject jfo = createWriter(originName + suffix);
+    final JavaFileObject jfo = createWriter(originName + suffix);
     return jfo.openWriter();
   }
 

@@ -13,7 +13,7 @@
   <name>avaje inject generator</name>
   <description>annotation processor generating di as source code</description>
   <properties>
-    <avaje.prisms.version>1.8</avaje.prisms.version>
+    <avaje.prisms.version>1.10</avaje.prisms.version>
   </properties>
   <dependencies>
 
@@ -66,9 +66,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <argLine>
-            --add-opens io.avaje.inject.generator/io.avaje.inject.generator=ALL-UNNAMED
-          </argLine>
+          <useModulePath>false</useModulePath>
         </configuration>
       </plugin>
     </plugins>
