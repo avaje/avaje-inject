@@ -128,9 +128,10 @@ public final class Processor extends AbstractProcessor {
         .map(ImportPrism::getInstanceOn)
         .flatMap(p -> p.value().stream())
         .map(ProcessingContext::asElement)
-        .map(e -> {
-          addImportedType(e.getQualifiedName().toString());
-          return e;
+        .map(
+            e -> {
+              addImportedType(e.getQualifiedName().toString());
+              return e;
             })
         .collect(Collectors.toSet());
   }
