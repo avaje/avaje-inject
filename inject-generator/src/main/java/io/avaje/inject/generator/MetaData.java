@@ -1,5 +1,5 @@
 package io.avaje.inject.generator;
-
+import static io.avaje.inject.generator.ProcessingContext.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +79,7 @@ final class MetaData {
     if (Util.isVoid(type)) {
       return "void_" + Util.trimMethod(method);
     } else {
-      String trimType = Util.trimMethod(type);
+      final String trimType = Util.trimMethod(type);
       if (name != null) {
         return trimType + "_" + name;
       } else {
@@ -154,7 +154,17 @@ final class MetaData {
     if (hasMethod()) {
       importTypes.add(Util.classOfMethod(method));
     } else if (!generateProxy) {
-      importTypes.add(type + Constants.DI);
+      if (isImportedType(type)) {
+        String packageName;
+        if (element(type).getNestingKind().isNested()) {
+          packageName = Util.nestedPackageOf(type);
+        } else {
+          packageName = Util.packageOf(type);
+        }
+        importTypes.add(packageName + "." + shortType + Constants.DI);
+      } else {
+        importTypes.add(type + Constants.DI);
+      }
     }
   }
 
