@@ -10,10 +10,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -100,11 +97,7 @@ public final class Processor extends AbstractProcessor {
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
     readModule(roundEnv);
-    final var importedAspects =
-        roundEnv.getElementsAnnotatedWith(element(AspectImportPrism.PRISM_TYPE)).stream()
-            .map(AspectImportPrism::getInstanceOn)
-            .collect(Collectors.toMap(p -> p.value().toString(), p -> p));
-    addImportedAspects(importedAspects);
+    addImportedAspects(importedAspects(roundEnv));
     readScopes(roundEnv.getElementsAnnotatedWith(element(Constants.SCOPE)));
     readChangedBeans(roundEnv.getElementsAnnotatedWith(element(Constants.FACTORY)), true);
     if (defaultScope.includeSingleton()) {
@@ -113,20 +106,7 @@ public final class Processor extends AbstractProcessor {
     readChangedBeans(roundEnv.getElementsAnnotatedWith(element(Constants.COMPONENT)), false);
     readChangedBeans(roundEnv.getElementsAnnotatedWith(element(Constants.PROTOTYPE)), false);
 
-    final var importedElements =
-        roundEnv.getElementsAnnotatedWith(element(ImportPrism.PRISM_TYPE)).stream()
-            .map(ImportPrism::getInstanceOn)
-            .flatMap(p -> p.value().stream())
-            .map(ProcessingContext::asElement)
-            .map(
-                e -> {
-                  addImportedType(e.getQualifiedName().toString());
-                  return e;
-                })
-            .collect(Collectors.toSet());
-
-    readChangedBeans(importedElements, false);
-
+    readChangedBeans(importedElements(roundEnv), false);
     readChangedBeans(roundEnv.getElementsAnnotatedWith(element(Constants.PROTOTYPE)), false);
     final var typeElement = elementUtils.getTypeElement(Constants.CONTROLLER);
     if (typeElement != null) {
@@ -141,6 +121,21 @@ public final class Processor extends AbstractProcessor {
       ProcessingContext.clear();
     }
     return false;
+  }
+
+  private static Set<TypeElement> importedElements(RoundEnvironment roundEnv) {
+    return roundEnv.getElementsAnnotatedWith(element(ImportPrism.PRISM_TYPE)).stream()
+        .map(ImportPrism::getInstanceOn)
+        .flatMap(p -> p.value().stream())
+        .map(ProcessingContext::asElement)
+        .peek(e -> addImportedType(e.getQualifiedName().toString()))
+        .collect(Collectors.toSet());
+  }
+
+  private static Map<String, AspectImportPrism> importedAspects(RoundEnvironment roundEnv) {
+    return roundEnv.getElementsAnnotatedWith(element(AspectImportPrism.PRISM_TYPE)).stream()
+        .map(AspectImportPrism::getInstanceOn)
+        .collect(Collectors.toMap(p -> p.value().toString(), p -> p));
   }
 
   private void readScopes(Set<? extends Element> scopes) {
