@@ -19,7 +19,9 @@ public interface PropertyRequiresPlugin {
   /**
    * Return true if the property is not defined.
    */
-  boolean missing(String property);
+  default boolean missing(String property) {
+    return !contains(property);
+  }
 
   /**
    * Return true if the property is equal to the given value.
@@ -29,5 +31,7 @@ public interface PropertyRequiresPlugin {
   /**
    * Return true if the property is not defined or not equal to the given value.
    */
-  boolean notEqualTo(String property, String value);
+  default boolean notEqualTo(String property, String value) {
+    return !equalTo(property, value);
+  }
 }
