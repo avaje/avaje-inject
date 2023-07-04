@@ -12,7 +12,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 final class Util {
-  static Pattern ANNOTATION_REGEX = Pattern.compile("(@.*?)(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)\\s");
+  private static final Pattern ANNOTATION_REGEX = Pattern.compile("(@.*?)(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)\\s");
 
   static final String ASPECT_PROVIDER_PREFIX = "io.avaje.inject.aop.AspectProvider<";
   static final String PROVIDER_PREFIX = "jakarta.inject.Provider<";
