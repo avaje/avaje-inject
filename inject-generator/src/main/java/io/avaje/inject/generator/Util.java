@@ -12,8 +12,10 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 final class Util {
-  private static final Pattern ANNOTATION_REGEX = Pattern.compile("(@.*?)(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)\\s");
-
+  private static final Pattern WHITE_SPACE_REGEX =
+      Pattern.compile("\\s+(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+  private static final Pattern COMMA_PATTERN =
+      Pattern.compile(", (?=(?:[^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
   static final String ASPECT_PROVIDER_PREFIX = "io.avaje.inject.aop.AspectProvider<";
   static final String PROVIDER_PREFIX = "jakarta.inject.Provider<";
   private static final String OPTIONAL_PREFIX = "java.util.Optional<";
@@ -56,15 +58,26 @@ final class Util {
   /** Trim off annotations from the raw type if present. */
   public static String trimAnnotations(String input) {
 
-    // Use a pattern matcher to find the first occurrence of the pattern
-    final Matcher matcher = ANNOTATION_REGEX.matcher(input);
-    String result = input;
-    while (matcher.find()) {
-      final String matchedSubstring = matcher.group();
-      result = result.replace(matchedSubstring, "");
+    input = COMMA_PATTERN.matcher(input).replaceAll(",");
+
+    return cutAnnotations(input);
+  }
+
+  private static String cutAnnotations(String input) {
+    final int pos = input.indexOf("@");
+    if (pos == -1) {
+      return input;
     }
 
-    return result.toString();
+     final Matcher matcher = WHITE_SPACE_REGEX.matcher(input);
+
+    int currentIndex = 0;
+    if (matcher.find()) {
+      currentIndex = matcher.start();
+    }
+    final var result = input.substring(0, pos) + input.substring(currentIndex + 1);
+
+    return cutAnnotations(result);
   }
 
   public static String sanitizeImports(String type) {
