@@ -127,6 +127,10 @@ class UtilTest {
         "java.util.Map<String,String>",
         Util.trimAnnotations(
             "java.util.Map<@jakarta.validation.constraints.Positive String,String>"));
+    assertEquals(
+        "java.util.List<java.lang.String>",
+        Util.trimAnnotations(
+            "java.util.@jakarta.validation.constraints.NotEmpty List<java.lang.@jakarta.validation.constraints.NotNull String>"));
   }
 
   @Test
@@ -168,5 +172,6 @@ class UtilTest {
     assertEquals("my.Foo", Util.sanitizeImports("@annotationMcgee my.Foo"));
     assertEquals("my.Foo", Util.sanitizeImports("@org.bar.annotationMcgee my.Foo[]"));
     assertEquals("my.Foo", Util.sanitizeImports("@org.bar.annotationMcgee my.Foo"));
+    assertEquals("java.util.String", Util.sanitizeImports("java.util.String>"));
   }
 }

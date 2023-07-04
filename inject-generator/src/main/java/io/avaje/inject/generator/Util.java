@@ -50,21 +50,24 @@ final class Util {
   }
 
   /** Trim off annotations from the raw type if present. */
-  public static String trimAnnotations(String type) {
-    final int pos = type.indexOf("@");
-    if (pos == -1) {
-      return type;
-    }
-    return type.substring(0, pos) + type.substring(type.lastIndexOf(' ') + 1);
+  public static String trimAnnotations(String input) {
+    // Regular expression pattern to match annotations
+    final String annotationPattern = "@[^\\s(]+(?:\\([^)]*\\))?";
+
+    // Replace annotations with an empty string
+    final String withoutAnnotations = input.replaceAll(annotationPattern, "");
+
+    // Remove any remaining whitespace
+    return withoutAnnotations.replaceAll("\\s", "");
   }
 
   public static String sanitizeImports(String type) {
     final int pos = type.indexOf("@");
     if (pos == -1) {
-      return type.replace("[]", "");
+      return type.replaceAll("[^\\n\\r\\t $;\\w.]", "");
     }
     final var start = pos == 0 ? type.substring(0, pos) : "";
-    return start + type.substring(type.lastIndexOf(' ') + 1).replace("[]", "");
+    return start + type.substring(type.lastIndexOf(' ') + 1).replaceAll("[^\\n\\r\\t $;\\w.]", "");
   }
 
   static String nestedPackageOf(String cls) {
