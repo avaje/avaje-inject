@@ -12,8 +12,10 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 final class Util {
+  // whitespace not in quotes
   private static final Pattern WHITE_SPACE_REGEX =
       Pattern.compile("\\s+(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+  // comma not in quotes
   private static final Pattern COMMA_PATTERN =
       Pattern.compile(", (?=(?:[^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
   static final String ASPECT_PROVIDER_PREFIX = "io.avaje.inject.aop.AspectProvider<";
@@ -69,7 +71,7 @@ final class Util {
       return input;
     }
 
-     final Matcher matcher = WHITE_SPACE_REGEX.matcher(input);
+    final Matcher matcher = WHITE_SPACE_REGEX.matcher(input);
 
     int currentIndex = 0;
     if (matcher.find()) {
