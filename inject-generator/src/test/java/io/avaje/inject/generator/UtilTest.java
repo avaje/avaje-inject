@@ -122,15 +122,15 @@ class UtilTest {
 
   @Test
   void trimmedAnnotation() {
+    assertEquals(
+        "java.util.List<java.lang.String>",
+        Util.trimAnnotations(
+            "java.util.@jakarta.validation.constraints.NotEmpty(\"message(); ,\") List<java.lang.@jakarta.validation.constraints.NotNull String>"));
     assertEquals("int", Util.trimAnnotations("@jakarta.validation.constraints.Positive int"));
     assertEquals(
         "java.util.Map<String,String>",
         Util.trimAnnotations(
             "java.util.Map<@jakarta.validation.constraints.Positive String,String>"));
-    assertEquals(
-        "java.util.List<java.lang.String>",
-        Util.trimAnnotations(
-            "java.util.@jakarta.validation.constraints.NotEmpty List<java.lang.@jakarta.validation.constraints.NotNull String>"));
   }
 
   @Test

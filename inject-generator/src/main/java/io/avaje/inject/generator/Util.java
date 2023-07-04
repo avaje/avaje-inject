@@ -1,7 +1,10 @@
 package io.avaje.inject.generator;
 
-import java.util.Optional;
 import static io.avaje.inject.generator.ProcessingContext.isImportedType;
+
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -9,6 +12,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 final class Util {
+  static Pattern ANNOTATION_REGEX = Pattern.compile("(@.*?)(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)\\s");
 
   static final String ASPECT_PROVIDER_PREFIX = "io.avaje.inject.aop.AspectProvider<";
   static final String PROVIDER_PREFIX = "jakarta.inject.Provider<";
@@ -51,14 +55,16 @@ final class Util {
 
   /** Trim off annotations from the raw type if present. */
   public static String trimAnnotations(String input) {
-    // Regular expression pattern to match annotations
-    final String annotationPattern = "@[^\\s(]+(?:\\([^)]*\\))?";
 
-    // Replace annotations with an empty string
-    final String withoutAnnotations = input.replaceAll(annotationPattern, "");
+    // Use a pattern matcher to find the first occurrence of the pattern
+    final Matcher matcher = ANNOTATION_REGEX.matcher(input);
+    String result = input;
+    while (matcher.find()) {
+      final String matchedSubstring = matcher.group();
+      result = result.replace(matchedSubstring, "");
+    }
 
-    // Remove any remaining whitespace
-    return withoutAnnotations.replaceAll("\\s", "");
+    return result.toString().replace(" ", "");
   }
 
   public static String sanitizeImports(String type) {
