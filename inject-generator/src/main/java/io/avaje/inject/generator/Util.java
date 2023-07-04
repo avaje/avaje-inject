@@ -64,7 +64,7 @@ final class Util {
       result = result.replace(matchedSubstring, "");
     }
 
-    return result.toString().replace(" ", "");
+    return result.toString();
   }
 
   public static String sanitizeImports(String type) {
