@@ -59,7 +59,6 @@ final class Util {
 
   /** Trim off annotations from the raw type if present. */
   public static String trimAnnotations(String input) {
-
     input = COMMA_PATTERN.matcher(input).replaceAll(",");
 
     return cutAnnotations(input);
@@ -72,7 +71,6 @@ final class Util {
     }
 
     final Matcher matcher = WHITE_SPACE_REGEX.matcher(input);
-
     int currentIndex = 0;
     if (matcher.find()) {
       currentIndex = matcher.start();
@@ -85,10 +83,14 @@ final class Util {
   public static String sanitizeImports(String type) {
     final int pos = type.indexOf("@");
     if (pos == -1) {
-      return type.replaceAll("[^\\n\\r\\t $;\\w.]", "");
+      return trimArrayBrackets(type);
     }
     final var start = pos == 0 ? type.substring(0, pos) : "";
-    return start + type.substring(type.lastIndexOf(' ') + 1).replaceAll("[^\\n\\r\\t $;\\w.]", "");
+    return start + trimArrayBrackets(type.substring(type.lastIndexOf(' ') + 1));
+  }
+
+  private static String trimArrayBrackets(String type) {
+    return type.replaceAll("[^\\n\\r\\t $;\\w.]", "");
   }
 
   static String nestedPackageOf(String cls) {
