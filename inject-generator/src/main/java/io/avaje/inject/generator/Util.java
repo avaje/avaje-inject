@@ -1,7 +1,10 @@
 package io.avaje.inject.generator;
 
-import java.util.Optional;
 import static io.avaje.inject.generator.ProcessingContext.isImportedType;
+
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -9,7 +12,12 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 final class Util {
-
+  // whitespace not in quotes
+  private static final Pattern WHITE_SPACE_REGEX =
+      Pattern.compile("\\s+(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+  // comma not in quotes
+  private static final Pattern COMMA_PATTERN =
+      Pattern.compile(", (?=(?:[^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
   static final String ASPECT_PROVIDER_PREFIX = "io.avaje.inject.aop.AspectProvider<";
   static final String PROVIDER_PREFIX = "jakarta.inject.Provider<";
   private static final String OPTIONAL_PREFIX = "java.util.Optional<";
@@ -49,23 +57,38 @@ final class Util {
     return type.substring(0, i);
   }
 
-
   /** Trim off annotations from the raw type if present. */
-  public static String trimAnnotations(String type) {
-    final int pos = type.indexOf(".@");
+  public static String trimAnnotations(String input) {
+
+    input = COMMA_PATTERN.matcher(input).replaceAll(",");
+
+    return cutAnnotations(input);
+  }
+
+  private static String cutAnnotations(String input) {
+    final int pos = input.indexOf("@");
     if (pos == -1) {
-      return type;
+      return input;
     }
-    return type.substring(0, pos + 1) + type.substring(type.lastIndexOf(' ') + 1);
+
+    final Matcher matcher = WHITE_SPACE_REGEX.matcher(input);
+
+    int currentIndex = 0;
+    if (matcher.find()) {
+      currentIndex = matcher.start();
+    }
+    final var result = input.substring(0, pos) + input.substring(currentIndex + 1);
+
+    return cutAnnotations(result);
   }
 
   public static String sanitizeImports(String type) {
     final int pos = type.indexOf("@");
     if (pos == -1) {
-      return type.replace("[]", "");
+      return type.replaceAll("[^\\n\\r\\t $;\\w.]", "");
     }
     final var start = pos == 0 ? type.substring(0, pos) : "";
-    return start + type.substring(type.lastIndexOf(' ') + 1).replace("[]", "");
+    return start + type.substring(type.lastIndexOf(' ') + 1).replaceAll("[^\\n\\r\\t $;\\w.]", "");
   }
 
   static String nestedPackageOf(String cls) {
