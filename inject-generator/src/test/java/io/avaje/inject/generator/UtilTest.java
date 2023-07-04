@@ -121,6 +121,15 @@ class UtilTest {
   }
 
   @Test
+  void trimmedAnnotation() {
+    assertEquals("int", Util.trimAnnotations("@jakarta.validation.constraints.Positive int"));
+    assertEquals(
+        "java.util.Map<String,String>",
+        Util.trimAnnotations(
+            "java.util.Map<@jakarta.validation.constraints.Positive String,String>"));
+  }
+
+  @Test
   void validImportType_not() {
     assertFalse(Util.validImportType("void"));
     assertFalse(Util.validImportType("Foo"));

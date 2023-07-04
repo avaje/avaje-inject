@@ -49,14 +49,13 @@ final class Util {
     return type.substring(0, i);
   }
 
-
   /** Trim off annotations from the raw type if present. */
   public static String trimAnnotations(String type) {
-    final int pos = type.indexOf(".@");
+    final int pos = type.indexOf("@");
     if (pos == -1) {
       return type;
     }
-    return type.substring(0, pos + 1) + type.substring(type.lastIndexOf(' ') + 1);
+    return type.substring(0, pos) + type.substring(type.lastIndexOf(' ') + 1);
   }
 
   public static String sanitizeImports(String type) {
