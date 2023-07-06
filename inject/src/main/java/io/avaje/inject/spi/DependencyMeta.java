@@ -38,7 +38,7 @@ public @interface DependencyMeta {
   String[] provides() default {};
 
   /**
-   * The list of dependencies.
+   * The list of dependencies this bean requires.
    */
   String[] dependsOn() default {};
 
