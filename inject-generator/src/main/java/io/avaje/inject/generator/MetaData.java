@@ -178,8 +178,7 @@ final class MetaData {
       append.append("  // uses external dependency ").append(externalDependency).append(NEWLINE);
     }
 
-    final var  hasName= name != null;
-
+    final var hasName = name != null;
     final var hasMethod = hasMethod();
     final var hasProvidesAspect = !providesAspect.isEmpty();
     final var hasDependsOn = !dependsOn.isEmpty();
@@ -197,8 +196,7 @@ final class MetaData {
       append.eol().append("      ");
     }
 
-    append
-    .append("type = \"").append(type).append("\"");
+    append.append("type = \"").append(type).append("\"");
     if (hasName) {
       append.append(",").eol().append("      name = \"").append(name).append("\"");
     }
