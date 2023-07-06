@@ -177,27 +177,48 @@ final class MetaData {
     if (usesExternalDependency) {
       append.append("  // uses external dependency ").append(externalDependency).append(NEWLINE);
     }
-    append.append("  @DependencyMeta(").eol().append("      type = \"").append(type).append("\"");
-    if (name != null) {
+
+    final var  hasName= name != null;
+
+    final var hasMethod = hasMethod();
+    final var hasProvidesAspect = !providesAspect.isEmpty();
+    final var hasDependsOn = !dependsOn.isEmpty();
+    final var hasProvides = !provides.isEmpty();
+    final var hasAutoProvides = autoProvides != null && !autoProvides.isEmpty();
+
+    append.append("  @DependencyMeta(");
+
+    if (hasName
+        || hasMethod
+        || hasProvidesAspect
+        || hasDependsOn
+        || hasProvides
+        || hasAutoProvides) {
+      append.eol().append("      ");
+    }
+
+    append
+    .append("type = \"").append(type).append("\"");
+    if (hasName) {
       append.append(",").eol().append("      name = \"").append(name).append("\"");
     }
-    if (hasMethod()) {
+    if (hasMethod) {
       append.append(",").eol().append("      method = \"").append(method).append("\"");
     }
-    if (!providesAspect.isEmpty()) {
+    if (hasProvidesAspect) {
       append
           .append(",")
           .eol()
           .append("      providesAspect = \"")
           .append(providesAspect)
           .append("\"");
-    } else if (!provides.isEmpty()) {
+    } else if (hasProvides) {
       appendProvides(append, "provides", provides);
     }
-    if (!dependsOn.isEmpty()) {
+    if (hasDependsOn) {
       appendProvides(append, "dependsOn", dependsOn.stream().map(Dependency::dependsOn).collect(Collectors.toList()));
     }
-    if (autoProvides != null && !autoProvides.isEmpty()) {
+    if (hasAutoProvides) {
       append.append(",").eol().append("      autoProvides = \"").append(autoProvides).append("\"");
     }
     append.append(")").append(NEWLINE);
