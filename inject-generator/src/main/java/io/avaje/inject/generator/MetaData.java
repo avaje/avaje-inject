@@ -1,4 +1,5 @@
 package io.avaje.inject.generator;
+
 import static io.avaje.inject.generator.ProcessingContext.*;
 
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ final class MetaData {
    * Type deemed to be candidate for providing to another external module.
    */
   private String autoProvides;
+
   private boolean generateProxy;
   private boolean usesExternalDependency;
   private String externalDependency;
@@ -175,15 +177,20 @@ final class MetaData {
     if (usesExternalDependency) {
       append.append("  // uses external dependency ").append(externalDependency).append(NEWLINE);
     }
-    append.append("  @DependencyMeta(type=\"").append(type).append("\"");
+    append.append("  @DependencyMeta(").eol().append("      type = \"").append(type).append("\"");
     if (name != null) {
-      append.append(", name=\"").append(name).append("\"");
+      append.append(",").eol().append("      name = \"").append(name).append("\"");
     }
     if (hasMethod()) {
-      append.append(", method=\"").append(method).append("\"");
+      append.append(",").eol().append("      method = \"").append(method).append("\"");
     }
     if (!providesAspect.isEmpty()) {
-      append.append(", providesAspect=\"").append(providesAspect).append("\"");
+      append
+          .append(",")
+          .eol()
+          .append("      providesAspect = \"")
+          .append(providesAspect)
+          .append("\"");
     } else if (!provides.isEmpty()) {
       appendProvides(append, "provides", provides);
     }
@@ -191,7 +198,7 @@ final class MetaData {
       appendProvides(append, "dependsOn", dependsOn.stream().map(Dependency::dependsOn).collect(Collectors.toList()));
     }
     if (autoProvides != null && !autoProvides.isEmpty()) {
-      append.append(", autoProvides=\"").append(autoProvides).append("\"");
+      append.append(",").eol().append("      autoProvides = \"").append(autoProvides).append("\"");
     }
     append.append(")").append(NEWLINE);
     append.append("  private void build_").append(buildName()).append("() {").append(NEWLINE);
@@ -210,14 +217,21 @@ final class MetaData {
   }
 
   private void appendProvides(Append sb, String attribute, List<String> types) {
-    sb.append(", ").append(attribute).append("={");
+    sb.append(",").eol().append("      ").append(attribute).append(" = {");
+    final var size = types.size();
+    if (size > 1) {
+      sb.eol().append("        ");
+    }
     for (int i = 0; i < types.size(); i++) {
       if (i > 0) {
-        sb.append(",");
+        sb.append(",").eol().append("        ");
       }
       sb.append("\"");
       sb.append(types.get(i));
       sb.append("\"");
+    }
+    if (size > 1) {
+      sb.eol().append("      ");
     }
     sb.append("}");
   }
