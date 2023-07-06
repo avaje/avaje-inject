@@ -439,11 +439,6 @@ final class ScopeInfo {
     }
   }
 
-
-    final String replacement = "$1_$2";
-    return str.replaceAll(regex, replacement).toUpperCase();
-  }
-
   void readModuleMetaData(TypeElement moduleType) {
     final InjectModulePrism module = InjectModulePrism.getInstanceOn(moduleType);
     details(module.name(), moduleType);
