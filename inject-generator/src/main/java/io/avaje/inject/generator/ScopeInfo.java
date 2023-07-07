@@ -234,8 +234,8 @@ final class ScopeInfo {
       }
       return;
     }
-    MetaDataOrdering ordering = new MetaDataOrdering(meta, this);
-    int remaining = ordering.processQueue();
+    final MetaDataOrdering ordering = new MetaDataOrdering(meta, this);
+    final int remaining = ordering.processQueue();
     if (remaining > 0) {
       ordering.logWarnings();
     }
@@ -399,7 +399,7 @@ final class ScopeInfo {
   private void buildProvidesMethod(Append writer, String fieldName, Set<String> types) {
     writer.append("  @Override").eol();
     writer.append("  public Class<?>[] %s() {\n    return %s;\n  }", fieldName, fieldName).eol();
-    writer.append("  private final Class<?>[] %s = new Class<?>[]{", fieldName).eol();
+    writer.append("  private final Class<?>[] %s = {", fieldName).eol();
     for (final String rawType : types) {
       writer.append("    %s.class,", trimGenerics(rawType)).eol();
     }
@@ -446,7 +446,7 @@ final class ScopeInfo {
   }
 
   private void readFactoryMetaData(TypeElement moduleType) {
-    List<? extends Element> elements = moduleType.getEnclosedElements();
+    final List<? extends Element> elements = moduleType.getEnclosedElements();
     if (elements != null) {
       for (Element element : elements) {
         if (ElementKind.METHOD == element.getKind()) {
