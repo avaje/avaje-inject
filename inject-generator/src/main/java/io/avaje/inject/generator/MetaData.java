@@ -186,7 +186,6 @@ final class MetaData {
     final var hasAutoProvides = autoProvides != null && !autoProvides.isEmpty();
 
     append.append("  @DependencyMeta(");
-
     if (hasName
         || hasMethod
         || hasProvidesAspect
@@ -204,12 +203,7 @@ final class MetaData {
       append.append(",").eol().append("      method = \"").append(method).append("\"");
     }
     if (hasProvidesAspect) {
-      append
-          .append(",")
-          .eol()
-          .append("      providesAspect = \"")
-          .append(providesAspect)
-          .append("\"");
+      append.append(",").eol().append("      providesAspect = \"").append(providesAspect).append("\"");
     } else if (hasProvides) {
       appendProvides(append, "provides", provides);
     }
