@@ -398,7 +398,7 @@ final class ScopeInfo {
 
   private void buildProvidesMethod(Append writer, String fieldName, Set<String> types) {
     writer.append("  @Override").eol();
-    writer.append("  public Class<?>[] %s() { return %s; }", fieldName, fieldName).eol();
+    writer.append("  public Class<?>[] %s() {\n    return %s;\n  }", fieldName, fieldName).eol();
     writer.append("  private final Class<?>[] %s = new Class<?>[]{", fieldName).eol();
     for (final String rawType : types) {
       writer.append("    %s.class,", trimGenerics(rawType)).eol();
@@ -440,7 +440,7 @@ final class ScopeInfo {
   }
 
   void readModuleMetaData(TypeElement moduleType) {
-    InjectModulePrism module = InjectModulePrism.getInstanceOn(moduleType);
+    final InjectModulePrism module = InjectModulePrism.getInstanceOn(moduleType);
     details(module.name(), moduleType);
     readFactoryMetaData(moduleType);
   }

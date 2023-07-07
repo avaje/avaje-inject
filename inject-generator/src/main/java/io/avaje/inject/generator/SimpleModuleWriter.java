@@ -20,7 +20,7 @@ final class SimpleModuleWriter {
     "/**\n" +
       " * Generated source - avaje inject module for %s.\n" +
       " * \n" +
-      " * With Java module system this generated class should be explicitly\n" +
+      " * With the Java module system, this generated class should be explicitly\n" +
       " * registered in module-info via a <code>provides</code> clause like:\n" +
       " * \n" +
       " * <pre>{@code\n" +
