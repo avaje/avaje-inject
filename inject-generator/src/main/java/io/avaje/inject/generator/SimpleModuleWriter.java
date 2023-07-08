@@ -37,8 +37,6 @@ final class SimpleModuleWriter {
 
   private static final String CODE_COMMENT_CREATE_CONTEXT =
     "  /**\n" +
-      "   * Create the beans.\n" +
-      "   * <p>\n" +
       "   * Creates all the beans in order based on constructor dependencies.\n" +
       "   * The beans are registered into the builder along with callbacks for\n" +
       "   * field injection, method injection and lifecycle support.\n" +
