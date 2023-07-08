@@ -116,7 +116,7 @@ public final class Example$DI  {
 ### Generated Wiring Class
 The inject annotation processor determines the dependency wiring order and generates a `Module` class that calls all the generated DI classes.
 
-```
+```java
 @Generated("io.avaje.inject.generator")
 @InjectModule
 public final class ExampleModule implements Module {
