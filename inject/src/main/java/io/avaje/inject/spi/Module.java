@@ -63,6 +63,7 @@ public interface Module {
   default Class<?>[] autoRequires() {
     return EMPTY_CLASSES;
   }
+
   /**
    * These are the apects that this module requires whose implementations are provided by other external
    * modules (that are in the classpath at compile time).

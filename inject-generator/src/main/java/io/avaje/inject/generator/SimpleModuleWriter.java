@@ -18,9 +18,9 @@ final class SimpleModuleWriter {
 
   private static final String CODE_COMMENT_FACTORY =
     "/**\n" +
-      " * Generated source - avaje inject module for %s.\n" +
+      " * Avaje Inject module for %s.\n" +
       " * \n" +
-      " * With the Java module system, this generated class should be explicitly\n" +
+      " * When using the Java module system, this generated class should be explicitly\n" +
       " * registered in module-info via a <code>provides</code> clause like:\n" +
       " * \n" +
       " * <pre>{@code\n" +
@@ -39,7 +39,7 @@ final class SimpleModuleWriter {
     "  /**\n" +
       "   * Creates all the beans in order based on constructor dependencies.\n" +
       "   * The beans are registered into the builder along with callbacks for\n" +
-      "   * field injection, method injection and lifecycle support.\n" +
+      "   * field injection, method injection, and lifecycle support.\n" +
       "   */";
 
   private final String modulePackage;

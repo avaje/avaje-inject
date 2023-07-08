@@ -364,7 +364,7 @@ final class ScopeInfo {
       if (leadingComma) {
         writer.append(", ");
       }
-      writer.append("customScopeType=\"%s\"", annotationType.getQualifiedName().toString());
+      writer.append("customScopeType = \"%s\"", annotationType.getQualifiedName().toString());
     }
     writer.append(")").eol();
   }
@@ -373,9 +373,9 @@ final class ScopeInfo {
     if (leadingComma) {
       writer.append(", ");
     }
-    writer.append("%s={", prefix);
+    writer.append("%s = {", prefix);
     int c = 0;
-    for (String value : classNames) {
+    for (final String value : classNames) {
       if (c++ > 0) {
         writer.append(",");
       }
