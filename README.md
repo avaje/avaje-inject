@@ -5,7 +5,7 @@
 [![Discord](https://img.shields.io/discord/1074074312421683250?color=%237289da&label=discord)](https://discord.gg/Qcqf9R27BR)
 
 # [Avaje-Inject](https://avaje.io/inject)
-APT based dependency injection for server side developers - https://avaje.io/inject
+APT-based dependency injection for server-side developers - https://avaje.io/inject
 ## Quick Start
 #### 1. Add avaje-inject as a dependency.
 ```xml
@@ -31,7 +31,7 @@ public class Example {
 
  private DependencyClass d1;
  private DependencyClass2 d2;
-  
+
   // Dependencies must be annotated with singleton,
   // or else be provided from another class annotated with @Factory
   public Example(DependencyClass d1, DependencyClass2 d2) {
@@ -126,6 +126,7 @@ public final class ExampleModule implements Module {
   @Override
   public Class<?>[] classes() {
     return new Class<?>[] {
+      org.example.DependencyClass.class,
       org.example.DependencyClass2.class,
       org.example.Example.class,
       org.example.ExampleFactory.class,
@@ -143,6 +144,7 @@ public final class ExampleModule implements Module {
     // create beans in order based on constructor dependencies
     // i.e. "provides" followed by "dependsOn"
     build_example_ExampleFactory();
+    build_example_DependencyClass();
     build_example_DependencyClass2();
     build_example_Example();
   }
@@ -150,6 +152,12 @@ public final class ExampleModule implements Module {
   @DependencyMeta(type = "org.example.ExampleFactory")
   private void build_example_ExampleFactory() {
     ExampleFactory$DI.build(builder);
+  }
+
+  @DependencyMeta(
+      type = "org.example.DependencyClass")
+  private void build_example_DependencyClass() {
+    DependencyClass$DI.build(builder);
   }
 
   @DependencyMeta(
