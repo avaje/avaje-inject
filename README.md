@@ -107,6 +107,7 @@ public final class Example$DI  {
     if (builder.isAddBeanFor(Example.class)) {
       var bean = new Example(builder.get(DependencyClass.class,"!d1"), builder.get(DependencyClass2.class,"!d2"));
       builder.register(bean);
+      // depending on the type of bean, callbacks for field/method injection, and lifecycle support will be generated here as well.
     }
   }
 }
@@ -133,7 +134,7 @@ public final class ExampleModule implements Module {
 
   /**
    * Creates all the beans in order based on constructor dependencies. The beans are registered
-   * into the builder along with callbacks for field injection, method injection, and lifecycle
+   * into the builder along with callbacks for field/method injection, and lifecycle
    * support.
    */
   @Override
