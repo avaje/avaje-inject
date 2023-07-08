@@ -78,7 +78,7 @@ module org.example {
 
 ## Differences to Dagger
 
-- Aimed specifically for server-side development (rather than Andriod)
+- Aimed specifically for server-side development (rather than Android)
 - Supports lifecycle methods with `@PostConstruct` and `@PreDestory`
 - Supports `@Factory` and `@Bean`
 - Provides API to obtain all bean instances that implement an interface
