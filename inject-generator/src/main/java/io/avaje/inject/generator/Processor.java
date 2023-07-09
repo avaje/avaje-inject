@@ -123,11 +123,15 @@ public final class Processor extends AbstractProcessor {
     return false;
   }
 
-  private static Set<TypeElement> importedElements(RoundEnvironment roundEnv) {
+  private Set<TypeElement> importedElements(RoundEnvironment roundEnv) {
     return roundEnv.getElementsAnnotatedWith(element(ImportPrism.PRISM_TYPE)).stream()
         .map(ImportPrism::getInstanceOn)
         .flatMap(p -> p.value().stream())
         .map(ProcessingContext::asElement)
+        .filter(
+            e ->
+                !moduleFileProvided.contains(e.getQualifiedName().toString())
+                    && !pluginFileProvided.contains(e.getQualifiedName().toString()))
         .peek(e -> addImportedType(e.getQualifiedName().toString()))
         .collect(Collectors.toSet());
   }
