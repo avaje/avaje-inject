@@ -154,8 +154,7 @@ public final class ExampleModule implements Module {
     ExampleFactory$DI.build(builder);
   }
 
-  @DependencyMeta(
-      type = "org.example.DependencyClass")
+  @DependencyMeta(type = "org.example.DependencyClass")
   private void build_example_DependencyClass() {
     DependencyClass$DI.build(builder);
   }
