@@ -133,7 +133,10 @@ public final class Processor extends AbstractProcessor {
   }
 
   private static Map<String, AspectImportPrism> importedAspects(RoundEnvironment roundEnv) {
-    return roundEnv.getElementsAnnotatedWith(element(AspectImportPrism.PRISM_TYPE)).stream()
+    return Optional.ofNullable(element(AspectImportPrism.PRISM_TYPE))
+        .map(roundEnv::getElementsAnnotatedWith)
+        .stream()
+        .flatMap(Set::stream)
         .map(AspectImportPrism::getInstanceOn)
         .collect(Collectors.toMap(p -> p.value().toString(), p -> p));
   }

@@ -5,7 +5,7 @@
 [![Discord](https://img.shields.io/discord/1074074312421683250?color=%237289da&label=discord)](https://discord.gg/Qcqf9R27BR)
 
 # [Avaje-Inject](https://avaje.io/inject)
-APT based dependency injection for server side developers - https://avaje.io/inject
+APT-based dependency injection for server-side developers - https://avaje.io/inject
 ## Quick Start
 #### 1. Add avaje-inject as a dependency.
 ```xml
@@ -31,7 +31,7 @@ public class Example {
 
  private DependencyClass d1;
  private DependencyClass2 d2;
-  
+
   // Dependencies must be annotated with singleton,
   // or else be provided from another class annotated with @Factory
   public Example(DependencyClass d1, DependencyClass2 d2) {
@@ -45,19 +45,20 @@ Example factory class:
 @Factory
 public class ExampleFactory {
   @Bean
-  public DependencyClass2() {
+  public DependencyClass2 bean() {
     return new DependencyClass2();
   }
 }
 ```
 
-#### 4. Use BeanScope to wire and retrieve the beans and use however you wish.
+#### 4. Use BeanScope to wire and retrieve the beans and use them however you wish.
 ```java
 BeanScope beanScope = BeanScope.builder().build()
 Example ex = beanScope.get(Example.class);
 ```
 
-### Example module use
+### Java Module Usage
+When working with Java modules you need to add a `provides` statement in your `module-info.java` with the generated class.
 ```java
 import io.avaje.inject.spi.Module;
 
@@ -69,23 +70,108 @@ module org.example {
 }
 ```
 
-## Similar to Dagger (https://google.github.io/dagger/)
+## Similar to [Dagger](https://google.github.io/dagger/)
 
 - Uses Java annotation processing for dependency injection
 - Generates source code
 - Avoids any use of reflection or classpath scanning (so low overhead and fast startup)
-- A `Library only` (a DI library and that's it. ~25k in size)
-
 
 ## Differences to Dagger
 
-- Aimed specifically for server side development (rather than Andriod)
+- Aimed specifically for server-side development (rather than Android)
 - Supports lifecycle methods with `@PostConstruct` and `@PreDestory`
 - Supports `@Factory` and `@Bean`
 - Provides API to obtain all bean instances that implement an interface
 - Provides API to obtain all bean instances that have an annotation
-- Integration with server side web frameworks Javalin, Helidon
+- Integration with server-side web frameworks Javalin, Helidon
 
 ## Spring DI
 
 For comparison with Spring DI look at https://avaje.io/inject/#spring
+
+
+## Generated Code
+
+### DI classes
+
+DI classes will be generated to call the constructors for annotated type/factory methods. Below is the class generated for the `Example` class in the above quickstart.
+
+```java
+@Generated("io.avaje.inject.generator")
+public final class Example$DI  {
+
+  /**
+   * Create and register Example.
+   */
+  public static void build(Builder builder) {
+    if (builder.isAddBeanFor(Example.class)) {
+      var bean = new Example(builder.get(DependencyClass.class,"!d1"), builder.get(DependencyClass2.class,"!d2"));
+      builder.register(bean);
+      // depending on the type of bean, callbacks for field/method injection, and lifecycle support will be generated here as well.
+    }
+  }
+}
+```
+
+### Generated Wiring Class
+The inject annotation processor determines the dependency wiring order and generates a `Module` class that calls all the generated DI classes.
+
+```java
+@Generated("io.avaje.inject.generator")
+@InjectModule
+public final class ExampleModule implements Module {
+
+  private Builder builder;
+
+  @Override
+  public Class<?>[] classes() {
+    return new Class<?>[] {
+      org.example.DependencyClass.class,
+      org.example.DependencyClass2.class,
+      org.example.Example.class,
+      org.example.ExampleFactory.class,
+    };
+  }
+
+  /**
+   * Creates all the beans in order based on constructor dependencies. The beans are registered
+   * into the builder along with callbacks for field/method injection, and lifecycle
+   * support.
+   */
+  @Override
+  public void build(Builder builder) {
+    this.builder = builder;
+    // create beans in order based on constructor dependencies
+    // i.e. "provides" followed by "dependsOn"
+    build_example_ExampleFactory();
+    build_example_DependencyClass();
+    build_example_DependencyClass2();
+    build_example_Example();
+  }
+
+  @DependencyMeta(type = "org.example.ExampleFactory")
+  private void build_example_ExampleFactory() {
+    ExampleFactory$DI.build(builder);
+  }
+
+  @DependencyMeta(type = "org.example.DependencyClass")
+  private void build_example_DependencyClass() {
+    DependencyClass$DI.build(builder);
+  }
+
+  @DependencyMeta(
+      type = "org.example.DependencyClass2",
+      method = "org.example.ExampleFactory$DI.build_bean", // factory method
+      dependsOn = {"org.example.ExampleFactory"}) //factory beans naturally depend on the factory
+  private void build_example_DependencyClass2() {
+    ExampleFactory$DI.build_bean(builder);
+  }
+
+  @DependencyMeta(
+      type = "org.example.Example",
+      dependsOn = {"org.example.DependencyClass", "org.example.DependencyClass2"})
+  private void build_example_Example() {
+    Example$DI.build(builder);
+  }
+}
+```
