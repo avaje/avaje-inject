@@ -128,12 +128,14 @@ public final class Processor extends AbstractProcessor {
         .map(ImportPrism::getInstanceOn)
         .flatMap(p -> p.value().stream())
         .map(ProcessingContext::asElement)
-        .filter(
-            e ->
-                !moduleFileProvided.contains(e.getQualifiedName().toString())
-                    && !pluginFileProvided.contains(e.getQualifiedName().toString()))
+        .filter(this::notAlreadyProvided)
         .peek(e -> addImportedType(e.getQualifiedName().toString()))
         .collect(Collectors.toSet());
+  }
+
+  private boolean notAlreadyProvided(TypeElement e) {
+    final String type = e.getQualifiedName().toString();
+    return !moduleFileProvided.contains(type) && !pluginFileProvided.contains(type);
   }
 
   private static Map<String, AspectImportPrism> importedAspects(RoundEnvironment roundEnv) {
