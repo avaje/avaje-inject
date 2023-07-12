@@ -405,9 +405,7 @@ class DBuilder implements Builder {
   @Override
   public final BeanScope build(boolean withShutdownHook, long start) {
     runInjectors();
-    final var scope =
-        new DBeanScope(
-            withShutdownHook, preDestroy, postConstruct, postConstructConsumers, beanMap, parent);
+    final var scope = new DBeanScope(withShutdownHook, preDestroy, postConstruct, postConstructConsumers, beanMap, parent);
     if (beanScopeProxy != null) {
       beanScopeProxy.inject(scope);
     }
