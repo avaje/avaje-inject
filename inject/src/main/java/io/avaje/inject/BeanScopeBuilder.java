@@ -221,6 +221,13 @@ public interface BeanScopeBuilder {
   BeanScopeBuilder addPostConstructHooks(Runnable... runnables);
 
   /**
+   * Adds hook that will execute after this scope is built.
+   *
+   * @param consumer the PostConstruct hook to add to the bean scope
+   */
+  BeanScopeBuilder addPostConstructConsumerHook(Consumer<BeanScope> consumer);
+
+  /**
    * Adds hooks that will execute before this scope is destroyed.
    *
    * @param closables the PreDestroy hooks to add to the bean scope
@@ -429,5 +436,4 @@ public interface BeanScopeBuilder {
      */
     <D> BeanScopeBuilder.ForTesting spy(Class<D> type, Consumer<D> consumer);
   }
-
 }

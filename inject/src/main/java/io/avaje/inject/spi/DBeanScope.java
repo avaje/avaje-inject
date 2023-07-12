@@ -12,6 +12,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static java.lang.System.Logger.Level.INFO;
@@ -24,6 +25,7 @@ final class DBeanScope implements BeanScope {
 
   private final ReentrantLock lock = new ReentrantLock();
   private final List<Runnable> postConstruct;
+  private final List<Consumer<BeanScope>> postConstructConsumers;
   private final List<AutoCloseable> preDestroy;
   private final DBeanMap beans;
   private final ShutdownHook shutdownHook;
@@ -31,9 +33,16 @@ final class DBeanScope implements BeanScope {
   private boolean shutdown;
   private boolean closed;
 
-  DBeanScope(boolean withShutdownHook, List<AutoCloseable> preDestroy, List<Runnable> postConstruct, DBeanMap beans, BeanScope parent) {
+  DBeanScope(
+      boolean withShutdownHook,
+      List<AutoCloseable> preDestroy,
+      List<Runnable> postConstruct,
+      List<Consumer<BeanScope>> postConstructConsumers,
+      DBeanMap beans,
+      BeanScope parent) {
     this.preDestroy = preDestroy;
     this.postConstruct = postConstruct;
+    this.postConstructConsumers = postConstructConsumers;
     this.beans = beans;
     this.parent = parent;
     if (withShutdownHook) {
@@ -51,7 +60,7 @@ final class DBeanScope implements BeanScope {
 
   @Override
   public List<BeanEntry> all() {
-    IdentityHashMap<DContextEntryBean, DEntry> map = new IdentityHashMap<>();
+    final IdentityHashMap<DContextEntryBean, DEntry> map = new IdentityHashMap<>();
     if (parent != null) {
       ((DBeanScope) parent).addAll(map);
     }
@@ -224,8 +233,11 @@ final class DBeanScope implements BeanScope {
     lock.lock();
     try {
       log.log(TRACE, "firing postConstruct");
-      for (Runnable invoke : postConstruct) {
+      for (final var invoke : postConstruct) {
         invoke.run();
+      }
+      for (final var consumer : postConstructConsumers) {
+        consumer.accept(this);
       }
     } finally {
       lock.unlock();
@@ -245,10 +257,10 @@ final class DBeanScope implements BeanScope {
         // we only allow one call to preDestroy
         closed = true;
         log.log(TRACE, "firing preDestroy");
-        for (AutoCloseable closeable : preDestroy) {
+        for (final AutoCloseable closeable : preDestroy) {
           try {
             closeable.close();
-          } catch (Exception e) {
+          } catch (final Exception e) {
             log.log(Level.ERROR, "Error during PreDestroy lifecycle method", e);
           }
         }
@@ -297,9 +309,9 @@ final class DBeanScope implements BeanScope {
     int initPriority(Class<? extends Annotation> priorityAnnotation) {
       // Avoid adding hard dependency on javax.annotation-api by using reflection
       try {
-        Annotation ann = bean.getClass().getDeclaredAnnotation(priorityAnnotation);
+        final Annotation ann = bean.getClass().getDeclaredAnnotation(priorityAnnotation);
         if (ann != null) {
-          int priority = (Integer) priorityAnnotation.getMethod("value").invoke(ann);
+          final int priority = (Integer) priorityAnnotation.getMethod("value").invoke(ann);
           priorityDefined = true;
           return priority;
         }

@@ -27,6 +27,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private final List<EnrichBean> enrichBeans = new ArrayList<>();
   private final Set<Module> includeModules = new LinkedHashSet<>();
   private final List<Runnable> postConstructList = new ArrayList<>();
+  private final List<Consumer<BeanScope>> postConstructConsumerList = new ArrayList<>();
   private final List<AutoCloseable> preDestroyList = new ArrayList<>();
   private BeanScope parent;
   private boolean parentOverride = true;
@@ -73,7 +74,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   @Override
   public BeanScopeBuilder beans(Object... beans) {
-    for (Object bean : beans) {
+    for (final Object bean : beans) {
       suppliedBeans.add(SuppliedBean.of(superOf(bean.getClass()), bean));
     }
     return this;
@@ -111,6 +112,12 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   @Override
   public BeanScopeBuilder addPostConstructHooks(Runnable... postConstructRunnable) {
     Collections.addAll(this.postConstructList, postConstructRunnable);
+    return this;
+  }
+
+  @Override
+  public BeanScopeBuilder addPostConstructConsumerHook(Consumer<BeanScope> postConstructConsumer) {
+    this.postConstructConsumerList.add(postConstructConsumer);
     return this;
   }
 
@@ -200,14 +207,14 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     try {
       Class.forName("io.avaje.config.Configuration", false, classLoader);
       return true;
-    } catch (ClassNotFoundException e) {
+    } catch (final ClassNotFoundException e) {
       return false;
     }
   }
 
   @Override
   public BeanScope build() {
-    var start = System.currentTimeMillis();
+    final var start = System.currentTimeMillis();
     // load and apply plugins first
     initClassLoader();
     if (propertyRequiresPlugin == null) {
@@ -216,12 +223,12 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
     ServiceLoader.load(Plugin.class, classLoader).forEach(plugin -> plugin.apply(this));
     // sort factories by dependsOn
-    FactoryOrder factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
+    final FactoryOrder factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
     if (factoryOrder.isEmpty()) {
       ServiceLoader.load(Module.class, classLoader).forEach(factoryOrder::add);
     }
 
-    Set<String> moduleNames = factoryOrder.orderFactories();
+    final Set<String> moduleNames = factoryOrder.orderFactories();
     if (moduleNames.isEmpty()) {
       throw new IllegalStateException("No modules found. When using java module system we need an explicit provides clause in module-info like:\n\n" +
         " provides io.avaje.inject.spi.Module with org.example.ExampleModule;\n\n" +
@@ -231,12 +238,13 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
     log.log(DEBUG, "building with modules {0}", moduleNames);
 
-    Builder builder = Builder.newBuilder(propertyRequiresPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
-    for (Module factory : factoryOrder.factories()) {
+    final Builder builder = Builder.newBuilder(propertyRequiresPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
+    for (final Module factory : factoryOrder.factories()) {
       factory.build(builder);
     }
 
     postConstructList.forEach(builder::addPostConstruct);
+    postConstructConsumerList.forEach(builder::addPostConstruct);
     preDestroyList.forEach(builder::addPreDestroy);
     return builder.build(shutdownHook, start);
   }
@@ -245,7 +253,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
    * Return the type that we map the supplied bean to.
    */
   private static Class<?> superOf(Class<?> suppliedClass) {
-    Class<?> suppliedSuper = suppliedClass.getSuperclass();
+    final Class<?> suppliedSuper = suppliedClass.getSuperclass();
     if (Object.class.equals(suppliedSuper)) {
       return suppliedClass;
     } else {
@@ -272,13 +280,13 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       this.parent = parent;
       this.factories.addAll(includeModules);
       this.suppliedBeans = suppliedBeans;
-      for (Module includeModule : includeModules) {
+      for (final Module includeModule : includeModules) {
         moduleNames.add(includeModule.getClass().getName());
       }
     }
 
     void add(Module module) {
-      FactoryState factoryState = new FactoryState(module);
+      final FactoryState factoryState = new FactoryState(module);
       providesMap.computeIfAbsent(module.getClass().getTypeName(), s -> new FactoryList()).add(factoryState);
       addFactoryProvides(factoryState, module.provides());
       addFactoryProvides(factoryState, module.autoProvides());
@@ -299,7 +307,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
 
     private void addFactoryProvides(FactoryState factoryState, Class<?>[] provides) {
-      for (Class<?> feature : provides) {
+      for (final Class<?> feature : provides) {
         providesMap.computeIfAbsent(feature.getTypeName(), s -> new FactoryList()).add(factoryState);
       }
     }
@@ -319,7 +327,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     Set<String> orderFactories() {
       // push the 'no dependency' modules after the 'provides only' ones
       // as this is more intuitive for the simple (only provides modules case)
-      for (FactoryState factoryState : queueNoDependencies) {
+      for (final FactoryState factoryState : queueNoDependencies) {
         push(factoryState);
       }
       processQueue();
@@ -345,12 +353,12 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       if (suppliedBeans) {
         // just push everything left assuming supplied beans
         // will satisfy the required dependencies
-        for (FactoryState factoryState : queue) {
+        for (final FactoryState factoryState : queue) {
           push(factoryState);
         }
       } else if (!queue.isEmpty()) {
-        StringBuilder sb = new StringBuilder();
-        for (FactoryState factory : queue) {
+        final StringBuilder sb = new StringBuilder();
+        for (final FactoryState factory : queue) {
           sb.append("Module [").append(factory).append("] has unsatisfied");
           unsatisfiedRequires(sb, factory.requires(), "requires");
           unsatisfiedRequires(sb, factory.requiresPackages(), "requiresPackages");
@@ -366,7 +374,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
 
     private void unsatisfiedRequires(StringBuilder sb, Class<?>[] requiredType, String requires) {
-      for (Class<?> depModuleName : requiredType) {
+      for (final Class<?> depModuleName : requiredType) {
         if (notProvided(depModuleName.getTypeName())) {
           sb.append(String.format(" %s [%s]", requires, depModuleName.getTypeName()));
         }
@@ -377,7 +385,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       if (parent != null && parent.contains(dependency)) {
         return false;
       }
-      FactoryList factories = providesMap.get(dependency);
+      final FactoryList factories = providesMap.get(dependency);
       return (factories == null || !factories.allPushed());
     }
 
@@ -389,9 +397,9 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
      */
     private int processQueuedFactories() {
       int count = 0;
-      Iterator<FactoryState> it = queue.iterator();
+      final Iterator<FactoryState> it = queue.iterator();
       while (it.hasNext()) {
-        FactoryState factory = it.next();
+        final FactoryState factory = it.next();
         if (satisfiedDependencies(factory)) {
           // push the factory onto the build order
           it.remove();
@@ -503,7 +511,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
      * Return true if all factories here have been pushed onto the build order.
      */
     boolean allPushed() {
-      for (FactoryState factory : factories) {
+      for (final FactoryState factory : factories) {
         if (!factory.isPushed()) {
           return false;
         }

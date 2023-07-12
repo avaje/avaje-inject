@@ -17,6 +17,7 @@ class DBuilder implements Builder {
    * List of Lifecycle methods.
    */
   private final List<Runnable> postConstruct = new ArrayList<>();
+  private final List<Consumer<BeanScope>> postConstructConsumers = new ArrayList<>();
   private final List<AutoCloseable> preDestroy = new ArrayList<>();
   /**
    * List of field injection closures.
@@ -62,7 +63,7 @@ class DBuilder implements Builder {
     }
     if (parent instanceof DBeanScope) {
       // effectively looking for a match in the test scope
-      DBeanScope dParent = (DBeanScope) parent;
+      final DBeanScope dParent = (DBeanScope) parent;
       parentMatch = dParent.getStrict(name, removeAnnotations(types));
       return parentMatch == null;
     }
@@ -120,7 +121,7 @@ class DBuilder implements Builder {
 
   @SuppressWarnings({"unchecked"})
   private <T> List<T> listOf(Type type) {
-    List<T> values = (List<T>) beanMap.all(type);
+    final List<T> values = (List<T>) beanMap.all(type);
     if (parent == null) {
       return values;
     }
@@ -199,6 +200,11 @@ class DBuilder implements Builder {
   @Override
   public final void addPostConstruct(Runnable invoke) {
     postConstruct.add(invoke);
+  }
+
+  @Override
+  public void addPostConstruct(Consumer<BeanScope> consumer) {
+    postConstructConsumers.add(consumer);
   }
 
   @Override
@@ -399,7 +405,9 @@ class DBuilder implements Builder {
   @Override
   public final BeanScope build(boolean withShutdownHook, long start) {
     runInjectors();
-    var scope = new DBeanScope(withShutdownHook, preDestroy, postConstruct, beanMap, parent);
+    final var scope =
+        new DBeanScope(
+            withShutdownHook, preDestroy, postConstruct, postConstructConsumers, beanMap, parent);
     if (beanScopeProxy != null) {
       beanScopeProxy.inject(scope);
     }
