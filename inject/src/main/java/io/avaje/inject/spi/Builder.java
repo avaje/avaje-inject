@@ -96,6 +96,11 @@ public interface Builder {
   void addPostConstruct(Runnable runnable);
 
   /**
+   * Add lifecycle PostConstruct method.
+   */
+  void addPostConstruct(Consumer<BeanScope> consumer);
+
+  /**
    * Add lifecycle PreDestroy method.
    */
   void addPreDestroy(AutoCloseable closeable);
