@@ -1,6 +1,5 @@
 package io.avaje.inject.generator;
 
-import java.util.Iterator;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.Set;
@@ -63,6 +62,9 @@ final class ExternalProvider {
     for (final Plugin plugin : ServiceLoader.load(Plugin.class, Processor.class.getClassLoader())) {
       for (final Class<?> provide : plugin.provides()) {
         defaultScope.pluginProvided(provide.getCanonicalName());
+      }
+      for (final Class<?> provide : plugin.providesAspects()) {
+        defaultScope.pluginProvided(Util.wrapAspect(provide.getCanonicalName()));
       }
     }
   }
