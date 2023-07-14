@@ -5,7 +5,7 @@ import java.lang.reflect.Type;
 /**
  * Represents a full type including generics declaration, to avoid information loss due to type erasure.
  * <p>
- * This is a cut down version of Helidon GenericType Apache 2 licence.
+ * This is a cut down version of Helidon GenericType Apache 2 license.
  *
  * @param <T> the generic type parameter
  */

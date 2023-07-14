@@ -1,5 +1,6 @@
 package io.avaje.inject.generator;
 
+import java.util.Iterator;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.Set;
