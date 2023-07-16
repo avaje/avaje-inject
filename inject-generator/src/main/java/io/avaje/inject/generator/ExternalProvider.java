@@ -34,7 +34,7 @@ final class ExternalProvider {
   static void registerModuleProvidedTypes(Set<String> providedTypes) {
     if (!injectAvailable) {
       logWarn(
-          "Running in Compiler Plugin/Modular Project, use the Avaje Inject Maven/Gradle plugin for automatic external module discovery");
+          "Unable to detect Avaje Inject in Annotation Processor Class Path, use the Avaje Inject Maven/Gradle plugin for detecting external dependencies");
       return;
     }
 
