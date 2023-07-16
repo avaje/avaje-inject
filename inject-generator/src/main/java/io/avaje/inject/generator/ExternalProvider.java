@@ -3,6 +3,7 @@ package io.avaje.inject.generator;
 import static io.avaje.inject.generator.ProcessingContext.logDebug;
 import static io.avaje.inject.generator.ProcessingContext.logWarn;
 
+import java.util.Iterator;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.Set;
@@ -37,23 +38,26 @@ final class ExternalProvider {
       return;
     }
 
-    for (final Module module:ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader())){
-    try {
-      logDebug("Loaded External Module %s", module.getClass().getCanonicalName());
+    Iterator<Module> iterator =
+        ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader()).iterator();
+    while (iterator.hasNext()) {
+      try {
+        var module = iterator.next();
+        logDebug("Loaded External Module %s", module.getClass().getCanonicalName());
 
-      for (final Class<?> provide : module.provides()) {
-        providedTypes.add(provide.getCanonicalName());
+        for (final Class<?> provide : module.provides()) {
+          providedTypes.add(provide.getCanonicalName());
+        }
+        for (final Class<?> provide : module.autoProvides()) {
+          providedTypes.add(provide.getCanonicalName());
+        }
+        for (final Class<?> provide : module.autoProvidesAspects()) {
+          providedTypes.add(Util.wrapAspect(provide.getCanonicalName()));
+        }
+      } catch (final ServiceConfigurationError expected) {
+        // ignore expected error reading the module that we are also writing
       }
-      for (final Class<?> provide : module.autoProvides()) {
-        providedTypes.add(provide.getCanonicalName());
-      }
-      for (final Class<?> provide : module.autoProvidesAspects()) {
-        providedTypes.add(Util.wrapAspect(provide.getCanonicalName()));
-      }
-    } catch (final ServiceConfigurationError expected) {
-      // ignore expected error reading the module that we are also writing
     }
-  }
   }
 
   /**
