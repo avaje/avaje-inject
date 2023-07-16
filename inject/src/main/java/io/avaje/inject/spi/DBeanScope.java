@@ -242,7 +242,7 @@ final class DBeanScope implements BeanScope {
     } finally {
       lock.unlock();
     }
-    log.log(INFO, "Wired beans in {0}ms", (System.currentTimeMillis() - start));
+    log.log(INFO, String.format("Wired beans in %sms", System.currentTimeMillis() - start));
     return this;
   }
 
