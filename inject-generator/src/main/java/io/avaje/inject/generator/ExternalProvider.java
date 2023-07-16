@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.ProcessingContext.*;
+import static io.avaje.inject.generator.ProcessingContext.logDebug;
+import static io.avaje.inject.generator.ProcessingContext.logWarn;
 
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
@@ -36,24 +37,23 @@ final class ExternalProvider {
       return;
     }
 
-    for (final Module module :
-        ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader())) {
-      try {
-        logDebug("Loaded External Module %s", module.getClass().getCanonicalName());
+    for (final Module module:ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader())){
+    try {
+      logDebug("Loaded External Module %s", module.getClass().getCanonicalName());
 
-        for (final Class<?> provide : module.provides()) {
-          providedTypes.add(provide.getCanonicalName());
-        }
-        for (final Class<?> provide : module.autoProvides()) {
-          providedTypes.add(provide.getCanonicalName());
-        }
-        for (final Class<?> provide : module.autoProvidesAspects()) {
-          providedTypes.add(Util.wrapAspect(provide.getCanonicalName()));
-        }
-      } catch (final ServiceConfigurationError expected) {
-        // ignore expected error reading the module that we are also writing
+      for (final Class<?> provide : module.provides()) {
+        providedTypes.add(provide.getCanonicalName());
       }
+      for (final Class<?> provide : module.autoProvides()) {
+        providedTypes.add(provide.getCanonicalName());
+      }
+      for (final Class<?> provide : module.autoProvidesAspects()) {
+        providedTypes.add(Util.wrapAspect(provide.getCanonicalName()));
+      }
+    } catch (final ServiceConfigurationError expected) {
+      // ignore expected error reading the module that we are also writing
     }
+  }
   }
 
   /**
@@ -65,6 +65,7 @@ final class ExternalProvider {
       return;
     }
     for (final Plugin plugin : ServiceLoader.load(Plugin.class, Processor.class.getClassLoader())) {
+      logDebug("Loaded Plugin %s", plugin.getClass().getCanonicalName());
       for (final Class<?> provide : plugin.provides()) {
         defaultScope.pluginProvided(provide.getCanonicalName());
       }
