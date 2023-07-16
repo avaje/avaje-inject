@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
-import java.util.Iterator;
+import static io.avaje.inject.generator.ProcessingContext.*;
+
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.Set;
@@ -30,13 +31,16 @@ final class ExternalProvider {
 
   static void registerModuleProvidedTypes(Set<String> providedTypes) {
     if (!injectAvailable) {
+      logWarn(
+          "Running in Compiler Plugin/Modular Project, use the Avaje Inject Maven/Gradle plugin for automatic external module discovery");
       return;
     }
 
-    Iterator<Module> iterator = ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader()).iterator();
-    while (iterator.hasNext()) {
+    for (final Module module :
+        ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader())) {
       try {
-        Module module = iterator.next();
+        logDebug("Loaded External Module %s", module.getClass().getCanonicalName());
+
         for (final Class<?> provide : module.provides()) {
           providedTypes.add(provide.getCanonicalName());
         }

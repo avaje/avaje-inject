@@ -236,7 +236,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         " Review IntelliJ Settings / Build / Build tools / Gradle - 'Build and run using' value and set that to 'Gradle'. " +
         " Refer to https://avaje.io/inject#gradle");
     }
-    log.log(DEBUG, "building with modules {0}", moduleNames);
+    log.log(DEBUG, "building with modules " + moduleNames);
 
     final Builder builder = Builder.newBuilder(propertyRequiresPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
     for (final Module factory : factoryOrder.factories()) {
