@@ -10,6 +10,7 @@ import io.avaje.lang.Nullable;
 import java.lang.System.Logger.Level;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -242,7 +243,7 @@ final class DBeanScope implements BeanScope {
     } finally {
       lock.unlock();
     }
-    log.log(INFO, String.format("Wired beans in %sms", System.currentTimeMillis() - start));
+    log.log(INFO, MessageFormat.format("Wired beans in {0}ms", System.currentTimeMillis() - start));
     return this;
   }
 
