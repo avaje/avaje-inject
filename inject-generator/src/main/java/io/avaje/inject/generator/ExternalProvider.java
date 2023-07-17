@@ -1,8 +1,5 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.ProcessingContext.logDebug;
-import static io.avaje.inject.generator.ProcessingContext.logWarn;
-
 import java.util.Iterator;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
@@ -33,8 +30,6 @@ final class ExternalProvider {
 
   static void registerModuleProvidedTypes(Set<String> providedTypes) {
     if (!injectAvailable) {
-      logWarn(
-          "Unable to detect Avaje Inject in Annotation Processor Class Path, use the Avaje Inject Maven/Gradle plugin for detecting external dependencies");
       return;
     }
 
@@ -43,7 +38,6 @@ final class ExternalProvider {
     while (iterator.hasNext()) {
       try {
         var module = iterator.next();
-        logDebug("Loaded External Module %s", module.getClass().getCanonicalName());
         for (final Class<?> provide : module.provides()) {
           providedTypes.add(provide.getCanonicalName());
         }
@@ -68,7 +62,6 @@ final class ExternalProvider {
       return;
     }
     for (final Plugin plugin : ServiceLoader.load(Plugin.class, Processor.class.getClassLoader())) {
-      logDebug("Loaded Plugin %s", plugin.getClass().getCanonicalName());
       for (final Class<?> provide : plugin.provides()) {
         defaultScope.pluginProvided(provide.getCanonicalName());
       }
