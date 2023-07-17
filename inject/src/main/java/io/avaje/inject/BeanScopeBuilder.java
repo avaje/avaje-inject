@@ -225,7 +225,7 @@ public interface BeanScopeBuilder {
    *
    * @param consumer the PostConstruct hook to add to the bean scope
    */
-  BeanScopeBuilder addPostConstructConsumerHook(Consumer<BeanScope> consumer);
+  BeanScopeBuilder addPostConstructHooks(BeanScopeConsumer... consumers);
 
   /**
    * Adds hooks that will execute before this scope is destroyed.

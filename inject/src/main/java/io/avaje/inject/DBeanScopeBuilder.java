@@ -116,8 +116,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  public BeanScopeBuilder addPostConstructConsumerHook(Consumer<BeanScope> postConstructConsumer) {
-    this.postConstructConsumerList.add(postConstructConsumer);
+  public BeanScopeBuilder addPostConstructHooks(BeanScopeConsumer... postConstructConsumer) {
+    Collections.addAll(this.postConstructConsumerList, postConstructConsumer);
     return this;
   }
 
