@@ -2,8 +2,6 @@ package io.avaje.inject.plugin;
 
 import org.gradle.api.*;
 
-import io.avaje.inject.spi.Plugin;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -58,7 +56,7 @@ public class AvajeInjectPlugin implements Plugin<Project> {
   private void writeProvidedPlugins(ClassLoader cl, FileWriter pluginWriter) throws IOException {
 	    final Set<String> providedTypes = new HashSet<>();
 
-	    for (final var plugin : ServiceLoader.load(Plugin.class, newClassLoader)) {
+	    for (final var plugin : ServiceLoader.load(io.avaje.inject.spi.Plugin.class, cl)) {
 	      for (final Class<?> provide : plugin.provides()) {
 	        providedTypes.add(provide.getCanonicalName());
 	      }
