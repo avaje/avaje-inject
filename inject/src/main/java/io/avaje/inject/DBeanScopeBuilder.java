@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static java.lang.System.Logger.Level.DEBUG;
+import static java.lang.System.Logger.Level.*;
 
 /**
  * Build a bean scope with options for shutdown hook and supplying test doubles.
@@ -236,7 +236,11 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         " Review IntelliJ Settings / Build / Build tools / Gradle - 'Build and run using' value and set that to 'Gradle'. " +
         " Refer to https://avaje.io/inject#gradle");
     }
-    log.log(DEBUG, "building with modules {0}", moduleNames);
+    
+    log.log(
+        propertyRequiresPlugin.contains("printModules") ? INFO : DEBUG,
+        "building with modules {0}",
+        moduleNames);
 
     final Builder builder = Builder.newBuilder(propertyRequiresPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
     for (final Module factory : factoryOrder.factories()) {
