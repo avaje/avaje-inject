@@ -216,14 +216,14 @@ public interface BeanScopeBuilder {
   /**
    * Adds hooks that will execute after this scope is built.
    *
-   * @param runnables the PostConstruct hooks to add to the bean scope
+   * @param runnables the PostConstruct hooks to run after the BeanScope is constructed
    */
   BeanScopeBuilder addPostConstructHooks(Runnable... runnables);
 
   /**
    * Adds hook that will execute after this scope is built.
    *
-   * @param consumer the PostConstruct hook to add to the bean scope
+   * @param consumers the PostConstruct hooks to run after the BeanScope is constructed
    */
   BeanScopeBuilder addPostConstructHooks(BeanScopeConsumer... consumers);
 
