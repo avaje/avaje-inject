@@ -12,11 +12,11 @@ import java.lang.reflect.Type;
  */
 public interface Plugin {
 
-  /** Apply the plugin to the scope builder. */
-  void apply(BeanScopeBuilder builder);
-
   /** Empty array of classes. */
   Class<?>[] EMPTY_CLASSES = {};
+
+  /** Apply the plugin to the scope builder. */
+  void apply(BeanScopeBuilder builder);
 
   /** Return the classes that the plugin provides. */
   default Class<?>[] provides() {
