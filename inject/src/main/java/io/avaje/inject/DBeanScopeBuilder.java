@@ -115,10 +115,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     return this;
   }
 
-
   @Override
-  @SafeVarargs
-  public final BeanScopeBuilder addPostConstructHooks(Consumer<BeanScope>... postConstructConsumer) {
+  public BeanScopeBuilder addPostConstructHooks(BeanScopeConsumer... postConstructConsumer) {
     Collections.addAll(this.postConstructConsumerList, postConstructConsumer);
     return this;
   }

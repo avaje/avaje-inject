@@ -225,8 +225,7 @@ public interface BeanScopeBuilder {
    *
    * @param consumers the PostConstruct hooks to run after the BeanScope is constructed
    */
-  @SuppressWarnings("unchecked")
-  BeanScopeBuilder addPostConstructHooks(Consumer<BeanScope>... consumers);
+  BeanScopeBuilder addPostConstructHooks(BeanScopeConsumer... consumers);
 
   /**
    * Adds hooks that will execute before this scope is destroyed.
