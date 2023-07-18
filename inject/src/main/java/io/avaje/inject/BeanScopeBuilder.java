@@ -215,24 +215,18 @@ public interface BeanScopeBuilder {
 
   /**
    * Adds hooks that will execute after this scope is built.
-   *
-   * @param runnables the PostConstruct hooks to add to the bean scope
    */
-  BeanScopeBuilder addPostConstructHooks(Runnable... runnables);
+  BeanScopeBuilder addPostConstruct(Runnable postConstructHook);
 
   /**
    * Adds hook that will execute after this scope is built.
-   *
-   * @param consumer the PostConstruct hook to add to the bean scope
    */
-  BeanScopeBuilder addPostConstructConsumerHook(Consumer<BeanScope> consumer);
+  BeanScopeBuilder addPostConstruct(Consumer<BeanScope> postConstructHook);
 
   /**
-   * Adds hooks that will execute before this scope is destroyed.
-   *
-   * @param closables the PreDestroy hooks to add to the bean scope
+   * Add hook that will execute before this scope is destroyed.
    */
-  BeanScopeBuilder addPreDestroyHooks(AutoCloseable... closables);
+  BeanScopeBuilder addPreDestroy(AutoCloseable preDestroyHook);
 
   /**
    * Set the ClassLoader to use when loading modules.
