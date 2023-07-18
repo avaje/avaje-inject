@@ -110,20 +110,20 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  public BeanScopeBuilder addPostConstructHooks(Runnable... postConstructRunnable) {
-    Collections.addAll(this.postConstructList, postConstructRunnable);
+  public BeanScopeBuilder addPostConstruct(Runnable postConstructHook) {
+    postConstructList.add(postConstructHook);
     return this;
   }
 
   @Override
-  public BeanScopeBuilder addPostConstructConsumerHook(Consumer<BeanScope> postConstructConsumer) {
+  public BeanScopeBuilder addPostConstruct(Consumer<BeanScope> postConstructConsumer) {
     this.postConstructConsumerList.add(postConstructConsumer);
     return this;
   }
 
   @Override
-  public BeanScopeBuilder addPreDestroyHooks(AutoCloseable... closables) {
-    Collections.addAll(this.preDestroyList, closables);
+  public BeanScopeBuilder addPreDestroy(AutoCloseable preDestroyHook) {
+    preDestroyList.add(preDestroyHook);
     return this;
   }
 
