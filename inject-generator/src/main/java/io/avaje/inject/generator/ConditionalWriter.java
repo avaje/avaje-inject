@@ -1,5 +1,7 @@
 package io.avaje.inject.generator;
 
+import static java.util.stream.Collectors.joining;
+
 final class ConditionalWriter {
   private final Append writer;
   private final BeanConditions conditions;
@@ -17,6 +19,12 @@ final class ConditionalWriter {
 
     writer.append("    if (");
 
+    if (!conditions.profiles.isEmpty()) {
+      first = false;
+      writer.append(
+          "!builder.containsProfiles(java.util.List.of(\"%s\"))",
+          conditions.profiles.stream().collect(joining(",")));
+    }
     for (final var requireType : conditions.requireTypes) {
       prefix();
       writer.append("!builder.contains(%s.class)", Util.shortName(requireType));

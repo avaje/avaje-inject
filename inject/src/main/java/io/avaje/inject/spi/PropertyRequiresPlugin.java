@@ -3,7 +3,7 @@ package io.avaje.inject.spi;
 import java.util.Optional;
 
 /**
- * Plugin interface used with {@link io.avaje.inject.RequiresProperty}.
+ * Plugin interface which contains the application properties used for wiring. Used with {@link io.avaje.inject.RequiresProperty} and {@link io.avaje.inject.Profile}.
  * <p>
  * The plugin is loaded via ServiceLoader and defaults to an implementation
  * that uses {@link System#getProperty(String)} and {@link System#getenv(String)}.

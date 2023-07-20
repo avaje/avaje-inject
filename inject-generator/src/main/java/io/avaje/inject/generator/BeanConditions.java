@@ -14,6 +14,7 @@ final class BeanConditions {
   final Set<String> qualifierNames = new HashSet<>();
   final Set<String> containsProps = new HashSet<>();
   final Set<String> missingProps = new HashSet<>();
+  final Set<String> profiles = new HashSet<>();
   final Map<String, String> propertyEquals = new HashMap<>();
   final Map<String, String> propertyNotEquals = new HashMap<>();
 
@@ -25,16 +26,11 @@ final class BeanConditions {
   private void readAllDirect(Element element) {
     RequiresBeanPrism.getAllInstancesOn(element).forEach(this::read);
     RequiresBeanContainerPrism.getOptionalOn(element)
-        .ifPresent(
-            container -> {
-              container.value().forEach(this::read);
-            });
+        .ifPresent(container -> container.value().forEach(this::read));
     RequiresPropertyPrism.getAllInstancesOn(element).forEach(this::read);
     RequiresPropertyContainerPrism.getOptionalOn(element)
-        .ifPresent(
-            container -> {
-              container.value().forEach(this::read);
-            });
+        .ifPresent(container -> container.value().forEach(this::read));
+    ProfilePrism.getOptionalOn(element).ifPresent(this::read);
   }
 
   private void readMetaAnnotations(Element element) {
@@ -46,6 +42,11 @@ final class BeanConditions {
     RequiresPropertyContainerPrism.getAllOnMetaAnnotations(element).stream()
         .flatMap(e -> e.value().stream())
         .forEach(this::read);
+    ProfilePrism.getAllOnMetaAnnotations(element).forEach(this::read);
+  }
+
+  private void read(ProfilePrism prism) {
+    profiles.addAll(prism.value());
   }
 
   private void read(RequiresBeanPrism prism) {
@@ -73,12 +74,13 @@ final class BeanConditions {
   }
 
   boolean isEmpty() {
-    return requireTypes.isEmpty()
-      && missingTypes.isEmpty()
-      && qualifierNames.isEmpty()
-      && containsProps.isEmpty()
-      && missingProps.isEmpty()
-      && propertyEquals.isEmpty()
-      && propertyNotEquals.isEmpty();
+    return profiles.isEmpty()
+        && requireTypes.isEmpty()
+        && missingTypes.isEmpty()
+        && qualifierNames.isEmpty()
+        && containsProps.isEmpty()
+        && missingProps.isEmpty()
+        && propertyEquals.isEmpty()
+        && propertyNotEquals.isEmpty();
   }
 }

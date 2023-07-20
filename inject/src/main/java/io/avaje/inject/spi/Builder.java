@@ -250,6 +250,9 @@ public interface Builder {
    */
   boolean containsQualifier(String name);
 
+  /** Return true if the builder contains the given profile */
+  boolean containsProfiles(List<String> type);
+
   /**
    * Return the plugin for required properties.
    */
@@ -259,4 +262,5 @@ public interface Builder {
    * Build and return the bean scope.
    */
   BeanScope build(boolean withShutdownHook, long start);
+
 }
