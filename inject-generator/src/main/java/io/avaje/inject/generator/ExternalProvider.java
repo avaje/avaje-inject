@@ -1,9 +1,5 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.ProcessingContext.logDebug;
-import static io.avaje.inject.generator.ProcessingContext.logWarn;
-
-import java.util.Iterator;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.Set;
