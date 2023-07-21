@@ -222,7 +222,7 @@ class DBuilder implements Builder {
   @Override
   public final void addAutoClosable(Object maybeAutoCloseable) {
     if (maybeAutoCloseable instanceof AutoCloseable) {
-      preDestroy.add((AutoCloseable)maybeAutoCloseable);
+      preDestroy.add((AutoCloseable) maybeAutoCloseable);
     }
   }
 
@@ -355,6 +355,14 @@ class DBuilder implements Builder {
   }
 
   @Override
+  public boolean containsAllProfiles(List<String> type) {
+    for (final var string : type) {
+      if (!profiles.contains(string)) return false;
+    }
+    return true;
+  }
+
+  @Override
   public boolean contains(String type) {
     return beanMap.contains(type);
   }
@@ -399,7 +407,10 @@ class DBuilder implements Builder {
       msg.append(" name:").append(name);
     }
     final List<T> beanList = list(type);
-    msg.append(" when creating ").append(injectTarget).append(" - potential beans to inject: ").append(beanList);
+    msg.append(" when creating ")
+        .append(injectTarget)
+        .append(" - potential beans to inject: ")
+        .append(beanList);
     if (!beanList.isEmpty()) {
       msg.append(". Check @Named or Qualifier being used");
     }

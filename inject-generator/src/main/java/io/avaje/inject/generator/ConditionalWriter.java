@@ -19,11 +19,24 @@ final class ConditionalWriter {
 
     writer.append("    if (");
 
-    if (!conditions.profiles.isEmpty()) {
-      first = false;
+    if (!conditions.orProfiles.isEmpty()) {
+      prefix();
+      writer.append(
+          "builder.containsProfiles(java.util.List.of(\"%s\"))",
+          conditions.orProfiles.stream().collect(joining(",")));
+    }
+    if (!conditions.andProfiles.isEmpty()) {
+      prefix();
+      writer.append(
+          "!builder.containsAllProfiles(java.util.List.of(\"%s\"))",
+          conditions.andProfiles.stream().collect(joining(",")));
+    }
+
+    if (!conditions.notProfiles.isEmpty()) {
+      prefix();
       writer.append(
           "!builder.containsProfiles(java.util.List.of(\"%s\"))",
-          conditions.profiles.stream().collect(joining(",")));
+          conditions.andProfiles.stream().collect(joining(",")));
     }
     for (final var requireType : conditions.requireTypes) {
       prefix();

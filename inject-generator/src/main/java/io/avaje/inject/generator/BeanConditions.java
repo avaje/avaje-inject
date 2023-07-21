@@ -14,7 +14,9 @@ final class BeanConditions {
   final Set<String> qualifierNames = new HashSet<>();
   final Set<String> containsProps = new HashSet<>();
   final Set<String> missingProps = new HashSet<>();
-  final Set<String> profiles = new HashSet<>();
+  final Set<String> orProfiles = new HashSet<>();
+  final Set<String> andProfiles = new HashSet<>();
+  final Set<String> notProfiles = new HashSet<>();
   final Map<String, String> propertyEquals = new HashMap<>();
   final Map<String, String> propertyNotEquals = new HashMap<>();
 
@@ -46,7 +48,9 @@ final class BeanConditions {
   }
 
   private void read(ProfilePrism prism) {
-    profiles.addAll(prism.value());
+    orProfiles.addAll(prism.value());
+    andProfiles.addAll(prism.all());
+    notProfiles.addAll(prism.none());
   }
 
   private void read(RequiresBeanPrism prism) {
@@ -74,7 +78,7 @@ final class BeanConditions {
   }
 
   boolean isEmpty() {
-    return profiles.isEmpty()
+    return orProfiles.isEmpty()
         && requireTypes.isEmpty()
         && missingTypes.isEmpty()
         && qualifierNames.isEmpty()

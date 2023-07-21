@@ -37,5 +37,24 @@ import java.lang.annotation.*;
 @Target({TYPE, METHOD, ANNOTATION_TYPE})
 public @interface Profile {
 
-  String[] value();
+  /**
+   * Expresses that any of the given profiles must be set for the bean to load.
+   *
+   * @return the property to check
+   */
+  String[] value() default {};
+
+  /**
+   * Expresses that all of the given profiles must be set for the bean to load.
+   *
+   * @return the property to check
+   */
+  String[] all() default {};
+
+  /**
+   * Expresses that none of the given profiles must be set for the bean to load.
+   *
+   * @return the properties to check
+   */
+  String[] none() default {};
 }

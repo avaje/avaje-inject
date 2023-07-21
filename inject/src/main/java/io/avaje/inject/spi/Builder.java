@@ -253,6 +253,9 @@ public interface Builder {
   /** Return true if the builder contains the given profile */
   boolean containsProfiles(List<String> type);
 
+  /** Return true if the builder contains all of the given profile */
+  boolean containsAllProfiles(List<String> type);
+
   /**
    * Return the plugin for required properties.
    */
@@ -262,5 +265,6 @@ public interface Builder {
    * Build and return the bean scope.
    */
   BeanScope build(boolean withShutdownHook, long start);
+
 
 }
