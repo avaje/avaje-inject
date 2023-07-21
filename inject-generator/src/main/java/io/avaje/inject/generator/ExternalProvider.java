@@ -45,7 +45,7 @@ final class ExternalProvider {
     while (iterator.hasNext()) {
       try {
         final var module = iterator.next();
-        System.out.println("Detected Module " + module.getClass().getCanonicalName());
+        System.out.println("Detected Module: " + module.getClass().getCanonicalName());
         for (final Class<?> provide : module.provides()) {
           providedTypes.add(provide.getCanonicalName());
         }
@@ -71,7 +71,7 @@ final class ExternalProvider {
     }
     for (final Plugin plugin : ServiceLoader.load(Plugin.class, Processor.class.getClassLoader())) {
 
-      System.out.println("Loaded Plugin " + plugin.getClass().getCanonicalName());
+      System.out.println("Loaded Plugin: " + plugin.getClass().getCanonicalName());
 
       for (final Class<?> provide : plugin.provides()) {
         defaultScope.pluginProvided(provide.getCanonicalName());

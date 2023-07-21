@@ -88,7 +88,7 @@ public class AutoProvidesMojo extends AbstractMojo {
 
     for (final var plugin : ServiceLoader.load(Plugin.class, newClassLoader)) {
 
-      System.out.println("Loaded Plugin " + plugin.getClass().getCanonicalName());
+      System.out.println("Loaded Plugin: " + plugin.getClass().getCanonicalName());
 
       for (final Class<?> provide : plugin.provides()) {
         providedTypes.add(provide.getCanonicalName());
@@ -110,7 +110,7 @@ public class AutoProvidesMojo extends AbstractMojo {
 
     for (final var module : ServiceLoader.load(Module.class, newClassLoader)) {
 
-      System.out.println("Detected External Module " + module.getClass().getCanonicalName());
+      System.out.println("Detected External Module: " + module.getClass().getCanonicalName());
 
       for (final Class<?> provide : module.provides()) {
         providedTypes.add(provide.getCanonicalName());
