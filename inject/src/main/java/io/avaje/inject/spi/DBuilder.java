@@ -4,6 +4,8 @@ import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
 import jakarta.inject.Provider;
 
+import static java.util.stream.Collectors.toSet;
+
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Consumer;
@@ -13,40 +15,36 @@ import static io.avaje.inject.spi.DBeanScope.combine;
 class DBuilder implements Builder {
 
   private final PropertyRequiresPlugin propertyRequires;
-  /**
-   * List of Lifecycle methods.
-   */
+  private final Set<String> profiles;
+  /** List of Lifecycle methods. */
   private final List<Runnable> postConstruct = new ArrayList<>();
+
   private final List<Consumer<BeanScope>> postConstructConsumers = new ArrayList<>();
   private final List<AutoCloseable> preDestroy = new ArrayList<>();
-  /**
-   * List of field injection closures.
-   */
+  /** List of field injection closures. */
   private final List<Consumer<Builder>> injectors = new ArrayList<>();
-  /**
-   * The beans created and added to the scope during building.
-   */
+  /** The beans created and added to the scope during building. */
   protected final DBeanMap beanMap = new DBeanMap();
+
   protected final BeanScope parent;
   protected final boolean parentOverride;
-  /**
-   * Bean provided by the parent scope that we are not overriding.
-   */
+  /** Bean provided by the parent scope that we are not overriding. */
   protected Object parentMatch;
-  /**
-   * Debug of the current bean being wired - used in injection errors.
-   */
+  /** Debug of the current bean being wired - used in injection errors. */
   private Type injectTarget;
-  /**
-   * Flag set when we are running post construct injection.
-   */
+  /** Flag set when we are running post construct injection. */
   private boolean runningPostConstruct;
+
   private DBeanScopeProxy beanScopeProxy;
 
   DBuilder(PropertyRequiresPlugin propertyRequires, BeanScope parent, boolean parentOverride) {
     this.propertyRequires = propertyRequires;
     this.parent = parent;
     this.parentOverride = parentOverride;
+    this.profiles =
+        propertyRequires.get("avaje.profiles").map(p -> p.split(",")).stream()
+            .flatMap(Arrays::stream)
+            .collect(toSet());
   }
 
   @Override
@@ -72,9 +70,9 @@ class DBuilder implements Builder {
 
   /**
    * Return the types without any annotation types.
-   * <p>
-   * For the purposes of supplied beans (typically test doubles) we are not
-   * interested in annotation types.
+   *
+   * <p>For the purposes of supplied beans (typically test doubles) we are not interested in
+   * annotation types.
    */
   protected final Type[] removeAnnotations(Type[] source) {
     for (int i = 1, end = source.length; i < end; i++) {
@@ -144,16 +142,14 @@ class DBuilder implements Builder {
   }
 
   private <T> T getMaybe(Type type, String name) {
-    T bean = beanMap.get(type, name);
+    final T bean = beanMap.get(type, name);
     if (bean != null) {
       return bean;
     }
     return parent == null ? null : parent.<T>getOptional(type, name).orElse(null);
   }
 
-  /**
-   * Return the bean to register potentially with spy enhancement.
-   */
+  /** Return the bean to register potentially with spy enhancement. */
   protected <T> T enrich(T bean, DBeanMap.NextBean next) {
     // only enriched by DBuilderExtn
     return bean;
@@ -215,7 +211,7 @@ class DBuilder implements Builder {
   @Override
   public final void addAutoClosable(Object maybeAutoCloseable) {
     if (maybeAutoCloseable instanceof AutoCloseable) {
-      preDestroy.add((AutoCloseable)maybeAutoCloseable);
+      preDestroy.add((AutoCloseable) maybeAutoCloseable);
     }
   }
 
@@ -293,13 +289,13 @@ class DBuilder implements Builder {
       return obtainProvider(type, name);
     }
     // use injectors to delay obtaining the provider until end of build
-    ProviderPromise<T> promise = new ProviderPromise<>(type, name, this);
+    final ProviderPromise<T> promise = new ProviderPromise<>(type, name, this);
     injectors.add(promise);
     return promise;
   }
 
   <T> Provider<T> obtainProvider(Type type, String name) {
-    Provider<T> provider = beanMap.provider(type, name);
+    final Provider<T> provider = beanMap.provider(type, name);
     if (provider != null) {
       return provider;
     }
@@ -316,7 +312,12 @@ class DBuilder implements Builder {
       if (bean != null) {
         return bean;
       }
-      String msg = "Unable to inject an instance for generic type " + type + " usually provided by " + cls + "?";
+      final String msg =
+          "Unable to inject an instance for generic type "
+              + type
+              + " usually provided by "
+              + cls
+              + "?";
       throw new IllegalStateException(msg);
     };
   }
@@ -339,6 +340,20 @@ class DBuilder implements Builder {
   @Override
   public final <T> T get(Type type, String name) {
     return getBean(type, name);
+  }
+
+  @Override
+  public boolean containsProfiles(List<String> type) {
+
+    return !Collections.disjoint(profiles, type);
+  }
+
+  @Override
+  public boolean containsAllProfiles(List<String> type) {
+    for (final var string : type) {
+      if (!profiles.contains(string)) return false;
+    }
+    return true;
   }
 
   @Override
@@ -365,7 +380,7 @@ class DBuilder implements Builder {
     if (BeanScope.class.equals(type)) {
       return injectBeanScope();
     }
-    T bean = getMaybe(type, name);
+    final T bean = getMaybe(type, name);
     if (bean == null) {
       throw new IllegalStateException(errorInjectingNull(type, name));
     }
@@ -381,23 +396,26 @@ class DBuilder implements Builder {
   }
 
   private <T> String errorInjectingNull(Type type, String name) {
-    String msg = "Injecting null for " + type.getTypeName();
+    final StringBuilder msg = new StringBuilder("Injecting null for ").append(type.getTypeName());
     if (name != null) {
-      msg += " name:" + name;
+      msg.append(" name:").append(name);
     }
-    List<T> beanList = list(type);
-    msg += " when creating " + injectTarget + " - potential beans to inject: " + beanList;
+    final List<T> beanList = list(type);
+    msg.append(" when creating ")
+        .append(injectTarget)
+        .append(" - potential beans to inject: ")
+        .append(beanList);
     if (!beanList.isEmpty()) {
-      msg += ". Check @Named or Qualifier being used";
+      msg.append(". Check @Named or Qualifier being used");
     }
-    msg += ". Check for missing module? [ missing beanScopeBuilder.modules() ]";
-    msg += ". If it is expected to be externally provided, missing beanScopeBuilder.bean() ?";
-    return msg;
+    msg.append(". Check for missing module? [ missing beanScopeBuilder.modules() ]");
+    msg.append(". If it is expected to be externally provided, missing beanScopeBuilder.bean() ?");
+    return msg.toString();
   }
 
   private void runInjectors() {
     runningPostConstruct = true;
-    for (Consumer<Builder> injector : injectors) {
+    for (final Consumer<Builder> injector : injectors) {
       injector.accept(this);
     }
   }
@@ -405,7 +423,9 @@ class DBuilder implements Builder {
   @Override
   public final BeanScope build(boolean withShutdownHook, long start) {
     runInjectors();
-    final var scope = new DBeanScope(withShutdownHook, preDestroy, postConstruct, postConstructConsumers, beanMap, parent);
+    final var scope =
+        new DBeanScope(
+            withShutdownHook, preDestroy, postConstruct, postConstructConsumers, beanMap, parent);
     if (beanScopeProxy != null) {
       beanScopeProxy.inject(scope);
     }
