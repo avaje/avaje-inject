@@ -75,6 +75,10 @@ final class BeanConditions {
   void addImports(ImportTypeMap importTypes) {
     requireTypes.forEach(importTypes::add);
     missingTypes.forEach(importTypes::add);
+
+    if (!orProfiles.isEmpty() || !andProfiles.isEmpty() || !notProfiles.isEmpty()) {
+      importTypes.add("java.util.List");
+    }
   }
 
   boolean isEmpty() {
