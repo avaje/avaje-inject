@@ -1,4 +1,4 @@
-package org.example.myapp;
+package org.example.myapp.conditional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

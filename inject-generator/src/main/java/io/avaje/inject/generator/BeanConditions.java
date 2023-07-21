@@ -83,6 +83,8 @@ final class BeanConditions {
 
   boolean isEmpty() {
     return orProfiles.isEmpty()
+        && andProfiles.isEmpty()
+        && notProfiles.isEmpty()
         && requireTypes.isEmpty()
         && missingTypes.isEmpty()
         && qualifierNames.isEmpty()

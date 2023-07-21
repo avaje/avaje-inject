@@ -16,34 +16,25 @@ class DBuilder implements Builder {
 
   private final PropertyRequiresPlugin propertyRequires;
   private final Set<String> profiles;
-  /**
-   * List of Lifecycle methods.
-   */
+  /** List of Lifecycle methods. */
   private final List<Runnable> postConstruct = new ArrayList<>();
+
   private final List<Consumer<BeanScope>> postConstructConsumers = new ArrayList<>();
   private final List<AutoCloseable> preDestroy = new ArrayList<>();
-  /**
-   * List of field injection closures.
-   */
+  /** List of field injection closures. */
   private final List<Consumer<Builder>> injectors = new ArrayList<>();
-  /**
-   * The beans created and added to the scope during building.
-   */
+  /** The beans created and added to the scope during building. */
   protected final DBeanMap beanMap = new DBeanMap();
+
   protected final BeanScope parent;
   protected final boolean parentOverride;
-  /**
-   * Bean provided by the parent scope that we are not overriding.
-   */
+  /** Bean provided by the parent scope that we are not overriding. */
   protected Object parentMatch;
-  /**
-   * Debug of the current bean being wired - used in injection errors.
-   */
+  /** Debug of the current bean being wired - used in injection errors. */
   private Type injectTarget;
-  /**
-   * Flag set when we are running post construct injection.
-   */
+  /** Flag set when we are running post construct injection. */
   private boolean runningPostConstruct;
+
   private DBeanScopeProxy beanScopeProxy;
 
   DBuilder(PropertyRequiresPlugin propertyRequires, BeanScope parent, boolean parentOverride) {
@@ -79,9 +70,9 @@ class DBuilder implements Builder {
 
   /**
    * Return the types without any annotation types.
-   * <p>
-   * For the purposes of supplied beans (typically test doubles) we are not
-   * interested in annotation types.
+   *
+   * <p>For the purposes of supplied beans (typically test doubles) we are not interested in
+   * annotation types.
    */
   protected final Type[] removeAnnotations(Type[] source) {
     for (int i = 1, end = source.length; i < end; i++) {
@@ -158,9 +149,7 @@ class DBuilder implements Builder {
     return parent == null ? null : parent.<T>getOptional(type, name).orElse(null);
   }
 
-  /**
-   * Return the bean to register potentially with spy enhancement.
-   */
+  /** Return the bean to register potentially with spy enhancement. */
   protected <T> T enrich(T bean, DBeanMap.NextBean next) {
     // only enriched by DBuilderExtn
     return bean;
@@ -323,7 +312,12 @@ class DBuilder implements Builder {
       if (bean != null) {
         return bean;
       }
-      final String msg = "Unable to inject an instance for generic type " + type + " usually provided by " + cls + "?";
+      final String msg =
+          "Unable to inject an instance for generic type "
+              + type
+              + " usually provided by "
+              + cls
+              + "?";
       throw new IllegalStateException(msg);
     };
   }
@@ -429,7 +423,9 @@ class DBuilder implements Builder {
   @Override
   public final BeanScope build(boolean withShutdownHook, long start) {
     runInjectors();
-    final var scope = new DBeanScope(withShutdownHook, preDestroy, postConstruct, postConstructConsumers, beanMap, parent);
+    final var scope =
+        new DBeanScope(
+            withShutdownHook, preDestroy, postConstruct, postConstructConsumers, beanMap, parent);
     if (beanScopeProxy != null) {
       beanScopeProxy.inject(scope);
     }

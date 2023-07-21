@@ -22,21 +22,21 @@ final class ConditionalWriter {
     if (!conditions.orProfiles.isEmpty()) {
       prefix();
       writer.append(
-          "builder.containsProfiles(List.of(\"%s\"))",
-          conditions.orProfiles.stream().collect(joining(",")));
+          "!builder.containsProfiles(List.of(%s\"))",
+          conditions.orProfiles.stream().map(s -> "\"" + s).collect(joining("\",")));
     }
     if (!conditions.andProfiles.isEmpty()) {
       prefix();
       writer.append(
-          "builder.containsAllProfiles(List.of(\"%s\"))",
-          conditions.andProfiles.stream().collect(joining(",")));
+          "!builder.containsAllProfiles(List.of(%s\"))",
+          conditions.andProfiles.stream().map(s -> "\"" + s).collect(joining("\",")));
     }
 
     if (!conditions.notProfiles.isEmpty()) {
       prefix();
       writer.append(
-          "!builder.containsProfiles(List.of(\"%s\"))",
-          conditions.andProfiles.stream().collect(joining(",")));
+          "builder.containsProfiles(List.of(%s\"))",
+          conditions.notProfiles.stream().map(s -> "\"" + s).collect(joining("\",")));
     }
     for (final var requireType : conditions.requireTypes) {
       prefix();
