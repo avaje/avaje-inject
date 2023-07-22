@@ -48,7 +48,9 @@ final class MetaInfo {
     }
 
     final var profiles =
-        Optional.ofNullable(testInstance.getClass().getAnnotation(InjectTest.class))
+        Optional.ofNullable(testInstance)
+            .map(Object::getClass)
+            .map(c -> c.getAnnotation(InjectTest.class))
             .map(InjectTest::profiles)
             .map(p -> String.join(",", p))
             .orElse("");
