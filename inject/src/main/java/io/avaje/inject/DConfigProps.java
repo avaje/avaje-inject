@@ -5,10 +5,7 @@ import io.avaje.inject.spi.PropertyRequiresPlugin;
 
 import java.util.Optional;
 
-
-/**
- * Avaje-Config based implementation of PropertyRequiresPlugin.
- */
+/** Avaje-Config based implementation of PropertyRequiresPlugin. */
 final class DConfigProps implements PropertyRequiresPlugin {
 
   @Override
@@ -24,5 +21,10 @@ final class DConfigProps implements PropertyRequiresPlugin {
   @Override
   public boolean equalTo(String property, String value) {
     return value.equals(Config.getNullable(property));
+  }
+
+  @Override
+  public void set(String property, String value) {
+    Config.setProperty(property, value);
   }
 }
