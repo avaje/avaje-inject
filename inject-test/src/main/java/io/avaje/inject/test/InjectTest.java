@@ -17,5 +17,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface InjectTest {
+
+  /** Wiring profiles to use */
   String[] profiles() default {};
 }

@@ -1,5 +1,7 @@
 package io.avaje.inject.test;
 
+import java.util.Optional;
+
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.BeanScopeBuilder;
 
@@ -40,6 +42,18 @@ final class MetaInfo {
     final BeanScopeBuilder builder = BeanScope.builder();
     if (parent != null) {
       builder.parent(parent, false);
+    }
+
+    final var profiles =
+        Optional.ofNullable(testInstance)
+            .map(Object::getClass)
+            .map(c -> c.getAnnotation(InjectTest.class))
+            .map(InjectTest::profiles)
+            .map(p -> String.join(",", p))
+            .orElse("");
+
+    if (!profiles.isBlank()) {
+      builder.propertyPlugin().set("avaje.profiles", profiles);
     }
     // register mocks and spies local to this test
     reader.build(builder, testInstance);

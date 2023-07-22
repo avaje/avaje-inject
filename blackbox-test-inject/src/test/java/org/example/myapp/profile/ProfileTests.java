@@ -1,24 +1,24 @@
 package org.example.myapp.profile;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
-import org.example.myapp.conditional.Bird;
-import org.example.myapp.conditional.Bird.BlueJay;
-import org.example.myapp.conditional.Bird.StrawberryFinch;
-import org.example.myapp.conditional.BirdFactory;
-import org.example.myapp.conditional.BirdWatcher;
-import org.example.myapp.conditional.QualifiedBirdWatcher;
 import org.example.myapp.profile.Fish.CardinalTetra;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.avaje.config.Config;
 import io.avaje.inject.BeanScope;
+import io.avaje.inject.test.InjectTest;
+import jakarta.inject.Inject;
 
+@InjectTest(profiles = {"Fish", "testRepeatable"})
 class ProfileTests {
+
+  @Inject FishFactory factory;
 
   @BeforeEach
   void clearConfig() {
@@ -28,6 +28,9 @@ class ProfileTests {
 
   @Test
   void basic() throws IOException {
+
+    assertNotNull(factory != null);
+
     // just wire everything with no test scope, mocks etc
     final BeanScope beanScope = BeanScope.builder().build();
     assertTrue(beanScope.getOptional(Fish.class).isEmpty());

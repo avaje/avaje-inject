@@ -19,4 +19,9 @@ final class DSystemProps implements io.avaje.inject.spi.PropertyRequiresPlugin {
   public boolean equalTo(String property, String value) {
     return value.equals(System.getProperty(property)) || value.equals(System.getenv(property));
   }
+
+  @Override
+  public void set(String property, String value) {
+    System.setProperty(property, value);
+  }
 }
