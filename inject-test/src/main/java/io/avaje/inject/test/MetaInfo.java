@@ -1,8 +1,5 @@
 package io.avaje.inject.test;
 
-import static java.util.stream.Collectors.joining;
-
-import java.util.Arrays;
 import java.util.Optional;
 
 import io.avaje.inject.BeanScope;
