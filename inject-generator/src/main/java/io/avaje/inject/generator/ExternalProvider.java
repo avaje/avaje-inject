@@ -34,14 +34,11 @@ final class ExternalProvider {
       return;
     }
 
-    final var iterator =
-        ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader()).iterator();
-
+    final var iterator = ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader()).iterator();
     if (!iterator.hasNext()) {
       System.out.println("No external modules detected");
       return;
     }
-
     while (iterator.hasNext()) {
       try {
         final var module = iterator.next();
@@ -70,9 +67,7 @@ final class ExternalProvider {
       return;
     }
     for (final Plugin plugin : ServiceLoader.load(Plugin.class, Processor.class.getClassLoader())) {
-
       System.out.println("Loaded Plugin: " + plugin.getClass().getCanonicalName());
-
       for (final Class<?> provide : plugin.provides()) {
         defaultScope.pluginProvided(provide.getCanonicalName());
       }

@@ -55,9 +55,7 @@ public class AvajeInjectPlugin implements Plugin<Project> {
     final Set<String> providedTypes = new HashSet<>();
 
     for (final var plugin : ServiceLoader.load(io.avaje.inject.spi.Plugin.class, cl)) {
-
       System.out.println("Loaded Plugin: " + plugin.getClass().getCanonicalName());
-
       for (final Class<?> provide : plugin.provides()) {
         providedTypes.add(provide.getCanonicalName());
       }
@@ -72,13 +70,10 @@ public class AvajeInjectPlugin implements Plugin<Project> {
     }
   }
 
-  private void writeProvidedModules(ClassLoader classLoader, FileWriter moduleWriter)
-      throws IOException {
+  private void writeProvidedModules(ClassLoader classLoader, FileWriter moduleWriter) throws IOException {
     final Set<String> providedTypes = new HashSet<>();
-    for (final io.avaje.inject.spi.Module module :
-        ServiceLoader.load(io.avaje.inject.spi.Module.class, classLoader)) {
+    for (final io.avaje.inject.spi.Module module : ServiceLoader.load(io.avaje.inject.spi.Module.class, classLoader)) {
       System.out.println("Detected External Module: " + module.getClass().getCanonicalName());
-
       for (final Class<?> provide : module.provides()) {
         providedTypes.add(provide.getCanonicalName());
       }

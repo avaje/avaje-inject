@@ -1,8 +1,8 @@
 package io.avaje.inject;
 
 import io.avaje.applog.AppLog;
-import io.avaje.inject.spi.*;
 import io.avaje.inject.spi.Module;
+import io.avaje.inject.spi.*;
 import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
 import jakarta.inject.Provider;
@@ -12,7 +12,8 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static java.lang.System.Logger.Level.*;
+import static java.lang.System.Logger.Level.DEBUG;
+import static java.lang.System.Logger.Level.INFO;
 
 /**
  * Build a bean scope with options for shutdown hook and supplying test doubles.

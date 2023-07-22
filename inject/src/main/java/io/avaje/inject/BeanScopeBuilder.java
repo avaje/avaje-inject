@@ -1,13 +1,13 @@
 package io.avaje.inject;
 
-import java.lang.reflect.Type;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
 import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.PropertyRequiresPlugin;
 import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
+
+import java.lang.reflect.Type;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Build a bean scope with options for shutdown hook and supplying external dependencies.
@@ -117,7 +117,7 @@ public interface BeanScopeBuilder {
    * }</pre>
    *
    * @param beans Externally provided beans used when injecting a dependency for the bean or the
-   *     interface(s) it implements
+   *              interface(s) it implements
    * @return This BeanScopeBuilder
    */
   BeanScopeBuilder beans(Object... beans);

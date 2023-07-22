@@ -1,11 +1,11 @@
 package io.avaje.inject;
 
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Repeatable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-import java.lang.annotation.*;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Expresses a requirement for a bean to be wired/registered into the {@link BeanScope}.
@@ -75,7 +75,9 @@ public @interface RequiresProperty {
   @Target({TYPE, METHOD, ANNOTATION_TYPE})
   @interface Container {
 
-    /** @return The required dependencies */
+    /**
+     * The required dependencies.
+     */
     RequiresProperty[] value();
   }
 }

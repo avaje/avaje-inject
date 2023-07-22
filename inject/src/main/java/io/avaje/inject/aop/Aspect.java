@@ -1,10 +1,6 @@
 package io.avaje.inject.aop;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Meta annotation used to define an Aspect.
@@ -36,7 +32,9 @@ public @interface Aspect {
    */
   int ordering() default 1000;
 
-  /** Marks an External Annotation as being used for aspects */
+  /**
+   * Marks an External Annotation as being used for aspects
+   */
   @Target({ElementType.PACKAGE, ElementType.TYPE})
   @Retention(RetentionPolicy.SOURCE)
   public @interface Import {

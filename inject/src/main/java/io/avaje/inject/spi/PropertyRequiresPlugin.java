@@ -10,10 +10,14 @@ import java.util.Optional;
  */
 public interface PropertyRequiresPlugin {
 
-  /** Return a configuration value that might not exist. */
+  /**
+   * Return a configuration value that might not exist.
+   */
   Optional<String> get(String property);
 
-  /** Return true if the property is defined. */
+  /**
+   * Return true if the property is defined.
+   */
   boolean contains(String property);
 
   /**

@@ -250,10 +250,14 @@ public interface Builder {
    */
   boolean containsQualifier(String name);
 
-  /** Return true if the builder contains the given profile */
+  /**
+   * Return true if the builder contains the given profile
+   */
   boolean containsProfiles(List<String> type);
 
-  /** Return true if the builder contains all of the given profile */
+  /**
+   * Return true if the builder contains all of the given profile
+   */
   boolean containsAllProfiles(List<String> type);
 
   /**

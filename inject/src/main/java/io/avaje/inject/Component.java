@@ -1,11 +1,11 @@
 package io.avaje.inject;
 
-import static java.lang.annotation.RetentionPolicy.CLASS;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.RetentionPolicy.CLASS;
 
 /**
  * Identify a bean as component with singleton scope that avaje-inject will use.
@@ -67,7 +67,9 @@ public @interface Component {
   @Target({ElementType.TYPE, ElementType.PACKAGE})
   @interface Import {
 
-    /** Specify types to generate DI classes for. */
+    /**
+     * Specify types to generate DI classes for.
+     */
     Class<?>[] value();
   }
 }
