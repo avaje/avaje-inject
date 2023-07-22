@@ -17,15 +17,14 @@ public class AvajeInjectPlugin implements Plugin<Project> {
 
   @Override
   public void apply(Project project) {
-    project.afterEvaluate(prj -> {
-      // run it automatically after clean
-      Task cleanTask = prj.getTasks().getByName("clean");
-      cleanTask.doLast( it -> writeProvides(project));
-    });
+    project.afterEvaluate(
+        prj -> {
+          // run it automatically after clean
+          Task cleanTask = prj.getTasks().getByName("clean");
+          cleanTask.doLast(it -> writeProvides(project));
+        });
     // register a task to run it manually
-    project
-      .task("discoverModules")
-      .doLast(task -> writeProvides(project));
+    project.task("discoverModules").doLast(task -> writeProvides(project));
   }
 
   private void writeProvides(Project project) {
@@ -37,9 +36,8 @@ public class AvajeInjectPlugin implements Plugin<Project> {
     }
     try {
       final var classLoader = classLoader(project);
-      try (
-        var moduleWriter = createFileWriter(outputDir.getPath(), "avaje-module-provides.txt");
-        var pluginWriter = createFileWriter(outputDir.getPath(), "avaje-plugin-provides.txt")) {
+      try (var moduleWriter = createFileWriter(outputDir.getPath(), "avaje-module-provides.txt");
+          var pluginWriter = createFileWriter(outputDir.getPath(), "avaje-plugin-provides.txt")) {
 
         writeProvidedPlugins(classLoader, pluginWriter);
         writeProvidedModules(classLoader, moduleWriter);
@@ -54,26 +52,33 @@ public class AvajeInjectPlugin implements Plugin<Project> {
   }
 
   private void writeProvidedPlugins(ClassLoader cl, FileWriter pluginWriter) throws IOException {
-	    final Set<String> providedTypes = new HashSet<>();
-
-	    for (final var plugin : ServiceLoader.load(io.avaje.inject.spi.Plugin.class, cl)) {
-	      for (final Class<?> provide : plugin.provides()) {
-	        providedTypes.add(provide.getCanonicalName());
-	      }
-	      for (final Class<?> provide : plugin.providesAspects()) {
-	        providedTypes.add(wrapAspect(provide.getCanonicalName()));
-	      }
-	    }
-
-	    for (final var providedType : providedTypes) {
-	    	pluginWriter.write(providedType);
-	    	pluginWriter.write("\n");
-	    }
-	  }
-
-  private void writeProvidedModules(ClassLoader classLoader, FileWriter moduleWriter) throws IOException {
     final Set<String> providedTypes = new HashSet<>();
-    for (final io.avaje.inject.spi.Module module : ServiceLoader.load(io.avaje.inject.spi.Module.class, classLoader)) {
+
+    for (final var plugin : ServiceLoader.load(io.avaje.inject.spi.Plugin.class, cl)) {
+
+      System.out.println("Loaded Plugin: " + plugin.getClass().getCanonicalName());
+
+      for (final Class<?> provide : plugin.provides()) {
+        providedTypes.add(provide.getCanonicalName());
+      }
+      for (final Class<?> provide : plugin.providesAspects()) {
+        providedTypes.add(wrapAspect(provide.getCanonicalName()));
+      }
+    }
+
+    for (final var providedType : providedTypes) {
+      pluginWriter.write(providedType);
+      pluginWriter.write("\n");
+    }
+  }
+
+  private void writeProvidedModules(ClassLoader classLoader, FileWriter moduleWriter)
+      throws IOException {
+    final Set<String> providedTypes = new HashSet<>();
+    for (final io.avaje.inject.spi.Module module :
+        ServiceLoader.load(io.avaje.inject.spi.Module.class, classLoader)) {
+      System.out.println("Detected External Module: " + module.getClass().getCanonicalName());
+
       for (final Class<?> provide : module.provides()) {
         providedTypes.add(provide.getCanonicalName());
       }
@@ -97,7 +102,7 @@ public class AvajeInjectPlugin implements Plugin<Project> {
 
   private ClassLoader classLoader(Project project) {
     final URL[] urls = createClassPath(project);
-    return  new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
+    return new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
   }
 
   private static URL[] createClassPath(Project project) {

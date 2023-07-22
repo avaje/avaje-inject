@@ -84,28 +84,34 @@ public class AutoProvidesMojo extends AbstractMojo {
 
   private void writeProvidedPlugins(URLClassLoader newClassLoader, FileWriter pluginWriter)
       throws IOException {
-	    final Set<String> providedTypes = new HashSet<>();
+    final Set<String> providedTypes = new HashSet<>();
 
-	    for (final var plugin : ServiceLoader.load(Plugin.class, newClassLoader)) {
-	      for (final Class<?> provide : plugin.provides()) {
-	        providedTypes.add(provide.getCanonicalName());
-	      }
-	      for (final Class<?> provide : plugin.providesAspects()) {
-	        providedTypes.add(wrapAspect(provide.getCanonicalName()));
-	      }
-	    }
+    for (final var plugin : ServiceLoader.load(Plugin.class, newClassLoader)) {
 
-	    for (final var providedType : providedTypes) {
-	    	pluginWriter.write(providedType);
-	    	pluginWriter.write("\n");
-	    }
-	  }
+      System.out.println("Loaded Plugin: " + plugin.getClass().getCanonicalName());
+
+      for (final Class<?> provide : plugin.provides()) {
+        providedTypes.add(provide.getCanonicalName());
+      }
+      for (final Class<?> provide : plugin.providesAspects()) {
+        providedTypes.add(wrapAspect(provide.getCanonicalName()));
+      }
+    }
+
+    for (final var providedType : providedTypes) {
+      pluginWriter.write(providedType);
+      pluginWriter.write("\n");
+    }
+  }
 
   private void writeProvidedModules(URLClassLoader newClassLoader, FileWriter moduleWriter)
       throws IOException {
     final Set<String> providedTypes = new HashSet<>();
 
     for (final var module : ServiceLoader.load(Module.class, newClassLoader)) {
+
+      System.out.println("Detected External Module: " + module.getClass().getCanonicalName());
+
       for (final Class<?> provide : module.provides()) {
         providedTypes.add(provide.getCanonicalName());
       }

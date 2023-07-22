@@ -8,14 +8,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * An avaje-inject test supporting {@code @Inject} along with Mockito
- * annotations - {@code @Mock, @Spy, @Captor}.
- * <p>
- * This is a JUnit 5 extension.
+ * An avaje-inject test supporting {@code @Inject} along with Mockito annotations -
+ * {@code @Mock, @Spy, @Captor}.
+ *
+ * <p>This is a JUnit 5 extension.
  */
 @ExtendWith(InjectExtension.class)
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface InjectTest {
-
+  String[] profiles() default {};
 }
