@@ -47,14 +47,11 @@ final class MetaInfo {
       builder.parent(parent, false);
     }
 
-    final var props = builder.propertyPlugin();
-    final String existingProfiles = props.get("avaje.profiles").map(s -> s + ",").orElse("");
     final var profiles =
-        existingProfiles
-            + Optional.ofNullable(testInstance.getClass().getAnnotation(InjectTest.class))
-                .map(InjectTest::profiles)
-                .map(p -> String.join(",", p))
-                .orElse("");
+        Optional.ofNullable(testInstance.getClass().getAnnotation(InjectTest.class))
+            .map(InjectTest::profiles)
+            .map(p -> String.join(",", p))
+            .orElse("");
 
     if (!profiles.isBlank()) {
       builder.propertyPlugin().set("avaje.profiles", profiles);
