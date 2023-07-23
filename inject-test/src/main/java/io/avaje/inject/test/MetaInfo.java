@@ -44,17 +44,13 @@ final class MetaInfo {
       builder.parent(parent, false);
     }
 
-    final var profiles =
-        Optional.ofNullable(testInstance)
-            .map(Object::getClass)
-            .map(c -> c.getAnnotation(InjectTest.class))
-            .map(InjectTest::profiles)
-            .map(p -> String.join(",", p))
-            .orElse("");
+    //set wiring profile
+    Optional.ofNullable(testInstance)
+        .map(Object::getClass)
+        .map(c -> c.getAnnotation(InjectTest.class))
+        .map(InjectTest::profiles)
+        .ifPresent(builder::profiles);
 
-    if (!profiles.isBlank()) {
-      builder.profiles(profiles);
-    }
     // register mocks and spies local to this test
     reader.build(builder, testInstance);
 

@@ -2,12 +2,12 @@ package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
-import io.avaje.lang.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Extended builder that supports supplied beans (mocks) and enriching beans (spy).
@@ -20,14 +20,14 @@ final class DBuilderExtn extends DBuilder {
   private final boolean hasSuppliedBeans;
 
   @SuppressWarnings("rawtypes")
-  DBuilderExtn(@Nullable String profiles, PropertyRequiresPlugin plugin, BeanScope parent, boolean parentOverride, List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans) {
+  DBuilderExtn(Set<String> profiles, PropertyRequiresPlugin plugin, BeanScope parent, boolean parentOverride, List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans) {
     super(profiles, plugin, parent, parentOverride);
     this.hasSuppliedBeans = (suppliedBeans != null && !suppliedBeans.isEmpty());
     if (hasSuppliedBeans) {
       beanMap.add(suppliedBeans);
     }
     if (enrichBeans != null && !enrichBeans.isEmpty()) {
-      for (EnrichBean spy : enrichBeans) {
+      for (final EnrichBean spy : enrichBeans) {
         enrichMap.put(spy.key(), spy);
       }
     }
@@ -51,7 +51,7 @@ final class DBuilderExtn extends DBuilder {
    */
   private void enrichParentMatch() {
     if (parentMatch != null && !enrichMap.isEmpty()) {
-      Object enrichedBean = enrich(parentMatch, beanMap.next());
+      final Object enrichedBean = enrich(parentMatch, beanMap.next());
       if (enrichedBean != parentMatch) {
         beanMap.nextPriority(BeanEntry.SUPPLIED);
         beanMap.register(enrichedBean);
@@ -68,7 +68,7 @@ final class DBuilderExtn extends DBuilder {
     if (enrich != null) {
       return enrich.enrich(bean);
     }
-    for (Type type : next.types) {
+    for (final Type type : next.types) {
       enrich = enrichLookup(type, next.name);
       if (enrich != null) {
         return enrich.enrich(bean);
