@@ -43,7 +43,7 @@ final class AllScopes {
     for (Data data : scopeAnnotations.values()) {
       for (Element customBean : roundEnv.getElementsAnnotatedWith(data.type)) {
         if (customBean instanceof TypeElement) {
-          data.scopeInfo.read((TypeElement) customBean, false);
+          data.scopeInfo.read((TypeElement) customBean, false, false);
         }
       }
     }

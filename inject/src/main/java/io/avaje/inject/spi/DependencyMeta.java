@@ -23,6 +23,11 @@ public @interface DependencyMeta {
   String name() default "";
 
   /**
+   * True when the component has been imported.
+   */
+  boolean importedComponent() default false;
+
+  /**
    * The bean factory method (for <code>@Bean</code> annotated methods).
    */
   String method() default "";

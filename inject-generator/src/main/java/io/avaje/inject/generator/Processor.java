@@ -106,7 +106,7 @@ public final class Processor extends AbstractProcessor {
     readBeans(roundEnv.getElementsAnnotatedWith(element(Constants.COMPONENT)));
     readBeans(roundEnv.getElementsAnnotatedWith(element(Constants.PROTOTYPE)));
 
-    readBeans(importedElements(roundEnv));
+    readImported(importedElements(roundEnv));
     readBeans(roundEnv.getElementsAnnotatedWith(element(Constants.PROTOTYPE)));
     final var typeElement = elementUtils.getTypeElement(Constants.CONTROLLER);
     if (typeElement != null) {
@@ -168,17 +168,21 @@ public final class Processor extends AbstractProcessor {
   }
 
   private void readFactories(Set<? extends Element> beans) {
-    readChangedBeans(beans, true);
+    readChangedBeans(beans, true, false);
   }
 
   private void readBeans(Set<? extends Element> beans) {
-    readChangedBeans(beans, false);
+    readChangedBeans(beans, false, false);
+  }
+
+  private void readImported(Set<? extends Element> beans) {
+    readChangedBeans(beans, false, true);
   }
 
   /**
    * Read the beans that have changed.
    */
-  private void readChangedBeans(Set<? extends Element> beans, boolean factory) {
+  private void readChangedBeans(Set<? extends Element> beans, boolean factory, boolean importedComponent) {
     for (final Element element : beans) {
       // ignore methods (e.g. factory methods with @Prototype on them)
       if (element instanceof TypeElement) {
@@ -191,13 +195,13 @@ public final class Processor extends AbstractProcessor {
         if (!factory) {
           // will be found via custom scope so effectively ignore additional @Singleton
           if (scope == null) {
-            defaultScope.read(typeElement, false);
+            defaultScope.read(typeElement, false, importedComponent);
           }
         } else if (scope != null) {
           // logWarn("Adding factory to custom scope "+element+" scope: "+scope);
-          scope.read(typeElement, true);
+          scope.read(typeElement, true, false);
         } else {
-          defaultScope.read(typeElement, true);
+          defaultScope.read(typeElement, true, false);
         }
       }
     }

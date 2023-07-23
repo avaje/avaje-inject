@@ -31,15 +31,8 @@ final class SimpleBeanWriter {
 
   SimpleBeanWriter(BeanReader beanReader) {
     this.beanReader = beanReader;
-    final TypeElement origin = beanReader.beanType();
-    final var originName = origin.getQualifiedName().toString();
-    if (origin.getNestingKind().isNested()) {
-      this.packageName = Util.nestedPackageOf(originName);
-      this.shortName = Util.nestedShortName(originName);
-    } else {
-      this.packageName = Util.packageOf(originName);
-      this.shortName = Util.shortName(originName);
-    }
+    this.packageName = beanReader.packageName();
+    this.shortName = beanReader.shortName();
     this.suffix = beanReader.suffix();
     this.proxied = beanReader.isGenerateProxy();
     this.originName = packageName + "." + shortName;

@@ -28,12 +28,14 @@ final class BeanReader {
   private final boolean proxy;
   private final BeanAspects aspects;
   private final BeanConditions conditions = new BeanConditions();
+  private final boolean importedComponent;
   private boolean writtenToFile;
   private boolean suppressBuilderImport;
   private boolean suppressGeneratedImport;
   private Set<GenericType> allGenericTypes;
 
-  BeanReader(TypeElement beanType, boolean factory) {
+  BeanReader(TypeElement beanType, boolean factory, boolean importedComponent) {
+    this.importedComponent = importedComponent;
     this.beanType = beanType;
     this.type = beanType.getQualifiedName().toString();
     this.shortName = shortName(beanType);
@@ -72,6 +74,10 @@ final class BeanReader {
 
   boolean prototype() {
     return prototype;
+  }
+
+  boolean importedComponent() {
+    return importedComponent;
   }
 
   BeanReader read() {
@@ -402,5 +408,31 @@ final class BeanReader {
 
   boolean hasConditions() {
     return !conditions.isEmpty();
+  }
+
+  String shortName() {
+    final var originName = beanType.getQualifiedName().toString();
+    if (beanType.getNestingKind().isNested()) {
+      return Util.nestedShortName(originName);
+    } else {
+      return Util.shortName(originName);
+    }
+  }
+
+  String packageName() {
+    if (importedComponent) {
+      return beanPackageName() + ".di";
+    } else {
+      return beanPackageName();
+    }
+  }
+
+  private String beanPackageName() {
+    final var originName = beanType.getQualifiedName().toString();
+    if (beanType.getNestingKind().isNested()) {
+      return Util.nestedPackageOf(originName);
+    } else {
+      return Util.packageOf(originName);
+    }
   }
 }

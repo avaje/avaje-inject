@@ -99,14 +99,12 @@ final class Util {
       return "";
     }
     pos = cls.lastIndexOf('.', pos - 1);
-    final var packageName = (pos == -1) ? "" : cls.substring(0, pos);
-    return isImportedType(cls) ? packageName + ".di" : packageName;
+    return (pos == -1) ? "" : cls.substring(0, pos);
   }
 
   static String packageOf(String cls) {
     final int pos = cls.lastIndexOf('.');
-    final var packageName = (pos == -1) ? "" : cls.substring(0, pos);
-    return isImportedType(cls) ? packageName + ".di" : packageName;
+    return (pos == -1) ? "" : cls.substring(0, pos);
   }
 
   static String unwrapProvider(String maybeProvider) {

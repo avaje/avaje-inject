@@ -40,6 +40,7 @@ final class MetaData {
   private boolean generateProxy;
   private boolean usesExternalDependency;
   private String externalDependency;
+  private boolean importedComponent;
 
   MetaData(DependencyMetaPrism meta) {
     this.type = meta.type();
@@ -50,6 +51,7 @@ final class MetaData {
     this.provides = meta.provides();
     this.dependsOn = meta.dependsOn().stream().map(Dependency::new).collect(Collectors.toList());
     this.autoProvides = meta.autoProvides();
+    this.importedComponent = meta.importedComponent();
   }
 
   MetaData(String type, String name) {
@@ -119,6 +121,7 @@ final class MetaData {
     this.providesAspect = beanReader.providesAspect();
     this.autoProvides = beanReader.autoProvides();
     this.generateProxy = beanReader.isGenerateProxy();
+    this.importedComponent = beanReader.importedComponent();
   }
 
   String type() {
@@ -156,14 +159,14 @@ final class MetaData {
     if (hasMethod()) {
       importTypes.add(Util.classOfMethod(method));
     } else if (!generateProxy) {
-      if (isImportedType(type)) {
+      if (importedComponent) {
         String packageName;
         if (element(type).getNestingKind().isNested()) {
           packageName = Util.nestedPackageOf(type);
         } else {
           packageName = Util.packageOf(type);
         }
-        importTypes.add(packageName + "." + shortType + Constants.DI);
+        importTypes.add(packageName + ".di." + shortType + Constants.DI);
       } else {
         importTypes.add(type + Constants.DI);
       }
@@ -198,6 +201,9 @@ final class MetaData {
     append.append("type = \"").append(type).append("\"");
     if (hasName) {
       append.append(",").eol().append("      name = \"").append(name).append("\"");
+    }
+    if (importedComponent) {
+      append.append(",").eol().append("      importedComponent = true");
     }
     if (hasMethod) {
       append.append(",").eol().append("      method = \"").append(method).append("\"");
