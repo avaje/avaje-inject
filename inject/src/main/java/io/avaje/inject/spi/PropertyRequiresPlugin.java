@@ -37,9 +37,4 @@ public interface PropertyRequiresPlugin {
     return !equalTo(property, value);
   }
 
-  /** Set a property for wiring. */
-  default void set(String property, String value) {
-
-    throw new UnsupportedOperationException("Not Implemented");
-  }
 }

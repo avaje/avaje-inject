@@ -2,15 +2,16 @@ package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
+import io.avaje.lang.Nullable;
 import jakarta.inject.Provider;
-
-import static java.util.stream.Collectors.toSet;
 
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Consumer;
 
 import static io.avaje.inject.spi.DBeanScope.combine;
+import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.toSet;
 
 class DBuilder implements Builder {
 
@@ -37,14 +38,24 @@ class DBuilder implements Builder {
 
   private DBeanScopeProxy beanScopeProxy;
 
-  DBuilder(PropertyRequiresPlugin propertyRequires, BeanScope parent, boolean parentOverride) {
+  DBuilder(@Nullable String profiles, PropertyRequiresPlugin propertyRequires, BeanScope parent, boolean parentOverride) {
     this.propertyRequires = propertyRequires;
     this.parent = parent;
     this.parentOverride = parentOverride;
-    this.profiles =
-        propertyRequires.get("avaje.profiles").map(p -> p.split(",")).stream()
-            .flatMap(Arrays::stream)
-            .collect(toSet());
+    this.profiles = initProfiles(profiles, propertyRequires);
+  }
+
+  private Set<String> initProfiles(@Nullable String profiles, PropertyRequiresPlugin properties) {
+    if (profiles != null) {
+      return toProfiles(profiles);
+    }
+    return properties.get("avaje.profiles")
+      .map(this::toProfiles)
+      .orElse(emptySet());
+  }
+
+  private Set<String> toProfiles(String profiles) {
+    return Arrays.stream(profiles.split(",")).collect(toSet());
   }
 
   @Override
