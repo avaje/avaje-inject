@@ -294,12 +294,12 @@ final class ScopeInfo {
   /**
    * Read the dependency injection meta data for the given bean.
    */
-  private void readBeanMeta(TypeElement typeElement, boolean factory) {
+  private void readBeanMeta(TypeElement typeElement, boolean factory, boolean importedComponent) {
     if (typeElement.getKind() == ElementKind.ANNOTATION_TYPE) {
       logDebug("skipping annotation type " + typeElement);
       return;
     }
-    beanReaders.add(new BeanReader(typeElement, factory).read());
+    beanReaders.add(new BeanReader(typeElement, factory, importedComponent).read());
   }
 
   void readBuildMethodDependencyMeta(Element element) {
@@ -316,9 +316,9 @@ final class ScopeInfo {
     }
   }
 
-  void read(TypeElement element, boolean factory) {
+  void read(TypeElement element, boolean factory, boolean importedComponent) {
     if (readBeans.add(element.toString())) {
-      readBeanMeta(element, factory);
+      readBeanMeta(element, factory, importedComponent);
     } else {
       logDebug("skipping already processed bean " + element);
     }

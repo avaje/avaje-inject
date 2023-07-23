@@ -24,29 +24,10 @@ class UtilTest {
   }
 
   @Test
-  void PackageOfImported() {
-    ProcessingContext.testInit();
-    ProcessingContext.addImportedType("com.example.Bar1");
-    ProcessingContext.addImportedType("com.example.other.Bar1");
-    assertEquals(Util.packageOf("com.example.Bar1"), "com.example.di");
-    assertEquals(Util.packageOf("com.example.other.Bar1"), "com.example.other.di");
-  }
-
-
-  @Test
   void nestedPackageOf() {
     ProcessingContext.testInit();
     assertEquals(Util.nestedPackageOf("com.example.Foo.Bar"), "com.example");
     assertEquals(Util.nestedPackageOf("com.example.other.foo.Bar"), "com.example.other");
-  }
-
-  @Test
-  void nestedPackageOfImported() {
-    ProcessingContext.testInit();
-    ProcessingContext.addImportedType("com.example.Foo.Bar1");
-    ProcessingContext.addImportedType("com.example.other.foo.Bar1");
-    assertEquals(Util.nestedPackageOf("com.example.Foo.Bar1"), "com.example.di");
-    assertEquals(Util.nestedPackageOf("com.example.other.foo.Bar1"), "com.example.other.di");
   }
 
   @Test

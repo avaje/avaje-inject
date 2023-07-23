@@ -28,12 +28,14 @@ final class BeanReader {
   private final boolean proxy;
   private final BeanAspects aspects;
   private final BeanConditions conditions = new BeanConditions();
+  private final boolean importedComponent;
   private boolean writtenToFile;
   private boolean suppressBuilderImport;
   private boolean suppressGeneratedImport;
   private Set<GenericType> allGenericTypes;
 
-  BeanReader(TypeElement beanType, boolean factory) {
+  BeanReader(TypeElement beanType, boolean factory, boolean importedComponent) {
+    this.importedComponent = importedComponent;
     this.beanType = beanType;
     this.type = beanType.getQualifiedName().toString();
     this.shortName = shortName(beanType);
@@ -72,6 +74,10 @@ final class BeanReader {
 
   boolean prototype() {
     return prototype;
+  }
+
+  boolean importedComponent() {
+    return importedComponent;
   }
 
   BeanReader read() {
@@ -192,7 +198,7 @@ final class BeanReader {
     if (beanType.getNestingKind().isNested()) {
       type = beanType.getEnclosingElement().toString() + "$" + beanType.getSimpleName();
     } else {
-      type = beanType.getQualifiedName().toString();
+      type = beanQualifiedName();
     }
     MetaData metaData = new MetaData(type, name);
     metaData.update(this);
@@ -402,5 +408,33 @@ final class BeanReader {
 
   boolean hasConditions() {
     return !conditions.isEmpty();
+  }
+
+  String shortName() {
+    if (beanType.getNestingKind().isNested()) {
+      return Util.nestedShortName(beanQualifiedName());
+    } else {
+      return Util.shortName(beanQualifiedName());
+    }
+  }
+
+  String packageName() {
+    if (importedComponent) {
+      return beanPackageName() + ".di";
+    } else {
+      return beanPackageName();
+    }
+  }
+
+  private String beanPackageName() {
+    if (beanType.getNestingKind().isNested()) {
+      return Util.nestedPackageOf(beanQualifiedName());
+    } else {
+      return Util.packageOf(beanQualifiedName());
+    }
+  }
+
+  private String beanQualifiedName() {
+    return beanType.getQualifiedName().toString();
   }
 }
