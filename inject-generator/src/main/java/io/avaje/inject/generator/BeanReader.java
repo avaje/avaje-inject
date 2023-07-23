@@ -198,7 +198,7 @@ final class BeanReader {
     if (beanType.getNestingKind().isNested()) {
       type = beanType.getEnclosingElement().toString() + "$" + beanType.getSimpleName();
     } else {
-      type = beanType.getQualifiedName().toString();
+      type = beanQualifiedName();
     }
     MetaData metaData = new MetaData(type, name);
     metaData.update(this);
@@ -411,11 +411,10 @@ final class BeanReader {
   }
 
   String shortName() {
-    final var originName = beanType.getQualifiedName().toString();
     if (beanType.getNestingKind().isNested()) {
-      return Util.nestedShortName(originName);
+      return Util.nestedShortName(beanQualifiedName());
     } else {
-      return Util.shortName(originName);
+      return Util.shortName(beanQualifiedName());
     }
   }
 
@@ -428,11 +427,14 @@ final class BeanReader {
   }
 
   private String beanPackageName() {
-    final var originName = beanType.getQualifiedName().toString();
     if (beanType.getNestingKind().isNested()) {
-      return Util.nestedPackageOf(originName);
+      return Util.nestedPackageOf(beanQualifiedName());
     } else {
-      return Util.packageOf(originName);
+      return Util.packageOf(beanQualifiedName());
     }
+  }
+
+  private String beanQualifiedName() {
+    return beanType.getQualifiedName().toString();
   }
 }
