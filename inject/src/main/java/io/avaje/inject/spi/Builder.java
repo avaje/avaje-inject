@@ -1,6 +1,7 @@
 package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanScope;
+import io.avaje.lang.Nullable;
 import jakarta.inject.Provider;
 
 import java.lang.reflect.Type;
@@ -18,18 +19,19 @@ public interface Builder {
   /**
    * Create the root level Builder.
    *
+   * @param profiles       Explicit profiles used
    * @param suppliedBeans  The list of beans (typically test doubles) supplied when building the context.
    * @param enrichBeans    The list of classes we want to have with mockito spy enhancement
    * @param parent         The parent BeanScope
    * @param parentOverride When false do not add beans that already exist on the parent
    */
   @SuppressWarnings("rawtypes")
-  static Builder newBuilder(PropertyRequiresPlugin plugin, List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans, BeanScope parent, boolean parentOverride) {
+  static Builder newBuilder(@Nullable String profiles, PropertyRequiresPlugin plugin, List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans, BeanScope parent, boolean parentOverride) {
     if (suppliedBeans.isEmpty() && enrichBeans.isEmpty()) {
       // simple case, no mocks or spies
-      return new DBuilder(plugin, parent, parentOverride);
+      return new DBuilder(profiles, plugin, parent, parentOverride);
     }
-    return new DBuilderExtn(plugin, parent, parentOverride, suppliedBeans, enrichBeans);
+    return new DBuilderExtn(profiles, plugin, parent, parentOverride, suppliedBeans, enrichBeans);
   }
 
   /**

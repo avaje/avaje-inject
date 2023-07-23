@@ -2,6 +2,7 @@ package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
+import io.avaje.lang.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -19,8 +20,8 @@ final class DBuilderExtn extends DBuilder {
   private final boolean hasSuppliedBeans;
 
   @SuppressWarnings("rawtypes")
-  DBuilderExtn(PropertyRequiresPlugin plugin, BeanScope parent, boolean parentOverride, List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans) {
-    super(plugin, parent, parentOverride);
+  DBuilderExtn(@Nullable String profiles, PropertyRequiresPlugin plugin, BeanScope parent, boolean parentOverride, List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans) {
+    super(profiles, plugin, parent, parentOverride);
     this.hasSuppliedBeans = (suppliedBeans != null && !suppliedBeans.isEmpty());
     if (hasSuppliedBeans) {
       beanMap.add(suppliedBeans);

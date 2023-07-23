@@ -189,6 +189,13 @@ public interface BeanScopeBuilder {
   <D> BeanScopeBuilder bean(Type type, D bean);
 
   /**
+   * Set the explicit profiles to use when building the scope.
+   *
+   * <p>If profiles are not set explicitly here they are read from the properties plugin.
+   */
+  BeanScopeBuilder profiles(String profiles);
+
+  /**
    * Add a supplied bean provider that acts as a default fallback for a dependency.
    * <p>
    * This provider is only called if nothing else provides the dependency. It effectively

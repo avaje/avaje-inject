@@ -35,6 +35,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private boolean shutdownHook;
   private ClassLoader classLoader;
   private PropertyRequiresPlugin propertyRequiresPlugin;
+  private String profiles;
 
   /**
    * Create a BeanScopeBuilder to ultimately load and return a new BeanScope.
@@ -100,6 +101,12 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   @Override
   public <D> BeanScopeBuilder bean(@Nullable String name, Type type, D bean) {
     suppliedBeans.add(SuppliedBean.ofType(name, type, bean));
+    return this;
+  }
+
+  @Override
+  public BeanScopeBuilder profiles(String profiles) {
+    this.profiles = profiles;
     return this;
   }
 
@@ -241,7 +248,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     final var level = propertyRequiresPlugin.contains("printModules") ? INFO : DEBUG;
     log.log(level, "building with modules {0}", moduleNames);
 
-    final Builder builder = Builder.newBuilder(propertyRequiresPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
+    final Builder builder = Builder.newBuilder(profiles, propertyRequiresPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
     for (final Module factory : factoryOrder.factories()) {
       factory.build(builder);
     }

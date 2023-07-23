@@ -53,7 +53,7 @@ final class MetaInfo {
             .orElse("");
 
     if (!profiles.isBlank()) {
-      builder.propertyPlugin().set("avaje.profiles", profiles);
+      builder.profiles(profiles);
     }
     // register mocks and spies local to this test
     reader.build(builder, testInstance);
