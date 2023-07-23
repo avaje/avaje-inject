@@ -99,20 +99,20 @@ public final class Processor extends AbstractProcessor {
     readModule(roundEnv);
     addImportedAspects(importedAspects(roundEnv));
     readScopes(roundEnv.getElementsAnnotatedWith(element(Constants.SCOPE)));
-    readChangedBeans(roundEnv.getElementsAnnotatedWith(element(Constants.FACTORY)), true);
+    readFactories(roundEnv.getElementsAnnotatedWith(element(Constants.FACTORY)));
     if (defaultScope.includeSingleton()) {
-      readChangedBeans(roundEnv.getElementsAnnotatedWith(element(Constants.SINGLETON)), false);
+      readBeans(roundEnv.getElementsAnnotatedWith(element(Constants.SINGLETON)));
     }
-    readChangedBeans(roundEnv.getElementsAnnotatedWith(element(Constants.COMPONENT)), false);
-    readChangedBeans(roundEnv.getElementsAnnotatedWith(element(Constants.PROTOTYPE)), false);
+    readBeans(roundEnv.getElementsAnnotatedWith(element(Constants.COMPONENT)));
+    readBeans(roundEnv.getElementsAnnotatedWith(element(Constants.PROTOTYPE)));
 
-    readChangedBeans(importedElements(roundEnv), false);
-    readChangedBeans(roundEnv.getElementsAnnotatedWith(element(Constants.PROTOTYPE)), false);
+    readBeans(importedElements(roundEnv));
+    readBeans(roundEnv.getElementsAnnotatedWith(element(Constants.PROTOTYPE)));
     final var typeElement = elementUtils.getTypeElement(Constants.CONTROLLER);
     if (typeElement != null) {
-      readChangedBeans(roundEnv.getElementsAnnotatedWith(typeElement), false);
+      readBeans(roundEnv.getElementsAnnotatedWith(typeElement));
     }
-    readChangedBeans(roundEnv.getElementsAnnotatedWith(element(Constants.PROXY)), false);
+    readBeans(roundEnv.getElementsAnnotatedWith(element(Constants.PROXY)));
     allScopes.readBeans(roundEnv);
     defaultScope.write(roundEnv.processingOver());
     allScopes.write(roundEnv.processingOver());
@@ -165,6 +165,14 @@ public final class Processor extends AbstractProcessor {
     if (testScopeType != null) {
       allScopes.addScopeAnnotation(testScopeType);
     }
+  }
+
+  private void readFactories(Set<? extends Element> beans) {
+    readChangedBeans(beans, true);
+  }
+
+  private void readBeans(Set<? extends Element> beans) {
+    readChangedBeans(beans, false);
   }
 
   /**
