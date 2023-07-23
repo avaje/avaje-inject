@@ -224,13 +224,11 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   private void initProfiles() {
     if (profiles == null) {
-      profiles =
-          propertyRequiresPlugin.get("avaje.profiles").map(DBeanScopeBuilder::toProfiles).orElse(emptySet());
+      profiles = propertyRequiresPlugin.get("avaje.profiles").map(DBeanScopeBuilder::toProfiles).orElse(emptySet());
     }
   }
 
   private static Set<String> toProfiles(String profiles) {
-
     return Arrays.stream(profiles.split(",")).collect(toSet());
   }
 
@@ -261,11 +259,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
 
     final var level = propertyRequiresPlugin.contains("printModules") ? INFO : DEBUG;
-    log.log(level, "building with modules {0}", moduleNames);
-
     initProfiles();
-
-    log.log(INFO, "building with profiles {0}", profiles);
+    log.log(level, "building with modules {0} profiles {1}", moduleNames, profiles);
 
     final Builder builder = Builder.newBuilder(profiles, propertyRequiresPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
     for (final Module factory : factoryOrder.factories()) {
