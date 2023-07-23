@@ -193,7 +193,7 @@ public interface BeanScopeBuilder {
    *
    * <p>If profiles are not set explicitly here they are read from the properties plugin.
    */
-  BeanScopeBuilder profiles(String profiles);
+  BeanScopeBuilder profiles(String... profiles);
 
   /**
    * Add a supplied bean provider that acts as a default fallback for a dependency.
