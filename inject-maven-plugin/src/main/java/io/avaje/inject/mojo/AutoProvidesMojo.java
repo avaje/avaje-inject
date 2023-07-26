@@ -6,6 +6,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -82,13 +83,12 @@ public class AutoProvidesMojo extends AbstractMojo {
     return new FileWriter(new File(project.getBuild().getDirectory(), string));
   }
 
-  private void writeProvidedPlugins(URLClassLoader newClassLoader, FileWriter pluginWriter)
-      throws IOException {
+  private void writeProvidedPlugins(URLClassLoader newClassLoader, FileWriter pluginWriter) throws IOException {
     final Set<String> providedTypes = new HashSet<>();
 
+    final Log log = getLog();
     for (final var plugin : ServiceLoader.load(Plugin.class, newClassLoader)) {
-
-      System.out.println("Loaded Plugin: " + plugin.getClass().getCanonicalName());
+      log.info("Loaded Plugin: " + plugin.getClass().getCanonicalName());
 
       for (final Class<?> provide : plugin.provides()) {
         providedTypes.add(provide.getCanonicalName());
@@ -104,13 +104,12 @@ public class AutoProvidesMojo extends AbstractMojo {
     }
   }
 
-  private void writeProvidedModules(URLClassLoader newClassLoader, FileWriter moduleWriter)
-      throws IOException {
+  private void writeProvidedModules(URLClassLoader newClassLoader, FileWriter moduleWriter) throws IOException {
     final Set<String> providedTypes = new HashSet<>();
 
+    final Log log = getLog();
     for (final var module : ServiceLoader.load(Module.class, newClassLoader)) {
-
-      System.out.println("Detected External Module: " + module.getClass().getCanonicalName());
+      log.info("Detected External Module: " + module.getClass().getCanonicalName());
 
       for (final Class<?> provide : module.provides()) {
         providedTypes.add(provide.getCanonicalName());
