@@ -3,7 +3,7 @@ package io.avaje.inject.generator;
 final class Dependency {
 
   private final String name;
-  private final boolean softDependency;
+  private boolean softDependency;
   private final boolean conditionalDependency;
 
   Dependency(String name) {
@@ -57,5 +57,10 @@ final class Dependency {
 
   String dependsOn() {
     return toString();
+  }
+
+  /** External dependency */
+  void markExternal() {
+    softDependency = true;
   }
 }
