@@ -206,8 +206,8 @@ final class MetaDataOrdering {
             }
           }
         } else if (!providerList.isAllWired()) {
-        return false;
-      }
+          return false;
+        }
       }
     }
     return true;
