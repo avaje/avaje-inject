@@ -129,22 +129,22 @@ final class Util {
     return sb.toString();
   }
 
-  static String nestedShortName(String fullType) {
-    int pos = fullType.lastIndexOf('.');
-    if (pos < 0) {
-      return fullType;
-    } else {
-      pos = fullType.lastIndexOf('.', pos - 1);
-      return pos < 0 ? fullType : fullType.substring(pos + 1);
-    }
-  }
-
   static String shortName(String fullType) {
     final int p = fullType.lastIndexOf('.');
     if (p == -1) {
       return fullType;
-    } else {
+    } else if (fullType.startsWith("java")) {
       return fullType.substring(p + 1);
+    } else {
+      var result = "";
+      var foundClass = false;
+      for (final String part : fullType.split("\\.")) {
+        if (foundClass || Character.isUpperCase(part.charAt(0))) {
+          foundClass = true;
+          result += (result.isEmpty() ? "" : ".") + part;
+        }
+      }
+      return result;
     }
   }
 

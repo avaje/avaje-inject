@@ -5,7 +5,10 @@ import static io.avaje.inject.generator.ProcessingContext.logError;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.lang.model.element.TypeElement;
@@ -67,13 +70,49 @@ final class SimpleBeanWriter {
     // collect all types to prevent duplicates
     Set<GenericType> genericTypes = beanReader.allGenericTypes();
     if (!genericTypes.isEmpty()) {
-      for (GenericType type : genericTypes) {
-        writer.append("  public static final Type TYPE_%s = new GenericType<", type.shortName());
+
+    	final Map<String, String> seenShortNames= new HashMap<>();
+
+      for (final GenericType type : genericTypes) {
+        writer
+            .append("  public static final Type TYPE_%s =", type.shortName().replace(".", "_"))
+            .eol()
+            .append("      new GenericType<");
+
+        writeGenericType(type,seenShortNames, writer);
         // use fully qualified types here rather than use type.writeShort(writer)
-        writer.append(type.toString());
+
         writer.append(">(){}.type();").eol();
       }
       writer.eol();
+    }
+  }
+
+  private void writeGenericType(GenericType type, Map<String, String> seenShortNames, Append writer) {
+    final var typeShortName = Util.shortName(type.topType());
+    final var topType = seenShortNames.computeIfAbsent(typeShortName, k -> type.topType());
+    if (type.isGenericType()) {
+      final var shortName =
+          Objects.equals(type.topType(), topType) ? typeShortName : type.topType();
+
+      writer.append(shortName);
+      writer.append("<");
+      boolean first = true;
+      for (final var param : type.params()) {
+        if (first) {
+          first = false;
+          writeGenericType(param, seenShortNames, writer);
+          continue;
+        }
+        writer.append(", ");
+        writeGenericType(param, seenShortNames, writer);
+      }
+      writer.append(">");
+    } else {
+      final var shortName =
+          Objects.equals(type.topType(), topType) ? typeShortName : type.topType();
+
+      writer.append(shortName);
     }
   }
 

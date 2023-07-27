@@ -1,5 +1,7 @@
 package io.avaje.inject.generator;
 
+import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -26,16 +28,22 @@ final class ImportTypeMap {
     return mapByShortName.containsKey(suffix);
   }
 
-  /**
-   * Register the full type checking for unique short name and returning the short name to use.
-   */
+  /** Register the full type checking for unique short name and returning the short name to use. */
   String add(String fullType) {
-    String shortName = Util.shortName(fullType);
-    String existingFull = mapByShortName.get(shortName);
+    final String shortName = Util.shortName(fullType);
+    String fullTypeActual;
+    final var index = shortName.lastIndexOf('.');
+    if (index != -1) {
+      fullTypeActual = fullType.replace(shortName, shortName.substring(0, index));
+
+    } else {
+      fullTypeActual = fullType;
+    }
+    final String existingFull = mapByShortName.get(shortName);
     if (existingFull == null) {
-      mapByShortName.put(shortName, fullType);
+      mapByShortName.put(shortName, fullTypeActual);
       return shortName;
-    } else if (existingFull.equals(fullType)) {
+    } else if (existingFull.equals(fullTypeActual)) {
       // already existing
       return shortName;
     } else {
