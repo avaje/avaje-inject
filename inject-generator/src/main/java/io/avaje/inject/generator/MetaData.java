@@ -2,9 +2,7 @@ package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.ProcessingContext.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -39,7 +37,7 @@ final class MetaData {
 
   private boolean generateProxy;
   private boolean usesExternalDependency;
-  private String externalDependency;
+  private Set<String> externalDependencies = new HashSet<>();
   private boolean importedComponent;
 
   MetaData(DependencyMetaPrism meta) {
@@ -178,7 +176,7 @@ final class MetaData {
       return;
     }
     if (usesExternalDependency) {
-      append.append("  // uses external dependency ").append(externalDependency).append(NEWLINE);
+      append.append("  // uses external dependency " + externalDependencies + NEWLINE);
     }
 
     final var hasName = name != null;
@@ -280,6 +278,11 @@ final class MetaData {
    */
   void markWithExternalDependency(String name) {
     usesExternalDependency = true;
-    externalDependency = name;
+    externalDependencies.add(name);
+    for (Dependency dependency : dependsOn) {
+      if (name.equals(dependency.name())) {
+        dependency.markExternal();
+      }
+    }
   }
 }
