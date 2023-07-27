@@ -14,6 +14,8 @@ final class MethodReader {
 
   private static final String CODE_COMMENT_BUILD_FACTORYBEAN = "  /**\n   * Create and register %s via factory bean method %s#%s().\n   */";
 
+  private static final Set<String> UNSAFE_SHORT_NAME = Set.of("Builder", "Generated");
+
   private final ExecutableElement element;
   private final String factoryType;
   private final String methodName;
@@ -396,7 +398,7 @@ final class MethodReader {
     void builderGetDependency(Append writer, String builderName, boolean forFactory) {
       writer.append(builderName).append(".").append(utilType.getMethod(nullable, isBeanMap));
       if (!genericType.isGenericType()) {
-        writer.append(Util.shortName(genericType.topType())).append(".class");
+        writer.append(safeShortName(genericType.topType())).append(".class");
       } else if (isProvider()) {
         writer.append(providerParam()).append(".class");
       } else {
@@ -416,6 +418,14 @@ final class MethodReader {
         writer.append("\"");
       }
       writer.append(")");
+    }
+
+    private String safeShortName(String fullType) {
+      final String shortName = Util.shortName(fullType);
+      if (UNSAFE_SHORT_NAME.contains(shortName)) {
+        return fullType;
+      }
+      return shortName;
     }
 
     private String providerParam() {
