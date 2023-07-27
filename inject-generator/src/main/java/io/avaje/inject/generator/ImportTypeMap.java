@@ -32,15 +32,12 @@ final class ImportTypeMap {
   String add(String fullType) {
     final String shortName = Util.shortName(fullType);
     String fullTypeActual;
-    String shortNameActual;
     final var index = shortName.lastIndexOf('.');
     if (index != -1) {
-      shortNameActual = shortName.substring(0, index);
-      fullTypeActual = fullType.replace(shortName, shortNameActual);
+      fullTypeActual = fullType.replace(shortName, shortName.substring(0, index));
 
     } else {
       fullTypeActual = fullType;
-      shortNameActual = shortName;
     }
     final String existingFull = mapByShortName.get(shortName);
     if (existingFull == null) {
@@ -51,7 +48,7 @@ final class ImportTypeMap {
       return shortName;
     } else {
       // must use fully qualified type
-      return fullTypeActual;
+      return fullType;
     }
   }
 

@@ -27,10 +27,7 @@ class AFactory {
     b2.hashCode();
   }
 
-  static class I0 implements A0.Builder {
+  static class I0 implements A0.Builder {}
 
-  }
-  static class I1 implements A1.Builder {
-
-  }
+  static class I1 implements A1.Builder {}
 }

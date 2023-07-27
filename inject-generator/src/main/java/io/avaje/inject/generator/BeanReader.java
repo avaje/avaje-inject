@@ -276,7 +276,7 @@ final class BeanReader {
       if (!genericTypes.isEmpty()) {
         importTypes.add(Constants.TYPE);
         importTypes.add(Constants.GENERICTYPE);
-        // TYPE_ generic types are fully qualified
+        genericTypes.forEach(t->t.addImports(importTypes));
       }
     }
     checkImports();
