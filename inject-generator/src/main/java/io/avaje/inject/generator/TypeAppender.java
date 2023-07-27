@@ -43,7 +43,7 @@ final class TypeAppender {
 
   private void addGenericType(GenericType genericType) {
     genericTypes.add(genericType);
-    types.add("TYPE_" + genericType.shortName());
+    types.add("TYPE_" + genericType.shortName().replace(".", "_"));
   }
 
   Set<GenericType> genericTypes() {

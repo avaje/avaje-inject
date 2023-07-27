@@ -68,7 +68,7 @@ final class SimpleBeanWriter {
     Set<GenericType> genericTypes = beanReader.allGenericTypes();
     if (!genericTypes.isEmpty()) {
       for (GenericType type : genericTypes) {
-        writer.append("  public static final Type TYPE_%s = new GenericType<", type.shortName());
+        writer.append("  public static final Type TYPE_%s = new GenericType<", type.shortName().replace(".", "_"));
         // use fully qualified types here rather than use type.writeShort(writer)
         writer.append(type.toString());
         writer.append(">(){}.type();").eol();

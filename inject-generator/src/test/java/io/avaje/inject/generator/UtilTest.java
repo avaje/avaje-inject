@@ -12,8 +12,7 @@ class UtilTest {
 
   @Test
   void nestedShortName() {
-    assertEquals(Util.nestedShortName("com.example.Foo.Bar"), "Foo.Bar");
-    assertEquals(Util.nestedShortName("com.example.foo.Bar"), "foo.Bar");
+    assertEquals(Util.shortName("com.example.Foo.Bar"), "Foo.Bar");
   }
 
   @Test

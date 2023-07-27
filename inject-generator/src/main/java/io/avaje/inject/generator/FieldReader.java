@@ -47,10 +47,10 @@ final class FieldReader {
   }
 
   String builderGetDependency(String builder) {
-    StringBuilder sb = new StringBuilder();
+    final var sb = new StringBuilder();
     sb.append(builder).append(".").append(utype.getMethod(nullable, isBeanMap));
     if (isGenericParam()) {
-      sb.append("TYPE_").append(type.shortName());
+      sb.append("TYPE_").append(type.shortName().replace(".", "_"));
     } else {
       sb.append(Util.shortName(fieldType)).append(".class");
     }

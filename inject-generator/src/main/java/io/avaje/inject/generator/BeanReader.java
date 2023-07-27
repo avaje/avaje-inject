@@ -371,7 +371,7 @@ final class BeanReader {
     for (FieldReader field : injectFields) {
       field.writeRequestInject(writer);
     }
-    for (MethodReader method : injectMethods) {
+    for (final MethodReader method : injectMethods) {
       writer.append("    bean.%s(", method.name());
       method.writeRequestConstructor(writer);
       writer.append(");").eol();
@@ -411,11 +411,7 @@ final class BeanReader {
   }
 
   String shortName() {
-    if (beanType.getNestingKind().isNested()) {
-      return Util.nestedShortName(beanQualifiedName());
-    } else {
-      return Util.shortName(beanQualifiedName());
-    }
+    return Util.shortName(beanQualifiedName());
   }
 
   String packageName() {
