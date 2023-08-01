@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.io.Writer;
 
 /**
@@ -21,7 +22,7 @@ final class Append {
       writer.append(content);
       return this;
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new UncheckedIOException(e);
     }
   }
 
@@ -30,7 +31,7 @@ final class Append {
       writer.flush();
       writer.close();
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new UncheckedIOException(e);
     }
   }
 
@@ -39,7 +40,7 @@ final class Append {
       writer.append("\n");
       return this;
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new UncheckedIOException(e);
     }
   }
 
