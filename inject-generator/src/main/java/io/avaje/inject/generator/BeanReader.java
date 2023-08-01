@@ -1,5 +1,7 @@
 package io.avaje.inject.generator;
 
+import static io.avaje.inject.generator.ProcessingContext.logError;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.*;
@@ -259,7 +261,7 @@ final class BeanReader {
 
   private void prototypeNotSupported(String lifecycle) {
     if (prototype) {
-      throw new IllegalStateException(String.format("@Prototype scoped bean does not support %s lifecycle method", lifecycle));
+      logError(beanType, "@Prototype scoped bean does not support %s lifecycle method", lifecycle);
     }
   }
 
