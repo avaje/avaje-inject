@@ -1,7 +1,5 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.ProcessingContext.logWarn;
-
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -18,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.FilerException;
@@ -31,7 +28,6 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
-import javax.tools.DocumentationTool.Location;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
@@ -90,10 +86,6 @@ final class ProcessingContext {
 
   static void logWarn(String msg, Object... args) {
     CTX.get().messager.printMessage(Diagnostic.Kind.WARNING, String.format(msg, args));
-  }
-
-  static void logWarn(Element e, String msg, Object... args) {
-    CTX.get().messager.printMessage(Diagnostic.Kind.WARNING, String.format(msg, args), e);
   }
 
   static void logDebug(String msg, Object... args) {
@@ -220,7 +212,6 @@ final class ProcessingContext {
   }
 
   static void validateModule(String injectFQN) {
-
     if (!CTX.get().validated) {
       CTX.get().validated = true;
       var module = CTX.get().module;

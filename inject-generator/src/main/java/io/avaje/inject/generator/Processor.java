@@ -3,15 +3,20 @@ package io.avaje.inject.generator;
 import static io.avaje.inject.generator.ProcessingContext.addImportedAspects;
 import static io.avaje.inject.generator.ProcessingContext.addImportedType;
 import static io.avaje.inject.generator.ProcessingContext.element;
+import static io.avaje.inject.generator.ProcessingContext.findModule;
 import static io.avaje.inject.generator.ProcessingContext.loadMetaInfCustom;
-import static io.avaje.inject.generator.ProcessingContext.*;
 import static io.avaje.inject.generator.ProcessingContext.loadMetaInfServices;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -23,12 +28,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ModuleElement;
-import javax.lang.model.element.ModuleElement.DirectiveKind;
-import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.tools.StandardLocation;
 
@@ -52,6 +52,7 @@ public final class Processor extends AbstractProcessor {
   private boolean readModuleInfo;
   private final Set<String> pluginFileProvided = new HashSet<>();
   private final Set<String> moduleFileProvided = new HashSet<>();
+
   @Override
   public SourceVersion getSupportedSourceVersion() {
     return SourceVersion.latest();
@@ -249,10 +250,9 @@ public final class Processor extends AbstractProcessor {
   /** Read InjectModule for things like package-info etc (not for custom scopes) */
   private void readInjectModule(RoundEnvironment roundEnv) {
 
-    var injectModuleElements = roundEnv.getElementsAnnotatedWith(element(Constants.INJECTMODULE));
-
     // read other that are annotated with InjectModule
-    for (final Element element : injectModuleElements) {
+    for (final Element element :
+        roundEnv.getElementsAnnotatedWith(element(Constants.INJECTMODULE))) {
 
       final var scope = ScopePrism.getInstanceOn(element);
       if (scope == null) {
