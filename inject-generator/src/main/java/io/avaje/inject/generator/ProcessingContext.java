@@ -1,8 +1,13 @@
 package io.avaje.inject.generator;
 
+import static io.avaje.inject.generator.ProcessingContext.logWarn;
+
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.net.URI;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,17 +18,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.FilerException;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ModuleElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
+import javax.tools.DocumentationTool.Location;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
@@ -44,6 +52,8 @@ final class ProcessingContext {
     private final Set<String> optionalTypes = new LinkedHashSet<>();
     private final Set<String> importedTypes = new LinkedHashSet<>();
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
+    private ModuleElement module;
+    private boolean validated;
 
     public Ctx(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
       messager = processingEnv.getMessager();
@@ -80,6 +90,10 @@ final class ProcessingContext {
 
   static void logWarn(String msg, Object... args) {
     CTX.get().messager.printMessage(Diagnostic.Kind.WARNING, String.format(msg, args));
+  }
+
+  static void logWarn(Element e, String msg, Object... args) {
+    CTX.get().messager.printMessage(Diagnostic.Kind.WARNING, String.format(msg, args), e);
   }
 
   static void logDebug(String msg, Object... args) {
@@ -197,6 +211,48 @@ final class ProcessingContext {
 
   static boolean isImportedType(String type) {
     return CTX.get().importedTypes.contains(type);
+  }
+
+  static void findModule(Element e) {
+    if (CTX.get().module == null) {
+      CTX.get().module = search(e);
+    }
+  }
+
+  static void validateModule(String injectFQN) {
+
+    if (!CTX.get().validated) {
+      CTX.get().validated = true;
+      var module = CTX.get().module;
+      if (module != null && !module.isUnnamed()) {
+        try {
+          var resource =
+              CTX.get()
+                  .filer
+                  .getResource(StandardLocation.SOURCE_PATH, "", "module-info.java")
+                  .toUri()
+                  .toString();
+          try (var inputStream = new URI(resource).toURL().openStream();
+              var reader = new BufferedReader(new InputStreamReader(inputStream))) {
+
+            var noProvides = reader.lines().noneMatch(s -> s.contains(injectFQN));
+            if (noProvides) {
+              logError(
+                  module, "Missing \"provides io.avaje.inject.spi.Module with %s\"", injectFQN);
+            }
+          }
+        } catch (Exception e) {
+          // can't read module
+        }
+      }
+    }
+  }
+
+  static ModuleElement search(Element e) {
+    if (e == null || e instanceof ModuleElement) {
+      return (ModuleElement) e;
+    }
+    return search(e.getEnclosingElement());
   }
 
   static Optional<AspectImportPrism> getImportedAspect(String type) {

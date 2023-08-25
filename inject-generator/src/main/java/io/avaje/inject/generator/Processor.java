@@ -4,6 +4,7 @@ import static io.avaje.inject.generator.ProcessingContext.addImportedAspects;
 import static io.avaje.inject.generator.ProcessingContext.addImportedType;
 import static io.avaje.inject.generator.ProcessingContext.element;
 import static io.avaje.inject.generator.ProcessingContext.loadMetaInfCustom;
+import static io.avaje.inject.generator.ProcessingContext.*;
 import static io.avaje.inject.generator.ProcessingContext.loadMetaInfServices;
 
 import java.io.BufferedReader;
@@ -22,7 +23,12 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ModuleElement;
+import javax.lang.model.element.ModuleElement.DirectiveKind;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.tools.StandardLocation;
 
@@ -46,7 +52,6 @@ public final class Processor extends AbstractProcessor {
   private boolean readModuleInfo;
   private final Set<String> pluginFileProvided = new HashSet<>();
   private final Set<String> moduleFileProvided = new HashSet<>();
-
   @Override
   public SourceVersion getSupportedSourceVersion() {
     return SourceVersion.latest();
@@ -184,6 +189,7 @@ public final class Processor extends AbstractProcessor {
    */
   private void readChangedBeans(Set<? extends Element> beans, boolean factory, boolean importedComponent) {
     for (final Element element : beans) {
+      findModule(element);
       // ignore methods (e.g. factory methods with @Prototype on them)
       if (element instanceof TypeElement) {
         if (element.getKind() == ElementKind.INTERFACE) {
@@ -240,12 +246,14 @@ public final class Processor extends AbstractProcessor {
     readInjectModule(roundEnv);
   }
 
-  /**
-   * Read InjectModule for things like package-info etc (not for custom scopes)
-   */
+  /** Read InjectModule for things like package-info etc (not for custom scopes) */
   private void readInjectModule(RoundEnvironment roundEnv) {
+
+    var injectModuleElements = roundEnv.getElementsAnnotatedWith(element(Constants.INJECTMODULE));
+
     // read other that are annotated with InjectModule
-    for (final Element element : roundEnv.getElementsAnnotatedWith(element(Constants.INJECTMODULE))) {
+    for (final Element element : injectModuleElements) {
+
       final var scope = ScopePrism.getInstanceOn(element);
       if (scope == null) {
         // it it not a custom scope annotation
