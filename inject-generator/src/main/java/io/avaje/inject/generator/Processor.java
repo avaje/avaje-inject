@@ -3,7 +3,6 @@ package io.avaje.inject.generator;
 import static io.avaje.inject.generator.ProcessingContext.addImportedAspects;
 import static io.avaje.inject.generator.ProcessingContext.addImportedType;
 import static io.avaje.inject.generator.ProcessingContext.element;
-import static io.avaje.inject.generator.ProcessingContext.findModule;
 import static io.avaje.inject.generator.ProcessingContext.loadMetaInfCustom;
 import static io.avaje.inject.generator.ProcessingContext.loadMetaInfServices;
 
@@ -123,6 +122,8 @@ public final class Processor extends AbstractProcessor {
     defaultScope.write(roundEnv.processingOver());
     allScopes.write(roundEnv.processingOver());
 
+    ProcessingContext.findModule(annotations, roundEnv);
+
     if (roundEnv.processingOver()) {
       ProcessingContext.clear();
     }
@@ -190,7 +191,6 @@ public final class Processor extends AbstractProcessor {
    */
   private void readChangedBeans(Set<? extends Element> beans, boolean factory, boolean importedComponent) {
     for (final Element element : beans) {
-      findModule(element);
       // ignore methods (e.g. factory methods with @Prototype on them)
       if (element instanceof TypeElement) {
         if (element.getKind() == ElementKind.INTERFACE) {

@@ -8,6 +8,7 @@ import java.io.LineNumberReader;
 import java.net.URI;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,6 +22,7 @@ import javax.annotation.processing.Filer;
 import javax.annotation.processing.FilerException;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ModuleElement;
 import javax.lang.model.element.TypeElement;
@@ -205,36 +207,41 @@ final class ProcessingContext {
     return CTX.get().importedTypes.contains(type);
   }
 
-  static void findModule(Element e) {
+  static void findModule(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
     if (CTX.get().module == null) {
-      CTX.get().module = search(e);
+      CTX.get().module =
+          annotations.stream()
+              .map(roundEnv::getElementsAnnotatedWith)
+              .flatMap(Collection::stream)
+              .findAny()
+              .map(ProcessingContext::search)
+              .orElse(null);
     }
   }
 
   static void validateModule(String injectFQN) {
-    if (!CTX.get().validated) {
-      CTX.get().validated = true;
-      var module = CTX.get().module;
-      if (module != null && !module.isUnnamed()) {
-        try {
-          var resource =
-              CTX.get()
-                  .filer
-                  .getResource(StandardLocation.SOURCE_PATH, "", "module-info.java")
-                  .toUri()
-                  .toString();
-          try (var inputStream = new URI(resource).toURL().openStream();
-              var reader = new BufferedReader(new InputStreamReader(inputStream))) {
+    var module = CTX.get().module;
+    if (module != null && !CTX.get().validated && !module.isUnnamed()) {
 
-            var noProvides = reader.lines().noneMatch(s -> s.contains(injectFQN));
-            if (noProvides) {
-              logError(
-                  module, "Missing \"provides io.avaje.inject.spi.Module with %s\"", injectFQN);
-            }
+      CTX.get().validated = true;
+      try {
+        var resource =
+            CTX.get()
+                .filer
+                .getResource(StandardLocation.SOURCE_PATH, "", "module-info.java")
+                .toUri()
+                .toString();
+        try (var inputStream = new URI(resource).toURL().openStream();
+            var reader = new BufferedReader(new InputStreamReader(inputStream))) {
+
+          var noProvides = reader.lines().noneMatch(s -> s.contains(injectFQN));
+
+          if (noProvides) {
+            logError(module, "Missing \"provides io.avaje.inject.spi.Module with %s\"", injectFQN);
           }
-        } catch (Exception e) {
-          // can't read module
         }
+      } catch (Exception e) {
+        // can't read module
       }
     }
   }

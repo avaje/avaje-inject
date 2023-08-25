@@ -56,6 +56,7 @@ final class SimpleModuleWriter {
     this.modulePackage = scopeInfo.modulePackage();
     this.shortName = scopeInfo.moduleShortName();
     this.fullName = scopeInfo.moduleFullName();
+    ProcessingContext.validateModule(fullName);
   }
 
   void write(ScopeInfo.Type scopeType) throws IOException {
