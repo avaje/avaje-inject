@@ -214,7 +214,7 @@ final class ProcessingContext {
               .map(roundEnv::getElementsAnnotatedWith)
               .flatMap(Collection::stream)
               .findAny()
-              .map(ProcessingContext::search)
+              .map(ProcessingContext::getModuleElement)
               .orElse(null);
     }
   }
@@ -246,11 +246,11 @@ final class ProcessingContext {
     }
   }
 
-  static ModuleElement search(Element e) {
+  static ModuleElement getModuleElement(Element e) {
     if (e == null || e instanceof ModuleElement) {
       return (ModuleElement) e;
     }
-    return search(e.getEnclosingElement());
+    return getModuleElement(e.getEnclosingElement());
   }
 
   static Optional<AspectImportPrism> getImportedAspect(String type) {
