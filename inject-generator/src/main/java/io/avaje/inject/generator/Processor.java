@@ -1,28 +1,6 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.ProcessingContext.addImportedAspects;
-import static io.avaje.inject.generator.ProcessingContext.addImportedType;
-import static io.avaje.inject.generator.ProcessingContext.element;
-import static io.avaje.inject.generator.ProcessingContext.loadMetaInfCustom;
-import static io.avaje.inject.generator.ProcessingContext.loadMetaInfServices;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Filer;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -30,6 +8,14 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.tools.StandardLocation;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static io.avaje.inject.generator.ProcessingContext.*;
 
 @SupportedAnnotationTypes({
   Constants.INJECTMODULE,
@@ -83,7 +69,7 @@ public final class Processor extends AbstractProcessor {
     try {
       final String resource = resource(filer, relativeName, replace);
       try (var inputStream = new URI(resource).toURL().openStream();
-          var reader = new BufferedReader(new InputStreamReader(inputStream))) {
+           var reader = new BufferedReader(new InputStreamReader(inputStream))) {
         return reader.lines().collect(Collectors.toList());
       }
     } catch (final Exception e) {
@@ -132,12 +118,12 @@ public final class Processor extends AbstractProcessor {
 
   private Set<TypeElement> importedElements(RoundEnvironment roundEnv) {
     return roundEnv.getElementsAnnotatedWith(element(ImportPrism.PRISM_TYPE)).stream()
-        .map(ImportPrism::getInstanceOn)
-        .flatMap(p -> p.value().stream())
-        .map(ProcessingContext::asElement)
-        .filter(this::notAlreadyProvided)
-        .peek(e -> addImportedType(e.getQualifiedName().toString()))
-        .collect(Collectors.toSet());
+      .map(ImportPrism::getInstanceOn)
+      .flatMap(p -> p.value().stream())
+      .map(ProcessingContext::asElement)
+      .filter(this::notAlreadyProvided)
+      .peek(e -> addImportedType(e.getQualifiedName().toString()))
+      .collect(Collectors.toSet());
   }
 
   private boolean notAlreadyProvided(TypeElement e) {
@@ -147,11 +133,11 @@ public final class Processor extends AbstractProcessor {
 
   private static Map<String, AspectImportPrism> importedAspects(RoundEnvironment roundEnv) {
     return Optional.ofNullable(element(AspectImportPrism.PRISM_TYPE))
-        .map(roundEnv::getElementsAnnotatedWith)
-        .stream()
-        .flatMap(Set::stream)
-        .map(AspectImportPrism::getInstanceOn)
-        .collect(Collectors.toMap(p -> p.value().toString(), p -> p));
+      .map(roundEnv::getElementsAnnotatedWith)
+      .stream()
+      .flatMap(Set::stream)
+      .map(AspectImportPrism::getInstanceOn)
+      .collect(Collectors.toMap(p -> p.value().toString(), p -> p));
   }
 
   private void readScopes(Set<? extends Element> scopes) {
@@ -247,13 +233,12 @@ public final class Processor extends AbstractProcessor {
     readInjectModule(roundEnv);
   }
 
-  /** Read InjectModule for things like package-info etc (not for custom scopes) */
+  /**
+   * Read InjectModule for things like package-info etc (not for custom scopes)
+   */
   private void readInjectModule(RoundEnvironment roundEnv) {
-
     // read other that are annotated with InjectModule
-    for (final Element element :
-        roundEnv.getElementsAnnotatedWith(element(Constants.INJECTMODULE))) {
-
+    for (final Element element : roundEnv.getElementsAnnotatedWith(element(Constants.INJECTMODULE))) {
       final var scope = ScopePrism.getInstanceOn(element);
       if (scope == null) {
         // it it not a custom scope annotation
