@@ -71,6 +71,9 @@ final class SimpleModuleWriter {
     if (scopeType != ScopeInfo.Type.CUSTOM) {
       writeServicesFile(scopeType);
     }
+    if (!ordering.ordered().isEmpty()) {
+      ProcessingContext.validateModule(fullName);
+    }
   }
 
   private void writeServicesFile(ScopeInfo.Type scopeType) {

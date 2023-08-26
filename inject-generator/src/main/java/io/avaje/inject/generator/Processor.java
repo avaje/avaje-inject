@@ -10,7 +10,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -116,6 +121,8 @@ public final class Processor extends AbstractProcessor {
     allScopes.readBeans(roundEnv);
     defaultScope.write(roundEnv.processingOver());
     allScopes.write(roundEnv.processingOver());
+
+    ProcessingContext.findModule(annotations, roundEnv);
 
     if (roundEnv.processingOver()) {
       ProcessingContext.clear();
@@ -240,12 +247,13 @@ public final class Processor extends AbstractProcessor {
     readInjectModule(roundEnv);
   }
 
-  /**
-   * Read InjectModule for things like package-info etc (not for custom scopes)
-   */
+  /** Read InjectModule for things like package-info etc (not for custom scopes) */
   private void readInjectModule(RoundEnvironment roundEnv) {
+
     // read other that are annotated with InjectModule
-    for (final Element element : roundEnv.getElementsAnnotatedWith(element(Constants.INJECTMODULE))) {
+    for (final Element element :
+        roundEnv.getElementsAnnotatedWith(element(Constants.INJECTMODULE))) {
+
       final var scope = ScopePrism.getInstanceOn(element);
       if (scope == null) {
         // it it not a custom scope annotation
