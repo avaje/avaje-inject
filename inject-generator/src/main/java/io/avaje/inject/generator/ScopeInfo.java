@@ -145,7 +145,6 @@ final class ScopeInfo {
       moduleShortName = name + "Module";
       moduleFullName = modulePackage + "." + moduleShortName;
       moduleFile = createWriter(moduleFullName);
-      ProcessingContext.validateModule(moduleFullName);
     }
   }
 

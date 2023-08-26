@@ -56,7 +56,6 @@ final class SimpleModuleWriter {
     this.modulePackage = scopeInfo.modulePackage();
     this.shortName = scopeInfo.moduleShortName();
     this.fullName = scopeInfo.moduleFullName();
-    ProcessingContext.validateModule(fullName);
   }
 
   void write(ScopeInfo.Type scopeType) throws IOException {
@@ -71,6 +70,9 @@ final class SimpleModuleWriter {
     writer.close();
     if (scopeType != ScopeInfo.Type.CUSTOM) {
       writeServicesFile(scopeType);
+    }
+    if (!ordering.ordered().isEmpty()) {
+      ProcessingContext.validateModule(fullName);
     }
   }
 
