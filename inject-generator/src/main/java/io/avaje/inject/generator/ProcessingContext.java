@@ -237,7 +237,7 @@ final class ProcessingContext {
           var noProvides = reader.lines().noneMatch(s -> s.contains(injectFQN));
 
           if (noProvides) {
-            logError(module, "Missing \"provides io.avaje.inject.spi.Module with %s;\"", injectFQN);
+            logError(module, "Missing `provides io.avaje.inject.spi.Module with %s;`", injectFQN);
           }
         }
       } catch (Exception e) {
