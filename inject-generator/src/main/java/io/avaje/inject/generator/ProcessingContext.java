@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
-import java.net.URI;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -224,22 +223,22 @@ final class ProcessingContext {
     if (module != null && !CTX.get().validated && !module.isUnnamed()) {
 
       CTX.get().validated = true;
-      try {
-        var resource =
-            CTX.get()
-                .filer
-                .getResource(StandardLocation.SOURCE_PATH, "", "module-info.java")
-                .toUri()
-                .toString();
-        try (var inputStream = new URI(resource).toURL().openStream();
-            var reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-          var noProvides = reader.lines().noneMatch(s -> s.contains(injectFQN));
+      try (var inputStream =
+              CTX.get()
+                  .filer
+                  .getResource(StandardLocation.SOURCE_PATH, "", "module-info.java")
+                  .toUri()
+                  .toURL()
+                  .openStream();
+          var reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-          if (noProvides) {
-            logError(module, "Missing `provides io.avaje.inject.spi.Module with %s;`", injectFQN);
-          }
+        var noProvides = reader.lines().noneMatch(s -> s.contains(injectFQN));
+
+        if (noProvides) {
+          logError(module, "Missing \"provides io.avaje.inject.spi.Module with %s;\"", injectFQN);
         }
+
       } catch (Exception e) {
         // can't read module
       }
