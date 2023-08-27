@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 
 import static java.lang.System.Logger.Level.DEBUG;
 import static java.lang.System.Logger.Level.INFO;
+import static java.lang.System.Logger.Level.WARNING;;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toSet;
 
@@ -38,6 +39,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private ClassLoader classLoader;
   private PropertyRequiresPlugin propertyRequiresPlugin;
   private Set<String> profiles;
+  private boolean failOnEmpty = true;
 
   /**
    * Create a BeanScopeBuilder to ultimately load and return a new BeanScope.
@@ -47,6 +49,12 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   @Override
   public ForTesting forTesting() {
+    return this;
+  }
+
+  @Override
+  public BeanScopeBuilder failOnEmpty(boolean failOnEmpty) {
+    this.failOnEmpty = failOnEmpty;
     return this;
   }
 
@@ -250,13 +258,20 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
 
     final Set<String> moduleNames = factoryOrder.orderFactories();
-    if (moduleNames.isEmpty()) {
+    if (moduleNames.isEmpty() && failOnEmpty) {
       throw new IllegalStateException("No modules found. When using java module system we need an explicit provides clause in module-info like:\n\n" +
         " provides io.avaje.inject.spi.Module with org.example.ExampleModule;\n\n" +
         " Otherwise perhaps using Gradle and IDEA but with a setup issue?" +
         " Review IntelliJ Settings / Build / Build tools / Gradle - 'Build and run using' value and set that to 'Gradle'. " +
         " Refer to https://avaje.io/inject#gradle");
     }
+    else if (moduleNames.isEmpty()) {
+    	  log.log(WARNING, "No modules found. When using java module system we need an explicit provides clause in module-info like:\n\n" +
+    	          " provides io.avaje.inject.spi.Module with org.example.ExampleModule;\n\n" +
+    	          " Otherwise perhaps using Gradle and IDEA but with a setup issue?" +
+    	          " Review IntelliJ Settings / Build / Build tools / Gradle - 'Build and run using' value and set that to 'Gradle'. " +
+    	          " Refer to https://avaje.io/inject#gradle");
+      }
 
     final var level = propertyRequiresPlugin.contains("printModules") ? INFO : DEBUG;
     initProfiles();

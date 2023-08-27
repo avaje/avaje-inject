@@ -230,10 +230,14 @@ public interface BeanScopeBuilder {
    */
   BeanScopeBuilder addPostConstruct(Consumer<BeanScope> postConstructHook);
 
-  /**
-   * Add hook that will execute before this scope is destroyed.
-   */
+  /** Add hook that will execute before this scope is destroyed. */
   BeanScopeBuilder addPreDestroy(AutoCloseable preDestroyHook);
+
+  /**
+   * Determine if an exception should be thrown if no modules can be discovered via ServiceLoader.
+   * By default, the value is true.
+   */
+  BeanScopeBuilder failOnEmpty(boolean failOnEmpty);
 
   /**
    * Set the ClassLoader to use when loading modules.
@@ -437,4 +441,5 @@ public interface BeanScopeBuilder {
      */
     <D> BeanScopeBuilder.ForTesting spy(Class<D> type, Consumer<D> consumer);
   }
+
 }
