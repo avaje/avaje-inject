@@ -266,11 +266,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         " Refer to https://avaje.io/inject#gradle");
     }
     else if (moduleNames.isEmpty()) {
-    	  log.log(WARNING, "No modules found. When using java module system we need an explicit provides clause in module-info like:\n\n" +
-    	          " provides io.avaje.inject.spi.Module with org.example.ExampleModule;\n\n" +
-    	          " Otherwise perhaps using Gradle and IDEA but with a setup issue?" +
-    	          " Review IntelliJ Settings / Build / Build tools / Gradle - 'Build and run using' value and set that to 'Gradle'. " +
-    	          " Refer to https://avaje.io/inject#gradle");
+    	  log.log(INFO, "No inject modules found");
       }
 
     final var level = propertyRequiresPlugin.contains("printModules") ? INFO : DEBUG;
