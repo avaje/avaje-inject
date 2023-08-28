@@ -214,13 +214,13 @@ final class ProcessingContext {
               .flatMap(Collection::stream)
               .findAny()
               .map(CTX.get().elementUtils::getModuleOf)
-              .orElseThrow();
+              .orElse(null);
     }
   }
 
   static void validateModule(String injectFQN) {
     var module = CTX.get().module;
-    if (!CTX.get().validated && !module.isUnnamed()) {
+    if (module != null && !CTX.get().validated && !module.isUnnamed()) {
 
       CTX.get().validated = true;
 
