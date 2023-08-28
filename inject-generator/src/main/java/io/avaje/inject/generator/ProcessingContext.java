@@ -213,14 +213,14 @@ final class ProcessingContext {
               .map(roundEnv::getElementsAnnotatedWith)
               .flatMap(Collection::stream)
               .findAny()
-              .map(ProcessingContext::getModuleElement)
-              .orElse(null);
+              .map(CTX.get().elementUtils::getModuleOf)
+              .orElseThrow();
     }
   }
 
   static void validateModule(String injectFQN) {
     var module = CTX.get().module;
-    if (module != null && !CTX.get().validated && !module.isUnnamed()) {
+    if (!CTX.get().validated && !module.isUnnamed()) {
 
       CTX.get().validated = true;
 
@@ -243,13 +243,6 @@ final class ProcessingContext {
         // can't read module
       }
     }
-  }
-
-  static ModuleElement getModuleElement(Element e) {
-    if (e == null || e instanceof ModuleElement) {
-      return (ModuleElement) e;
-    }
-    return getModuleElement(e.getEnclosingElement());
   }
 
   static Optional<AspectImportPrism> getImportedAspect(String type) {
