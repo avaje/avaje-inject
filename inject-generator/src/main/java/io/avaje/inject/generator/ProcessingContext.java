@@ -213,7 +213,7 @@ final class ProcessingContext {
               .map(roundEnv::getElementsAnnotatedWith)
               .flatMap(Collection::stream)
               .findAny()
-              .map(ProcessingContext::getModuleElement)
+              .map(CTX.get().elementUtils::getModuleOf)
               .orElse(null);
     }
   }
@@ -243,13 +243,6 @@ final class ProcessingContext {
         // can't read module
       }
     }
-  }
-
-  static ModuleElement getModuleElement(Element e) {
-    if (e == null || e instanceof ModuleElement) {
-      return (ModuleElement) e;
-    }
-    return getModuleElement(e.getEnclosingElement());
   }
 
   static Optional<AspectImportPrism> getImportedAspect(String type) {
