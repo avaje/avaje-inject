@@ -3,6 +3,7 @@ package io.avaje.inject.generator;
 import static io.avaje.inject.generator.APContext.elements;
 import static io.avaje.inject.generator.APContext.filer;
 import static io.avaje.inject.generator.APContext.getModuleInfoReader;
+import static io.avaje.inject.generator.APContext.getProjectModuleElement;
 import static io.avaje.inject.generator.APContext.logError;
 import static io.avaje.inject.generator.APContext.logNote;
 import static io.avaje.inject.generator.APContext.logWarn;
@@ -43,7 +44,6 @@ final class ProcessingContext {
     private final Set<String> optionalTypes = new LinkedHashSet<>();
     private final Set<String> importedTypes = new LinkedHashSet<>();
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
-    private ModuleElement module;
     private boolean validated;
 
     public Ctx(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
@@ -51,8 +51,8 @@ final class ProcessingContext {
       ExternalProvider.registerModuleProvidedTypes(providedTypes);
       providedTypes.addAll(moduleFileProvided);
     }
-    public Ctx() {
-    }
+
+    public Ctx() {}
   }
 
   public static void init(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
@@ -103,9 +103,9 @@ final class ProcessingContext {
 
   static FileObject createMetaInfWriter(ScopeInfo.Type scopeType) throws IOException {
     final var serviceName =
-      scopeType == ScopeInfo.Type.DEFAULT
-        ? Constants.META_INF_MODULE
-        : Constants.META_INF_TESTMODULE;
+        scopeType == ScopeInfo.Type.DEFAULT
+            ? Constants.META_INF_MODULE
+            : Constants.META_INF_TESTMODULE;
     return createMetaInfWriterFor(serviceName);
   }
 
@@ -164,7 +164,7 @@ final class ProcessingContext {
   }
 
   static void validateModule(String injectFQN) {
-    var module = CTX.get().module;
+    var module = getProjectModuleElement();
     if (module != null && !CTX.get().validated && !module.isUnnamed()) {
 
       CTX.get().validated = true;

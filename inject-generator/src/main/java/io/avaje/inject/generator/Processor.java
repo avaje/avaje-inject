@@ -94,6 +94,8 @@ public final class Processor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+
+    APContext.setProjectModuleElement(annotations, roundEnv);
     readModule(roundEnv);
     addImportedAspects(importedAspects(roundEnv));
     readScopes(roundEnv.getElementsAnnotatedWith(typeElement(Constants.SCOPE)));
@@ -114,8 +116,6 @@ public final class Processor extends AbstractProcessor {
     allScopes.readBeans(roundEnv);
     defaultScope.write(roundEnv.processingOver());
     allScopes.write(roundEnv.processingOver());
-
-    APContext.setProjectModuleElement(annotations, roundEnv);
 
     if (roundEnv.processingOver()) {
       ProcessingContext.clear();
