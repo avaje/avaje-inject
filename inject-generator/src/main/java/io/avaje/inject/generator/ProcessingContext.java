@@ -8,6 +8,7 @@ import static io.avaje.inject.generator.APContext.logError;
 import static io.avaje.inject.generator.APContext.logNote;
 import static io.avaje.inject.generator.APContext.logWarn;
 import static io.avaje.inject.generator.APContext.typeElement;
+import static io.avaje.inject.generator.APContext.asTypeElement;
 import static io.avaje.inject.generator.APContext.types;
 
 import java.io.FileNotFoundException;
@@ -123,7 +124,7 @@ final class ProcessingContext {
 
   static TypeElement asElement(TypeMirror returnType) {
     final var wrapper = PrimitiveUtil.wrap(returnType.toString());
-    return wrapper == null ? (TypeElement) types().asElement(returnType) : typeElement(wrapper);
+    return wrapper == null ? asTypeElement(returnType) : typeElement(wrapper);
   }
 
   static boolean isUncheckedException(TypeMirror returnType) {
