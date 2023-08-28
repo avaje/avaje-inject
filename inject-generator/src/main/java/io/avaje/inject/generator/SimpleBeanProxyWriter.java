@@ -1,6 +1,6 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.ProcessingContext.createWriter;
+import static io.avaje.inject.generator.APContext.createSourceFile;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -108,7 +108,7 @@ final class SimpleBeanProxyWriter {
   }
 
   private Writer createFileWriter() throws IOException {
-    JavaFileObject jfo = createWriter(originName + suffix);
+    JavaFileObject jfo = createSourceFile(originName + suffix);
     return jfo.openWriter();
   }
 

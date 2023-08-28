@@ -1,9 +1,9 @@
 package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.ProcessingContext.asElement;
-import static io.avaje.inject.generator.ProcessingContext.element;
-import static io.avaje.inject.generator.ProcessingContext.logWarn;
-import static io.avaje.inject.generator.ProcessingContext.types;
+import static io.avaje.inject.generator.APContext.typeElement;
+import static io.avaje.inject.generator.APContext.logWarn;
+import static io.avaje.inject.generator.APContext.types;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -174,7 +174,7 @@ final class TypeExtendsReader {
         final var knownType =
           genericType.params().stream()
             .flatMap(g -> Stream.concat(Stream.of(g), g.params().stream()))
-            .noneMatch(g -> element(g.mainType()) == null);
+            .noneMatch(g -> typeElement(g.mainType()) == null);
 
         extendsTypes.add(knownType ? type : genericType.topType());
         extendsInjection.read(element);
@@ -218,7 +218,7 @@ final class TypeExtendsReader {
       final var knownType =
         genericType.params().stream()
           .flatMap(g -> Stream.concat(Stream.of(g), g.params().stream()))
-          .noneMatch(g -> element(g.mainType()) == null);
+          .noneMatch(g -> typeElement(g.mainType()) == null);
 
       interfaceTypes.add(knownType ? rawType : GenericType.removeParameter(rawType));
       if (!rawType.startsWith("java.lang.")) {

@@ -1,13 +1,19 @@
 package io.avaje.inject.generator;
 
-import java.io.BufferedReader;
+import static io.avaje.inject.generator.APContext.elements;
+import static io.avaje.inject.generator.APContext.filer;
+import static io.avaje.inject.generator.APContext.getModuleInfoReader;
+import static io.avaje.inject.generator.APContext.logError;
+import static io.avaje.inject.generator.APContext.logNote;
+import static io.avaje.inject.generator.APContext.logWarn;
+import static io.avaje.inject.generator.APContext.typeElement;
+import static io.avaje.inject.generator.APContext.types;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,20 +23,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.processing.Filer;
 import javax.annotation.processing.FilerException;
-import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ModuleElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
-import javax.tools.Diagnostic;
 import javax.tools.FileObject;
-import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
 
 final class ProcessingContext {
@@ -40,10 +38,6 @@ final class ProcessingContext {
   private ProcessingContext() {}
 
   static final class Ctx {
-    private final Messager messager;
-    private final Filer filer;
-    private final Elements elementUtils;
-    private final Types typeUtils;
     private final Set<String> uniqueModuleNames = new HashSet<>();
     private final Set<String> providedTypes = new HashSet<>();
     private final Set<String> optionalTypes = new LinkedHashSet<>();
@@ -53,44 +47,21 @@ final class ProcessingContext {
     private boolean validated;
 
     public Ctx(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
-      messager = processingEnv.getMessager();
-      filer = processingEnv.getFiler();
-      elementUtils = processingEnv.getElementUtils();
-      typeUtils = processingEnv.getTypeUtils();
+
       ExternalProvider.registerModuleProvidedTypes(providedTypes);
       providedTypes.addAll(moduleFileProvided);
     }
     public Ctx() {
-      this.messager = null;
-      this.filer = null;
-      this.elementUtils = null;
-      this.typeUtils = null;
     }
   }
 
   public static void init(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
     CTX.set(new Ctx(processingEnv, moduleFileProvided));
+    APContext.init(processingEnv);
   }
 
   public static void testInit() {
     CTX.set(new Ctx());
-  }
-
-  /** Log an error message. */
-  static void logError(Element e, String msg, Object... args) {
-    CTX.get().messager.printMessage(Diagnostic.Kind.ERROR, String.format(msg, args), e);
-  }
-
-  static void logError(String msg, Object... args) {
-    CTX.get().messager.printMessage(Diagnostic.Kind.ERROR, String.format(msg, args));
-  }
-
-  static void logWarn(String msg, Object... args) {
-    CTX.get().messager.printMessage(Diagnostic.Kind.WARNING, String.format(msg, args));
-  }
-
-  static void logDebug(String msg, Object... args) {
-    CTX.get().messager.printMessage(Diagnostic.Kind.NOTE, String.format(msg, args));
   }
 
   static String loadMetaInfServices() {
@@ -104,7 +75,7 @@ final class ProcessingContext {
 
   private static List<String> loadMetaInf(String fullName) {
     try {
-      final var fileObject = CTX.get().filer.getResource(StandardLocation.CLASS_OUTPUT, "", fullName);
+      final var fileObject = filer().getResource(StandardLocation.CLASS_OUTPUT, "", fullName);
       if (fileObject != null) {
         final List<String> lines = new ArrayList<>();
         final var reader = fileObject.openReader(true);
@@ -122,17 +93,12 @@ final class ProcessingContext {
     } catch (FileNotFoundException | NoSuchFileException e) {
       // logDebug("no services file yet");
     } catch (final FilerException e) {
-      logDebug("FilerException reading services file");
+      logNote("FilerException reading services file");
     } catch (final Exception e) {
       e.printStackTrace();
       logWarn("Error reading services file: " + e.getMessage());
     }
     return Collections.emptyList();
-  }
-
-  /** Create a file writer for the given class name. */
-  static JavaFileObject createWriter(String cls) throws IOException {
-    return CTX.get().filer.createSourceFile(cls);
   }
 
   static FileObject createMetaInfWriter(ScopeInfo.Type scopeType) throws IOException {
@@ -144,34 +110,25 @@ final class ProcessingContext {
   }
 
   private static FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
-    return CTX.get().filer.createResource(StandardLocation.CLASS_OUTPUT, "", interfaceType);
-  }
-
-  static TypeElement element(String rawType) {
-    return CTX.get().elementUtils.getTypeElement(rawType);
-  }
-
-  static Types types() {
-    return CTX.get().typeUtils;
+    return filer().createResource(StandardLocation.CLASS_OUTPUT, "", interfaceType);
   }
 
   static TypeElement elementMaybe(String rawType) {
     if (rawType == null) {
       return null;
     } else {
-      return CTX.get().elementUtils.getTypeElement(rawType);
+      return elements().getTypeElement(rawType);
     }
   }
 
   static TypeElement asElement(TypeMirror returnType) {
     final var wrapper = PrimitiveUtil.wrap(returnType.toString());
-    return wrapper == null ? (TypeElement) CTX.get().typeUtils.asElement(returnType) : element(wrapper);
+    return wrapper == null ? (TypeElement) types().asElement(returnType) : typeElement(wrapper);
   }
 
   static boolean isUncheckedException(TypeMirror returnType) {
-    final var types = CTX.get().typeUtils;
-    final var runtime = element("java.lang.RuntimeException").asType();
-    return types.isSubtype(returnType, runtime);
+    final var runtime = typeElement("java.lang.RuntimeException").asType();
+    return types().isSubtype(returnType, runtime);
   }
 
   static void addModule(String moduleFullName) {
@@ -206,32 +163,13 @@ final class ProcessingContext {
     return CTX.get().importedTypes.contains(type);
   }
 
-  static void findModule(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-    if (CTX.get().module == null) {
-      CTX.get().module =
-          annotations.stream()
-              .map(roundEnv::getElementsAnnotatedWith)
-              .flatMap(Collection::stream)
-              .findAny()
-              .map(CTX.get().elementUtils::getModuleOf)
-              .orElse(null);
-    }
-  }
-
   static void validateModule(String injectFQN) {
     var module = CTX.get().module;
     if (module != null && !CTX.get().validated && !module.isUnnamed()) {
 
       CTX.get().validated = true;
 
-      try (var inputStream =
-              CTX.get()
-                  .filer
-                  .getResource(StandardLocation.SOURCE_PATH, "", "module-info.java")
-                  .toUri()
-                  .toURL()
-                  .openStream();
-          var reader = new BufferedReader(new InputStreamReader(inputStream))) {
+      try (var reader = getModuleInfoReader()) {
 
         var noProvides = reader.lines().noneMatch(s -> s.contains(injectFQN));
 
@@ -251,5 +189,6 @@ final class ProcessingContext {
 
   public static void clear() {
     CTX.remove();
+    APContext.clear();
   }
 }

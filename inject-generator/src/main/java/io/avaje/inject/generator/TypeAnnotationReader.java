@@ -1,7 +1,6 @@
 package io.avaje.inject.generator;
 
-
-import static io.avaje.inject.generator.ProcessingContext.logWarn;
+import static io.avaje.inject.generator.APContext.logWarn;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.ProcessingContext.*;
+import static io.avaje.inject.generator.APContext.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -144,7 +145,7 @@ final class ScopeInfo {
       final String name = initName(modulePackage);
       moduleShortName = name + "Module";
       moduleFullName = modulePackage + "." + moduleShortName;
-      moduleFile = createWriter(moduleFullName);
+      moduleFile = createSourceFile(moduleFullName);
     }
   }
 
@@ -296,7 +297,7 @@ final class ScopeInfo {
    */
   private void readBeanMeta(TypeElement typeElement, boolean factory, boolean importedComponent) {
     if (typeElement.getKind() == ElementKind.ANNOTATION_TYPE) {
-      logDebug("skipping annotation type " + typeElement);
+      logNote("skipping annotation type " + typeElement);
       return;
     }
     beanReaders.add(new BeanReader(typeElement, factory, importedComponent).read());
@@ -320,7 +321,7 @@ final class ScopeInfo {
     if (readBeans.add(element.toString())) {
       readBeanMeta(element, factory, importedComponent);
     } else {
-      logDebug("skipping already processed bean " + element);
+      logNote("skipping already processed bean " + element);
     }
   }
 

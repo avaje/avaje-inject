@@ -1,6 +1,6 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.ProcessingContext.*;
+import static io.avaje.inject.generator.APContext.typeElement;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -159,7 +159,7 @@ final class MetaData {
     } else if (!generateProxy) {
       if (importedComponent) {
         String packageName;
-        if (element(type).getNestingKind().isNested()) {
+        if (typeElement(type).getNestingKind().isNested()) {
           packageName = Util.nestedPackageOf(type);
         } else {
           packageName = Util.packageOf(type);

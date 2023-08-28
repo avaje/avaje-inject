@@ -1,6 +1,6 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.ProcessingContext.*;
+import static io.avaje.inject.generator.APContext.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,12 +62,12 @@ final class AllScopes {
 
   void readModules(List<String> customScopeModules) {
     for (String customScopeModule : customScopeModules) {
-      final TypeElement module = element(customScopeModule);
+      final TypeElement module = typeElement(customScopeModule);
       if (module != null) {
         InjectModulePrism injectModule = InjectModulePrism.getInstanceOn(module);
         if (injectModule != null) {
           final String customScopeType = injectModule.customScopeType();
-          final TypeElement scopeType = element(customScopeType);
+          final TypeElement scopeType = typeElement(customScopeType);
           if (scopeType == null) {
             logError(module, "customScopeType [" + customScopeType + "] is invalid? on " + module);
           } else {

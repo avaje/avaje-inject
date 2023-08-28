@@ -13,7 +13,7 @@
   <name>avaje inject generator</name>
   <description>annotation processor generating di as source code</description>
   <properties>
-    <avaje.prisms.version>1.13</avaje.prisms.version>
+    <avaje.prisms.version>1.14</avaje.prisms.version>
   </properties>
   <dependencies>
 
