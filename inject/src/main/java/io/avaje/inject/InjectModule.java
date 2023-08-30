@@ -1,5 +1,13 @@
 package io.avaje.inject;
 
+import static java.lang.annotation.ElementType.MODULE;
+import static java.lang.annotation.ElementType.PACKAGE;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.CLASS;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
 /**
  * Used to explicitly specify if it depends on externally provided beans or provides.
  *
@@ -34,6 +42,8 @@ package io.avaje.inject;
  *
  * }</pre>
  */
+@Retention(CLASS)
+@Target({TYPE, PACKAGE, MODULE})
 public @interface InjectModule {
 
   /**
