@@ -1,7 +1,7 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.ProcessingContext.createWriter;
-import static io.avaje.inject.generator.ProcessingContext.logError;
+import static io.avaje.inject.generator.APContext.createSourceFile;
+import static io.avaje.inject.generator.APContext.logError;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 
 /**
@@ -46,7 +45,7 @@ final class SimpleBeanWriter {
     if (beanReader.beanType().getNestingKind().isNested()) {
       originName = originName.replace(shortName, shortName.replace(".", "$"));
     }
-    final JavaFileObject jfo = createWriter(originName + suffix);
+    final JavaFileObject jfo = createSourceFile(originName + suffix);
     return jfo.openWriter();
   }
 

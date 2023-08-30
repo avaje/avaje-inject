@@ -1,6 +1,10 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.ProcessingContext.*;
+import static io.avaje.inject.generator.APContext.logError;
+import static io.avaje.inject.generator.APContext.logWarn;
+import static io.avaje.inject.generator.ProcessingContext.elementMaybe;
+import static io.avaje.inject.generator.ProcessingContext.externallyProvided;
+
 import javax.lang.model.element.TypeElement;
 import java.util.*;
 

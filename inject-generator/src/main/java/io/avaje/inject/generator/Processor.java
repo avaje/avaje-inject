@@ -1,5 +1,8 @@
 package io.avaje.inject.generator;
 
+import static io.avaje.inject.generator.APContext.*;
+import static io.avaje.inject.generator.ProcessingContext.*;
+
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
@@ -8,6 +11,9 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.tools.StandardLocation;
+
+import io.avaje.prism.GenerateAPContext;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -17,6 +23,7 @@ import java.util.stream.Collectors;
 
 import static io.avaje.inject.generator.ProcessingContext.*;
 
+@GenerateAPContext
 @SupportedAnnotationTypes({
   Constants.INJECTMODULE,
   Constants.FACTORY,
@@ -87,28 +94,28 @@ public final class Processor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+
+    APContext.setProjectModuleElement(annotations, roundEnv);
     readModule(roundEnv);
     addImportedAspects(importedAspects(roundEnv));
-    readScopes(roundEnv.getElementsAnnotatedWith(element(Constants.SCOPE)));
-    readFactories(roundEnv.getElementsAnnotatedWith(element(Constants.FACTORY)));
+    readScopes(roundEnv.getElementsAnnotatedWith(typeElement(Constants.SCOPE)));
+    readFactories(roundEnv.getElementsAnnotatedWith(typeElement(Constants.FACTORY)));
     if (defaultScope.includeSingleton()) {
-      readBeans(roundEnv.getElementsAnnotatedWith(element(Constants.SINGLETON)));
+      readBeans(roundEnv.getElementsAnnotatedWith(typeElement(Constants.SINGLETON)));
     }
-    readBeans(roundEnv.getElementsAnnotatedWith(element(Constants.COMPONENT)));
-    readBeans(roundEnv.getElementsAnnotatedWith(element(Constants.PROTOTYPE)));
+    readBeans(roundEnv.getElementsAnnotatedWith(typeElement(Constants.COMPONENT)));
+    readBeans(roundEnv.getElementsAnnotatedWith(typeElement(Constants.PROTOTYPE)));
 
     readImported(importedElements(roundEnv));
-    readBeans(roundEnv.getElementsAnnotatedWith(element(Constants.PROTOTYPE)));
+    readBeans(roundEnv.getElementsAnnotatedWith(typeElement(Constants.PROTOTYPE)));
     final var typeElement = elementUtils.getTypeElement(Constants.CONTROLLER);
     if (typeElement != null) {
       readBeans(roundEnv.getElementsAnnotatedWith(typeElement));
     }
-    readBeans(roundEnv.getElementsAnnotatedWith(element(Constants.PROXY)));
+    readBeans(roundEnv.getElementsAnnotatedWith(typeElement(Constants.PROXY)));
     allScopes.readBeans(roundEnv);
     defaultScope.write(roundEnv.processingOver());
     allScopes.write(roundEnv.processingOver());
-
-    ProcessingContext.findModule(annotations, roundEnv);
 
     if (roundEnv.processingOver()) {
       ProcessingContext.clear();
@@ -117,7 +124,7 @@ public final class Processor extends AbstractProcessor {
   }
 
   private Set<TypeElement> importedElements(RoundEnvironment roundEnv) {
-    return roundEnv.getElementsAnnotatedWith(element(ImportPrism.PRISM_TYPE)).stream()
+    return roundEnv.getElementsAnnotatedWith(typeElement(ImportPrism.PRISM_TYPE)).stream()
       .map(ImportPrism::getInstanceOn)
       .flatMap(p -> p.value().stream())
       .map(ProcessingContext::asElement)
@@ -132,7 +139,7 @@ public final class Processor extends AbstractProcessor {
   }
 
   private static Map<String, AspectImportPrism> importedAspects(RoundEnvironment roundEnv) {
-    return Optional.ofNullable(element(AspectImportPrism.PRISM_TYPE))
+    return Optional.ofNullable(typeElement(AspectImportPrism.PRISM_TYPE))
       .map(roundEnv::getElementsAnnotatedWith)
       .stream()
       .flatMap(Set::stream)
@@ -238,7 +245,7 @@ public final class Processor extends AbstractProcessor {
    */
   private void readInjectModule(RoundEnvironment roundEnv) {
     // read other that are annotated with InjectModule
-    for (final Element element : roundEnv.getElementsAnnotatedWith(element(Constants.INJECTMODULE))) {
+    for (final Element element : roundEnv.getElementsAnnotatedWith(typeElement(Constants.INJECTMODULE))) {
       final var scope = ScopePrism.getInstanceOn(element);
       if (scope == null) {
         // it it not a custom scope annotation

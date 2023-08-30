@@ -1,15 +1,19 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.ProcessingContext.*;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.tools.FileObject;
+import static io.avaje.inject.generator.APContext.logError;
+import static io.avaje.inject.generator.APContext.typeElement;
+import static io.avaje.inject.generator.ProcessingContext.createMetaInfWriter;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.tools.FileObject;
 
 /**
  * Write the source code for the factory.
@@ -141,7 +145,7 @@ final class SimpleModuleWriter {
       String rawType = metaData.type();
       if (!"void".equals(rawType)) {
         String type = GenericType.parse(rawType).topType();
-        TypeElement element = element(type);
+        TypeElement element = typeElement(type);
         if (element != null && element.getModifiers().contains(Modifier.PUBLIC)) {
           publicClasses.add(type);
         }
