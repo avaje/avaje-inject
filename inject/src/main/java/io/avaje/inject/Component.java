@@ -75,7 +75,7 @@ public @interface Component {
 
     /**
      * When true, avaje will write generated classes to the same package as the imported class.
-     * (this will cause package splitting and will not work on JPMS by default)
+     * (this will cause package splitting and will not work on JPMS so by default this is disabled)
      */
     boolean packagePrivate() default false;
   }

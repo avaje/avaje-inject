@@ -8,7 +8,7 @@ import io.avaje.config.Config;
 import io.avaje.inject.Component;
 import io.avaje.inject.spi.PropertyRequiresPlugin;
 
-@Component.Import(value = OtherComponent2.class, packagePrivate = false)
+@Component.Import(value = OtherComponent2.class, packagePrivate = true)
 public class ConfigPropertiesPlugin implements PropertyRequiresPlugin {
 
   @Override
