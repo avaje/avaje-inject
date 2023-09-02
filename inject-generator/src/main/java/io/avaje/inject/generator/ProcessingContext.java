@@ -27,7 +27,6 @@ import java.util.Set;
 
 import javax.annotation.processing.FilerException;
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.ModuleElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.FileObject;
@@ -43,7 +42,6 @@ final class ProcessingContext {
     private final Set<String> uniqueModuleNames = new HashSet<>();
     private final Set<String> providedTypes = new HashSet<>();
     private final Set<String> optionalTypes = new LinkedHashSet<>();
-    private final Set<String> importedTypes = new LinkedHashSet<>();
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
     private boolean validated;
 
@@ -154,14 +152,6 @@ final class ProcessingContext {
 
   static void addImportedAspects(Map<String, AspectImportPrism> importedMap) {
     CTX.get().aspectImportPrisms.putAll(importedMap);
-  }
-
-  static void addImportedType(String importedMap) {
-    CTX.get().importedTypes.add(importedMap);
-  }
-
-  static boolean isImportedType(String type) {
-    return CTX.get().importedTypes.contains(type);
   }
 
   static void validateModule(String injectFQN) {

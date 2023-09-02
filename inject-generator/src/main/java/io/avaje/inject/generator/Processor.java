@@ -9,6 +9,8 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.tools.StandardLocation;
 
@@ -20,8 +22,6 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static io.avaje.inject.generator.ProcessingContext.*;
 
 @GenerateAPContext
 @SupportedAnnotationTypes({
@@ -44,6 +44,7 @@ public final class Processor extends AbstractProcessor {
   private boolean readModuleInfo;
   private final Set<String> pluginFileProvided = new HashSet<>();
   private final Set<String> moduleFileProvided = new HashSet<>();
+  private final Set<String> packagePrivateClasses = new HashSet<>();
 
   @Override
   public SourceVersion getSupportedSourceVersion() {
@@ -105,8 +106,7 @@ public final class Processor extends AbstractProcessor {
     }
     readBeans(roundEnv.getElementsAnnotatedWith(typeElement(Constants.COMPONENT)));
     readBeans(roundEnv.getElementsAnnotatedWith(typeElement(Constants.PROTOTYPE)));
-
-    readImported(importedElements(roundEnv));
+    imported(roundEnv);
     readBeans(roundEnv.getElementsAnnotatedWith(typeElement(Constants.PROTOTYPE)));
     final var typeElement = elementUtils.getTypeElement(Constants.CONTROLLER);
     if (typeElement != null) {
@@ -123,13 +123,23 @@ public final class Processor extends AbstractProcessor {
     return false;
   }
 
+  private void imported(RoundEnvironment roundEnv) {
+        roundEnv.getElementsAnnotatedWith(typeElement(ImportPrism.PRISM_TYPE)).stream()
+            .map(ImportPrism::getInstanceOn)
+            .filter(ImportPrism::packagePrivate)
+            .map(ImportPrism::value)
+            .flatMap(List::stream)
+            .map(TypeMirror::toString)
+            .forEach(packagePrivateClasses::add);
+    readImported(importedElements(roundEnv));
+  }
+
   private Set<TypeElement> importedElements(RoundEnvironment roundEnv) {
     return roundEnv.getElementsAnnotatedWith(typeElement(ImportPrism.PRISM_TYPE)).stream()
       .map(ImportPrism::getInstanceOn)
       .flatMap(p -> p.value().stream())
       .map(ProcessingContext::asElement)
       .filter(this::notAlreadyProvided)
-      .peek(e -> addImportedType(e.getQualifiedName().toString()))
       .collect(Collectors.toSet());
   }
 
@@ -168,41 +178,39 @@ public final class Processor extends AbstractProcessor {
   }
 
   private void readFactories(Set<? extends Element> beans) {
-    readChangedBeans(beans, true, false);
+    readChangedBeans(ElementFilter.typesIn(beans), true, false);
   }
 
   private void readBeans(Set<? extends Element> beans) {
-    readChangedBeans(beans, false, false);
+    readChangedBeans(ElementFilter.typesIn(beans), false, false);
   }
 
   private void readImported(Set<? extends Element> beans) {
-    readChangedBeans(beans, false, true);
+    readChangedBeans(ElementFilter.typesIn(beans), false, true);
   }
 
-  /**
-   * Read the beans that have changed.
-   */
-  private void readChangedBeans(Set<? extends Element> beans, boolean factory, boolean importedComponent) {
-    for (final Element element : beans) {
-      // ignore methods (e.g. factory methods with @Prototype on them)
-      if (element instanceof TypeElement) {
-        if (element.getKind() == ElementKind.INTERFACE) {
-          continue;
-        }
+  /** Read the beans that have changed. */
+  private void readChangedBeans(
+      Set<TypeElement> beans, boolean factory, boolean importedComponent) {
+    for (final var typeElement : beans) {
 
-        final var typeElement = (TypeElement) element;
-        final var scope = findScope(typeElement);
-        if (!factory) {
-          // will be found via custom scope so effectively ignore additional @Singleton
-          if (scope == null) {
-            defaultScope.read(typeElement, false, importedComponent);
-          }
-        } else if (scope != null) {
-          // logWarn("Adding factory to custom scope "+element+" scope: "+scope);
-          scope.read(typeElement, true, false);
-        } else {
-          defaultScope.read(typeElement, true, false);
+      if (typeElement.getKind() == ElementKind.INTERFACE) {
+        continue;
+      }
+      if (packagePrivateClasses.contains(typeElement.asType().toString())) {
+        importedComponent = false;
+      }
+
+      final var scope = findScope(typeElement);
+      if (!factory) {
+        // will be found via custom scope so effectively ignore additional @Singleton
+        if (scope == null) {
+          defaultScope.read(typeElement, false, importedComponent);
         }
+      } else if (scope != null) {
+        scope.read(typeElement, true, false);
+      } else {
+        defaultScope.read(typeElement, true, false);
       }
     }
   }
