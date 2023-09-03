@@ -1,7 +1,5 @@
 package io.avaje.inject.generator;
 
-import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;

@@ -53,12 +53,12 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 public @interface Component {
 
   /**
-   * Specify types to generate DI classes for.
+   * Specify types to generate DI classes for. To avoid package splitting, the imported DI classes
    *
    * <p>These types are typically in an external project / dependency or otherwise types that we
    * can't or don't want to explicitly annotate with {@code @Singleton}/{@code @Component}.
    *
-   * <p>Typically, we put this annotation on a package.
+   * <p>Typically, we put this annotation on a package/module-info.
    *
    * <pre>{@code
    * Component.Import({Customer.class, Product.class, ...})
@@ -70,9 +70,13 @@ public @interface Component {
   @Target({TYPE, PACKAGE, MODULE})
   @interface Import {
 
-    /**
-     * Specify types to generate DI classes for.
-     */
+    /** Specify types to generate DI classes for. */
     Class<?>[] value();
+
+    /**
+     * When true, avaje will write generated classes to the same package as the imported class.
+     * (this will cause package splitting and will not work on JPMS so by default this is disabled)
+     */
+    boolean packagePrivate() default false;
   }
 }

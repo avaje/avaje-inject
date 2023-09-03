@@ -1,7 +1,5 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.ProcessingContext.isImportedType;
-
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
