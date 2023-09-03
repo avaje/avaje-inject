@@ -124,14 +124,19 @@ public final class Processor extends AbstractProcessor {
   }
 
   private void imported(RoundEnvironment roundEnv) {
-        roundEnv.getElementsAnnotatedWith(typeElement(ImportPrism.PRISM_TYPE)).stream()
-            .map(ImportPrism::getInstanceOn)
-            .filter(ImportPrism::packagePrivate)
-            .map(ImportPrism::value)
-            .flatMap(List::stream)
-            .map(TypeMirror::toString)
-            .forEach(packagePrivateClasses::add);
+    registerImportedPackagePrivate(roundEnv);
     readImported(importedElements(roundEnv));
+  }
+
+  /** Register the packagePrivate true, ultimately to generate them into the same package */
+  private void registerImportedPackagePrivate(RoundEnvironment roundEnv) {
+    roundEnv.getElementsAnnotatedWith(typeElement(ImportPrism.PRISM_TYPE)).stream()
+        .map(ImportPrism::getInstanceOn)
+        .filter(ImportPrism::packagePrivate)
+        .map(ImportPrism::value)
+        .flatMap(List::stream)
+        .map(TypeMirror::toString)
+        .forEach(packagePrivateClasses::add);
   }
 
   private Set<TypeElement> importedElements(RoundEnvironment roundEnv) {
@@ -190,17 +195,14 @@ public final class Processor extends AbstractProcessor {
   }
 
   /** Read the beans that have changed. */
-  private void readChangedBeans(
-      Set<TypeElement> beans, boolean factory, boolean importedComponent) {
+  private void readChangedBeans(Set<TypeElement> beans, boolean factory, boolean importedComponent) {
     for (final var typeElement : beans) {
-
       if (typeElement.getKind() == ElementKind.INTERFACE) {
         continue;
       }
       if (packagePrivateClasses.contains(typeElement.asType().toString())) {
         importedComponent = false;
       }
-
       final var scope = findScope(typeElement);
       if (!factory) {
         // will be found via custom scope so effectively ignore additional @Singleton
