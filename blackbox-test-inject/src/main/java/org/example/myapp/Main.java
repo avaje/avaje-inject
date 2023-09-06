@@ -1,10 +1,16 @@
 package org.example.myapp;
 
+import io.avaje.inject.Component;
 import org.example.external.aspect.MyExternalAspect;
 
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.aop.Aspect.Import;
+import org.example.myapp.other.SimulateExternal;
+import org.example.myapp.other.SimulateExternal2;
+import org.example.myapp.other.SimulateExternalPub;
+import org.example.myapp.other.SimulateExternalPub2;
 
+@Component.Import(value = {SimulateExternal.class, SimulateExternal2.class, SimulateExternalPub.class, SimulateExternalPub2.class}) //, packagePrivate = true)
 @Import(MyExternalAspect.class)
 public class Main {
 

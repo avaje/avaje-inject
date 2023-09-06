@@ -61,7 +61,7 @@ public @interface Component {
    * <p>Typically, we put this annotation on a package/module-info.
    *
    * <pre>{@code
-   * Component.Import({Customer.class, Product.class, ...})
+   * Component.Import({CustomerService.class, ProductService.class, ...})
    * package org.example.processor;
    *
    * }</pre>
