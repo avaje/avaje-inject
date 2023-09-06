@@ -85,10 +85,21 @@ module org.example {
 - Provides API to obtain all bean instances that have an annotation
 - Integration with server-side web frameworks Javalin, Helidon
 
-## Spring DI
+## Spring DI comparison
 
-For comparison with Spring DI look at https://avaje.io/inject/#spring
-
+| Spring | Avaje
+| :--- | :---  |
+| @Component, @Service, @Repository | [@Singleton](https://avaje.io/inject/#singleton) |
+| FactoryBean&lt;T> | [Provider&lt;T>](https://avaje.io/inject/#provider) |
+| @Inject, @Autowired | [@Inject](https://avaje.io/inject/#inject) |
+| @Autowired(required=false) |[@Inject @Nullable](https://avaje.io/inject/#nullable) or [@Inject Optional&lt;T>](https://avaje.io/inject/#optional) |
+| @PostConstruct| [@PostConstruct](https://avaje.io/inject/#post-construct) |
+| @PreDestroy| [@PreDestroy](https://avaje.io/inject/#pre-destroy) |
+| @Configuration and @Bean | [@Factory and @Bean](https://avaje.io/inject/#factory) |
+| @Conditional | [@RequiresBean and @RequiresProperty](https://avaje.io/inject/#conditional) |
+| @Primary | [@Primary](https://avaje.io/inject/#primary) |
+| @Secondary | [@Secondary](https://avaje.io/inject/#secondary) |
+| @Profile | [@Profile](https://avaje.io/inject/#profile) |
 
 ## Generated Code
 
