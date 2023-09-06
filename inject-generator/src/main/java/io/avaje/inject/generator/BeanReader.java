@@ -37,7 +37,6 @@ final class BeanReader {
   private Set<GenericType> allGenericTypes;
 
   BeanReader(TypeElement beanType, boolean factory, boolean importedComponent) {
-    this.importedComponent = importedComponent;
     this.beanType = beanType;
     this.type = beanType.getQualifiedName().toString();
     this.shortName = shortName(beanType);
@@ -59,6 +58,7 @@ final class BeanReader {
     this.postConstructMethod = typeReader.postConstructMethod();
     this.preDestroyMethod = typeReader.preDestroyMethod();
     this.constructor = typeReader.constructor();
+    this.importedComponent = importedComponent && (constructor != null && constructor.isPublic());
   }
 
   @Override

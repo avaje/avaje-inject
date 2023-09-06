@@ -1,14 +1,13 @@
 package org.example.myapp;
 
-import java.util.Optional;
-
-import org.other.one.OtherComponent2;
-
 import io.avaje.config.Config;
 import io.avaje.inject.Component;
 import io.avaje.inject.spi.PropertyRequiresPlugin;
+import org.other.one.OtherComponent2;
 
-@Component.Import(value = OtherComponent2.class, packagePrivate = true)
+import java.util.Optional;
+
+@Component.Import(value = OtherComponent2.class)
 public class ConfigPropertiesPlugin implements PropertyRequiresPlugin {
 
   @Override

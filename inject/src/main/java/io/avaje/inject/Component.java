@@ -61,7 +61,7 @@ public @interface Component {
    * <p>Typically, we put this annotation on a package/module-info.
    *
    * <pre>{@code
-   * Component.Import({Customer.class, Product.class, ...})
+   * Component.Import({CustomerService.class, ProductService.class, ...})
    * package org.example.processor;
    *
    * }</pre>
@@ -72,11 +72,5 @@ public @interface Component {
 
     /** Specify types to generate DI classes for. */
     Class<?>[] value();
-
-    /**
-     * When true, avaje will write generated classes to the same package as the imported class.
-     * (this will cause package splitting and will not work on JPMS so by default this is disabled)
-     */
-    boolean packagePrivate() default false;
   }
 }

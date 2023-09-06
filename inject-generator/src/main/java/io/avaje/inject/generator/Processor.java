@@ -9,7 +9,6 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.tools.StandardLocation;
@@ -44,7 +43,6 @@ public final class Processor extends AbstractProcessor {
   private boolean readModuleInfo;
   private final Set<String> pluginFileProvided = new HashSet<>();
   private final Set<String> moduleFileProvided = new HashSet<>();
-  private final Set<String> packagePrivateClasses = new HashSet<>();
 
   @Override
   public SourceVersion getSupportedSourceVersion() {
@@ -106,7 +104,7 @@ public final class Processor extends AbstractProcessor {
     }
     readBeans(roundEnv.getElementsAnnotatedWith(typeElement(Constants.COMPONENT)));
     readBeans(roundEnv.getElementsAnnotatedWith(typeElement(Constants.PROTOTYPE)));
-    imported(roundEnv);
+    readImported(importedElements(roundEnv));
     readBeans(roundEnv.getElementsAnnotatedWith(typeElement(Constants.PROTOTYPE)));
     final var typeElement = elementUtils.getTypeElement(Constants.CONTROLLER);
     if (typeElement != null) {
@@ -121,22 +119,6 @@ public final class Processor extends AbstractProcessor {
       ProcessingContext.clear();
     }
     return false;
-  }
-
-  private void imported(RoundEnvironment roundEnv) {
-    registerImportedPackagePrivate(roundEnv);
-    readImported(importedElements(roundEnv));
-  }
-
-  /** Register the packagePrivate true, ultimately to generate them into the same package */
-  private void registerImportedPackagePrivate(RoundEnvironment roundEnv) {
-    roundEnv.getElementsAnnotatedWith(typeElement(ImportPrism.PRISM_TYPE)).stream()
-        .map(ImportPrism::getInstanceOn)
-        .filter(ImportPrism::packagePrivate)
-        .map(ImportPrism::value)
-        .flatMap(List::stream)
-        .map(TypeMirror::toString)
-        .forEach(packagePrivateClasses::add);
   }
 
   private Set<TypeElement> importedElements(RoundEnvironment roundEnv) {
@@ -199,9 +181,6 @@ public final class Processor extends AbstractProcessor {
     for (final var typeElement : beans) {
       if (typeElement.getKind() == ElementKind.INTERFACE) {
         continue;
-      }
-      if (packagePrivateClasses.contains(typeElement.asType().toString())) {
-        importedComponent = false;
       }
       final var scope = findScope(typeElement);
       if (!factory) {
