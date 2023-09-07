@@ -229,9 +229,7 @@ final class Util {
     return currentTop;
   }
 
-  /**
-   * Return the name via <code>@Named</code> or a Qualifier annotation.
-   */
+  /** Return the name via <code>@Named</code> or a Qualifier annotation. */
   public static String getNamed(Element p) {
     final NamedPrism named = NamedPrism.getInstanceOn(p);
     if (named != null) {

@@ -37,7 +37,7 @@ final class MetaData {
 
   private boolean generateProxy;
   private boolean usesExternalDependency;
-  private Set<String> externalDependencies = new HashSet<>();
+  private final Set<String> externalDependencies = new HashSet<>();
   private boolean importedComponent;
 
   MetaData(DependencyMetaPrism meta) {
@@ -83,7 +83,7 @@ final class MetaData {
     } else {
       final String trimType = Util.trimMethod(type);
       if (name != null) {
-        return trimType + "_" + name;
+        return trimType + "_" + name.replaceAll("[^a-zA-Z0-9_$]+", "_");
       } else {
         return trimType;
       }
