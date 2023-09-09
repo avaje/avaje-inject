@@ -137,10 +137,17 @@ final class Util {
       var result = "";
       var foundClass = false;
       for (final String part : fullType.split("\\.")) {
-        if (foundClass || Character.isUpperCase(part.charAt(0))) {
+        char firstChar = part.charAt(0);
+        if (foundClass
+            || Character.isUpperCase(firstChar)
+            || (!Character.isAlphabetic(firstChar) && Character.isJavaIdentifierStart(firstChar))) {
           foundClass = true;
           result += (result.isEmpty() ? "" : ".") + part;
         }
+      }
+      // when in doubt, do the basic thing
+      if (result.isBlank()) {
+        return fullType.substring(p + 1);
       }
       return result;
     }
@@ -229,9 +236,7 @@ final class Util {
     return currentTop;
   }
 
-  /**
-   * Return the name via <code>@Named</code> or a Qualifier annotation.
-   */
+  /** Return the name via <code>@Named</code> or a Qualifier annotation. */
   public static String getNamed(Element p) {
     final NamedPrism named = NamedPrism.getInstanceOn(p);
     if (named != null) {
