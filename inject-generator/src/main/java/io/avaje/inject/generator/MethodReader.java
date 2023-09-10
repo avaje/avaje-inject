@@ -74,7 +74,7 @@ final class MethodReader {
     String destroyMethod = (bean == null) ? null : bean.destroyMethod();
     this.beanCloseable = (bean != null) && bean.autoCloseable();
     this.name = qualifierName;
-    TypeElement returnElement = (TypeElement) asElement(returnMirror);
+    TypeElement returnElement = asElement(returnMirror);
     if (returnElement == null) {
       this.typeReader = null;
       this.initMethod = initMethod;

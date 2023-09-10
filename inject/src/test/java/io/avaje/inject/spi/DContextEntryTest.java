@@ -6,10 +6,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class DContextEntryTest {
+@SuppressWarnings("all")
+class DContextEntryTest {
 
   @Test
-  public void get_when_onePrimary() {
+  void get_when_onePrimary() {
 
     DContextEntry entry = new DContextEntry();
     entry.add(DContextEntryBean.of("P", null, BeanEntry.PRIMARY));
@@ -20,7 +21,7 @@ public class DContextEntryTest {
   }
 
   @Test
-  public void get_when_twoPrimary() {
+  void get_when_twoPrimary() {
     assertThrows(IllegalStateException.class, () -> {
       DContextEntry entry = new DContextEntry();
       entry.add(DContextEntryBean.of("P", null, BeanEntry.PRIMARY));
@@ -32,7 +33,7 @@ public class DContextEntryTest {
   }
 
   @Test
-  public void get_when_oneNormal() {
+  void get_when_oneNormal() {
 
     DContextEntry entry = new DContextEntry();
     entry.add(DContextEntryBean.of("N", null, BeanEntry.NORMAL));
@@ -43,7 +44,7 @@ public class DContextEntryTest {
 
 
   @Test
-  public void get_when_oneNormal2() {
+  void get_when_oneNormal2() {
 
     DContextEntry entry = new DContextEntry();
     entry.add(DContextEntryBean.of("N", null, BeanEntry.NORMAL));
@@ -54,7 +55,7 @@ public class DContextEntryTest {
   }
 
   @Test
-  public void get_when_multiSecondaryOnly() {
+  void get_when_multiSecondaryOnly() {
 
     assertThrows(IllegalStateException.class, () -> {
       DContextEntry entry = new DContextEntry();
@@ -65,9 +66,8 @@ public class DContextEntryTest {
     });
   }
 
-
   @Test
-  public void get_when_multiSecondary_butNamed() {
+  void get_when_multiSecondary_butNamed() {
 
     DContextEntry entry = new DContextEntry();
     entry.add(DContextEntryBean.of("S1", "a", BeanEntry.SECONDARY));
@@ -77,7 +77,7 @@ public class DContextEntryTest {
   }
 
   @Test
-  public void get_when_multiSecondary_butNamed2() {
+  void get_when_multiSecondary_butNamed2() {
 
     DContextEntry entry = new DContextEntry();
     entry.add(DContextEntryBean.of("S1", null, BeanEntry.SECONDARY));
@@ -87,7 +87,7 @@ public class DContextEntryTest {
   }
 
   @Test
-  public void get_when_secondary_butNamed() {
+  void get_when_secondary_butNamed() {
 
     DContextEntry entry = new DContextEntry();
     entry.add(DContextEntryBean.of("S1", null, BeanEntry.PRIMARY));

@@ -65,6 +65,10 @@ final class MetaData {
     return (name == null) ? type : type + ":" + name;
   }
 
+  boolean importedComponent() {
+    return importedComponent;
+  }
+
   /**
    * Return true if this is a component with Aspects applied to it.
    * This means this type doesn't have a $DI but instead we have the $Proxy$DI.
