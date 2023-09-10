@@ -16,6 +16,7 @@ import static io.avaje.inject.spi.Module.EMPTY_CLASSES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@SuppressWarnings("all")
 class BeanScopeBuilderTest {
 
   @Test

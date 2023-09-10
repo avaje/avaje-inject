@@ -16,7 +16,9 @@ final class MetaTopPackage {
 
   private MetaTopPackage(Collection<MetaData> values) {
     for (MetaData metaData : values) {
-      topPackage = Util.commonParent(topPackage, metaData.topPackage());
+      if (!metaData.importedComponent()) {
+        topPackage = Util.commonParent(topPackage, metaData.topPackage());
+      }
     }
   }
 }
