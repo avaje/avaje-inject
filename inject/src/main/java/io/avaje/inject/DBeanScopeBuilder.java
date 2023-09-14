@@ -255,7 +255,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
     final var level = propertyRequiresPlugin.contains("printModules") ? INFO : DEBUG;
     initProfiles();
-    log.log(level, "building with modules {0} profiles {1}", moduleNames, profiles);
+    log.log(level, "building with avaje modules {0} profiles {1}", moduleNames, profiles);
 
     final Builder builder = Builder.newBuilder(profiles, propertyRequiresPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
     for (final Module factory : factoryOrder.factories()) {
