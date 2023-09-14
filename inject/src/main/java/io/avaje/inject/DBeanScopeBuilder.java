@@ -246,11 +246,11 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
     final Set<String> moduleNames = factoryOrder.orderFactories();
     if (moduleNames.isEmpty()) {
-      throw new IllegalStateException("No modules found. When using java module system we need an explicit provides clause in module-info like:\n\n" +
-        " provides io.avaje.inject.spi.Module with org.example.ExampleModule;\n\n" +
-        " Otherwise perhaps using Gradle and IDEA but with a setup issue?" +
-        " Review IntelliJ Settings / Build / Build tools / Gradle - 'Build and run using' value and set that to 'Gradle'. " +
-        " Refer to https://avaje.io/inject#gradle");
+      throw new IllegalStateException(
+          "Could not find any avaje modules."
+              + " Perhaps using Gradle and IDEA but with a setup issue?"
+              + " Review IntelliJ Settings / Build / Build tools / Gradle - 'Build and run using' value and set that to 'Gradle'. "
+              + " Refer to https://avaje.io/inject#gradle");
     }
 
     final var level = propertyRequiresPlugin.contains("printModules") ? INFO : DEBUG;
