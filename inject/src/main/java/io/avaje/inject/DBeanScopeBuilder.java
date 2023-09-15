@@ -17,9 +17,7 @@ import static java.lang.System.Logger.Level.INFO;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toSet;
 
-/**
- * Build a bean scope with options for shutdown hook and supplying test doubles.
- */
+/** Build a bean scope with options for shutdown hook and supplying test doubles. */
 @NonNullApi
 final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
@@ -39,11 +37,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private PropertyRequiresPlugin propertyRequiresPlugin;
   private Set<String> profiles;
 
-  /**
-   * Create a BeanScopeBuilder to ultimately load and return a new BeanScope.
-   */
-  DBeanScopeBuilder() {
-  }
+  /** Create a BeanScopeBuilder to ultimately load and return a new BeanScope. */
+  DBeanScopeBuilder() {}
 
   @Override
   public ForTesting forTesting() {
@@ -251,16 +246,16 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
     final Set<String> moduleNames = factoryOrder.orderFactories();
     if (moduleNames.isEmpty()) {
-      throw new IllegalStateException("No modules found. When using java module system we need an explicit provides clause in module-info like:\n\n" +
-        " provides io.avaje.inject.spi.Module with org.example.ExampleModule;\n\n" +
-        " Otherwise perhaps using Gradle and IDEA but with a setup issue?" +
-        " Review IntelliJ Settings / Build / Build tools / Gradle - 'Build and run using' value and set that to 'Gradle'. " +
-        " Refer to https://avaje.io/inject#gradle");
+      throw new IllegalStateException(
+          "Could not find any avaje modules."
+              + " Perhaps using Gradle and IDEA but with a setup issue?"
+              + " Review IntelliJ Settings / Build / Build tools / Gradle - 'Build and run using' value and set that to 'Gradle'. "
+              + " Refer to https://avaje.io/inject#gradle");
     }
 
     final var level = propertyRequiresPlugin.contains("printModules") ? INFO : DEBUG;
     initProfiles();
-    log.log(level, "building with modules {0} profiles {1}", moduleNames, profiles);
+    log.log(level, "building with avaje modules {0} profiles {1}", moduleNames, profiles);
 
     final Builder builder = Builder.newBuilder(profiles, propertyRequiresPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
     for (final Module factory : factoryOrder.factories()) {
@@ -273,9 +268,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     return builder.build(shutdownHook, start);
   }
 
-  /**
-   * Return the type that we map the supplied bean to.
-   */
+  /** Return the type that we map the supplied bean to. */
   private static Class<?> superOf(Class<?> suppliedClass) {
     final Class<?> suppliedSuper = suppliedClass.getSuperclass();
     if (Object.class.equals(suppliedSuper)) {
@@ -286,9 +279,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
   }
 
-  /**
-   * Helper to order the BeanContextFactory based on dependsOn.
-   */
+  /** Helper to order the BeanContextFactory based on dependsOn. */
   static class FactoryOrder {
 
     private final BeanScope parent;
@@ -336,18 +327,14 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       }
     }
 
-    /**
-     * Push the factory onto the build order (the wiring order for modules).
-     */
+    /** Push the factory onto the build order (the wiring order for modules). */
     private void push(FactoryState factory) {
       factory.setPushed();
       factories.add(factory.factory());
       moduleNames.add(factory.factory().getClass().getName());
     }
 
-    /**
-     * Order the factories returning the ordered list of module names.
-     */
+    /** Order the factories returning the ordered list of module names. */
     Set<String> orderFactories() {
       // push the 'no dependency' modules after the 'provides only' ones
       // as this is more intuitive for the simple (only provides modules case)
@@ -358,16 +345,12 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       return moduleNames;
     }
 
-    /**
-     * Return the list of factories in the order they should be built.
-     */
+    /** Return the list of factories in the order they should be built. */
     List<Module> factories() {
       return factories;
     }
 
-    /**
-     * Process the queue pushing the factories in order to satisfy dependencies.
-     */
+    /** Process the queue pushing the factories in order to satisfy dependencies. */
     private void processQueue() {
       int count;
       do {
@@ -409,15 +392,14 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       if (parent != null && parent.contains(dependency)) {
         return false;
       }
-      final FactoryList factories = providesMap.get(dependency);
-      return (factories == null || !factories.allPushed());
+      final FactoryList factoryList = providesMap.get(dependency);
+      return (factoryList == null || !factoryList.allPushed());
     }
 
     /**
-     * Process the queued factories pushing them when all their (module) dependencies
-     * are satisfied.
-     * <p>
-     * This returns the number of factories added so once this returns 0 it is done.
+     * Process the queued factories pushing them when all their (module) dependencies are satisfied.
+     *
+     * <p>This returns the number of factories added so once this returns 0 it is done.
      */
     private int processQueuedFactories() {
       int count = 0;
@@ -434,9 +416,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       return count;
     }
 
-    /**
-     * Return true if the (module) requires dependencies are satisfied for this factory.
-     */
+    /** Return true if the (module) requires dependencies are satisfied for this factory. */
     private boolean satisfiedDependencies(FactoryState factory) {
       return satisfiedDependencies(factory.requires())
         && satisfiedDependencies(factory.requiresPackages())
@@ -458,9 +438,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
   }
 
-  /**
-   * Wrapper on Factory holding the pushed state.
-   */
+  /** Wrapper on Factory holding the pushed state. */
   private static class FactoryState {
 
     private final Module factory;
@@ -470,9 +448,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       this.factory = factory;
     }
 
-    /**
-     * Set when factory is pushed onto the build/wiring order.
-     */
+    /** Set when factory is pushed onto the build/wiring order. */
     void setPushed() {
       this.pushed = true;
     }
@@ -520,9 +496,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
   }
 
-  /**
-   * List of factories for a given name or feature.
-   */
+  /** List of factories for a given name or feature. */
   private static class FactoryList {
 
     private final List<FactoryState> factories = new ArrayList<>();
@@ -531,9 +505,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       factories.add(factory);
     }
 
-    /**
-     * Return true if all factories here have been pushed onto the build order.
-     */
+    /** Return true if all factories here have been pushed onto the build order. */
     boolean allPushed() {
       for (final FactoryState factory : factories) {
         if (!factory.isPushed()) {
@@ -543,5 +515,4 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       return true;
     }
   }
-
 }
