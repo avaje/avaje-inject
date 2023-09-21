@@ -4,6 +4,7 @@ import io.avaje.inject.*;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import org.example.myapp.HelloData;
+import org.example.myapp.MyDestroyOrder;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -13,12 +14,17 @@ public class AppConfig {
 
   public static AtomicBoolean BEAN_AUTO_CLOSED = new AtomicBoolean();
 
+  @PreDestroy
+  void close() {
+    MyDestroyOrder.add("AppConfig");
+  }
+
   @Bean(autoCloseable = true)
   SomeInterface someInterface() {
     return new SomeInterfaceWithClose();
   }
 
-  @Bean
+  @Bean(destroyMethod = "shutdown", destroyPriority = 1500)
   HelloData data() {
     return new AppHelloData();
   }
@@ -28,6 +34,11 @@ public class AppConfig {
     @Override
     public String helloData() {
       return "AppHelloData";
+    }
+
+    @Override
+    public void shutdown() {
+      MyDestroyOrder.add("AppHelloData");
     }
   }
 

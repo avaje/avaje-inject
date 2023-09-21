@@ -31,6 +31,7 @@ final class BeanReader {
   private final BeanAspects aspects;
   private final BeanConditions conditions = new BeanConditions();
   private final boolean importedComponent;
+  private final Integer preDestroyPriority;
   private boolean writtenToFile;
   private boolean suppressBuilderImport;
   private boolean suppressGeneratedImport;
@@ -57,6 +58,7 @@ final class BeanReader {
     this.factoryMethods = typeReader.factoryMethods();
     this.postConstructMethod = typeReader.postConstructMethod();
     this.preDestroyMethod = typeReader.preDestroyMethod();
+    this.preDestroyPriority = typeReader.preDestroyPriority();
     this.constructor = typeReader.constructor();
     this.importedComponent = importedComponent && (constructor != null && constructor.isPublic());
   }
@@ -247,7 +249,8 @@ final class BeanReader {
     }
     if (preDestroyMethod != null) {
       prototypeNotSupported("@PreDestroy");
-      writer.append("%s builder.addPreDestroy($bean::%s);", indent, preDestroyMethod.getSimpleName()).eol();
+      var priority = preDestroyPriority == null || preDestroyPriority == 1000 ? "" : ", " + preDestroyPriority;
+      writer.append("%s builder.addPreDestroy($bean::%s%s);", indent, preDestroyMethod.getSimpleName(), priority).eol();
     } else if (typeReader.isClosable() && !prototype) {
       writer.append("%s builder.addPreDestroy($bean);", indent).eol();
     }

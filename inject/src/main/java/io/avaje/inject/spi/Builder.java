@@ -107,6 +107,11 @@ public interface Builder {
   void addPreDestroy(AutoCloseable closeable);
 
   /**
+   * Add lifecycle PreDestroy method with a given priority.
+   */
+  void addPreDestroy(AutoCloseable closeable, int priority);
+
+  /**
    * Check if the instance is AutoCloseable and if so register it with PreDestroy.
    *
    * @param maybeAutoCloseable An instance that might be AutoCloseable

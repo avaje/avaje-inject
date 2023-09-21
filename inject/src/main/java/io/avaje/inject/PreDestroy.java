@@ -29,4 +29,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Target(METHOD)
 public @interface PreDestroy {
+
+  /**
+   * Specify the priority of the destroy method to control its execution
+   * order relative to other destroy methods.
+   * <p>
+   * Low values execute earlier than high values. All destroy methods without
+   * any explicit priority are given a value of 1000.
+   */
+  int priority() default 1000;
 }

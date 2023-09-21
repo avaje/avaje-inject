@@ -1,5 +1,6 @@
 package org.example.myapp;
 
+import io.avaje.inject.PreDestroy;
 import jakarta.inject.Singleton;
 import org.example.myapp.aspect.MyTimed;
 
@@ -35,5 +36,10 @@ public class ExampleService {
 
   public void withListString(List<String> param0) {
     System.out.println("withListString " + param0);
+  }
+
+  @PreDestroy(priority = 1001)
+  public void close() {
+    MyDestroyOrder.add("ExampleService");
   }
 }

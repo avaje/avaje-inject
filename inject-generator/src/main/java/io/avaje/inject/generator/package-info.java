@@ -13,6 +13,7 @@
 @GeneratePrism(Primary.class)
 @GeneratePrism(Secondary.class)
 @GeneratePrism(Proxy.class)
+@GeneratePrism(PreDestroy.class)
 @GeneratePrism(DependencyMeta.class)
 @GeneratePrism(Bean.class)
 @GeneratePrism(QualifiedMap.class)

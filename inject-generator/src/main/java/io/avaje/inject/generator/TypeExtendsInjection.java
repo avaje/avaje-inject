@@ -30,6 +30,7 @@ final class TypeExtendsInjection {
   private final List<AspectPair> typeAspects;
   private Element postConstructMethod;
   private Element preDestroyMethod;
+  private Integer preDestroyPriority;
 
   TypeExtendsInjection(TypeElement baseType, boolean factory, ImportTypeMap importTypes) {
     this.importTypes = importTypes;
@@ -124,6 +125,7 @@ final class TypeExtendsInjection {
     if (AnnotationUtil.hasAnnotationWithName(element, "PreDestroy")) {
       preDestroyMethod = element;
       checkAspect = false;
+      PreDestroyPrism.getOptionalOn(element).ifPresent(preDestroy -> preDestroyPriority = preDestroy.priority());
     }
     if (checkAspect) {
       checkForAspect(methodElement);
@@ -200,6 +202,10 @@ final class TypeExtendsInjection {
 
   Element preDestroyMethod() {
     return preDestroyMethod;
+  }
+
+  Integer preDestroyPriority() {
+    return preDestroyPriority;
   }
 
   MethodReader constructor() {

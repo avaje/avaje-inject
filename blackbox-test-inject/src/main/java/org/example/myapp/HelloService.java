@@ -91,8 +91,8 @@ public class HelloService {
 
   }
 
-  @PreDestroy
+  @PreDestroy(priority = 100)
   void preDest() {
-
+    MyDestroyOrder.add("HelloService");
   }
 }

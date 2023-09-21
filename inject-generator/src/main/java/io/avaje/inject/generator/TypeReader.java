@@ -77,6 +77,10 @@ final class TypeReader {
     return extendsReader.preDestroyMethod();
   }
 
+  Integer preDestroyPriority() {
+    return extendsReader.preDestroyPriority();
+  }
+
   MethodReader constructor() {
     return extendsReader.constructor();
   }

@@ -29,7 +29,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private final Set<Module> includeModules = new LinkedHashSet<>();
   private final List<Runnable> postConstructList = new ArrayList<>();
   private final List<Consumer<BeanScope>> postConstructConsumerList = new ArrayList<>();
-  private final List<AutoCloseable> preDestroyList = new ArrayList<>();
+  private final List<ClosePair> preDestroyList = new ArrayList<>();
   private BeanScope parent;
   private boolean parentOverride = true;
   private boolean shutdownHook;
@@ -128,7 +128,12 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   @Override
   public BeanScopeBuilder addPreDestroy(AutoCloseable preDestroyHook) {
-    preDestroyList.add(preDestroyHook);
+    return addPreDestroy(preDestroyHook, 1000);
+  }
+
+  @Override
+  public BeanScopeBuilder addPreDestroy(AutoCloseable preDestroyHook, int priority) {
+    preDestroyList.add(new ClosePair(priority, preDestroyHook));
     return this;
   }
 
@@ -264,7 +269,9 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
     postConstructList.forEach(builder::addPostConstruct);
     postConstructConsumerList.forEach(builder::addPostConstruct);
-    preDestroyList.forEach(builder::addPreDestroy);
+    for (ClosePair closePair : preDestroyList) {
+      builder.addPreDestroy(closePair.closeable(), closePair.priority());
+    }
     return builder.build(shutdownHook, start);
   }
 
