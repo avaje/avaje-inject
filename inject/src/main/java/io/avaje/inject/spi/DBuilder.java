@@ -7,6 +7,7 @@ import jakarta.inject.Provider;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static io.avaje.inject.spi.DBeanScope.combine;
 
@@ -18,7 +19,7 @@ class DBuilder implements Builder {
   private final List<Runnable> postConstruct = new ArrayList<>();
 
   private final List<Consumer<BeanScope>> postConstructConsumers = new ArrayList<>();
-  private final List<AutoCloseable> preDestroy = new ArrayList<>();
+  private final List<ClosePair> preDestroy = new ArrayList<>();
   /** List of field injection closures. */
   private final List<Consumer<Builder>> injectors = new ArrayList<>();
   /** The beans created and added to the scope during building. */
@@ -200,13 +201,18 @@ class DBuilder implements Builder {
 
   @Override
   public final void addPreDestroy(AutoCloseable invoke) {
-    preDestroy.add(invoke);
+    addPreDestroy(invoke, 1000);
+  }
+
+  @Override
+  public final void addPreDestroy(AutoCloseable invoke, int priority) {
+    preDestroy.add(new ClosePair(priority, invoke));
   }
 
   @Override
   public final void addAutoClosable(Object maybeAutoCloseable) {
     if (maybeAutoCloseable instanceof AutoCloseable) {
-      preDestroy.add((AutoCloseable) maybeAutoCloseable);
+      preDestroy.add(new ClosePair(1000, (AutoCloseable) maybeAutoCloseable));
     }
   }
 
@@ -418,12 +424,20 @@ class DBuilder implements Builder {
   @Override
   public final BeanScope build(boolean withShutdownHook, long start) {
     runInjectors();
-    final var scope =
-        new DBeanScope(
-            withShutdownHook, preDestroy, postConstruct, postConstructConsumers, beanMap, parent);
+    final var scope = new DBeanScope(withShutdownHook, preDestroy(), postConstruct, postConstructConsumers, beanMap, parent);
     if (beanScopeProxy != null) {
       beanScopeProxy.inject(scope);
     }
     return scope.start(start);
+  }
+
+  /**
+   * Return the PreDestroy methods in priority order.
+   */
+  private List<AutoCloseable> preDestroy() {
+    Collections.sort(preDestroy);
+    return preDestroy.stream()
+      .map(ClosePair::closeable)
+      .collect(Collectors.toList());
   }
 }

@@ -101,6 +101,10 @@ final class TypeExtendsReader {
     return extendsInjection.preDestroyMethod();
   }
 
+  Integer preDestroyPriority() {
+    return extendsInjection.preDestroyPriority();
+  }
+
   MethodReader constructor() {
     return extendsInjection.constructor();
   }

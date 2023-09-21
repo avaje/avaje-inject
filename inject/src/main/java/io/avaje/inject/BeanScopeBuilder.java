@@ -236,6 +236,17 @@ public interface BeanScopeBuilder {
   BeanScopeBuilder addPreDestroy(AutoCloseable preDestroyHook);
 
   /**
+   * Add hook with a priority that will execute before this scope is destroyed.
+   * <p>
+   * Specify the priority of the destroy method to control its execution
+   * order relative to other destroy methods.
+   * <p>
+   * Low values for priority execute earlier than high values. All destroy methods
+   * without any explicit priority are given a value of 1000.
+   */
+  BeanScopeBuilder addPreDestroy(AutoCloseable preDestroyHook, int priority);
+
+  /**
    * Set the ClassLoader to use when loading modules.
    *
    * @param classLoader The ClassLoader to use

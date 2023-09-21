@@ -29,6 +29,7 @@ final class MethodReader {
   private final boolean isFactory;
   private final String initMethod;
   private final String destroyMethod;
+  private final Integer destroyPriority;
   private final boolean beanCloseable;
   private final String name;
   private final TypeReader typeReader;
@@ -72,6 +73,7 @@ final class MethodReader {
     this.isVoid = Util.isVoid(topType);
     String initMethod = (bean == null) ? null : bean.initMethod();
     String destroyMethod = (bean == null) ? null : bean.destroyMethod();
+    this.destroyPriority = (bean == null) ? null : bean.destroyPriority();
     this.beanCloseable = (bean != null) && bean.autoCloseable();
     this.name = qualifierName;
     TypeElement returnElement = asElement(returnMirror);
@@ -227,10 +229,11 @@ final class MethodReader {
       if (notEmpty(initMethod)) {
         writer.append(indent).append("builder.addPostConstruct($bean::%s);", initMethod).eol();
       }
+      var priority = destroyPriority == null || destroyPriority == 1000 ? "" : ", " + destroyPriority;
       if (notEmpty(destroyMethod)) {
-        writer.append(indent).append("builder.addPreDestroy($bean::%s);", destroyMethod).eol();
+        writer.append(indent).append("builder.addPreDestroy($bean::%s%s);", destroyMethod, priority).eol();
       } else if (typeReader != null && typeReader.isClosable()) {
-        writer.append(indent).append("builder.addPreDestroy($bean::close);").eol();
+        writer.append(indent).append("builder.addPreDestroy($bean::close%s);", priority).eol();
       } else if (beanCloseable) {
         writer.append(indent).append("builder.addAutoClosable($bean);").eol();
       }
