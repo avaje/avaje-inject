@@ -1,5 +1,10 @@
 package io.avaje.inject.generator;
 
+import static java.util.Map.entry;
+import static java.util.List.of;
+
+import java.util.List;
+import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.Set;
@@ -15,6 +20,22 @@ import io.avaje.inject.spi.Plugin;
 final class ExternalProvider {
 
   private static final boolean injectAvailable = moduleCP();
+  private static final Map<String, List<String>> avajePlugins =
+      Map.ofEntries(
+          entry("io.avaje.jsonb.inject.DefaultJsonbProvider", of("io.avaje.jsonb.Jsonb")),
+          entry(
+              "io.avaje.http.inject.DefaultResolverProvider",
+              of("io.avaje.http.api.context.RequestContextResolver")),
+          entry(
+              "io.avaje.nima.provider.DefaultConfigProvider",
+              of(
+                  "io.helidon.webserver.WebServerConfig.Builder",
+                  "io.helidon.webserver.http.HttpRouting.Builder")),
+          entry(
+              "io.avaje.validation.inject.spi.DefaultValidatorProvider",
+              of(
+                  "io.avaje.validation.Validator",
+                  "io.avaje.inject.aop.AspectProvider<io.avaje.validation.ValidMethod>")));
 
   private ExternalProvider() {}
 
@@ -28,13 +49,15 @@ final class ExternalProvider {
   }
 
   static void registerModuleProvidedTypes(Set<String> providedTypes) {
+
     if (!injectAvailable) {
       System.out.println(
           "Unable to detect Avaje Inject in Annotation Processor ClassPath, use the Avaje Inject Maven/Gradle plugin for detecting Inject Modules from dependencies");
       return;
     }
 
-    final var iterator = ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader()).iterator();
+    final var iterator =
+        ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader()).iterator();
     if (!iterator.hasNext()) {
       System.out.println("No external modules detected");
       return;
@@ -63,10 +86,23 @@ final class ExternalProvider {
    * types and the only thing providing them is the plugin.
    */
   static void registerPluginProvidedTypes(ScopeInfo defaultScope) {
+
+    avajePlugins.forEach(
+        (k, v) -> {
+          if (APContext.typeElement(k) != null) {
+            System.out.println("Loaded Plugin: " + k);
+            v.forEach(defaultScope::pluginProvided);
+          }
+        });
     if (!injectAvailable) {
       return;
     }
     for (final Plugin plugin : ServiceLoader.load(Plugin.class, Processor.class.getClassLoader())) {
+
+      var name = plugin.getClass().getCanonicalName();
+      if (avajePlugins.containsKey(name)) {
+        continue;
+      }
       System.out.println("Loaded Plugin: " + plugin.getClass().getCanonicalName());
       for (final Class<?> provide : plugin.provides()) {
         defaultScope.pluginProvided(provide.getCanonicalName());
