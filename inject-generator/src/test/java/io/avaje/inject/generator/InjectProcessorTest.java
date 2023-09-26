@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 
 import javax.tools.JavaCompiler;
@@ -57,7 +58,12 @@ class InjectProcessorTest {
 
     final CompilationTask task =
         compiler.getTask(
-            new PrintWriter(System.out), null, null, Arrays.asList("--release=11"), null, files);
+            new PrintWriter(System.out),
+            null,
+            null,
+            List.of("--release=" + Integer.getInteger("java.specification.version")),
+            null,
+            files);
     task.setProcessors(Arrays.asList(new Processor()));
 
     assertThat(task.call()).isTrue();
