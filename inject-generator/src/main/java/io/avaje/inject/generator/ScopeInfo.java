@@ -274,12 +274,12 @@ final class ScopeInfo {
     }
   }
 
-  /**
-   * Add a new previously unknown bean.
-   */
+  /** Add a new previously unknown bean. */
   private void addMeta(BeanReader beanReader) {
     MetaData meta = beanReader.createMeta();
-    metaData.put(meta.key(), meta);
+    if (!meta.isGenerateProxy()) {
+      metaData.put(meta.key(), meta);
+    }
     for (MetaData methodMeta : beanReader.createFactoryMethodMeta()) {
       metaData.put(methodMeta.key(), methodMeta);
     }
