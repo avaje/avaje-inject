@@ -5,7 +5,7 @@ import org.example.myapp.aspect.MyAround;
 import org.example.myapp.aspect.MyTimed;
 
 @Singleton
-public class OtherService {
+class OtherService {
 
   @MyAround
   public String other(String param0, int param1) {
