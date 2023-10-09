@@ -34,6 +34,7 @@ final class TypeExtendsReader {
   private final boolean baseTypeIsInterface;
   private final boolean publicAccess;
   private final boolean autoProvide;
+  private final boolean proxyBean;
   private boolean closeable;
   /**
    * The implied qualifier name based on naming convention.
@@ -41,7 +42,7 @@ final class TypeExtendsReader {
   private String qualifierName;
   private String providesAspect = "";
 
-  TypeExtendsReader(GenericType baseGenericType, TypeElement baseType, boolean factory, ImportTypeMap importTypes) {
+  TypeExtendsReader(GenericType baseGenericType, TypeElement baseType, boolean factory, ImportTypeMap importTypes, boolean proxyBean) {
     this.baseGenericType = baseGenericType;
     this.baseType = baseType;
     this.extendsInjection = new TypeExtendsInjection(baseType, factory, importTypes);
@@ -50,6 +51,7 @@ final class TypeExtendsReader {
     this.baseTypeIsInterface = baseType.getKind() == ElementKind.INTERFACE;
     this.publicAccess = baseType.getModifiers().contains(Modifier.PUBLIC);
     this.autoProvide = autoProvide();
+    this.proxyBean = proxyBean;
   }
 
   private boolean autoProvide() {
@@ -147,7 +149,7 @@ final class TypeExtendsReader {
           qualifierName = baseName.substring(0, baseName.length() - superName.length()).toLowerCase();
         }
       }
-      addSuperType(superElement, superMirror);
+      addSuperType(superElement, superMirror, proxyBean);
     }
 
     providesTypes.addAll(extendsTypes);
@@ -167,12 +169,12 @@ final class TypeExtendsReader {
     return "";
   }
 
-  private void addSuperType(TypeElement element, TypeMirror mirror) {
+  private void addSuperType(TypeElement element, TypeMirror mirror, boolean proxyBean) {
     readInterfaces(element);
     final String fullName = mirror.toString();
     if (!JAVA_LANG_OBJECT.equals(fullName) && !JAVA_LANG_RECORD.equals(fullName)) {
       final String type = Util.unwrapProvider(fullName);
-      if (isPublic(element)) {
+      if (proxyBean || isPublic(element)) {
         final var genericType = GenericType.parse(type);
         // check if any unknown generic types are in the parameters (T,T2, etc.)
         final var knownType =
@@ -186,7 +188,7 @@ final class TypeExtendsReader {
 
       final var superMirror = element.getSuperclass();
       final var superElement = asElement(superMirror);
-      addSuperType(superElement, superMirror);
+      addSuperType(superElement, superMirror, false);
     }
   }
 

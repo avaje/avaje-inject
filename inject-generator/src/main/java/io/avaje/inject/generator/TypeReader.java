@@ -29,7 +29,8 @@ final class TypeReader {
     this.forBean = forBean;
     this.beanType = beanType;
     this.importTypes = importTypes;
-    this.extendsReader = new TypeExtendsReader(genericType, beanType, factory, importTypes);
+    final boolean proxyBean = forBean && ProxyPrism.isPresent(beanType);
+    this.extendsReader = new TypeExtendsReader(genericType, beanType, factory, importTypes, proxyBean);
     this.annotationReader = new TypeAnnotationReader(beanType);
   }
 
