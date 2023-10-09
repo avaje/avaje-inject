@@ -9,8 +9,7 @@
 
   <artifactId>avaje-inject</artifactId>
   <name>avaje inject</name>
-  <description>avaje dependency injection library</description>
-
+  <description>avaje-inject dependency injection library using source code generation</description>
   <dependencies>
 
     <dependency>
