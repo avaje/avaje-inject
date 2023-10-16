@@ -44,23 +44,6 @@
         <module>blackbox-test-inject</module>
       </modules>
     </profile>
-    <profile>
-      <id>jdk22plus</id>
-      <activation>
-        <jdk>[21, 22]</jdk>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <configuration>
-              <compilerArgs>-proc:full</compilerArgs>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
   </profiles>
 
 </project>
