@@ -1,5 +1,11 @@
 package org.example.myapp.resilience4j;
 
+import java.lang.reflect.Method;
+import java.time.Duration;
+import java.time.format.DateTimeParseException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
+
 import io.avaje.inject.Component;
 import io.avaje.inject.aop.AspectProvider;
 import io.avaje.inject.aop.Fallback;
@@ -7,12 +13,6 @@ import io.avaje.inject.aop.Invocation;
 import io.avaje.inject.aop.MethodInterceptor;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
-
-import java.lang.reflect.Method;
-import java.time.Duration;
-import java.time.format.DateTimeParseException;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 
 @Component
 public class RetryProvider implements AspectProvider<MyRetry> {
@@ -32,15 +32,15 @@ public class RetryProvider implements AspectProvider<MyRetry> {
       } catch (DateTimeParseException e) {
         e.printStackTrace();
       }
-
     }
-    RetryConfig retryConfig = RetryConfig.ofDefaults();
     RetryConfig config = builder.build();
     io.github.resilience4j.retry.Retry retry = io.github.resilience4j.retry.Retry.of("id", config);
 
     Fallback fallback = fallback(method, retryAnnotation);
 
-    return fallback == null ?  new RetryInterceptor(retry) : new RetryFallbackInterceptor(retry, fallback);
+    return fallback == null
+        ? new RetryInterceptor(retry)
+        : new RetryFallbackInterceptor(retry, fallback);
   }
 
   private Fallback fallback(Method method, MyRetry retryAnnotation) {
@@ -53,7 +53,6 @@ public class RetryProvider implements AspectProvider<MyRetry> {
     }
     return null;
   }
-
 
   public static AtomicInteger testCounter = new AtomicInteger();
 
@@ -68,8 +67,7 @@ public class RetryProvider implements AspectProvider<MyRetry> {
     @Override
     public void invoke(Invocation invocation) throws Throwable {
       testCounter.incrementAndGet();
-      Retry.decorateCheckedSupplier(retry, invocation::invoke)
-        .apply();
+      Retry.decorateCheckedRunnable(retry, invocation::invoke).run();
     }
   }
 
@@ -77,19 +75,25 @@ public class RetryProvider implements AspectProvider<MyRetry> {
 
     private final io.github.resilience4j.retry.Retry retry;
     private final Fallback fallback;
+    private final Predicate<Throwable> errorPredicate;
 
     public RetryFallbackInterceptor(Retry retry, Fallback fallback) {
       this.retry = retry;
       this.fallback = fallback;
+      this.errorPredicate = retry.getRetryConfig().getExceptionPredicate();
     }
 
     @Override
     public void invoke(Invocation invocation) throws Throwable {
       testCounter.incrementAndGet();
-      Retry.decorateCheckedSupplier(retry, invocation::invoke)
-        .recover((throwable) -> (Supplier<Object>) () -> fallback.invoke(invocation, throwable))
-        .apply();
+      try {
+        Retry.decorateCheckedRunnable(retry, invocation::invoke).run();
+
+      } catch (Throwable e) {
+        if (!errorPredicate.test(e)) throw e;
+
+        fallback.invoke(invocation, e);
+      }
     }
   }
-
 }
