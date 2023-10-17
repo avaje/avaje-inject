@@ -59,7 +59,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-http-api</artifactId>
-      <version>1.17</version>
+      <version>1.46</version>
       <scope>test</scope>
     </dependency>
 
