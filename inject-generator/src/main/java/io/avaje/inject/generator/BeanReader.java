@@ -61,19 +61,14 @@ final class BeanReader {
     this.importedComponent = importedComponent && (constructor != null && constructor.isPublic());
 
     var proxyPrism = ProxyPrism.getInstanceOn(beanType);
-
     if (proxyPrism != null) {
       this.proxy = true;
       var proxyMirror = proxyPrism.value();
-
       if (!"Void".equals(proxyMirror.toString())) {
-
         conditions.readAll(APContext.asTypeElement(proxyMirror));
       }
     } else {
-
       conditions.readAll(beanType);
-
       this.proxy = false;
     }
   }
