@@ -285,6 +285,24 @@ final class MethodReader {
     writer.append(")) {").eol();
   }
 
+  private boolean methodThrows() {
+    return !element.getThrownTypes().isEmpty();
+  }
+
+  void startTry(Append writer) {
+    if (methodThrows()) {
+      writer.append("      try {").eol();
+    }
+  }
+
+  void endTry(Append writer) {
+    if (methodThrows()) {
+      writer.append("      } catch (Throwable e) {").eol();
+      writer.append("        throw new RuntimeException(\"Error during wiring\", e);").eol();
+      writer.append("      }").eol();
+    }
+  }
+
   /**
    * Check for request scoped dependency.
    */

@@ -135,13 +135,17 @@ final class SimpleBeanWriter {
     method.buildConditional(writer);
     method.buildAddFor(writer);
     method.builderGetFactory(writer, beanReader.hasConditions());
+    method.startTry(writer);
     if (method.isProtoType()) {
       method.builderAddBeanProvider(writer);
+      method.endTry(writer);
     } else if (method.isUseProviderForSecondary()) {
       method.builderAddBeanProvider(writer);
+      method.endTry(writer);
     } else {
       method.builderBuildBean(writer);
       method.builderBuildAddBean(writer);
+      method.endTry(writer);
       writer.append("    }").eol();
     }
     writer.append("  }").eol().eol();

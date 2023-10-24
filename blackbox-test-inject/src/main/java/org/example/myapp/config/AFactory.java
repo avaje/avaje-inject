@@ -3,6 +3,8 @@ package org.example.myapp.config;
 import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
 
+import java.io.IOException;
+
 @Factory
 class AFactory {
 
@@ -27,10 +29,19 @@ class AFactory {
     b2.hashCode();
   }
 
+  @Bean
+  AFoo buildAfoo() throws IOException {
+    return new AFoo();
+  }
+
   static class I0 implements A0.Builder {
 
   }
   static class I1 implements A1.Builder {
+
+  }
+
+  static class AFoo {
 
   }
 }
