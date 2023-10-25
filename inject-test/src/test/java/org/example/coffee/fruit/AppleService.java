@@ -3,6 +3,8 @@ package org.example.coffee.fruit;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
+import java.io.IOException;
+
 @Singleton
 public class AppleService {
 
@@ -11,8 +13,13 @@ public class AppleService {
 
   PeachService peachService;
 
+  public AppleService() throws IOException {
+    // maybe I throw on construction
+  }
+
   @Inject
-  void setPeachService(PeachService peachService) {
+  void setPeachService(PeachService peachService) throws IOException {
+    // maybe I throw on method injection
     this.peachService = peachService;
   }
 

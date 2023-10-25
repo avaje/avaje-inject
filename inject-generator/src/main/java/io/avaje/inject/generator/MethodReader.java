@@ -26,7 +26,6 @@ final class MethodReader {
   private final boolean isVoid;
   private final List<MethodParam> params = new ArrayList<>();
   private final String factoryShortName;
-  private final boolean isFactory;
   private final String initMethod;
   private final String destroyMethod;
   private final Integer destroyPriority;
@@ -41,15 +40,12 @@ final class MethodReader {
   }
 
   MethodReader(ExecutableElement element, TypeElement beanType, BeanPrism bean, String qualifierName, ImportTypeMap importTypes) {
-    this.isFactory = bean != null;
     this.element = element;
-    if (isFactory) {
+    if (bean != null) {
       prototype = PrototypePrism.isPresent(element);
       primary = PrimaryPrism.isPresent(element);
       secondary = SecondaryPrism.isPresent(element);
-
       conditions.readAll(element);
-
     } else {
       prototype = false;
       primary = false;
@@ -164,7 +160,7 @@ final class MethodReader {
   }
 
   void builderBuildBean(Append writer) {
-    writer.append("      ");
+    writer.indent("      ");
     if (isVoid) {
       writer.append("factory.%s(", methodName);
     } else {
@@ -175,7 +171,7 @@ final class MethodReader {
       if (i > 0) {
         writer.append(", ");
       }
-      params.get(i).builderGetDependency(writer, "builder", true);
+      params.get(i).builderGetDependency(writer, "builder");
     }
     writer.append(");").eol();
   }
@@ -191,31 +187,31 @@ final class MethodReader {
     }
     String indent = "    ";
     if (prototype) {
-      writer.append(indent).append("  builder.asPrototype().registerProvider(() -> {").eol();
+      writer.indent(indent).append("  builder.asPrototype().registerProvider(() -> {").eol();
     } else {
-      writer.append(indent).append("  builder.asSecondary().registerProvider(() -> {").eol();
+      writer.indent(indent).append("  builder.asSecondary().registerProvider(() -> {").eol();
     }
-    writer.append("%s    return ", indent);
-    writer.append(String.format("factory.%s(", methodName));
+    writer.indent(indent).append("    return ");
+    writer.append("factory.%s(", methodName);
     for (int i = 0; i < params.size(); i++) {
       if (i > 0) {
         writer.append(", ");
       }
-      params.get(i).builderGetDependency(writer, "builder", true);
+      params.get(i).builderGetDependency(writer, "builder");
     }
     writer.append(");").eol();
-    writer.append(indent).append("  });").eol();
-    writer.append(indent).append("}").eol();
+    writer.indent(indent).append("  });").eol();
+    writer.indent(indent).append("}").eol();
   }
 
   void builderBuildAddBean(Append writer) {
     if (!isVoid) {
-      String indent = optionalType ? "        " : "      ";
       if (optionalType) {
         writer.append("      if (optionalBean.isPresent()) {").eol();
         writer.append("        var bean = optionalBean.get();").eol();
       }
-      writer.append(indent);
+      String indent = optionalType ? "        " : "      ";
+      writer.indent(indent);
       if (hasLifecycleMethods()) {
         writer.append("var $bean = ");
       }
@@ -227,15 +223,15 @@ final class MethodReader {
       }
       writer.append(".register(bean);").eol();
       if (notEmpty(initMethod)) {
-        writer.append(indent).append("builder.addPostConstruct($bean::%s);", initMethod).eol();
+        writer.indent(indent).append("builder.addPostConstruct($bean::%s);", initMethod).eol();
       }
       var priority = destroyPriority == null || destroyPriority == 1000 ? "" : ", " + destroyPriority;
       if (notEmpty(destroyMethod)) {
-        writer.append(indent).append("builder.addPreDestroy($bean::%s%s);", destroyMethod, priority).eol();
+        writer.indent(indent).append("builder.addPreDestroy($bean::%s%s);", destroyMethod, priority).eol();
       } else if (typeReader != null && typeReader.isClosable()) {
-        writer.append(indent).append("builder.addPreDestroy($bean::close%s);", priority).eol();
+        writer.indent(indent).append("builder.addPreDestroy($bean::close%s);", priority).eol();
       } else if (beanCloseable) {
-        writer.append(indent).append("builder.addAutoClosable($bean);").eol();
+        writer.indent(indent).append("builder.addAutoClosable($bean);").eol();
       }
       if (optionalType) {
         writer.append("      }").eol();
@@ -283,6 +279,26 @@ final class MethodReader {
       }
     }
     writer.append(")) {").eol();
+  }
+
+  boolean methodThrows() {
+    return !element.getThrownTypes().isEmpty();
+  }
+
+  void startTry(Append writer) {
+    if (methodThrows()) {
+      writer.append("      try {").eol();
+      writer.setExtraIndent("  ");
+    }
+  }
+
+  void endTry(Append writer) {
+    if (methodThrows()) {
+      writer.setExtraIndent(null);
+      writer.append("      } catch (Throwable e) {").eol();
+      writer.append("        throw new RuntimeException(\"Error during wiring\", e);").eol();
+      writer.append("      }").eol();
+    }
   }
 
   /**
@@ -356,7 +372,7 @@ final class MethodReader {
 
   static class MethodParam {
 
-    private VariableElement element;
+    private final VariableElement element;
     private final String named;
     private final UtilType utilType;
     private final String paramType;
@@ -382,7 +398,6 @@ final class MethodReader {
       if (nullable || param.asType().toString().startsWith("java.util.Optional<")) {
         ProcessingContext.addOptionalType(paramType);
       }
-
     }
 
     @Override
@@ -396,7 +411,7 @@ final class MethodReader {
       }
     }
 
-    void builderGetDependency(Append writer, String builderName, boolean forFactory) {
+    void builderGetDependency(Append writer, String builderName) {
       writer.append(builderName).append(".").append(utilType.getMethod(nullable, isBeanMap));
       if (!genericType.isGenericType()) {
         writer.append(Util.shortName(genericType.topType())).append(".class");
@@ -472,11 +487,9 @@ final class MethodReader {
     }
 
     void writeMethodParam(Append writer) {
-
       if (nullable) {
         writer.append("@Nullable ");
       }
-
       if (genericType.isGenericType()) {
         genericType.writeShort(writer);
       } else {

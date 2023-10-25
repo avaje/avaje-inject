@@ -240,7 +240,7 @@ final class BeanReader {
     if (prototype) {
       return;
     }
-    writer.append("      ");
+    writer.indent("      ");
     if (isExtraInjectionRequired() || hasLifecycleMethods()) {
       writer.append("var $bean = ");
     }
@@ -255,14 +255,14 @@ final class BeanReader {
 
   void addLifecycleCallbacks(Append writer, String indent) {
     if (postConstructMethod != null && !prototype) {
-      writer.append("%s builder.addPostConstruct($bean::%s);", indent, postConstructMethod.getSimpleName()).eol();
+      writer.indent(indent).append(" builder.addPostConstruct($bean::%s);", postConstructMethod.getSimpleName()).eol();
     }
     if (preDestroyMethod != null) {
       prototypeNotSupported("@PreDestroy");
       var priority = preDestroyPriority == null || preDestroyPriority == 1000 ? "" : ", " + preDestroyPriority;
-      writer.append("%s builder.addPreDestroy($bean::%s%s);", indent, preDestroyMethod.getSimpleName(), priority).eol();
+      writer.indent(indent).append(" builder.addPreDestroy($bean::%s%s);", preDestroyMethod.getSimpleName(), priority).eol();
     } else if (typeReader.isClosable() && !prototype) {
-      writer.append("%s builder.addPreDestroy($bean);", indent).eol();
+      writer.indent(indent).append(" builder.addPreDestroy($bean);").eol();
     }
   }
 
@@ -447,5 +447,14 @@ final class BeanReader {
 
   private String beanQualifiedName() {
     return beanType.getQualifiedName().toString();
+  }
+
+  boolean needsTryForMethodInjection() {
+    for (MethodReader injectMethod : injectMethods) {
+      if (injectMethod.methodThrows()) {
+        return true;
+      }
+    }
+    return false;
   }
 }
