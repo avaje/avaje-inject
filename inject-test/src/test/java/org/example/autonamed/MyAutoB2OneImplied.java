@@ -2,6 +2,8 @@ package org.example.autonamed;
 
 import jakarta.inject.Singleton;
 
+import javax.annotation.PostConstruct;
+
 @Singleton
 public class MyAutoB2OneImplied {
 
@@ -13,6 +15,11 @@ public class MyAutoB2OneImplied {
 
   public String one() {
     return one.who();
+  }
+
+  @PostConstruct
+  public void postInit() {
+
   }
 
 }
