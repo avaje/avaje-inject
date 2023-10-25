@@ -2,8 +2,8 @@ package org.example.request;
 
 
 import io.avaje.inject.xtra.ApplicationScope;
-import io.helidon.webserver.ServerRequest;
-import io.helidon.webserver.ServerResponse;
+import io.helidon.webserver.http.ServerRequest;
+import io.helidon.webserver.http.ServerResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 

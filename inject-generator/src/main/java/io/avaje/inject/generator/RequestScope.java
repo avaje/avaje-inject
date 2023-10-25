@@ -13,8 +13,8 @@ final class RequestScope {
   private static final String HELIDON_REQ = "io.helidon.webserver.ServerRequest";
   private static final String HELIDON_RES = "io.helidon.webserver.ServerResponse";
 
-  private static final String NIMA_REQ = "io.helidon.nima.webserver.http.ServerRequest";
-  private static final String NIMA_RES = "io.helidon.nima.webserver.http.ServerResponse";
+  private static final String NIMA_REQ = "io.helidon.webserver.http.ServerRequest";
+  private static final String NIMA_RES = "io.helidon.webserver.http.ServerResponse";
   private static final String HELIDON_REACTIVE_REQ = "io.helidon.reactive.webserver.ServerRequest";
   private static final String HELIDON_REACTIVE_RES = "io.helidon.reactive.webserver.ServerResponse";
 
