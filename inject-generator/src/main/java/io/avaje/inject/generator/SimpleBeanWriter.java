@@ -226,11 +226,21 @@ final class SimpleBeanWriter {
   }
 
   private void injectMethods() {
-    String bean = beanReader.prototype() ? "bean" : "$bean";
-    String builder = beanReader.prototype() ? "builder" : "b";
+    final var needsTry = beanReader.needsTryForMethodInjection();
+    final var bean = beanReader.prototype() ? "bean" : "$bean";
+    final var builder = beanReader.prototype() ? "builder" : "b";
+    if (needsTry) {
+      writer.indent("        try {").eol();
+    }
+    final var indent = needsTry ? "          " : "        ";
     for (MethodReader methodReader : beanReader.injectMethods()) {
-      writer.indent("        ").append("%s.%s(", bean, methodReader.name());
+      writer.indent(indent).append("%s.%s(", bean, methodReader.name());
       writeMethodParams(builder, methodReader);
+    }
+    if (needsTry) {
+      writer.indent("        } catch (Throwable e) {").eol();
+      writer.indent("          throw new RuntimeException(\"Error wiring method\", e);").eol();
+      writer.indent("        }").eol();
     }
   }
 

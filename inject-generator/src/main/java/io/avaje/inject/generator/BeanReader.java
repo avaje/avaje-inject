@@ -448,4 +448,13 @@ final class BeanReader {
   private String beanQualifiedName() {
     return beanType.getQualifiedName().toString();
   }
+
+  boolean needsTryForMethodInjection() {
+    for (MethodReader injectMethod : injectMethods) {
+      if (injectMethod.methodThrows()) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

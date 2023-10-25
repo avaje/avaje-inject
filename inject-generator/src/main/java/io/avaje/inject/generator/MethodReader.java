@@ -281,7 +281,7 @@ final class MethodReader {
     writer.append(")) {").eol();
   }
 
-  private boolean methodThrows() {
+  boolean methodThrows() {
     return !element.getThrownTypes().isEmpty();
   }
 
