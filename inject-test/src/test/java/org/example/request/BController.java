@@ -1,8 +1,8 @@
 package org.example.request;
 
 import io.avaje.http.api.Controller;
-import io.helidon.webserver.ServerRequest;
-import io.helidon.webserver.ServerResponse;
+import io.helidon.webserver.http.ServerRequest;
+import io.helidon.webserver.http.ServerResponse;
 
 /**
  * Controller with request scoped dependencies (request and response).

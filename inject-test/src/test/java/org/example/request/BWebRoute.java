@@ -1,8 +1,8 @@
 package org.example.request;
 
 import io.avaje.inject.spi.BeanFactory2;
-import io.helidon.webserver.ServerRequest;
-import io.helidon.webserver.ServerResponse;
+import io.helidon.webserver.http.ServerRequest;
+import io.helidon.webserver.http.ServerResponse;
 
 import jakarta.inject.Singleton;
 
