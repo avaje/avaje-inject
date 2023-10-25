@@ -241,7 +241,7 @@ final class SimpleBeanWriter {
       if (i > 0) {
         writer.append(", ");
       }
-      methodParams.get(i).builderGetDependency(writer, builderRef, false);
+      methodParams.get(i).builderGetDependency(writer, builderRef);
     }
     writer.append(");").eol();
   }

@@ -26,7 +26,6 @@ final class MethodReader {
   private final boolean isVoid;
   private final List<MethodParam> params = new ArrayList<>();
   private final String factoryShortName;
-  private final boolean isFactory;
   private final String initMethod;
   private final String destroyMethod;
   private final Integer destroyPriority;
@@ -41,15 +40,12 @@ final class MethodReader {
   }
 
   MethodReader(ExecutableElement element, TypeElement beanType, BeanPrism bean, String qualifierName, ImportTypeMap importTypes) {
-    this.isFactory = bean != null;
     this.element = element;
-    if (isFactory) {
+    if (bean != null) {
       prototype = PrototypePrism.isPresent(element);
       primary = PrimaryPrism.isPresent(element);
       secondary = SecondaryPrism.isPresent(element);
-
       conditions.readAll(element);
-
     } else {
       prototype = false;
       primary = false;
@@ -175,7 +171,7 @@ final class MethodReader {
       if (i > 0) {
         writer.append(", ");
       }
-      params.get(i).builderGetDependency(writer, "builder", true);
+      params.get(i).builderGetDependency(writer, "builder");
     }
     writer.append(");").eol();
   }
@@ -201,7 +197,7 @@ final class MethodReader {
       if (i > 0) {
         writer.append(", ");
       }
-      params.get(i).builderGetDependency(writer, "builder", true);
+      params.get(i).builderGetDependency(writer, "builder");
     }
     writer.append(");").eol();
     writer.append(indent).append("  });").eol();
@@ -374,7 +370,7 @@ final class MethodReader {
 
   static class MethodParam {
 
-    private VariableElement element;
+    private final VariableElement element;
     private final String named;
     private final UtilType utilType;
     private final String paramType;
@@ -400,7 +396,6 @@ final class MethodReader {
       if (nullable || param.asType().toString().startsWith("java.util.Optional<")) {
         ProcessingContext.addOptionalType(paramType);
       }
-
     }
 
     @Override
@@ -414,7 +409,7 @@ final class MethodReader {
       }
     }
 
-    void builderGetDependency(Append writer, String builderName, boolean forFactory) {
+    void builderGetDependency(Append writer, String builderName) {
       writer.append(builderName).append(".").append(utilType.getMethod(nullable, isBeanMap));
       if (!genericType.isGenericType()) {
         writer.append(Util.shortName(genericType.topType())).append(".class");
@@ -490,11 +485,9 @@ final class MethodReader {
     }
 
     void writeMethodParam(Append writer) {
-
       if (nullable) {
         writer.append("@Nullable ");
       }
-
       if (genericType.isGenericType()) {
         genericType.writeShort(writer);
       } else {
