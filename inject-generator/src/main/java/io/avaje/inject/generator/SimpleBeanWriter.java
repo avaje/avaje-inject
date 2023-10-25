@@ -135,13 +135,14 @@ final class SimpleBeanWriter {
     method.buildConditional(writer);
     method.buildAddFor(writer);
     method.builderGetFactory(writer, beanReader.hasConditions());
-    if (method.isProtoType()) {
+    method.startTry(writer);
+    if (method.isProtoType() || method.isUseProviderForSecondary()) {
       method.builderAddBeanProvider(writer);
-    } else if (method.isUseProviderForSecondary()) {
-      method.builderAddBeanProvider(writer);
+      method.endTry(writer);
     } else {
       method.builderBuildBean(writer);
       method.builderBuildAddBean(writer);
+      method.endTry(writer);
       writer.append("    }").eol();
     }
     writer.append("  }").eol().eol();
@@ -169,6 +170,7 @@ final class SimpleBeanWriter {
       indent += "  ";
       writer.append("      builder.asPrototype().registerProvider(() -> {", shortName, shortName).eol();
     }
+    constructor.startTry(writer);
     writeCreateBean(constructor);
     beanReader.buildRegister(writer);
     beanReader.addLifecycleCallbacks(writer, indent);
@@ -177,9 +179,10 @@ final class SimpleBeanWriter {
     }
     if (beanReader.prototype()) {
       beanReader.prototypePostConstruct(writer, indent);
-      writer.append("        return bean;").eol();
-      writer.append("      });", shortName, shortName).eol();
+      writer.indent("        return bean;").eol();
+      writer.indent("      });").eol();
     }
+    constructor.endTry(writer);
     writer.append("    }").eol();
   }
 
@@ -195,20 +198,20 @@ final class SimpleBeanWriter {
   private String indent = "     ";
 
   private void writeCreateBean(MethodReader constructor) {
-    writer.append(indent).append(" var bean = new %s(", shortName);
+    writer.indent(indent).append(" var bean = new %s(", shortName);
     // add constructor dependencies
     writeMethodParams("builder", constructor);
   }
 
   private void writeExtraInjection() {
     if (!beanReader.prototype()) {
-      writer.append("      builder.addInjector(b -> {").eol();
-      writer.append("        // field and method injection").eol();
+      writer.indent("      ").append("builder.addInjector(b -> {").eol();
+      writer.indent("      ").append("  // field and method injection").eol();
     }
     injectFields();
     injectMethods();
     if (!beanReader.prototype()) {
-      writer.append("      });").eol();
+      writer.indent("      });").eol();
     }
   }
 
@@ -218,16 +221,26 @@ final class SimpleBeanWriter {
     for (FieldReader fieldReader : beanReader.injectFields()) {
       String fieldName = fieldReader.fieldName();
       String getDependency = fieldReader.builderGetDependency(builder);
-      writer.append("        %s.%s = %s;", bean, fieldName, getDependency).eol();
+      writer.indent("        ").append("%s.%s = %s;", bean, fieldName, getDependency).eol();
     }
   }
 
   private void injectMethods() {
-    String bean = beanReader.prototype() ? "bean" : "$bean";
-    String builder = beanReader.prototype() ? "builder" : "b";
+    final var needsTry = beanReader.needsTryForMethodInjection();
+    final var bean = beanReader.prototype() ? "bean" : "$bean";
+    final var builder = beanReader.prototype() ? "builder" : "b";
+    if (needsTry) {
+      writer.indent("        try {").eol();
+    }
+    final var indent = needsTry ? "          " : "        ";
     for (MethodReader methodReader : beanReader.injectMethods()) {
-      writer.append("        %s.%s(", bean, methodReader.name());
+      writer.indent(indent).append("%s.%s(", bean, methodReader.name());
       writeMethodParams(builder, methodReader);
+    }
+    if (needsTry) {
+      writer.indent("        } catch (Throwable e) {").eol();
+      writer.indent("          throw new RuntimeException(\"Error wiring method\", e);").eol();
+      writer.indent("        }").eol();
     }
   }
 
@@ -237,7 +250,7 @@ final class SimpleBeanWriter {
       if (i > 0) {
         writer.append(", ");
       }
-      methodParams.get(i).builderGetDependency(writer, builderRef, false);
+      methodParams.get(i).builderGetDependency(writer, builderRef);
     }
     writer.append(");").eol();
   }

@@ -5,7 +5,7 @@
   <parent>
     <artifactId>avaje-inject-parent</artifactId>
     <groupId>io.avaje</groupId>
-    <version>9.8-RC1</version>
+    <version>9.9-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -39,7 +39,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-config</artifactId>
-      <version>3.8</version>
+      <version>3.9</version>
     </dependency>
 
     <dependency>
@@ -57,7 +57,7 @@
     <dependency>
       <groupId>io.github.resilience4j</groupId>
       <artifactId>resilience4j-annotations</artifactId>
-      <version>1.7.1</version>
+      <version>2.1.0</version>
     </dependency>
 
     <!-- annotation processor -->

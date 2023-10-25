@@ -12,9 +12,27 @@ final class Append {
   private final Writer writer;
   private int nameIndex;
   private boolean comma;
+  private String extraIndent;
 
   Append(Writer writer) {
     this.writer = writer;
+  }
+
+  Append setExtraIndent(String extraIndent) {
+    this.extraIndent = extraIndent;
+    return this;
+  }
+
+  Append indent(String content) {
+    try {
+      if (extraIndent != null) {
+        writer.append(extraIndent);
+      }
+      writer.append(content);
+      return this;
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   Append append(String content) {

@@ -44,12 +44,10 @@ final class BeanReader {
     this.prototype = PrototypePrism.isPresent(beanType);
     this.primary = PrimaryPrism.isPresent(beanType);
     this.secondary = !primary && SecondaryPrism.isPresent(beanType);
-    this.proxy = ProxyPrism.isPresent(beanType);
     this.typeReader = new TypeReader(GenericType.parse(type), beanType, importTypes, factory);
 
-    conditions.readAll(beanType);
-
     typeReader.process();
+
     this.requestParams = new BeanRequestParams(type);
     this.name = typeReader.name();
     this.aspects = typeReader.hasAspects();
@@ -61,6 +59,18 @@ final class BeanReader {
     this.preDestroyPriority = typeReader.preDestroyPriority();
     this.constructor = typeReader.constructor();
     this.importedComponent = importedComponent && (constructor != null && constructor.isPublic());
+
+    var proxyPrism = ProxyPrism.getInstanceOn(beanType);
+    if (proxyPrism != null) {
+      this.proxy = true;
+      var proxyMirror = proxyPrism.value();
+      if (!"Void".equals(proxyMirror.toString())) {
+        conditions.readAll(APContext.asTypeElement(proxyMirror));
+      }
+    } else {
+      conditions.readAll(beanType);
+      this.proxy = false;
+    }
   }
 
   @Override
@@ -111,7 +121,7 @@ final class BeanReader {
       for (MethodReader.MethodParam param : constructor.params()) {
         Dependency dependsOn = param.dependsOn();
         // BeanScope is always injectable with no impact on injection ordering
-        if (!dependsOn.dependsOn().equals(Constants.BEANSCOPE)) {
+        if (!Constants.BEANSCOPE.equals(dependsOn.dependsOn())) {
           list.add(dependsOn);
         }
       }
@@ -230,7 +240,7 @@ final class BeanReader {
     if (prototype) {
       return;
     }
-    writer.append("      ");
+    writer.indent("      ");
     if (isExtraInjectionRequired() || hasLifecycleMethods()) {
       writer.append("var $bean = ");
     }
@@ -245,14 +255,14 @@ final class BeanReader {
 
   void addLifecycleCallbacks(Append writer, String indent) {
     if (postConstructMethod != null && !prototype) {
-      writer.append("%s builder.addPostConstruct($bean::%s);", indent, postConstructMethod.getSimpleName()).eol();
+      writer.indent(indent).append(" builder.addPostConstruct($bean::%s);", postConstructMethod.getSimpleName()).eol();
     }
     if (preDestroyMethod != null) {
       prototypeNotSupported("@PreDestroy");
       var priority = preDestroyPriority == null || preDestroyPriority == 1000 ? "" : ", " + preDestroyPriority;
-      writer.append("%s builder.addPreDestroy($bean::%s%s);", indent, preDestroyMethod.getSimpleName(), priority).eol();
+      writer.indent(indent).append(" builder.addPreDestroy($bean::%s%s);", preDestroyMethod.getSimpleName(), priority).eol();
     } else if (typeReader.isClosable() && !prototype) {
-      writer.append("%s builder.addPreDestroy($bean);", indent).eol();
+      writer.indent(indent).append(" builder.addPreDestroy($bean);").eol();
     }
   }
 
@@ -437,5 +447,14 @@ final class BeanReader {
 
   private String beanQualifiedName() {
     return beanType.getQualifiedName().toString();
+  }
+
+  boolean needsTryForMethodInjection() {
+    for (MethodReader injectMethod : injectMethods) {
+      if (injectMethod.methodThrows()) {
+        return true;
+      }
+    }
+    return false;
   }
 }

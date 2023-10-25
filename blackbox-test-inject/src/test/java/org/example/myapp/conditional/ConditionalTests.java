@@ -21,7 +21,6 @@ class ConditionalTests {
 
   @BeforeEach
   void clearConfig() {
-
     Config.eventBuilder("")
         .remove("secondary")
         .remove("factory")
@@ -32,15 +31,14 @@ class ConditionalTests {
   }
 
   @Test
-  void basic() throws IOException {
+  void basic() {
     // just wire everything with no test scope, mocks etc
     final BeanScope beanScope = BeanScope.builder().build();
     assertTrue(beanScope.getOptional(Bird.class).isEmpty());
   }
 
   @Test
-  void jay() throws IOException {
-
+  void jay() {
     Config.setProperty("factory", "bird");
 
     final BeanScope beanScope = BeanScope.builder().build();
@@ -51,8 +49,7 @@ class ConditionalTests {
   }
 
   @Test
-  void birdWatch() throws IOException {
-
+  void birdWatch() {
     Config.setProperty("factory", "bird");
     Config.setProperty("watcher", "bird");
 
@@ -62,8 +59,7 @@ class ConditionalTests {
   }
 
   @Test
-  void missingBeans() throws IOException {
-
+  void missingBeans() {
     Config.setProperty("watcher", "bird");
 
     final BeanScope beanScope = BeanScope.builder().build();
@@ -72,13 +68,13 @@ class ConditionalTests {
   }
 
   @Test
-  void noFactory() throws IOException {
-
+  void noFactory() {
     Config.setProperty("kiwi", "somethin");
     Config.setProperty("watcher", "bird");
 
     final BeanScope beanScope = BeanScope.builder().build();
 
+    assertTrue(beanScope.getOptional(WithAspectConditional.class).isEmpty());
     assertTrue(beanScope.getOptional(BirdFactory.class).isEmpty());
     assertTrue(beanScope.getOptional(BlueJay.class).isEmpty());
     assertTrue(beanScope.getOptional(BirdWatcher.class).isPresent());
@@ -86,20 +82,19 @@ class ConditionalTests {
   }
 
   @Test
-  void factoryKiwiOverride() throws IOException {
-
+  void factoryKiwiOverride() {
     Config.setProperty("kiwi", "somethin");
     Config.setProperty("factory", "bird");
     Config.setProperty("watcher", "bird");
 
     final BeanScope beanScope = BeanScope.builder().build();
     assertTrue(beanScope.getOptional(BirdWatcher.class).isPresent());
+    assertTrue(beanScope.getOptional(WithAspectConditional.class).isPresent());
     assertEquals("Kiwi", beanScope.get(Bird.class).toString());
   }
 
   @Test
-  void factorySecondaryOverride() throws IOException {
-
+  void factorySecondaryOverride() {
     Config.setProperty("secondary", "somethin");
     Config.setProperty("factory", "bird");
     Config.setProperty("watcher", "bird");
@@ -110,16 +105,14 @@ class ConditionalTests {
   }
 
   @Test
-  void qualifierTest() throws IOException {
-
+  void qualifierTest() {
     final BeanScope beanScope =
         BeanScope.builder().bean("finch", Bird.class, new StrawberryFinch()).build();
     assertTrue(beanScope.getOptional(QualifiedBirdWatcher.class).isPresent());
   }
 
   @Test
-  void metaMetaAnnotationTest() throws IOException {
-
+  void metaMetaAnnotationTest() {
     Config.setProperty("finch-time", "somethin");
     Config.setProperty("factory", "bird");
     Config.setProperty("watcher", "bird");
