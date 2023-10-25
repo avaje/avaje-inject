@@ -9,7 +9,7 @@ import org.example.myapp.MyDestroyOrder;
 @Component
 public class MyNamed {
 
-  @PreDestroy
+  @PreDestroy(priority = 999)
   public void close() {
     MyDestroyOrder.add("MyNamed");
   }

@@ -14,7 +14,7 @@ public class AppConfig {
 
   public static AtomicBoolean BEAN_AUTO_CLOSED = new AtomicBoolean();
 
-  @PreDestroy
+  @PreDestroy(priority = 999)
   void close() {
     MyDestroyOrder.add("AppConfig");
   }
