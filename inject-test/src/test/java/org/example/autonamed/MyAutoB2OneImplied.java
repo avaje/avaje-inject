@@ -7,7 +7,7 @@ public class MyAutoB2OneImplied {
 
   final AutoB2 one;
 
-  public MyAutoB2OneImplied(AutoB2 one) {
+  public MyAutoB2OneImplied(AutoB2 one) throws Exception {
     this.one = one;
   }
 

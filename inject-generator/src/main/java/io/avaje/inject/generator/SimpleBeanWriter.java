@@ -173,6 +173,7 @@ final class SimpleBeanWriter {
       indent += "  ";
       writer.append("      builder.asPrototype().registerProvider(() -> {", shortName, shortName).eol();
     }
+    constructor.startTry(writer);
     writeCreateBean(constructor);
     beanReader.buildRegister(writer);
     beanReader.addLifecycleCallbacks(writer, indent);
@@ -184,6 +185,7 @@ final class SimpleBeanWriter {
       writer.append("        return bean;").eol();
       writer.append("      });", shortName, shortName).eol();
     }
+    constructor.endTry(writer);
     writer.append("    }").eol();
   }
 
