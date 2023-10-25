@@ -46,7 +46,6 @@ final class ProcessingContext {
     private boolean validated;
 
     public Ctx(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
-
       ExternalProvider.registerModuleProvidedTypes(providedTypes);
       providedTypes.addAll(moduleFileProvided);
     }
