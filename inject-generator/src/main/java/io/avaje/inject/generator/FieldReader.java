@@ -52,7 +52,8 @@ final class FieldReader {
     if (isGenericParam()) {
       sb.append("TYPE_").append(type.shortName().replace(".", "_"));
     } else {
-      sb.append(Util.shortName(fieldType)).append(".class");
+      var trimmed = Util.trimAnnotations(fieldType);
+      sb.append(Util.shortName(trimmed)).append(".class");
     }
     if (name != null) {
       sb.append(",\"").append(name).append("\"");
