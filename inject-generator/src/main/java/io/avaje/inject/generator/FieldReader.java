@@ -24,8 +24,9 @@ final class FieldReader {
     this.isBeanMap = QualifiedMapPrism.isPresent(element);
     this.fieldType = Util.unwrapProvider(utype.rawType(isBeanMap));
     this.type = GenericType.parse(utype.rawType(isBeanMap));
-    if (nullable || element.asType().toString().startsWith("java.util.Optional<"))
+    if (nullable || element.asType().toString().startsWith("java.util.Optional<")) {
       ProcessingContext.addOptionalType(fieldType);
+    }
   }
 
   boolean isGenericParam() {
