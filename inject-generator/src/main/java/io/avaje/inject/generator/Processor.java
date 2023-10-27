@@ -96,19 +96,21 @@ public final class Processor extends AbstractProcessor {
     readModule(roundEnv);
 
     addImportedAspects(importedAspects(roundEnv));
-    maybeElements(roundEnv, ScopePrism.PRISM_TYPE).ifPresent(this::readScopes);
-    maybeElements(roundEnv, FactoryPrism.PRISM_TYPE).ifPresent(this::readFactories);
+    readScopes(roundEnv.getElementsAnnotatedWith(typeElement(ScopePrism.PRISM_TYPE)));
+    readFactories(roundEnv.getElementsAnnotatedWith(typeElement(FactoryPrism.PRISM_TYPE)));
 
     if (defaultScope.includeSingleton()) {
-      maybeElements(roundEnv, SingletonPrism.PRISM_TYPE).ifPresent(this::readBeans);
+      readBeans(roundEnv.getElementsAnnotatedWith(typeElement(SingletonPrism.PRISM_TYPE)));
     }
-    maybeElements(roundEnv, ComponentPrism.PRISM_TYPE).ifPresent(this::readBeans);
-    maybeElements(roundEnv, PrototypePrism.PRISM_TYPE).ifPresent(this::readBeans);
+    readBeans(roundEnv.getElementsAnnotatedWith(typeElement(ComponentPrism.PRISM_TYPE)));
+    readBeans(roundEnv.getElementsAnnotatedWith(typeElement(PrototypePrism.PRISM_TYPE)));
 
     readImported(importedElements(roundEnv));
-
-    maybeElements(roundEnv, Constants.CONTROLLER).ifPresent(this::readBeans);
-    maybeElements(roundEnv, ProxyPrism.PRISM_TYPE).ifPresent(this::readBeans);
+    final var typeElement = elementUtils.getTypeElement(Constants.CONTROLLER);
+    if (typeElement != null) {
+      readBeans(roundEnv.getElementsAnnotatedWith(typeElement));
+    }
+    readBeans(roundEnv.getElementsAnnotatedWith(typeElement(ProxyPrism.PRISM_TYPE)));
 
     allScopes.readBeans(roundEnv);
     defaultScope.write(roundEnv.processingOver());
@@ -120,14 +122,8 @@ public final class Processor extends AbstractProcessor {
     return false;
   }
 
-  // Optional because these annotations are not guaranteed to exist
-  private static Optional<? extends Set<? extends Element>> maybeElements(RoundEnvironment round, String name) {
-    return Optional.ofNullable(typeElement(name)).map(round::getElementsAnnotatedWith);
-  }
-
   private Set<TypeElement> importedElements(RoundEnvironment roundEnv) {
-    return maybeElements(roundEnv, ImportPrism.PRISM_TYPE).stream()
-      .flatMap(Set::stream)
+    return roundEnv.getElementsAnnotatedWith(typeElement(ImportPrism.PRISM_TYPE)).stream()
       .map(ImportPrism::getInstanceOn)
       .flatMap(p -> p.value().stream())
       .map(ProcessingContext::asElement)
@@ -141,7 +137,9 @@ public final class Processor extends AbstractProcessor {
   }
 
   private static Map<String, AspectImportPrism> importedAspects(RoundEnvironment roundEnv) {
-    return maybeElements(roundEnv, AspectImportPrism.PRISM_TYPE).stream()
+    return Optional.ofNullable(typeElement(AspectImportPrism.PRISM_TYPE))
+      .map(roundEnv::getElementsAnnotatedWith)
+      .stream()
       .flatMap(Set::stream)
       .map(AspectImportPrism::getInstanceOn)
       .collect(Collectors.toMap(p -> p.value().toString(), p -> p));
@@ -239,17 +237,15 @@ public final class Processor extends AbstractProcessor {
    */
   private void readInjectModule(RoundEnvironment roundEnv) {
     // read other that are annotated with InjectModule
-    maybeElements(roundEnv, InjectModulePrism.PRISM_TYPE).stream()
-      .flatMap(Set::stream)
-      .forEach(element -> {
-        final var scope = ScopePrism.getInstanceOn(element);
-        if (scope == null) {
-          // it it not a custom scope annotation
-          final var annotation = InjectModulePrism.getInstanceOn(element);
-          if (annotation != null) {
-            defaultScope.details(annotation.name(), element);
-          }
+    for (final Element element : roundEnv.getElementsAnnotatedWith(typeElement(Constants.INJECTMODULE))) {
+      final var scope = ScopePrism.getInstanceOn(element);
+      if (scope == null) {
+        // it it not a custom scope annotation
+        final var annotation = InjectModulePrism.getInstanceOn(element);
+        if (annotation != null) {
+          defaultScope.details(annotation.name(), element);
         }
-      });
+      }
+    }
   }
 }
