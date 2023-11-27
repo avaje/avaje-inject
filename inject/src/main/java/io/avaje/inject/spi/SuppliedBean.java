@@ -1,11 +1,12 @@
 package io.avaje.inject.spi;
 
-import io.avaje.inject.BeanEntry;
-import jakarta.inject.Named;
-import org.mockito.Mockito;
-
 import java.lang.reflect.Type;
 import java.util.function.Consumer;
+
+import org.mockito.Mockito;
+
+import io.avaje.inject.BeanEntry;
+import jakarta.inject.Named;
 
 /**
  * Holds beans supplied to the dependency injection.
@@ -47,7 +48,7 @@ public class SuppliedBean {
    * Create a supplied bean for a generic type.
    */
   public static SuppliedBean ofType(String name, Type type, Object source) {
-    return new SuppliedBean(BeanEntry.SUPPLIED, name, type, source);
+    return new SuppliedBean.ForType(name, type, source);
   }
 
   /**
@@ -136,4 +137,24 @@ public class SuppliedBean {
       return source;
     }
   }
+
+  /** Class based supplied bean. */
+  private static final class ForType extends SuppliedBean {
+
+    private final Type classType;
+
+    ForType(String name, Type type, Object source) {
+      super(BeanEntry.SUPPLIED, name, type, source);
+      this.classType = type;
+    }
+
+    @Override
+    public Object source() {
+      if (source == null) {
+        source = Mockito.mock(Types.rawType(classType));
+      }
+      return source;
+    }
+  }
+
 }

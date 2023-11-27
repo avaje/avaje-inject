@@ -1,5 +1,7 @@
 package io.avaje.inject.test;
 
+import java.lang.reflect.Type;
+
 import io.avaje.inject.BeanScope;
 
 /**
@@ -13,7 +15,7 @@ public interface Plugin {
   /**
    * Return true if this plugin should inject for this class.
    */
-  boolean forType(Class<?> type);
+  boolean forType(Type type);
 
   /**
    * Create a plugin scope for either EACH or ALL (per test or per class)
@@ -32,7 +34,7 @@ public interface Plugin {
      * <p>
      * For example, avaje-jex-test will create a http client.
      */
-    Object create(Class<?> type);
+    Object create(Type type);
 
     /**
      * Close resources that are in this scope - for example, http server.

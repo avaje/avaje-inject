@@ -15,6 +15,7 @@ import org.mockito.internal.util.reflection.GenericMaster;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,14 +54,14 @@ final class MetaReader {
 
   @Override
   public String toString() {
-    String s = toStringAppend("mocks:", mocks);
-    s += toStringAppend("spies:", spies);
-    s += toStringAppend("inject:", injection);
-    s += toStringAppend("captors:", captors);
-    s += toStringAppend("staticMocks:", staticMocks);
-    s += toStringAppend("staticSpies:", staticSpies);
-    s += toStringAppend("staticInjection:", staticInjection);
-    return s;
+    StringBuilder s = new StringBuilder().append(toStringAppend("mocks:", mocks));
+    s.append(toStringAppend("spies:", spies));
+    s.append(toStringAppend("inject:", injection));
+    s.append(toStringAppend("captors:", captors));
+    s.append(toStringAppend("staticMocks:", staticMocks));
+    s.append(toStringAppend("staticSpies:", staticSpies));
+    s.append(toStringAppend("staticInjection:", staticInjection));
+    return s.toString();
   }
 
   private String toStringAppend(String key, List<?> entries) {
@@ -282,8 +283,8 @@ final class MetaReader {
       return field.getName();
     }
 
-    Class<?> type() {
-      return field.getType();
+    Type type() {
+      return field.getGenericType();
     }
 
     String name() {

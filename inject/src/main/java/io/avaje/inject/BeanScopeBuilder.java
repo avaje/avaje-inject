@@ -325,7 +325,7 @@ public interface BeanScopeBuilder {
      *
      * }</pre>
      */
-    BeanScopeBuilder.ForTesting mock(Class<?> type);
+    BeanScopeBuilder.ForTesting mock(Type type);
 
     /**
      * Register as a Mockito mock with a qualifier name.
@@ -343,7 +343,7 @@ public interface BeanScopeBuilder {
      *
      * }</pre>
      */
-    BeanScopeBuilder.ForTesting mock(Class<?> type, String name);
+    BeanScopeBuilder.ForTesting mock(Type type, String name);
 
     /**
      * Use a mockito mock when injecting this bean type additionally
@@ -398,7 +398,7 @@ public interface BeanScopeBuilder {
      *
      * }</pre>
      */
-    BeanScopeBuilder.ForTesting spy(Class<?> type);
+    BeanScopeBuilder.ForTesting spy(Type type);
 
     /**
      * Register a Mockito spy with a qualifier name.
@@ -416,7 +416,7 @@ public interface BeanScopeBuilder {
      *
      * }</pre>
      */
-    BeanScopeBuilder.ForTesting spy(Class<?> type, String name);
+    BeanScopeBuilder.ForTesting spy(Type type, String name);
 
     /**
      * Use a mockito spy when injecting this bean type additionally

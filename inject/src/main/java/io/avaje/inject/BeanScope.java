@@ -1,5 +1,6 @@
 package io.avaje.inject;
 
+import io.avaje.inject.spi.Types;
 import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
 
@@ -140,7 +141,51 @@ public interface BeanScope extends AutoCloseable {
   <T> T get(Class<T> type, @Nullable String name);
 
   /**
-   * Return a single bean given the generic type and name.
+   * Return a single bean given its type and generic components.
+   *
+   * <pre>{@code
+   * Map<String, CoffeeMaker> coffeeMaker = beanScope.get(Map.class, String.class, CoffeeMaker.class);
+   *
+   * }</pre>
+   *
+   * @param base the base generic type
+   * @param type component types of the generic type
+   * @throws java.util.NoSuchElementException When no matching bean is found
+   */
+  default <T> T get(Type base, Type... types) {
+    return get(null, base, types);
+  }
+
+  /**
+   * Return a single bean given it's name, type, and generic components.
+   *
+   * <pre>{@code
+   * Heater heater = beanScope.get("electric", Set.class,  );
+   * heater.heat();
+   *
+   * }</pre>
+   *
+   * @param type an interface or bean type
+   * @param name the name qualifier of a specific bean
+   * @throws java.util.NoSuchElementException When no matching bean is found
+   */
+  default <T> T get(@Nullable String name, Type type, Type... types) {
+
+    return get(Types.parameterizedType(type, types), name);
+  }
+
+  /**
+   * Return a single bean given the full generic type.
+   *
+   * @param type The generic type
+   * @throws java.util.NoSuchElementException When no matching bean is found
+   */
+  default <T> T get(Type type) {
+    return get(type, (String) null);
+  }
+
+  /**
+   * Return a single bean given the full generic type and name.
    *
    * @param type The generic type
    * @param name the name qualifier of a specific bean

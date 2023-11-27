@@ -9,7 +9,7 @@ import io.avaje.inject.Factory;
 public class GenericFactory {
 
   @Bean
-  Generic<String> one() {
+  Generic<Integer> one() {
 
     return new Generic<>() {};
   }

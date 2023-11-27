@@ -157,13 +157,14 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  public BeanScopeBuilder.ForTesting mock(Class<?> type) {
-    return mock(type, null, null);
+  public BeanScopeBuilder.ForTesting mock(Type type) {
+    return mock(type, null);
   }
 
   @Override
-  public BeanScopeBuilder.ForTesting mock(Class<?> type, String name) {
-    return mock(type, name, null);
+  public BeanScopeBuilder.ForTesting mock(Type type, String name) {
+    suppliedBeans.add(SuppliedBean.ofType(name, type, null));
+    return this;
   }
 
   @Override
@@ -177,12 +178,12 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  public BeanScopeBuilder.ForTesting spy(Class<?> type) {
+  public BeanScopeBuilder.ForTesting spy(Type type) {
     return spy(type, null, null);
   }
 
   @Override
-  public BeanScopeBuilder.ForTesting spy(Class<?> type, String name) {
+  public BeanScopeBuilder.ForTesting spy(Type type, String name) {
     return spy(type, name, null);
   }
 
@@ -192,6 +193,12 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   private <D> BeanScopeBuilder.ForTesting spy(Class<D> type, @Nullable String name, @Nullable Consumer<D> consumer) {
+    enrichBeans.add(new EnrichBean<>(type, name, consumer));
+    return this;
+  }
+
+  private <D> BeanScopeBuilder.ForTesting spy(
+      Type type, @Nullable String name, @Nullable Consumer<D> consumer) {
     enrichBeans.add(new EnrichBean<>(type, name, consumer));
     return this;
   }

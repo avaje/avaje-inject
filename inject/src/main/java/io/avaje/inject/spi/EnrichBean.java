@@ -2,6 +2,7 @@ package io.avaje.inject.spi;
 
 import org.mockito.Mockito;
 
+import java.lang.reflect.Type;
 import java.util.function.Consumer;
 
 /**
@@ -9,11 +10,11 @@ import java.util.function.Consumer;
  */
 public final class EnrichBean<B> {
 
-  private final Class<B> type;
+  private final Type type;
   private final String name;
   private final Consumer<B> consumer;
 
-  public EnrichBean(Class<B> type, String name, Consumer<B> consumer) {
+  public EnrichBean(Type type, String name, Consumer<B> consumer) {
     this.type = type;
     this.name = KeyUtil.lower(name);
     this.consumer = consumer;
