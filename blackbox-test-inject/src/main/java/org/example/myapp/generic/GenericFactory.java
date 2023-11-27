@@ -1,7 +1,5 @@
 package org.example.myapp.generic;
 
-import org.other.one.OneModule;
-
 import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
 
@@ -13,4 +11,12 @@ public class GenericFactory {
 
     return new Generic<>() {};
   }
+
+  @Bean
+  Stringy two() {
+
+    return new Stringy() {};
+  }
+
+  public interface Stringy extends Generic<String> {}
 }

@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 class GenericFactoryTest {
 
   @Inject Generic<Integer> intymcintface;
+  @Inject Generic<String> stringy;
 
   @Test
   void test() {

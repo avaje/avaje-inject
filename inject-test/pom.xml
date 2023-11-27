@@ -24,6 +24,13 @@
     </dependency>
 
     <dependency>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-inject-generator</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
       <version>${jupiter.version}</version>
