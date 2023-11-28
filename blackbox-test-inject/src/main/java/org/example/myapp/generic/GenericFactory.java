@@ -8,13 +8,11 @@ public class GenericFactory {
 
   @Bean
   Generic<Integer> one() {
-
     return new Generic<>() {};
   }
 
   @Bean
   Stringy two() {
-
     return new Stringy() {};
   }
 

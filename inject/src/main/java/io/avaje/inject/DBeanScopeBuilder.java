@@ -197,8 +197,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     return this;
   }
 
-  private <D> BeanScopeBuilder.ForTesting spy(
-      Type type, @Nullable String name, @Nullable Consumer<D> consumer) {
+  private <D> BeanScopeBuilder.ForTesting spy(Type type, @Nullable String name, @Nullable Consumer<D> consumer) {
     enrichBeans.add(new EnrichBean<>(type, name, consumer));
     return this;
   }

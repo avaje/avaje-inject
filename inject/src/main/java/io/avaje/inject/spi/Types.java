@@ -15,32 +15,32 @@
  */
 package io.avaje.inject.spi;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.lang.reflect.WildcardType;
+import java.lang.reflect.*;
 
-/** Factory methods for types. */
+/**
+ * Factory methods for types.
+ */
 public class Types {
 
-  private Types() {}
-
-  /** Returns an array type whose elements are all instances of {@code componentType}. */
-  public static GenericArrayType arrayOf(Type elementType) {
-    return GenericTypeUtil.arrayOf(elementType);
+  private Types() {
   }
+
+//  /** Returns an array type whose elements are all instances of {@code componentType}. */
+//  public static GenericArrayType arrayOf(Type elementType) {
+//    return GenericTypeUtil.arrayOf(elementType);
+//  }
+//
+//  /**
+//   * Returns a new parameterized type, applying {@code typeArguments} to {@code rawType}. Use this
+//   * method if {@code rawType} is not enclosed in another type.
+//   */
+//  public static ParameterizedType parameterizedType(Type rawType, Type... typeArguments) {
+//    return GenericTypeUtil.newParameterizedType(rawType, typeArguments);
+//  }
 
   /**
-   * Returns a new parameterized type, applying {@code typeArguments} to {@code rawType}. Use this
-   * method if {@code rawType} is not enclosed in another type.
+   * Return the raw type for the given potentially generic type.
    */
-  public static ParameterizedType parameterizedType(Type rawType, Type... typeArguments) {
-    return GenericTypeUtil.newParameterizedType(rawType, typeArguments);
-  }
-
-  /** Return the raw type for the given potentially generic type. */
   public static Class<?> rawType(Type type) {
     if (type instanceof Class<?>) {
       // type is a normal class.
@@ -48,7 +48,6 @@ public class Types {
 
     } else if (type instanceof ParameterizedType) {
       ParameterizedType parameterizedType = (ParameterizedType) type;
-
       Type rawType = parameterizedType.getRawType();
       return (Class<?>) rawType;
 
@@ -63,13 +62,12 @@ public class Types {
       return rawType(((WildcardType) type).getUpperBounds()[0]);
 
     } else {
-
       String className = type == null ? "null" : type.getClass().getName();
       throw new IllegalArgumentException(
-          "Expected a Class, ParameterizedType, or  GenericArrayType, but <"
-              + type
-              + "> is of type "
-              + className);
+        "Expected a Class, ParameterizedType, or  GenericArrayType, but <"
+          + type
+          + "> is of type "
+          + className);
     }
   }
 }

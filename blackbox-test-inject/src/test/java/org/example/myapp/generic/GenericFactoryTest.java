@@ -16,5 +16,6 @@ class GenericFactoryTest {
   @Test
   void test() {
     assertThat(intymcintface).isNotNull();
+    assertThat(stringy).isNotNull();
   }
 }
