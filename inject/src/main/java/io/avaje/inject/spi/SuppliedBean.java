@@ -151,7 +151,7 @@ public class SuppliedBean {
     @Override
     public Object source() {
       if (source == null) {
-        source = Mockito.mock(Types.rawType(classType));
+        source = Mockito.mock(RawType.of(classType));
       }
       return source;
     }
