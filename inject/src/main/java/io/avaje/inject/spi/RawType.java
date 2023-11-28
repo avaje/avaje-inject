@@ -20,28 +20,15 @@ import java.lang.reflect.*;
 /**
  * Factory methods for types.
  */
-public class Types {
+final class RawType {
 
-  private Types() {
+  private RawType() {
   }
-
-//  /** Returns an array type whose elements are all instances of {@code componentType}. */
-//  public static GenericArrayType arrayOf(Type elementType) {
-//    return GenericTypeUtil.arrayOf(elementType);
-//  }
-//
-//  /**
-//   * Returns a new parameterized type, applying {@code typeArguments} to {@code rawType}. Use this
-//   * method if {@code rawType} is not enclosed in another type.
-//   */
-//  public static ParameterizedType parameterizedType(Type rawType, Type... typeArguments) {
-//    return GenericTypeUtil.newParameterizedType(rawType, typeArguments);
-//  }
 
   /**
    * Return the raw type for the given potentially generic type.
    */
-  public static Class<?> rawType(Type type) {
+  static Class<?> of(Type type) {
     if (type instanceof Class<?>) {
       // type is a normal class.
       return (Class<?>) type;
@@ -53,13 +40,13 @@ public class Types {
 
     } else if (type instanceof GenericArrayType) {
       Type componentType = ((GenericArrayType) type).getGenericComponentType();
-      return Array.newInstance(rawType(componentType), 0).getClass();
+      return Array.newInstance(of(componentType), 0).getClass();
 
     } else if (type instanceof TypeVariable) {
       return Object.class;
 
     } else if (type instanceof WildcardType) {
-      return rawType(((WildcardType) type).getUpperBounds()[0]);
+      return of(((WildcardType) type).getUpperBounds()[0]);
 
     } else {
       String className = type == null ? "null" : type.getClass().getName();
