@@ -100,8 +100,11 @@ final class SimpleAssistWriter {
     if (beanReader.injectFields().isEmpty()) return;
 
     for (final var field : beanReader.injectFields()) {
+      if (field.assisted()) {
+        continue;
+      }
       var element = field.element();
-      AnnotationCopier.copyAnnotations(writer, element);
+      AnnotationCopier.copyAnnotations(writer, element, "  ");
       var type = GenericType.parse(element.asType().toString());
       writer.append("  %s %s$field;", type.shortName(), field.fieldName()).eol().eol();
     }
@@ -128,7 +131,9 @@ final class SimpleAssistWriter {
   }
 
   private void writeConstructor() {
-
+    if (beanReader.constructor().params().isEmpty()) {
+      return;
+    }
     beanReader.constructor().params().stream()
         .filter(not(MethodParam::assisted))
         .forEach(
@@ -218,32 +223,38 @@ final class SimpleAssistWriter {
 
     injectFields();
     injectMethods();
+    final var needsTry = beanReader.needsTryForMethodInjection();
+    final var indent = needsTry ? "        " : "    ";
+
+    writer.append(indent).indent("return bean;");
   }
 
   private void injectFields() {
-    String bean = "$bean";
     for (FieldReader fieldReader : beanReader.injectFields()) {
+      if (fieldReader.assisted()) {
+        continue;
+      }
       String fieldName = fieldReader.fieldName();
       String getDependency = fieldName + "$field";
-      writer.indent("        ").append("%s.%s = %s;", bean, fieldName, getDependency).eol();
+      writer.indent("").append("bean.%s = %s;", fieldName, getDependency).eol();
     }
 
     for (int i = 0; i < assistedElements.size(); i++) {
       var field = assistedElements.get(i);
       String fieldName = field.getSimpleName().toString();
-      writer.indent("        ").append("%s.%s = arg%s;", bean, fieldName, i).eol();
+      writer.indent("    ").append("bean.%s = arg%s;", fieldName, i).eol();
     }
   }
 
   private void injectMethods() {
     final var needsTry = beanReader.needsTryForMethodInjection();
-    final var bean = "$bean";
+
     if (needsTry) {
       writer.indent("        try {").eol();
     }
     final var indent = needsTry ? "          " : "        ";
     for (MethodReader methodReader : beanReader.injectMethods()) {
-      writer.indent(indent).append("%s.%s(", bean, methodReader.name());
+      writer.indent(indent).append("bean.%s(", methodReader.name());
       writeMethodParams(methodReader);
     }
     if (needsTry) {

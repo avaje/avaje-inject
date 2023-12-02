@@ -103,5 +103,7 @@ final class FieldReader {
     return element;
   }
 
-public boolean assisted(){return assisted;}
+  public boolean assisted() {
+    return assisted;
+  }
 }

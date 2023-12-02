@@ -107,9 +107,7 @@ final class AssistBeanReader {
 
   void buildRegister(Append writer) {
     writer.indent("    ");
-    if (isExtraInjectionRequired()) {
-      writer.append("var $bean = ");
-    } else {
+    if (!isExtraInjectionRequired()) {
       writer.append("return bean;");
     }
   }
