@@ -6,7 +6,7 @@ import java.lang.annotation.*;
  * Meta annotation used to define an Aspect.
  *
  * <p>Create an annotation and annotate with {@code @Aspect} to define an aspect annotation. The
- * associated type that implements {@link AspectProvider} will be used as the target class. The
+ * associated type that implements {@link AssistInjector} will be used as the target class. The
  * aspect provider should be a {@code @Singleton} such that registers with <em>avaje-inject</em>.
  *
  * <p>

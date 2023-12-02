@@ -1,13 +1,14 @@
 package io.avaje.inject;
 
-import io.avaje.lang.NonNullApi;
-import io.avaje.lang.Nullable;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import io.avaje.inject.spi.GenericType;
+import io.avaje.lang.NonNullApi;
+import io.avaje.lang.Nullable;
 
 /**
  * Holds beans created by dependency injection.
@@ -147,6 +148,17 @@ public interface BeanScope extends AutoCloseable {
    */
   default <T> T get(Type type) {
     return get(type, null);
+  }
+
+  /**
+   * Return a single bean given the full generic type.
+   *
+   * @param type The generic type
+   * @throws java.util.NoSuchElementException When no matching bean is found
+   */
+  default <T> T getAssisted(Object... dependencies) {
+    AssistInjector<T> injector = get(new GenericType<AssistInjector<T>>() {}.type());
+    return injector.inject(dependencies);
   }
 
   /**
