@@ -1,7 +1,5 @@
 package io.avaje.inject.generator.models.valid.assist;
 
-import java.awt.Paint;
-
 import io.avaje.inject.Assist;
 import io.avaje.inject.Assisted;
 import io.avaje.lang.Nullable;
