@@ -157,8 +157,8 @@ public interface BeanScope extends AutoCloseable {
    * @throws java.util.NoSuchElementException When no matching bean is found
    */
   default <T> T getAssisted(Object... dependencies) {
-    AssistInjector<T> injector = get(new GenericType<AssistInjector<T>>() {}.type());
-    return injector.inject(dependencies);
+    AssistFactory<T> injector = get(new GenericType<AssistFactory<T>>() {}.type());
+    return injector.create(dependencies);
   }
 
   /**

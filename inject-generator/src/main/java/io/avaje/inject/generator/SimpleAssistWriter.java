@@ -90,7 +90,7 @@ final class SimpleAssistWriter {
         .append("public final class ")
         .append(name)
         .append(suffix)
-        .append(" implements AssistInjector<%s>", shortName);
+        .append(" implements AssistFactory<%s>", shortName);
 
     writer.append(" {").eol().eol();
   }
@@ -186,7 +186,7 @@ final class SimpleAssistWriter {
     writer.append(CODE_COMMENT_BUILD, shortName).eol();
 
     writer.append("  @Override").eol();
-    writer.append("  public %s inject(Object... deps) {", shortName).eol();
+    writer.append("  public %s create(Object... deps) {", shortName).eol();
     var assists = beanReader.assistElements();
     var size = assists.size();
     writer

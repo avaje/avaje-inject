@@ -113,7 +113,7 @@ final class AssistBeanReader {
   }
 
   private Set<String> importTypes() {
-    importTypes.add("io.avaje.inject.AssistInjector");
+    importTypes.add("io.avaje.inject.AssistFactory");
     if (Util.validImportType(type)) {
       importTypes.add(type);
     }

@@ -6,8 +6,8 @@ package io.avaje.inject;
  * @param <T> The aspect annotation
  */
 @FunctionalInterface
-public interface AssistInjector<T> {
+public interface AssistFactory<T> {
 
   /** Return the method interceptor to use for the given method and aspect annotation. */
-  T inject(Object... dependencies);
+  T create(Object... dependencies);
 }
