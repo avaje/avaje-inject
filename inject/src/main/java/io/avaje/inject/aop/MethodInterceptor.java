@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 /**
  * Provides method interception such that logic can be provided both before and after method invocation.
  * <p>
- * MethodInterceptor instances are provided by {@link AssistInjector#interceptor(Method, Annotation)}.
+ * MethodInterceptor instances are provided by {@link AspectProvider#interceptor(Method, Annotation)}.
  */
 @FunctionalInterface
 public interface MethodInterceptor {
