@@ -7,9 +7,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-/**
- * @see InjectModule#ignoreSingleton()
- */
+/** */
 @Target({FIELD, PARAMETER})
 @Retention(SOURCE)
 public @interface Assist {}
