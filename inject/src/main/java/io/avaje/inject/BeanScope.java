@@ -151,17 +151,6 @@ public interface BeanScope extends AutoCloseable {
   }
 
   /**
-   * Return a single bean given the full generic type.
-   *
-   * @param type The generic type
-   * @throws java.util.NoSuchElementException When no matching bean is found
-   */
-  default <T> T getAssisted(Object... dependencies) {
-    AssistFactory<T> injector = get(new GenericType<AssistFactory<T>>() {}.type());
-    return injector.create(dependencies);
-  }
-
-  /**
    * Return a single bean given the full generic type and name.
    *
    * @param type The generic type

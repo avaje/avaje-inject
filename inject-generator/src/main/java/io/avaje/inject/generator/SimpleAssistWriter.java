@@ -16,8 +16,8 @@ import io.avaje.inject.generator.MethodReader.MethodParam;
 final class SimpleAssistWriter {
 
   private static final String CODE_COMMENT =
-      "/**\n * Generated source - dependency injection builder for %s.\n */";
-  private static final String CODE_COMMENT_BUILD = "  /**\n   * Create and register %s.\n   */";
+      "/**\n * Generated source - Factory for %s.\n */";
+  private static final String CODE_COMMENT_BUILD = "  /**\n   * Fabricates a new %s.\n   */";
   private final AssistBeanReader beanReader;
   private final String originName;
   private final String shortName;
@@ -32,17 +32,17 @@ final class SimpleAssistWriter {
     this.beanReader = beanReader;
     this.packageName = beanReader.packageName();
     this.shortName = beanReader.shortName();
-    this.suffix = "$Assist";
+    this.suffix = "$Factory";
     this.assistedElements = beanReader.assistElements();
     this.originName = packageName + "." + shortName;
   }
 
   private Writer createFileWriter() throws IOException {
-    String originName = this.originName;
+    String origin = this.originName;
     if (beanReader.beanType().getNestingKind().isNested()) {
-      originName = originName.replace(shortName, shortName.replace(".", "$"));
+      origin = origin.replace(shortName, shortName.replace(".", "$"));
     }
-    final JavaFileObject jfo = createSourceFile(originName + suffix);
+    final JavaFileObject jfo = createSourceFile(origin + suffix);
     return jfo.openWriter();
   }
 
@@ -57,7 +57,7 @@ final class SimpleAssistWriter {
 
     writeConstructor();
 
-    writeBuildMethodStart();
+    writeCreatMethod();
 
     beanReader.injectMethods().forEach(this::writeInjectionMethods);
     writeClassEnd();
@@ -89,8 +89,7 @@ final class SimpleAssistWriter {
     writer
         .append("public final class ")
         .append(name)
-        .append(suffix)
-        .append(" implements AssistFactory<%s>", shortName);
+        .append(suffix);
 
     writer.append(" {").eol().eol();
   }
@@ -112,7 +111,9 @@ final class SimpleAssistWriter {
   }
 
   private void writeMethodFields() {
-    if (beanReader.injectMethods().isEmpty()) return;
+    if (beanReader.injectMethods().isEmpty()) {
+      return;
+    }
 
     beanReader.injectMethods().stream()
         .flatMap(m -> m.params().stream())
@@ -182,25 +183,22 @@ final class SimpleAssistWriter {
     writer.append("  }").eol().eol();
   }
 
-  private void writeBuildMethodStart() {
+  private void writeCreatMethod() {
     writer.append(CODE_COMMENT_BUILD, shortName).eol();
 
-    writer.append("  @Override").eol();
-    writer.append("  public %s create(Object... deps) {", shortName).eol();
-    var assists = beanReader.assistElements();
-    var size = assists.size();
-    writer
-        .append(
-            "    if(deps.length != %s) throw new IllegalArgumentException(\"expected %s arguments but recieved \" + deps.length);",
-            size, size)
-        .eol();
+    writer.append("  public %s create(", shortName);
+    for (var iterator = assistedElements.iterator(); iterator.hasNext(); ) {
+      var element = iterator.next();
 
-    for (int i = 0; i < size; i++) {
-      var assist = assists.get(i);
-      var type = GenericType.parse(assist.asType().toString());
+      var type = GenericType.parse(element.asType().toString());
 
-      writer.append("    var arg%s = (%s) deps[%s];", i, type.shortName(), i).eol();
+      writer.append("%s %s", type.shortName(), element.getSimpleName());
+      if (iterator.hasNext()) {
+        writer.append(", ");
+      }
     }
+
+    writer.append(") {").eol();
 
     MethodReader constructor = beanReader.constructor();
     constructor.startTry(writer);
@@ -241,10 +239,8 @@ final class SimpleAssistWriter {
       writer.indent("").append("bean.%s = %s;", fieldName, getDependency).eol();
     }
 
-    for (int i = 0; i < assistedElements.size(); i++) {
-      var field = assistedElements.get(i);
-      String fieldName = field.getSimpleName().toString();
-      writer.indent("    ").append("bean.%s = arg%s;", fieldName, i).eol();
+    for (var field : assistedElements) {
+      writer.indent("    ").append("bean.%s = %s;", field.getSimpleName(), field.getSimpleName()).eol();
     }
   }
 
@@ -276,8 +272,7 @@ final class SimpleAssistWriter {
       if (!methodParam.assisted()) {
         writer.append(methodParam.simpleName()).append(constructor ? "" : "$method");
       } else {
-        var index = getIndexByProperty(methodParam.element(), methodParam.simpleName());
-        writer.append("arg%s", index);
+        writer.append("%s", methodParam.simpleName());
       }
     }
     writer.append(");").eol();
@@ -321,15 +316,5 @@ final class SimpleAssistWriter {
     }
 
     writer.append("  }").eol();
-  }
-
-  private int getIndexByProperty(Element element, String yourString) {
-    for (int i = 0; i < assistedElements.size(); i++) {
-      var e = assistedElements.get(i);
-      if (element.getKind() == e.getKind() && e.getSimpleName().toString().equals(yourString)) {
-        return i;
-      }
-    }
-    return -1;
   }
 }

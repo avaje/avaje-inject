@@ -23,7 +23,7 @@ import static io.avaje.inject.generator.ProcessingContext.*;
 
 @GenerateAPContext
 @SupportedAnnotationTypes({
-  AssistedPrism.PRISM_TYPE,
+  AssistFactoryPrism.PRISM_TYPE,
   InjectModulePrism.PRISM_TYPE,
   FactoryPrism.PRISM_TYPE,
   SingletonPrism.PRISM_TYPE,
@@ -110,7 +110,7 @@ public final class Processor extends AbstractProcessor {
 
     maybeElements(roundEnv, Constants.CONTROLLER).ifPresent(this::readBeans);
     maybeElements(roundEnv, ProxyPrism.PRISM_TYPE).ifPresent(this::readBeans);
-    maybeElements(roundEnv, AssistedPrism.PRISM_TYPE).ifPresent(this::readAssisted);
+    maybeElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
 
     allScopes.readBeans(roundEnv);
     defaultScope.write(roundEnv.processingOver());

@@ -1,13 +1,20 @@
 package io.avaje.inject;
 
-/**
- * Provides the {@code MethodInterceptor} for the given aspect.
- *
- * @param <T> The aspect annotation
- */
-@FunctionalInterface
-public interface AssistFactory<T> {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-  /** Return the method interceptor to use for the given method and aspect annotation. */
-  T create(Object... dependencies);
+import static java.lang.annotation.ElementType.MODULE;
+import static java.lang.annotation.ElementType.PACKAGE;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.CLASS;
+
+/**
+ *
+ */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface AssistFactory {
+
 }
