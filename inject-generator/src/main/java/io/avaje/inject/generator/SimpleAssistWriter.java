@@ -123,7 +123,7 @@ final class SimpleAssistWriter {
               var type = GenericType.parse(element.asType().toString());
 
               writer
-                  .append("  private final %s %s$method =", type.shortName(), p.simpleName())
+                  .append("  private %s %s$method;", type.shortName(), p.simpleName())
                   .eol()
                   .eol();
             });
@@ -216,7 +216,7 @@ final class SimpleAssistWriter {
   private void writeCreateBean(MethodReader constructor) {
     writer.indent(indent).append(" var bean = new %s(", shortName);
     // add constructor dependencies
-    writeMethodParams(constructor);
+    writeMethodParams(constructor, true);
   }
 
   private void writeExtraInjection() {
@@ -230,6 +230,7 @@ final class SimpleAssistWriter {
   }
 
   private void injectFields() {
+    if (beanReader.injectFields().isEmpty()) return;
     for (FieldReader fieldReader : beanReader.injectFields()) {
       if (fieldReader.assisted()) {
         continue;
@@ -252,10 +253,10 @@ final class SimpleAssistWriter {
     if (needsTry) {
       writer.indent("        try {").eol();
     }
-    final var indent = needsTry ? "          " : "        ";
+    final var indent = needsTry ? "    " : "  ";
     for (MethodReader methodReader : beanReader.injectMethods()) {
       writer.indent(indent).append("bean.%s(", methodReader.name());
-      writeMethodParams(methodReader);
+      writeMethodParams(methodReader, false);
     }
     if (needsTry) {
       writer.indent("        } catch (Throwable e) {").eol();
@@ -264,7 +265,7 @@ final class SimpleAssistWriter {
     }
   }
 
-  private void writeMethodParams(MethodReader methodReader) {
+  private void writeMethodParams(MethodReader methodReader, boolean constructor) {
     var methodParams = methodReader.params();
     for (int i = 0; i < methodParams.size(); i++) {
       if (i > 0) {
@@ -272,7 +273,7 @@ final class SimpleAssistWriter {
       }
       final var methodParam = methodParams.get(i);
       if (!methodParam.assisted()) {
-        writer.append(methodParam.simpleName());
+        writer.append(methodParam.simpleName()).append(constructor ? "" : "$method");
       } else {
         var index = getIndexByProperty(methodParam.element(), methodParam.simpleName());
         writer.append("arg%s", index);
@@ -287,7 +288,8 @@ final class SimpleAssistWriter {
 
   private void writeInjectionMethods(MethodReader reader) {
     String simpleName = reader.name();
-    writer.append("public ").append(simpleName).append("(");
+    String returnType = GenericType.parse(reader.element().getReturnType().toString()).shortName();
+    writer.append("  public ").append(returnType).append(" ").append(simpleName).append("(");
 
     for (var iterator = reader.params().iterator(); iterator.hasNext(); ) {
       var p = iterator.next();
@@ -308,7 +310,7 @@ final class SimpleAssistWriter {
 
     writer.append(") {").eol();
 
-    for (var p : beanReader.constructor().params()) {
+    for (var p : reader.params()) {
 
       if (p.assisted()) {
         continue;

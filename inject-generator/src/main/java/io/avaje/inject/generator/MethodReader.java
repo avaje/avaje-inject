@@ -370,6 +370,10 @@ final class MethodReader {
     }
   }
 
+  public ExecutableElement element() {
+      return element;
+    }
+
   static class MethodParam {
 
     private final VariableElement element;
@@ -529,5 +533,4 @@ final class MethodReader {
       return element;
     }
   }
-
 }

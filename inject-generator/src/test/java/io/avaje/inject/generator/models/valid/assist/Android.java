@@ -7,12 +7,12 @@ import io.avaje.inject.generator.models.valid._Wiring;
 @Assisted
 public class Android {
 
-  private final int personalityMatrix;
+  private final int personality;
   private final Model model;
   private final _Wiring wiring;
 
-  public Android(@Assist int personalityMatrix, @Assist Model model, _Wiring wiring) {
-    this.personalityMatrix = personalityMatrix;
+  public Android(@Assist int personality, @Assist Model model, _Wiring wiring) {
+    this.personality = personality;
     this.model = model;
     this.wiring = wiring;
   }

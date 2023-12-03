@@ -7,7 +7,7 @@ import jakarta.inject.Inject;
 
 @Assisted
 public class AndroidField {
-  @Assist int personalityMatrix;
+  @Assist int personality;
   @Assist Model model;
   @Inject _Wiring wiring;
 }
