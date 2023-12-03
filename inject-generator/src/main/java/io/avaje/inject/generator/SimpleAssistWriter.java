@@ -104,7 +104,7 @@ final class SimpleAssistWriter {
         continue;
       }
       var element = field.element();
-      AnnotationCopier.copyAnnotations(writer, element, "  ");
+      AnnotationCopier.copyAnnotations(writer, element, "  ", true);
       var type = GenericType.parse(element.asType().toString());
       writer.append("  %s %s$field;", type.shortName(), field.fieldName()).eol().eol();
     }
@@ -158,7 +158,7 @@ final class SimpleAssistWriter {
       }
 
       var element = p.element();
-      AnnotationCopier.copyAnnotations(writer, element);
+      AnnotationCopier.copyAnnotations(writer, element, false);
 
       var type = GenericType.parse(element.asType().toString());
 
@@ -185,6 +185,7 @@ final class SimpleAssistWriter {
   private void writeBuildMethodStart() {
     writer.append(CODE_COMMENT_BUILD, shortName).eol();
 
+    writer.append("  @Override").eol();
     writer.append("  public %s inject(Object... deps) {", shortName).eol();
     var assists = beanReader.assistElements();
     var size = assists.size();
@@ -298,7 +299,7 @@ final class SimpleAssistWriter {
       }
 
       var element = p.element();
-      AnnotationCopier.copyAnnotations(writer, element);
+      AnnotationCopier.copyAnnotations(writer, element, false);
 
       var type = GenericType.parse(element.asType().toString());
 

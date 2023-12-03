@@ -10,18 +10,20 @@ import javax.lang.model.element.VariableElement;
 final class AnnotationCopier {
   private AnnotationCopier() {}
 
-  public static void copyAnnotations(Append writer, Element element) {
-    copyAnnotations(writer, element, "");
+  public static void copyAnnotations(Append writer, Element element, boolean newLines) {
+    copyAnnotations(writer, element, "", newLines);
   }
 
-  public static void copyAnnotations(Append writer, Element element, String indent) {
+  public static void copyAnnotations(
+      Append writer, Element element, String indent, boolean newLines) {
     for (final AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
       final var type = annotationMirror.getAnnotationType().asElement().asType().toString();
-      if (type.startsWith("io.avaje.inject.Assist") ) {
+      if (type.startsWith("io.avaje.inject.Assist")) {
         continue;
       }
       final String annotationName = annotationMirror.getAnnotationType().toString();
-      final StringBuilder sb = new StringBuilder(indent).append("@").append(annotationName).append("(");
+      final StringBuilder sb =
+          new StringBuilder(indent).append("@").append(annotationName).append("(");
       boolean first = true;
 
       for (final var entry : annotationMirror.getElementValues().entrySet()) {
@@ -35,7 +37,13 @@ final class AnnotationCopier {
 
       sb.append(")");
       final String annotationString = sb.toString();
-      writer.append(annotationString).eol();
+      writer.append(annotationString);
+
+      if (newLines) {
+        writer.eol();
+      } else {
+        writer.append(" ");
+      }
     }
   }
 
