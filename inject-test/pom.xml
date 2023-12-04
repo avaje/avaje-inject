@@ -12,7 +12,7 @@
 
   <properties>
     <jupiter.version>5.10.1</jupiter.version>
-    <mockito.version>5.7.0</mockito.version>
+    <mockito.version>5.8.0</mockito.version>
   </properties>
 
   <dependencies>
