@@ -9,8 +9,6 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MyRetry {
 
-  String fallbackMethod() default "";
-
   int maxAttempts() default -1;
 
   String waitDuration() default "";

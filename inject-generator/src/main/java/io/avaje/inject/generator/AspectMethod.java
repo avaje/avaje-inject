@@ -6,6 +6,8 @@ import static java.util.stream.Collectors.joining;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
+
 import java.util.*;
 import io.avaje.inject.generator.MethodReader.MethodParam;
 
@@ -18,6 +20,8 @@ final class AspectMethod {
   private final String simpleName;
   private final List<? extends TypeMirror> thrownTypes;
   private final String localName;
+  private final ExecutableElement fallback;
+  private final boolean methodRef;
 
   AspectMethod(int nameIndex, List<AspectPair> aspectPairs, ExecutableElement method) {
     this.aspectPairs = sort(aspectPairs);
@@ -27,6 +31,18 @@ final class AspectMethod {
     this.rawReturn = method.getReturnType().toString();
     this.thrownTypes = method.getThrownTypes();
     this.localName = simpleName + nameIndex;
+
+    this.fallback =
+        ElementFilter.methodsIn(method.getEnclosingElement().getEnclosedElements()).stream()
+            .filter(
+                e ->
+                    AOPFallbackPrism.getOptionalOn(e)
+                        .map(AOPFallbackPrism::value)
+                        .filter(v -> v.contains(simpleName))
+                        .isPresent())
+            .findFirst()
+            .orElse(null);
+    methodRef = params.isEmpty();
   }
 
   private List<AspectPair> sort(List<AspectPair> aspectPairs) {
@@ -79,7 +95,8 @@ final class AspectMethod {
     writer.append(" {").eol();
 
     String type = isVoid() ? "Run" : "Call<>";
-    writer.append("    var call = new Invocation.%s(() ->", type);
+
+    writer.append("    var call = new Invocation.%s(", type);
     invokeSuper(writer, simpleName);
     writer.append(")").eol();
     writeArgs(writer);
@@ -99,7 +116,13 @@ final class AspectMethod {
   }
 
   private void invokeSuper(Append writer, String simpleName) {
-    writer.append(" super.%s(", simpleName);
+
+    if (methodRef) {
+      writer.append("super::%s", simpleName);
+      return;
+    }
+
+    writer.append("() -> super.%s(", simpleName);
     for (int i = 0, size = params.size(); i < size; i++) {
       if (i > 0) {
         writer.append(", ");
@@ -151,9 +174,7 @@ final class AspectMethod {
     }
     writer.append(")");
     int aspectCount = aspectPairs.size();
-    if (aspectCount < 2) {
-      writer.append(";").eol();
-    } else {
+    if (aspectCount >= 2) {
       // nesting all but last aspect
       writer.eol();
       writer.append("      // wrapping inner nested aspects based on ordering attribute").eol();
@@ -162,13 +183,13 @@ final class AspectMethod {
         AspectPair aspect = aspectPairs.get(i);
         String sn = aspect.annotationShortName();
         writer.append("      .wrap(%s%s)", localName, sn);
-        if (i < nesting -1) {
+        if (i < nesting - 1) {
           writer.eol();
-        } else {
-          writer.append(";").eol();
         }
       }
     }
+    writeFallback(writer);
+    writer.append(";").eol();
     writer.append("    try {").eol();
     if (aspectCount > 1) {
       writer.append("      // outer-most aspect").eol();
@@ -192,7 +213,36 @@ final class AspectMethod {
     writer.append("    }").eol();
   }
 
-  private void writeThrowsCatch(Append writer) {
+  private void writeFallback(Append writer) {
+    if (fallback == null) return;
+
+    var fallParams = fallback.getParameters();
+    writer.eol().append("      .fallback(");
+    var hasThrowable =
+        fallParams.stream().anyMatch(p -> p.asType().toString().contains("java.lang.Throwable"));
+
+    if (fallParams.size() == 1 && hasThrowable) {
+      writer.append("this::%s", fallback.getSimpleName());
+
+      writer.append(")");
+      return;
+    }
+    writer.append("ex -> %s(", fallback.getSimpleName());
+    if (!fallParams.isEmpty()) {
+      for (int i = 0, size = params.size(); i < size; i++) {
+        if (i > 0) {
+          writer.append(", ");
+        }
+        writer.append(params.get(i).simpleName());
+      }
+    }
+    if (hasThrowable) {
+      writer.append(", ex");
+    }
+    writer.append("))");
+  }
+
+private void writeThrowsCatch(Append writer) {
     final var types = new ArrayList<>(thrownTypes);
     types.removeIf(ProcessingContext::isUncheckedException);
     if (types.isEmpty()) {
@@ -204,7 +254,7 @@ final class AspectMethod {
         .map(Util::shortName)
         .collect(collectingAndThen(joining(" | "), writer::append))
         .append(" e) {")
-        .eol(); 
+        .eol();
     writer.append("      e.addSuppressed(new InvocationException(\"%s proxy threw exception\"));", simpleName).eol();
     writer.append("      throw e;").eol();
   }

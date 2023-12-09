@@ -8,8 +8,10 @@ import java.lang.reflect.Method;
  * This isn't strictly required but more a helper to make it easier for aspects
  * that want to use a fallback or recovery method.
  */
+@Deprecated
 @FunctionalInterface
 public interface Fallback {
+
 
   /**
    * Find and return the fallback given the name and original method.
