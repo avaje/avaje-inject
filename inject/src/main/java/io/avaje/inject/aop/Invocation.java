@@ -121,7 +121,7 @@ public interface Invocation {
     @Override
     public Object[] arguments(Throwable e) {
       if (args == null || args.length == 0) {
-        return new Object[]{e};
+        return new Object[] {e};
       } else {
         Object[] newArgs = Arrays.copyOf(args, args.length + 1);
         newArgs[args.length] = e;
@@ -186,8 +186,7 @@ public interface Invocation {
 
     @Override
     public Base<Void> wrap(MethodInterceptor methodInterceptor) {
-      return new Invocation.Run(() -> methodInterceptor.invoke(this))
-        .with(instance, method, args);
+      return new Invocation.Run(() -> methodInterceptor.invoke(this)).with(instance, method, args);
     }
 
     @Override
@@ -195,9 +194,10 @@ public interface Invocation {
 
       return fallback != null;
     }
+
     @Override
     public Object invokeRecoveryMethod(Throwable t) {
-    	noRecovery(fallback);
+      noRecovery(fallback);
       fallback.accept(t);
       return null;
     }
@@ -207,7 +207,6 @@ public interface Invocation {
       super.with(instance, method, args);
       return this;
     }
-
   }
 
   /**
@@ -253,11 +252,13 @@ public interface Invocation {
 
     @Override
     public Base<T> wrap(MethodInterceptor methodInterceptor) {
-      return new Invocation.Call<>(() -> {
-        final Call<T> delegate = this;
-        methodInterceptor.invoke(delegate);
-        return delegate.finalResult();
-      }).with(instance, method, args);
+      return new Invocation.Call<>(
+              () -> {
+                final Call<T> delegate = this;
+                methodInterceptor.invoke(delegate);
+                return delegate.finalResult();
+              })
+          .with(instance, method, args);
     }
 
     @Override
@@ -273,7 +274,6 @@ public interface Invocation {
       super.result(result);
       return result;
     }
-
   }
 
   /**
