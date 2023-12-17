@@ -43,6 +43,35 @@ final class AspectMethod {
             .findFirst()
             .orElse(null);
     methodRef = params.isEmpty();
+    validateFallback();
+  }
+
+  private void validateFallback() {
+
+    if (fallback == null) {
+      return;
+    }
+    var returnType = Util.trimAnnotations(fallback.getReturnType().toString());
+
+    if (!returnType.contains(Util.shortName(rawReturn))) {
+      APContext.logError(
+          fallback, "An AOP fallback method must have the same return type as the target method");
+    }
+
+    var fallParams = fallback.getParameters();
+
+    final var size = fallParams.size();
+
+    if (fallParams.isEmpty()
+        || size == 1 && fallParams.get(0).asType().toString().contains("Throwable")) {
+      return;
+    }
+
+    if (params.size() != size && size != params.size() + 1) {
+      APContext.logError(
+          fallback,
+          "Invalid fallback signature. An AOP fallback method can have either 0 arguments, one Throwable argument, all the target method's arguements, or all the target method's arguements with Throwable appended.");
+    }
   }
 
   private List<AspectPair> sort(List<AspectPair> aspectPairs) {
@@ -52,8 +81,8 @@ final class AspectMethod {
 
   List<MethodReader.MethodParam> initParams(List<? extends VariableElement> parameters) {
     List<MethodReader.MethodParam> mps = new ArrayList<>(parameters.size());
-    for (VariableElement var : parameters) {
-      mps.add(new MethodReader.MethodParam(var));
+    for (var e : parameters) {
+      mps.add(new MethodReader.MethodParam(e));
     }
     return mps;
   }
@@ -202,13 +231,13 @@ final class AspectMethod {
       writer.append("      return call.finalResult();").eol();
     }
 
-    writer.append("    } catch (RuntimeException ex) {").eol();
-    writer.append("      ex.addSuppressed(new InvocationException(\"%s proxy threw exception\"));", simpleName).eol();
-    writer.append("      throw ex;").eol();
+    writer.append("    } catch (RuntimeException $ex) {").eol();
+    writer.append("      $ex.addSuppressed(new InvocationException(\"%s proxy threw exception\"));", simpleName).eol();
+    writer.append("      throw $ex;").eol();
     writeThrowsCatch(writer);
     if (thrownTypes.stream().map(Object::toString).noneMatch("java.lang.Throwable"::equals)) {
-      writer.append("    } catch (Throwable t) {").eol();
-      writer.append("      throw new InvocationException(\"%s proxy threw exception\", t);", simpleName).eol();
+      writer.append("    } catch (Throwable $t) {").eol();
+      writer.append("      throw new InvocationException(\"%s proxy threw exception\", $t);", simpleName).eol();
     }
     writer.append("    }").eol();
   }
@@ -219,7 +248,7 @@ final class AspectMethod {
     var fallParams = fallback.getParameters();
     writer.eol().append("      .fallback(");
     var hasThrowable =
-        fallParams.stream().anyMatch(p -> p.asType().toString().contains("java.lang.Throwable"));
+        fallParams.stream().anyMatch(p -> p.asType().toString().contains("Throwable"));
 
     if (fallParams.size() == 1 && hasThrowable) {
       writer.append("this::%s", fallback.getSimpleName());
@@ -227,7 +256,13 @@ final class AspectMethod {
       writer.append(")");
       return;
     }
-    writer.append("ex -> %s(", fallback.getSimpleName());
+
+    var jdk = APContext.jdkVersion();
+
+    var unNamedPattern = jdk >= 22 || APContext.previewEnabled() && jdk == 21;
+
+    var exName = !hasThrowable && unNamedPattern ? "_" : "$ex";
+    writer.append("%s -> %s(", exName, fallback.getSimpleName());
     if (!fallParams.isEmpty()) {
       for (int i = 0, size = params.size(); i < size; i++) {
         if (i > 0) {
@@ -237,12 +272,12 @@ final class AspectMethod {
       }
     }
     if (hasThrowable) {
-      writer.append(", ex");
+      writer.append(", $ex");
     }
     writer.append("))");
   }
 
-private void writeThrowsCatch(Append writer) {
+  private void writeThrowsCatch(Append writer) {
     final var types = new ArrayList<>(thrownTypes);
     types.removeIf(ProcessingContext::isUncheckedException);
     if (types.isEmpty()) {
