@@ -74,6 +74,7 @@ public interface Invocation {
   /**
    * Invoke the recovery method associated for this invocation and return the result.
    *
+   * @throws IllegalStateException if no fallback method is configured with this invocation
    * @return The result of the method call. This will return null for void methods.
    */
   Object invokeRecoveryMethod(Throwable t);
