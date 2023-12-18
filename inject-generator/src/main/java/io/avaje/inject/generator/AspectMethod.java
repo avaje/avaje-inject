@@ -2,6 +2,7 @@ package io.avaje.inject.generator;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
@@ -32,13 +33,21 @@ final class AspectMethod {
     this.thrownTypes = method.getThrownTypes();
     this.localName = simpleName + nameIndex;
 
+    var methods = ElementFilter.methodsIn(method.getEnclosingElement().getEnclosedElements());
+
+    var sameNameMethods =
+        methods.stream().filter(m -> m.getSimpleName().contentEquals(simpleName)).collect(toList());
+    var index = sameNameMethods.indexOf(method);
+
     this.fallback =
-        ElementFilter.methodsIn(method.getEnclosingElement().getEnclosedElements()).stream()
+        methods.stream()
             .filter(
                 e ->
                     AOPFallbackPrism.getOptionalOn(e)
-                        .map(AOPFallbackPrism::value)
-                        .filter(v -> v.contains(simpleName))
+                        .filter(
+                            v ->
+                                v.value().contains(simpleName)
+                                    && (sameNameMethods.size() == 1 || index == v.place()))
                         .isPresent())
             .findFirst()
             .orElse(null);

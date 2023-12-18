@@ -29,4 +29,10 @@ public class MethodTest {
   @AOPFallback("test2")
   void retry4(
       @Param Map<@TypeUse String, String> str, @Param int inty, String regular, Throwable t) {}
+
+  @Timed
+  void test2( @Param int inty, String regular) {}
+
+  @AOPFallback(value = "test2", place = 1)
+  void retry4(@Param int inty, String regular, Throwable t) {}
 }

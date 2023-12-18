@@ -11,4 +11,7 @@ public @interface AOPFallback {
 
   /** the name of the target method to recover from. */
   String value();
+
+  /** Distinguish what method to fallback when multiple methods share the same name. */
+  int place() default 0;
 }
