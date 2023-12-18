@@ -9,6 +9,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AOPFallback {
 
-  /** the name of the target method to recover for. */
+  /** the name of the target method to recover from. */
   String value();
 }
