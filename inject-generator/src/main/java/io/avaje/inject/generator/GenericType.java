@@ -25,13 +25,9 @@ final class GenericType {
    */
   static String trimGenericParams(String rawType) {
     int start = rawType.indexOf('<');
-    if (start > 0) {
-      // no package for any generic parameter types
-      if (rawType.indexOf('.', start) == -1) {
-        if (rawType.lastIndexOf('>') > -1) {
-          return rawType.substring(0, start);
-        }
-      }
+    // no package for any generic parameter types
+    if (start > 0 && rawType.indexOf('.', start) == -1 && rawType.lastIndexOf('>') > -1) {
+      return rawType.substring(0, start);
     }
     return rawType;
   }
@@ -108,7 +104,9 @@ final class GenericType {
   }
 
   private static boolean includeInImports(String type) {
-    return type != null && !type.startsWith("java.lang.") && type.contains(".");
+    return type != null
+        && type.contains(".")
+        && (!type.startsWith("java.lang.") || Character.isLowerCase(type.charAt(10)));
   }
 
   /**
