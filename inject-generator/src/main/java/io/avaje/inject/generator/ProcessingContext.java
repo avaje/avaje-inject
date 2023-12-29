@@ -1,47 +1,69 @@
 package io.avaje.inject.generator;
 
+import static io.avaje.inject.generator.APContext.elements;
+import static io.avaje.inject.generator.APContext.filer;
+import static io.avaje.inject.generator.APContext.getModuleInfoReader;
+import static io.avaje.inject.generator.APContext.getProjectModuleElement;
+import static io.avaje.inject.generator.APContext.logError;
+import static io.avaje.inject.generator.APContext.logNote;
+import static io.avaje.inject.generator.APContext.logWarn;
+import static io.avaje.inject.generator.APContext.typeElement;
+import static io.avaje.inject.generator.APContext.asTypeElement;
+import static io.avaje.inject.generator.APContext.types;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.LineNumberReader;
+import java.nio.file.NoSuchFileException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
 import javax.annotation.processing.FilerException;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.LineNumberReader;
-import java.nio.file.NoSuchFileException;
-import java.util.*;
-
-import static io.avaje.inject.generator.APContext.*;
-import static java.util.stream.Collectors.toSet;
 
 final class ProcessingContext {
 
   private static final ThreadLocal<Ctx> CTX = new ThreadLocal<>();
-  private static boolean processingOver;
 
-  private ProcessingContext() {
-  }
+  private ProcessingContext() {}
 
   static final class Ctx {
     private final Set<String> uniqueModuleNames = new HashSet<>();
     private final Set<String> providedTypes = new HashSet<>();
     private final Set<String> optionalTypes = new LinkedHashSet<>();
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
-    private final List<TypeElement> delayQueue = new ArrayList<>();
+    private final List<AvajeModule> avajeModules = new ArrayList<>();
     private boolean validated;
+    private String injectFqn;
+    private String orderFqn;
 
     public Ctx(Set<String> moduleFileProvided) {
-      ExternalProvider.registerModuleProvidedTypes(providedTypes);
+
       providedTypes.addAll(moduleFileProvided);
     }
 
-    public Ctx() {
+    public void registerExternalModules() {
+      ExternalProvider.registerModuleProvidedTypes(providedTypes);
     }
+
+    public Ctx() {}
   }
 
   public static void init(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
     CTX.set(new Ctx(moduleFileProvided));
+    CTX.get().registerExternalModules();
     APContext.init(processingEnv);
   }
 
@@ -88,13 +110,13 @@ final class ProcessingContext {
 
   static FileObject createMetaInfWriter(ScopeInfo.Type scopeType) throws IOException {
     final var serviceName =
-      scopeType == ScopeInfo.Type.DEFAULT
-        ? Constants.META_INF_MODULE
-        : Constants.META_INF_TESTMODULE;
+        scopeType == ScopeInfo.Type.DEFAULT
+            ? Constants.META_INF_MODULE
+            : Constants.META_INF_TESTMODULE;
     return createMetaInfWriterFor(serviceName);
   }
 
-  private static FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
+  static FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
     return filer().createResource(StandardLocation.CLASS_OUTPUT, "", interfaceType);
   }
 
@@ -140,18 +162,38 @@ final class ProcessingContext {
     CTX.get().aspectImportPrisms.putAll(importedMap);
   }
 
-  static void validateModule(String injectFQN) {
+  static void setInjectModuleFQN(String fqn) {
+    CTX.get().injectFqn = fqn;
+  }
+
+  public static void setOrderFQN(String fqn) {
+    CTX.get().orderFqn = fqn;
+  }
+
+  static void validateModule() {
     var module = getProjectModuleElement();
     if (module != null && !CTX.get().validated && !module.isUnnamed()) {
 
       CTX.get().validated = true;
 
       try (var reader = getModuleInfoReader()) {
-
-        var noProvides = reader.lines().noneMatch(s -> s.contains(injectFQN));
+        var injectFQN = CTX.get().injectFqn;
+        var orderFQN = CTX.get().orderFqn;
+        var providers = new ModuleInfoReader(module, reader).provides();
+        var noProvides =
+            injectFQN != null
+                && providers.stream().noneMatch(s -> s.implementations().contains(injectFQN));
+        var noProvidesOrder =
+            orderFQN != null
+                && providers.stream().noneMatch(s -> s.implementations().contains(orderFQN));
 
         if (noProvides) {
           logError(module, "Missing \"provides io.avaje.inject.spi.Module with %s;\"", injectFQN);
+        }
+
+        if (noProvidesOrder) {
+          logError(
+              module, "Missing \"provides io.avaje.inject.spi.ModuleOrdering with %s;\"", orderFQN);
         }
 
       } catch (Exception e) {
@@ -164,29 +206,18 @@ final class ProcessingContext {
     return Optional.ofNullable(CTX.get().aspectImportPrisms.get(type));
   }
 
-  static Set<TypeElement> delayedElements() {
-    var set =
-      CTX.get().delayQueue.stream()
-        .map(t -> t.getQualifiedName().toString())
-        .map(APContext::typeElement)
-        .collect(toSet());
-    CTX.get().delayQueue.clear();
-    return set;
-  }
-
-  static boolean delayUntilNextRound(TypeElement element) {
-    if (!processingOver) {
-      CTX.get().delayQueue.add(element);
-    }
-    return !processingOver;
-  }
-
-  static void clear() {
+  public static void clear() {
     CTX.remove();
     APContext.clear();
   }
 
-  static void processingOver(boolean over) {
-    processingOver = over;
+  public static void addAvajeModule(AvajeModule module) {
+    CTX.get().avajeModules.add(module);
   }
+
+  public static List<AvajeModule> avajeModules() {
+    return CTX.get().avajeModules;
+  }
+
+
 }

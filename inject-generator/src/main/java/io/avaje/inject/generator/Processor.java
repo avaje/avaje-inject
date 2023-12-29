@@ -1,7 +1,7 @@
 package io.avaje.inject.generator;
 
 import io.avaje.prism.GenerateAPContext;
-import io.avaje.prism.GenerateUtils;
+import io.avaje.prism.GenerateModuleInfoReader;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -20,13 +20,12 @@ import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.avaje.inject.generator.APContext.typeElement;
+import static io.avaje.inject.generator.APContext.*;
 import static io.avaje.inject.generator.ProcessingContext.*;
 
-@GenerateUtils
 @GenerateAPContext
+@GenerateModuleInfoReader
 @SupportedAnnotationTypes({
-  AssistFactoryPrism.PRISM_TYPE,
   InjectModulePrism.PRISM_TYPE,
   FactoryPrism.PRISM_TYPE,
   SingletonPrism.PRISM_TYPE,
@@ -47,6 +46,7 @@ public final class Processor extends AbstractProcessor {
   private boolean readModuleInfo;
   private final Set<String> pluginFileProvided = new HashSet<>();
   private final Set<String> moduleFileProvided = new HashSet<>();
+  private boolean strictWiring;
 
   @Override
   public SourceVersion getSupportedSourceVersion() {
@@ -100,10 +100,6 @@ public final class Processor extends AbstractProcessor {
     APContext.setProjectModuleElement(annotations, roundEnv);
     readModule(roundEnv);
 
-    final var processingOver = roundEnv.processingOver();
-    ProcessingContext.processingOver(processingOver);
-
-    readBeans(delayedElements());
     addImportedAspects(importedAspects(roundEnv));
     maybeElements(roundEnv, QualifierPrism.PRISM_TYPE).stream()
       .flatMap(Set::stream)
@@ -123,13 +119,22 @@ public final class Processor extends AbstractProcessor {
 
     maybeElements(roundEnv, Constants.CONTROLLER).ifPresent(this::readBeans);
     maybeElements(roundEnv, ProxyPrism.PRISM_TYPE).ifPresent(this::readBeans);
-    maybeElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
 
     allScopes.readBeans(roundEnv);
-    defaultScope.write(processingOver);
-    allScopes.write(processingOver);
+    defaultScope.write(roundEnv.processingOver());
+    allScopes.write(roundEnv.processingOver());
 
-    if (processingOver) {
+    if (roundEnv.processingOver()) {
+      if (strictWiring) {
+        var order =
+            new FactoryOrder(ProcessingContext.avajeModules(), defaultScope.pluginProvided());
+        try {
+          new SimpleOrderWriter(order, defaultScope).write();
+        } catch (IOException e) {
+          logError("FilerException trying to write wiring order class " + e.getMessage());
+        }
+      }
+      ProcessingContext.validateModule();
       ProcessingContext.clear();
     }
     return false;
@@ -198,17 +203,6 @@ public final class Processor extends AbstractProcessor {
 
   private void readFactories(Set<? extends Element> beans) {
     readChangedBeans(ElementFilter.typesIn(beans), true, false);
-  }
-
-  private void readAssisted(Set<? extends Element> beans) {
-    ElementFilter.typesIn(beans).forEach(t -> {
-      var reader = new AssistBeanReader(t);
-      try {
-        new SimpleAssistWriter(reader).write();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    });
   }
 
   private void readBeans(Set<? extends Element> beans) {
@@ -280,16 +274,17 @@ public final class Processor extends AbstractProcessor {
   private void readInjectModule(RoundEnvironment roundEnv) {
     // read other that are annotated with InjectModule
     maybeElements(roundEnv, InjectModulePrism.PRISM_TYPE).stream()
-      .flatMap(Set::stream)
-      .forEach(element -> {
-        final var scope = ScopePrism.getInstanceOn(element);
-        if (scope == null) {
-          // it it not a custom scope annotation
-          final var annotation = InjectModulePrism.getInstanceOn(element);
-          if (annotation != null) {
-            defaultScope.details(annotation.name(), element);
-          }
-        }
-      });
+        .flatMap(Set::stream)
+        .forEach(
+            element -> {
+              final var scope = ScopePrism.getInstanceOn(element);
+              if (scope == null) {
+                // it it not a custom scope annotation
+                final var annotation = InjectModulePrism.getInstanceOn(element);
+
+                defaultScope.details(annotation.name(), element);
+                this.strictWiring = annotation.strictWiring();
+              }
+            });
   }
 }

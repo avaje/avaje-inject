@@ -127,7 +127,7 @@ final class ScopeInfo {
         .forEach(
             require -> {
               requiresPackages.add(require);
-              requirePkg.add(ProcessorUtils.packageOf(require) + ".");
+              requirePkg.add(Util.packageOf(require) + ".");
             });
   }
 
@@ -171,6 +171,10 @@ final class ScopeInfo {
 
   Set<String> requires() {
     return requires;
+  }
+
+  Set<String> provides() {
+    return provides;
   }
 
   Set<String> pluginProvided() {
@@ -237,6 +241,7 @@ final class ScopeInfo {
     }
     final MetaDataOrdering ordering = new MetaDataOrdering(meta, this);
     final int remaining = ordering.processQueue();
+
     if (remaining > 0) {
       ordering.logWarnings();
     }
@@ -300,12 +305,7 @@ final class ScopeInfo {
       logNote("skipping annotation type " + typeElement);
       return;
     }
-    var reader = new BeanReader(typeElement, factory, importedComponent).read();
-    if (reader.isDelayed() && ProcessingContext.delayUntilNextRound(typeElement)) {
-      readBeans.remove(typeElement.toString());
-    } else {
-      beanReaders.add(reader);
-    }
+    beanReaders.add(new BeanReader(typeElement, factory, importedComponent).read());
   }
 
   void readBuildMethodDependencyMeta(Element element) {
@@ -487,10 +487,10 @@ final class ScopeInfo {
     for (String require : requires) {
       final ScopeInfo requiredScope = scopes.get(require);
       // recursively search parent scope
-      if ((requiredScope != null) && requiredScope.providesDependencyRecursive(dependency)) {
-        // logWarn("dependency " + dependency + " provided by other scope " + requiredScope.name);
-        return true;
-      }
+  if ((requiredScope != null) && requiredScope.providesDependencyRecursive(dependency)) {
+    // logWarn("dependency " + dependency + " provided by other scope " + requiredScope.name);
+    return true;
+  }
     }
     return false;
   }

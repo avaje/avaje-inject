@@ -1,6 +1,8 @@
 package org.example.myapp;
 
 import io.avaje.inject.Component;
+import io.avaje.inject.InjectModule;
+
 import org.example.external.aspect.MyExternalAspect;
 
 import io.avaje.inject.BeanScope;
@@ -12,6 +14,7 @@ import org.example.myapp.other.SimulateExternalPub2;
 
 @Component.Import(value = {SimulateExternal.class, SimulateExternal2.class, SimulateExternalPub.class, SimulateExternalPub2.class}) //, packagePrivate = true)
 @Import(MyExternalAspect.class)
+//@InjectModule(strictWiring = true)
 public class Main {
 
   public static void main(String[] args) {
@@ -22,6 +25,6 @@ public class Main {
     String greeting = helloService.hello();
     System.out.println("Greeting: " + greeting);
 
-    assert greeting.equals("hello+AppHelloData");
+    assert "hello+AppHelloData".equals(greeting);
   }
 }

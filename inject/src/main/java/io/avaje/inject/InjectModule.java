@@ -47,8 +47,19 @@ import java.lang.annotation.Target;
 public @interface InjectModule {
 
   /**
-   * Explicitly specify the name of the module.
+   * Optimizes module wiring by enforcing multi-module wiring checks at compile-time. Will throw a compilation error if all
+   * inter-module {@link InjectModule#requires requires} dependencies are not satisfied.
+   *
+   * <p>Set true if your project:
+   *
+   * <ol>
+   *   <li>Is not a library
+   *   <li>Does not dynamically provide beans at runtime
+   * </ol>
    */
+  boolean strictWiring() default false;
+
+  /** Explicitly specify the name of the module. */
   String name() default "";
 
   /**
