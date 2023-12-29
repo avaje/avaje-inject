@@ -46,6 +46,7 @@ final class ProcessingContext {
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
     private final List<AvajeModule> avajeModules = new ArrayList<>();
     private boolean validated;
+    private boolean strictWiring;
     private String injectFqn;
     private String orderFqn;
 
@@ -219,5 +220,11 @@ final class ProcessingContext {
     return CTX.get().avajeModules;
   }
 
+  public static void strictWiring(boolean strictWiring) {
+    CTX.get().strictWiring = strictWiring;
+  }
 
+  public static boolean strictWiring() {
+    return CTX.get().strictWiring;
+  }
 }

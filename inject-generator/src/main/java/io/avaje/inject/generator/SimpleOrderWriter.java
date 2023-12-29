@@ -18,8 +18,8 @@ final class SimpleOrderWriter {
 
   private Append writer;
 
-  SimpleOrderWriter(FactoryOrder orders, ScopeInfo scopeInfo) {
-    this.ordering = orders.orderModules();
+  SimpleOrderWriter(Set<String> orderedModules, ScopeInfo scopeInfo) {
+    this.ordering = orderedModules;
     this.modulePackage = scopeInfo.modulePackage();
     this.shortName = "CompiledOrder";
     this.fullName = modulePackage + "." + shortName;

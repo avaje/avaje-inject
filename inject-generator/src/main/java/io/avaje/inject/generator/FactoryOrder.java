@@ -89,7 +89,11 @@ class FactoryOrder {
       sb.append(" - none of the loaded modules ")
           .append(loadedModules)
           .append(" explicitly provide the dependencies.");
-      APContext.logError(sb.toString());
+      if (ProcessingContext.strictWiring()) {
+        APContext.logError(sb.toString());
+      } else {
+        APContext.logNote(sb.toString());
+      }
     }
   }
 
