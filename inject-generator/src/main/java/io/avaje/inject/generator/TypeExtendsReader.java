@@ -188,7 +188,9 @@ final class TypeExtendsReader {
 
       final var superMirror = element.getSuperclass();
       final var superElement = asElement(superMirror);
-      addSuperType(superElement, superMirror, false);
+      if (superElement != null) {
+        addSuperType(superElement, superMirror, false);
+      }
     }
   }
 
