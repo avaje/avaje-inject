@@ -25,9 +25,9 @@ APT-based dependency injection for server-side developers - https://avaje.io/inj
 </dependency>
 ```
 
-**JDK 22+**
+**JDK 23+**
 
-In JDK 22+, annotation processors are disabled by default, you will need to add a flag in maven to re-enable the processor.
+In JDK 23+, annotation processors are disabled by default, you will need to add a flag in maven to re-enable the processor.
 ```xml
 <plugin>
   <groupId>org.apache.maven.plugins</groupId>

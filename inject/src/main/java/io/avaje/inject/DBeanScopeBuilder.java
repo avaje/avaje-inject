@@ -15,7 +15,6 @@ import java.util.function.Supplier;
 import static java.lang.System.Logger.Level.DEBUG;
 import static java.lang.System.Logger.Level.INFO;
 import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.toSet;
 
 /** Build a bean scope with options for shutdown hook and supplying test doubles. */
 @NonNullApi
@@ -233,14 +232,13 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   private void initProfiles() {
     if (profiles == null) {
-      profiles = propertyRequiresPlugin.get("avaje.profiles").map(DBeanScopeBuilder::toProfiles).orElse(emptySet());
+      profiles =
+          propertyRequiresPlugin
+              .get("avaje.profiles")
+              .map(p -> Set.of(p.split(",")))
+              .orElse(emptySet());
     }
   }
-
-  private static Set<String> toProfiles(String profiles) {
-    return Arrays.stream(profiles.split(",")).collect(toSet());
-  }
-
 
   @Override
   public BeanScope build() {

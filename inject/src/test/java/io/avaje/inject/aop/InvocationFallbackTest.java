@@ -2,7 +2,6 @@ package io.avaje.inject.aop;
 
 import org.junit.jupiter.api.Test;
 
-import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,13 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class InvocationFallbackTest {
 
-  private final MethodHandles.Lookup lookup = MethodHandles.lookup();
-
   private final List<String> trace = new ArrayList<>();
-  private final List<Method> methods = new ArrayList<>();
-  private final List<Object> results = new ArrayList<>();
-  private final List<Object> args = new ArrayList<>();
-
   private final Method doStuffMethod;
   private final Object myArg = new Object();
   private boolean throwOnDoStuff;
@@ -51,11 +44,12 @@ class InvocationFallbackTest {
   void invokeWithFallback() throws Throwable {
     throwOnDoStuff = true;
 
-    Invocation.Base<String> call = new Invocation.Call<>(() -> this.doStuff(myArg))
-      .with(this, doStuffMethod, myArg);
+    Invocation.Base<String> call =
+        new Invocation.Call<>(() -> doStuff(myArg))
+            .with(this, doStuffMethod, myArg)
+            .fallback(e -> fallbackDoStuff(myArg));
 
-    Fallback fallback = Fallback.find("fallbackDoStuff", doStuffMethod);
-    MyInterceptor myInterceptor = new MyInterceptor(fallback);
+    MyInterceptor myInterceptor = new MyInterceptor();
 
     // invoke the original method
     myInterceptor.invoke(call);
@@ -70,11 +64,11 @@ class InvocationFallbackTest {
   void invokeWithNoFallback() throws Throwable {
     throwOnDoStuff = false;
 
-    Invocation.Base<String> call = new Invocation.Call<>(() -> this.doStuff(myArg))
-      .with(this, doStuffMethod, myArg);
+    Invocation.Base<String> call = new Invocation.Call<>(() -> doStuff(myArg))
+      .with(this, doStuffMethod, myArg)
+      .fallback(this::fallbackDoStuff);
 
-    Fallback fallback = Fallback.find("fallbackDoStuff", doStuffMethod);
-    MyInterceptor myInterceptor = new MyInterceptor(fallback);
+     MyInterceptor myInterceptor = new MyInterceptor();
 
     // invoke the original method
     myInterceptor.invoke(call);
@@ -87,18 +81,12 @@ class InvocationFallbackTest {
 
   static class MyInterceptor implements MethodInterceptor {
 
-    final Fallback fallback;
-
-    MyInterceptor(Fallback fallback) {
-      this.fallback = fallback;
-    }
-
     @Override
     public void invoke(Invocation invocation) throws Throwable {
       try {
         invocation.invoke();
       } catch (Throwable e) {
-        fallback.invoke(invocation, e);
+        invocation.invokeRecoveryMethod(e);
       }
     }
   }

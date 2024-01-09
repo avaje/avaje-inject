@@ -2,6 +2,8 @@ package io.avaje.inject.aop;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Method invocation using in {@link MethodInterceptor#invoke(Invocation)} for Aspects.
@@ -51,8 +53,12 @@ public interface Invocation {
   Object[] arguments();
 
   /**
+   * @deprecated migrate to using {@link AOPFallback} to specify fallback method.
+   * That then removes the need to use this method altogether.
+   * <p>
    * Return the arguments additionally appending the throwable.
    */
+  @Deprecated(forRemoval = true)
   Object[] arguments(Throwable e);
 
   /**
@@ -66,6 +72,19 @@ public interface Invocation {
    * This is typically used when invoking fallback/recovery methods.
    */
   Object instance();
+
+  /**
+   * Return whether this invocation has a registered recovery method
+   */
+  boolean hasRecoveryMethod();
+
+  /**
+   * Invoke the recovery method associated for this invocation and return the result.
+   *
+   * @return The result of the method call. This will return null for void methods.
+   * @throws IllegalStateException if no fallback method is configured with this invocation
+   */
+  Object invokeRecoveryMethod(Throwable t);
 
   /**
    * Invocation base type for both callable and runnable methods.
@@ -137,6 +156,12 @@ public interface Invocation {
      * @return The wrapped call
      */
     public abstract Base<T> wrap(MethodInterceptor methodInterceptor);
+
+    protected void noRecovery(Object recover) {
+      if (recover == null) {
+        throw new IllegalStateException("No recovery method available for this invocation");
+      }
+    }
   }
 
   /**
@@ -145,6 +170,7 @@ public interface Invocation {
   final class Run extends Base<Void> {
 
     private final CheckedRunnable delegate;
+    private Consumer<Throwable> fallback;
 
     /**
      * Create with a given closure to run.
@@ -159,12 +185,37 @@ public interface Invocation {
       return null;
     }
 
-    @Override
-    public Base<Void> wrap(MethodInterceptor methodInterceptor) {
-      return new Invocation.Run(() -> methodInterceptor.invoke(this))
-        .with(instance, method, args);
+    /**
+     * Register a fallback method which can be used to recover from an exception
+     * while intercepting an invocation
+     */
+    public Run fallback(Consumer<Throwable> fallback) {
+      this.fallback = fallback;
+      return this;
     }
 
+    @Override
+    public Base<Void> wrap(MethodInterceptor methodInterceptor) {
+      return new Invocation.Run(() -> methodInterceptor.invoke(this)).with(instance, method, args);
+    }
+
+    @Override
+    public boolean hasRecoveryMethod() {
+      return fallback != null;
+    }
+
+    @Override
+    public Object invokeRecoveryMethod(Throwable t) {
+      noRecovery(fallback);
+      fallback.accept(t);
+      return null;
+    }
+
+    @Override
+    public Run with(Object instance, Method method, Object... args) {
+      super.with(instance, method, args);
+      return this;
+    }
   }
 
   /**
@@ -173,6 +224,7 @@ public interface Invocation {
   final class Call<T> extends Base<T> {
 
     private final CheckedSupplier<T> delegate;
+    private Function<Throwable, T> fallback;
 
     /**
      * Create with a given supplier.
@@ -193,12 +245,40 @@ public interface Invocation {
     }
 
     @Override
+    public Call<T> with(Object instance, Method method, Object... args) {
+      super.with(instance, method, args);
+      return this;
+    }
+
+    /**
+     * register a fallback method which can be used to recover from an exception while intercepting
+     * an invocation
+     */
+    public Call<T> fallback(Function<Throwable, T> fallback) {
+      this.fallback = fallback;
+      return this;
+    }
+
+    @Override
     public Base<T> wrap(MethodInterceptor methodInterceptor) {
-      return new Invocation.Call<T>(() -> {
+      return new Invocation.Call<>(() -> {
         final Call<T> delegate = this;
         methodInterceptor.invoke(delegate);
         return delegate.finalResult();
       }).with(instance, method, args);
+    }
+
+    @Override
+    public boolean hasRecoveryMethod() {
+      return fallback != null;
+    }
+
+    @Override
+    public Object invokeRecoveryMethod(Throwable t) {
+      noRecovery(fallback);
+      var result = fallback.apply(t);
+      super.result(result);
+      return result;
     }
   }
 

@@ -70,7 +70,7 @@ public @interface Component {
   @Target({TYPE, PACKAGE, MODULE})
   @interface Import {
 
-    /** Specify types to generate DI classes for. */
+    /** Types to generate DI classes for. */
     Class<?>[] value();
   }
 }

@@ -2,10 +2,13 @@ package io.avaje.inject.generator;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
+
 import java.util.*;
 import io.avaje.inject.generator.MethodReader.MethodParam;
 
@@ -18,6 +21,8 @@ final class AspectMethod {
   private final String simpleName;
   private final List<? extends TypeMirror> thrownTypes;
   private final String localName;
+  private final ExecutableElement fallback;
+  private final boolean methodRef;
 
   AspectMethod(int nameIndex, List<AspectPair> aspectPairs, ExecutableElement method) {
     this.aspectPairs = sort(aspectPairs);
@@ -27,6 +32,52 @@ final class AspectMethod {
     this.rawReturn = method.getReturnType().toString();
     this.thrownTypes = method.getThrownTypes();
     this.localName = simpleName + nameIndex;
+    this.fallback = findFallback(method);
+    methodRef = params.isEmpty();
+    validateFallback();
+  }
+
+  private ExecutableElement findFallback(ExecutableElement method) {
+    var methods = ElementFilter.methodsIn(method.getEnclosingElement().getEnclosedElements());
+    var sameNameMethods = methods.stream().filter(m -> m.getSimpleName().contentEquals(simpleName)).collect(toList());
+    var index = sameNameMethods.indexOf(method);
+
+    return methods.stream()
+      .filter(e -> matchFallback(e, sameNameMethods, index))
+      .findFirst()
+      .orElse(null);
+  }
+
+  private boolean matchFallback(ExecutableElement e, List<ExecutableElement> sameNameMethods, int index) {
+    return AOPFallbackPrism.getOptionalOn(e)
+      .filter(v -> matchFallback(v, sameNameMethods, index))
+      .isPresent();
+  }
+
+  private boolean matchFallback(AOPFallbackPrism v, List<ExecutableElement> sameNameMethods, int index) {
+    return v.value().contains(simpleName) && (sameNameMethods.size() == 1 || index == v.place());
+  }
+
+  private void validateFallback() {
+    if (fallback == null) {
+      return;
+    }
+    var returnType = Util.trimAnnotations(fallback.getReturnType().toString());
+    if (!returnType.contains(Util.shortName(rawReturn))) {
+      APContext.logError(fallback, "An AOP fallback method must have the same return type as the target method");
+    }
+
+    var fallParams = fallback.getParameters();
+    final var size = fallParams.size();
+    if (fallParams.isEmpty() || size == 1 && fallParams.get(0).asType().toString().contains("Throwable")) {
+      return;
+    }
+
+    if (params.size() != size && size != params.size() + 1) {
+      APContext.logError(
+          fallback,
+          "Invalid fallback signature. An AOP fallback method can have either 0 arguments, one Throwable argument, all the target method's arguments, or all the target method's arguments with Throwable appended.");
+    }
   }
 
   private List<AspectPair> sort(List<AspectPair> aspectPairs) {
@@ -36,8 +87,8 @@ final class AspectMethod {
 
   List<MethodReader.MethodParam> initParams(List<? extends VariableElement> parameters) {
     List<MethodReader.MethodParam> mps = new ArrayList<>(parameters.size());
-    for (VariableElement var : parameters) {
-      mps.add(new MethodReader.MethodParam(var));
+    for (var e : parameters) {
+      mps.add(new MethodReader.MethodParam(e));
     }
     return mps;
   }
@@ -79,7 +130,8 @@ final class AspectMethod {
     writer.append(" {").eol();
 
     String type = isVoid() ? "Run" : "Call<>";
-    writer.append("    var call = new Invocation.%s(() ->", type);
+
+    writer.append("    var call = new Invocation.%s(", type);
     invokeSuper(writer, simpleName);
     writer.append(")").eol();
     writeArgs(writer);
@@ -99,7 +151,12 @@ final class AspectMethod {
   }
 
   private void invokeSuper(Append writer, String simpleName) {
-    writer.append(" super.%s(", simpleName);
+    if (methodRef) {
+      writer.append("super::%s", simpleName);
+      return;
+    }
+
+    writer.append("() -> super.%s(", simpleName);
     for (int i = 0, size = params.size(); i < size; i++) {
       if (i > 0) {
         writer.append(", ");
@@ -133,11 +190,6 @@ final class AspectMethod {
     writer.eol();
   }
 
-  static String aspectTargetShortName(String target) {
-    String type = Util.shortName(target);
-    return Util.initLower(type);
-  }
-
   void writeArgs(Append writer) {
     writer.append("      .with(this, %s", localName);
     if (!params.isEmpty()) {
@@ -151,9 +203,7 @@ final class AspectMethod {
     }
     writer.append(")");
     int aspectCount = aspectPairs.size();
-    if (aspectCount < 2) {
-      writer.append(";").eol();
-    } else {
+    if (aspectCount >= 2) {
       // nesting all but last aspect
       writer.eol();
       writer.append("      // wrapping inner nested aspects based on ordering attribute").eol();
@@ -162,13 +212,13 @@ final class AspectMethod {
         AspectPair aspect = aspectPairs.get(i);
         String sn = aspect.annotationShortName();
         writer.append("      .wrap(%s%s)", localName, sn);
-        if (i < nesting -1) {
+        if (i < nesting - 1) {
           writer.eol();
-        } else {
-          writer.append(";").eol();
         }
       }
     }
+    writeFallback(writer);
+    writer.append(";").eol();
     writer.append("    try {").eol();
     if (aspectCount > 1) {
       writer.append("      // outer-most aspect").eol();
@@ -181,15 +231,49 @@ final class AspectMethod {
       writer.append("      return call.finalResult();").eol();
     }
 
-    writer.append("    } catch (RuntimeException ex) {").eol();
-    writer.append("      ex.addSuppressed(new InvocationException(\"%s proxy threw exception\"));", simpleName).eol();
-    writer.append("      throw ex;").eol();
+    writer.append("    } catch (RuntimeException $ex) {").eol();
+    writer.append("      $ex.addSuppressed(new InvocationException(\"%s proxy threw exception\"));", simpleName).eol();
+    writer.append("      throw $ex;").eol();
     writeThrowsCatch(writer);
     if (thrownTypes.stream().map(Object::toString).noneMatch("java.lang.Throwable"::equals)) {
-      writer.append("    } catch (Throwable t) {").eol();
-      writer.append("      throw new InvocationException(\"%s proxy threw exception\", t);", simpleName).eol();
+      writer.append("    } catch (Throwable $t) {").eol();
+      writer.append("      throw new InvocationException(\"%s proxy threw exception\", $t);", simpleName).eol();
     }
     writer.append("    }").eol();
+  }
+
+  private void writeFallback(Append writer) {
+    if (fallback == null) {
+      return;
+    }
+
+    var fallParams = fallback.getParameters();
+    writer.eol().append("      .fallback(");
+    var hasThrowable = fallParams.stream().anyMatch(p -> p.asType().toString().contains("Throwable"));
+
+    if (fallParams.size() == 1 && hasThrowable) {
+      writer.append("this::%s", fallback.getSimpleName());
+      writer.append(")");
+      return;
+    }
+
+    var jdk = APContext.jdkVersion();
+    var unNamedPattern = jdk >= 22 || APContext.previewEnabled() && jdk == 21;
+
+    var exName = !hasThrowable && unNamedPattern ? "_" : "$ex";
+    writer.append("%s -> %s(", exName, fallback.getSimpleName());
+    if (!fallParams.isEmpty()) {
+      for (int i = 0, size = params.size(); i < size; i++) {
+        if (i > 0) {
+          writer.append(", ");
+        }
+        writer.append(params.get(i).simpleName());
+      }
+    }
+    if (hasThrowable) {
+      writer.append(", $ex");
+    }
+    writer.append("))");
   }
 
   private void writeThrowsCatch(Append writer) {
@@ -204,7 +288,7 @@ final class AspectMethod {
         .map(Util::shortName)
         .collect(collectingAndThen(joining(" | "), writer::append))
         .append(" e) {")
-        .eol(); 
+        .eol();
     writer.append("      e.addSuppressed(new InvocationException(\"%s proxy threw exception\"));", simpleName).eol();
     writer.append("      throw e;").eol();
   }

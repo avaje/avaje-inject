@@ -7,9 +7,7 @@ import java.lang.annotation.*;
  *
  * <p>Create an annotation and annotate with {@code @Aspect} to define an aspect annotation. The
  * associated type that implements {@link AspectProvider} will be used as the target class. The
- * aspect provider should be a {@code @Singleton} such that registers with <em>avaje-inject</em>.
- *
- * <p>
+ * aspect provider should be a {@code @Singleton} bean registered with <em>avaje-inject</em>.
  */
 @Target(ElementType.ANNOTATION_TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -37,24 +35,17 @@ public @interface Aspect {
    */
   @Target({ElementType.PACKAGE, ElementType.TYPE})
   @Retention(RetentionPolicy.SOURCE)
-  public @interface Import {
+  @interface Import {
 
+    /**
+     * Annotation type to import
+     */
     Class<? extends Annotation> value();
 
     /**
-     * Specify the priority ordering when multiple aspects are on a method.
+     * Specify the priority of the imported aspect.
      *
-     * <p>When multiple aspects are on a method they are nested. The highest ordering value will be
-     * the outer-most aspect, the lowest ordering will be the inner-most aspect.
-     *
-     * <p>The outer-most aspect will have it's <em>before</em> executed first, followed by the
-     * <em>before</em> of the inner nested aspects ultimately down the invocation of the target
-     * method.
-     *
-     * <p>The reverse ordering occurs for <em>after</em> with the outer-most aspect having it's
-     * <em>after</em> executed last.
-     *
-     * @return The ordering of this aspect. High value for outer-most aspect.
+     * @see Aspect#ordering()
      */
     int ordering() default 1000;
   }

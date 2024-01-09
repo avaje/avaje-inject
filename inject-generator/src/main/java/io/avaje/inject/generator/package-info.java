@@ -10,6 +10,7 @@
 @GeneratePrism(Qualifier.class)
 @GeneratePrism(Named.class)
 @GeneratePrism(Inject.class)
+@GeneratePrism(AOPFallback.class)
 @GeneratePrism(Aspect.class)
 @GeneratePrism(value = Aspect.Import.class, name = "AspectImportPrism")
 @GeneratePrism(Primary.class)
@@ -28,10 +29,8 @@
 package io.avaje.inject.generator;
 
 import io.avaje.inject.*;
-import io.avaje.inject.aop.Aspect;
-import io.avaje.inject.spi.DependencyMeta;
-import io.avaje.inject.spi.Generated;
-import io.avaje.inject.spi.Proxy;
+import io.avaje.inject.aop.*;
+import io.avaje.inject.spi.*;
 import io.avaje.prism.GeneratePrism;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;

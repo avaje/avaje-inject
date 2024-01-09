@@ -23,6 +23,10 @@ final class Util {
   private static final int PROVIDER_LENGTH = PROVIDER_PREFIX.length();
   private static final int ASPECT_PROVIDER_LENGTH = ASPECT_PROVIDER_PREFIX.length();
 
+  static boolean notJavaLang(String type) {
+    return !type.startsWith("java.lang.") || Character.isLowerCase(type.charAt(10));
+  }
+
   static boolean isVoid(String type) {
     return "void".equalsIgnoreCase(type);
   }
