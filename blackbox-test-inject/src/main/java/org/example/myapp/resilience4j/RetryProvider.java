@@ -51,7 +51,6 @@ public class RetryProvider implements AspectProvider<MyRetry> {
     public void invoke(Invocation invocation) throws Throwable {
       testCounter.incrementAndGet();
       if (invocation.hasRecoveryMethod()) {
-
         Retry.decorateCheckedSupplier(retry, invocation::invoke)
             .recover(throwable -> () -> invocation.invokeRecoveryMethod(throwable))
             .apply();

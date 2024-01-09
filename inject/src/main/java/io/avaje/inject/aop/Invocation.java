@@ -151,8 +151,9 @@ public interface Invocation {
     public abstract Base<T> wrap(MethodInterceptor methodInterceptor);
 
     protected void noRecovery(Object recover) {
-      if (recover == null)
+      if (recover == null) {
         throw new IllegalStateException("No recovery method available for this invocation");
+      }
     }
   }
 
@@ -176,9 +177,10 @@ public interface Invocation {
       delegate.invoke();
       return null;
     }
+
     /**
-     * register a fallback method which can be used to recover from an exception while intercepting
-     * an invocation
+     * Register a fallback method which can be used to recover from an exception
+     * while intercepting an invocation
      */
     public Run fallback(Consumer<Throwable> fallback) {
       this.fallback = fallback;
@@ -192,7 +194,6 @@ public interface Invocation {
 
     @Override
     public boolean hasRecoveryMethod() {
-
       return fallback != null;
     }
 
@@ -253,18 +254,15 @@ public interface Invocation {
 
     @Override
     public Base<T> wrap(MethodInterceptor methodInterceptor) {
-      return new Invocation.Call<>(
-              () -> {
-                final Call<T> delegate = this;
-                methodInterceptor.invoke(delegate);
-                return delegate.finalResult();
-              })
-          .with(instance, method, args);
+      return new Invocation.Call<>(() -> {
+        final Call<T> delegate = this;
+        methodInterceptor.invoke(delegate);
+        return delegate.finalResult();
+      }).with(instance, method, args);
     }
 
     @Override
     public boolean hasRecoveryMethod() {
-
       return fallback != null;
     }
 

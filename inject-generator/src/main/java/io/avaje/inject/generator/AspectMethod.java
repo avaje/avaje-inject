@@ -32,54 +32,51 @@ final class AspectMethod {
     this.rawReturn = method.getReturnType().toString();
     this.thrownTypes = method.getThrownTypes();
     this.localName = simpleName + nameIndex;
-
-    var methods = ElementFilter.methodsIn(method.getEnclosingElement().getEnclosedElements());
-
-    var sameNameMethods =
-        methods.stream().filter(m -> m.getSimpleName().contentEquals(simpleName)).collect(toList());
-    var index = sameNameMethods.indexOf(method);
-
-    this.fallback =
-        methods.stream()
-            .filter(
-                e ->
-                    AOPFallbackPrism.getOptionalOn(e)
-                        .filter(
-                            v ->
-                                v.value().contains(simpleName)
-                                    && (sameNameMethods.size() == 1 || index == v.place()))
-                        .isPresent())
-            .findFirst()
-            .orElse(null);
+    this.fallback = findFallback(method);
     methodRef = params.isEmpty();
     validateFallback();
   }
 
-  private void validateFallback() {
+  private ExecutableElement findFallback(ExecutableElement method) {
+    var methods = ElementFilter.methodsIn(method.getEnclosingElement().getEnclosedElements());
+    var sameNameMethods = methods.stream().filter(m -> m.getSimpleName().contentEquals(simpleName)).collect(toList());
+    var index = sameNameMethods.indexOf(method);
 
+    return methods.stream()
+      .filter(e -> matchFallback(e, sameNameMethods, index))
+      .findFirst()
+      .orElse(null);
+  }
+
+  private boolean matchFallback(ExecutableElement e, List<ExecutableElement> sameNameMethods, int index) {
+    return AOPFallbackPrism.getOptionalOn(e)
+      .filter(v -> matchFallback(v, sameNameMethods, index))
+      .isPresent();
+  }
+
+  private boolean matchFallback(AOPFallbackPrism v, List<ExecutableElement> sameNameMethods, int index) {
+    return v.value().contains(simpleName) && (sameNameMethods.size() == 1 || index == v.place());
+  }
+
+  private void validateFallback() {
     if (fallback == null) {
       return;
     }
     var returnType = Util.trimAnnotations(fallback.getReturnType().toString());
-
     if (!returnType.contains(Util.shortName(rawReturn))) {
-      APContext.logError(
-          fallback, "An AOP fallback method must have the same return type as the target method");
+      APContext.logError(fallback, "An AOP fallback method must have the same return type as the target method");
     }
 
     var fallParams = fallback.getParameters();
-
     final var size = fallParams.size();
-
-    if (fallParams.isEmpty()
-        || size == 1 && fallParams.get(0).asType().toString().contains("Throwable")) {
+    if (fallParams.isEmpty() || size == 1 && fallParams.get(0).asType().toString().contains("Throwable")) {
       return;
     }
 
     if (params.size() != size && size != params.size() + 1) {
       APContext.logError(
           fallback,
-          "Invalid fallback signature. An AOP fallback method can have either 0 arguments, one Throwable argument, all the target method's arguements, or all the target method's arguements with Throwable appended.");
+          "Invalid fallback signature. An AOP fallback method can have either 0 arguments, one Throwable argument, all the target method's arguments, or all the target method's arguments with Throwable appended.");
     }
   }
 
@@ -154,7 +151,6 @@ final class AspectMethod {
   }
 
   private void invokeSuper(Append writer, String simpleName) {
-
     if (methodRef) {
       writer.append("super::%s", simpleName);
       return;
@@ -192,11 +188,6 @@ final class AspectMethod {
       writer.append("      %s%s = %s.interceptor(%s, %s.getAnnotation(%s.class));", localName, sn, name, localName, localName, sn).eol();
     }
     writer.eol();
-  }
-
-  static String aspectTargetShortName(String target) {
-    String type = Util.shortName(target);
-    return Util.initLower(type);
   }
 
   void writeArgs(Append writer) {
@@ -252,22 +243,21 @@ final class AspectMethod {
   }
 
   private void writeFallback(Append writer) {
-    if (fallback == null) return;
+    if (fallback == null) {
+      return;
+    }
 
     var fallParams = fallback.getParameters();
     writer.eol().append("      .fallback(");
-    var hasThrowable =
-        fallParams.stream().anyMatch(p -> p.asType().toString().contains("Throwable"));
+    var hasThrowable = fallParams.stream().anyMatch(p -> p.asType().toString().contains("Throwable"));
 
     if (fallParams.size() == 1 && hasThrowable) {
       writer.append("this::%s", fallback.getSimpleName());
-
       writer.append(")");
       return;
     }
 
     var jdk = APContext.jdkVersion();
-
     var unNamedPattern = jdk >= 22 || APContext.previewEnabled() && jdk == 21;
 
     var exName = !hasThrowable && unNamedPattern ? "_" : "$ex";
