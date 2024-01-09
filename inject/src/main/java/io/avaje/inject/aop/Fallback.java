@@ -3,13 +3,17 @@ package io.avaje.inject.aop;
 import java.lang.reflect.Method;
 
 /**
+ * @deprecated migrate to use {@link AOPFallback} to specify the fallback method.
+ * <p>
  * A fallback or recovery method used with Aspects.
  * <p>
  * This isn't strictly required but more a helper to make it easier for aspects
  * that want to use a fallback or recovery method.
  */
+@Deprecated(forRemoval = true)
 @FunctionalInterface
 public interface Fallback {
+
 
   /**
    * Find and return the fallback given the name and original method.
