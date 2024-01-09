@@ -229,7 +229,7 @@ final class TypeExtendsReader {
           .noneMatch(g -> typeElement(g.mainType()) == null);
 
       interfaceTypes.add(knownType ? rawType : GenericType.removeParameter(rawType));
-      if (!rawType.startsWith("java.lang.") || Character.isLowerCase(rawType.charAt(10))) {
+      if (Util.importJavaLang(rawType)) {
         for (final TypeMirror supertype : types().directSupertypes(anInterface)) {
           readInterfacesOf(supertype);
         }

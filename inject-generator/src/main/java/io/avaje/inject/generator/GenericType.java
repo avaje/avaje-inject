@@ -106,7 +106,7 @@ final class GenericType {
   private static boolean includeInImports(String type) {
     return type != null
         && type.contains(".")
-        && (!type.startsWith("java.lang.") || Character.isLowerCase(type.charAt(10)));
+        && Util.importJavaLang(type);
   }
 
   /**
