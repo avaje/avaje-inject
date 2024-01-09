@@ -11,13 +11,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class UtilTest {
 
   @Test
-  void importJavaLang() {
-    assertFalse(Util.importJavaLang("java.lang.A"));
-    assertFalse(Util.importJavaLang("java.lang.Foo"));
+  void notJavaLang() {
+    assertFalse(Util.notJavaLang("java.lang.A"));
+    assertFalse(Util.notJavaLang("java.lang.Foo"));
 
-    assertTrue(Util.importJavaLang("not.lang.Foo"));
-    assertTrue(Util.importJavaLang("java.lang.annotation.A"));
-    assertTrue(Util.importJavaLang("java.lang.other.Foo"));
+    assertTrue(Util.notJavaLang("not.lang.Foo"));
+    assertTrue(Util.notJavaLang("java.lang.annotation.A"));
+    assertTrue(Util.notJavaLang("java.lang.other.Foo"));
   }
 
   @Test
