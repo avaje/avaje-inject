@@ -188,7 +188,9 @@ final class TypeExtendsReader {
 
       final var superMirror = element.getSuperclass();
       final var superElement = asElement(superMirror);
-      addSuperType(superElement, superMirror, false);
+      if (superElement != null) {
+        addSuperType(superElement, superMirror, false);
+      }
     }
   }
 
@@ -227,7 +229,7 @@ final class TypeExtendsReader {
           .noneMatch(g -> typeElement(g.mainType()) == null);
 
       interfaceTypes.add(knownType ? rawType : GenericType.removeParameter(rawType));
-      if (!rawType.startsWith("java.lang.")) {
+      if (Util.notJavaLang(rawType)) {
         for (final TypeMirror supertype : types().directSupertypes(anInterface)) {
           readInterfacesOf(supertype);
         }

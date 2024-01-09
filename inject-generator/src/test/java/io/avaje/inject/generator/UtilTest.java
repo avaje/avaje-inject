@@ -11,6 +11,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class UtilTest {
 
   @Test
+  void notJavaLang() {
+    assertFalse(Util.notJavaLang("java.lang.A"));
+    assertFalse(Util.notJavaLang("java.lang.Foo"));
+
+    assertTrue(Util.notJavaLang("not.lang.Foo"));
+    assertTrue(Util.notJavaLang("java.lang.annotation.A"));
+    assertTrue(Util.notJavaLang("java.lang.other.Foo"));
+  }
+
+  @Test
   void nestedShortName() {
     assertEquals(Util.shortName("com.example.Foo.Bar"), "Foo.Bar");
   }
