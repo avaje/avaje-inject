@@ -8,8 +8,6 @@ import java.lang.annotation.*;
  * <p>Create an annotation and annotate with {@code @Aspect} to define an aspect annotation. The
  * associated type that implements {@link AspectProvider} will be used as the target class. The
  * aspect provider should be a {@code @Singleton} bean registered with <em>avaje-inject</em>.
- *
- * <p>
  */
 @Target(ElementType.ANNOTATION_TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -32,18 +30,22 @@ public @interface Aspect {
    */
   int ordering() default 1000;
 
-  /** Marks an External Annotation as being used for aspects */
+  /**
+   * Marks an External Annotation as being used for aspects
+   */
   @Target({ElementType.PACKAGE, ElementType.TYPE})
   @Retention(RetentionPolicy.SOURCE)
-  public @interface Import {
+  @interface Import {
 
-    /** Annotation type to import */
+    /**
+     * Annotation type to import
+     */
     Class<? extends Annotation> value();
 
     /**
      * Specify the priority of the imported aspect.
      *
-     * @see {@link Aspect#ordering()}
+     * @see Aspect#ordering()
      */
     int ordering() default 1000;
   }

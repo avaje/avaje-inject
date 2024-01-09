@@ -52,8 +52,13 @@ public interface Invocation {
    */
   Object[] arguments();
 
-  /** Return the arguments additionally appending the throwable. */
-  @Deprecated
+  /**
+   * @deprecated migrate to using {@link AOPFallback} to specify fallback method.
+   * That then removes the need to use this method altogether.
+   * <p>
+   * Return the arguments additionally appending the throwable.
+   */
+  @Deprecated(forRemoval = true)
   Object[] arguments(Throwable e);
 
   /**
@@ -68,14 +73,16 @@ public interface Invocation {
    */
   Object instance();
 
-  /** Return whether this invocation has a registered recovery method */
+  /**
+   * Return whether this invocation has a registered recovery method
+   */
   boolean hasRecoveryMethod();
 
   /**
    * Invoke the recovery method associated for this invocation and return the result.
    *
-   * @throws IllegalStateException if no fallback method is configured with this invocation
    * @return The result of the method call. This will return null for void methods.
+   * @throws IllegalStateException if no fallback method is configured with this invocation
    */
   Object invokeRecoveryMethod(Throwable t);
 
@@ -122,7 +129,7 @@ public interface Invocation {
     @Override
     public Object[] arguments(Throwable e) {
       if (args == null || args.length == 0) {
-        return new Object[] {e};
+        return new Object[]{e};
       } else {
         Object[] newArgs = Arrays.copyOf(args, args.length + 1);
         newArgs[args.length] = e;

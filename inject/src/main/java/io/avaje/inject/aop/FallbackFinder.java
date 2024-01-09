@@ -8,7 +8,6 @@ import java.lang.reflect.Parameter;
 final class FallbackFinder {
 
   static Fallback find(String name, Method method) throws NoSuchMethodException {
-
     final Class<?> type = method.getDeclaringClass();
     final Parameter[] parameters = method.getParameters();
     try {
@@ -46,7 +45,6 @@ final class FallbackFinder {
     @Override
     public Object invoke(Invocation call, Throwable e) {
        try {
-
         final Object result = fallbackMethod.invoke(call.instance(), call.arguments(e));
         call.result(result);
         return result;
