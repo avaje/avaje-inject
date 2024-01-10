@@ -2,17 +2,22 @@ package io.avaje.inject.generator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.util.ElementFilter;
 
 import io.avaje.inject.generator.MethodReader.MethodParam;
 
 final class AssistBeanReader {
 
   private final TypeElement beanType;
-  private final String shortName;
   private final String type;
 
   private final MethodReader constructor;
@@ -23,23 +28,25 @@ final class AssistBeanReader {
   private final ImportTypeMap importTypes = new ImportTypeMap();
   private final BeanRequestParams requestParams;
   private final TypeReader typeReader;
-  private boolean writtenToFile;
-  private boolean suppressBuilderImport;
-  private boolean suppressGeneratedImport;
+  private final Optional<TypeElement> target;
+  private final Optional<String> qualifier;
 
   AssistBeanReader(TypeElement beanType) {
     this.beanType = beanType;
     this.type = beanType.getQualifiedName().toString();
-    this.shortName = shortName(beanType);
     this.typeReader = new TypeReader(GenericType.parse(type), beanType, importTypes, false);
 
     typeReader.process();
-
     this.requestParams = new BeanRequestParams(type);
     this.injectMethods = typeReader.injectMethods();
     this.injectFields = typeReader.injectFields();
     typeReader.preDestroyPriority();
     this.constructor = typeReader.constructor();
+    this.target =
+        AssistFactoryPrism.getOptionalOn(beanType)
+            .map(AssistFactoryPrism::value)
+            .filter(m -> !"java.lang.Void".equals(m.toString()))
+            .map(APContext::asTypeElement);
     constructor.params().stream()
         .filter(MethodParam::assisted)
         .map(MethodParam::element)
@@ -54,6 +61,57 @@ final class AssistBeanReader {
         .filter(MethodParam::assisted)
         .map(MethodParam::element)
         .forEach(assistedElements::add);
+
+    this.qualifier = NamedPrism.getOptionalOn(beanType).map(NamedPrism::value);
+
+    target.ifPresent(this::validateTarget);
+  }
+
+  private void validateTarget(TypeElement t) {
+    if (t.getKind() != ElementKind.INTERFACE || !t.getModifiers().contains(Modifier.ABSTRACT)) {
+      APContext.logError(type, "@AssistFactory targets must be abstract");
+    }
+    var sb =
+        new StringBuilder(
+            String.format(
+                "@AssistFactory targets for type %s must have a '%s create(",
+                shortName(), shortName()));
+
+    for (var iterator = assistedElements.iterator(); iterator.hasNext(); ) {
+      var element = iterator.next();
+
+      var typeName = UType.parse(element.asType());
+
+      sb.append(
+          String.format("%s %s", typeName.shortWithoutAnnotations(), element.getSimpleName()));
+      if (iterator.hasNext()) {
+        sb.append(", ");
+      }
+    }
+    var errorMsg = sb.append(")' method.").toString();
+    ElementFilter.methodsIn(t.getEnclosedElements()).stream()
+        .filter(m -> m.getSimpleName().contentEquals("create"))
+        .map(ExecutableElement::getParameters)
+        .findAny()
+        .ifPresentOrElse(
+            params -> {
+              var mismatched = params.size() != assistedElements.size();
+              if (!mismatched) {
+                for (int i = 0; i < assistedElements.size(); i++) {
+                  var assistParam =
+                      GenericType.parse(assistedElements.get(i).asType().toString()).shortName();
+                  var targetParam =
+                      GenericType.parse(params.get(i).asType().toString()).shortName();
+                  if (!assistParam.equals(targetParam)) {
+                    mismatched = true;
+                  }
+                }
+              }
+              if (mismatched) {
+                APContext.logError(t, errorMsg);
+              }
+            },
+            () -> APContext.logError(t, errorMsg));
   }
 
   @Override
@@ -96,11 +154,6 @@ final class AssistBeanReader {
     return list;
   }
 
-  /** Return the short name of the element. */
-  private String shortName(Element element) {
-    return element.getSimpleName().toString();
-  }
-
   boolean isExtraInjectionRequired() {
     return !injectFields.isEmpty() || !injectMethods.isEmpty();
   }
@@ -114,32 +167,19 @@ final class AssistBeanReader {
 
   private Set<String> importTypes() {
     importTypes.add("io.avaje.inject.AssistFactory");
+    target.ifPresent(e -> importTypes.add(e.getQualifiedName().toString()));
     if (Util.validImportType(type)) {
       importTypes.add(type);
     }
+    qualifier.ifPresent(s -> importTypes.add(NamedPrism.PRISM_TYPE));
     typeReader.extraImports(importTypes);
     requestParams.addImports(importTypes);
-    checkImports();
-    if (!suppressGeneratedImport) {
-      importTypes.add(Constants.GENERATED);
-    }
-    if (!suppressBuilderImport) {
-      importTypes.add(Constants.BUILDER);
-    }
+    importTypes.add(Constants.GENERATED);
 
     constructor.addImports(importTypes);
     injectFields.forEach(r -> r.addImports(importTypes));
     injectMethods.forEach(r -> r.addImports(importTypes));
     return importTypes.forImport();
-  }
-
-  private void checkImports() {
-    suppressBuilderImport = importTypes.containsShortName("Builder");
-    suppressGeneratedImport = importTypes.containsShortName("Generated");
-  }
-
-  String generatedType() {
-    return suppressGeneratedImport ? "@io.avaje.inject.spi.Generated" : "@Generated";
   }
 
   void writeImports(Append writer) {
@@ -159,63 +199,6 @@ final class AssistBeanReader {
     return constructor;
   }
 
-  boolean isWrittenToFile() {
-    return writtenToFile;
-  }
-
-  void setWrittenToFile() {
-    this.writtenToFile = true;
-  }
-
-  /**
-   * Return true if the bean has a dependency which is a request scoped type. Like Javalin Context,
-   * Helidon request and response types.
-   *
-   * <p>If request scoped then generate a BeanFactory instead.
-   */
-  boolean isRequestScopedController() {
-    return requestParams.isRequestScopedController();
-  }
-
-  String suffix() {
-    return isRequestScopedController() ? Constants.DOLLAR_FACTORY : Constants.DI;
-  }
-
-  /** Add interface for this as a BeanFactory (request scoped). */
-  void factoryInterface(Append writer) {
-    requestParams.factoryInterface(writer);
-  }
-
-  /** Generate the BeanFactory dependencies and create method implementation. */
-  void writeRequestCreate(Append writer) {
-    if (constructor != null) {
-      constructor.writeRequestDependency(writer);
-    }
-    for (FieldReader field : injectFields) {
-      field.writeRequestDependency(writer);
-    }
-    for (MethodReader method : injectMethods) {
-      method.writeRequestDependency(writer);
-    }
-    requestParams.writeRequestCreate(writer);
-    writer.resetNextName();
-    writer.append("    var bean = new %s(", shortName);
-    if (constructor != null) {
-      constructor.writeRequestConstructor(writer);
-    }
-    writer.append(");").eol();
-    for (FieldReader field : injectFields) {
-      field.writeRequestInject(writer);
-    }
-    for (final MethodReader method : injectMethods) {
-      writer.append("    bean.%s(", method.name());
-      method.writeRequestConstructor(writer);
-      writer.append(");").eol();
-    }
-    writer.append("    return bean;").eol();
-    writer.append("  }").eol();
-  }
-
   List<FieldReader> injectFields() {
     return typeReader.injectFields();
   }
@@ -227,14 +210,6 @@ final class AssistBeanReader {
   void writeConstructorParams(Append writer) {
     if (constructor != null) {
       constructor.writeConstructorParams(writer);
-    }
-  }
-
-  void writeConstructorInit(Append writer) {
-    if (constructor != null) {
-      writer.append("    super(");
-      constructor.writeConstructorInit(writer);
-      writer.append(");").eol();
     }
   }
 
@@ -269,5 +244,13 @@ final class AssistBeanReader {
 
   public List<Element> assistElements() {
     return assistedElements;
+  }
+
+  public Optional<TypeElement> getTargetInterface() {
+    return target;
+  }
+
+  public Optional<String> getQualifier() {
+    return qualifier;
   }
 }

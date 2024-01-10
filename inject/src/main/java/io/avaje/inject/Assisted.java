@@ -10,4 +10,4 @@ import java.lang.annotation.Target;
 /** */
 @Target({FIELD, PARAMETER})
 @Retention(SOURCE)
-public @interface Assist {}
+public @interface Assisted {}

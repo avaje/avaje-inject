@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import io.avaje.prism.GenerateAPContext;
+import io.avaje.prism.GenerateUtils;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 import static io.avaje.inject.generator.APContext.typeElement;
 import static io.avaje.inject.generator.ProcessingContext.*;
 
+@GenerateUtils
 @GenerateAPContext
 @SupportedAnnotationTypes({
   AssistFactoryPrism.PRISM_TYPE,

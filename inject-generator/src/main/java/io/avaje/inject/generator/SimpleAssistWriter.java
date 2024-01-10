@@ -8,6 +8,7 @@ import java.io.Writer;
 import java.util.List;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.tools.JavaFileObject;
 
 import io.avaje.inject.generator.MethodReader.MethodParam;
@@ -57,7 +58,7 @@ final class SimpleAssistWriter {
 
     writeConstructor();
 
-    writeCreatMethod();
+    writeCreateMethod();
 
     beanReader.injectMethods().forEach(this::writeInjectionMethods);
     writeClassEnd();
@@ -78,18 +79,23 @@ final class SimpleAssistWriter {
 
     writer.append(CODE_COMMENT, shortName).eol();
 
-    writer.append(beanReader.generatedType()).append(Constants.AT_GENERATED_COMMENT).eol();
+    writer.append(Constants.AT_GENERATED).eol();
 
     String name = this.shortName;
     if (beanReader.beanType().getNestingKind().isNested()) {
       name = name.replace(".", "$");
     }
-
+    beanReader.getQualifier().ifPresent(s -> writer.append("@Named(\"%s\")", s).eol());
     writer.append("@Component").eol();
-    writer
-        .append("public final class ")
-        .append(name)
-        .append(suffix);
+    writer.append("public final class ").append(name).append(suffix);
+
+    beanReader
+        .getTargetInterface()
+        .ifPresent(
+            t ->
+                writer
+                    .append(t.getKind() == ElementKind.INTERFACE ? " implements " : " extends ")
+                    .append(Util.shortName(t.getQualifiedName().toString())));
 
     writer.append(" {").eol().eol();
   }
@@ -121,10 +127,11 @@ final class SimpleAssistWriter {
         .forEach(
             p -> {
               var element = p.element();
-              var type = GenericType.parse(element.asType().toString());
 
               writer
-                  .append("  private %s %s$method;", type.shortName(), p.simpleName())
+                  .append(
+                      "  private %s %s$method;",
+                      UType.parse(element.asType()).shortType(), p.simpleName())
                   .eol()
                   .eol();
             });
@@ -140,9 +147,9 @@ final class SimpleAssistWriter {
         .forEach(
             p -> {
               var element = p.element();
-              var type = GenericType.parse(element.asType().toString());
+              var type = UType.parse(element.asType()).shortType();
 
-              writer.append("  private final %s %s;", type.shortName(), p.simpleName()).eol().eol();
+              writer.append("  private final %s %s;", type, p.simpleName()).eol().eol();
             });
 
     String shortName = this.shortName;
@@ -161,9 +168,9 @@ final class SimpleAssistWriter {
       var element = p.element();
       AnnotationCopier.copyAnnotations(writer, element, false);
 
-      var type = GenericType.parse(element.asType().toString());
+      var type = UType.parse(element.asType());
 
-      writer.append("%s %s", type.shortName(), p.simpleName());
+      writer.append("%s %s", type.shortType(), p.simpleName());
       if (iterator.hasNext()) {
         writer.append(",");
       }
@@ -183,16 +190,16 @@ final class SimpleAssistWriter {
     writer.append("  }").eol().eol();
   }
 
-  private void writeCreatMethod() {
+  private void writeCreateMethod() {
     writer.append(CODE_COMMENT_BUILD, shortName).eol();
 
     writer.append("  public %s create(", shortName);
     for (var iterator = assistedElements.iterator(); iterator.hasNext(); ) {
       var element = iterator.next();
 
-      var type = GenericType.parse(element.asType().toString());
+      var type = UType.parse(element.asType());
 
-      writer.append("%s %s", type.shortName(), element.getSimpleName());
+      writer.append("%s %s", type.shortWithoutAnnotations(), element.getSimpleName());
       if (iterator.hasNext()) {
         writer.append(", ");
       }
