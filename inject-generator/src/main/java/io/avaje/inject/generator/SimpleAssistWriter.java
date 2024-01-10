@@ -33,7 +33,7 @@ final class SimpleAssistWriter {
     this.beanReader = beanReader;
     this.packageName = beanReader.packageName();
     this.shortName = beanReader.shortName();
-    this.suffix = "$Factory";
+    this.suffix = "$AssistFactory";
     this.assistedElements = beanReader.assistElements();
     this.originName = packageName + "." + shortName;
   }
