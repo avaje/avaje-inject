@@ -5,6 +5,8 @@ import io.avaje.lang.Nullable;
 
 import java.util.Optional;
 
+import org.other.one.SomeOptionalDep;
+
 @Component
 public class SomeOptionalUser2 {
 

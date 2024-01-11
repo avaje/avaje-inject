@@ -37,7 +37,7 @@ final class SimpleOrderWriter {
 
   private void writeServicesFile() {
     try {
-      FileObject jfo = createMetaInfWriterFor("io.avaje.inject.spi.ModuleOrdering");
+      FileObject jfo = createMetaInfWriterFor("META-INF/services/io.avaje.inject.spi.ModuleOrdering");
       if (jfo != null) {
         Writer writer = jfo.openWriter();
         writer.write(fullName);
