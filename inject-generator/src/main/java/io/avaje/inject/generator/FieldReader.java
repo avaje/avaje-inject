@@ -63,8 +63,8 @@ final class FieldReader {
     return sb.toString();
   }
 
-  void removeFromProvides(List<String> provides) {
-    provides.remove(type.toString());
+  void removeFromProvides(List<UType> provides) {
+    provides.remove(type);
   }
 
   /**

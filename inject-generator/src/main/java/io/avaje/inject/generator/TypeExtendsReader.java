@@ -156,9 +156,9 @@ final class TypeExtendsReader {
 
     providesTypes.addAll(extendsTypes);
     providesTypes.addAll(interfaceTypes);
-    providesTypes.removeIf(e->e.full().contains(baseTypeRaw));
+    providesTypes.remove(baseUType);
     // we can't provide a type that is getting injected
-    extendsInjection.removeFromProvides(providesTypes.stream().map(UType::full).collect(toList()));
+    extendsInjection.removeFromProvides(providesTypes);
     providesAspect = initProvidesAspect();
   }
 

@@ -366,7 +366,7 @@ final class MethodReader {
     }
   }
 
-  void removeFromProvides(List<String> provides) {
+  void removeFromProvides(List<UType> provides) {
     for (MethodParam param : params) {
       param.removeFromProvides(provides);
     }
@@ -517,8 +517,8 @@ final class MethodReader {
       writer.append(simpleName);
     }
 
-    void removeFromProvides(List<String> provides) {
-      provides.remove(genericType.toString());
+    void removeFromProvides(List<UType> provides) {
+      provides.remove(genericType);
     }
   }
 }
