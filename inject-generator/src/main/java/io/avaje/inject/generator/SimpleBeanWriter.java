@@ -6,6 +6,7 @@ import static io.avaje.inject.generator.APContext.logError;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -70,15 +71,22 @@ final class SimpleBeanWriter {
     Set<UType> genericTypes = beanReader.allGenericTypes();
     if (!genericTypes.isEmpty()) {
 
-    	final Map<String, String> seenShortNames= new HashMap<>();
+      final Map<String, String> seenShortNames = new HashMap<>();
+      final Set<String> writtenFields = new HashSet<>();
 
       for (final UType type : genericTypes) {
+        final var fieldName = Util.shortName(type).replace(".", "_");
+
+        if (!writtenFields.add(fieldName)) {
+          continue;
+        }
+
         writer
-            .append("  public static final Type TYPE_%s =", Util.shortName(type).replace(".", "_"))
+            .append("  public static final Type TYPE_%s =", fieldName)
             .eol()
             .append("      new GenericType<");
 
-        writeGenericType(type,seenShortNames, writer);
+        writeGenericType(type, seenShortNames, writer);
         // use fully qualified types here rather than use type.writeShort(writer)
 
         writer.append(">(){}.type();").eol();

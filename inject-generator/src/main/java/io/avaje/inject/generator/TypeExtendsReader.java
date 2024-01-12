@@ -136,7 +136,7 @@ final class TypeExtendsReader {
   }
 
   void process(boolean forBean) {
-    extendsTypes.add(Util.unwrapProvider(baseType.asType()));
+    extendsTypes.add(baseUType);
     if (forBean) {
       extendsInjection.read(baseType);
     }
