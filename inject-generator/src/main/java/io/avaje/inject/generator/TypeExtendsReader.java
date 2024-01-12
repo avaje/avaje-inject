@@ -1,13 +1,15 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.ProcessingContext.asElement;
-import static io.avaje.inject.generator.APContext.typeElement;
 import static io.avaje.inject.generator.APContext.logWarn;
+import static io.avaje.inject.generator.APContext.typeElement;
 import static io.avaje.inject.generator.APContext.types;
+import static io.avaje.inject.generator.ProcessingContext.asElement;
+import static java.util.stream.Collectors.toList;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
@@ -23,12 +25,12 @@ final class TypeExtendsReader {
 
   private static final String JAVA_LANG_OBJECT = "java.lang.Object";
   private static final String JAVA_LANG_RECORD = "java.lang.Record";
-  private final GenericType baseGenericType;
+  private final UType baseUType;
   private final TypeElement baseType;
   private final TypeExtendsInjection extendsInjection;
-  private final List<String> extendsTypes = new ArrayList<>();
-  private final List<String> interfaceTypes = new ArrayList<>();
-  private final List<String> providesTypes = new ArrayList<>();
+  private final List<UType> extendsTypes = new ArrayList<>();
+  private final List<UType> interfaceTypes = new ArrayList<>();
+  private final List<UType> providesTypes = new ArrayList<>();
   private final String beanSimpleName;
   private final String baseTypeRaw;
   private final boolean baseTypeIsInterface;
@@ -42,12 +44,12 @@ final class TypeExtendsReader {
   private String qualifierName;
   private String providesAspect = "";
 
-  TypeExtendsReader(GenericType baseGenericType, TypeElement baseType, boolean factory, ImportTypeMap importTypes, boolean proxyBean) {
-    this.baseGenericType = baseGenericType;
+  TypeExtendsReader(UType baseUType, TypeElement baseType, boolean factory, ImportTypeMap importTypes, boolean proxyBean) {
+    this.baseUType = baseUType;
     this.baseType = baseType;
     this.extendsInjection = new TypeExtendsInjection(baseType, factory, importTypes);
     this.beanSimpleName = baseType.getSimpleName().toString();
-    this.baseTypeRaw = Util.unwrapProvider(baseGenericType.toString());
+    this.baseTypeRaw = Util.unwrapProvider(baseUType.toString());
     this.baseTypeIsInterface = baseType.getKind() == ElementKind.INTERFACE;
     this.publicAccess = baseType.getModifiers().contains(Modifier.PUBLIC);
     this.autoProvide = autoProvide();
@@ -71,8 +73,8 @@ final class TypeExtendsReader {
     }
   }
 
-  GenericType baseType() {
-    return baseGenericType;
+  UType baseType() {
+    return baseUType;
   }
 
   String qualifierName() {
@@ -115,17 +117,17 @@ final class TypeExtendsReader {
     return providesAspect;
   }
 
-  String autoProvides() {
+  UType autoProvides() {
     if (!autoProvide || !providesAspect.isEmpty()) {
       return null;
     }
     if (baseTypeIsInterface || interfaceTypes.isEmpty()) {
-      return baseTypeRaw;
+      return Util.unwrapProvider(baseType.asType());
     }
     return interfaceTypes.get(0);
   }
 
-  List<String> provides() {
+  List<UType> provides() {
     return providesTypes;
   }
 
@@ -134,7 +136,7 @@ final class TypeExtendsReader {
   }
 
   void process(boolean forBean) {
-    extendsTypes.add(baseTypeRaw);
+    extendsTypes.add(Util.unwrapProvider(baseType.asType()));
     if (forBean) {
       extendsInjection.read(baseType);
     }
@@ -154,14 +156,15 @@ final class TypeExtendsReader {
 
     providesTypes.addAll(extendsTypes);
     providesTypes.addAll(interfaceTypes);
-    providesTypes.remove(baseTypeRaw);
+    providesTypes.removeIf(e->e.full().contains(baseTypeRaw));
     // we can't provide a type that is getting injected
-    extendsInjection.removeFromProvides(providesTypes);
+    extendsInjection.removeFromProvides(providesTypes.stream().map(UType::full).collect(toList()));
     providesAspect = initProvidesAspect();
   }
 
   private String initProvidesAspect() {
-    for (final String providesType : providesTypes) {
+    for (final var type : providesTypes) {
+    	var providesType= type.full();
       if (Util.isAspectProvider(providesType)) {
         return Util.extractAspectType(providesType);
       }
@@ -174,15 +177,17 @@ final class TypeExtendsReader {
     final String fullName = mirror.toString();
     if (!JAVA_LANG_OBJECT.equals(fullName) && !JAVA_LANG_RECORD.equals(fullName)) {
       final String type = Util.unwrapProvider(fullName);
+
       if (proxyBean || isPublic(element)) {
-        final var genericType = GenericType.parse(type);
+        final var genericType =
+            !Objects.equals(fullName, type) ? UType.parse(mirror).param0() : UType.parse(mirror);
         // check if any unknown generic types are in the parameters (T,T2, etc.)
         final var knownType =
-          genericType.params().stream()
-            .flatMap(g -> Stream.concat(Stream.of(g), g.params().stream()))
-            .noneMatch(g -> typeElement(g.mainType()) == null);
+            genericType.componentTypes().stream()
+                .flatMap(g -> Stream.concat(Stream.of(g), g.componentTypes().stream()))
+                .noneMatch(g -> typeElement(g.mainType()) == null);
 
-        extendsTypes.add(knownType ? type : genericType.topType());
+        extendsTypes.add(knownType ? Util.unwrapProvider(mirror) : UType.parse(typeElement(genericType.mainType()).asType()));
         extendsInjection.read(element);
       }
 
@@ -203,8 +208,9 @@ final class TypeExtendsReader {
   }
 
   private void readInterfacesOf(TypeMirror anInterface) {
-    final String rawType = Util.unwrapProvider(anInterface.toString());
-    if (JAVA_LANG_OBJECT.equals(rawType)) {
+	  final String rawType = Util.unwrapProvider(anInterface.toString());
+	  final UType rawUType = Util.unwrapProvider(anInterface);
+	    if (JAVA_LANG_OBJECT.equals(rawType)) {
       // we can stop
       return;
     }
@@ -213,9 +219,8 @@ final class TypeExtendsReader {
     } else if (Constants.AUTO_CLOSEABLE.equals(rawType) || Constants.IO_CLOSEABLE.equals(rawType)) {
       closeable = true;
     } else {
-      final var genericType = GenericType.parse(rawType);
       if (qualifierName == null) {
-        final String mainType = genericType.topType();
+        final String mainType = rawUType.mainType();
         final String iShortName = Util.shortName(mainType);
         if (beanSimpleName.endsWith(iShortName)) {
           // derived qualifier name based on prefix to interface short name
@@ -224,11 +229,11 @@ final class TypeExtendsReader {
       }
       // check if any unknown generic types are in the parameters (T,T2, etc.)
       final var knownType =
-        genericType.params().stream()
-          .flatMap(g -> Stream.concat(Stream.of(g), g.params().stream()))
+    		  rawUType.componentTypes().stream()
+          .flatMap(g -> Stream.concat(Stream.of(g), g.componentTypes().stream()))
           .noneMatch(g -> typeElement(g.mainType()) == null);
 
-      interfaceTypes.add(knownType ? rawType : GenericType.removeParameter(rawType));
+      interfaceTypes.add(knownType ? rawUType : UType.parse(typeElement(rawUType.mainType()).asType()));
       if (Util.notJavaLang(rawType)) {
         for (final TypeMirror supertype : types().directSupertypes(anInterface)) {
           readInterfacesOf(supertype);

@@ -127,7 +127,7 @@ final class ScopeInfo {
         .forEach(
             require -> {
               requiresPackages.add(require);
-              requirePkg.add(Util.packageOf(require) + ".");
+              requirePkg.add(ProcessorUtils.packageOf(require) + ".");
             });
   }
 
@@ -481,13 +481,11 @@ final class ScopeInfo {
     // look for required scopes ...
     for (String require : requires) {
       final ScopeInfo requiredScope = scopes.get(require);
-      if (requiredScope != null) {
-        // recursively search parent scope
-        if (requiredScope.providesDependencyRecursive(dependency)) {
-          // logWarn("dependency " + dependency + " provided by other scope " + requiredScope.name);
-          return true;
-        }
-      }
+      // recursively search parent scope
+  if ((requiredScope != null) && requiredScope.providesDependencyRecursive(dependency)) {
+    // logWarn("dependency " + dependency + " provided by other scope " + requiredScope.name);
+    return true;
+  }
     }
     return false;
   }

@@ -10,20 +10,20 @@ final class Dependency {
     if (name.startsWith("soft:")) {
       this.softDependency = true;
       this.conditionalDependency = false;
-      this.name = Util.trimAnnotations(name.substring(5));
+      this.name = ProcessorUtils.trimAnnotations(name.substring(5));
     } else if (name.startsWith("con:")) {
       this.softDependency = true;
       this.conditionalDependency = true;
-      this.name = Util.trimAnnotations(name.substring(4));
+      this.name = ProcessorUtils.trimAnnotations(name.substring(4));
     } else {
       this.softDependency = false;
       this.conditionalDependency = false;
-      this.name = Util.trimAnnotations(name);
+      this.name = ProcessorUtils.trimAnnotations(name);
     }
   }
 
   Dependency(String name, boolean softDependency) {
-    this.name = Util.trimAnnotations(name);
+    this.name = ProcessorUtils.trimAnnotations(name);
     this.softDependency = softDependency;
     this.conditionalDependency = false;
   }

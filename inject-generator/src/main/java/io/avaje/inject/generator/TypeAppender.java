@@ -11,29 +11,22 @@ final class TypeAppender {
 
   private final ImportTypeMap importTypes;
   private final Set<String> types = new LinkedHashSet<>();
-  private final Set<GenericType> genericTypes = new LinkedHashSet<>();
+  private final Set<UType> genericTypes = new LinkedHashSet<>();
 
   TypeAppender(ImportTypeMap importTypes) {
     this.importTypes = importTypes;
   }
 
-  void add(GenericType type) {
-    if (type.isGenericType()) {
-      addGenericType(type);
+  void add(UType type) {
+    if (type.isGeneric()) {
+      addUType(type);
     } else {
-      addSimpleType(type.topType());
+      addSimpleType(type.mainType());
     }
   }
 
-  void add(List<String> sourceTypes) {
-    for (String type : sourceTypes) {
-      GenericType genericType = GenericType.parse(type);
-      if (genericType.isGenericType()) {
-        addGenericType(genericType);
-      } else {
-        addSimpleType(genericType.topType());
-      }
-    }
+  void add(List<UType> sourceTypes) {
+    sourceTypes.forEach(this::add);
   }
 
   void addSimpleType(String classType) {
@@ -41,12 +34,12 @@ final class TypeAppender {
     types.add(shortName + ".class");
   }
 
-  private void addGenericType(GenericType genericType) {
+  private void addUType(UType genericType) {
     genericTypes.add(genericType);
-    types.add("TYPE_" + genericType.shortName().replace(".", "_"));
+    types.add("TYPE_" + Util.shortName(genericType).replace(".", "_"));
   }
 
-  Set<GenericType> genericTypes() {
+  Set<UType> genericTypes() {
     return genericTypes;
   }
 

@@ -144,7 +144,7 @@ final class SimpleModuleWriter {
     for (MetaData metaData : ordering.ordered()) {
       String rawType = metaData.type();
       if (!"void".equals(rawType)) {
-        String type = GenericType.parse(rawType).topType();
+        String type = UType.parse(typeElement(rawType).asType()).mainType();
         TypeElement element = typeElement(type);
         if (element != null && element.getModifiers().contains(Modifier.PUBLIC)) {
           publicClasses.add(type);

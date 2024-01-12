@@ -151,7 +151,7 @@ final class MetaData {
    */
   String topPackage() {
     if (method == null || method.isEmpty()) {
-      return Util.packageOf(type);
+      return ProcessorUtils.packageOf(type);
     }
     // ignore Beans from @Bean factory methods
     return null;
@@ -166,7 +166,7 @@ final class MetaData {
         if (typeElement(type).getNestingKind().isNested()) {
           packageName = Util.nestedPackageOf(type);
         } else {
-          packageName = Util.packageOf(type);
+          packageName = ProcessorUtils.packageOf(type);
         }
         importTypes.add(packageName + ".di." + shortType + Constants.DI);
       } else {

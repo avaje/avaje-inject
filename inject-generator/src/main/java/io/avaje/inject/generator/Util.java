@@ -1,8 +1,6 @@
 package io.avaje.inject.generator;
 
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -10,17 +8,11 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 final class Util {
-  // whitespace not in quotes
-  private static final Pattern WHITE_SPACE_REGEX =
-      Pattern.compile("\\s+(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
-  // comma not in quotes
-  private static final Pattern COMMA_PATTERN =
-      Pattern.compile(", (?=(?:[^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
   static final String ASPECT_PROVIDER_PREFIX = "io.avaje.inject.aop.AspectProvider<";
-  static final String PROVIDER_PREFIX = "jakarta.inject.Provider<";
+  static final String PROVIDER_PREFIX = "jakarta.inject.Provider";
   private static final String OPTIONAL_PREFIX = "java.util.Optional<";
   private static final String NULLABLE = "Nullable";
-  private static final int PROVIDER_LENGTH = PROVIDER_PREFIX.length();
+  private static final int PROVIDER_LENGTH = PROVIDER_PREFIX.length() + 1;
   private static final int ASPECT_PROVIDER_LENGTH = ASPECT_PROVIDER_PREFIX.length();
 
   static boolean notJavaLang(String type) {
@@ -36,7 +28,8 @@ final class Util {
   }
 
   static String classOfMethod(String method) {
-    return packageOf(method);
+    final int pos = method.lastIndexOf('.');
+    return (pos == -1) ? "" : method.substring(0, pos);
   }
 
   static String shortMethod(String method) {
@@ -57,29 +50,6 @@ final class Util {
       return type;
     }
     return type.substring(0, i);
-  }
-
-  /** Trim off annotations from the raw type if present. */
-  public static String trimAnnotations(String input) {
-    input = COMMA_PATTERN.matcher(input).replaceAll(",");
-
-    return cutAnnotations(input);
-  }
-
-  private static String cutAnnotations(String input) {
-    final int pos = input.indexOf("@");
-    if (pos == -1) {
-      return input;
-    }
-
-    final Matcher matcher = WHITE_SPACE_REGEX.matcher(input);
-    int currentIndex = 0;
-    if (matcher.find()) {
-      currentIndex = matcher.start();
-    }
-    final var result = input.substring(0, pos) + input.substring(currentIndex + 1);
-
-    return cutAnnotations(result);
   }
 
   public static String sanitizeImports(String type) {
@@ -103,17 +73,19 @@ final class Util {
     pos = cls.lastIndexOf('.', pos - 1);
     return (pos == -1) ? "" : cls.substring(0, pos);
   }
-
-  static String packageOf(String cls) {
-    final int pos = cls.lastIndexOf('.');
-    return (pos == -1) ? "" : cls.substring(0, pos);
-  }
-
   static String unwrapProvider(String maybeProvider) {
     if (isProvider(maybeProvider)) {
       return extractProviderType(maybeProvider);
     } else {
       return maybeProvider;
+    }
+  }
+
+  static UType unwrapProvider(TypeMirror maybeProvider) {
+    if (isProvider(maybeProvider.toString())) {
+      return UType.parse(maybeProvider).param0();
+    } else {
+      return UType.parse(maybeProvider);
     }
   }
 
@@ -157,8 +129,39 @@ final class Util {
     }
   }
 
-  static String trimmedName(GenericType type) {
-    return shortName(type.topType()).toLowerCase();
+  static String shortName(UType uType) {
+    StringBuilder sb = new StringBuilder();
+    shortName(uType, sb);
+    return sb.toString();
+  }
+
+  static void shortName(UType uType, StringBuilder sb) {
+    var type = trimWildcard(uType.mainType());
+    if (type != null && type.startsWith("? extends ")) {
+      type = type.substring(10);
+    } else if ("?".equals(type)) {
+      type = "Wildcard";
+    } else if (!type.contains(".")) {
+      return;
+    }
+    sb.append(Util.shortName(type));
+    for (UType param : uType.componentTypes()) {
+      shortName(param, sb);
+    }
+  }
+
+  static String trimmedName(UType type) {
+    return shortName(type.mainType()).toLowerCase();
+  }
+
+  String trimExtends(UType uType) {
+    String type = uType.mainType();
+    if (type != null && type.startsWith("? extends ")) {
+      return type.substring(10);
+    } else if ("?".equals(type)) {
+      return "Wildcard";
+    }
+    return type;
   }
 
   static boolean isOptional(String rawType) {
@@ -194,7 +197,26 @@ final class Util {
   }
 
   static UtilType determineType(TypeMirror rawType) {
-    return UtilType.of(rawType.toString());
+    return UtilType.of(rawType.toString(), rawType);
+  }
+
+  /** Trim off generic wildcard from the raw type if present. */
+  static String trimWildcard(String rawType) {
+    if (rawType.endsWith("<?>")) {
+      return rawType.substring(0, rawType.length() - 3);
+    } else {
+      return trimGenericParams(rawType);
+    }
+  }
+
+  /** Trim off generic type parameters. */
+  static String trimGenericParams(String rawType) {
+    int start = rawType.indexOf('<');
+    // no package for any generic parameter types
+    if (start > 0 && rawType.indexOf('.', start) == -1 && rawType.lastIndexOf('>') > -1) {
+      return rawType.substring(0, start);
+    }
+    return rawType;
   }
 
   static boolean isAspectProvider(String rawType) {
@@ -217,9 +239,7 @@ final class Util {
     return Constants.ASPECT_PROVIDER + "<" + aspect + ">";
   }
 
-  /**
-   * Return the common parent package.
-   */
+  /** Return the common parent package. */
   static String commonParent(String currentTop, String aPackage) {
     if (aPackage == null) return currentTop;
     if (currentTop == null) return aPackage;
@@ -256,9 +276,7 @@ final class Util {
     return null;
   }
 
-  /**
-   * Return true if the element has a Nullable annotation.
-   */
+  /** Return true if the element has a Nullable annotation. */
   public static boolean isNullable(Element p) {
     for (final AnnotationMirror mirror : p.getAnnotationMirrors()) {
       if (NULLABLE.equals(shortName(mirror.getAnnotationType().toString()))) {
@@ -285,9 +303,6 @@ final class Util {
   }
 
   public static String trimMethod(String method) {
-    return shortMethod(method)
-      .replace('.', '_')
-      .replace(Constants.DI, "");
+    return shortMethod(method).replace('.', '_').replace(Constants.DI, "");
   }
-
 }

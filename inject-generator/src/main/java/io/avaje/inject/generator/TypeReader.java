@@ -4,7 +4,10 @@ package io.avaje.inject.generator;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 final class TypeReader {
@@ -14,18 +17,18 @@ final class TypeReader {
   private final ImportTypeMap importTypes;
   private final TypeExtendsReader extendsReader;
   private final TypeAnnotationReader annotationReader;
-  private Set<GenericType> genericTypes;
+  private Set<UType> genericTypes;
   private String typesRegister;
 
-  TypeReader(GenericType genericType, TypeElement beanType, ImportTypeMap importTypes, boolean factory) {
+  TypeReader(UType genericType, TypeElement beanType, ImportTypeMap importTypes, boolean factory) {
     this(genericType, true, beanType, importTypes, factory);
   }
 
-  TypeReader(GenericType genericType, TypeElement returnElement, ImportTypeMap importTypes) {
+  TypeReader(UType genericType, TypeElement returnElement, ImportTypeMap importTypes) {
     this(genericType, false, returnElement, importTypes, false);
   }
 
-  private TypeReader(GenericType genericType, boolean forBean, TypeElement beanType, ImportTypeMap importTypes, boolean factory) {
+  private TypeReader(UType genericType, boolean forBean, TypeElement beanType, ImportTypeMap importTypes, boolean factory) {
     this.forBean = forBean;
     this.beanType = beanType;
     this.importTypes = importTypes;
@@ -39,11 +42,11 @@ final class TypeReader {
   }
 
   List<String> provides() {
-    return extendsReader.provides();
+    return extendsReader.provides().stream().map(UType::full).collect(toList());
   }
 
   String autoProvides() {
-    return extendsReader.autoProvides();
+    return Optional.ofNullable(extendsReader.autoProvides()).map(UType::full).orElse(null);
   }
 
   String providesAspect() {
@@ -86,7 +89,7 @@ final class TypeReader {
     return extendsReader.constructor();
   }
 
-  Set<GenericType> genericTypes() {
+  Set<UType> genericTypes() {
     return genericTypes;
   }
 
@@ -121,7 +124,7 @@ final class TypeReader {
     if (!genericTypes.isEmpty()) {
       importTypes.add(Constants.TYPE);
       importTypes.add(Constants.GENERICTYPE);
-      genericTypes.forEach(t->t.addImports(importTypes));
+      genericTypes.forEach(t->importTypes.addAll(t.importTypes()));
     }
   }
 }

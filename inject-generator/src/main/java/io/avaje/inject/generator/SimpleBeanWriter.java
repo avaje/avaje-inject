@@ -67,14 +67,14 @@ final class SimpleBeanWriter {
 
   private void writeGenericTypeFields() {
     // collect all types to prevent duplicates
-    Set<GenericType> genericTypes = beanReader.allGenericTypes();
+    Set<UType> genericTypes = beanReader.allGenericTypes();
     if (!genericTypes.isEmpty()) {
 
     	final Map<String, String> seenShortNames= new HashMap<>();
 
-      for (final GenericType type : genericTypes) {
+      for (final UType type : genericTypes) {
         writer
-            .append("  public static final Type TYPE_%s =", type.shortName().replace(".", "_"))
+            .append("  public static final Type TYPE_%s =", Util.shortName(type).replace(".", "_"))
             .eol()
             .append("      new GenericType<");
 
@@ -87,17 +87,17 @@ final class SimpleBeanWriter {
     }
   }
 
-  private void writeGenericType(GenericType type, Map<String, String> seenShortNames, Append writer) {
-    final var typeShortName = Util.shortName(type.topType());
-    final var topType = seenShortNames.computeIfAbsent(typeShortName, k -> type.topType());
-    if (type.isGenericType()) {
+  private void writeGenericType(UType type, Map<String, String> seenShortNames, Append writer) {
+    final var typeShortName = Util.shortName(type.mainType());
+    final var mainType = seenShortNames.computeIfAbsent(typeShortName, k -> type.mainType());
+    if (type.isGeneric()) {
       final var shortName =
-          Objects.equals(type.topType(), topType) ? typeShortName : type.topType();
+          Objects.equals(type.mainType(), mainType) ? typeShortName : type.mainType();
 
       writer.append(shortName);
       writer.append("<");
       boolean first = true;
-      for (final var param : type.params()) {
+      for (final var param : type.componentTypes()) {
         if (first) {
           first = false;
           writeGenericType(param, seenShortNames, writer);
@@ -109,7 +109,7 @@ final class SimpleBeanWriter {
       writer.append(">");
     } else {
       final var shortName =
-          Objects.equals(type.topType(), topType) ? typeShortName : type.topType();
+          Objects.equals(type.mainType(), mainType) ? typeShortName : type.mainType();
 
       writer.append(shortName);
     }

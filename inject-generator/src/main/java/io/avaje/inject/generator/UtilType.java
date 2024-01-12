@@ -1,5 +1,7 @@
 package io.avaje.inject.generator;
 
+import javax.lang.model.type.TypeMirror;
+
 final class UtilType {
 
   private enum Type {
@@ -13,25 +15,28 @@ final class UtilType {
 
   private final Type type;
   private final String rawType;
+  private final UType uType;
 
-  private UtilType(Type type, String rawType) {
+  private UtilType(Type type, String rawType, UType uType) {
     this.type = type;
     this.rawType = rawType;
+    this.uType = uType;
   }
 
-  static UtilType of(String rawType) {
+  static UtilType of(String rawType, TypeMirror mirror) {
+    var uType = UType.parse(mirror);
     if (rawType.startsWith("java.util.List<")) {
-      return new UtilType(Type.LIST, rawType);
+      return new UtilType(Type.LIST, rawType, uType.param0());
     } else if (rawType.startsWith("java.util.Set<")) {
-      return new UtilType(Type.SET, rawType);
+      return new UtilType(Type.SET, rawType, uType.param0());
     } else if (rawType.startsWith("java.util.Map<java.lang.String,")) {
-      return new UtilType(Type.MAP, rawType);
+      return new UtilType(Type.MAP, rawType, uType.param1());
     } else if (rawType.startsWith("java.util.Optional<")) {
-      return new UtilType(Type.OPTIONAL, rawType);
+      return new UtilType(Type.OPTIONAL, rawType, uType.param0());
     } else if (Util.isProvider(rawType)) {
-      return new UtilType(Type.PROVIDER, rawType);
+      return new UtilType(Type.PROVIDER, rawType, uType.param0());
     } else {
-      return new UtilType(Type.OTHER, rawType);
+      return new UtilType(Type.OTHER, rawType, uType);
     }
   }
 
@@ -66,6 +71,10 @@ final class UtilType {
       default:
         return rawType;
     }
+  }
+
+  UType toUType() {
+    return uType;
   }
 
   String getMethod(boolean nullable, boolean beanMap) {
