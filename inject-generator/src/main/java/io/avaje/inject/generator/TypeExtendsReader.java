@@ -16,6 +16,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 /**
@@ -229,9 +230,10 @@ final class TypeExtendsReader {
       }
       // check if any unknown generic types are in the parameters (T,T2, etc.)
       final var knownType =
-    		  rawUType.componentTypes().stream()
-          .flatMap(g -> Stream.concat(Stream.of(g), g.componentTypes().stream()))
-          .noneMatch(g -> typeElement(g.mainType()) == null);
+          rawUType.componentTypes().stream()
+              .flatMap(g -> Stream.concat(Stream.of(g), g.componentTypes().stream()))
+              .filter(u -> u.kind() != TypeKind.WILDCARD)
+              .noneMatch(g -> typeElement(g.mainType()) == null);
 
       interfaceTypes.add(knownType ? rawUType : UType.parse(typeElement(rawUType.mainType()).asType()));
       if (Util.notJavaLang(rawType)) {
