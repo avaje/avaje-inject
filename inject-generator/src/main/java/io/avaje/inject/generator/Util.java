@@ -5,6 +5,7 @@ import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 final class Util {
@@ -145,9 +146,11 @@ final class Util {
       return;
     }
     sb.append(Util.shortName(type));
-    for (UType param : uType.componentTypes()) {
-      shortName(param, sb);
-    }
+    final var componentTypes = uType.componentTypes();
+    if (componentTypes.size() != 1 || componentTypes.get(0).kind() != TypeKind.WILDCARD)
+      for (UType param : componentTypes) {
+        shortName(param, sb);
+      }
   }
 
   static String trimmedName(UType type) {

@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import javax.lang.model.element.*;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -415,7 +416,7 @@ final class MethodReader {
 
     void builderGetDependency(Append writer, String builderName) {
       writer.append(builderName).append(".").append(utilType.getMethod(nullable, isBeanMap));
-      if (!genericType.isGeneric()) {
+      if (!genericType.isGeneric() || genericType.param0().kind() == TypeKind.WILDCARD) {
         writer.append(Util.shortName(genericType.mainType())).append(".class");
       } else if (isProvider()) {
         writer.append(providerParam()).append(".class");

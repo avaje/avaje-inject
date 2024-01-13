@@ -78,7 +78,9 @@ final class SimpleBeanWriter {
       for (final UType type : genericTypes) {
         final var fieldName = Util.shortName(type).replace(".", "_");
 
-        if (type.componentTypes().stream().anyMatch(u -> u.kind() == TypeKind.TYPEVAR)
+        final var components = type.componentTypes();
+        if (components.size() == 1 && components.get(0).kind() == TypeKind.WILDCARD
+            || components.stream().anyMatch(u -> u.kind() == TypeKind.TYPEVAR)
             || !writtenFields.add(fieldName)) {
           continue;
         }

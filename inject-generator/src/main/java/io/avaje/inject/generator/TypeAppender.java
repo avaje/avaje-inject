@@ -20,9 +20,12 @@ final class TypeAppender {
   }
 
   void add(UType type) {
+    var components = type.componentTypes();
     if (type.isGeneric()
         && type.kind() != TypeKind.TYPEVAR
-        && type.componentTypes().stream().noneMatch(u -> u.kind() == TypeKind.TYPEVAR)) {
+        && (components.size() != 1 || components.get(0).kind() != TypeKind.WILDCARD)
+        && components.stream()
+            .noneMatch(u -> u.kind() == TypeKind.TYPEVAR || u.kind() == TypeKind.WILDCARD)) {
       addUType(type);
     } else {
       addSimpleType(type.mainType());
