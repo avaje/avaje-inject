@@ -228,14 +228,7 @@ final class TypeExtendsReader {
           qualifierName = beanSimpleName.substring(0, beanSimpleName.length() - iShortName.length()).toLowerCase();
         }
       }
-      // check if any unknown generic types are in the parameters (T,T2, etc.)
-      final var knownType =
-          rawUType.componentTypes().stream()
-              .flatMap(g -> Stream.concat(Stream.of(g), g.componentTypes().stream()))
-              .filter(u -> u.kind() != TypeKind.WILDCARD)
-              .noneMatch(g -> typeElement(g.mainType()) == null);
-
-      interfaceTypes.add(knownType ? rawUType : UType.parse(typeElement(rawUType.mainType()).asType()));
+      interfaceTypes.add(rawUType);
       if (Util.notJavaLang(rawType)) {
         for (final TypeMirror supertype : types().directSupertypes(anInterface)) {
           readInterfacesOf(supertype);

@@ -4,6 +4,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.lang.model.type.TypeKind;
+
 /**
  * Helper for building the registration types.
  */
@@ -18,7 +20,9 @@ final class TypeAppender {
   }
 
   void add(UType type) {
-    if (type.isGeneric()) {
+    if (type.isGeneric()
+        && type.kind() != TypeKind.TYPEVAR
+        && type.componentTypes().stream().noneMatch(u -> u.kind() == TypeKind.TYPEVAR)) {
       addUType(type);
     } else {
       addSimpleType(type.mainType());

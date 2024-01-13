@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.lang.model.type.TypeKind;
 import javax.tools.JavaFileObject;
 
 /**
@@ -77,7 +78,8 @@ final class SimpleBeanWriter {
       for (final UType type : genericTypes) {
         final var fieldName = Util.shortName(type).replace(".", "_");
 
-        if (!writtenFields.add(fieldName)) {
+        if (type.componentTypes().stream().anyMatch(u -> u.kind() == TypeKind.TYPEVAR)
+            || !writtenFields.add(fieldName)) {
           continue;
         }
 
