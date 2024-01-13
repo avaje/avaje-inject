@@ -165,7 +165,7 @@ final class TypeExtendsReader {
 
   private String initProvidesAspect() {
     for (final var type : providesTypes) {
-    	var providesType= type.full();
+      var providesType = type.full();
       if (Util.isAspectProvider(providesType)) {
         return Util.extractAspectType(providesType);
       }
@@ -186,9 +186,9 @@ final class TypeExtendsReader {
         final var knownType =
             genericType.componentTypes().stream()
                 .flatMap(g -> Stream.concat(Stream.of(g), g.componentTypes().stream()))
-                .noneMatch(g -> typeElement(g.mainType()) == null);
+                .noneMatch(g -> g.kind() == TypeKind.TYPEVAR);
 
-        extendsTypes.add(knownType ? Util.unwrapProvider(mirror) : UType.parse(typeElement(genericType.mainType()).asType()));
+        extendsTypes.add(knownType ? Util.unwrapProvider(mirror) : genericType);
         extendsInjection.read(element);
       }
 

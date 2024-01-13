@@ -88,7 +88,7 @@ final class TypeExtendsInjection {
 
     if (InjectPrism.isPresent(element)) {
       injectConstructor = methodReader;
-    }else if (methodReader.isNotPrivate()) {
+    } else if (methodReader.isNotPrivate()) {
       otherConstructors.add(methodReader);
     }
   }
