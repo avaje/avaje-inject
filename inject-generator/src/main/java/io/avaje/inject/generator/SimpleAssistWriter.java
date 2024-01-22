@@ -85,7 +85,10 @@ final class SimpleAssistWriter {
     if (beanReader.beanType().getNestingKind().isNested()) {
       name = name.replace(".", "$");
     }
-    beanReader.getQualifier().ifPresent(s -> writer.append("@Named(\"%s\")", s).eol());
+    String qualifierName = beanReader.qualifierName();
+    if (qualifierName != null) {
+      writer.append("@Named(\"%s\")", qualifierName).eol();
+    }
     writer.append("@Component").eol();
     if (!beanReader.hasTargetFactory()) {
       writer.append("public ");

@@ -24,7 +24,7 @@ final class AssistBeanReader {
   private final BeanRequestParams requestParams;
   private final TypeReader typeReader;
   private final Optional<TypeElement> target;
-  private final Optional<String> qualifier;
+  private final String qualifierName;
   private ExecutableElement factoryMethod;
 
   AssistBeanReader(TypeElement beanType) {
@@ -33,6 +33,7 @@ final class AssistBeanReader {
     this.typeReader = new TypeReader(GenericType.parse(type), beanType, importTypes, false);
 
     typeReader.process();
+    qualifierName = typeReader.name();
     this.requestParams = new BeanRequestParams(type);
     this.injectMethods = typeReader.injectMethods();
     this.injectFields = typeReader.injectFields();
@@ -58,7 +59,6 @@ final class AssistBeanReader {
         .map(MethodParam::element)
         .forEach(assistedElements::add);
 
-    this.qualifier = NamedPrism.getOptionalOn(beanType).map(NamedPrism::value);
     target.ifPresent(this::validateTarget);
   }
 
@@ -160,7 +160,9 @@ final class AssistBeanReader {
     if (Util.validImportType(type)) {
       importTypes.add(type);
     }
-    qualifier.ifPresent(s -> importTypes.add(NamedPrism.PRISM_TYPE));
+    if (qualifierName != null) {
+      importTypes.add(NamedPrism.PRISM_TYPE);
+    }
     typeReader.extraImports(importTypes);
     requestParams.addImports(importTypes);
     importTypes.add(Constants.GENERATED);
@@ -239,8 +241,8 @@ final class AssistBeanReader {
     return target;
   }
 
-  public Optional<String> getQualifier() {
-    return qualifier;
+  String qualifierName() {
+    return qualifierName;
   }
 
   String factoryMethodName() {
