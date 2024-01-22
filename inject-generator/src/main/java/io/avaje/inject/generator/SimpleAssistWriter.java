@@ -87,7 +87,10 @@ final class SimpleAssistWriter {
     }
     beanReader.getQualifier().ifPresent(s -> writer.append("@Named(\"%s\")", s).eol());
     writer.append("@Component").eol();
-    writer.append("public final class ").append(name).append(suffix);
+    if (!beanReader.hasTargetFactory()) {
+      writer.append("public ");
+    }
+    writer.append("final class ").append(name).append(suffix);
 
     beanReader
         .getTargetInterface()
@@ -192,7 +195,7 @@ final class SimpleAssistWriter {
 
   private void writeCreateMethod() {
     writer.append(CODE_COMMENT_BUILD, shortName).eol();
-    if (beanReader.factoryMethodOverride()) {
+    if (beanReader.hasTargetFactory()) {
       writer.append("  @Override").eol();
     }
     writer.append("  public %s %s(", shortName, beanReader.factoryMethodName());

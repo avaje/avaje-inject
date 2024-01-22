@@ -247,7 +247,7 @@ final class AssistBeanReader {
     return factoryMethod != null ? factoryMethod.getSimpleName().toString() : "create";
   }
 
-  boolean factoryMethodOverride() {
+  boolean hasTargetFactory() {
     return factoryMethod != null;
   }
 }
