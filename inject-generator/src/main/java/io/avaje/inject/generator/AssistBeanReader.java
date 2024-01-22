@@ -5,12 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
+import javax.lang.model.element.*;
 import javax.lang.model.util.ElementFilter;
 
 import io.avaje.inject.generator.MethodReader.MethodParam;
@@ -30,6 +25,7 @@ final class AssistBeanReader {
   private final TypeReader typeReader;
   private final Optional<TypeElement> target;
   private final Optional<String> qualifier;
+  private ExecutableElement factoryMethod;
 
   AssistBeanReader(TypeElement beanType) {
     this.beanType = beanType;
@@ -63,7 +59,6 @@ final class AssistBeanReader {
         .forEach(assistedElements::add);
 
     this.qualifier = NamedPrism.getOptionalOn(beanType).map(NamedPrism::value);
-
     target.ifPresent(this::validateTarget);
   }
 
@@ -71,47 +66,41 @@ final class AssistBeanReader {
     if (t.getKind() != ElementKind.INTERFACE || !t.getModifiers().contains(Modifier.ABSTRACT)) {
       APContext.logError(type, "@AssistFactory targets must be abstract");
     }
-    var sb =
-        new StringBuilder(
-            String.format(
-                "@AssistFactory targets for type %s must have a '%s create(",
-                shortName(), shortName()));
+    Optional<ExecutableElement> matchedMethod = ElementFilter.methodsIn(t.getEnclosedElements()).stream()
+      .filter(m -> m.getParameters().size() == assistedElements.size())
+      .filter(m -> {
+          List<? extends VariableElement> params = m.getParameters();
+          for (int i = 0; i < assistedElements.size(); i++) {
+            var assistParam = GenericType.parse(assistedElements.get(i).asType().toString()).shortName();
+            var targetParam = GenericType.parse(params.get(i).asType().toString()).shortName();
+            if (!assistParam.equals(targetParam)) {
+              return false;
+            }
+          }
+          return true;
+        }
+      )
+      .findFirst();
 
+    if (matchedMethod.isEmpty()) {
+      APContext.logError(t, mismatchedMethodError());
+    } else {
+      this.factoryMethod = matchedMethod.get();
+    }
+  }
+
+  private String mismatchedMethodError() {
+    var sb = new StringBuilder("@AssistFactory targets for type ");
+    sb.append(shortName()).append(" with parameter types of (");
     for (var iterator = assistedElements.iterator(); iterator.hasNext(); ) {
       var element = iterator.next();
-
       var typeName = UType.parse(element.asType());
-
-      sb.append(
-          String.format("%s %s", typeName.shortWithoutAnnotations(), element.getSimpleName()));
+      sb.append(typeName.shortWithoutAnnotations()).append(" ").append(element.getSimpleName());
       if (iterator.hasNext()) {
         sb.append(", ");
       }
     }
-    var errorMsg = sb.append(")' method.").toString();
-    ElementFilter.methodsIn(t.getEnclosedElements()).stream()
-        .filter(m -> m.getSimpleName().contentEquals("create"))
-        .map(ExecutableElement::getParameters)
-        .findAny()
-        .ifPresentOrElse(
-            params -> {
-              var mismatched = params.size() != assistedElements.size();
-              if (!mismatched) {
-                for (int i = 0; i < assistedElements.size(); i++) {
-                  var assistParam =
-                      GenericType.parse(assistedElements.get(i).asType().toString()).shortName();
-                  var targetParam =
-                      GenericType.parse(params.get(i).asType().toString()).shortName();
-                  if (!assistParam.equals(targetParam)) {
-                    mismatched = true;
-                  }
-                }
-              }
-              if (mismatched) {
-                APContext.logError(t, errorMsg);
-              }
-            },
-            () -> APContext.logError(t, errorMsg));
+    return sb.append(")'.").toString();
   }
 
   @Override
@@ -252,5 +241,13 @@ final class AssistBeanReader {
 
   public Optional<String> getQualifier() {
     return qualifier;
+  }
+
+  String factoryMethodName() {
+    return factoryMethod != null ? factoryMethod.getSimpleName().toString() : "create";
+  }
+
+  boolean factoryMethodOverride() {
+    return factoryMethod != null;
   }
 }

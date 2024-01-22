@@ -192,8 +192,10 @@ final class SimpleAssistWriter {
 
   private void writeCreateMethod() {
     writer.append(CODE_COMMENT_BUILD, shortName).eol();
-
-    writer.append("  public %s create(", shortName);
+    if (beanReader.factoryMethodOverride()) {
+      writer.append("  @Override").eol();
+    }
+    writer.append("  public %s %s(", shortName, beanReader.factoryMethodName());
     for (var iterator = assistedElements.iterator(); iterator.hasNext(); ) {
       var element = iterator.next();
 
