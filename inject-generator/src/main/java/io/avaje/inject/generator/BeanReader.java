@@ -76,15 +76,15 @@ final class BeanReader {
     this.delayed = shouldDelay();
   }
 
-  //delay until next round if types cannot be resolved
+  // delay until next round if types cannot be resolved
   private boolean shouldDelay() {
 
     var construct =
         Optional.ofNullable(constructor).map(MethodReader::params).stream()
             .flatMap(List::stream)
-            .map(p -> p.element().asType());
+            .map(MethodParam::element);
 
-    var fields = injectFields.stream().map(FieldReader::element).map(Element::asType);
+    var fields = injectFields.stream().map(FieldReader::element);
 
     var constructFields = Stream.concat(construct, fields);
 
@@ -92,8 +92,11 @@ final class BeanReader {
         injectMethods.stream()
             .map(MethodReader::params)
             .flatMap(List::stream)
-            .map(p -> p.element().asType());
-    return Stream.concat(constructFields, methods).anyMatch(t -> t.getKind() == TypeKind.ERROR);
+            .map(MethodParam::element);
+
+    return Stream.concat(constructFields, methods)
+        .map(Element::asType)
+        .anyMatch(t -> t.getKind() == TypeKind.ERROR);
   }
 
   @Override
