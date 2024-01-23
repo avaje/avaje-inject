@@ -1,5 +1,6 @@
 package io.avaje.inject.generator;
 
+import static io.avaje.inject.generator.APContext.asTypeElement;
 import static io.avaje.inject.generator.APContext.elements;
 import static io.avaje.inject.generator.APContext.filer;
 import static io.avaje.inject.generator.APContext.getModuleInfoReader;
@@ -8,15 +9,17 @@ import static io.avaje.inject.generator.APContext.logError;
 import static io.avaje.inject.generator.APContext.logNote;
 import static io.avaje.inject.generator.APContext.logWarn;
 import static io.avaje.inject.generator.APContext.typeElement;
-import static io.avaje.inject.generator.APContext.asTypeElement;
 import static io.avaje.inject.generator.APContext.types;
+import static java.util.stream.Collectors.toSet;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.nio.file.NoSuchFileException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -35,6 +38,7 @@ import javax.tools.StandardLocation;
 final class ProcessingContext {
 
   private static final ThreadLocal<Ctx> CTX = new ThreadLocal<>();
+private static boolean processingOver;
 
   private ProcessingContext() {}
 
@@ -43,10 +47,12 @@ final class ProcessingContext {
     private final Set<String> providedTypes = new HashSet<>();
     private final Set<String> optionalTypes = new LinkedHashSet<>();
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
+    private final List<TypeElement> delayQueue = new ArrayList<>();
+    private final Map<String, TypeElement> unknownTypes = new HashMap<>();
+
     private boolean validated;
 
     public Ctx(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
-
       ExternalProvider.registerModuleProvidedTypes(providedTypes);
       providedTypes.addAll(moduleFileProvided);
     }
@@ -178,8 +184,29 @@ final class ProcessingContext {
     return Optional.ofNullable(CTX.get().aspectImportPrisms.get(type));
   }
 
+  static Set<TypeElement> delayedElements() {
+    var set =
+        CTX.get().delayQueue.stream()
+            .map(t -> t.getQualifiedName().toString())
+            .map(APContext::typeElement)
+            .collect(toSet());
+    CTX.get().delayQueue.clear();
+    return set;
+  }
+
+  static boolean delayUntilNextRound(TypeElement element) {
+    if (!processingOver) {
+      CTX.get().delayQueue.add(element);
+    }
+    return !processingOver;
+  }
+
   public static void clear() {
     CTX.remove();
     APContext.clear();
+  }
+
+  public static void processingOver(boolean over) {
+    processingOver = over;
   }
 }

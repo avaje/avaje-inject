@@ -4,7 +4,12 @@ import static io.avaje.inject.generator.APContext.logError;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
+
+import io.avaje.inject.generator.MethodReader.MethodParam;
+
 import java.util.*;
+import java.util.stream.Stream;
 
 
 final class BeanReader {
@@ -36,6 +41,7 @@ final class BeanReader {
   private boolean suppressBuilderImport;
   private boolean suppressGeneratedImport;
   private Set<GenericType> allGenericTypes;
+  private final boolean delayed;
 
   BeanReader(TypeElement beanType, boolean factory, boolean importedComponent) {
     this.beanType = beanType;
@@ -67,6 +73,27 @@ final class BeanReader {
       conditions.readAll(beanType);
       this.proxy = false;
     }
+    this.delayed = shouldDelay();
+  }
+
+  //delay until next round if types cannot be resolved
+  private boolean shouldDelay() {
+
+    var construct =
+        Optional.ofNullable(constructor).map(MethodReader::params).stream()
+            .flatMap(List::stream)
+            .map(p -> p.element().asType());
+
+    var fields = injectFields.stream().map(FieldReader::element).map(Element::asType);
+
+    var constructFields = Stream.concat(construct, fields);
+
+    var methods =
+        injectMethods.stream()
+            .map(MethodReader::params)
+            .flatMap(List::stream)
+            .map(p -> p.element().asType());
+    return Stream.concat(constructFields, methods).anyMatch(t -> t.getKind() == TypeKind.ERROR);
   }
 
   @Override
@@ -452,5 +479,9 @@ final class BeanReader {
       }
     }
     return false;
+  }
+
+  public boolean isDelayed() {
+    return delayed;
   }
 }

@@ -98,6 +98,11 @@ public final class Processor extends AbstractProcessor {
     APContext.setProjectModuleElement(annotations, roundEnv);
     readModule(roundEnv);
 
+    final var processingOver = roundEnv.processingOver();
+
+    ProcessingContext.processingOver(processingOver);
+
+    readBeans(delayedElements());
     addImportedAspects(importedAspects(roundEnv));
     maybeElements(roundEnv, ScopePrism.PRISM_TYPE).ifPresent(this::readScopes);
     maybeElements(roundEnv, FactoryPrism.PRISM_TYPE).ifPresent(this::readFactories);
@@ -115,10 +120,10 @@ public final class Processor extends AbstractProcessor {
     maybeElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
 
     allScopes.readBeans(roundEnv);
-    defaultScope.write(roundEnv.processingOver());
-    allScopes.write(roundEnv.processingOver());
+    defaultScope.write(processingOver);
+    allScopes.write(processingOver);
 
-    if (roundEnv.processingOver()) {
+    if (processingOver) {
       ProcessingContext.clear();
     }
     return false;
