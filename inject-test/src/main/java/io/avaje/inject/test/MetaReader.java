@@ -119,9 +119,18 @@ final class MetaReader {
       return named.value().toLowerCase();
     }
     for (Annotation annotation : field.getAnnotations()) {
-      for (Annotation metaAnnotation : annotation.annotationType().getAnnotations()) {
+      final var annotationType = annotation.annotationType();
+      for (Annotation metaAnnotation : annotationType.getAnnotations()) {
         if (metaAnnotation.annotationType().equals(Qualifier.class)) {
-          return annotation.annotationType().getSimpleName().toLowerCase();
+          var toString =
+              annotation
+                  .toString()
+                  .substring(1)
+                  .replace(annotationType.getCanonicalName(), annotationType.getSimpleName());
+          if (toString.endsWith("()")) {
+            toString = toString.substring(0, toString.length() - 2);
+          }
+          return toString.toLowerCase();
         }
       }
     }

@@ -8,6 +8,7 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 
 final class Util {
   // whitespace not in quotes
@@ -250,7 +251,15 @@ final class Util {
       final DeclaredType annotationType = annotationMirror.getAnnotationType();
       final var hasQualifier = QualifierPrism.isPresent(annotationType.asElement());
       if (hasQualifier) {
-        return Util.shortName(annotationType.toString()).toLowerCase();
+        final var shortName = Util.shortName(annotationType.toString());
+
+        var fqn = APContext.asTypeElement(annotationType).getQualifiedName().toString();
+        return annotationMirror
+            .toString()
+            .substring(1)
+            .replace(fqn, shortName)
+            .replace("\"", "\\\"")
+            .toLowerCase();
       }
     }
     return null;
