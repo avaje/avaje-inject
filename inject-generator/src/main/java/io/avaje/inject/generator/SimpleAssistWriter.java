@@ -6,6 +6,7 @@ import static java.util.function.Predicate.not;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -141,11 +142,15 @@ final class SimpleAssistWriter {
   }
 
   private void writeConstructor() {
-    List<MethodParam> constructorParams = beanReader.constructor().params();
-    if (constructorParams.isEmpty()) {
+    List<MethodParam> injectParams = beanReader.constructor().params().stream()
+      .filter(not(MethodParam::assisted))
+      .collect(Collectors.toList());
+
+    if (injectParams.isEmpty()) {
       return;
     }
-    writeFieldsForInjected(constructorParams);
+
+    writeFieldsForInjected(injectParams);
 
     String shortName = this.shortName;
     if (beanReader.beanType().getNestingKind().isNested()) {
@@ -153,11 +158,8 @@ final class SimpleAssistWriter {
     }
     writer.append("  ").append(shortName).append(suffix).append("(");
 
-    for (var iterator = constructorParams.iterator(); iterator.hasNext(); ) {
+    for (var iterator = injectParams.iterator(); iterator.hasNext(); ) {
       var p = iterator.next();
-      if (p.assisted()) {
-        continue;
-      }
       var element = p.element();
       AnnotationCopier.copyAnnotations(writer, element, false);
       var type = UType.parse(element.asType());
@@ -168,24 +170,18 @@ final class SimpleAssistWriter {
     }
 
     writer.append(") {").eol();
-    for (var p : constructorParams) {
-      if (p.assisted()) {
-        continue;
-      }
+    for (var p : injectParams) {
       writer.append("    ").append("this.%s = %s;", p.simpleName(), p.simpleName()).eol();
     }
     writer.append("  }").eol().eol();
   }
 
-  private void writeFieldsForInjected(List<MethodParam> constructorParams) {
-    constructorParams.stream()
-      .filter(not(MethodParam::assisted))
-      .forEach(
-        p -> {
-          var element = p.element();
-          var type = UType.parse(element.asType()).shortType();
-          writer.append("  private final %s %s;", type, p.simpleName()).eol().eol();
-        });
+  private void writeFieldsForInjected(List<MethodParam> injectParams) {
+    for (MethodParam p : injectParams) {
+      var element = p.element();
+      var type = UType.parse(element.asType()).shortType();
+      writer.append("  private final %s %s;", type, p.simpleName()).eol().eol();
+    }
   }
 
   private void writeFactoryMethod() {
