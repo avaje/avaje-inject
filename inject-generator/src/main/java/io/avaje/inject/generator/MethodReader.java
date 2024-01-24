@@ -370,6 +370,10 @@ final class MethodReader {
     }
   }
 
+  ExecutableElement element() {
+    return element;
+  }
+
   static class MethodParam {
 
     private final VariableElement element;
@@ -383,6 +387,7 @@ final class MethodReader {
     private boolean requestParam;
     private String requestParamName;
     private final boolean isBeanMap;
+    private final boolean isAssisted;
 
     MethodParam(VariableElement param) {
       this.element = param;
@@ -394,6 +399,7 @@ final class MethodReader {
       this.paramType = utilType.rawType(isBeanMap);
       this.genericType = GenericType.parse(paramType);
       this.fullGenericType = GenericType.parse(utilType.full());
+      this.isAssisted = AssistedPrism.isPresent(param);
 
       if (nullable || param.asType().toString().startsWith("java.util.Optional<")) {
         ProcessingContext.addOptionalType(paramType);
@@ -517,6 +523,14 @@ final class MethodReader {
 
     void removeFromProvides(List<String> provides) {
       provides.remove(genericType.toString());
+    }
+
+    boolean assisted() {
+      return isAssisted;
+    }
+
+    Element element() {
+      return element;
     }
   }
 }

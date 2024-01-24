@@ -72,7 +72,7 @@ final class TypeExtendsInjection {
   }
 
   private void readField(Element element) {
-    if (InjectPrism.isPresent(element)) {
+    if (InjectPrism.isPresent(element) || AssistedPrism.isPresent(element)) {
       injectFields.add(new FieldReader(element));
     }
   }
@@ -88,10 +88,8 @@ final class TypeExtendsInjection {
 
     if (InjectPrism.isPresent(element)) {
       injectConstructor = methodReader;
-    } else {
-      if (methodReader.isNotPrivate()) {
-        otherConstructors.add(methodReader);
-      }
+    } else if (methodReader.isNotPrivate()) {
+      otherConstructors.add(methodReader);
     }
   }
 

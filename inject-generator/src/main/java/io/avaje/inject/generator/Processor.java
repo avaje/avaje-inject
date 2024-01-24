@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import io.avaje.prism.GenerateAPContext;
+import io.avaje.prism.GenerateUtils;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -21,8 +22,10 @@ import java.util.stream.Collectors;
 import static io.avaje.inject.generator.APContext.typeElement;
 import static io.avaje.inject.generator.ProcessingContext.*;
 
+@GenerateUtils
 @GenerateAPContext
 @SupportedAnnotationTypes({
+  AssistFactoryPrism.PRISM_TYPE,
   InjectModulePrism.PRISM_TYPE,
   FactoryPrism.PRISM_TYPE,
   SingletonPrism.PRISM_TYPE,
@@ -95,6 +98,10 @@ public final class Processor extends AbstractProcessor {
     APContext.setProjectModuleElement(annotations, roundEnv);
     readModule(roundEnv);
 
+    final var processingOver = roundEnv.processingOver();
+    ProcessingContext.processingOver(processingOver);
+
+    readBeans(delayedElements());
     addImportedAspects(importedAspects(roundEnv));
     maybeElements(roundEnv, ScopePrism.PRISM_TYPE).ifPresent(this::readScopes);
     maybeElements(roundEnv, FactoryPrism.PRISM_TYPE).ifPresent(this::readFactories);
@@ -109,12 +116,13 @@ public final class Processor extends AbstractProcessor {
 
     maybeElements(roundEnv, Constants.CONTROLLER).ifPresent(this::readBeans);
     maybeElements(roundEnv, ProxyPrism.PRISM_TYPE).ifPresent(this::readBeans);
+    maybeElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
 
     allScopes.readBeans(roundEnv);
-    defaultScope.write(roundEnv.processingOver());
-    allScopes.write(roundEnv.processingOver());
+    defaultScope.write(processingOver);
+    allScopes.write(processingOver);
 
-    if (roundEnv.processingOver()) {
+    if (processingOver) {
       ProcessingContext.clear();
     }
     return false;
@@ -169,6 +177,17 @@ public final class Processor extends AbstractProcessor {
 
   private void readFactories(Set<? extends Element> beans) {
     readChangedBeans(ElementFilter.typesIn(beans), true, false);
+  }
+
+  private void readAssisted(Set<? extends Element> beans) {
+    ElementFilter.typesIn(beans).forEach(t -> {
+      var reader = new AssistBeanReader(t);
+      try {
+        new SimpleAssistWriter(reader).write();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    });
   }
 
   private void readBeans(Set<? extends Element> beans) {
