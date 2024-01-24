@@ -11,7 +11,7 @@ final class FieldReader {
   private final UtilType utype;
   private final boolean nullable;
   private final String fieldType;
-  private final GenericType type;
+  private final UType type;
   private boolean requestParam;
   private String requestParamName;
   private final boolean isBeanMap;
@@ -24,7 +24,7 @@ final class FieldReader {
     this.utype = Util.determineType(element.asType());
     this.isBeanMap = QualifiedMapPrism.isPresent(element);
     this.fieldType = Util.unwrapProvider(utype.rawType(isBeanMap));
-    this.type = GenericType.parse(utype.rawType(isBeanMap));
+    this.type = utype.toUType();
     this.assisted = AssistedPrism.isPresent(element);
     if (nullable || element.asType().toString().startsWith("java.util.Optional<")) {
       ProcessingContext.addOptionalType(fieldType);
@@ -32,10 +32,10 @@ final class FieldReader {
   }
 
   boolean isGenericParam() {
-    return type.isGenericType() && !type.isProviderType();
+    return type.isGeneric() && !Util.isProvider(type.mainType());
   }
 
-  void addDependsOnGeneric(Set<GenericType> set) {
+  void addDependsOnGeneric(Set<UType> set) {
     if (isGenericParam()) {
       set.add(type);
     }
@@ -46,16 +46,16 @@ final class FieldReader {
   }
 
   void addImports(ImportTypeMap importTypes) {
-    type.addImports(importTypes);
+    importTypes.addAll(type.importTypes());
   }
 
   String builderGetDependency(String builder) {
     final var sb = new StringBuilder();
     sb.append(builder).append(".").append(utype.getMethod(nullable, isBeanMap));
     if (isGenericParam()) {
-      sb.append("TYPE_").append(type.shortName().replace(".", "_"));
+      sb.append("TYPE_").append(Util.shortName(type).replace(".", "_"));
     } else {
-      var trimmed = Util.trimAnnotations(fieldType);
+      var trimmed = ProcessorUtils.trimAnnotations(fieldType);
       sb.append(Util.shortName(trimmed)).append(".class");
     }
     if (name != null) {
@@ -65,8 +65,8 @@ final class FieldReader {
     return sb.toString();
   }
 
-  void removeFromProvides(List<String> provides) {
-    provides.remove(type.toString());
+  void removeFromProvides(List<UType> provides) {
+    provides.remove(type);
   }
 
   /**
@@ -87,7 +87,7 @@ final class FieldReader {
       // just add as field dependency
       requestParamName = writer.nextName(fieldName().toLowerCase());
       writer.append("  @Inject").eol().append("  ");
-      type.writeShort(writer);
+      writer.append(type.shortType());
       writer.append(" %s;", requestParamName).eol().eol();
     }
   }

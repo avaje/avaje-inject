@@ -28,7 +28,7 @@ final class AssistBeanReader {
   AssistBeanReader(TypeElement beanType) {
     this.beanType = beanType;
     this.type = beanType.getQualifiedName().toString();
-    this.typeReader = new TypeReader(GenericType.parse(type), beanType, importTypes, false);
+    this.typeReader = new TypeReader(UType.parse(beanType.asType()), beanType, importTypes, false);
 
     typeReader.process();
     qualifierName = typeReader.name();
@@ -144,7 +144,7 @@ final class AssistBeanReader {
     if (beanType.getNestingKind().isNested()) {
       return Util.nestedPackageOf(beanQualifiedName());
     } else {
-      return Util.packageOf(beanQualifiedName());
+      return ProcessorUtils.packageOf(beanQualifiedName());
     }
   }
 

@@ -165,7 +165,7 @@ final class TypeExtendsInjection {
     return aspectMethods.isEmpty() ? BeanAspects.EMPTY : new BeanAspects(aspectMethods);
   }
 
-  void removeFromProvides(List<String> provides) {
+  void removeFromProvides(List<UType> provides) {
     MethodReader constructor = constructor();
     if (constructor != null) {
       constructor.removeFromProvides(provides);

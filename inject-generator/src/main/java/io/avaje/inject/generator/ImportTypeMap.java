@@ -27,6 +27,11 @@ final class ImportTypeMap {
   }
 
   /** Register the full type checking for unique short name and returning the short name to use. */
+  void addAll(Iterable<String> types) {
+    types.forEach(this::add);
+  }
+
+  /** Register the full type checking for unique short name and returning the short name to use. */
   String add(String fullType) {
     final String shortName = Util.shortName(fullType);
     String fullTypeActual;

@@ -26,13 +26,6 @@ class UtilTest {
   }
 
   @Test
-  void PackageOf() {
-    ProcessingContext.testInit();
-    assertEquals(Util.packageOf("com.example.Bar"), "com.example");
-    assertEquals(Util.packageOf("com.example.other.Bar"), "com.example.other");
-  }
-
-  @Test
   void nestedPackageOf() {
     ProcessingContext.testInit();
     assertEquals(Util.nestedPackageOf("com.example.Foo.Bar"), "com.example");
@@ -109,26 +102,6 @@ class UtilTest {
     assertTrue(Util.validImportType("my.Foo"));
     assertTrue(Util.validImportType("other.pack.Foo"));
   }
-
-  @Test
-  void trimmedAnnotation() {
-
-  assertEquals(
-        "java.util.Map<java.lang.String,java.lang.String>",
-        Util.trimAnnotations(
-            "java.util.@io.avaje.validation.constraints.NotEmpty(message=\"sus \", groups={io.avaje.validation.generator.models.valid.Ship.class}) Map<java.lang.@io.avaje.validation.constraints.NotEmpty(groups={io.avaje.validation.generator.models.valid.Ship.class}),@io.avaje.validation.constraints.NotBlank String,java.lang.@io.avaje.validation.constraints.NotBlank(groups={io.avaje.validation.generator.models.valid.Ship.class}),@io.avaje.validation.Valid String>"));
-
-    assertEquals(
-        "java.util.List<java.lang.String>",
-        Util.trimAnnotations(
-            "java.util.@jakarta.validation.constraints.NotEmpty(\"message(); ,\") List<java.lang.@jakarta.validation.constraints.NotNull String>"));
-    assertEquals("int", Util.trimAnnotations("@jakarta.validation.constraints.Positive int"));
-    assertEquals(
-        "java.util.Map<java.lang.String,java.lang.String>",
-        Util.trimAnnotations(
-            "java.util.Map<@jakarta.validation.constraints.Positive(message=\"sus \", groups=1) java.lang.String,java.lang.String>"));
-
-    }
 
   @Test
   void validImportType_not() {

@@ -62,7 +62,7 @@ final class AspectMethod {
     if (fallback == null) {
       return;
     }
-    var returnType = Util.trimAnnotations(fallback.getReturnType().toString());
+    var returnType = ProcessorUtils.trimAnnotations(fallback.getReturnType().toString());
     if (!returnType.contains(Util.shortName(rawReturn))) {
       APContext.logError(fallback, "An AOP fallback method must have the same return type as the target method");
     }
