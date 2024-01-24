@@ -12,8 +12,8 @@ public class Meters {
   Thermometer metric;
 
   public Meters(
-      @TempQualifier(Scale.FAHRENHEIT) Thermometer imperial,
-      @TempQualifier(Scale.CELSIUS) Thermometer metric) {
+      @TempQualifier(value = Scale.FAHRENHEIT, someOtherString = "") Thermometer imperial,
+      @TempQualifier(value = Scale.CELSIUS, someOtherString = "") Thermometer metric) {
     this.imperial = imperial;
     this.metric = metric;
   }

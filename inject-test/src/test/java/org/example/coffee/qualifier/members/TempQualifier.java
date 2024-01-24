@@ -10,6 +10,10 @@ import jakarta.inject.Qualifier;
 public @interface TempQualifier {
   Scale value();
 
+  String someOtherString();
+
+  int defaultVal() default 0;
+
   enum Scale {
     CELSIUS,
     FAHRENHEIT,

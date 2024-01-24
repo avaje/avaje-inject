@@ -5,7 +5,7 @@ import org.example.coffee.qualifier.members.TempQualifier.Scale;
 import jakarta.inject.Singleton;
 
 @Singleton
-@TempQualifier(Scale.CELSIUS)
+@TempQualifier(value = Scale.CELSIUS, someOtherString = "")
 public class MetricMeter implements Thermometer {
 
   @Override

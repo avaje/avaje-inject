@@ -5,7 +5,7 @@ import org.example.coffee.qualifier.members.TempQualifier.Scale;
 import jakarta.inject.Singleton;
 
 @Singleton
-@TempQualifier(Scale.FAHRENHEIT)
+@TempQualifier(value = Scale.FAHRENHEIT, someOtherString = "")
 public class ImperialMeter implements Thermometer {
 
   @Override
