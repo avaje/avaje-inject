@@ -1,4 +1,4 @@
-package org.example.myapp.assist.driod;
+package org.example.myapp.assist.droid;
 
 import io.avaje.inject.Assisted;
 import io.avaje.inject.AssistFactory;

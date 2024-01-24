@@ -1,4 +1,4 @@
-package org.example.myapp.assist.driod;
+package org.example.myapp.assist.droid;
 
 public interface DroidFactory {
 

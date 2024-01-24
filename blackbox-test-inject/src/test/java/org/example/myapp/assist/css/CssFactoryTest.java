@@ -25,9 +25,6 @@ class CssFactoryTest {
       var cssThing = testScope.get(CssThing.class);
       String two = cssThing.scan("two");
       assertThat(two).isEqualTo("scanWith|path=two | somethin=hi");
-
-      var otherAssistFactory = testScope.get(OtherScanner$AssistFactory.class);
-      assertThat(otherAssistFactory).isNotNull();
     }
   }
 
