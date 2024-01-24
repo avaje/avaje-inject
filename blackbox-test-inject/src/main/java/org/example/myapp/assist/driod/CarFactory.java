@@ -1,4 +1,4 @@
-package io.avaje.inject.generator.models.valid.assist;
+package org.example.myapp.assist.driod;
 
 import java.util.List;
 
