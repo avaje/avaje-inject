@@ -66,11 +66,6 @@ final class Util {
     return type.replaceAll("[^\\n\\r\\t $;\\w.]", "");
   }
 
-  static String packageOf(String cls) {
-    final int pos = cls.lastIndexOf('.');
-    return (pos == -1) ? "" : cls.substring(0, pos);
-  }
-
   static String nestedPackageOf(String cls) {
     int pos = cls.lastIndexOf('.');
     if (pos < 0) {

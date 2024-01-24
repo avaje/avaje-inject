@@ -315,7 +315,7 @@ final class BeanReader {
       if (!utypes.isEmpty()) {
         importTypes.add(Constants.TYPE);
         importTypes.add(Constants.GENERICTYPE);
-        utypes.forEach(t->importTypes.addAll(t.importTypes()));
+        utypes.forEach(t -> importTypes.addAll(t.importTypes()));
       }
     }
     checkImports();

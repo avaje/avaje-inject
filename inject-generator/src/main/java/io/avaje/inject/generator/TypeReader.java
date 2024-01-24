@@ -3,12 +3,11 @@ package io.avaje.inject.generator;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-
-import static java.util.stream.Collectors.toList;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import static java.util.stream.Collectors.toList;
 
 final class TypeReader {
 
@@ -124,7 +123,7 @@ final class TypeReader {
     if (!genericTypes.isEmpty()) {
       importTypes.add(Constants.TYPE);
       importTypes.add(Constants.GENERICTYPE);
-      genericTypes.forEach(t->importTypes.addAll(t.importTypes()));
+      genericTypes.forEach(t -> importTypes.addAll(t.importTypes()));
     }
   }
 }

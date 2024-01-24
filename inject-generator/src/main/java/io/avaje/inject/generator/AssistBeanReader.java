@@ -144,7 +144,7 @@ final class AssistBeanReader {
     if (beanType.getNestingKind().isNested()) {
       return Util.nestedPackageOf(beanQualifiedName());
     } else {
-      return Util.packageOf(beanQualifiedName());
+      return ProcessorUtils.packageOf(beanQualifiedName());
     }
   }
 

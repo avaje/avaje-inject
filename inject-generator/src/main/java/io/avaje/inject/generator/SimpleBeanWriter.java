@@ -77,7 +77,6 @@ final class SimpleBeanWriter {
 
       for (final UType type : genericTypes) {
         final var fieldName = Util.shortName(type).replace(".", "_");
-
         final var components = type.componentTypes();
         if (components.size() == 1 && components.get(0).kind() == TypeKind.WILDCARD
             || components.stream().anyMatch(u -> u.kind() == TypeKind.TYPEVAR)
@@ -85,14 +84,11 @@ final class SimpleBeanWriter {
           continue;
         }
 
-        writer
-            .append("  public static final Type TYPE_%s =", fieldName)
-            .eol()
-            .append("      new GenericType<");
+        writer.append("  public static final Type TYPE_%s =", fieldName).eol()
+          .append("      new GenericType<");
 
         writeGenericType(type, seenShortNames, writer);
         // use fully qualified types here rather than use type.writeShort(writer)
-
         writer.append(">(){}.type();").eol();
       }
       writer.eol();
@@ -103,9 +99,7 @@ final class SimpleBeanWriter {
     final var typeShortName = Util.shortName(type.mainType());
     final var mainType = seenShortNames.computeIfAbsent(typeShortName, k -> type.mainType());
     if (type.isGeneric()) {
-      final var shortName =
-          Objects.equals(type.mainType(), mainType) ? typeShortName : type.mainType();
-
+      final var shortName = Objects.equals(type.mainType(), mainType) ? typeShortName : type.mainType();
       writer.append(shortName);
       writer.append("<");
       boolean first = true;
@@ -120,9 +114,7 @@ final class SimpleBeanWriter {
       }
       writer.append(">");
     } else {
-      final var shortName =
-          Objects.equals(type.mainType(), mainType) ? typeShortName : type.mainType();
-
+      final var shortName = Objects.equals(type.mainType(), mainType) ? typeShortName : type.mainType();
       writer.append(shortName);
     }
   }

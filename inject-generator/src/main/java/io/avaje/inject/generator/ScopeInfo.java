@@ -487,10 +487,10 @@ final class ScopeInfo {
     for (String require : requires) {
       final ScopeInfo requiredScope = scopes.get(require);
       // recursively search parent scope
-  if ((requiredScope != null) && requiredScope.providesDependencyRecursive(dependency)) {
-    // logWarn("dependency " + dependency + " provided by other scope " + requiredScope.name);
-    return true;
-  }
+      if ((requiredScope != null) && requiredScope.providesDependencyRecursive(dependency)) {
+        // logWarn("dependency " + dependency + " provided by other scope " + requiredScope.name);
+        return true;
+      }
     }
     return false;
   }

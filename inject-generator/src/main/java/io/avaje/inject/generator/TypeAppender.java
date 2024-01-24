@@ -21,15 +21,19 @@ final class TypeAppender {
 
   void add(UType type) {
     var components = type.componentTypes();
-    if (type.isGeneric()
-        && type.kind() != TypeKind.TYPEVAR
-        && (components.size() != 1 || components.get(0).kind() != TypeKind.WILDCARD)
-        && components.stream()
-            .noneMatch(u -> u.kind() == TypeKind.TYPEVAR || u.kind() == TypeKind.WILDCARD)) {
+    if (isAddGenericType(type, components)) {
       addUType(type);
     } else {
       addSimpleType(type.mainType());
     }
+  }
+
+  private static boolean isAddGenericType(UType type, List<UType> components) {
+    return type.isGeneric()
+      && type.kind() != TypeKind.TYPEVAR
+      && (components.size() != 1 || components.get(0).kind() != TypeKind.WILDCARD)
+      && components.stream()
+      .noneMatch(u -> u.kind() == TypeKind.TYPEVAR || u.kind() == TypeKind.WILDCARD);
   }
 
   void add(List<UType> sourceTypes) {

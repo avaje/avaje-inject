@@ -180,13 +180,11 @@ final class TypeExtendsReader {
       final String type = Util.unwrapProvider(fullName);
 
       if (proxyBean || isPublic(element)) {
-        final var genericType =
-            !Objects.equals(fullName, type) ? UType.parse(mirror).param0() : UType.parse(mirror);
+        final var genericType = !Objects.equals(fullName, type) ? UType.parse(mirror).param0() : UType.parse(mirror);
         // check if any unknown generic types are in the parameters (T,T2, etc.)
-        final var knownType =
-            genericType.componentTypes().stream()
-                .flatMap(g -> Stream.concat(Stream.of(g), g.componentTypes().stream()))
-                .noneMatch(g -> g.kind() == TypeKind.TYPEVAR);
+        final var knownType = genericType.componentTypes().stream()
+          .flatMap(g -> Stream.concat(Stream.of(g), g.componentTypes().stream()))
+          .noneMatch(g -> g.kind() == TypeKind.TYPEVAR);
 
         extendsTypes.add(knownType ? Util.unwrapProvider(mirror) : genericType);
         extendsInjection.read(element);
