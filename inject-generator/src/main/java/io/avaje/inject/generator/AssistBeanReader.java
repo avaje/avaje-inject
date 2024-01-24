@@ -162,7 +162,7 @@ final class AssistBeanReader {
     return false;
   }
 
-  public List<Element> assistElements() {
+  List<Element> assistElements() {
     return assistedElements;
   }
 
