@@ -281,7 +281,7 @@ final class SimpleAssistWriter {
 
     String simpleName = reader.name();
     String returnType = GenericType.parse(methodElement.getReturnType().toString()).shortName();
-    writer.append("  public ").append(returnType).append(" ").append(simpleName).append("(");
+    writer.append("  ").append(returnType).append(" ").append(simpleName).append("(");
 
     for (var iterator = reader.params().iterator(); iterator.hasNext(); ) {
       var p = iterator.next();
@@ -293,7 +293,7 @@ final class SimpleAssistWriter {
       var type = GenericType.parse(element.asType().toString());
       writer.append("%s %s", type.shortName(), p.simpleName());
       if (iterator.hasNext()) {
-        writer.append(",");
+        writer.append(", ");
       }
     }
 
