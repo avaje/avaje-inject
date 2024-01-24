@@ -29,9 +29,7 @@ final class SimpleAssistWriter {
   private Append writer;
   private final List<Element> assistedElements;
 
-  private final String indent = "   ";
-
-  SimpleAssistWriter(AssistBeanReader beanReader) {
+    SimpleAssistWriter(AssistBeanReader beanReader) {
     this.beanReader = beanReader;
     this.packageName = beanReader.packageName();
     this.shortName = beanReader.shortName();
@@ -106,7 +104,6 @@ final class SimpleAssistWriter {
     if (beanReader.injectFields().isEmpty()) {
       return;
     }
-
     for (final var field : beanReader.injectFields()) {
       if (field.assisted()) {
         continue;
@@ -123,21 +120,17 @@ final class SimpleAssistWriter {
     if (beanReader.injectMethods().isEmpty()) {
       return;
     }
-
     beanReader.injectMethods().stream()
-        .flatMap(m -> m.params().stream())
-        .filter(not(MethodParam::assisted))
-        .forEach(
-            p -> {
-              var element = p.element();
-
-              writer
-                  .append(
-                      "  private %s %s$method;",
-                      UType.parse(element.asType()).shortType(), p.simpleName())
-                  .eol()
-                  .eol();
-            });
+      .flatMap(m -> m.params().stream())
+      .filter(not(MethodParam::assisted))
+      .forEach(
+        p -> {
+          var element = p.element();
+          writer
+            .append("  private %s %s$method;", UType.parse(element.asType()).shortType(), p.simpleName())
+            .eol()
+            .eol();
+        });
     writer.eol();
   }
 
@@ -214,7 +207,8 @@ final class SimpleAssistWriter {
   }
 
   private void writeCreateBean(MethodReader constructor) {
-    writer.indent(indent).append(" var bean = new %s(", shortName);
+      String indent = "   ";
+      writer.indent(indent).append(" var bean = new %s(", shortName);
     // add constructor dependencies
     writeMethodParams(constructor, true);
   }
