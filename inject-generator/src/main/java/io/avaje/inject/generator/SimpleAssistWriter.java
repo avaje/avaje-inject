@@ -207,8 +207,8 @@ final class SimpleAssistWriter {
   }
 
   private void writeCreateBean(MethodReader constructor) {
-      String indent = "   ";
-      writer.indent(indent).append(" var bean = new %s(", shortName);
+    String indent = "   ";
+    writer.indent(indent).append(" var bean = new %s(", shortName);
     // add constructor dependencies
     writeMethodParams(constructor, true);
   }
@@ -242,7 +242,7 @@ final class SimpleAssistWriter {
     if (needsTry) {
       writer.indent("        try {").eol();
     }
-    final var indent = needsTry ? "    " : "  ";
+    final var indent = needsTry ? "    " : "";
     for (MethodReader methodReader : beanReader.injectMethods()) {
       writer.indent(indent).append("bean.%s(", methodReader.name());
       writeMethodParams(methodReader, false);
@@ -275,6 +275,7 @@ final class SimpleAssistWriter {
   }
 
   private void writeInjectionMethods(MethodReader reader) {
+    writer.eol();
     String simpleName = reader.name();
     String returnType = GenericType.parse(reader.element().getReturnType().toString()).shortName();
     writer.append("  public ").append(returnType).append(" ").append(simpleName).append("(");
@@ -298,7 +299,7 @@ final class SimpleAssistWriter {
       if (p.assisted()) {
         continue;
       }
-      writer.append("this.%s$method = %s;", p.simpleName(), p.simpleName());
+      writer.append("    this.%s$method = %s;", p.simpleName(), p.simpleName()).eol();
     }
     writer.append("  }").eol();
   }
