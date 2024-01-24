@@ -8,7 +8,7 @@ public class StoreManagerWithNamed {
 
   private final SomeStore store;
 
-  public StoreManagerWithNamed(@Named("Blue") SomeStore store) {
+  public StoreManagerWithNamed(@Named("ColorStore(Blue)") SomeStore store) {
     this.store = store;
   }
 

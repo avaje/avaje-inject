@@ -1,5 +1,7 @@
 package org.example.coffee.qualifier;
 
+import org.example.coffee.qualifier.ColorStore.Color;
+
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
@@ -7,7 +9,7 @@ import jakarta.inject.Singleton;
 public class StoreManagerWithFieldQualifier {
 
   @Inject
-  @Blue
+  @ColorStore(Color.BLUE)
   SomeStore store;
 
   public String store() {

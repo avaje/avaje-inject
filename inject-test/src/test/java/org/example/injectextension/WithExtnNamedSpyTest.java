@@ -4,9 +4,10 @@ import io.avaje.inject.BeanScope;
 import io.avaje.inject.test.InjectExtension;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import org.example.coffee.qualifier.Blue;
+import org.example.coffee.qualifier.ColorStore;
 import org.example.coffee.qualifier.SomeStore;
 import org.example.coffee.qualifier.StoreManagerWithSetterQualifier;
+import org.example.coffee.qualifier.ColorStore.Color;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
@@ -17,7 +18,8 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(InjectExtension.class)
 class WithExtnNamedSpyTest {
 
-  @Spy @Blue
+  @Spy
+  @ColorStore(Color.BLUE)
   SomeStore blueStore;
 
   @Spy @Named("green")
