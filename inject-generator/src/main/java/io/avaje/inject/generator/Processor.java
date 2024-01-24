@@ -99,7 +99,6 @@ public final class Processor extends AbstractProcessor {
     readModule(roundEnv);
 
     final var processingOver = roundEnv.processingOver();
-
     ProcessingContext.processingOver(processingOver);
 
     readBeans(delayedElements());
@@ -181,17 +180,14 @@ public final class Processor extends AbstractProcessor {
   }
 
   private void readAssisted(Set<? extends Element> beans) {
-    ElementFilter.typesIn(beans)
-        .forEach(
-            t -> {
-              var reader = new AssistBeanReader(t);
-
-              try {
-                new SimpleAssistWriter(reader).write();
-              } catch (IOException e) {
-                e.printStackTrace();
-              }
-            });
+    ElementFilter.typesIn(beans).forEach(t -> {
+      var reader = new AssistBeanReader(t);
+      try {
+        new SimpleAssistWriter(reader).write();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    });
   }
 
   private void readBeans(Set<? extends Element> beans) {

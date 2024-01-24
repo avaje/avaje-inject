@@ -370,9 +370,9 @@ final class MethodReader {
     }
   }
 
-  public ExecutableElement element() {
-      return element;
-    }
+  ExecutableElement element() {
+    return element;
+  }
 
   static class MethodParam {
 
@@ -525,11 +525,11 @@ final class MethodReader {
       provides.remove(genericType.toString());
     }
 
-    public boolean assisted() {
+    boolean assisted() {
       return isAssisted;
     }
 
-    public Element element() {
+    Element element() {
       return element;
     }
   }

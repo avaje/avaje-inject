@@ -14,16 +14,14 @@ final class AnnotationCopier {
     copyAnnotations(writer, element, "", newLines);
   }
 
-  public static void copyAnnotations(
-      Append writer, Element element, String indent, boolean newLines) {
+  public static void copyAnnotations(Append writer, Element element, String indent, boolean newLines) {
     for (final AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
       final var type = annotationMirror.getAnnotationType().asElement().asType().toString();
       if (type.startsWith("io.avaje.inject.Assist")) {
         continue;
       }
       final String annotationName = annotationMirror.getAnnotationType().toString();
-      final StringBuilder sb =
-          new StringBuilder(indent).append("@").append(annotationName).append("(");
+      final StringBuilder sb =  new StringBuilder(indent).append("@").append(annotationName).append("(");
       boolean first = true;
 
       for (final var entry : annotationMirror.getElementValues().entrySet()) {
@@ -47,35 +45,31 @@ final class AnnotationCopier {
     }
   }
 
+  @SuppressWarnings("unchecked")
   private static void writeVal(final StringBuilder sb, final AnnotationValue annotationValue) {
     final var value = annotationValue.getValue();
-    // handle array values
     if (value instanceof List) {
+      // handle array values
       sb.append("{");
       boolean first = true;
-
       for (final AnnotationValue listValue : (List<AnnotationValue>) value) {
-
         if (!first) {
           sb.append(", ");
         }
-
         writeVal(sb, listValue);
         first = false;
       }
       sb.append("}");
-      // Handle enum values
+
     } else if (value instanceof VariableElement) {
-
+      // Handle enum values
       final var element = (VariableElement) value;
-
       final var type = element.asType();
-      sb.append(type.toString() + "." + element.toString());
-      // handle annotation values
+      sb.append(type.toString() + "." + element);
+
     } else if (value instanceof AnnotationMirror) {
-
+      // handle annotation values
       final var mirror = (AnnotationMirror) value;
-
       final String annotationName = mirror.getAnnotationType().toString();
       sb.append("@").append(annotationName).append("(");
       boolean first = true;
@@ -88,10 +82,10 @@ final class AnnotationCopier {
         writeVal(sb, entry.getValue());
         first = false;
       }
-
       sb.append(")");
+
     } else {
-      sb.append(annotationValue.toString());
+      sb.append(annotationValue);
     }
   }
 }

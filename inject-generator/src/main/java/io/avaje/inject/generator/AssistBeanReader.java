@@ -48,39 +48,25 @@ final class AssistBeanReader {
     }
 
     constructor.params().stream()
-        .filter(MethodParam::assisted)
-        .map(MethodParam::element)
-        .forEach(assistedElements::add);
+      .filter(MethodParam::assisted)
+      .map(MethodParam::element)
+      .forEach(assistedElements::add);
     injectFields.stream()
-        .filter(FieldReader::assisted)
-        .map(FieldReader::element)
-        .forEach(assistedElements::add);
+      .filter(FieldReader::assisted)
+      .map(FieldReader::element)
+      .forEach(assistedElements::add);
     injectMethods.stream()
-        .map(MethodReader::params)
-        .flatMap(List::stream)
-        .filter(MethodParam::assisted)
-        .map(MethodParam::element)
-        .forEach(assistedElements::add);
+      .map(MethodReader::params)
+      .flatMap(List::stream)
+      .filter(MethodParam::assisted)
+      .map(MethodParam::element)
+      .forEach(assistedElements::add);
   }
 
   private void validateTarget(TypeElement t) {
     if (t.getKind() != ElementKind.INTERFACE || !t.getModifiers().contains(Modifier.ABSTRACT)) {
       APContext.logError(type, "@AssistFactory targets must be abstract");
     }
-  }
-
-  private String mismatchedMethodError() {
-    var sb = new StringBuilder("@AssistFactory targets for type ");
-    sb.append(shortName()).append(" with parameter types of (");
-    for (var iterator = assistedElements.iterator(); iterator.hasNext(); ) {
-      var element = iterator.next();
-      var typeName = UType.parse(element.asType());
-      sb.append(typeName.shortWithoutAnnotations()).append(" ").append(element.getSimpleName());
-      if (iterator.hasNext()) {
-        sb.append(", ");
-      }
-    }
-    return sb.append(")'.").toString();
   }
 
   @Override
@@ -90,37 +76,6 @@ final class AssistBeanReader {
 
   TypeElement beanType() {
     return beanType;
-  }
-
-  AssistBeanReader read() {
-    if (constructor != null) {
-      constructor.addImports(importTypes);
-      constructor.checkRequest(requestParams);
-    }
-    for (FieldReader field : injectFields) {
-      field.addImports(importTypes);
-      field.checkRequest(requestParams);
-    }
-    for (MethodReader method : injectMethods) {
-      method.addImports(importTypes);
-      method.checkRequest(requestParams);
-    }
-
-    return this;
-  }
-
-  List<Dependency> dependsOn() {
-    List<Dependency> list = new ArrayList<>();
-    if (constructor != null) {
-      for (MethodReader.MethodParam param : constructor.params()) {
-        Dependency dependsOn = param.dependsOn();
-        // BeanScope is always injectable with no impact on injection ordering
-        if (!Constants.BEANSCOPE.equals(dependsOn.dependsOn())) {
-          list.add(dependsOn);
-        }
-      }
-    }
-    return list;
   }
 
   boolean isExtraInjectionRequired() {
@@ -176,12 +131,6 @@ final class AssistBeanReader {
 
   List<MethodReader> injectMethods() {
     return typeReader.injectMethods();
-  }
-
-  void writeConstructorParams(Append writer) {
-    if (constructor != null) {
-      constructor.writeConstructorParams(writer);
-    }
   }
 
   String shortName() {

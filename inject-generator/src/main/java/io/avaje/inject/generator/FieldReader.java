@@ -99,11 +99,11 @@ final class FieldReader {
     writer.append("    bean.%s = %s;", fieldName(), requestParamName).eol();
   }
 
-  public Element element() {
+  Element element() {
     return element;
   }
 
-  public boolean assisted() {
+  boolean assisted() {
     return assisted;
   }
 }
