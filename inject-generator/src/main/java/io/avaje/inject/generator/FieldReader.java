@@ -15,6 +15,7 @@ final class FieldReader {
   private boolean requestParam;
   private String requestParamName;
   private final boolean isBeanMap;
+  private final boolean assisted;
 
   FieldReader(Element element) {
     this.element = element;
@@ -24,6 +25,7 @@ final class FieldReader {
     this.isBeanMap = QualifiedMapPrism.isPresent(element);
     this.fieldType = Util.unwrapProvider(utype.rawType(isBeanMap));
     this.type = utype.toUType();
+    this.assisted = AssistedPrism.isPresent(element);
     if (nullable || element.asType().toString().startsWith("java.util.Optional<")) {
       ProcessingContext.addOptionalType(fieldType);
     }
@@ -97,4 +99,11 @@ final class FieldReader {
     writer.append("    bean.%s = %s;", fieldName(), requestParamName).eol();
   }
 
+  Element element() {
+    return element;
+  }
+
+  boolean assisted() {
+    return assisted;
+  }
 }

@@ -72,7 +72,7 @@ final class TypeExtendsInjection {
   }
 
   private void readField(Element element) {
-    if (InjectPrism.isPresent(element)) {
+    if (InjectPrism.isPresent(element) || AssistedPrism.isPresent(element)) {
       injectFields.add(new FieldReader(element));
     }
   }

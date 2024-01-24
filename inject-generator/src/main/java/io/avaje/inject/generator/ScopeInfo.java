@@ -300,7 +300,12 @@ final class ScopeInfo {
       logNote("skipping annotation type " + typeElement);
       return;
     }
-    beanReaders.add(new BeanReader(typeElement, factory, importedComponent).read());
+    var reader = new BeanReader(typeElement, factory, importedComponent).read();
+    if (reader.isDelayed() && ProcessingContext.delayUntilNextRound(typeElement)) {
+      readBeans.remove(typeElement.toString());
+    } else {
+      beanReaders.add(reader);
+    }
   }
 
   void readBuildMethodDependencyMeta(Element element) {
