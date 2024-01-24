@@ -6,6 +6,10 @@ public interface DroidFactory {
 
   interface Droid {
 
+    int personality();
+
+    Model model();
+
     boolean dependenciesAreWired();
   }
 }

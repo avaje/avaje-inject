@@ -14,6 +14,14 @@ public class DroidField implements DroidFactory.Droid {
 
   @Inject Radio radio;
 
+  public int personality() {
+    return personality;
+  }
+
+  public Model model() {
+    return model;
+  }
+
   @Override
   public boolean dependenciesAreWired() {
     return wiring != null && radio != null;

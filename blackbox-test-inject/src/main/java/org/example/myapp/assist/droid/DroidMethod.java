@@ -23,6 +23,16 @@ public class DroidMethod implements DroidFactory.Droid {
   }
 
   @Override
+  public int personality() {
+    return personality;
+  }
+
+  @Override
+  public Model model() {
+    return model;
+  }
+
+  @Override
   public boolean dependenciesAreWired() {
     return wiring != null && radio != null;
   }
