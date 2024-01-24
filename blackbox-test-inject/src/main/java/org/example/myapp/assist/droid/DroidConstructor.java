@@ -11,11 +11,13 @@ public class DroidConstructor implements DroidFactory.Droid {
   private final int personality;
   private final Model model;
   private final Engine wiring;
+  private final Radio radio;
 
-  public DroidConstructor(@Assisted int personality, @Assisted Model model, Engine wiring) {
+  public DroidConstructor(@Assisted int personality, @Assisted Model model, Engine wiring, Radio radio) {
     this.personality = personality;
     this.model = model;
     this.wiring = wiring;
+    this.radio = radio;
   }
 
   public int personality() {
@@ -28,6 +30,6 @@ public class DroidConstructor implements DroidFactory.Droid {
 
   @Override
   public boolean dependenciesAreWired() {
-    return wiring != null;
+    return wiring != null && radio != null;
   }
 }

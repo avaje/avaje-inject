@@ -83,9 +83,8 @@ final class AssistBeanReader {
   }
 
   void buildRegister(Append writer) {
-    writer.indent("    ");
     if (!isExtraInjectionRequired()) {
-      writer.append("return bean;");
+      writer.indent("    return bean;");
     }
   }
 
