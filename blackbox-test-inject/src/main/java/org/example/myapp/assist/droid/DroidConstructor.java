@@ -13,7 +13,7 @@ public class DroidConstructor implements DroidFactory.Droid {
   private final Engine wiring;
   private final Radio radio;
 
-  public DroidConstructor(@Assisted int personality, @Assisted Model model, Engine wiring, Radio radio) {
+  public DroidConstructor(@Assisted int personality, @Assisted Model model, Engine wiring, @Named("red") Radio radio) {
     this.personality = personality;
     this.model = model;
     this.wiring = wiring;
