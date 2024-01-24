@@ -19,7 +19,7 @@ class StoreManagerWithSetterQualifierTest {
   @Test
   void namedTestDouble() {
     try (BeanScope context = BeanScope.builder()
-      .bean("ColorStore(Blue)", SomeStore.class, () -> "TD Blue")
+      .bean("Blue", SomeStore.class, () -> "TD Blue")
       .bean("Green", SomeStore.class, () -> "TD Green")
       .build()) {
 
@@ -32,7 +32,7 @@ class StoreManagerWithSetterQualifierTest {
   @Test
   void namedTestDouble_expect_otherNamedStillWired() {
     try (BeanScope context = BeanScope.builder()
-      .bean("ColorStore(Blue)", SomeStore.class, () -> "TD Blue Only")
+      .bean("Blue", SomeStore.class, () -> "TD Blue Only")
       // with GreenStore still wired
       .build()) {
 

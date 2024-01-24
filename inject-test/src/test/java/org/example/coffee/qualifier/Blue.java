@@ -7,11 +7,5 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Qualifier
 @Retention(RUNTIME)
-public @interface ColorStore {
-  Color value();
-
-  enum Color {
-    BLUE,
-    GREEN
-  }
+public @interface Blue {
 }
