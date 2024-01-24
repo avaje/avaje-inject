@@ -17,4 +17,9 @@ public class DroidConstructor implements DroidFactory.Droid {
     this.model = model;
     this.wiring = wiring;
   }
+
+  @Override
+  public boolean dependenciesAreWired() {
+    return wiring != null;
+  }
 }

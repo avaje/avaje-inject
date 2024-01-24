@@ -8,10 +8,7 @@ import java.io.Writer;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.tools.JavaFileObject;
 
 import io.avaje.inject.generator.MethodReader.MethodParam;
@@ -222,7 +219,9 @@ final class SimpleAssistWriter {
   }
 
   private void injectFields() {
-    if (beanReader.injectFields().isEmpty()) return;
+    if (beanReader.injectFields().isEmpty()) {
+      return;
+    }
     for (FieldReader fieldReader : beanReader.injectFields()) {
       if (fieldReader.assisted()) {
         continue;
@@ -276,8 +275,12 @@ final class SimpleAssistWriter {
 
   private void writeInjectionMethods(MethodReader reader) {
     writer.eol();
+
+    ExecutableElement methodElement = reader.element();
+    AnnotationCopier.copyAnnotations(writer, methodElement, "  ", true);
+
     String simpleName = reader.name();
-    String returnType = GenericType.parse(reader.element().getReturnType().toString()).shortName();
+    String returnType = GenericType.parse(methodElement.getReturnType().toString()).shortName();
     writer.append("  public ").append(returnType).append(" ").append(simpleName).append("(");
 
     for (var iterator = reader.params().iterator(); iterator.hasNext(); ) {

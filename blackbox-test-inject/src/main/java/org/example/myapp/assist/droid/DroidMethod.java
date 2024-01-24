@@ -13,10 +13,17 @@ public class DroidMethod implements DroidFactory.Droid {
   private Model model;
   private Engine wiring;
 
+  private Radio radio;
   @Inject
-  public void inject(@Assisted int personality, @Assisted Model model, Engine wiring) {
+  public void inject(@Assisted int personality, @Assisted Model model, Engine wiring, Radio radio) {
     this.personality = personality;
     this.model = model;
     this.wiring = wiring;
+    this.radio = radio;
+  }
+
+  @Override
+  public boolean dependenciesAreWired() {
+    return wiring != null && radio != null;
   }
 }

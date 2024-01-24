@@ -6,5 +6,6 @@ public interface DroidFactory {
 
   interface Droid {
 
+    boolean dependenciesAreWired();
   }
 }
