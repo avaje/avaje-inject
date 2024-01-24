@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import javax.lang.model.element.*;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +22,7 @@ final class MethodReader {
   private final boolean primary;
   private final boolean secondary;
   private final String returnTypeRaw;
-  private final GenericType genericType;
+  private final UType genericType;
   private final String shortName;
   private final boolean isVoid;
   private final List<MethodParam> params = new ArrayList<>();
@@ -53,20 +54,22 @@ final class MethodReader {
     }
     this.methodName = element.getSimpleName().toString();
     TypeMirror returnMirror = element.getReturnType();
+    UType uType = UType.parse(returnMirror);
     String raw = returnMirror.toString();
     if (Util.isOptional(raw)) {
       optionalType = true;
-      returnTypeRaw = GenericType.trimWildcard(Util.extractOptionalType(raw));
+      returnTypeRaw = Util.trimWildcard(Util.extractOptionalType(raw));
+      uType = uType.param0();
     } else {
       optionalType = false;
-      returnTypeRaw = GenericType.trimWildcard(raw);
+      returnTypeRaw = Util.trimWildcard(raw);
     }
-    this.genericType = GenericType.parse(returnTypeRaw);
-    String topType = genericType.topType();
-    this.shortName = Util.shortName(topType);
+    this.genericType = uType;
+    String mainType = genericType.mainType();
+    this.shortName = Util.shortName(mainType);
     this.factoryType = beanType.getQualifiedName().toString();
     this.factoryShortName = Util.shortName(factoryType);
-    this.isVoid = Util.isVoid(topType);
+    this.isVoid = Util.isVoid(mainType);
     String initMethod = (bean == null) ? null : bean.initMethod();
     String destroyMethod = (bean == null) ? null : bean.destroyMethod();
     this.destroyPriority = (bean == null) ? null : bean.destroyPriority();
@@ -94,11 +97,11 @@ final class MethodReader {
       '}';
   }
 
-  void addDependsOnGeneric(Set<GenericType> set) {
+  void addDependsOnGeneric(Set<UType> set) {
     for (MethodParam param : params) {
       param.addDependsOnGeneric(set);
     }
-    if (genericType.isGenericType()) {
+    if (genericType.isGeneric()) {
       set.add(genericType);
     }
     if (typeReader != null) {
@@ -137,7 +140,7 @@ final class MethodReader {
       .map(t -> "con:" + t)
       .forEach(dependsOn::add);
     for (final MethodParam param : params) {
-      dependsOn.add(GenericType.trimWildcard(param.paramType));
+      dependsOn.add(Util.trimWildcard(param.paramType));
     }
     metaData.setDependsOn(dependsOn);
     metaData.setProvides(typeReader == null ? Collections.emptyList() : typeReader.provides());
@@ -258,7 +261,7 @@ final class MethodReader {
     conditions.addImports(importTypes);
   }
 
-  Set<GenericType> genericTypes() {
+  Set<UType> genericTypes() {
     return typeReader == null ? Collections.emptySet() : typeReader.genericTypes();
   }
 
@@ -364,10 +367,14 @@ final class MethodReader {
     }
   }
 
-  void removeFromProvides(List<String> provides) {
+  void removeFromProvides(List<UType> provides) {
     for (MethodParam param : params) {
       param.removeFromProvides(provides);
     }
+  }
+
+  ExecutableElement element() {
+    return element;
   }
 
   static class MethodParam {
@@ -376,13 +383,14 @@ final class MethodReader {
     private final String named;
     private final UtilType utilType;
     private final String paramType;
-    private final GenericType genericType;
-    private final GenericType fullGenericType;
+    private final UType genericType;
+    private final UType fullUType;
     private final boolean nullable;
     private final String simpleName;
     private boolean requestParam;
     private String requestParamName;
     private final boolean isBeanMap;
+    private final boolean isAssisted;
 
     MethodParam(VariableElement param) {
       this.element = param;
@@ -392,8 +400,9 @@ final class MethodReader {
       this.utilType = Util.determineType(param.asType());
       this.isBeanMap = QualifiedMapPrism.isPresent(param);
       this.paramType = utilType.rawType(isBeanMap);
-      this.genericType = GenericType.parse(paramType);
-      this.fullGenericType = GenericType.parse(utilType.full());
+      this.genericType = utilType.toUType();
+      this.fullUType = UType.parse(param.asType());
+      this.isAssisted = AssistedPrism.isPresent(param);
 
       if (nullable || param.asType().toString().startsWith("java.util.Optional<")) {
         ProcessingContext.addOptionalType(paramType);
@@ -402,23 +411,23 @@ final class MethodReader {
 
     @Override
     public String toString() {
-      return "MethodParam{" + fullGenericType + '}';
+      return "MethodParam{" + fullUType + '}';
     }
 
-    void addDependsOnGeneric(Set<GenericType> set) {
-      if (genericType.isGenericType() && !genericType.isProviderType()) {
+    void addDependsOnGeneric(Set<UType> set) {
+      if (genericType.isGeneric() && !Util.isProvider(genericType.mainType())) {
         set.add(genericType);
       }
     }
 
     void builderGetDependency(Append writer, String builderName) {
       writer.append(builderName).append(".").append(utilType.getMethod(nullable, isBeanMap));
-      if (!genericType.isGenericType()) {
-        writer.append(Util.shortName(genericType.topType())).append(".class");
+      if (!genericType.isGeneric() || genericType.param0().kind() == TypeKind.WILDCARD) {
+        writer.append(Util.shortName(genericType.mainType())).append(".class");
       } else if (isProvider()) {
         writer.append(providerParam()).append(".class");
       } else {
-        writer.append("TYPE_").append(genericType.shortName().replace(".", "_"));
+        writer.append("TYPE_").append(Util.shortName(genericType).replace(".", "_"));
       }
       if (named != null && !named.isEmpty()) {
         writer.append(",\"").append(named).append("\"");
@@ -449,7 +458,7 @@ final class MethodReader {
     }
 
     boolean isGenericType() {
-      return genericType.isGenericType();
+      return genericType.isGeneric();
     }
 
     boolean isGenericParam() {
@@ -461,7 +470,7 @@ final class MethodReader {
     }
 
     void addImports(ImportTypeMap importTypes) {
-      fullGenericType.addImports(importTypes);
+      importTypes.addAll(fullUType.importTypes());
       Util.getNullableAnnotation(element).map(Object::toString).ifPresent(importTypes::add);
     }
 
@@ -477,7 +486,7 @@ final class MethodReader {
         requestParamName = writer.nextName(Util.trimmedName(genericType));
         writer.append("  @Inject").eol();
         writer.append("  ");
-        genericType.writeShort(writer);
+        writer.append(genericType.shortWithoutAnnotations());
         writer.append(" %s;", requestParamName).eol().eol();
       }
     }
@@ -490,33 +499,41 @@ final class MethodReader {
       if (nullable) {
         writer.append("@Nullable ");
       }
-      if (genericType.isGenericType()) {
-        genericType.writeShort(writer);
+      if (genericType.isGeneric()) {
+        writer.append(genericType.shortWithoutAnnotations());
       } else {
-        writer.append(Util.shortName(genericType.topType()));
+        writer.append(Util.shortName(genericType.mainType()));
       }
       writer.append(" ").append(simpleName);
     }
 
     void writeMethodParamAspect(Append writer) {
-      if (fullGenericType.isGenericType()) {
-        fullGenericType.writeShort(writer);
+      if (fullUType.isGeneric()) {
+        writer.append(fullUType.shortWithoutAnnotations());
       } else {
-        writer.append(Util.shortName(fullGenericType.topType()));
+        writer.append(Util.shortName(fullUType.mainType()));
       }
       writer.append(" ").append(simpleName);
     }
 
     void writeMethodParamTypeAspect(Append writer) {
-      writer.append(Util.shortName(fullGenericType.topType()));
+      writer.append(Util.shortName(fullUType.mainType()));
     }
 
     void writeConstructorInit(Append writer) {
       writer.append(simpleName);
     }
 
-    void removeFromProvides(List<String> provides) {
-      provides.remove(genericType.toString());
+    void removeFromProvides(List<UType> provides) {
+      provides.remove(genericType);
+    }
+
+    boolean assisted() {
+      return isAssisted;
+    }
+
+    Element element() {
+      return element;
     }
   }
 }

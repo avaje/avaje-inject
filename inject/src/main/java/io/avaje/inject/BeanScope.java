@@ -1,13 +1,13 @@
 package io.avaje.inject;
 
-import io.avaje.lang.NonNullApi;
-import io.avaje.lang.Nullable;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import io.avaje.lang.NonNullApi;
+import io.avaje.lang.Nullable;
 
 /**
  * Holds beans created by dependency injection.

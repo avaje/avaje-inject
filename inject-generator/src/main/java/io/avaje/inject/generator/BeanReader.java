@@ -4,7 +4,12 @@ import static io.avaje.inject.generator.APContext.logError;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
+
+import io.avaje.inject.generator.MethodReader.MethodParam;
+
 import java.util.*;
+import java.util.stream.Stream;
 
 
 final class BeanReader {
@@ -35,7 +40,8 @@ final class BeanReader {
   private boolean writtenToFile;
   private boolean suppressBuilderImport;
   private boolean suppressGeneratedImport;
-  private Set<GenericType> allGenericTypes;
+  private Set<UType> allUTypes;
+  private final boolean delayed;
 
   BeanReader(TypeElement beanType, boolean factory, boolean importedComponent) {
     this.beanType = beanType;
@@ -44,7 +50,7 @@ final class BeanReader {
     this.prototype = PrototypePrism.isPresent(beanType);
     this.primary = PrimaryPrism.isPresent(beanType);
     this.secondary = !primary && SecondaryPrism.isPresent(beanType);
-    this.typeReader = new TypeReader(GenericType.parse(type), beanType, importTypes, factory);
+    this.typeReader = new TypeReader(UType.parse(beanType.asType()), beanType, importTypes, factory);
 
     typeReader.process();
 
@@ -67,6 +73,28 @@ final class BeanReader {
       conditions.readAll(beanType);
       this.proxy = false;
     }
+    this.delayed = shouldDelay();
+  }
+
+  /**
+   * delay until next round if types cannot be resolved
+   */
+  private boolean shouldDelay() {
+    var construct = Optional.ofNullable(constructor)
+      .map(MethodReader::params).stream()
+      .flatMap(List::stream)
+      .map(MethodParam::element);
+
+    var fields = injectFields.stream().map(FieldReader::element);
+    var constructFields = Stream.concat(construct, fields);
+    var methods = injectMethods.stream()
+      .map(MethodReader::params)
+      .flatMap(List::stream)
+      .map(MethodParam::element);
+
+    return Stream.concat(constructFields, methods)
+      .map(Element::asType)
+      .anyMatch(t -> t.getKind() == TypeKind.ERROR);
   }
 
   @Override
@@ -148,24 +176,24 @@ final class BeanReader {
     return typeReader.providesAspect();
   }
 
-  Set<GenericType> allGenericTypes() {
-    if (allGenericTypes != null) {
-      return allGenericTypes;
+  Set<UType> allGenericTypes() {
+    if (allUTypes != null) {
+      return allUTypes;
     }
-    allGenericTypes = new LinkedHashSet<>(typeReader.genericTypes());
+    allUTypes = new LinkedHashSet<>(typeReader.genericTypes());
     for (FieldReader field : injectFields) {
-      field.addDependsOnGeneric(allGenericTypes);
+      field.addDependsOnGeneric(allUTypes);
     }
     for (MethodReader method : injectMethods) {
-      method.addDependsOnGeneric(allGenericTypes);
+      method.addDependsOnGeneric(allUTypes);
     }
     if (constructor != null) {
-      constructor.addDependsOnGeneric(allGenericTypes);
+      constructor.addDependsOnGeneric(allUTypes);
     }
     for (MethodReader factoryMethod : factoryMethods()) {
-      factoryMethod.addDependsOnGeneric(allGenericTypes);
+      factoryMethod.addDependsOnGeneric(allUTypes);
     }
-    return allGenericTypes;
+    return allUTypes;
   }
 
   /**
@@ -283,11 +311,11 @@ final class BeanReader {
     aspects.extraImports(importTypes);
 
     for (MethodReader factoryMethod : factoryMethods) {
-      Set<GenericType> genericTypes = factoryMethod.genericTypes();
-      if (!genericTypes.isEmpty()) {
+      Set<UType> utypes = factoryMethod.genericTypes();
+      if (!utypes.isEmpty()) {
         importTypes.add(Constants.TYPE);
         importTypes.add(Constants.GENERICTYPE);
-        genericTypes.forEach(t->t.addImports(importTypes));
+        utypes.forEach(t -> importTypes.addAll(t.importTypes()));
       }
     }
     checkImports();
@@ -437,7 +465,7 @@ final class BeanReader {
     if (beanType.getNestingKind().isNested()) {
       return Util.nestedPackageOf(beanQualifiedName());
     } else {
-      return Util.packageOf(beanQualifiedName());
+      return ProcessorUtils.packageOf(beanQualifiedName());
     }
   }
 
@@ -452,5 +480,9 @@ final class BeanReader {
       }
     }
     return false;
+  }
+
+  boolean isDelayed() {
+    return delayed;
   }
 }

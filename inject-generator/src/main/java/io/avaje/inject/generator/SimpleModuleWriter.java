@@ -136,15 +136,14 @@ final class SimpleModuleWriter {
     writer.append("  }").eol().eol();
   }
 
-  /**
-   * Return the distinct set of public classes that are dependency types.
-   */
+  /** Return the distinct set of public classes that are dependency types. */
   private Set<String> distinctPublicClasses() {
     Set<String> publicClasses = new LinkedHashSet<>();
     for (MetaData metaData : ordering.ordered()) {
       String rawType = metaData.type();
-      if (!"void".equals(rawType)) {
-        String type = GenericType.parse(rawType).topType();
+      if (!"void".equals(rawType) && !ProcessorUtils.isPrimitive(rawType)) {
+
+        String type = Util.trimGenerics(rawType);
         TypeElement element = typeElement(type);
         if (element != null && element.getModifiers().contains(Modifier.PUBLIC)) {
           publicClasses.add(type);

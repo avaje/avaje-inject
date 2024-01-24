@@ -6,11 +6,13 @@ import static io.avaje.inject.generator.APContext.logError;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.lang.model.type.TypeKind;
 import javax.tools.JavaFileObject;
 
 /**
@@ -67,37 +69,41 @@ final class SimpleBeanWriter {
 
   private void writeGenericTypeFields() {
     // collect all types to prevent duplicates
-    Set<GenericType> genericTypes = beanReader.allGenericTypes();
+    Set<UType> genericTypes = beanReader.allGenericTypes();
     if (!genericTypes.isEmpty()) {
 
-    	final Map<String, String> seenShortNames= new HashMap<>();
+      final Map<String, String> seenShortNames = new HashMap<>();
+      final Set<String> writtenFields = new HashSet<>();
 
-      for (final GenericType type : genericTypes) {
-        writer
-            .append("  public static final Type TYPE_%s =", type.shortName().replace(".", "_"))
-            .eol()
-            .append("      new GenericType<");
+      for (final UType type : genericTypes) {
+        final var fieldName = Util.shortName(type).replace(".", "_");
+        final var components = type.componentTypes();
+        if (components.size() == 1 && components.get(0).kind() == TypeKind.WILDCARD
+            || components.stream().anyMatch(u -> u.kind() == TypeKind.TYPEVAR)
+            || !writtenFields.add(fieldName)) {
+          continue;
+        }
 
-        writeGenericType(type,seenShortNames, writer);
+        writer.append("  public static final Type TYPE_%s =", fieldName).eol()
+          .append("      new GenericType<");
+
+        writeGenericType(type, seenShortNames, writer);
         // use fully qualified types here rather than use type.writeShort(writer)
-
         writer.append(">(){}.type();").eol();
       }
       writer.eol();
     }
   }
 
-  private void writeGenericType(GenericType type, Map<String, String> seenShortNames, Append writer) {
-    final var typeShortName = Util.shortName(type.topType());
-    final var topType = seenShortNames.computeIfAbsent(typeShortName, k -> type.topType());
-    if (type.isGenericType()) {
-      final var shortName =
-          Objects.equals(type.topType(), topType) ? typeShortName : type.topType();
-
+  private void writeGenericType(UType type, Map<String, String> seenShortNames, Append writer) {
+    final var typeShortName = Util.shortName(type.mainType());
+    final var mainType = seenShortNames.computeIfAbsent(typeShortName, k -> type.mainType());
+    if (type.isGeneric()) {
+      final var shortName = Objects.equals(type.mainType(), mainType) ? typeShortName : type.mainType();
       writer.append(shortName);
       writer.append("<");
       boolean first = true;
-      for (final var param : type.params()) {
+      for (final var param : type.componentTypes()) {
         if (first) {
           first = false;
           writeGenericType(param, seenShortNames, writer);
@@ -108,9 +114,7 @@ final class SimpleBeanWriter {
       }
       writer.append(">");
     } else {
-      final var shortName =
-          Objects.equals(type.topType(), topType) ? typeShortName : type.topType();
-
+      final var shortName = Objects.equals(type.mainType(), mainType) ? typeShortName : type.mainType();
       writer.append(shortName);
     }
   }

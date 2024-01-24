@@ -1,3 +1,5 @@
+@GeneratePrism(Assisted.class)
+@GeneratePrism(AssistFactory.class)
 @GeneratePrism(InjectModule.class)
 @GeneratePrism(Factory.class)
 @GeneratePrism(Singleton.class)
