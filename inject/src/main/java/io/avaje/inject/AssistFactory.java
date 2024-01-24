@@ -22,7 +22,8 @@ import java.lang.annotation.Target;
  * <pre>{@code
  *
  * public interface CssFactory {
- *   Scanner scanner(Path file);
+ *
+ *   Scanner scanner(Path path);
  * }
  *
  * }</pre>
