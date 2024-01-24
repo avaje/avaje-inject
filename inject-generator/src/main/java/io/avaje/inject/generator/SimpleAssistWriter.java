@@ -56,7 +56,7 @@ final class SimpleAssistWriter {
     writeInjectFields();
     writeMethodFields();
     writeConstructor();
-    writeCreateMethod();
+    writeFactoryMethod();
     beanReader.injectMethods().forEach(this::writeInjectionMethods);
     writeClassEnd();
     writer.close();
@@ -141,27 +141,19 @@ final class SimpleAssistWriter {
   }
 
   private void writeConstructor() {
-    if (beanReader.constructor().params().isEmpty()) {
+    List<MethodParam> constructorParams = beanReader.constructor().params();
+    if (constructorParams.isEmpty()) {
       return;
     }
-    beanReader.constructor().params().stream()
-        .filter(not(MethodParam::assisted))
-        .forEach(
-            p -> {
-              var element = p.element();
-              var type = UType.parse(element.asType()).shortType();
-
-              writer.append("  private final %s %s;", type, p.simpleName()).eol().eol();
-            });
+    writeFieldsForInjected(constructorParams);
 
     String shortName = this.shortName;
     if (beanReader.beanType().getNestingKind().isNested()) {
       shortName = shortName.replace(".", "$");
     }
-
     writer.append("  ").append(shortName).append(suffix).append("(");
 
-    for (var iterator = beanReader.constructor().params().iterator(); iterator.hasNext(); ) {
+    for (var iterator = constructorParams.iterator(); iterator.hasNext(); ) {
       var p = iterator.next();
       if (p.assisted()) {
         continue;
@@ -176,7 +168,7 @@ final class SimpleAssistWriter {
     }
 
     writer.append(") {").eol();
-    for (var p : beanReader.constructor().params()) {
+    for (var p : constructorParams) {
       if (p.assisted()) {
         continue;
       }
@@ -185,7 +177,18 @@ final class SimpleAssistWriter {
     writer.append("  }").eol().eol();
   }
 
-  private void writeCreateMethod() {
+  private void writeFieldsForInjected(List<MethodParam> constructorParams) {
+    constructorParams.stream()
+      .filter(not(MethodParam::assisted))
+      .forEach(
+        p -> {
+          var element = p.element();
+          var type = UType.parse(element.asType()).shortType();
+          writer.append("  private final %s %s;", type, p.simpleName()).eol().eol();
+        });
+  }
+
+  private void writeFactoryMethod() {
     writer.append(CODE_COMMENT_BUILD, shortName).eol();
     if (beanReader.hasTargetFactory()) {
       writer.append("  @Override").eol();
@@ -205,7 +208,6 @@ final class SimpleAssistWriter {
 
     MethodReader constructor = beanReader.constructor();
     constructor.startTry(writer);
-
     writeCreateBean(constructor);
     beanReader.buildRegister(writer);
     if (beanReader.isExtraInjectionRequired()) {
