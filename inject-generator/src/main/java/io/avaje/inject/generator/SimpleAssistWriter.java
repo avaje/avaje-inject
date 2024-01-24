@@ -107,8 +107,8 @@ final class SimpleAssistWriter {
       }
       var element = field.element();
       AnnotationCopier.copyAnnotations(writer, element, "  ", true);
-      var type = GenericType.parse(element.asType().toString());
-      writer.append("  %s %s$field;", type.shortName(), field.fieldName()).eol().eol();
+      var type = UType.parse(element.asType());
+      writer.append("  %s %s$field;", type.shortType(), field.fieldName()).eol().eol();
     }
     writer.eol();
   }
@@ -278,7 +278,7 @@ final class SimpleAssistWriter {
     AnnotationCopier.copyAnnotations(writer, methodElement, "  ", true);
 
     String simpleName = reader.name();
-    String returnType = GenericType.parse(methodElement.getReturnType().toString()).shortName();
+    String returnType = UType.parse(methodElement.getReturnType()).shortType();
     writer.append("  ").append(returnType).append(" ").append(simpleName).append("(");
 
     for (var iterator = reader.params().iterator(); iterator.hasNext(); ) {
@@ -288,8 +288,8 @@ final class SimpleAssistWriter {
       }
       var element = p.element();
       AnnotationCopier.copyAnnotations(writer, element, false);
-      var type = GenericType.parse(element.asType().toString());
-      writer.append("%s %s", type.shortName(), p.simpleName());
+      var type = UType.parse(element.asType());
+      writer.append("%s %s", type.shortType(), p.simpleName());
       if (iterator.hasNext()) {
         writer.append(", ");
       }
