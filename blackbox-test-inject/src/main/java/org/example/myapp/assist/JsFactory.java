@@ -2,5 +2,5 @@ package org.example.myapp.assist;
 
 public interface JsFactory {
 
-  Scanner scanner(String file);
+  Scanner scanner(String path);
 }

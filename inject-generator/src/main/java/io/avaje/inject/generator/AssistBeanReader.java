@@ -2,11 +2,9 @@ package io.avaje.inject.generator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.lang.model.element.*;
-import javax.lang.model.util.ElementFilter;
 
 import io.avaje.inject.generator.MethodReader.MethodParam;
 
@@ -23,7 +21,7 @@ final class AssistBeanReader {
   private final ImportTypeMap importTypes = new ImportTypeMap();
   private final BeanRequestParams requestParams;
   private final TypeReader typeReader;
-  private final Optional<TypeElement> target;
+  private final TypeElement targetType;
   private final String qualifierName;
   private ExecutableElement factoryMethod;
 
@@ -37,13 +35,18 @@ final class AssistBeanReader {
     this.requestParams = new BeanRequestParams(type);
     this.injectMethods = typeReader.injectMethods();
     this.injectFields = typeReader.injectFields();
-    typeReader.preDestroyPriority();
     this.constructor = typeReader.constructor();
-    this.target =
-        AssistFactoryPrism.getOptionalOn(beanType)
-            .map(AssistFactoryPrism::value)
-            .filter(m -> !"java.lang.Void".equals(m.toString()))
-            .map(APContext::asTypeElement);
+
+    AssistFactoryPrism instanceOn = AssistFactoryPrism.getInstanceOn(beanType);
+    targetType = APContext.asTypeElement(instanceOn.value());
+    validateTarget(targetType);
+
+    for (Element enclosedElement : targetType.getEnclosedElements()) {
+      if (enclosedElement.getKind() == ElementKind.METHOD) {
+        factoryMethod = (ExecutableElement) enclosedElement;
+      }
+    }
+
     constructor.params().stream()
         .filter(MethodParam::assisted)
         .map(MethodParam::element)
@@ -58,34 +61,11 @@ final class AssistBeanReader {
         .filter(MethodParam::assisted)
         .map(MethodParam::element)
         .forEach(assistedElements::add);
-
-    target.ifPresent(this::validateTarget);
   }
 
   private void validateTarget(TypeElement t) {
     if (t.getKind() != ElementKind.INTERFACE || !t.getModifiers().contains(Modifier.ABSTRACT)) {
       APContext.logError(type, "@AssistFactory targets must be abstract");
-    }
-    Optional<ExecutableElement> matchedMethod = ElementFilter.methodsIn(t.getEnclosedElements()).stream()
-      .filter(m -> m.getParameters().size() == assistedElements.size())
-      .filter(m -> {
-          List<? extends VariableElement> params = m.getParameters();
-          for (int i = 0; i < assistedElements.size(); i++) {
-            var assistParam = GenericType.parse(assistedElements.get(i).asType().toString()).shortName();
-            var targetParam = GenericType.parse(params.get(i).asType().toString()).shortName();
-            if (!assistParam.equals(targetParam)) {
-              return false;
-            }
-          }
-          return true;
-        }
-      )
-      .findFirst();
-
-    if (matchedMethod.isEmpty()) {
-      APContext.logError(t, mismatchedMethodError());
-    } else {
-      this.factoryMethod = matchedMethod.get();
     }
   }
 
@@ -156,7 +136,7 @@ final class AssistBeanReader {
 
   private Set<String> importTypes() {
     importTypes.add("io.avaje.inject.AssistFactory");
-    target.ifPresent(e -> importTypes.add(e.getQualifiedName().toString()));
+    importTypes.add(targetType.getQualifiedName().toString());
     if (Util.validImportType(type)) {
       importTypes.add(type);
     }
@@ -237,8 +217,8 @@ final class AssistBeanReader {
     return assistedElements;
   }
 
-  public Optional<TypeElement> getTargetInterface() {
-    return target;
+  TypeElement targetInterface() {
+    return targetType;
   }
 
   String qualifierName() {
@@ -251,5 +231,9 @@ final class AssistBeanReader {
 
   boolean hasTargetFactory() {
     return factoryMethod != null;
+  }
+
+  List<? extends VariableElement> factoryMethodParams() {
+    return factoryMethod.getParameters();
   }
 }

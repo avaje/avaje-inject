@@ -9,6 +9,8 @@ import java.util.List;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.tools.JavaFileObject;
 
 import io.avaje.inject.generator.MethodReader.MethodParam;
@@ -16,8 +18,7 @@ import io.avaje.inject.generator.MethodReader.MethodParam;
 /** Write the source code for the bean. */
 final class SimpleAssistWriter {
 
-  private static final String CODE_COMMENT =
-      "/**\n * Generated source - Factory for %s.\n */";
+  private static final String CODE_COMMENT = "/**\n * Generated source - Factory for %s.\n */";
   private static final String CODE_COMMENT_BUILD = "  /**\n   * Fabricates a new %s.\n   */";
   private final AssistBeanReader beanReader;
   private final String originName;
@@ -52,14 +53,10 @@ final class SimpleAssistWriter {
     writePackage();
     writeImports();
     writeClassStart();
-
     writeInjectFields();
     writeMethodFields();
-
     writeConstructor();
-
     writeCreateMethod();
-
     beanReader.injectMethods().forEach(this::writeInjectionMethods);
     writeClassEnd();
     writer.close();
@@ -76,9 +73,7 @@ final class SimpleAssistWriter {
   }
 
   private void writeClassStart() {
-
     writer.append(CODE_COMMENT, shortName).eol();
-
     writer.append(Constants.AT_GENERATED).eol();
 
     String name = this.shortName;
@@ -95,20 +90,21 @@ final class SimpleAssistWriter {
     }
     writer.append("final class ").append(name).append(suffix);
 
-    beanReader
-        .getTargetInterface()
-        .ifPresent(
-            t ->
-                writer
-                    .append(t.getKind() == ElementKind.INTERFACE ? " implements " : " extends ")
-                    .append(Util.shortName(t.getQualifiedName().toString())));
-
+    writeImplementsOrExtends();
     writer.append(" {").eol().eol();
   }
 
-  private void writeInjectFields() {
+  private void writeImplementsOrExtends() {
+    TypeElement targetInterface = beanReader.targetInterface();
+    writer
+      .append(targetInterface.getKind() == ElementKind.INTERFACE ? " implements " : " extends ")
+      .append(Util.shortName(targetInterface.getQualifiedName().toString()));
+  }
 
-    if (beanReader.injectFields().isEmpty()) return;
+  private void writeInjectFields() {
+    if (beanReader.injectFields().isEmpty()) {
+      return;
+    }
 
     for (final var field : beanReader.injectFields()) {
       if (field.assisted()) {
@@ -170,12 +166,9 @@ final class SimpleAssistWriter {
       if (p.assisted()) {
         continue;
       }
-
       var element = p.element();
       AnnotationCopier.copyAnnotations(writer, element, false);
-
       var type = UType.parse(element.asType());
-
       writer.append("%s %s", type.shortType(), p.simpleName());
       if (iterator.hasNext()) {
         writer.append(",");
@@ -183,16 +176,12 @@ final class SimpleAssistWriter {
     }
 
     writer.append(") {").eol();
-
     for (var p : beanReader.constructor().params()) {
-
       if (p.assisted()) {
         continue;
       }
-
       writer.append("    ").append("this.%s = %s;", p.simpleName(), p.simpleName()).eol();
     }
-
     writer.append("  }").eol().eol();
   }
 
@@ -202,11 +191,10 @@ final class SimpleAssistWriter {
       writer.append("  @Override").eol();
     }
     writer.append("  public %s %s(", shortName, beanReader.factoryMethodName());
-    for (var iterator = assistedElements.iterator(); iterator.hasNext(); ) {
+    List<? extends VariableElement> params = beanReader.factoryMethodParams();
+    for (var iterator = params.iterator(); iterator.hasNext(); ) {
       var element = iterator.next();
-
       var type = UType.parse(element.asType());
-
       writer.append("%s %s", type.shortWithoutAnnotations(), element.getSimpleName());
       if (iterator.hasNext()) {
         writer.append(", ");
@@ -234,12 +222,10 @@ final class SimpleAssistWriter {
   }
 
   private void writeExtraInjection() {
-
     injectFields();
     injectMethods();
     final var needsTry = beanReader.needsTryForMethodInjection();
     final var indent = needsTry ? "        " : "    ";
-
     writer.append(indent).indent("return bean;");
   }
 
@@ -261,7 +247,6 @@ final class SimpleAssistWriter {
 
   private void injectMethods() {
     final var needsTry = beanReader.needsTryForMethodInjection();
-
     if (needsTry) {
       writer.indent("        try {").eol();
     }
@@ -307,12 +292,9 @@ final class SimpleAssistWriter {
       if (p.assisted()) {
         continue;
       }
-
       var element = p.element();
       AnnotationCopier.copyAnnotations(writer, element, false);
-
       var type = GenericType.parse(element.asType().toString());
-
       writer.append("%s %s", type.shortName(), p.simpleName());
       if (iterator.hasNext()) {
         writer.append(",");
@@ -320,16 +302,12 @@ final class SimpleAssistWriter {
     }
 
     writer.append(") {").eol();
-
     for (var p : reader.params()) {
-
       if (p.assisted()) {
         continue;
       }
-
       writer.append("this.%s$method = %s;", p.simpleName(), p.simpleName());
     }
-
     writer.append("  }").eol();
   }
 }

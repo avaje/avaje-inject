@@ -6,7 +6,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 @Named("androidfield")
-//@AssistFactory(DroidFactory.class)
+@AssistFactory(DroidFactory.class)
 public class DroidField implements DroidFactory.Droid {
   @Assisted int personality;
   @Assisted Model model;

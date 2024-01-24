@@ -14,8 +14,8 @@ public class DroidMethod implements DroidFactory.Droid {
   private Engine wiring;
 
   @Inject
-  public void inject(@Assisted int personalityMatrix, @Assisted Model model, Engine wiring) {
-    this.personality = personalityMatrix;
+  public void inject(@Assisted int personality, @Assisted Model model, Engine wiring) {
+    this.personality = personality;
     this.model = model;
     this.wiring = wiring;
   }
