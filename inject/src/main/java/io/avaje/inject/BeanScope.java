@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import io.avaje.inject.spi.GenericType;
 import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
 
