@@ -1,13 +1,14 @@
 package io.avaje.inject.generator;
 
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.ElementFilter;
 
 final class Util {
   static final String ASPECT_PROVIDER_PREFIX = "io.avaje.inject.aop.AspectProvider<";
@@ -274,13 +275,10 @@ final class Util {
       final DeclaredType annotationType = annotationMirror.getAnnotationType();
       final var hasQualifier = QualifierPrism.isPresent(annotationType.asElement());
       if (hasQualifier) {
-        final var shortName = Util.shortName(annotationType.toString());
+        var shortName = Util.shortName(annotationType.toString());
 
-        var fqn = APContext.asTypeElement(annotationType).getQualifiedName().toString();
-        return annotationMirror
-            .toString()
-            .substring(1)
-            .replace(fqn, shortName)
+        return AnnotationCopier.getSimpleAnnotationString(annotationMirror)
+            .replaceFirst(annotationType.toString(), shortName)
             .replace("\"", "\\\"")
             .toLowerCase();
       }
@@ -316,5 +314,12 @@ final class Util {
 
   public static String trimMethod(String method) {
     return shortMethod(method).replace('.', '_').replace(Constants.DI, "");
+  }
+
+  private static final Pattern ANNOTATION_TYPE_PATTERN = Pattern.compile("@([\\w.]+)\\.");
+
+  public static String trimAnnotationString(String input) {
+
+    return ANNOTATION_TYPE_PATTERN.matcher(input).replaceAll("@");
   }
 }

@@ -122,15 +122,10 @@ final class MetaReader {
       final var annotationType = annotation.annotationType();
       for (Annotation metaAnnotation : annotationType.getAnnotations()) {
         if (metaAnnotation.annotationType().equals(Qualifier.class)) {
-          var toString =
-              annotation
-                  .toString()
-                  .substring(1)
-                  .replace(annotationType.getCanonicalName(), annotationType.getSimpleName());
-          if (toString.endsWith("()")) {
-            toString = toString.substring(0, toString.length() - 2);
-          }
-          return toString.toLowerCase();
+          return AnnotationReader.simplifyAnnotation(annotation.toString())
+              .replaceFirst(annotationType.getCanonicalName(), annotationType.getSimpleName())
+              .replace("()", "").substring(1)
+              .toLowerCase();
         }
       }
     }

@@ -8,7 +8,6 @@ import java.util.List;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.util.ElementFilter;
 
 /**
  * Read the annotations on the type.
@@ -42,13 +41,10 @@ final class TypeAnnotationReader {
 
       if (QualifierPrism.isPresent(annotationType.asElement())) {
 
-        final var shortName = Util.shortName(annotationType.toString());
-        var fqn = APContext.asTypeElement(annotationType).getQualifiedName().toString();
+        var shortName = Util.shortName(annotationType.toString());
         qualifierName =
-            annotationMirror
-                .toString()
-                .substring(1)
-                .replace(fqn, shortName)
+            AnnotationCopier.getSimpleAnnotationString(annotationMirror)
+                .replaceFirst(annotationType.toString(), shortName)
                 .replace("\"", "\\\"")
                 .toLowerCase();
 

@@ -1,4 +1,4 @@
-package org.example.coffee.qualifier.members;
+package io.avaje.inject.generator.models.valid.qualifier;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -21,6 +21,7 @@ public @interface TempQualifier {
     CELSIUS,
     FAHRENHEIT,
   }
+
   @interface NestedAnnotation {
 
     Inject[] inject() default {};

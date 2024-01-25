@@ -1,7 +1,6 @@
-package org.example.coffee.qualifier.members;
+package io.avaje.inject.generator.models.valid.qualifier;
 
-import org.example.coffee.qualifier.members.TempQualifier.Scale;
-
+import io.avaje.inject.generator.models.valid.qualifier.TempQualifier.Scale;
 import jakarta.inject.Singleton;
 
 @Singleton
