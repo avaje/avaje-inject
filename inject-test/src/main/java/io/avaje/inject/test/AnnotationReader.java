@@ -1,13 +1,15 @@
 package io.avaje.inject.test;
 
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.Collections;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 final class AnnotationReader {
+  private AnnotationReader() {}
 
   private static final Pattern ANNOTATION_TYPE_PATTERN = Pattern.compile("@([\\w.]+)\\.");
+
   private static final Pattern ANNOTATION_TYPE_PATTERN$ = Pattern.compile("@[\\w.]+\\$");
 
   private static final Pattern VALUE_ATTRIBUTE_PATTERN = Pattern.compile("(\\w+)=([\\w.]+)");
@@ -53,22 +55,15 @@ final class AnnotationReader {
     String[] annotations = annotationContent.split(",\\s*");
 
     // Creating a TreeMap to store annotations sorted by key
-    Map<String, String> sortedAnnotations = new TreeMap<>();
+    var sortedkeys = new TreeSet<String>();
 
-    // Sorting annotations by key
-    for (String annotation : annotations) {
-      String[] keyValue = annotation.split("=", 1);
-      sortedAnnotations.put(keyValue[0], keyValue.length > 1 ? keyValue[1] : "");
-    }
+    // Sorting by key
+    Collections.addAll(sortedkeys, annotations);
 
     // Constructing the sorted annotation string
     StringBuilder sortedOutput = new StringBuilder(input.substring(0, indexOfParanthesis + 1));
-    for (Map.Entry<String, String> entry : sortedAnnotations.entrySet()) {
-      sortedOutput.append(entry.getKey());
-      if (!entry.getValue().isEmpty()) {
-        sortedOutput.append("=").append(entry.getValue());
-      }
-      sortedOutput.append(", ");
+    for (var key : sortedkeys) {
+      sortedOutput.append(key).append(", ");
     }
     // Removing the trailing comma and space
     sortedOutput.setLength(sortedOutput.length() - 2);
