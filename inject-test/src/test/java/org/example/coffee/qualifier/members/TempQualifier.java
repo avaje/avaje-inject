@@ -21,6 +21,7 @@ public @interface TempQualifier {
     CELSIUS,
     FAHRENHEIT,
   }
+
   @interface NestedAnnotation {
 
     Inject[] inject() default {};

@@ -57,12 +57,12 @@ final class AnnotationReader {
 
     // Sorting annotations by key
     for (String annotation : annotations) {
-      String[] keyValue = annotation.split("=",1);
+      String[] keyValue = annotation.split("=", 1);
       sortedAnnotations.put(keyValue[0], keyValue.length > 1 ? keyValue[1] : "");
     }
 
     // Constructing the sorted annotation string
-    StringBuilder sortedOutput = new StringBuilder(input.substring(0, indexOfParanthesis+1));
+    StringBuilder sortedOutput = new StringBuilder(input.substring(0, indexOfParanthesis + 1));
     for (Map.Entry<String, String> entry : sortedAnnotations.entrySet()) {
       sortedOutput.append(entry.getKey());
       if (!entry.getValue().isEmpty()) {
