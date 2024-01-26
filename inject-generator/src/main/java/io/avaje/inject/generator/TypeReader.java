@@ -72,6 +72,10 @@ final class TypeReader {
     return extendsReader.factoryMethods();
   }
 
+  List<MethodReader> observerMethods() {
+    return extendsReader.observerMethods();
+  }
+
   Element postConstructMethod() {
     return extendsReader.postConstructMethod();
   }

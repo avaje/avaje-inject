@@ -1,4 +1,4 @@
-package io.avaje.inject.events;
+package io.avaje.inject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -7,6 +7,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 
+import io.avaje.inject.events.ObserverManager;
+import io.avaje.inject.events.TestEvent;
+import io.avaje.inject.events.TestGenericEvent;
 import io.avaje.inject.spi.GenericType;
 
 class DObserverManagerTest {

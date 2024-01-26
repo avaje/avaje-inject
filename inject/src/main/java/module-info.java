@@ -2,6 +2,7 @@ module io.avaje.inject {
 
   exports io.avaje.inject;
   exports io.avaje.inject.aop;
+  exports io.avaje.inject.events;
   exports io.avaje.inject.spi;
 
   requires transitive io.avaje.lang;

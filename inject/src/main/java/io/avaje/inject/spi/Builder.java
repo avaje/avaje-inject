@@ -76,6 +76,9 @@ public interface Builder {
    */
   <T> void registerProvider(Provider<T> provider);
 
+  /** Register the provider into the context. */
+  <T> void registerObserver(boolean sync, Type type, Consumer<T> observer, String qualifier);
+
   /**
    * Register the bean instance into the context.
    *

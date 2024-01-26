@@ -94,6 +94,10 @@ final class TypeExtendsReader {
     return extendsInjection.factoryMethods();
   }
 
+  List<MethodReader> observerMethods() {
+    return extendsInjection.observerMethods();
+  }
+
   Element postConstructMethod() {
     return extendsInjection.postConstructMethod();
   }

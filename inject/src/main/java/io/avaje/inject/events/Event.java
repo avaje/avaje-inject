@@ -25,10 +25,10 @@ public abstract class Event<T> {
   }
 
   public void fire(T event) {
-    fire(event, "");
+    fire(event, null);
   }
 
   public List<CompletableFuture<Void>> fireAsync(T event) {
-    return fireAsync(event, "");
+    return fireAsync(event, null);
   }
 }

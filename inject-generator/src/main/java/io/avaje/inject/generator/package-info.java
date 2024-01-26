@@ -26,11 +26,13 @@
 @GeneratePrism(value = RequiresBean.Container.class, name = "RequiresBeanContainerPrism")
 @GeneratePrism(value = RequiresProperty.Container.class, name = "RequiresPropertyContainerPrism")
 @GeneratePrism(Profile.class)
+@GeneratePrism(Observes.class)
 package io.avaje.inject.generator;
 
 import io.avaje.inject.*;
 import io.avaje.inject.aop.*;
 import io.avaje.inject.spi.*;
+import io.avaje.inject.events.*;
 import io.avaje.prism.GeneratePrism;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;

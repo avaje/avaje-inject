@@ -1,3 +1,6 @@
 package io.avaje.inject.events;
 
-public @interface Observes {}
+public @interface Observes {
+
+  boolean async() default false;
+}
