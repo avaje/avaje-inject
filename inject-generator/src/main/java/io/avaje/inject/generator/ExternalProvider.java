@@ -76,12 +76,14 @@ final class ExternalProvider {
    * types and the only thing providing them is the plugin.
    */
   static void registerPluginProvidedTypes(ScopeInfo defaultScope) {
-    avajePlugins.forEach((k, v) -> {
-      if (APContext.typeElement(k) != null) {
-        System.out.println("Loaded Plugin: " + k);
-        v.forEach(defaultScope::pluginProvided);
-      }
-    });
+    avajePlugins.forEach(
+        (k, v) -> {
+          if (APContext.typeElement(k) != null) {
+            System.out.println("Loaded Plugin: " + k);
+            v.forEach(defaultScope::pluginProvided);
+          }
+        });
+    defaultScope.pluginProvided("io.avaje.inject.events.ObserverManager");
     if (!injectAvailable) {
       return;
     }
