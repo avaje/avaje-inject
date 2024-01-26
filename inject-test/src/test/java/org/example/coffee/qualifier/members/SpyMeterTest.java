@@ -15,9 +15,9 @@ import jakarta.inject.Inject;
 class SpyMeterTest {
 
   private static final String METRIC =
-      "TempQualifier(defaultVal=0, inject={@NestedAnnotation(inject={})}, someOtherString=\"celsi\", value={CELSIUS})";
+      "@TempQualifier(defaultVal=0, inject={@NestedAnnotation(inject={})}, someOtherString=\"celsi\", value={CELSIUS})";
   private static final String IMPERIAL =
-      "TempQualifier(defaultVal=0, inject={@NestedAnnotation(inject={})}, someOtherString=\"far\", value={FAHRENHEIT})";
+      "@TempQualifier(defaultVal=0, inject={@NestedAnnotation(inject={})}, someOtherString=\"far\", value={FAHRENHEIT})";
 
   @Spy
   @TempQualifier(value = Scale.FAHRENHEIT, someOtherString = "far")
