@@ -155,6 +155,18 @@ final class BeanReader {
         }
       }
     }
+
+    observerMethods.stream()
+        .flatMap(m -> m.params().stream().skip(1))
+        .forEach(
+            param -> {
+              Dependency dependsOn = param.dependsOn();
+              // BeanScope is always injectable with no impact on injection ordering
+              if (!Constants.BEANSCOPE.equals(dependsOn.dependsOn())) {
+                list.add(dependsOn);
+              }
+            });
+
     conditions.requireTypes.stream()
       .map(t -> new Dependency("con:" + t))
       .forEach(list::add);
@@ -192,6 +204,11 @@ final class BeanReader {
     for (MethodReader method : injectMethods) {
       method.addDependsOnGeneric(allUTypes);
     }
+
+    for (MethodReader method : observerMethods) {
+      allUTypes.add(method.observeParam().getFullUType());
+    }
+
     if (constructor != null) {
       constructor.addDependsOnGeneric(allUTypes);
     }

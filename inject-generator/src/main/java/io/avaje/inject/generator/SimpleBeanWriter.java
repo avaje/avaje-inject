@@ -3,11 +3,13 @@ package io.avaje.inject.generator;
 import static io.avaje.inject.generator.APContext.createSourceFile;
 import static io.avaje.inject.generator.APContext.logError;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -232,6 +234,14 @@ final class SimpleBeanWriter {
       var observeEvent = methodReader.observeParam();
       var observeUtype = observeEvent.getFullUType();
       final var shortWithoutAnnotations = observeUtype.shortWithoutAnnotations();
+      var injectParams = methodReader.params().stream().skip(1).collect(toList());
+
+      for (MethodParam param : injectParams) {
+        writer.indent(indent).append("var %s = ", methodReader.name() + "$" + param.simpleName());
+        param.builderGetDependency(writer, builder);
+        writer.append(";").eol();
+      }
+
       writer
           .indent(indent)
           .append("Consumer<%s> %s = ", shortWithoutAnnotations, methodReader.name());
@@ -244,15 +254,14 @@ final class SimpleBeanWriter {
       if (methodReader.params().size() == 1) {
         writer.append("%s::%s;", bean, methodReader.name());
       } else {
-        var injectParams =
-            methodReader.params().stream()
-                .skip(1)
-                .map(p -> methodReader.name() + p.simpleName())
+        var injectParamNames =
+            injectParams.stream()
+                .map(p -> methodReader.name() + "$" + p.simpleName())
                 .collect(joining(", "));
-        writer.append(
-            "e -> %s.%s(e, %s);", shortWithoutAnnotations, methodReader.name(), injectParams);
+        writer.append("e -> bean.%s(e, %s);", methodReader.name(), injectParamNames);
       }
-      writer.eol()
+      writer
+          .eol()
           .indent(indent)
           .append(
               "%s.<%s>registerObserver(%s, %s, %s, \"%s\");",
@@ -261,7 +270,8 @@ final class SimpleBeanWriter {
               ObservesPrism.getInstanceOn(observeEvent.element()).async().booleanValue(),
               observeTypeString,
               methodReader.name(),
-              observeEvent.qualifier());
+              observeEvent.qualifier())
+          .eol();
     }
   }
 
