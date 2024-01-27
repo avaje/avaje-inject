@@ -260,15 +260,17 @@ final class SimpleBeanWriter {
                 .collect(joining(", "));
         writer.append("e -> bean.%s(e, %s);", methodReader.name(), injectParamNames);
       }
+      final var observesPrism = ObservesPrism.getInstanceOn(observeEvent.element());
       writer
           .eol()
           .indent(indent)
           .append(
-              "%s.<%s>registerObserver(%s, %s, %s, \"%s\");",
+              "%s.<%s>registerObserver(%s, %s, %s, %s, \"%s\");",
               builder,
               shortWithoutAnnotations,
-              ObservesPrism.getInstanceOn(observeEvent.element()).async().booleanValue(),
               observeTypeString,
+              observesPrism.priority(),
+              observesPrism.async().booleanValue(),
               methodReader.name(),
               observeEvent.qualifier())
           .eol();

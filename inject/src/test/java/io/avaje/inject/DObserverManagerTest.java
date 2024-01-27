@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 
+import io.avaje.inject.events.Observer;
 import io.avaje.inject.events.ObserverManager;
 import io.avaje.inject.events.TestEvent;
 import io.avaje.inject.events.TestGenericEvent;
@@ -23,21 +24,10 @@ class DObserverManagerTest {
     testEvent.fire("sus");
 
     assertThat(aBoolean.get()).isFalse();
-    manager.<String>registerObserver(false, String.class, s -> aBoolean.set(true), "");
+    manager.<String>registerObserver(
+        String.class, new Observer<>(0, false, s -> aBoolean.set(true), ""));
 
     testEvent.fire("sus");
-    assertThat(aBoolean.get()).isTrue();
-  }
-
-  @Test
-  void testRegisterAsync() throws InterruptedException {
-    AtomicBoolean aBoolean = new AtomicBoolean();
-
-    manager.<List<String>>registerObserver(
-        true, new GenericType<List<String>>() {}.type(), s -> aBoolean.set(true), "");
-
-    new TestGenericEvent(manager).fire(List.of("str"));
-    Thread.sleep(200);
     assertThat(aBoolean.get()).isTrue();
   }
 
@@ -45,10 +35,23 @@ class DObserverManagerTest {
   void testAsync() throws InterruptedException {
     AtomicBoolean aBoolean = new AtomicBoolean();
 
-    manager.<List<String>>registerObserver(
-        false, new GenericType<List<String>>() {}.type(), s -> aBoolean.set(true), "");
+    manager.<String>registerObserver(
+        String.class, new Observer<>(0, true, s -> aBoolean.set(true), ""));
 
-    new TestGenericEvent(manager).fireAsync(List.of("str"));
+    new TestEvent(manager).fireAsync("str");
+    Thread.sleep(500);
+    assertThat(aBoolean.get()).isTrue();
+  }
+
+  @Test
+  void testGenericAsync() throws InterruptedException {
+    AtomicBoolean aBoolean = new AtomicBoolean();
+
+    manager.<List<String>>registerObserver(
+        new GenericType<List<String>>() {}.type(),
+        new Observer<>(0, false, s -> aBoolean.set(true), ""));
+
+    new TestGenericEvent(manager).fire(List.of("str"));
     Thread.sleep(200);
     assertThat(aBoolean.get()).isTrue();
   }

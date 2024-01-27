@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import io.avaje.inject.events.Observer;
 import io.avaje.inject.events.ObserverManager;
@@ -15,12 +14,9 @@ class DObserverManager implements ObserverManager {
   Map<Type, List<Observer<?>>> observeMap = new HashMap<>();
 
   @Override
-  public <T> void registerObserver(
-      boolean async, Type type, Consumer<T> observer, String qualifier) {
+  public <T> void registerObserver(Type type, Observer<T> observer) {
 
-    observeMap
-        .computeIfAbsent(type, k -> new ArrayList<>())
-        .add(new Observer<>(async, observer, qualifier));
+    observeMap.computeIfAbsent(type, k -> new ArrayList<>()).add(observer);
   }
 
   @Override

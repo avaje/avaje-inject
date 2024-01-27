@@ -2,7 +2,6 @@ package io.avaje.inject.events;
 
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.function.Consumer;
 
 /** Manages all {@link Observer} instances in the BeanScope */
 public interface ObserverManager {
@@ -16,7 +15,7 @@ public interface ObserverManager {
    * @param observer the consumer to execute when a matching event is found
    * @param qualifier qualifier string that this observer should be registered to
    */
-  <T> void registerObserver(boolean async, Type type, Consumer<T> observer, String qualifier);
+  <T> void registerObserver(Type eventType, Observer<T> observer);
 
   /**
    * Retrieves a list of all Observers registered by the given type

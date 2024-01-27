@@ -38,6 +38,9 @@ import java.lang.annotation.Target;
 @Retention(SOURCE)
 public @interface Observes {
 
+  /** The priority of the observe method */
+  int priority() default 1000;
+
   /** Whether this Observer should be exclusively executed asynchronously */
   boolean async() default false;
 }

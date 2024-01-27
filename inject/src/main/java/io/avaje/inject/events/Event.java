@@ -1,5 +1,6 @@
 package io.avaje.inject.events;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -40,9 +41,9 @@ public abstract class Event<T> {
    * @param event the event object
    */
   public void fire(T event, String qualifier) {
-    for (var observer : observers) {
-      observer.observe(event, qualifier);
-    }
+    observers.stream()
+        .sorted(Comparator.comparing(Observer::priority))
+        .forEach(observer -> observer.observe(event, qualifier));
   }
 
   /**
@@ -58,6 +59,7 @@ public abstract class Event<T> {
 
     return CompletableFuture.allOf(
         observers.stream()
+            .sorted(Comparator.comparing(Observer::priority))
             .map(o -> o.observeAsync(event, qualifier))
             .toArray(CompletableFuture[]::new));
   }

@@ -2,6 +2,7 @@ package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
+import io.avaje.inject.events.Observer;
 import io.avaje.inject.events.ObserverManager;
 import jakarta.inject.Provider;
 
@@ -184,9 +185,9 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public <T> void registerObserver(
-      boolean sync, Type type, Consumer<T> observer, String qualifier) {
-    get(ObserverManager.class).registerObserver(sync, type, observer, qualifier);
+  public <T> void registerObserver(Type type, int priority, boolean sync, Consumer<T> observer, String qualifier) {
+    get(ObserverManager.class)
+        .registerObserver(type, new Observer<T>(priority, sync, observer, qualifier));
   }
 
   @Override

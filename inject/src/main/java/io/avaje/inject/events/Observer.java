@@ -10,14 +10,20 @@ import java.util.function.Consumer;
  */
 public class Observer<T> {
 
+  private final int priority;
   private final boolean async;
   private final Consumer<T> method;
   private final String qualifierString;
 
-  public Observer(boolean async, Consumer<T> method, String qualifierString) {
+  public Observer(int priority, boolean async, Consumer<T> method, String qualifierString) {
+    this.priority = priority;
     this.async = async;
     this.method = method;
     this.qualifierString = qualifierString;
+  }
+
+  public int priority() {
+    return priority;
   }
 
   void observe(T event, String qualifier) {
