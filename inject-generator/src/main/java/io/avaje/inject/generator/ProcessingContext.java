@@ -1,30 +1,9 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.APContext.elements;
-import static io.avaje.inject.generator.APContext.filer;
-import static io.avaje.inject.generator.APContext.getModuleInfoReader;
-import static io.avaje.inject.generator.APContext.getProjectModuleElement;
-import static io.avaje.inject.generator.APContext.logError;
-import static io.avaje.inject.generator.APContext.logNote;
-import static io.avaje.inject.generator.APContext.logWarn;
-import static io.avaje.inject.generator.APContext.typeElement;
-import static io.avaje.inject.generator.APContext.asTypeElement;
-import static io.avaje.inject.generator.APContext.types;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.nio.file.NoSuchFileException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 import javax.annotation.processing.FilerException;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -32,12 +11,18 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
+import java.util.*;
+
+import static io.avaje.inject.generator.APContext.*;
+import static java.util.stream.Collectors.toSet;
 
 final class ProcessingContext {
 
   private static final ThreadLocal<Ctx> CTX = new ThreadLocal<>();
+  private static boolean processingOver;
 
-  private ProcessingContext() {}
+  private ProcessingContext() {
+  }
 
   static final class Ctx {
     private final Set<String> uniqueModuleNames = new HashSet<>();
@@ -45,6 +30,7 @@ final class ProcessingContext {
     private final Set<String> optionalTypes = new LinkedHashSet<>();
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
     private final List<AvajeModule> avajeModules = new ArrayList<>();
+    private final List<TypeElement> delayQueue = new ArrayList<>();
     private boolean validated;
     private boolean strictWiring;
     private String injectFqn;
@@ -111,9 +97,9 @@ final class ProcessingContext {
 
   static FileObject createMetaInfWriter(ScopeInfo.Type scopeType) throws IOException {
     final var serviceName =
-        scopeType == ScopeInfo.Type.DEFAULT
-            ? Constants.META_INF_MODULE
-            : Constants.META_INF_TESTMODULE;
+      scopeType == ScopeInfo.Type.DEFAULT
+        ? Constants.META_INF_MODULE
+        : Constants.META_INF_TESTMODULE;
     return createMetaInfWriterFor(serviceName);
   }
 
@@ -207,7 +193,24 @@ final class ProcessingContext {
     return Optional.ofNullable(CTX.get().aspectImportPrisms.get(type));
   }
 
-  public static void clear() {
+  static Set<TypeElement> delayedElements() {
+    var set =
+      CTX.get().delayQueue.stream()
+        .map(t -> t.getQualifiedName().toString())
+        .map(APContext::typeElement)
+        .collect(toSet());
+    CTX.get().delayQueue.clear();
+    return set;
+  }
+
+  static boolean delayUntilNextRound(TypeElement element) {
+    if (!processingOver) {
+      CTX.get().delayQueue.add(element);
+    }
+    return !processingOver;
+  }
+
+  static void clear() {
     CTX.remove();
     APContext.clear();
   }
@@ -226,5 +229,9 @@ final class ProcessingContext {
 
   public static boolean strictWiring() {
     return CTX.get().strictWiring;
+  }
+
+  static void processingOver(boolean over) {
+    processingOver = over;
   }
 }

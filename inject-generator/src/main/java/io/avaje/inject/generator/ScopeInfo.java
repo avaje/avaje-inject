@@ -127,7 +127,7 @@ final class ScopeInfo {
         .forEach(
             require -> {
               requiresPackages.add(require);
-              requirePkg.add(Util.packageOf(require) + ".");
+              requirePkg.add(ProcessorUtils.packageOf(require) + ".");
             });
   }
 
@@ -305,7 +305,12 @@ final class ScopeInfo {
       logNote("skipping annotation type " + typeElement);
       return;
     }
-    beanReaders.add(new BeanReader(typeElement, factory, importedComponent).read());
+    var reader = new BeanReader(typeElement, factory, importedComponent).read();
+    if (reader.isDelayed() && ProcessingContext.delayUntilNextRound(typeElement)) {
+      readBeans.remove(typeElement.toString());
+    } else {
+      beanReaders.add(reader);
+    }
   }
 
   void readBuildMethodDependencyMeta(Element element) {
@@ -487,10 +492,10 @@ final class ScopeInfo {
     for (String require : requires) {
       final ScopeInfo requiredScope = scopes.get(require);
       // recursively search parent scope
-  if ((requiredScope != null) && requiredScope.providesDependencyRecursive(dependency)) {
-    // logWarn("dependency " + dependency + " provided by other scope " + requiredScope.name);
-    return true;
-  }
+      if ((requiredScope != null) && requiredScope.providesDependencyRecursive(dependency)) {
+        // logWarn("dependency " + dependency + " provided by other scope " + requiredScope.name);
+        return true;
+      }
     }
     return false;
   }
