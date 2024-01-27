@@ -1,12 +1,8 @@
 package org.example.observes;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Spy;
 
 import io.avaje.inject.events.Event;
 import io.avaje.inject.test.InjectTest;
@@ -37,8 +33,8 @@ public class TestEventMessaging {
 
     event.fire(message, "qual");
 
-    assertThat(observer.wasInvoked()).isTrue();
+    assertThat(observer.wasInvoked()).isFalse();
     assertThat(qualifiedObserver.wasInvoked()).isTrue();
-    assertThat(observerInjected.wasInvoked()).isTrue();
+    assertThat(observerInjected.wasInvoked()).isFalse();
   }
 }

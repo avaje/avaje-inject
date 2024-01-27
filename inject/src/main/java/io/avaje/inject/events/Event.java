@@ -1,10 +1,30 @@
 package io.avaje.inject.events;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Allows the application to fire events of a particular type.
+ *
+ * <p>Beans fire events via an instance of the <code>Event</code> abstract class, which may be
+ * injected:
+ *
+ * <pre>
+ * &#064;Inject
+ * Event&lt;LoggedInEvent&gt; loggedInEvent;
+ * </pre>
+ *
+ * <p>The <code>fire()</code> method accepts an event object:
+ *
+ * <pre>
+ * public void login() {
+ *    ...
+ *    loggedInEvent.fire(new LoggedInEvent(user));
+ * }
+ * </pre>
+ *
+ * @param <T> the type of the event object
+ */
 public abstract class Event<T> {
 
   private final List<Observer<T>> observers;
@@ -13,22 +33,54 @@ public abstract class Event<T> {
     this.observers = observers;
   }
 
-  public void fire(T event, String qualifiers) {
+  /**
+   * Fires an event with the specified qualifier and notifies observers.
+   *
+   * @param qualifier qualifier for this event
+   * @param event the event object
+   */
+  public void fire(T event, String qualifier) {
     for (var observer : observers) {
-      observer.observe(event, qualifiers);
+      observer.observe(event, qualifier);
     }
   }
 
-  public List<CompletableFuture<Void>> fireAsync(T event, String qualifiers) {
+  /**
+   * Fires an event asynchronously with the specified qualifier and notifies observers
+   * asynchronously.
+   *
+   * @param event the event object
+   * @param qualifier the qualifier for this event
+   * @return a {@link CompletableFuture} allowing further pipeline composition on the asynchronous
+   *     operation.
+   */
+  public CompletableFuture<Void> fireAsync(T event, String qualifier) {
 
-    return observers.stream().map(o -> o.observeAsync(event, qualifiers)).collect(toList());
+    return CompletableFuture.allOf(
+        observers.stream()
+            .map(o -> o.observeAsync(event, qualifier))
+            .toArray(CompletableFuture[]::new));
   }
 
+  /**
+   * Fires an event and notifies observers with no qualifier.
+   *
+   * @param qualifier qualifier for this event
+   * @param event the event object
+   */
   public void fire(T event) {
-    fire(event, null);
+    fire(event, "");
   }
 
-  public List<CompletableFuture<Void>> fireAsync(T event) {
-    return fireAsync(event, null);
+  /**
+   * Fires an event asynchronously with the notifies observers without qualifiers
+   *
+   * @param event the event object
+   * @param qualifier the qualifier for this event
+   * @return a {@link CompletableFuture} allowing further pipeline composition on the asynchronous
+   *     operation.
+   */
+  public CompletableFuture<Void> fireAsync(T event) {
+    return fireAsync(event, "");
   }
 }

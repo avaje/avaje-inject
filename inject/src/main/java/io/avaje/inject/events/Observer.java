@@ -3,8 +3,11 @@ package io.avaje.inject.events;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import io.avaje.lang.Nullable;
-
+/**
+ * Container class for an observer method and it's information
+ *
+ * @param <T> the type of the event
+ */
 public class Observer<T> {
 
   private final boolean async;
@@ -19,7 +22,7 @@ public class Observer<T> {
 
   void observe(T event, String qualifier) {
 
-    if (event != null && qualifierString == null || qualifierString.equalsIgnoreCase(qualifier)) {
+    if (event != null && qualifierString.equalsIgnoreCase(qualifier)) {
       if (!async) {
         method.accept(event);
       } else {
@@ -30,7 +33,7 @@ public class Observer<T> {
 
   CompletableFuture<Void> observeAsync(T event, String qualifier) {
 
-    if (event != null && qualifierString == null || qualifierString.equalsIgnoreCase(qualifier)) {
+    if (event != null && qualifierString.equalsIgnoreCase(qualifier)) {
       return CompletableFuture.runAsync(() -> method.accept(event));
     }
     return CompletableFuture.completedFuture(null);

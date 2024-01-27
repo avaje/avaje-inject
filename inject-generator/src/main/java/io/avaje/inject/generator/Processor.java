@@ -118,7 +118,6 @@ public final class Processor extends AbstractProcessor {
     maybeElements(roundEnv, Constants.CONTROLLER).ifPresent(this::readBeans);
     maybeElements(roundEnv, ProxyPrism.PRISM_TYPE).ifPresent(this::readBeans);
     maybeElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
-    maybeElements(roundEnv, PrototypePrism.PRISM_TYPE).ifPresent(this::readBeans);
     maybeElements(roundEnv, EventTypePrism.PRISM_TYPE).stream()
         .flatMap(Set::stream)
         .forEach(EventPublisherWriter::new);

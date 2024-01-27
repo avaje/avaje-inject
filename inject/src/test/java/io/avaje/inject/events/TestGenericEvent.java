@@ -7,6 +7,6 @@ import io.avaje.inject.spi.GenericType;
 public class TestGenericEvent extends Event<List<String>> {
 
   public TestGenericEvent(ObserverManager manager) {
-    super(manager.observers((new GenericType<List<String>>() {}.type())));
+    super(manager.observersByType((new GenericType<List<String>>() {}.type())));
   }
 }

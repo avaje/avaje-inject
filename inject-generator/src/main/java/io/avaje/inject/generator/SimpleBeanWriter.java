@@ -264,7 +264,7 @@ final class SimpleBeanWriter {
           .eol()
           .indent(indent)
           .append(
-              "%s.<%s>registerObserver(%s, %s, %s, %s);",
+              "%s.<%s>registerObserver(%s, %s, %s, \"%s\");",
               builder,
               shortWithoutAnnotations,
               ObservesPrism.getInstanceOn(observeEvent.element()).async().booleanValue(),

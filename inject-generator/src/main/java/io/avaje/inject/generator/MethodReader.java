@@ -559,7 +559,7 @@ final class MethodReader {
 
     public String qualifier() {
 
-      return named != null ? "\"" + named + "\"" : null;
+      return named != null ? named : "";
     }
   }
 }

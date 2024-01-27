@@ -16,16 +16,16 @@ class DObserverManager implements ObserverManager {
 
   @Override
   public <T> void registerObserver(
-      boolean sync, Type type, Consumer<T> observer, String qualifier) {
+      boolean async, Type type, Consumer<T> observer, String qualifier) {
 
     observeMap
         .computeIfAbsent(type, k -> new ArrayList<>())
-        .add(new Observer<>(sync, observer, qualifier));
+        .add(new Observer<>(async, observer, qualifier));
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public List<Observer<?>> observers(Type eventType) {
+  public List<Observer<?>> observersByType(Type eventType) {
 
     return observeMap.computeIfAbsent(eventType, k -> new ArrayList<>());
   }

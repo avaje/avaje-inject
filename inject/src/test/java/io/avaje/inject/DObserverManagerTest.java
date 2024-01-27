@@ -23,7 +23,7 @@ class DObserverManagerTest {
     testEvent.fire("sus");
 
     assertThat(aBoolean.get()).isFalse();
-    manager.<String>registerObserver(false, String.class, s -> aBoolean.set(true), null);
+    manager.<String>registerObserver(false, String.class, s -> aBoolean.set(true), "");
 
     testEvent.fire("sus");
     assertThat(aBoolean.get()).isTrue();
@@ -34,7 +34,7 @@ class DObserverManagerTest {
     AtomicBoolean aBoolean = new AtomicBoolean();
 
     manager.<List<String>>registerObserver(
-        true, new GenericType<List<String>>() {}.type(), s -> aBoolean.set(true), null);
+        true, new GenericType<List<String>>() {}.type(), s -> aBoolean.set(true), "");
 
     new TestGenericEvent(manager).fire(List.of("str"));
     Thread.sleep(200);
@@ -46,7 +46,7 @@ class DObserverManagerTest {
     AtomicBoolean aBoolean = new AtomicBoolean();
 
     manager.<List<String>>registerObserver(
-        false, new GenericType<List<String>>() {}.type(), s -> aBoolean.set(true), null);
+        false, new GenericType<List<String>>() {}.type(), s -> aBoolean.set(true), "");
 
     new TestGenericEvent(manager).fireAsync(List.of("str"));
     Thread.sleep(200);
