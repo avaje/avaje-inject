@@ -20,7 +20,7 @@ final class EventPublisherWriter {
           + "public class {2}Publisher extends Event<{2}> '{'\n"
           + "\n"
           + "  public {2}Publisher(ObserverManager manager) '{'\n"
-          + "    super(manager.observersByType({2}.class));\n"
+          + "    super(manager, {2}.class);\n"
           + "  '}'\n"
           + "'}'\n";
   private final String originName;

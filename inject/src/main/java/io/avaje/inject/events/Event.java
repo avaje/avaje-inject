@@ -1,5 +1,6 @@
 package io.avaje.inject.events;
 
+import java.lang.reflect.Type;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -30,8 +31,8 @@ public abstract class Event<T> {
 
   private final List<Observer<T>> observers;
 
-  protected Event(List<Observer<T>> observers) {
-    this.observers = observers;
+  protected Event(ObserverManager manager, Type type) {
+    this.observers = manager.observersByType(type);
   }
 
   /**
