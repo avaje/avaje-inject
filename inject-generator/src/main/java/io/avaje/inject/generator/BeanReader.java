@@ -206,7 +206,10 @@ final class BeanReader {
     }
 
     for (MethodReader method : observerMethods) {
-      allUTypes.add(method.observeParam().getFullUType());
+      var utype = method.observeParam().getFullUType();
+      if (utype.isGeneric()) {
+        allUTypes.add(utype);
+      }
     }
 
     if (constructor != null) {
