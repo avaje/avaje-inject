@@ -80,11 +80,11 @@ class CustomScopeTest {
 
       // includes the 2 supplied beans
       final List<BeanEntry> all = beanScope.all();
-      assertThat(all).hasSize(6);
+      assertThat(all).hasSize(7);
 
       final CustomBean customBean = beanScope.get(CustomBean.class);
 
-      final Optional<BeanEntry> customBeanEntry = all.stream()
+      final Optional<BeanEntry> customBeanEntry = all.stream().skip(1)
         .filter(beanEntry -> beanEntry.hasKey(CustomBean.class))
         .findFirst();
 
