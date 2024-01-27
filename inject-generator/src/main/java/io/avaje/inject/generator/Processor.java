@@ -35,7 +35,8 @@ import static io.avaje.inject.generator.ProcessingContext.*;
   Constants.TESTSCOPE,
   Constants.CONTROLLER,
   ImportPrism.PRISM_TYPE,
-  AspectImportPrism.PRISM_TYPE
+  AspectImportPrism.PRISM_TYPE,
+  EventTypePrism.PRISM_TYPE
 })
 public final class Processor extends AbstractProcessor {
 
@@ -117,6 +118,10 @@ public final class Processor extends AbstractProcessor {
     maybeElements(roundEnv, Constants.CONTROLLER).ifPresent(this::readBeans);
     maybeElements(roundEnv, ProxyPrism.PRISM_TYPE).ifPresent(this::readBeans);
     maybeElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
+    maybeElements(roundEnv, PrototypePrism.PRISM_TYPE).ifPresent(this::readBeans);
+    maybeElements(roundEnv, EventTypePrism.PRISM_TYPE).stream()
+        .flatMap(Set::stream)
+        .forEach(EventPublisherWriter::new);
 
     allScopes.readBeans(roundEnv);
     defaultScope.write(processingOver);

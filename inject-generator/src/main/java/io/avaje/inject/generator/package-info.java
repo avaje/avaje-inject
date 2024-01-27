@@ -27,6 +27,7 @@
 @GeneratePrism(value = RequiresProperty.Container.class, name = "RequiresPropertyContainerPrism")
 @GeneratePrism(Profile.class)
 @GeneratePrism(Observes.class)
+@GeneratePrism(EventType.class)
 package io.avaje.inject.generator;
 
 import io.avaje.inject.*;
