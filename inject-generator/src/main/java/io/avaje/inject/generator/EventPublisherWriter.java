@@ -17,9 +17,9 @@ final class EventPublisherWriter {
           + "{1}"
           + "@Component\n"
           + "@Generated(\"avaje-inject-generator\")\n"
-          + "public class {2}EventImpl extends Event<{2}> '{'\n"
+          + "public class {2}Publisher extends Event<{2}> '{'\n"
           + "\n"
-          + "  public {2}EventImpl (ObserverManager manager) '{'\n"
+          + "  public {2}Publisher(ObserverManager manager) '{'\n"
           + "    super(manager.observers({2}.class));\n"
           + "  '}'\n"
           + "'}'\n";
@@ -32,7 +32,7 @@ final class EventPublisherWriter {
     this.packageName = APContext.elements().getPackageOf(element).getQualifiedName().toString();
 
     this.utype = UType.parse(element.asType());
-    this.originName = utype.mainType() + "EventImpl";
+    this.originName = utype.mainType() + "Publisher";
     importTypes.addAll(utype.importTypes());
     if (utype.isGeneric()) {
       APContext.logError(

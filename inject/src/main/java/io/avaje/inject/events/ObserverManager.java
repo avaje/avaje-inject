@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 
 public interface ObserverManager {
 
-  <T> void registerObserver(boolean sync, Type type, Consumer<T> observer, String qualifier);
+  <T> void registerObserver(boolean async, Type type, Consumer<T> observer, String qualifier);
 
   <T> List<Observer<T>> observers(Type eventType);
 }

@@ -3,38 +3,36 @@ package io.avaje.inject.events;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+import io.avaje.lang.Nullable;
+
 public class Observer<T> {
 
-  private final boolean sync;
+  private final boolean async;
   private final Consumer<T> method;
   private final String qualifierString;
 
-  public Observer(boolean sync, Consumer<T> method, String qualifierString) {
-    this.sync = sync;
+  public Observer(boolean async, Consumer<T> method, String qualifierString) {
+    this.async = async;
     this.method = method;
     this.qualifierString = qualifierString;
   }
 
   void observe(T event, String qualifier) {
 
-    if (event != null && qualifierString.isBlank() || qualifierString.equalsIgnoreCase(qualifier)) {
-      if (sync) {
-        execute(event);
+    if (event != null && qualifierString == null || qualifierString.equalsIgnoreCase(qualifier)) {
+      if (!async) {
+        method.accept(event);
       } else {
-        CompletableFuture.runAsync(() -> execute(event));
+        CompletableFuture.runAsync(() -> method.accept(event));
       }
     }
   }
 
   CompletableFuture<Void> observeAsync(T event, String qualifier) {
 
-    if (event != null && qualifierString.isBlank() || qualifierString.equalsIgnoreCase(qualifier)) {
-      return CompletableFuture.runAsync(() -> execute(event));
+    if (event != null && qualifierString == null || qualifierString.equalsIgnoreCase(qualifier)) {
+      return CompletableFuture.runAsync(() -> method.accept(event));
     }
     return CompletableFuture.completedFuture(null);
-  }
-
-  private void execute(T event) {
-    method.accept(event);
   }
 }
