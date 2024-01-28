@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import io.avaje.applog.AppLog;
-import io.avaje.inject.events.ObserverManager;
+import io.avaje.inject.event.ObserverManager;
 import io.avaje.inject.spi.Builder;
 import io.avaje.inject.spi.ClosePair;
 import io.avaje.inject.spi.EnrichBean;

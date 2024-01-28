@@ -1,6 +1,6 @@
 package org.example.observes;
 
-import io.avaje.inject.events.Observes;
+import io.avaje.inject.event.Observes;
 import jakarta.inject.Singleton;
 
 @Singleton

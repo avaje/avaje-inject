@@ -58,8 +58,8 @@ final class EventPublisherWriter {
 
   String imports() {
     importTypes.add("io.avaje.inject.Component");
-    importTypes.add("io.avaje.inject.events.Event");
-    importTypes.add("io.avaje.inject.events.ObserverManager");
+    importTypes.add("io.avaje.inject.event.Event");
+    importTypes.add("io.avaje.inject.event.ObserverManager");
     importTypes.add("io.avaje.inject.spi.Generated");
     StringBuilder writer = new StringBuilder();
     for (String importType : importTypes.forImport()) {

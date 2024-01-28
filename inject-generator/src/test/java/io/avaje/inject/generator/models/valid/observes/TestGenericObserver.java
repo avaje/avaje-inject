@@ -2,7 +2,7 @@ package io.avaje.inject.generator.models.valid.observes;
 
 import java.util.List;
 
-import io.avaje.inject.events.Observes;
+import io.avaje.inject.event.Observes;
 import jakarta.inject.Singleton;
 
 @Singleton

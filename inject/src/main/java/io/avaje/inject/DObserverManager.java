@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.avaje.inject.events.Observer;
-import io.avaje.inject.events.ObserverManager;
+import io.avaje.inject.event.Observer;
+import io.avaje.inject.event.ObserverManager;
 
 class DObserverManager implements ObserverManager {
 

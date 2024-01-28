@@ -1,4 +1,4 @@
-package io.avaje.inject.events;
+package io.avaje.inject.event;
 
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * of a bean class.
  *
  * <pre>
- * public void afterLogin(&#064;Observes LoggedInEvent event) { ... }
+ * public void afterLogin(&#064;ObservesAsync LoggedInEvent event) { ... }
  * </pre>
  *
  * <p>An observer method is a non-abstract method of a managed bean class.
@@ -36,11 +36,9 @@ import java.lang.annotation.Target;
  */
 @Target(PARAMETER)
 @Retention(SOURCE)
-public @interface Observes {
+public @interface ObservesAsync {
 
   /** The priority of the observe method */
   int priority() default 1000;
 
-  /** Whether this Observer should be exclusively executed asynchronously */
-  boolean async() default false;
 }

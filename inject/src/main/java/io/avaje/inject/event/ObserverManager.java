@@ -1,4 +1,4 @@
-package io.avaje.inject.events;
+package io.avaje.inject.event;
 
 import java.lang.reflect.Type;
 import java.util.List;

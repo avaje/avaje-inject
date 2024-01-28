@@ -270,7 +270,7 @@ final class SimpleBeanWriter {
               shortWithoutAnnotations,
               observeTypeString,
               observesPrism.priority(),
-              observesPrism.async().booleanValue(),
+              observesPrism.async(),
               methodReader.name(),
               observeEvent.qualifier())
           .eol();

@@ -2,8 +2,8 @@ package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
-import io.avaje.inject.events.Observer;
-import io.avaje.inject.events.ObserverManager;
+import io.avaje.inject.event.Observer;
+import io.avaje.inject.event.ObserverManager;
 import jakarta.inject.Provider;
 
 import java.lang.reflect.Type;
