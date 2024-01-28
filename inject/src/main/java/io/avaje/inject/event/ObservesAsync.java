@@ -7,7 +7,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Identifies the event parameter of an observer method. May be applied to a parameter of a method
+ * Identifies the event parameter of an asynchronous observer method. May be applied to a parameter of a method
  * of a bean class.
  *
  * <pre>
@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * has occurred.
  *
  * <pre>
- * public void afterLogin(&#064;Observes LoggedInEvent event, &#064;Manager User user, Logger log) { ... }
+ * public void afterLogin(&#064;ObservesAsync LoggedInEvent event, &#064;Manager User user, Logger log) { ... }
  * </pre>
  */
 @Target(PARAMETER)

@@ -1,11 +1,8 @@
 package io.avaje.inject.event;
 
-import static java.util.stream.Collectors.toList;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -54,8 +51,7 @@ public abstract class Event<T> {
   }
 
   /**
-   * Fires an event asynchronously with the specified qualifier and notifies observers
-   * asynchronously.
+   * Fires an event with the specified qualifier and notifies asynchronous observers
    *
    * @param event the event object
    * @param qualifier the qualifier for this event
@@ -87,7 +83,7 @@ public abstract class Event<T> {
   }
 
   /**
-   * Fires an event and notifies sync observers with no qualifier.
+   * Fires an event and notifies observers with no qualifier.
    *
    * @param qualifier qualifier for this event
    * @param event the event object
@@ -97,7 +93,7 @@ public abstract class Event<T> {
   }
 
   /**
-   * Fires an event asynchronously with the notifies async observers without qualifiers
+   * Fires an event to asynchronous observers without qualifiers
    *
    * @param event the event object
    * @param qualifier the qualifier for this event

@@ -3,7 +3,7 @@ package io.avaje.inject.event;
 import java.util.function.Consumer;
 
 /**
- * Container class for an observer method and it's information
+ * Container class for an observer method and its information
  *
  * @param <T> the type of the event
  */

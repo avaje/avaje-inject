@@ -26,7 +26,7 @@
 @GeneratePrism(value = RequiresBean.Container.class, name = "RequiresBeanContainerPrism")
 @GeneratePrism(value = RequiresProperty.Container.class, name = "RequiresPropertyContainerPrism")
 @GeneratePrism(Profile.class)
-@GeneratePrism(EventType.class)
+@GeneratePrism(ApplicationEvent.class)
 package io.avaje.inject.generator;
 
 import io.avaje.inject.*;

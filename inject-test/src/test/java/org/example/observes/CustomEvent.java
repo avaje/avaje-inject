@@ -1,8 +1,8 @@
 package org.example.observes;
 
-import io.avaje.inject.event.EventType;
+import io.avaje.inject.event.ApplicationEvent;
 
-@EventType
+@ApplicationEvent
 public class CustomEvent {
   private final String string;
 
