@@ -1,9 +1,9 @@
 package io.avaje.inject;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
@@ -36,6 +36,18 @@ class DObserverManagerTest {
   }
 
   @Test
+  void testPriority() throws InterruptedException, ExecutionException {
+    var l = new ArrayList<String>();
+
+    manager.<String>registerObserver(String.class, new Observer<>(0, true, s -> l.add("1"), ""));
+    manager.<String>registerObserver(String.class, new Observer<>(5, true, s -> l.add("5"), ""));
+    manager.<String>registerObserver(String.class, new Observer<>(2, true, s -> l.add("2"), ""));
+
+    new TestEvent(manager).fire("str");
+    assertThat(l).containsExactly("1", "2", "5");
+  }
+
+  @Test
   void testAsync() throws InterruptedException, ExecutionException {
     AtomicBoolean aBoolean = new AtomicBoolean();
 
@@ -44,6 +56,18 @@ class DObserverManagerTest {
 
     new TestEvent(manager).fireAsync("str").toCompletableFuture().get();
     assertThat(aBoolean.get()).isTrue();
+  }
+
+  @Test
+  void testAsyncPriority() throws InterruptedException, ExecutionException {
+    var l = new ArrayList<String>();
+
+    manager.<String>registerObserver(String.class, new Observer<>(0, true, s -> l.add("1"), ""));
+    manager.<String>registerObserver(String.class, new Observer<>(5, true, s -> l.add("5"), ""));
+    manager.<String>registerObserver(String.class, new Observer<>(2, true, s -> l.add("2"), ""));
+
+    new TestEvent(manager).fireAsync("str").toCompletableFuture().get();
+    assertThat(l).containsExactly("1", "2", "5");
   }
 
   @Test
@@ -64,7 +88,14 @@ class DObserverManagerTest {
     testEvent.fire("sus");
 
     manager.<String>registerObserver(
-        String.class, new Observer<>(0, false, s->{throw new IllegalArgumentException();}, ""));
+        String.class,
+        new Observer<>(
+            0,
+            false,
+            s -> {
+              throw new IllegalArgumentException();
+            },
+            ""));
 
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> testEvent.fire("sus"));
@@ -75,7 +106,14 @@ class DObserverManagerTest {
     final var testEvent = new TestEvent(manager);
 
     manager.<String>registerObserver(
-        String.class, new Observer<>(0, true,  s->{throw new IllegalArgumentException();}, ""));
+        String.class,
+        new Observer<>(
+            0,
+            true,
+            s -> {
+              throw new IllegalArgumentException();
+            },
+            ""));
 
     testEvent.fire("sus");
     var future = testEvent.fireAsync("sus").toCompletableFuture();

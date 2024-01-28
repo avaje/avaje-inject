@@ -1,8 +1,11 @@
 package io.avaje.inject.event;
 
+import static java.util.stream.Collectors.toList;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -62,20 +65,20 @@ public abstract class Event<T> {
   public CompletionStage<T> fireAsync(T event, String qualifier) {
     var exceptionHandler = new CollectingExceptionHandler();
 
-    return CompletableFuture.allOf(
-            observers.stream()
-                .sorted(Comparator.comparing(Observer::priority))
-                .map(
-                    o ->
-                        CompletableFuture.runAsync(
-                            () -> {
-                              try {
-                                o.observe(event, qualifier, true);
-                              } catch (Exception e) {
-                                exceptionHandler.handle(e);
-                              }
-                            }))
-                .toArray(CompletableFuture[]::new))
+    return observers.stream()
+        .sorted(Comparator.comparing(Observer::priority))
+        .reduce(
+            CompletableFuture.<Void>completedFuture(null),
+            (future, observer) ->
+                future.thenRun(
+                    () -> {
+                      try {
+                        observer.observe(event, qualifier, true);
+                      } catch (Exception e) {
+                        exceptionHandler.handle(e);
+                      }
+                    }),
+            (future1, future2) -> future1)
         .thenApply(
             v -> {
               handleExceptions(exceptionHandler);
