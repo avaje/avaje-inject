@@ -39,9 +39,9 @@ class DObserverManagerTest {
   void testPriority() throws InterruptedException, ExecutionException {
     var l = new ArrayList<String>();
 
-    manager.<String>registerObserver(String.class, new Observer<>(0, true, s -> l.add("1"), ""));
-    manager.<String>registerObserver(String.class, new Observer<>(5, true, s -> l.add("5"), ""));
-    manager.<String>registerObserver(String.class, new Observer<>(2, true, s -> l.add("2"), ""));
+    manager.<String>registerObserver(String.class, new Observer<>(0, false, s -> l.add("1"), ""));
+    manager.<String>registerObserver(String.class, new Observer<>(5, false, s -> l.add("5"), ""));
+    manager.<String>registerObserver(String.class, new Observer<>(2, false, s -> l.add("2"), ""));
 
     new TestEvent(manager).fire("str");
     assertThat(l).containsExactly("1", "2", "5");
