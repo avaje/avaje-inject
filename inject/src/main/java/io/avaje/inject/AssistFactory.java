@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
  * because the factory has some managed dependencies that should be injected for us and some
  * dependencies that are provided by the application (and annotated with {@code Assisted}).
  *
- * <p>The factory class must be a functional interface, or an abstract class with only one
+ * <p>The factory supertype must be a functional interface, or an abstract class with only one
  * abstract method defined.
  *
  * <pre>{@code

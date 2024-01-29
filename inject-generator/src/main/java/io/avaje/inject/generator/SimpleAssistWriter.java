@@ -25,6 +25,7 @@ final class SimpleAssistWriter {
   private final String suffix;
   private Append writer;
   private final List<Element> assistedElements;
+  private final boolean hasNoContructorParams;
 
     SimpleAssistWriter(AssistBeanReader beanReader) {
     this.beanReader = beanReader;
@@ -33,6 +34,11 @@ final class SimpleAssistWriter {
     this.suffix = "$AssistFactory";
     this.assistedElements = beanReader.assistElements();
     this.originName = packageName + "." + shortName;
+    this.hasNoContructorParams =
+        beanReader.constructor().params().stream()
+            .filter(not(MethodParam::assisted))
+            .findAny()
+            .isEmpty();
   }
 
   private Writer createFileWriter() throws IOException {
@@ -110,7 +116,9 @@ final class SimpleAssistWriter {
       var type = UType.parse(element.asType());
       writer.append("  %s %s$field;", type.shortType(), field.fieldName()).eol().eol();
     }
-    writer.eol();
+    if (beanReader.injectMethods().isEmpty() && hasNoContructorParams) {
+      writer.eol();
+    }
   }
 
   private void writeMethodFields() {
@@ -118,17 +126,20 @@ final class SimpleAssistWriter {
       return;
     }
     beanReader.injectMethods().stream()
-      .flatMap(m -> m.params().stream())
-      .filter(not(MethodParam::assisted))
-      .forEach(
-        p -> {
-          var element = p.element();
-          writer
-            .append("  private %s %s$method;", UType.parse(element.asType()).shortType(), p.simpleName())
-            .eol()
-            .eol();
-        });
-    writer.eol();
+        .flatMap(m -> m.params().stream())
+        .filter(not(MethodParam::assisted))
+        .forEach(
+            p -> {
+              var element = p.element();
+              writer
+                  .append(
+                      "  private %s %s$method;",
+                      UType.parse(element.asType()).shortType(), p.simpleName())
+                  .eol();
+            });
+  if (hasNoContructorParams) {
+      writer.eol();
+    }
   }
 
   private void writeConstructor() {
@@ -146,7 +157,7 @@ final class SimpleAssistWriter {
     if (beanReader.beanType().getNestingKind().isNested()) {
       shortName = shortName.replace(".", "$");
     }
-    writer.append("  ").append(shortName).append(suffix).append("(");
+    writer.eol().append("  ").append(shortName).append(suffix).append("(");
 
     for (var iterator = injectParams.iterator(); iterator.hasNext(); ) {
       var p = iterator.next();
@@ -170,7 +181,7 @@ final class SimpleAssistWriter {
     for (MethodParam p : injectParams) {
       var element = p.element();
       var type = UType.parse(element.asType()).shortType();
-      writer.append("  private final %s %s;", type, p.simpleName()).eol().eol();
+      writer.append("  private final %s %s;", type, p.simpleName()).eol();
     }
   }
 
