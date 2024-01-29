@@ -1,8 +1,13 @@
 package io.avaje.inject.generator;
 
+import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -91,7 +96,7 @@ final class AssistBeanReader {
             String.format(
                 "@AssistFactory targets for type %s must have an abstract method with form '%s <methodName>(",
                 shortName(), shortName()));
-
+    var assistNames = new ArrayList<String>();
     for (var iterator = assistedElements.iterator(); iterator.hasNext(); ) {
       var element = iterator.next();
 
@@ -102,6 +107,8 @@ final class AssistBeanReader {
       if (iterator.hasNext()) {
         sb.append(", ");
       }
+      assistNames.add(
+          String.format("%s %s", typeName.shortWithoutAnnotations(), element.getSimpleName()));
     }
     var errorMsg = sb.append(")' method.").toString();
 
@@ -113,6 +120,23 @@ final class AssistBeanReader {
               var mismatched = params.size() != assistedElements.size();
               if (mismatched) {
                 APContext.logError(t, errorMsg);
+                return;
+              }
+
+              var paramTypes =
+                  params.stream()
+                      .map(
+                          v ->
+                              String.format(
+                                  "%s %s",
+                                  UType.parse(v.asType()).shortWithoutAnnotations(),
+                                  v.getSimpleName()))
+                      .collect(toSet());
+              var missingParams =
+                  assistNames.stream().filter(not(paramTypes::contains)).collect(joining(", "));
+              if (!missingParams.isBlank()) {
+                APContext.logError(
+                    factoryMethod, "factory method missing required parameters: %s", missingParams);
               }
             },
             () -> APContext.logError(t, errorMsg));
