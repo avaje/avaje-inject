@@ -70,12 +70,8 @@ final class AssistBeanReader {
             .findFirst()
             .orElse(null);
 
-    if (!factoryType.getQualifiedName().contentEquals("java.lang.Void")) {
-      validateTarget(factoryType);
-      this.targetType = factoryType;
-    } else {
-      targetType = null;
-    }
+    validateTarget(factoryType);
+    this.targetType = factoryType;
   }
 
   private void validateTarget(TypeElement t) {
@@ -163,7 +159,8 @@ final class AssistBeanReader {
 
   private Set<String> importTypes() {
     importTypes.add("io.avaje.inject.AssistFactory");
-    importTypes.add(targetType.getQualifiedName().toString());
+    Optional.ofNullable(targetType).ifPresent(t -> importTypes.add(t.getQualifiedName().toString()));
+
     if (Util.validImportType(type)) {
       importTypes.add(type);
     }
