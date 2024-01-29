@@ -229,9 +229,14 @@ final class SimpleAssistWriter {
       writer.indent("    ").append("bean.%s = %s;", fieldName, getDependency).eol();
     }
 
-    for (var field : assistedElements) {
-      writer.indent("    ").append("bean.%s = %s;", field.getSimpleName(), field.getSimpleName()).eol();
-    }
+    assistedElements.stream()
+        .filter(e -> e.getKind() == ElementKind.FIELD)
+        .forEach(
+            field ->
+                writer
+                    .indent("    ")
+                    .append("bean.%s = %s;", field.getSimpleName(), field.getSimpleName())
+                    .eol());
   }
 
   private void injectMethods() {

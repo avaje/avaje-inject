@@ -1,10 +1,14 @@
 package io.avaje.inject.generator;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.lang.model.element.*;
+import javax.lang.model.util.ElementFilter;
 
 import io.avaje.inject.generator.MethodReader.MethodParam;
 
@@ -23,7 +27,7 @@ final class AssistBeanReader {
   private final TypeReader typeReader;
   private final TypeElement targetType;
   private final String qualifierName;
-  private ExecutableElement factoryMethod;
+  private final ExecutableElement factoryMethod;
 
   AssistBeanReader(TypeElement beanType) {
     this.beanType = beanType;
@@ -38,35 +42,80 @@ final class AssistBeanReader {
     this.constructor = typeReader.constructor();
 
     AssistFactoryPrism instanceOn = AssistFactoryPrism.getInstanceOn(beanType);
-    targetType = APContext.asTypeElement(instanceOn.value());
-    validateTarget(targetType);
-
-    for (Element enclosedElement : targetType.getEnclosedElements()) {
-      if (enclosedElement.getKind() == ElementKind.METHOD) {
-        factoryMethod = (ExecutableElement) enclosedElement;
-      }
-    }
+    var factoryType = APContext.asTypeElement(instanceOn.value());
 
     constructor.params().stream()
-      .filter(MethodParam::assisted)
-      .map(MethodParam::element)
-      .forEach(assistedElements::add);
+        .filter(MethodParam::assisted)
+        .map(MethodParam::element)
+        .forEach(assistedElements::add);
     injectFields.stream()
-      .filter(FieldReader::assisted)
-      .map(FieldReader::element)
-      .forEach(assistedElements::add);
+        .filter(FieldReader::assisted)
+        .map(FieldReader::element)
+        .forEach(assistedElements::add);
     injectMethods.stream()
-      .map(MethodReader::params)
-      .flatMap(List::stream)
-      .filter(MethodParam::assisted)
-      .map(MethodParam::element)
-      .forEach(assistedElements::add);
+        .map(MethodReader::params)
+        .flatMap(List::stream)
+        .filter(MethodParam::assisted)
+        .map(MethodParam::element)
+        .forEach(assistedElements::add);
+
+    factoryMethod =
+        ElementFilter.methodsIn(factoryType.getEnclosedElements()).stream()
+            .filter(e -> e.getModifiers().contains(Modifier.ABSTRACT))
+            .findFirst()
+            .orElse(null);
+
+    if (!factoryType.getQualifiedName().contentEquals("java.lang.Void")) {
+      validateTarget(factoryType);
+      this.targetType = factoryType;
+    } else {
+      targetType = null;
+    }
   }
 
   private void validateTarget(TypeElement t) {
-    if (t.getKind() != ElementKind.INTERFACE || !t.getModifiers().contains(Modifier.ABSTRACT)) {
-      APContext.logError(type, "@AssistFactory targets must be abstract");
+    var methods = ElementFilter.methodsIn(t.getEnclosedElements());
+    if (!APContext.elements().isFunctionalInterface(t)) {
+      if (!t.getModifiers().contains(Modifier.ABSTRACT)) {
+        APContext.logError(type, "@AssistFactory targets must be abstract");
+      } else if (methods.stream()
+              .filter(e -> e.getModifiers().contains(Modifier.ABSTRACT))
+              .collect(toList())
+              .size()
+          != 1) {
+        APContext.logError(type, "@AssistFactory targets must have only one abstract method");
+      }
     }
+    var sb =
+        new StringBuilder(
+            String.format(
+                "@AssistFactory targets for type %s must have an abstract method with form '%s <methodName>(",
+                shortName(), shortName()));
+
+    for (var iterator = assistedElements.iterator(); iterator.hasNext(); ) {
+      var element = iterator.next();
+
+      var typeName = UType.parse(element.asType());
+
+      sb.append(
+          String.format("%s %s", typeName.shortWithoutAnnotations(), element.getSimpleName()));
+      if (iterator.hasNext()) {
+        sb.append(", ");
+      }
+    }
+    var errorMsg = sb.append(")' method.").toString();
+
+    Optional.of(factoryMethod).stream()
+        .map(ExecutableElement::getParameters)
+        .findAny()
+        .ifPresentOrElse(
+            params -> {
+              var mismatched = params.size() != assistedElements.size();
+              if (mismatched) {
+                APContext.logError(t, errorMsg);
+              }
+            },
+            () -> APContext.logError(t, errorMsg));
   }
 
   @Override
