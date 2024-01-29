@@ -108,7 +108,7 @@ final class AssistBeanReader {
     }
     var errorMsg = sb.append(")' method.").toString();
 
-    Optional.of(factoryMethod).stream()
+    Optional.ofNullable(factoryMethod).stream()
         .map(ExecutableElement::getParameters)
         .findAny()
         .ifPresentOrElse(
