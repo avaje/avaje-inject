@@ -85,7 +85,7 @@ final class AnnotationCopier {
         if (!first) {
           sb.append(", ");
         }
-        writeVal(sb, listValue, first);
+        writeVal(sb, listValue, simpleEnums);
         first = false;
       }
       sb.append("}");
@@ -109,7 +109,7 @@ final class AnnotationCopier {
           sb.append(", ");
         }
         sb.append(entry.getKey().getSimpleName()).append("=");
-        writeVal(sb, entry.getValue(), first);
+        writeVal(sb, entry.getValue(), simpleEnums);
         first = false;
       }
       sb.append(")");
