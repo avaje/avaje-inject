@@ -1,6 +1,7 @@
 package io.avaje.inject.aop;
 
 import java.lang.annotation.*;
+import static java.lang.annotation.ElementType.*;
 
 /**
  * Meta annotation used to define an Aspect.
@@ -9,7 +10,7 @@ import java.lang.annotation.*;
  * associated type that implements {@link AspectProvider} will be used as the target class. The
  * aspect provider should be a {@code @Singleton} bean registered with <em>avaje-inject</em>.
  */
-@Target(ElementType.ANNOTATION_TYPE)
+@Target(ANNOTATION_TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Aspect {
 
@@ -33,7 +34,7 @@ public @interface Aspect {
   /**
    * Marks an External Annotation as being used for aspects
    */
-  @Target({ElementType.PACKAGE, ElementType.TYPE})
+  @Target({PACKAGE, TYPE, MODULE})
   @Retention(RetentionPolicy.SOURCE)
   @interface Import {
 
