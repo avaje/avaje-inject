@@ -88,8 +88,7 @@ final class MethodReader {
       this.initMethod = lifecycleReader.initMethod();
       this.destroyMethod = lifecycleReader.destroyMethod();
     }
-
-    }
+  }
 
   @Override
   public String toString() {
