@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import static io.avaje.inject.generator.ProcessingContext.asElement;
-
+import static io.avaje.inject.generator.Constants.*;
 
 final class MethodReader {
 
@@ -133,11 +133,11 @@ final class MethodReader {
     dependsOn.add(factoryType);
 
     conditions.requireTypes.stream()
-      .map(t -> "con:" + t)
+      .map(t -> CONDITIONAL_DEPENDENCY + t)
       .forEach(dependsOn::add);
     conditions.missingTypes.stream()
       .filter(t -> !t.equals(returnTypeRaw))
-      .map(t -> "con:" + t)
+      .map(t -> CONDITIONAL_DEPENDENCY + t)
       .forEach(dependsOn::add);
     for (final MethodParam param : params) {
       dependsOn.add(Util.trimWildcard(param.paramType));

@@ -404,10 +404,14 @@ final class ScopeInfo {
 
   private void buildProvidesMethod(Append writer, String fieldName, Set<String> types) {
     writer.append("  @Override").eol();
-    writer.append("  public Class<?>[] %s() {\n    return %s;\n  }", fieldName, fieldName).eol();
-    writer.append("  private final Class<?>[] %s = {", fieldName).eol();
+    writer.append("  public Type[] %s() {\n    return %s;\n  }", fieldName, fieldName).eol();
+    writer.append("  private final Type[] %s = {", fieldName).eol();
     for (final String rawType : types) {
-      writer.append("    %s.class,", trimGenerics(rawType)).eol();
+      if (rawType.contains("<")) {
+        writer.append("    new GenericType<%s>(){},", rawType).eol();
+      } else {
+        writer.append("    %s.class,", trimGenerics(rawType)).eol();
+      }
     }
     writer.append("  };").eol().eol();
   }

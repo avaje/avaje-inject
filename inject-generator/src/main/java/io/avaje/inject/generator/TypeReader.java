@@ -3,11 +3,14 @@ package io.avaje.inject.generator;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
+import static io.avaje.inject.generator.Constants.*;
 
 final class TypeReader {
 
@@ -45,7 +48,10 @@ final class TypeReader {
   }
 
   String autoProvides() {
-    return Optional.ofNullable(extendsReader.autoProvides()).map(UType::full).orElse(null);
+    return Optional.ofNullable(extendsReader.autoProvides())
+        .filter(u -> u.componentTypes().stream().noneMatch(p -> p.kind() == TypeKind.TYPEVAR))
+        .map(UType::full)
+        .orElse(null);
   }
 
   String providesAspect() {

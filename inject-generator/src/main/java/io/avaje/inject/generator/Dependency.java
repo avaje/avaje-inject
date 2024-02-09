@@ -1,5 +1,8 @@
 package io.avaje.inject.generator;
 
+import static io.avaje.inject.generator.Constants.CONDITIONAL_DEPENDENCY;
+import static io.avaje.inject.generator.Constants.SOFT_DEPENDENCY;
+
 final class Dependency {
 
   private final String name;
@@ -8,11 +11,11 @@ final class Dependency {
 
   Dependency(String name) {
     String nameStr;
-    if (name.startsWith("soft:")) {
+    if (name.startsWith(SOFT_DEPENDENCY)) {
       this.softDependency = true;
       this.conditionalDependency = false;
       nameStr = ProcessorUtils.trimAnnotations(name.substring(5));
-    } else if (name.startsWith("con:")) {
+    } else if (name.startsWith(CONDITIONAL_DEPENDENCY)) {
       this.softDependency = true;
       this.conditionalDependency = true;
       nameStr = ProcessorUtils.trimAnnotations(name.substring(4));
@@ -32,7 +35,7 @@ final class Dependency {
 
   @Override
   public String toString() {
-    return softDependency ? "soft:" + name : name;
+    return softDependency ? SOFT_DEPENDENCY + name : name;
   }
 
   String name() {

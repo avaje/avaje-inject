@@ -335,8 +335,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       }
     }
 
-    private void addFactoryProvides(FactoryState factoryState, Class<?>[] provides) {
-      for (final Class<?> feature : provides) {
+    private void addFactoryProvides(FactoryState factoryState, Type[] provides) {
+      for (final var feature : provides) {
         providesMap.computeIfAbsent(feature.getTypeName(), s -> new FactoryList()).add(factoryState);
       }
     }
@@ -394,8 +394,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       }
     }
 
-    private void unsatisfiedRequires(StringBuilder sb, Class<?>[] requiredType, String requires) {
-      for (final Class<?> depModuleName : requiredType) {
+    private void unsatisfiedRequires(StringBuilder sb, Type[] requiredType, String requires) {
+      for (final var depModuleName : requiredType) {
         if (notProvided(depModuleName.getTypeName())) {
           sb.append(String.format(" %s [%s]", requires, depModuleName.getTypeName()));
         }
@@ -438,8 +438,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         && satisfiedDependencies(factory.autoRequires());
     }
 
-    private boolean satisfiedDependencies(Class<?>[] requires) {
-      for (final Class<?> dependency : requires) {
+    private boolean satisfiedDependencies(Type[] requires) {
+      for (final var dependency : requires) {
         if (notProvided(dependency.getTypeName())) {
           return false;
         }
@@ -475,19 +475,19 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       return factory;
     }
 
-    Class<?>[] requires() {
+    Type[] requires() {
       return factory.requires();
     }
 
-    Class<?>[] requiresPackages() {
+    Type[] requiresPackages() {
       return factory.requiresPackages();
     }
 
-    Class<?>[] autoRequires() {
+    Type[] autoRequires() {
       return factory.autoRequires();
     }
 
-    Class<?>[] autoRequiresAspects() {
+    Type[] autoRequiresAspects() {
       return factory.autoRequiresAspects();
     }
 
@@ -505,7 +505,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       return !isEmpty(factory.provides());
     }
 
-    private boolean isEmpty(@Nullable Class<?>[] values) {
+    private boolean isEmpty(@Nullable Type[] values) {
       return values == null || values.length == 0;
     }
   }
