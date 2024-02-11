@@ -12,7 +12,7 @@ public interface Module {
   /**
    * Empty array of classes.
    */
-  Type[] EMPTY_CLASSES = {};
+  Class<?>[] EMPTY_CLASSES = {};
 
   /**
    * Return the set of types this module explicitly provides to other modules.
@@ -51,7 +51,7 @@ public interface Module {
    * This is a convenience when using multiple modules that we otherwise manually specify via
    * {@link InjectModule#provides()}.
    */
-  default Type[] autoProvidesAspects() {
+  default Class<?>[] autoProvidesAspects() {
     return EMPTY_CLASSES;
   }
 
@@ -70,7 +70,7 @@ public interface Module {
    * These are the apects that this module requires whose implementations are provided by other external
    * modules (that are in the classpath at compile time).
    */
-  default Type[] autoRequiresAspects() {
+  default Class<?>[] autoRequiresAspects() {
     return EMPTY_CLASSES;
   }
 

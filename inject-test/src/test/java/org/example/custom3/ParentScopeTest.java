@@ -55,8 +55,8 @@ class ParentScopeTest {
   @Test
   void module_classes() {
     MyThreeModule module = new MyThreeModule();
-    Class<?>[] classes = module.classes();
-    Set<Class<?>> asSet = new HashSet<>(Arrays.asList(classes));
+    var classes = module.classes();
+    var asSet = new HashSet<>(Arrays.asList(classes));
 
     assertThat(asSet).contains(
       org.example.custom3.TcsFactory.class,

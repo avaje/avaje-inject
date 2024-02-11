@@ -404,8 +404,9 @@ final class ScopeInfo {
 
   private void buildProvidesMethod(Append writer, String fieldName, Set<String> types) {
     writer.append("  @Override").eol();
-    writer.append("  public Type[] %s() {\n    return %s;\n  }", fieldName, fieldName).eol();
-    writer.append("  private final Type[] %s = {", fieldName).eol();
+    final var arrayType = fieldName.contains("Aspects") ? "Class<?>" : "Type";
+    writer.append("  public %s[] %s() {\n    return %s;\n  }", arrayType, fieldName, fieldName).eol();
+    writer.append("  private static final %s[] %s = {", arrayType, fieldName).eol();
     for (final String rawType : types) {
       if (rawType.contains("<")) {
         writer.append("    new GenericType<%s>(){},", rawType).eol();
