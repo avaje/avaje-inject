@@ -12,7 +12,7 @@ import static java.lang.System.Logger.Level.TRACE;
 /**
  * Holds the global BeanScope used for all tests.
  */
-final class GlobalTestScope implements  ExtensionContext.Store.CloseableResource {
+final class GlobalTestScope implements ExtensionContext.Store.CloseableResource {
 
   private static final System.Logger log = AppLog.getLogger("io.avaje.inject");
 
