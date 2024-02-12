@@ -17,6 +17,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 final class MetaReader {
@@ -38,10 +39,23 @@ final class MetaReader {
 
   MetaReader(Class<?> testClass, Plugin plugin) {
     this.plugin = plugin;
-    this.methodFinder = new SetupMethods(testClass);
-    for (Field field : testClass.getDeclaredFields()) {
-      readField(field);
+    final var hierarchy = typeHierarchy(testClass);
+    this.methodFinder = new SetupMethods(hierarchy);
+    for (Class<?> aTestClass : hierarchy) {
+      for (Field field : aTestClass.getDeclaredFields()) {
+        readField(field);
+      }
     }
+  }
+
+  private static LinkedList<Class<?>> typeHierarchy(Class<?> testClass) {
+    var hierarchy = new LinkedList<Class<?>>();
+    var analyzedClass = testClass;
+    while (analyzedClass != null && !analyzedClass.equals(Object.class)) {
+      hierarchy.addFirst(analyzedClass);
+      analyzedClass = analyzedClass.getSuperclass();
+    }
+    return hierarchy;
   }
 
   boolean hasClassInjection() {
