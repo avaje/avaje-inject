@@ -406,7 +406,7 @@ final class ScopeInfo {
     writer.append("  @Override").eol();
     final var arrayType = fieldName.contains("Aspects") ? "Class<?>" : "Type";
     writer.append("  public %s[] %s() {\n    return %s;\n  }", arrayType, fieldName, fieldName).eol();
-    writer.append("  private static final %s[] %s = {", arrayType, fieldName).eol();
+    writer.append("  private final %s[] %s = {", arrayType, fieldName).eol();
     for (final String rawType : types) {
       if (rawType.contains("<")) {
         writer.append("    new GenericType<%s>(){},", rawType).eol();
