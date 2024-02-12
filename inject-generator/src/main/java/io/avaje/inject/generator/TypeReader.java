@@ -1,16 +1,13 @@
 package io.avaje.inject.generator;
 
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
-import static io.avaje.inject.generator.Constants.*;
 
 final class TypeReader {
 
@@ -47,11 +44,11 @@ final class TypeReader {
     return extendsReader.provides().stream().map(UType::full).collect(toList());
   }
 
-  String autoProvides() {
-    return Optional.ofNullable(extendsReader.autoProvides())
+  List<String> autoProvides() {
+    return extendsReader.autoProvides().stream()
         .filter(u -> u.componentTypes().stream().noneMatch(p -> p.kind() == TypeKind.TYPEVAR))
         .map(UType::full)
-        .orElse(null);
+        .collect(toList());
   }
 
   String providesAspect() {
