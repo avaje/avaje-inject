@@ -48,6 +48,33 @@ final class MetaReader {
     }
   }
 
+  boolean hasMocksOrSpies(Object testInstance) {
+    if (testInstance == null) {
+      return hasStaticMocksOrSpies() || methodFinder.hasStaticMethods();
+    } else {
+      return hasInstanceMocksOrSpies(testInstance) || methodFinder.hasInstanceMethods();
+    }
+  }
+
+  private boolean hasInstanceMocksOrSpies(Object testInstance) {
+    return !mocks.isEmpty() || !spies.isEmpty() || hasInjectMock(injection, testInstance);
+  }
+
+  private boolean hasStaticMocksOrSpies() {
+    return !staticMocks.isEmpty() || !staticSpies.isEmpty() || hasInjectMock(staticInjection, null);
+  }
+
+  private boolean hasInjectMock(List<FieldTarget> fields, Object testInstance) {
+    for (FieldTarget target : fields) {
+      Object existingValue = target.get(testInstance);
+      if (existingValue != null) {
+        // an assigned injection field is a mock
+        return true;
+      }
+    }
+    return false;
+  }
+
   private static LinkedList<Class<?>> typeHierarchy(Class<?> testClass) {
     var hierarchy = new LinkedList<Class<?>>();
     var analyzedClass = testClass;
@@ -142,15 +169,15 @@ final class MetaReader {
     return null;
   }
 
-  MetaInfo.Scope setFromScope(BeanScope beanScope, Object testInstance) {
+  MetaInfo.Scope setFromScope(BeanScope beanScope, Object testInstance, boolean newScope) {
     if (testInstance != null) {
-      return setForInstance(beanScope, testInstance);
+      return setForInstance(beanScope, testInstance, newScope);
     } else {
-      return setForStatics(beanScope);
+      return setForStatics(beanScope, newScope);
     }
   }
 
-  private MetaInfo.Scope setForInstance(BeanScope beanScope, Object testInstance) {
+  private MetaInfo.Scope setForInstance(BeanScope beanScope, Object testInstance, boolean newScope) {
     try {
       Plugin.Scope pluginScope = instancePlugin ? plugin.createScope(beanScope) : null;
 
@@ -171,14 +198,14 @@ final class MetaReader {
           target.setFromScope(beanScope, testInstance);
         }
       }
-      return new MetaInfo.Scope(beanScope, pluginScope);
+      return new MetaInfo.Scope(beanScope, pluginScope, newScope);
 
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private MetaInfo.Scope setForStatics(BeanScope beanScope) {
+  private MetaInfo.Scope setForStatics(BeanScope beanScope, boolean newScope) {
     try {
       Plugin.Scope pluginScope = staticPlugin ? plugin.createScope(beanScope) : null;
 
@@ -196,7 +223,7 @@ final class MetaReader {
           target.setFromScope(beanScope, null);
         }
       }
-      return new MetaInfo.Scope(beanScope, pluginScope);
+      return new MetaInfo.Scope(beanScope, pluginScope, newScope);
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e);
     }

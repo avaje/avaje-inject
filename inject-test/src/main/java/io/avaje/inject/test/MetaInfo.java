@@ -27,38 +27,48 @@ final class MetaInfo {
   /**
    * Build for static fields class level scope.
    */
-  Scope buildForClass(BeanScope globalTestScope) {
+  Scope buildForClass(GlobalTestScope.Pair globalTestScope) {
     return buildSet(globalTestScope, null);
   }
 
   /**
    * Build test instance per test scope.
    */
-  Scope buildForInstance(BeanScope globalTestScope, Object testInstance) {
+  Scope buildForInstance(GlobalTestScope.Pair globalTestScope, Object testInstance) {
     return buildSet(globalTestScope, testInstance);
   }
 
-  private Scope buildSet(BeanScope parent, Object testInstance) {
-    final BeanScopeBuilder builder = BeanScope.builder();
-    if (parent != null) {
-      builder.parent(parent, false);
+  private Scope buildSet(GlobalTestScope.Pair parent, Object testInstance) {
+    // wiring profiles
+    String[] profiles = Optional.ofNullable(testInstance)
+      .map(Object::getClass)
+      .map(c -> c.getAnnotation(InjectTest.class))
+      .map(InjectTest::profiles)
+      .orElse(new String[0]);
+
+    boolean newScope = false;
+    final BeanScope beanScope;
+    if (profiles.length > 0 || reader.hasMocksOrSpies(testInstance)) {
+      // need to build a BeanScope for this using testScope() as the parent
+      final BeanScopeBuilder builder = BeanScope.builder();
+      if (parent != null) {
+        builder.parent(parent.baseScope(), false);
+        if (profiles.length > 0) {
+          builder.profiles(profiles);
+        }
+      }
+      // register mocks and spies local to this test
+      reader.build(builder, testInstance);
+      // wire with local mocks, spies, and globalTestScope
+      beanScope = builder.build();
+      newScope = true;
+    } else {
+      // just use the all scope
+      beanScope = parent.allScope();
     }
 
-    //set wiring profile
-    Optional.ofNullable(testInstance)
-        .map(Object::getClass)
-        .map(c -> c.getAnnotation(InjectTest.class))
-        .map(InjectTest::profiles)
-        .ifPresent(builder::profiles);
-
-    // register mocks and spies local to this test
-    reader.build(builder, testInstance);
-
-    // wire with local mocks, spies, and globalTestScope
-    final BeanScope beanScope = builder.build();
-
     // set inject, spy, mock fields from beanScope
-    return reader.setFromScope(beanScope, testInstance);
+    return reader.setFromScope(beanScope, testInstance, newScope);
   }
 
   /**
@@ -69,10 +79,12 @@ final class MetaInfo {
 
     private final BeanScope beanScope;
     private final Plugin.Scope pluginScope;
+    private final boolean newScope;
 
-    Scope(BeanScope beanScope, Plugin.Scope pluginScope) {
+    Scope(BeanScope beanScope, Plugin.Scope pluginScope, boolean newScope) {
       this.beanScope = beanScope;
       this.pluginScope = pluginScope;
+      this.newScope = newScope;
     }
 
     BeanScope beanScope() {
@@ -81,7 +93,9 @@ final class MetaInfo {
 
     @Override
     public void close() {
-      beanScope.close();
+      if (newScope) {
+        beanScope.close();
+      }
       if (pluginScope != null) {
         pluginScope.close();
       }

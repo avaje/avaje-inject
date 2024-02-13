@@ -18,9 +18,9 @@ final class GlobalTestScope implements ExtensionContext.Store.CloseableResource 
 
   private final ReentrantLock lock = new ReentrantLock();
   private boolean started;
-  private BeanScope globalBeanScope;
+  private Pair globalBeanScope;
 
-  BeanScope obtain(ExtensionContext context) {
+  Pair obtain(ExtensionContext context) {
     lock.lock();
     try {
       if (!started) {
@@ -34,11 +34,9 @@ final class GlobalTestScope implements ExtensionContext.Store.CloseableResource 
   }
 
   private void initialise(ExtensionContext context) {
-    globalBeanScope = TestBeanScope.init(false);
-    if (globalBeanScope != null) {
-      log.log(TRACE, "register global test BeanScope with beans {0}", globalBeanScope);
-      context.getRoot().getStore(ExtensionContext.Namespace.GLOBAL).put(InjectExtension.class.getCanonicalName(), this);
-    }
+    globalBeanScope = TSBuild.initialise(false);
+    log.log(TRACE, "register global test BeanScope with beans {0}", globalBeanScope);
+    context.getRoot().getStore(ExtensionContext.Namespace.GLOBAL).put(InjectExtension.class.getCanonicalName(), this);
   }
 
   /**
@@ -55,6 +53,57 @@ final class GlobalTestScope implements ExtensionContext.Store.CloseableResource 
     } finally {
       lock.unlock();
     }
+  }
+
+  /**
+   * The pair of BeanScopes that can be used for InjectTests.
+   */
+  static final class Pair {
+
+    /**
+     * Entire application wired (with testScope as parent replacing those beans).
+     * This can be used when a test only injects beans and there are no mocks,
+     * spies, or setup methods.
+     */
+    private final BeanScope allScope;
+
+    /**
+     * The TestScope beans, used as the parent scope when a new BeanScope
+     * needs to be wired for a test (due to mocks, spies or setup methods).
+     */
+    private final BeanScope baseScope;
+
+    Pair(BeanScope allScope, BeanScope baseScope) {
+      this.allScope = allScope;
+      this.baseScope = baseScope;
+    }
+
+    void close() {
+      if (allScope != null) {
+        allScope.close();
+      }
+      if (baseScope != null) {
+        baseScope.close();
+      }
+    }
+
+    BeanScope allScope() {
+      return allScope;
+    }
+
+    BeanScope baseScope() {
+      return baseScope;
+    }
+
+    Pair newPair(BeanScope newAllScope) {
+      return new Pair(newAllScope, baseScope);
+    }
+
+    @Override
+    public String toString() {
+      return "All[" + allScope + "] Test[" + baseScope + "]";
+    }
+
   }
 
 }
