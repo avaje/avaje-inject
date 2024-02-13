@@ -74,7 +74,7 @@ public abstract class TestBeanScope {
    */
   @Nullable
   public static BeanScope create(boolean shutdownHook) {
-    return TSBuild.create(shutdownHook);
+    return TSBuild.createTestBaseScope(shutdownHook);
   }
 
   @Nullable

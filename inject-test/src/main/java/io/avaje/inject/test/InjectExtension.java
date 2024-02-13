@@ -21,7 +21,7 @@ public final class InjectExtension implements BeforeAllCallback, AfterAllCallbac
   private static final String META = "META";
   private static final GlobalTestScope GLOBAL = new GlobalTestScope();
 
-  private BeanScope globalBeanScope;
+  private GlobalTestScope.Pair globalBeanScope;
 
   @Override
   public void beforeAll(ExtensionContext context) {
@@ -64,9 +64,8 @@ public final class InjectExtension implements BeforeAllCallback, AfterAllCallbac
     if (metaInfo.hasInstanceInjection()) {
 
       // if (static fields) then (class scope) else (globalTestScope)
-      final BeanScope parent = metaInfo.hasStaticInjection() ? getClassScope(context) : globalBeanScope;
-
-      AutoCloseable beanScope = metaInfo.buildForInstance(parent, context.getRequiredTestInstance());
+      final GlobalTestScope.Pair pair = metaInfo.hasStaticInjection() ? globalBeanScope.newPair(getClassScope(context)) : globalBeanScope;
+      AutoCloseable beanScope = metaInfo.buildForInstance(pair, context.getRequiredTestInstance());
 
       // put method level test scope
       Method testMethod = context.getRequiredTestMethod();

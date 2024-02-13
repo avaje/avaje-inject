@@ -30,7 +30,7 @@ final class TSBuild {
    * time this method is called.
    */
   @Nullable
-  static BeanScope create(boolean shutdownHook) {
+  static BeanScope createTestBaseScope(boolean shutdownHook) {
     return new TSBuild(shutdownHook).build();
   }
 
@@ -42,7 +42,7 @@ final class TSBuild {
     lock.lock();
     try {
       if (SCOPE == null) {
-        SCOPE = create(shutdownHook);
+        SCOPE = createTestBaseScope(shutdownHook);
       }
       return SCOPE;
     } finally {
@@ -52,6 +52,18 @@ final class TSBuild {
 
   TSBuild(boolean shutdownHook) {
     this.shutdownHook = shutdownHook;
+  }
+
+  static GlobalTestScope.Pair initialise() {
+    BeanScope testBaseScope = createTestBaseScope(false);
+    BeanScope testAllScope = createTestAllScope(testBaseScope);
+    return new GlobalTestScope.Pair(testAllScope, testBaseScope);
+  }
+
+  private static BeanScope createTestAllScope(BeanScope testBaseScope) {
+      return BeanScope.builder()
+        .parent(testBaseScope, false)
+        .build();
   }
 
   @Nullable
