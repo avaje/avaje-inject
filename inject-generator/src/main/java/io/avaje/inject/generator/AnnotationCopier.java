@@ -38,7 +38,7 @@ final class AnnotationCopier {
   }
 
   static String getSimpleAnnotationString(AnnotationMirror annotationMirror) {
-    return Util.trimAnnotationString(getAnnotationString("", annotationMirror, true));
+    return Util.trimAnnotationString(getAnnotationString("", annotationMirror, true)).substring(1);
   }
 
   static String getAnnotationString(

@@ -16,7 +16,7 @@ public class AllQue4 {
   private Que sam;
   private Que bilbo;
 
-  AllQue4(@Named("@Frodo") Que frodo) {
+  AllQue4(@Named("frodo") Que frodo) {
     this.frodo = frodo;
   }
 

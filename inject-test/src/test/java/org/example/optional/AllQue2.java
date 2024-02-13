@@ -12,7 +12,7 @@ import java.util.Optional;
 @Singleton
 public class AllQue2 {
 
-  @Inject @Named("@Frodo") Que frodo;
+  @Inject @Named("frodo") Que frodo;
   @Inject @Named("sam") Optional<Que> sam;
   @Inject @Named("bilbo") Optional<Que> bilbo;
 

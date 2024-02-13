@@ -15,7 +15,7 @@ public class AllQue {
   private final Optional<Que> sam;
   private final Optional<Que> bilbo;
 
-  AllQue(@Named("@Frodo") Optional<Que> frodo, @Named("sam") Optional<Que> sam, @Named("bilbo") Optional<Que> bilbo) {
+  AllQue(@Named("frodo") Optional<Que> frodo, @Named("sam") Optional<Que> sam, @Named("bilbo") Optional<Que> bilbo) {
     this.frodo = frodo;
     this.sam = sam;
     this.bilbo = bilbo;
