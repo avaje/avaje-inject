@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 
-class BeanScopeBuilderAddTest {
+public class BeanScopeBuilderAddTest {
 
   @Test
   void withModules_excludingThisOne() {
@@ -28,7 +28,7 @@ class BeanScopeBuilderAddTest {
     }
   }
 
-  static class SillyModule implements Module {
+  public static class SillyModule implements Module {
 
     @Override
     public Class<?>[] requires() {
