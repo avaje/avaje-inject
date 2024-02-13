@@ -38,8 +38,8 @@ public abstract class TestBeanScope {
    * @return A new test BeanScope with the global "test scope" as its parent.
    */
   public static BeanScopeBuilder builder() {
-    BeanScope globalTestScope = init(true);
-    return BeanScope.builder().parent(globalTestScope, false);
+    BeanScope baseTestScope = init(true);
+    return BeanScope.builder().parent(baseTestScope, false);
   }
 
   /**
@@ -79,7 +79,7 @@ public abstract class TestBeanScope {
 
   @Nullable
   static BeanScope init(boolean shutdownHook) {
-    return TSBuild.initialise(shutdownHook);
+    return TSBuild.initialise(shutdownHook).baseScope();
   }
 
 }
