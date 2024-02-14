@@ -46,7 +46,7 @@ final class TypeExtendsReader {
     this.baseType = baseType;
     this.extendsInjection = new TypeExtendsInjection(baseType, factory, importTypes);
     this.beanSimpleName = baseType.getSimpleName().toString();
-    Util.unwrapProvider(baseUType.toString());
+
     this.baseTypeIsInterface = baseType.getKind() == ElementKind.INTERFACE;
     this.publicAccess = baseType.getModifiers().contains(Modifier.PUBLIC);
     this.autoProvide = autoProvide();

@@ -1,12 +1,17 @@
 package io.avaje.inject.generator;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import io.avaje.inject.generator.MethodReader.MethodParam;
 
 import javax.lang.model.element.*;
+import javax.lang.model.util.ElementFilter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
-import io.avaje.inject.generator.MethodReader.MethodParam;
+import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toSet;
 
 final class AssistBeanReader {
 
@@ -23,7 +28,7 @@ final class AssistBeanReader {
   private final TypeReader typeReader;
   private final TypeElement targetType;
   private final String qualifierName;
-  private ExecutableElement factoryMethod;
+  private final ExecutableElement factoryMethod;
 
   AssistBeanReader(TypeElement beanType) {
     this.beanType = beanType;
@@ -38,14 +43,7 @@ final class AssistBeanReader {
     this.constructor = typeReader.constructor();
 
     AssistFactoryPrism instanceOn = AssistFactoryPrism.getInstanceOn(beanType);
-    targetType = APContext.asTypeElement(instanceOn.value());
-    validateTarget(targetType);
-
-    for (Element enclosedElement : targetType.getEnclosedElements()) {
-      if (enclosedElement.getKind() == ElementKind.METHOD) {
-        factoryMethod = (ExecutableElement) enclosedElement;
-      }
-    }
+    var factoryType = APContext.asTypeElement(instanceOn.value());
 
     constructor.params().stream()
       .filter(MethodParam::assisted)
@@ -61,12 +59,65 @@ final class AssistBeanReader {
       .filter(MethodParam::assisted)
       .map(MethodParam::element)
       .forEach(assistedElements::add);
+
+    factoryMethod =
+      ElementFilter.methodsIn(factoryType.getEnclosedElements()).stream()
+        .filter(e -> e.getModifiers().contains(Modifier.ABSTRACT))
+        .findFirst()
+        .orElse(null);
+
+    validateTarget(factoryType);
+    this.targetType = factoryType;
   }
 
   private void validateTarget(TypeElement t) {
-    if (t.getKind() != ElementKind.INTERFACE || !t.getModifiers().contains(Modifier.ABSTRACT)) {
-      APContext.logError(type, "@AssistFactory targets must be abstract");
+    var methods = ElementFilter.methodsIn(t.getEnclosedElements());
+    if (!APContext.elements().isFunctionalInterface(t)) {
+      if (!t.getModifiers().contains(Modifier.ABSTRACT)) {
+        APContext.logError(type, "@AssistFactory targets must be abstract");
+      } else if (checkAbstractMethodCount(methods)) {
+        APContext.logError(type, "@AssistFactory targets must have only one abstract method");
+      }
     }
+    var sb = new StringBuilder(String.format("@AssistFactory targets for type %s must have an abstract method with form '%s <methodName>(", shortName(), shortName()));
+    var assistNames = new ArrayList<String>();
+    for (var iterator = assistedElements.iterator(); iterator.hasNext(); ) {
+      var element = iterator.next();
+      var typeName = UType.parse(element.asType());
+      sb.append(String.format("%s %s", typeName.shortWithoutAnnotations(), element.getSimpleName()));
+      if (iterator.hasNext()) {
+        sb.append(", ");
+      }
+      assistNames.add(String.format("%s %s", typeName.shortWithoutAnnotations(), element.getSimpleName()));
+    }
+    var errorMsg = sb.append(")' method.").toString();
+
+    Optional.ofNullable(factoryMethod).stream()
+      .map(ExecutableElement::getParameters)
+      .findAny()
+      .ifPresentOrElse(params -> {
+          var mismatched = params.size() != assistedElements.size();
+          if (mismatched) {
+            APContext.logError(t, errorMsg);
+            return;
+          }
+
+          var paramTypes = params.stream()
+            .map(v -> String.format("%s %s", UType.parse(v.asType()).shortWithoutAnnotations(), v.getSimpleName()))
+            .collect(toSet());
+
+          var missingParams = assistNames.stream().filter(not(paramTypes::contains)).collect(joining(", "));
+          if (!missingParams.isBlank()) {
+            APContext.logError(factoryMethod, "factory method missing required parameters: %s", missingParams);
+          }
+        },
+        () -> APContext.logError(t, errorMsg));
+  }
+
+  private static boolean checkAbstractMethodCount(List<ExecutableElement> methods) {
+    return methods.stream()
+      .filter(e -> e.getModifiers().contains(Modifier.ABSTRACT))
+      .count() != 1;
   }
 
   @Override
@@ -90,7 +141,8 @@ final class AssistBeanReader {
 
   private Set<String> importTypes() {
     importTypes.add("io.avaje.inject.AssistFactory");
-    importTypes.add(targetType.getQualifiedName().toString());
+    Optional.ofNullable(targetType).ifPresent(t -> importTypes.add(t.getQualifiedName().toString()));
+
     if (Util.validImportType(type)) {
       importTypes.add(type);
     }

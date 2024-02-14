@@ -1,19 +1,20 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.APContext.createSourceFile;
-import static java.util.function.Predicate.not;
+import io.avaje.inject.generator.MethodReader.MethodParam;
 
+import javax.lang.model.element.*;
+import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.lang.model.element.*;
-import javax.tools.JavaFileObject;
+import static io.avaje.inject.generator.APContext.createSourceFile;
+import static java.util.function.Predicate.not;
 
-import io.avaje.inject.generator.MethodReader.MethodParam;
-
-/** Write the source code for the bean. */
+/**
+ * Write the source code for the bean.
+ */
 final class SimpleAssistWriter {
 
   private static final String CODE_COMMENT = "/**\n * Generated source - Factory for %s.\n */";
@@ -25,14 +26,20 @@ final class SimpleAssistWriter {
   private final String suffix;
   private Append writer;
   private final List<Element> assistedElements;
+  private final boolean hasNoConstructorParams;
 
-    SimpleAssistWriter(AssistBeanReader beanReader) {
+  SimpleAssistWriter(AssistBeanReader beanReader) {
     this.beanReader = beanReader;
     this.packageName = beanReader.packageName();
     this.shortName = beanReader.shortName();
     this.suffix = "$AssistFactory";
     this.assistedElements = beanReader.assistElements();
     this.originName = packageName + "." + shortName;
+    this.hasNoConstructorParams =
+      beanReader.constructor().params().stream()
+        .filter(not(MethodParam::assisted))
+        .findAny()
+        .isEmpty();
   }
 
   private Writer createFileWriter() throws IOException {
@@ -110,7 +117,9 @@ final class SimpleAssistWriter {
       var type = UType.parse(element.asType());
       writer.append("  %s %s$field;", type.shortType(), field.fieldName()).eol().eol();
     }
-    writer.eol();
+    if (beanReader.injectMethods().isEmpty() && hasNoConstructorParams) {
+      writer.eol();
+    }
   }
 
   private void writeMethodFields() {
@@ -120,15 +129,13 @@ final class SimpleAssistWriter {
     beanReader.injectMethods().stream()
       .flatMap(m -> m.params().stream())
       .filter(not(MethodParam::assisted))
-      .forEach(
-        p -> {
-          var element = p.element();
-          writer
-            .append("  private %s %s$method;", UType.parse(element.asType()).shortType(), p.simpleName())
-            .eol()
-            .eol();
-        });
-    writer.eol();
+      .forEach(p -> {
+        var element = p.element();
+        writer.append("  private %s %s$method;", UType.parse(element.asType()).shortType(), p.simpleName()).eol();
+      });
+    if (hasNoConstructorParams) {
+      writer.eol();
+    }
   }
 
   private void writeConstructor() {
@@ -146,7 +153,7 @@ final class SimpleAssistWriter {
     if (beanReader.beanType().getNestingKind().isNested()) {
       shortName = shortName.replace(".", "$");
     }
-    writer.append("  ").append(shortName).append(suffix).append("(");
+    writer.eol().append("  ").append(shortName).append(suffix).append("(");
 
     for (var iterator = injectParams.iterator(); iterator.hasNext(); ) {
       var p = iterator.next();
@@ -170,7 +177,7 @@ final class SimpleAssistWriter {
     for (MethodParam p : injectParams) {
       var element = p.element();
       var type = UType.parse(element.asType()).shortType();
-      writer.append("  private final %s %s;", type, p.simpleName()).eol().eol();
+      writer.append("  private final %s %s;", type, p.simpleName()).eol();
     }
   }
 
@@ -229,9 +236,13 @@ final class SimpleAssistWriter {
       writer.indent("    ").append("bean.%s = %s;", fieldName, getDependency).eol();
     }
 
-    for (var field : assistedElements) {
-      writer.indent("    ").append("bean.%s = %s;", field.getSimpleName(), field.getSimpleName()).eol();
-    }
+    assistedElements.stream()
+      .filter(e -> e.getKind() == ElementKind.FIELD)
+      .forEach(field ->
+        writer
+          .indent("    ")
+          .append("bean.%s = %s;", field.getSimpleName(), field.getSimpleName())
+          .eol());
   }
 
   private void injectMethods() {

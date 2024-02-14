@@ -21,7 +21,7 @@ import java.util.concurrent.locks.ReentrantLock;
 final class TSBuild {
 
   private static final ReentrantLock lock = new ReentrantLock();
-  private static BeanScope SCOPE;
+  private static GlobalTestScope.Pair SCOPE;
 
   private final boolean shutdownHook;
 
@@ -30,19 +30,18 @@ final class TSBuild {
    * time this method is called.
    */
   @Nullable
-  static BeanScope create(boolean shutdownHook) {
+  static BeanScope createTestBaseScope(boolean shutdownHook) {
     return new TSBuild(shutdownHook).build();
   }
 
   /**
    * Return the test BeanScope only creating once.
    */
-  @Nullable
-  static BeanScope initialise(boolean shutdownHook) {
+  static GlobalTestScope.Pair initialise(boolean shutdownHook) {
     lock.lock();
     try {
       if (SCOPE == null) {
-        SCOPE = create(shutdownHook);
+        SCOPE = createScopes(shutdownHook);
       }
       return SCOPE;
     } finally {
@@ -52,6 +51,18 @@ final class TSBuild {
 
   TSBuild(boolean shutdownHook) {
     this.shutdownHook = shutdownHook;
+  }
+
+  private static GlobalTestScope.Pair createScopes(boolean shutdownHook) {
+    BeanScope testBaseScope = createTestBaseScope(shutdownHook);
+    BeanScope testAllScope = createTestAllScope(testBaseScope);
+    return new GlobalTestScope.Pair(testAllScope, testBaseScope);
+  }
+
+  private static BeanScope createTestAllScope(BeanScope testBaseScope) {
+      return BeanScope.builder()
+        .parent(testBaseScope, false)
+        .build();
   }
 
   @Nullable

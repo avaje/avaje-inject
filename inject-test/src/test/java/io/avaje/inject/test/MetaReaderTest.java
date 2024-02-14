@@ -39,7 +39,7 @@ class MetaReaderTest {
     assertThat(metaReader.instancePlugin).isTrue();
 
     HelloBean helloBean = new HelloBean();
-    metaReader.setFromScope(Mockito.mock(BeanScope.class), helloBean);
+    metaReader.setFromScope(Mockito.mock(BeanScope.class), helloBean, true);
 
     assertThat(helloBean.client).isNotNull();
   }

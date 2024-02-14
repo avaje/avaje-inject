@@ -101,19 +101,19 @@ module org.example {
 
 ## Spring DI comparison
 
-| Spring | Avaje
+|  Avaje | Spring
 | :--- | :---  |
-| @Component, @Service, @Repository | [@Singleton](https://avaje.io/inject/#singleton) |
-| FactoryBean&lt;T> | [Provider&lt;T>](https://avaje.io/inject/#provider) |
-| @Inject, @Autowired | [@Inject](https://avaje.io/inject/#inject) |
-| @Autowired(required=false) |[@Inject @Nullable](https://avaje.io/inject/#nullable) or [@Inject Optional&lt;T>](https://avaje.io/inject/#optional) |
-| @PostConstruct| [@PostConstruct](https://avaje.io/inject/#post-construct) |
-| @PreDestroy| [@PreDestroy](https://avaje.io/inject/#pre-destroy) |
-| @Configuration and @Bean | [@Factory and @Bean](https://avaje.io/inject/#factory) |
-| @Conditional | [@RequiresBean and @RequiresProperty](https://avaje.io/inject/#conditional) |
-| @Primary | [@Primary](https://avaje.io/inject/#primary) |
-| @Secondary | [@Secondary](https://avaje.io/inject/#secondary) |
-| @Profile | [@Profile](https://avaje.io/inject/#profile) |
+| [@Singleton](https://avaje.io/inject/#singleton) | @Component, @Service, @Repository |
+| [Provider&lt;T>](https://avaje.io/inject/#provider) | FactoryBean&lt;T> |
+| [@Inject](https://avaje.io/inject/#inject) | @Inject, @Autowired |
+| [@Inject @Nullable](https://avaje.io/inject/#nullable) or [@Inject Optional&lt;T>](https://avaje.io/inject/#optional) | @Autowired(required=false) |
+| [@PostConstruct](https://avaje.io/inject/#post-construct) | @PostConstruct|
+| [@PreDestroy](https://avaje.io/inject/#pre-destroy) | @PreDestroy |
+| [@Factory and @Bean](https://avaje.io/inject/#factory) | @Configuration and @Bean |
+| [@RequiresBean and @RequiresProperty](https://avaje.io/inject/#conditional) | @Conditional |
+| [@Primary](https://avaje.io/inject/#primary) | @Primary |
+| [@Secondary](https://avaje.io/inject/#secondary) | @Secondary |
+| [@AssistFactory](https://avaje.io/inject/#assistInject) | - |
 
 ## Generated Code
 
