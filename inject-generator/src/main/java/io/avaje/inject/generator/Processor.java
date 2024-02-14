@@ -8,6 +8,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
@@ -35,7 +36,8 @@ import static io.avaje.inject.generator.ProcessingContext.*;
   Constants.TESTSCOPE,
   Constants.CONTROLLER,
   ImportPrism.PRISM_TYPE,
-  AspectImportPrism.PRISM_TYPE
+  AspectImportPrism.PRISM_TYPE,
+  QualifierPrism.PRISM_TYPE
 })
 public final class Processor extends AbstractProcessor {
 
@@ -103,6 +105,11 @@ public final class Processor extends AbstractProcessor {
 
     readBeans(delayedElements());
     addImportedAspects(importedAspects(roundEnv));
+    maybeElements(roundEnv, QualifierPrism.PRISM_TYPE).stream()
+      .flatMap(Set::stream)
+      .flatMap(e -> ElementFilter.methodsIn(e.getEnclosedElements()).stream())
+      .forEach(this::validateQualifier);
+
     maybeElements(roundEnv, ScopePrism.PRISM_TYPE).ifPresent(this::readScopes);
     maybeElements(roundEnv, FactoryPrism.PRISM_TYPE).ifPresent(this::readFactories);
 
@@ -126,6 +133,19 @@ public final class Processor extends AbstractProcessor {
       ProcessingContext.clear();
     }
     return false;
+  }
+
+  private void validateQualifier(ExecutableElement method) {
+    var type = APContext.asTypeElement(method.getReturnType());
+    if (type == null || type.getKind() != ElementKind.ANNOTATION_TYPE) {
+      return;
+    }
+
+    var enclosedMethods = ElementFilter.methodsIn(type.getEnclosedElements());
+    if (enclosedMethods.size() > 1) {
+      APContext.logError(method, "Qualifier annotation members can only have a single attribute");
+    }
+    enclosedMethods.forEach(this::validateQualifier);
   }
 
   // Optional because these annotations are not guaranteed to exist

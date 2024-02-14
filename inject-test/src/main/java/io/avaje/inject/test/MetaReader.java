@@ -160,9 +160,13 @@ final class MetaReader {
       return named.value().toLowerCase();
     }
     for (Annotation annotation : field.getAnnotations()) {
-      for (Annotation metaAnnotation : annotation.annotationType().getAnnotations()) {
+      final var annotationType = annotation.annotationType();
+      for (Annotation metaAnnotation : annotationType.getAnnotations()) {
         if (metaAnnotation.annotationType().equals(Qualifier.class)) {
-          return annotation.annotationType().getSimpleName().toLowerCase();
+          return AnnotationReader.simplifyAnnotation(annotation.toString())
+            .replaceFirst(annotationType.getCanonicalName(), annotationType.getSimpleName())
+            .replace("()", "").substring(1)
+            .toLowerCase();
         }
       }
     }
