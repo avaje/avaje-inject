@@ -1,4 +1,4 @@
-package io.avaje.inject.generator.models.valid.assist;
+package org.example.myapp.assist.droid;
 
 import jakarta.inject.Singleton;
 
