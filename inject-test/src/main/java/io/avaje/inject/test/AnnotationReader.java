@@ -6,7 +6,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 final class AnnotationReader {
-  private AnnotationReader() {}
+  private AnnotationReader() {
+  }
 
   private static final Pattern ANNOTATION_TYPE_PATTERN = Pattern.compile("@([\\w.]+)\\.");
 
@@ -14,40 +15,39 @@ final class AnnotationReader {
 
   private static final Pattern VALUE_ATTRIBUTE_PATTERN = Pattern.compile("(\\w+)=([\\w.]+)");
 
-  public static String simplifyAnnotation(String input) {
+  static String simplifyAnnotation(String input) {
     String result = ANNOTATION_TYPE_PATTERN$.matcher(input).replaceAll("@");
-
     result = ANNOTATION_TYPE_PATTERN.matcher(result).replaceAll("@");
 
     Matcher valueAttributeMatcher = VALUE_ATTRIBUTE_PATTERN.matcher(result);
 
     // Replace package names in any attribute value with only the class name
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     while (valueAttributeMatcher.find()) {
       valueAttributeMatcher.appendReplacement(
-          sb, valueAttributeMatcher.group(1) + "=" + shortType(valueAttributeMatcher.group(2)));
+        sb, valueAttributeMatcher.group(1) + "=" + shortType(valueAttributeMatcher.group(2)));
     }
     valueAttributeMatcher.appendTail(sb);
     return rearrangeAnnotations(sb.toString());
   }
 
-  public static String shortType(String fqn) {
+  static String shortType(String fqn) {
     final int dotIndex = fqn.lastIndexOf('.');
     final int $index = fqn.lastIndexOf('$');
 
     if (dotIndex == -1 && $index == -1) {
       return fqn;
     } else if ($index != -1) {
-
       return fqn.substring($index + 1);
     }
     return fqn.substring(dotIndex + 1);
   }
 
-  public static String rearrangeAnnotations(String input) {
+  static String rearrangeAnnotations(String input) {
     final var indexOfParanthesis = input.indexOf('(');
-    if (indexOfParanthesis == -1) return input;
-
+    if (indexOfParanthesis == -1) {
+      return input;
+    }
     // Extracting annotation content
     var annotationContent = input.substring(indexOfParanthesis + 1, input.lastIndexOf(')'));
 
@@ -67,9 +67,7 @@ final class AnnotationReader {
     }
     // Removing the trailing comma and space
     sortedOutput.setLength(sortedOutput.length() - 2);
-
     sortedOutput.append(")");
-
     return sortedOutput.toString();
   }
 }

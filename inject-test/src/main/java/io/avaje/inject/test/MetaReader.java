@@ -137,9 +137,9 @@ final class MetaReader {
       for (Annotation metaAnnotation : annotationType.getAnnotations()) {
         if (metaAnnotation.annotationType().equals(Qualifier.class)) {
           return AnnotationReader.simplifyAnnotation(annotation.toString())
-              .replaceFirst(annotationType.getCanonicalName(), annotationType.getSimpleName())
-              .replace("()", "").substring(1)
-              .toLowerCase();
+            .replaceFirst(annotationType.getCanonicalName(), annotationType.getSimpleName())
+            .replace("()", "").substring(1)
+            .toLowerCase();
         }
       }
     }

@@ -1,13 +1,10 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.APContext.logWarn;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+
+import static io.avaje.inject.generator.APContext.logWarn;
 
 /**
  * Read the annotations on the type.
@@ -15,16 +12,12 @@ import javax.lang.model.type.DeclaredType;
 final class TypeAnnotationReader {
 
   private final TypeElement beanType;
-  private final List<String> annotationTypes = new ArrayList<>();
   private String qualifierName;
 
   TypeAnnotationReader(TypeElement beanType) {
     this.beanType = beanType;
   }
 
-  List<String> annotationTypes() {
-    return annotationTypes;
-  }
 
   boolean hasQualifierName() {
     return qualifierName != null;
@@ -40,18 +33,14 @@ final class TypeAnnotationReader {
       String annType = annotationType.toString();
 
       if (QualifierPrism.isPresent(annotationType.asElement())) {
-
         var shortName = Util.shortName(annotationType.toString());
-        qualifierName =
-            AnnotationCopier.getSimpleAnnotationString(annotationMirror)
-                .replaceFirst(annotationType.toString(), shortName)
-                .replace("\"", "\\\"")
-                .toLowerCase();
+        qualifierName = AnnotationCopier.toSimpleAnnotationString(annotationMirror)
+          .replaceFirst(annotationType.toString(), shortName)
+          .replace("\"", "\\\"")
+          .toLowerCase();
 
       } else if (annType.indexOf('.') == -1) {
         logWarn("skip when no package on annotation " + annType);
-      } else if (IncludeAnnotations.include(annType)) {
-        annotationTypes.add(annType);
       }
     }
   }

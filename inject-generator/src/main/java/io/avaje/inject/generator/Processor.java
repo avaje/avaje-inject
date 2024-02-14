@@ -106,9 +106,9 @@ public final class Processor extends AbstractProcessor {
     readBeans(delayedElements());
     addImportedAspects(importedAspects(roundEnv));
     maybeElements(roundEnv, QualifierPrism.PRISM_TYPE).stream()
-        .flatMap(Set::stream)
-        .flatMap(e -> ElementFilter.methodsIn(e.getEnclosedElements()).stream())
-        .forEach(this::validateQualifier);
+      .flatMap(Set::stream)
+      .flatMap(e -> ElementFilter.methodsIn(e.getEnclosedElements()).stream())
+      .forEach(this::validateQualifier);
 
     maybeElements(roundEnv, ScopePrism.PRISM_TYPE).ifPresent(this::readScopes);
     maybeElements(roundEnv, FactoryPrism.PRISM_TYPE).ifPresent(this::readFactories);
@@ -137,21 +137,18 @@ public final class Processor extends AbstractProcessor {
 
   private void validateQualifier(ExecutableElement method) {
     var type = APContext.asTypeElement(method.getReturnType());
-
     if (type == null || type.getKind() != ElementKind.ANNOTATION_TYPE) {
       return;
     }
 
     var enclosedMethods = ElementFilter.methodsIn(type.getEnclosedElements());
-
     if (enclosedMethods.size() > 1) {
       APContext.logError(method, "Qualifier annotation members can only have a single attribute");
     }
-
-    enclosedMethods.stream().forEach(this::validateQualifier);
+    enclosedMethods.forEach(this::validateQualifier);
   }
 
-// Optional because these annotations are not guaranteed to exist
+  // Optional because these annotations are not guaranteed to exist
   private static Optional<? extends Set<? extends Element>> maybeElements(RoundEnvironment round, String name) {
     return Optional.ofNullable(typeElement(name)).map(round::getElementsAnnotatedWith);
   }

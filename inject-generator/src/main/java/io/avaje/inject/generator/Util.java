@@ -1,14 +1,12 @@
 package io.avaje.inject.generator;
 
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 final class Util {
   static final String ASPECT_PROVIDER_PREFIX = "io.avaje.inject.aop.AspectProvider<";
@@ -76,6 +74,7 @@ final class Util {
     pos = cls.lastIndexOf('.', pos - 1);
     return (pos == -1) ? "" : cls.substring(0, pos);
   }
+
   static String unwrapProvider(String maybeProvider) {
     if (isProvider(maybeProvider)) {
       return extractProviderType(maybeProvider);
@@ -118,8 +117,8 @@ final class Util {
       for (final String part : fullType.split("\\.")) {
         char firstChar = part.charAt(0);
         if (foundClass
-            || Character.isUpperCase(firstChar)
-            || (!Character.isAlphabetic(firstChar) && Character.isJavaIdentifierStart(firstChar))) {
+          || Character.isUpperCase(firstChar)
+          || (!Character.isAlphabetic(firstChar) && Character.isJavaIdentifierStart(firstChar))) {
           foundClass = true;
           result += (result.isEmpty() ? "" : ".") + part;
         }
@@ -205,7 +204,9 @@ final class Util {
     return UtilType.of(rawType.toString(), rawType);
   }
 
-  /** Trim off generic wildcard from the raw type if present. */
+  /**
+   * Trim off generic wildcard from the raw type if present.
+   */
   static String trimWildcard(String rawType) {
     if (rawType.endsWith("<?>")) {
       return rawType.substring(0, rawType.length() - 3);
@@ -214,7 +215,9 @@ final class Util {
     }
   }
 
-  /** Trim off generic type parameters. */
+  /**
+   * Trim off generic type parameters.
+   */
   static String trimGenericParams(String rawType) {
     int start = rawType.indexOf('<');
     // no package for any generic parameter types
@@ -244,7 +247,9 @@ final class Util {
     return Constants.ASPECT_PROVIDER + "<" + aspect + ">";
   }
 
-  /** Return the common parent package. */
+  /**
+   * Return the common parent package.
+   */
   static String commonParent(String currentTop, String aPackage) {
     if (aPackage == null) return currentTop;
     if (currentTop == null) return aPackage;
@@ -265,8 +270,10 @@ final class Util {
     return currentTop;
   }
 
-  /** Return the name via <code>@Named</code> or a Qualifier annotation. */
-  public static String getNamed(Element p) {
+  /**
+   * Return the name via <code>@Named</code> or a Qualifier annotation.
+   */
+  static String getNamed(Element p) {
     final NamedPrism named = NamedPrism.getInstanceOn(p);
     if (named != null) {
       return named.value().toLowerCase();
@@ -277,17 +284,19 @@ final class Util {
       if (hasQualifier) {
         var shortName = Util.shortName(annotationType.toString());
 
-        return AnnotationCopier.getSimpleAnnotationString(annotationMirror)
-            .replaceFirst(annotationType.toString(), shortName)
-            .replace("\"", "\\\"")
-            .toLowerCase();
+        return AnnotationCopier.toSimpleAnnotationString(annotationMirror)
+          .replaceFirst(annotationType.toString(), shortName)
+          .replace("\"", "\\\"")
+          .toLowerCase();
       }
     }
     return null;
   }
 
-  /** Return true if the element has a Nullable annotation. */
-  public static boolean isNullable(Element p) {
+  /**
+   * Return true if the element has a Nullable annotation.
+   */
+  static boolean isNullable(Element p) {
     for (final AnnotationMirror mirror : p.getAnnotationMirrors()) {
       if (NULLABLE.equals(shortName(mirror.getAnnotationType().toString()))) {
         return true;
@@ -296,7 +305,7 @@ final class Util {
     return false;
   }
 
-  public static Optional<DeclaredType> getNullableAnnotation(Element p) {
+  static Optional<DeclaredType> getNullableAnnotation(Element p) {
     for (final AnnotationMirror mirror : p.getAnnotationMirrors()) {
       if (NULLABLE.equals(shortName(mirror.getAnnotationType().toString()))) {
         return Optional.of(mirror.getAnnotationType());
@@ -305,21 +314,20 @@ final class Util {
     return Optional.empty();
   }
 
-  public static String addForInterface(String interfaceType) {
+  static String addForInterface(String interfaceType) {
     if (interfaceType.contains("<")) {
       return null;
     }
     return shortName(interfaceType);
   }
 
-  public static String trimMethod(String method) {
+  static String trimMethod(String method) {
     return shortMethod(method).replace('.', '_').replace(Constants.DI, "");
   }
 
   private static final Pattern ANNOTATION_TYPE_PATTERN = Pattern.compile("@([\\w.]+)\\.");
 
-  public static String trimAnnotationString(String input) {
-
+  static String trimAnnotationString(String input) {
     return ANNOTATION_TYPE_PATTERN.matcher(input).replaceAll("@");
   }
 }
