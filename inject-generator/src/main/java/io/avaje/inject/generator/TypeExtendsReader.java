@@ -113,14 +113,17 @@ final class TypeExtendsReader {
     return providesAspect;
   }
 
-  UType autoProvides() {
+  List<UType> autoProvides() {
     if (!autoProvide || !providesAspect.isEmpty()) {
-      return null;
+      return List.of();
     }
-    if (baseTypeIsInterface || interfaceTypes.isEmpty()) {
-      return Util.unwrapProvider(baseType.asType());
+    if (baseTypeIsInterface) {
+      return List.of(Util.unwrapProvider(baseType.asType()));
     }
-    return interfaceTypes.get(0);
+    var autoProvides = new ArrayList<>(interfaceTypes);
+    autoProvides.addAll(extendsTypes);
+    autoProvides.add(Util.unwrapProvider(baseType.asType()));
+    return autoProvides;
   }
 
   List<UType> provides() {
