@@ -7,7 +7,6 @@ import static io.avaje.inject.generator.ProcessingContext.createMetaInfWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -104,9 +103,9 @@ final class SimpleModuleWriter {
       if (aspect != null && !aspect.isEmpty()) {
         autoProvidesAspects.add(aspect);
       }
-      final var forExternal = metaData.autoProvides();
+      final String forExternal = metaData.autoProvides();
       if (forExternal != null && !forExternal.isEmpty()) {
-        autoProvides.addAll(forExternal);
+        autoProvides.add(forExternal);
       }
     }
     if (!autoProvides.isEmpty()) {

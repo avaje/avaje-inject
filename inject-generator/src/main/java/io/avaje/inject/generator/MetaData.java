@@ -33,7 +33,7 @@ final class MetaData {
   /**
    * Type deemed to be candidate for providing to another external module.
    */
-  private List<String> autoProvides;
+  private String autoProvides;
 
   private boolean generateProxy;
   private boolean usesExternalDependency;
@@ -138,7 +138,7 @@ final class MetaData {
     return dependsOn;
   }
 
-  List<String> autoProvides() {
+  String autoProvides() {
     return autoProvides;
   }
 
@@ -219,7 +219,7 @@ final class MetaData {
       appendProvides(append, "dependsOn", dependsOn.stream().map(Dependency::dependsOn).collect(Collectors.toList()));
     }
     if (hasAutoProvides) {
-      appendProvides(append, "autoProvides", autoProvides);
+      append.append(",").eol().append("      autoProvides = \"").append(autoProvides).append("\"");
     }
     append.append(")").append(NEWLINE);
     append.append("  private void build_").append(buildName()).append("() {").append(NEWLINE);
@@ -269,7 +269,7 @@ final class MetaData {
     this.method = method;
   }
 
-  void setAutoProvides(List<String> autoProvides) {
+  void setAutoProvides(String autoProvides) {
     this.autoProvides = autoProvides;
   }
 

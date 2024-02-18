@@ -1,8 +1,11 @@
 package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.logWarn;
+import static io.avaje.inject.generator.APContext.typeElement;
 import static io.avaje.inject.generator.APContext.types;
 import static io.avaje.inject.generator.ProcessingContext.asElement;
+import static java.util.stream.Collectors.toList;
+
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +49,6 @@ final class TypeExtendsReader {
     this.baseType = baseType;
     this.extendsInjection = new TypeExtendsInjection(baseType, factory, importTypes);
     this.beanSimpleName = baseType.getSimpleName().toString();
-
     this.baseTypeIsInterface = baseType.getKind() == ElementKind.INTERFACE;
     this.publicAccess = baseType.getModifiers().contains(Modifier.PUBLIC);
     this.autoProvide = autoProvide();
@@ -114,17 +116,14 @@ final class TypeExtendsReader {
     return providesAspect;
   }
 
-  List<UType> autoProvides() {
+  UType autoProvides() {
     if (!autoProvide || !providesAspect.isEmpty()) {
-      return List.of();
+      return null;
     }
-    if (baseTypeIsInterface) {
-      return List.of(Util.unwrapProvider(baseType.asType()));
+    if (baseTypeIsInterface || interfaceTypes.isEmpty()) {
+      return Util.unwrapProvider(baseType.asType());
     }
-    var autoProvides = new ArrayList<>(interfaceTypes);
-    autoProvides.addAll(extendsTypes);
-    autoProvides.add(Util.unwrapProvider(baseType.asType()));
-    return autoProvides;
+    return interfaceTypes.get(0);
   }
 
   List<UType> provides() {
