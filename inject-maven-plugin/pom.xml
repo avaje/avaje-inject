@@ -29,7 +29,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-inject</artifactId>
-      <version>9.11-RC3</version>
+      <version>9.11-RC5</version>
     </dependency>
   </dependencies>
 
