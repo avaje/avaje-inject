@@ -59,7 +59,7 @@ public abstract class TestBeanScope {
    */
   @Nullable
   public static BeanScope initialise() {
-    return TSBuild.initialise(true).baseScope();
+    return GlobalInitialise.initialise(true).baseBeans();
   }
 
   /**
@@ -73,7 +73,7 @@ public abstract class TestBeanScope {
    */
   @Nullable
   public static BeanScope create(boolean shutdownHook) {
-    return TSBuild.createTestBaseScope(shutdownHook);
+    return GlobalInitialise.createTestBaseScope(shutdownHook);
   }
 
 }

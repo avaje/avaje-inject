@@ -173,17 +173,18 @@ final class MetaReader {
     return null;
   }
 
-  MetaInfo.Scope setFromScope(BeanScope beanScope, Object testInstance, boolean newScope) {
+  TestBeans setFromScope(TestBeans metaScope, Object testInstance) {
     if (testInstance != null) {
-      return setForInstance(beanScope, testInstance, newScope);
+      return setForInstance(metaScope, testInstance);
     } else {
-      return setForStatics(beanScope, newScope);
+      return setForStatics(metaScope);
     }
   }
 
-  private MetaInfo.Scope setForInstance(BeanScope beanScope, Object testInstance, boolean newScope) {
+  private TestBeans setForInstance(TestBeans metaScope, Object testInstance) {
     try {
-      Plugin.Scope pluginScope = instancePlugin ? plugin.createScope(beanScope) : null;
+      Plugin.Scope pluginScope = metaScope.plugin();
+      BeanScope beanScope = metaScope.beanScope();
 
       for (Field field : captors) {
         set(field, captorFor(field), testInstance);
@@ -202,17 +203,17 @@ final class MetaReader {
           target.setFromScope(beanScope, testInstance);
         }
       }
-      return new MetaInfo.Scope(beanScope, pluginScope, newScope);
+      return metaScope;
 
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private MetaInfo.Scope setForStatics(BeanScope beanScope, boolean newScope) {
+  private TestBeans setForStatics(TestBeans metaScope) {
     try {
-      Plugin.Scope pluginScope = staticPlugin ? plugin.createScope(beanScope) : null;
-
+      Plugin.Scope pluginScope = metaScope.plugin();
+      BeanScope beanScope = metaScope.beanScope();
       for (FieldTarget target : staticMocks) {
         target.setFromScope(beanScope, null);
       }
@@ -227,7 +228,7 @@ final class MetaReader {
           target.setFromScope(beanScope, null);
         }
       }
-      return new MetaInfo.Scope(beanScope, pluginScope, newScope);
+      return metaScope;
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e);
     }
