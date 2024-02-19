@@ -12,30 +12,30 @@ import static java.lang.System.Logger.Level.TRACE;
 /**
  * Holds the global BeanScope used for all tests.
  */
-final class GlobalTestScope implements ExtensionContext.Store.CloseableResource {
+final class GlobalTestBeans implements ExtensionContext.Store.CloseableResource {
 
   private static final System.Logger log = AppLog.getLogger("io.avaje.inject");
 
   private final ReentrantLock lock = new ReentrantLock();
   private boolean started;
-  private Pair globalBeanScope;
+  private Beans globalBeans;
 
-  Pair obtain(ExtensionContext context) {
+  Beans obtain(ExtensionContext context) {
     lock.lock();
     try {
       if (!started) {
         initialise(context);
         started = true;
       }
-      return globalBeanScope;
+      return globalBeans;
     } finally {
       lock.unlock();
     }
   }
 
   private void initialise(ExtensionContext context) {
-    globalBeanScope = TSBuild.initialise(false);
-    log.log(TRACE, "register global test BeanScope with beans {0}", globalBeanScope);
+    globalBeans = GlobalInitialise.initialise(false);
+    log.log(TRACE, "register global test BeanScope with beans {0}", globalBeans);
     context.getRoot().getStore(ExtensionContext.Namespace.GLOBAL).put(InjectExtension.class.getCanonicalName(), this);
   }
 
@@ -46,9 +46,9 @@ final class GlobalTestScope implements ExtensionContext.Store.CloseableResource 
   public void close() {
     lock.lock();
     try {
-      if (globalBeanScope != null) {
+      if (globalBeans != null) {
         log.log(DEBUG, "Closing global test BeanScope");
-        globalBeanScope.close();
+        globalBeans.close();
       }
     } finally {
       lock.unlock();
@@ -56,54 +56,63 @@ final class GlobalTestScope implements ExtensionContext.Store.CloseableResource 
   }
 
   /**
-   * The pair of BeanScopes that can be used for InjectTests.
+   * The BeanScopes and plugin scope that can be used for InjectTests.
    */
-  static final class Pair {
+  static final class Beans {
+
+    private final Plugin.Scope plugin;
 
     /**
      * Entire application wired (with testScope as parent replacing those beans).
      * This can be used when a test only injects beans and there are no mocks,
      * spies, or setup methods.
      */
-    private final BeanScope allScope;
+    private final BeanScope allBeans;
 
     /**
      * The TestScope beans, used as the parent scope when a new BeanScope
      * needs to be wired for a test (due to mocks, spies or setup methods).
      */
-    private final BeanScope baseScope;
+    private final BeanScope baseBeans;
 
-    Pair(BeanScope allScope, BeanScope baseScope) {
-      this.allScope = allScope;
-      this.baseScope = baseScope;
+    Beans(Plugin.Scope plugin, BeanScope allBeans, BeanScope baseBeans) {
+      this.plugin = plugin;
+      this.allBeans = allBeans;
+      this.baseBeans = baseBeans;
     }
 
     void close() {
-      if (allScope != null) {
-        allScope.close();
+      if (plugin != null) {
+        plugin.close();
       }
-      if (baseScope != null) {
-        baseScope.close();
+      if (allBeans != null) {
+        allBeans.close();
+      }
+      if (baseBeans != null) {
+        baseBeans.close();
       }
     }
 
-    BeanScope allScope() {
-      return allScope;
+    Plugin.Scope allPlugin() {
+      return plugin;
     }
 
-    BeanScope baseScope() {
-      return baseScope;
+    BeanScope allBeans() {
+      return allBeans;
     }
 
-    Pair newPair(BeanScope newAllScope) {
-      return new Pair(newAllScope, baseScope);
+    BeanScope baseBeans() {
+      return baseBeans;
+    }
+
+    Beans withBeans(TestBeans otherBeans) {
+      return new Beans(otherBeans.plugin(), otherBeans.beanScope(), baseBeans);
     }
 
     @Override
     public String toString() {
-      return "All[" + allScope + "] Test[" + baseScope + "]";
+      return "All[" + allBeans + "] Test[" + baseBeans + "]";
     }
-
   }
 
 }
