@@ -276,5 +276,4 @@ public interface Builder {
    */
   BeanScope build(boolean withShutdownHook, long start);
 
-
 }
