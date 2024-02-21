@@ -5,13 +5,9 @@ import jakarta.inject.Singleton;
 
 @Singleton
 public class Observer {
-  private boolean invoked = false;
+  boolean invoked = false;
 
   void observe(@Observes CustomEvent e) {
     invoked = true;
-  }
-
-  public boolean wasInvoked() {
-    return invoked;
   }
 }

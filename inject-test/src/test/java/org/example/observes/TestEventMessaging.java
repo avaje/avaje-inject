@@ -2,6 +2,7 @@ package org.example.observes;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.avaje.inject.event.Event;
@@ -16,15 +17,22 @@ public class TestEventMessaging {
   @Inject ObserverInjected observerInjected;
   @Inject Event<CustomEvent> event;
 
+  @BeforeEach
+  void before() {
+    observer.invoked = false;
+    qualifiedObserver.invoked= false;
+    observerInjected.invoked= false;
+  }
+
   @Test
   void test() {
     var message = new CustomEvent("hi");
 
     event.fire(message);
 
-    assertThat(observer.wasInvoked()).isTrue();
-    assertThat(qualifiedObserver.wasInvoked()).isFalse();
-    assertThat(observerInjected.wasInvoked()).isTrue();
+    assertThat(observer.invoked).isTrue();
+    assertThat(qualifiedObserver.invoked).isFalse();
+    assertThat(observerInjected.invoked).isTrue();
   }
 
   @Test
@@ -33,8 +41,8 @@ public class TestEventMessaging {
 
     event.fire(message, "qual");
 
-    assertThat(observer.wasInvoked()).isFalse();
-    assertThat(qualifiedObserver.wasInvoked()).isTrue();
-    assertThat(observerInjected.wasInvoked()).isFalse();
+    assertThat(observer.invoked).isFalse();
+    assertThat(qualifiedObserver.invoked).isTrue();
+    assertThat(observerInjected.invoked).isFalse();
   }
 }
