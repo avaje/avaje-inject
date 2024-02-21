@@ -80,7 +80,7 @@ public interface Module {
    * This method allows code to use reflection to inspect the modules classes
    * before the module is wired. This method is not required for DI wiring.
    */
-  Type[] classes();
+  Class<?>[] classes();
 
   /**
    * Build all the beans.

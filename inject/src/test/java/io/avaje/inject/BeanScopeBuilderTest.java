@@ -218,7 +218,7 @@ class BeanScopeBuilderTest {
     }
 
     @Override
-    public Type[] classes() {
+    public Class<?>[] classes() {
       return new Class[0];
     }
 

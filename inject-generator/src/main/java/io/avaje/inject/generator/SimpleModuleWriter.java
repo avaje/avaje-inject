@@ -128,8 +128,8 @@ final class SimpleModuleWriter {
   private void writeClassesMethod() {
     Set<String> allClasses = distinctPublicClasses();
     writer.append("  @Override").eol();
-    writer.append("  public Type[] classes() {").eol();
-    writer.append("    return new Type[] {").eol();
+    writer.append("  public Class<?>[] classes() {").eol();
+    writer.append("    return new Class<?>[] {").eol();
     for (String rawType : new TreeSet<>(allClasses)) {
       writer.append("      %s.class,", rawType).eol();
     }
