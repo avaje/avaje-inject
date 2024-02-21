@@ -17,6 +17,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 final class MetaReader {
@@ -38,10 +39,50 @@ final class MetaReader {
 
   MetaReader(Class<?> testClass, Plugin plugin) {
     this.plugin = plugin;
-    this.methodFinder = new SetupMethods(testClass);
-    for (Field field : testClass.getDeclaredFields()) {
-      readField(field);
+    final var hierarchy = typeHierarchy(testClass);
+    this.methodFinder = new SetupMethods(hierarchy);
+    for (Class<?> aTestClass : hierarchy) {
+      for (Field field : aTestClass.getDeclaredFields()) {
+        readField(field);
+      }
     }
+  }
+
+  boolean hasMocksOrSpies(Object testInstance) {
+    if (testInstance == null) {
+      return hasStaticMocksOrSpies() || methodFinder.hasStaticMethods();
+    } else {
+      return hasInstanceMocksOrSpies(testInstance) || methodFinder.hasInstanceMethods();
+    }
+  }
+
+  private boolean hasInstanceMocksOrSpies(Object testInstance) {
+    return !mocks.isEmpty() || !spies.isEmpty() || hasInjectMock(injection, testInstance);
+  }
+
+  private boolean hasStaticMocksOrSpies() {
+    return !staticMocks.isEmpty() || !staticSpies.isEmpty() || hasInjectMock(staticInjection, null);
+  }
+
+  private boolean hasInjectMock(List<FieldTarget> fields, Object testInstance) {
+    for (FieldTarget target : fields) {
+      Object existingValue = target.get(testInstance);
+      if (existingValue != null) {
+        // an assigned injection field is a mock
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static LinkedList<Class<?>> typeHierarchy(Class<?> testClass) {
+    var hierarchy = new LinkedList<Class<?>>();
+    var analyzedClass = testClass;
+    while (analyzedClass != null && !analyzedClass.equals(Object.class)) {
+      hierarchy.addFirst(analyzedClass);
+      analyzedClass = analyzedClass.getSuperclass();
+    }
+    return hierarchy;
   }
 
   boolean hasClassInjection() {
@@ -119,26 +160,31 @@ final class MetaReader {
       return named.value().toLowerCase();
     }
     for (Annotation annotation : field.getAnnotations()) {
-      for (Annotation metaAnnotation : annotation.annotationType().getAnnotations()) {
+      final var annotationType = annotation.annotationType();
+      for (Annotation metaAnnotation : annotationType.getAnnotations()) {
         if (metaAnnotation.annotationType().equals(Qualifier.class)) {
-          return annotation.annotationType().getSimpleName().toLowerCase();
+          return AnnotationReader.simplifyAnnotation(annotation.toString())
+            .replaceFirst(annotationType.getCanonicalName(), annotationType.getSimpleName())
+            .replace("()", "").substring(1)
+            .toLowerCase();
         }
       }
     }
     return null;
   }
 
-  MetaInfo.Scope setFromScope(BeanScope beanScope, Object testInstance) {
+  TestBeans setFromScope(TestBeans metaScope, Object testInstance) {
     if (testInstance != null) {
-      return setForInstance(beanScope, testInstance);
+      return setForInstance(metaScope, testInstance);
     } else {
-      return setForStatics(beanScope);
+      return setForStatics(metaScope);
     }
   }
 
-  private MetaInfo.Scope setForInstance(BeanScope beanScope, Object testInstance) {
+  private TestBeans setForInstance(TestBeans metaScope, Object testInstance) {
     try {
-      Plugin.Scope pluginScope = instancePlugin ? plugin.createScope(beanScope) : null;
+      Plugin.Scope pluginScope = metaScope.plugin();
+      BeanScope beanScope = metaScope.beanScope();
 
       for (Field field : captors) {
         set(field, captorFor(field), testInstance);
@@ -157,17 +203,17 @@ final class MetaReader {
           target.setFromScope(beanScope, testInstance);
         }
       }
-      return new MetaInfo.Scope(beanScope, pluginScope);
+      return metaScope;
 
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private MetaInfo.Scope setForStatics(BeanScope beanScope) {
+  private TestBeans setForStatics(TestBeans metaScope) {
     try {
-      Plugin.Scope pluginScope = staticPlugin ? plugin.createScope(beanScope) : null;
-
+      Plugin.Scope pluginScope = metaScope.plugin();
+      BeanScope beanScope = metaScope.beanScope();
       for (FieldTarget target : staticMocks) {
         target.setFromScope(beanScope, null);
       }
@@ -182,7 +228,7 @@ final class MetaReader {
           target.setFromScope(beanScope, null);
         }
       }
-      return new MetaInfo.Scope(beanScope, pluginScope);
+      return metaScope;
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e);
     }

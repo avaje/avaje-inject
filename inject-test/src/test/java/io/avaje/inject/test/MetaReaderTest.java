@@ -35,11 +35,15 @@ class MetaReaderTest {
 
   @Test
   void checkMetaReader_with_plugin() {
-    MetaReader metaReader = new MetaReader(HelloBean.class, new MyPlugin());
+    MyPlugin myPlugin = new MyPlugin();
+    MetaReader metaReader = new MetaReader(HelloBean.class, myPlugin);
     assertThat(metaReader.instancePlugin).isTrue();
 
     HelloBean helloBean = new HelloBean();
-    metaReader.setFromScope(Mockito.mock(BeanScope.class), helloBean);
+    BeanScope beanScope = Mockito.mock(BeanScope.class);
+    MyPlugin.Scope scope = myPlugin.createScope(beanScope);
+    TestBeans beans = new TestBeans(beanScope, scope);
+    metaReader.setFromScope(beans, helloBean);
 
     assertThat(helloBean.client).isNotNull();
   }

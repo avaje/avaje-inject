@@ -139,8 +139,15 @@ final class DBeanMap {
     if (parent == null) {
       return map(type);
     }
-    Map<String, Object> result = parent.map(type);
-    result.putAll(map(type));
+    Map<String, Object> parentMap = parent.map(type);
+    Map<String, Object> localMap = map(type);
+    if (parentMap.isEmpty()) {
+      return localMap;
+    } else if (localMap.isEmpty()) {
+      return parentMap;
+    }
+    Map<String, Object> result = new LinkedHashMap<>(parentMap);
+    result.putAll(localMap);
     return result;
   }
 

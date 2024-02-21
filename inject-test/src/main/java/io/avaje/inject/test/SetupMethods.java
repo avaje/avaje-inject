@@ -14,13 +14,7 @@ final class SetupMethods {
   private final List<Method> staticMethods = new ArrayList<>();
   private final List<Method> instanceMethods = new ArrayList<>();
 
-  SetupMethods(Class<?> testClass) {
-    var analyzedClass = testClass;
-    var hierarchy = new LinkedList<Class<?>>();
-    while (analyzedClass != null && !analyzedClass.equals(Object.class)) {
-      hierarchy.addFirst(analyzedClass);
-      analyzedClass = analyzedClass.getSuperclass();
-    }
+  SetupMethods(LinkedList<Class<?>> hierarchy) {
     for (Class<?> aClass : hierarchy) {
       for (Method method : aClass.getDeclaredMethods()) {
         if (method.getDeclaredAnnotation(Setup.class) != null) {

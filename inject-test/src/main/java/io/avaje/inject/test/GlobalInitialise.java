@@ -18,10 +18,10 @@ import java.util.concurrent.locks.ReentrantLock;
  * Takes into when Service loading does not work such as when using module-path.
  * In that case loads the META-INF services resources and uses reflection.
  */
-final class TSBuild {
+final class GlobalInitialise {
 
   private static final ReentrantLock lock = new ReentrantLock();
-  private static BeanScope SCOPE;
+  private static GlobalTestBeans.Beans SCOPE;
 
   private final boolean shutdownHook;
 
@@ -30,19 +30,18 @@ final class TSBuild {
    * time this method is called.
    */
   @Nullable
-  static BeanScope create(boolean shutdownHook) {
-    return new TSBuild(shutdownHook).build();
+  static BeanScope createTestBaseScope(boolean shutdownHook) {
+    return new GlobalInitialise(shutdownHook).build();
   }
 
   /**
    * Return the test BeanScope only creating once.
    */
-  @Nullable
-  static BeanScope initialise(boolean shutdownHook) {
+  static GlobalTestBeans.Beans initialise(boolean shutdownHook) {
     lock.lock();
     try {
       if (SCOPE == null) {
-        SCOPE = create(shutdownHook);
+        SCOPE = createScopes(shutdownHook);
       }
       return SCOPE;
     } finally {
@@ -50,8 +49,21 @@ final class TSBuild {
     }
   }
 
-  TSBuild(boolean shutdownHook) {
+  GlobalInitialise(boolean shutdownHook) {
     this.shutdownHook = shutdownHook;
+  }
+
+  private static GlobalTestBeans.Beans createScopes(boolean shutdownHook) {
+    BeanScope testBaseScope = createTestBaseScope(shutdownHook);
+    BeanScope testAllScope = createTestAllScope(testBaseScope);
+    Plugin.Scope pluginAll = PluginMgr.scope(testAllScope);
+    return new GlobalTestBeans.Beans(pluginAll, testAllScope, testBaseScope);
+  }
+
+  private static BeanScope createTestAllScope(BeanScope testBaseScope) {
+      return BeanScope.builder()
+        .parent(testBaseScope, false)
+        .build();
   }
 
   @Nullable

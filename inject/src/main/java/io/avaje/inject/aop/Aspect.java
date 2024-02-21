@@ -1,6 +1,10 @@
 package io.avaje.inject.aop;
 
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.*;
+
+import io.avaje.inject.aop.Aspect.Import.List;
 
 /**
  * Meta annotation used to define an Aspect.
@@ -9,8 +13,8 @@ import java.lang.annotation.*;
  * associated type that implements {@link AspectProvider} will be used as the target class. The
  * aspect provider should be a {@code @Singleton} bean registered with <em>avaje-inject</em>.
  */
-@Target(ElementType.ANNOTATION_TYPE)
-@Retention(RetentionPolicy.RUNTIME)
+@Target(ANNOTATION_TYPE)
+@Retention(RUNTIME)
 public @interface Aspect {
 
   /**
@@ -33,8 +37,9 @@ public @interface Aspect {
   /**
    * Marks an External Annotation as being used for aspects
    */
-  @Target({ElementType.PACKAGE, ElementType.TYPE})
-  @Retention(RetentionPolicy.SOURCE)
+  @Retention(SOURCE)
+  @Repeatable(List.class)
+  @Target({PACKAGE, TYPE, MODULE})
   @interface Import {
 
     /**
@@ -48,5 +53,12 @@ public @interface Aspect {
      * @see Aspect#ordering()
      */
     int ordering() default 1000;
+
+    @Retention(SOURCE)
+    @Target({TYPE, PACKAGE, MODULE})
+    @interface List {
+
+      Import[] value();
+    }
   }
 }

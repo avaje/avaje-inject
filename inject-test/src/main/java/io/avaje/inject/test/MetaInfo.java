@@ -1,9 +1,9 @@
 package io.avaje.inject.test;
 
-import java.util.Optional;
-
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.BeanScopeBuilder;
+
+import java.util.Optional;
 
 /**
  * Wraps the underlying metadata (fields with annotations @Mock, @Spy, @Inject, @Captor).
@@ -27,64 +27,51 @@ final class MetaInfo {
   /**
    * Build for static fields class level scope.
    */
-  Scope buildForClass(BeanScope globalTestScope) {
+  TestBeans buildForClass(GlobalTestBeans.Beans globalTestScope) {
     return buildSet(globalTestScope, null);
   }
 
   /**
    * Build test instance per test scope.
    */
-  Scope buildForInstance(BeanScope globalTestScope, Object testInstance) {
+  TestBeans buildForInstance(GlobalTestBeans.Beans globalTestScope, Object testInstance) {
     return buildSet(globalTestScope, testInstance);
   }
 
-  private Scope buildSet(BeanScope parent, Object testInstance) {
-    final BeanScopeBuilder builder = BeanScope.builder();
-    if (parent != null) {
-      builder.parent(parent, false);
-    }
-
-    //set wiring profile
-    Optional.ofNullable(testInstance)
-        .map(Object::getClass)
-        .map(c -> c.getAnnotation(InjectTest.class))
-        .map(InjectTest::profiles)
-        .ifPresent(builder::profiles);
-
-    // register mocks and spies local to this test
-    reader.build(builder, testInstance);
-
-    // wire with local mocks, spies, and globalTestScope
-    final BeanScope beanScope = builder.build();
-
+  private TestBeans buildSet(GlobalTestBeans.Beans parent, Object testInstance) {
+    var testBeans = buildTestBeans(parent, testInstance);
     // set inject, spy, mock fields from beanScope
-    return reader.setFromScope(beanScope, testInstance);
+    return reader.setFromScope(testBeans, testInstance);
   }
 
-  /**
-   * Wraps both BeanScope and Plugin.Scope for either EACH or ALL
-   * (aka instance or class level).
-   */
-  static class Scope implements AutoCloseable {
+  private TestBeans buildTestBeans(GlobalTestBeans.Beans parent, Object testInstance) {
+    // wiring profiles
+    String[] profiles = Optional.ofNullable(testInstance)
+      .map(Object::getClass)
+      .map(c -> c.getAnnotation(InjectTest.class))
+      .map(InjectTest::profiles)
+      .orElse(new String[0]);
 
-    private final BeanScope beanScope;
-    private final Plugin.Scope pluginScope;
-
-    Scope(BeanScope beanScope, Plugin.Scope pluginScope) {
-      this.beanScope = beanScope;
-      this.pluginScope = pluginScope;
-    }
-
-    BeanScope beanScope() {
-      return beanScope;
-    }
-
-    @Override
-    public void close() {
-      beanScope.close();
-      if (pluginScope != null) {
-        pluginScope.close();
+    if (profiles.length > 0 || reader.hasMocksOrSpies(testInstance)) {
+      // need to build a BeanScope for this using baseBeans() as the parent
+      final BeanScopeBuilder builder = BeanScope.builder();
+      if (parent != null) {
+        builder.parent(parent.baseBeans(), false);
+        if (profiles.length > 0) {
+          builder.profiles(profiles);
+        }
       }
+      // register mocks and spies local to this test
+      reader.build(builder, testInstance);
+      // wire with local mocks, spies, and TestScope beans
+      var newBeanScope = builder.build();
+      var newPlugin = PluginMgr.scope(newBeanScope);
+      return new TestBeans(newBeanScope, newPlugin);
+
+    } else {
+      // just use the existing beans and plugin from parent
+      return new TestBeans(parent);
     }
   }
+
 }

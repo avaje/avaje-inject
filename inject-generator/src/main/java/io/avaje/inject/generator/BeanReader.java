@@ -185,7 +185,7 @@ final class BeanReader {
     return typeReader.provides();
   }
 
-  String autoProvides() {
+  List<String> autoProvides() {
     return typeReader.autoProvides();
   }
 

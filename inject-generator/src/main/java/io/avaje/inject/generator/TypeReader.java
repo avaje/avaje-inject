@@ -1,10 +1,8 @@
 package io.avaje.inject.generator;
 
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
@@ -44,8 +42,10 @@ final class TypeReader {
     return extendsReader.provides().stream().map(UType::full).collect(toList());
   }
 
-  String autoProvides() {
-    return Optional.ofNullable(extendsReader.autoProvides()).map(UType::full).orElse(null);
+  List<String> autoProvides() {
+    return extendsReader.autoProvides().stream()
+        .map(UType::full)
+        .collect(toList());
   }
 
   String providesAspect() {

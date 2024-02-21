@@ -1,7 +1,6 @@
 package io.avaje.inject.test;
 
 import io.avaje.applog.AppLog;
-import io.avaje.inject.BeanScope;
 import org.junit.jupiter.api.extension.*;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 
@@ -19,18 +18,18 @@ public final class InjectExtension implements BeforeAllCallback, AfterAllCallbac
   private static final Namespace INJECT_NS = Namespace.create("io.avaje.inject.InjectTest");
   private static final String BEAN_SCOPE = "BEAN_SCOPE";
   private static final String META = "META";
-  private static final GlobalTestScope GLOBAL = new GlobalTestScope();
+  private static final GlobalTestBeans GLOBAL = new GlobalTestBeans();
 
-  private BeanScope globalBeanScope;
+  private GlobalTestBeans.Beans globalTestBeans;
 
   @Override
   public void beforeAll(ExtensionContext context) {
-    globalBeanScope = GLOBAL.obtain(context);
+    globalTestBeans = GLOBAL.obtain(context);
 
     final MetaInfo metaInfo = createMetaInfo(context);
     putMetaInfo(context, metaInfo);
     if (metaInfo.hasStaticInjection()) {
-      putClassScope(context, metaInfo.buildForClass(globalBeanScope));
+      putClassScope(context, metaInfo.buildForClass(globalTestBeans));
     }
   }
 
@@ -44,15 +43,15 @@ public final class InjectExtension implements BeforeAllCallback, AfterAllCallbac
     return (MetaInfo) context.getStore(INJECT_NS).get(META + testClass);
   }
 
-  private void putClassScope(ExtensionContext context, MetaInfo.Scope testClassBeanScope) {
+  private void putClassScope(ExtensionContext context, TestBeans testClassBeanScope) {
     Class<?> testClass = context.getRequiredTestClass();
     context.getStore(INJECT_NS).put(BEAN_SCOPE + testClass, testClassBeanScope);
   }
 
-  private BeanScope getClassScope(ExtensionContext context) {
+  private GlobalTestBeans.Beans getClassScope(ExtensionContext context, GlobalTestBeans.Beans globalTestBeans) {
     Class<?> testClass = context.getRequiredTestClass();
-    MetaInfo.Scope pair = (MetaInfo.Scope) context.getStore(INJECT_NS).get(BEAN_SCOPE + testClass);
-    return pair.beanScope();
+    TestBeans testBeans =  (TestBeans) context.getStore(INJECT_NS).get(BEAN_SCOPE + testClass);
+    return globalTestBeans.withBeans(testBeans);
   }
 
   /**
@@ -62,15 +61,13 @@ public final class InjectExtension implements BeforeAllCallback, AfterAllCallbac
   public void beforeEach(final ExtensionContext context) {
     final MetaInfo metaInfo = getMetaInfo(context);
     if (metaInfo.hasInstanceInjection()) {
-
-      // if (static fields) then (class scope) else (globalTestScope)
-      final BeanScope parent = metaInfo.hasStaticInjection() ? getClassScope(context) : globalBeanScope;
-
-      AutoCloseable beanScope = metaInfo.buildForInstance(parent, context.getRequiredTestInstance());
+      // if (static fields) then (class scope) else (global scope)
+      final GlobalTestBeans.Beans parentBeans = metaInfo.hasStaticInjection() ? getClassScope(context, globalTestBeans) : globalTestBeans;
+      AutoCloseable metaScope = metaInfo.buildForInstance(parentBeans, context.getRequiredTestInstance());
 
       // put method level test scope
       Method testMethod = context.getRequiredTestMethod();
-      context.getStore(INJECT_NS).put(BEAN_SCOPE + testMethod, beanScope);
+      context.getStore(INJECT_NS).put(BEAN_SCOPE + testMethod, metaScope);
     }
   }
 
@@ -110,7 +107,7 @@ public final class InjectExtension implements BeforeAllCallback, AfterAllCallbac
    * Return the MetaInfo.
    */
   private MetaInfo createMetaInfo(ExtensionContext context) {
-    return new MetaInfo(context.getRequiredTestClass(), PluginInitialise.plugin());
+    return new MetaInfo(context.getRequiredTestClass(), PluginMgr.plugin());
   }
 
 }
