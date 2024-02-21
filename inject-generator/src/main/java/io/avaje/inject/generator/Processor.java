@@ -37,7 +37,7 @@ import static io.avaje.inject.generator.ProcessingContext.*;
   Constants.CONTROLLER,
   ImportPrism.PRISM_TYPE,
   AspectImportPrism.PRISM_TYPE,
-  ApplicationEventPrism.PRISM_TYPE
+  ApplicationEventPrism.PRISM_TYPE,
   QualifierPrism.PRISM_TYPE
 })
 public final class Processor extends AbstractProcessor {
