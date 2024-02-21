@@ -84,7 +84,7 @@ class CustomScopeTest {
 
       final CustomBean customBean = beanScope.get(CustomBean.class);
 
-      final Optional<BeanEntry> customBeanEntry = all.stream().skip(1)
+      final Optional<BeanEntry> customBeanEntry = all.stream()
         .filter(beanEntry -> beanEntry.hasKey(CustomBean.class))
         .findFirst();
 
