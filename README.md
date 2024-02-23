@@ -26,19 +26,6 @@ APT-based dependency injection for server-side developers - https://avaje.io/inj
 </dependency>
 ```
 
-**JDK 23+**
-
-In JDK 23+, annotation processors are disabled by default, you will need to add a flag in maven to re-enable the processor.
-```xml
-<plugin>
-  <groupId>org.apache.maven.plugins</groupId>
-  <artifactId>maven-compiler-plugin</artifactId>
-  <configuration>
-    <compilerArgument>-proc:full</compilerArgument>
-  </configuration>
-</plugin>
-```
-
 #### 3. Create a Bean Class annotated with @Singleton
 ```java
 @Singleton
