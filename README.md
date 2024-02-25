@@ -72,62 +72,6 @@ module org.example {
 }
 ```
 
-## Similar to [Dagger](https://google.github.io/dagger/)
-
-- Uses Java annotation processing for dependency injection
-- Generates source code
-- Avoids any use of reflection or classpath scanning (so low overhead and fast startup)
-
-## Differences to Dagger
-
-- Specifically Aimed for server-side development (rather than Android)
-- Provides API to obtain all bean instances that implement an interface
-- Lifecycle methods with `@PostConstruct` and `@PreDestory`
-- Spring-like factory classes with `@Factory` and `@Bean`
-- Conditional Wiring based on an active profile or existing beans/properties
-- Component testing support (Mocking/Spying beans for tests)
-
-## DI Framework comparison
-
-|  Avaje | Dagger | Spring
-| :--- | :---  | :---  |
-| [@Singleton](https://avaje.io/inject/#singleton) | @Singleton | @Component, @Service, @Repository |
-| [Provider&lt;T>](https://avaje.io/inject/#provider) | Provider&lt;T> | FactoryBean&lt;T>
-| [@Inject](https://avaje.io/inject/#inject) | @Inject | @Inject, @Autowired 
-| [@Inject @Nullable](https://avaje.io/inject/#nullable) or [@Inject Optional&lt;T>](https://avaje.io/inject/#optional) | @Inject @Nullable | @Autowired(required=false)
-| [@Qualifier/@Named](https://avaje.io/inject/#qualifiers) | @Qualifier/@Named | @Qualifier
-| [@AssistFactory](https://avaje.io/inject/#assistInject) | @AssistedFactory | - |
-| [@PostConstruct](https://avaje.io/inject/#post-construct) | - | @PostConstruct
-| [@PreDestroy](https://avaje.io/inject/#pre-destroy) | - | @PreDestroy 
-| [@Factory and @Bean](https://avaje.io/inject/#factory) | - | @Configuration and @Bean 
-| [@RequiresBean and @RequiresProperty](https://avaje.io/inject/#conditional) | - | @Conditional 
-| [@Primary](https://avaje.io/inject/#primary) | - | @Primary 
-| [@Secondary](https://avaje.io/inject/#secondary) | - | @Secondary 
-| [@InjectTest](https://avaje.io/inject/#component-testing) | - | @SpringBootTest 
-
-## Generated Code
-
-### DI classes
-
-DI classes will be generated to call the constructors for annotated type/factory methods. Below is the class generated for the `Example` class in the above quickstart.
-
-```java
-@Generated("io.avaje.inject.generator")
-public final class Example$DI  {
-
-  /**
-   * Create and register Example.
-   */
-  public static void build(Builder builder) {
-    if (builder.isAddBeanFor(Example.class)) {
-      var bean = new Example(builder.get(DependencyClass.class,"!d1"), builder.get(DependencyClass2.class,"!d2"));
-      builder.register(bean);
-      // depending on the type of bean, callbacks for field/method injection, and lifecycle support will be generated here as well.
-    }
-  }
-}
-```
-
 ### Generated Wiring Class
 The inject annotation processor determines the dependency wiring order and generates a `Module` class that calls all the generated DI classes.
 
@@ -190,3 +134,35 @@ public final class ExampleModule implements Module {
   }
 }
 ```
+
+## Similar to [Dagger](https://google.github.io/dagger/)
+
+- Uses Java annotation processing for dependency injection
+- Generates source code
+- Avoids any use of reflection or classpath scanning (so low overhead and fast startup)
+
+## Differences to Dagger
+
+- Specifically Aimed for server-side development (rather than Android)
+- Provides API to obtain all bean instances that implement an interface
+- Lifecycle methods with `@PostConstruct` and `@PreDestory`
+- Spring-like factory classes with `@Factory` and `@Bean`
+- Conditional Wiring based on active profiles or existing beans/properties
+
+## DI Framework comparison
+
+|  Avaje | Dagger | Spring
+| :--- | :---  | :---  |
+| [@Singleton](https://avaje.io/inject/#singleton) | @Singleton | @Component, @Service, @Repository |
+| [Provider&lt;T>](https://avaje.io/inject/#provider) | Provider&lt;T> | FactoryBean&lt;T>
+| [@Inject](https://avaje.io/inject/#inject) | @Inject | @Inject, @Autowired 
+| [@Inject @Nullable](https://avaje.io/inject/#nullable) or [@Inject Optional&lt;T>](https://avaje.io/inject/#optional) | @Inject @Nullable | @Autowired(required=false)
+| [@Qualifier/@Named](https://avaje.io/inject/#qualifiers) | @Qualifier/@Named | @Qualifier
+| [@AssistFactory](https://avaje.io/inject/#assistInject) | @AssistedFactory | - |
+| [@PostConstruct](https://avaje.io/inject/#post-construct) | - | @PostConstruct
+| [@PreDestroy](https://avaje.io/inject/#pre-destroy) | - | @PreDestroy 
+| [@Factory and @Bean](https://avaje.io/inject/#factory) | - | @Configuration and @Bean 
+| [@RequiresBean and @RequiresProperty](https://avaje.io/inject/#conditional) | - | @Conditional 
+| [@Primary](https://avaje.io/inject/#primary) | - | @Primary 
+| [@Secondary](https://avaje.io/inject/#secondary) | - | @Secondary 
+| [@InjectTest](https://avaje.io/inject/#component-testing) | - | @SpringBootTest 
