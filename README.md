@@ -80,28 +80,30 @@ module org.example {
 
 ## Differences to Dagger
 
-- Aimed specifically for server-side development (rather than Android)
-- Supports lifecycle methods with `@PostConstruct` and `@PreDestory`
-- Supports `@Factory` and `@Bean`
+- Specifically Aimed for server-side development (rather than Android)
 - Provides API to obtain all bean instances that implement an interface
-- Provides API to obtain all bean instances that have an annotation
-- Integration with server-side web frameworks Javalin, Helidon
+- Lifecycle methods with `@PostConstruct` and `@PreDestory`
+- Spring-like factory classes with `@Factory` and `@Bean`
+- Conditional Wiring based on an active profile or existing beans/properties
+- Component testing support (Mocking/Spying beans for tests)
 
-## Spring DI comparison
+## DI Framework comparison
 
-|  Avaje | Spring
-| :--- | :---  |
-| [@Singleton](https://avaje.io/inject/#singleton) | @Component, @Service, @Repository |
-| [Provider&lt;T>](https://avaje.io/inject/#provider) | FactoryBean&lt;T> |
-| [@Inject](https://avaje.io/inject/#inject) | @Inject, @Autowired |
-| [@Inject @Nullable](https://avaje.io/inject/#nullable) or [@Inject Optional&lt;T>](https://avaje.io/inject/#optional) | @Autowired(required=false) |
-| [@PostConstruct](https://avaje.io/inject/#post-construct) | @PostConstruct|
-| [@PreDestroy](https://avaje.io/inject/#pre-destroy) | @PreDestroy |
-| [@Factory and @Bean](https://avaje.io/inject/#factory) | @Configuration and @Bean |
-| [@RequiresBean and @RequiresProperty](https://avaje.io/inject/#conditional) | @Conditional |
-| [@Primary](https://avaje.io/inject/#primary) | @Primary |
-| [@Secondary](https://avaje.io/inject/#secondary) | @Secondary |
-| [@AssistFactory](https://avaje.io/inject/#assistInject) | - |
+|  Avaje | Dagger | Spring
+| :--- | :---  | :---  |
+| [@Singleton](https://avaje.io/inject/#singleton) | @Singleton | @Component, @Service, @Repository |
+| [Provider&lt;T>](https://avaje.io/inject/#provider) | Provider&lt;T> | FactoryBean&lt;T>
+| [@Inject](https://avaje.io/inject/#inject) | @Inject | @Inject, @Autowired 
+| [@Inject @Nullable](https://avaje.io/inject/#nullable) or [@Inject Optional&lt;T>](https://avaje.io/inject/#optional) | @Inject @Nullable | @Autowired(required=false)
+| [@Qualifier/@Named](https://avaje.io/inject/#qualifiers) | @Qualifier/@Named | @Qualifier
+| [@AssistFactory](https://avaje.io/inject/#assistInject) | @AssistedFactory | - |
+| [@PostConstruct](https://avaje.io/inject/#post-construct) | - | @PostConstruct
+| [@PreDestroy](https://avaje.io/inject/#pre-destroy) | - | @PreDestroy 
+| [@Factory and @Bean](https://avaje.io/inject/#factory) | - | @Configuration and @Bean 
+| [@RequiresBean and @RequiresProperty](https://avaje.io/inject/#conditional) | - | @Conditional 
+| [@Primary](https://avaje.io/inject/#primary) | - | @Primary 
+| [@Secondary](https://avaje.io/inject/#secondary) | - | @Secondary 
+| [@InjectTest](https://avaje.io/inject/#component-testing) | - | @SpringBootTest 
 
 ## Generated Code
 
