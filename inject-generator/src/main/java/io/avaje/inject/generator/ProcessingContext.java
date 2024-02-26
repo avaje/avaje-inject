@@ -19,9 +19,9 @@ final class ProcessingContext {
 
   private static final ThreadLocal<Ctx> CTX = new ThreadLocal<>();
   private static boolean processingOver;
+  private static boolean moduleValidation;
 
-  private ProcessingContext() {
-  }
+  private ProcessingContext() {}
 
   static final class Ctx {
     private final Set<String> uniqueModuleNames = new HashSet<>();
@@ -36,11 +36,14 @@ final class ProcessingContext {
       providedTypes.addAll(moduleFileProvided);
     }
 
-    public Ctx() {
-    }
+    public Ctx() {}
   }
 
-  public static void init(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
+  public static void init(
+      ProcessingEnvironment processingEnv,
+      Set<String> moduleFileProvided,
+      boolean moduleValdation) {
+    moduleValidation = moduleValdation;
     CTX.set(new Ctx(moduleFileProvided));
     APContext.init(processingEnv);
   }
@@ -88,9 +91,9 @@ final class ProcessingContext {
 
   static FileObject createMetaInfWriter(ScopeInfo.Type scopeType) throws IOException {
     final var serviceName =
-      scopeType == ScopeInfo.Type.DEFAULT
-        ? Constants.META_INF_MODULE
-        : Constants.META_INF_TESTMODULE;
+        scopeType == ScopeInfo.Type.DEFAULT
+            ? Constants.META_INF_MODULE
+            : Constants.META_INF_TESTMODULE;
     return createMetaInfWriterFor(serviceName);
   }
 
@@ -142,7 +145,7 @@ final class ProcessingContext {
 
   static void validateModule(String injectFQN) {
     var module = getProjectModuleElement();
-    if (module != null && !CTX.get().validated && !module.isUnnamed()) {
+    if (moduleValidation && module != null && !CTX.get().validated && !module.isUnnamed()) {
 
       CTX.get().validated = true;
 
@@ -166,10 +169,10 @@ final class ProcessingContext {
 
   static Set<TypeElement> delayedElements() {
     var set =
-      CTX.get().delayQueue.stream()
-        .map(t -> t.getQualifiedName().toString())
-        .map(APContext::typeElement)
-        .collect(toSet());
+        CTX.get().delayQueue.stream()
+            .map(t -> t.getQualifiedName().toString())
+            .map(APContext::typeElement)
+            .collect(toSet());
     CTX.get().delayQueue.clear();
     return set;
   }
