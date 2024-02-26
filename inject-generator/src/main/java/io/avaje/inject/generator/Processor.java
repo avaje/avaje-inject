@@ -81,7 +81,12 @@ public final class Processor extends AbstractProcessor {
 
   private static List<String> lines(Filer filer, String relativeName, String replace) {
     try {
-      final String resource = resource(filer, relativeName, replace);
+      final String resource =
+          filer
+              .getResource(StandardLocation.CLASS_OUTPUT, "", relativeName)
+              .toUri()
+              .toString()
+              .replace(replace, "");
       try (var inputStream = new URI(resource).toURL().openStream();
            var reader = new BufferedReader(new InputStreamReader(inputStream))) {
         return reader.lines().collect(Collectors.toList());
@@ -89,14 +94,6 @@ public final class Processor extends AbstractProcessor {
     } catch (final Exception e) {
       return Collections.emptyList();
     }
-  }
-
-  private static String resource(Filer filer, String relativeName, String replace) throws IOException {
-    return filer
-      .getResource(StandardLocation.CLASS_OUTPUT, "", relativeName)
-      .toUri()
-      .toString()
-      .replace(replace, "");
   }
 
   @Override
