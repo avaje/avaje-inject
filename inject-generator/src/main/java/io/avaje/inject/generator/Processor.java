@@ -72,7 +72,8 @@ public final class Processor extends AbstractProcessor {
   void loadProvidedFiles(Filer filer) {
 
     this.moduleValidation =
-        lines(filer, "target/avaje-plugin-exists.txt", "/target/classes").isEmpty();
+        lines(filer, "target/avaje-plugin-exists.txt", "/target/classes").isEmpty()
+            || lines(filer, "build/avaje-plugin-exists.txt", "/build/classes/java/main").isEmpty();
     pluginFileProvided.addAll(lines(filer, "target/avaje-plugin-provides.txt", "/target/classes"));
     moduleFileProvided.addAll(lines(filer, "target/avaje-module-provides.txt", "/target/classes"));
     pluginFileProvided.addAll(lines(filer, "build/avaje-plugin-provides.txt", "/build/classes/java/main"));
