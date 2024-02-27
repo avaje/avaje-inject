@@ -41,6 +41,8 @@ import static io.avaje.inject.generator.ProcessingContext.*;
 })
 public final class Processor extends AbstractProcessor {
 
+  private static final String GRADLE_BUILD_PATH = "/build/classes/java/main";
+  private static final String MAVEN_TARGET_PATH = "/target/classes";
   private Elements elementUtils;
   private ScopeInfo defaultScope;
   private AllScopes allScopes;
@@ -72,12 +74,12 @@ public final class Processor extends AbstractProcessor {
   void loadProvidedFiles(Filer filer) {
 
     this.moduleValidation =
-        lines(filer, "target/avaje-plugin-exists.txt", "/target/classes").isEmpty()
-            || lines(filer, "build/avaje-plugin-exists.txt", "/build/classes/java/main").isEmpty();
-    pluginFileProvided.addAll(lines(filer, "target/avaje-plugin-provides.txt", "/target/classes"));
-    moduleFileProvided.addAll(lines(filer, "target/avaje-module-provides.txt", "/target/classes"));
-    pluginFileProvided.addAll(lines(filer, "build/avaje-plugin-provides.txt", "/build/classes/java/main"));
-    moduleFileProvided.addAll(lines(filer, "build/avaje-module-provides.txt", "/build/classes/java/main"));
+        lines(filer, "target/avaje-plugin-exists.txt", MAVEN_TARGET_PATH).isEmpty()
+            || lines(filer, "build/avaje-plugin-exists.txt", GRADLE_BUILD_PATH).isEmpty();
+    pluginFileProvided.addAll(lines(filer, "target/avaje-plugin-provides.txt", MAVEN_TARGET_PATH));
+    moduleFileProvided.addAll(lines(filer, "target/avaje-module-provides.txt", MAVEN_TARGET_PATH));
+    pluginFileProvided.addAll(lines(filer, "build/avaje-plugin-provides.txt", GRADLE_BUILD_PATH));
+    moduleFileProvided.addAll(lines(filer, "build/avaje-module-provides.txt", GRADLE_BUILD_PATH));
   }
 
   private static List<String> lines(Filer filer, String relativeName, String replace) {
