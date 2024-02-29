@@ -11,6 +11,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.annotation.processing.FilerException;
 import javax.lang.model.element.Element;
@@ -409,12 +410,13 @@ final class ScopeInfo {
 
   private void buildProvidesMethod(Append writer, String fieldName, Set<String> types) {
     writer.append("  @Override").eol();
-    writer.append("  public Class<?>[] %s() {\n    return %s;\n  }", fieldName, fieldName).eol();
-    writer.append("  private final Class<?>[] %s = {", fieldName).eol();
-    for (final String rawType : types) {
-      writer.append("    %s.class,", trimGenerics(rawType)).eol();
+    writer.append("  public Class<?>[] %s() {", fieldName).eol();
+    writer.append("    return new Class<?>[]{").eol();
+    for (String rawType : new TreeSet<>(types)) {
+      writer.append("      %s.class,", trimGenerics(rawType)).eol();
     }
-    writer.append("  };").eol().eol();
+    writer.append("    };").eol();
+    writer.append("  }").eol().eol();
   }
 
   static String trimGenerics(String rawType) {
