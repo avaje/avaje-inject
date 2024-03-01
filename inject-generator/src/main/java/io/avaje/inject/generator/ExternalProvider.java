@@ -2,6 +2,11 @@ package io.avaje.inject.generator;
 
 import static java.util.Map.entry;
 
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Collections;
+
 import static java.util.List.of;
 
 import java.util.List;
@@ -9,6 +14,8 @@ import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.Set;
+
+import javax.tools.StandardLocation;
 
 import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.Plugin;
@@ -44,7 +51,8 @@ final class ExternalProvider {
 
   static void registerModuleProvidedTypes(Set<String> providedTypes) {
     if (!injectAvailable) {
-      if (!Util.resource("avaje-module-provides.txt").toFile().exists()) {
+      if (!pluginExists("build/avaje-plugin-exists.txt")
+          || pluginExists("target/avaje-plugin-exists.txt")) {
         APContext.logNote(
             "Unable to detect Avaje Inject in Annotation Processor ClassPath, use the Avaje Inject Maven/Gradle plugin for detecting Inject Modules from dependencies");
       }
@@ -101,6 +109,21 @@ final class ExternalProvider {
       for (final Class<?> provide : plugin.providesAspects()) {
         defaultScope.pluginProvided(Util.wrapAspect(provide.getCanonicalName()));
       }
+    }
+  }
+
+  private static boolean pluginExists(String relativeName) {
+    try {
+      final String resource =
+          APContext.filer()
+              .getResource(StandardLocation.CLASS_OUTPUT, "", relativeName)
+              .toUri()
+              .toString()
+              .replaceFirst("/target/classes", "")
+              .replaceFirst("/build/classes/java/main", "");
+      return Paths.get(new URI(resource)).toFile().exists();
+    } catch (final Exception e) {
+      return false;
     }
   }
 }
