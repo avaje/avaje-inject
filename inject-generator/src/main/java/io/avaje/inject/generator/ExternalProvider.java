@@ -3,10 +3,7 @@ package io.avaje.inject.generator;
 import static java.util.Map.entry;
 
 import java.net.URI;
-import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
-
 import static java.util.List.of;
 
 import java.util.List;
