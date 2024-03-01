@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import static java.util.Map.entry;
+
 import static java.util.List.of;
 
 import java.util.List;
@@ -43,13 +44,16 @@ final class ExternalProvider {
 
   static void registerModuleProvidedTypes(Set<String> providedTypes) {
     if (!injectAvailable) {
-      System.out.println("Unable to detect Avaje Inject in Annotation Processor ClassPath, use the Avaje Inject Maven/Gradle plugin for detecting Inject Modules from dependencies");
+      if (!Util.resource("avaje-module-provides.txt").toFile().exists()) {
+        APContext.logNote(
+            "Unable to detect Avaje Inject in Annotation Processor ClassPath, use the Avaje Inject Maven/Gradle plugin for detecting Inject Modules from dependencies");
+      }
       return;
     }
 
     final var iterator = ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader()).iterator();
     if (!iterator.hasNext()) {
-      System.out.println("No external modules detected");
+      APContext.logNote("No external modules detected");
       return;
     }
     while (iterator.hasNext()) {
@@ -78,7 +82,7 @@ final class ExternalProvider {
   static void registerPluginProvidedTypes(ScopeInfo defaultScope) {
     avajePlugins.forEach((k, v) -> {
       if (APContext.typeElement(k) != null) {
-        System.out.println("Loaded Plugin: " + k);
+    	APContext.logNote("Loaded Plugin: " + k);
         v.forEach(defaultScope::pluginProvided);
       }
     });
@@ -90,7 +94,7 @@ final class ExternalProvider {
       if (avajePlugins.containsKey(name)) {
         continue;
       }
-      System.out.println("Loaded Plugin: " + plugin.getClass().getCanonicalName());
+      APContext.logNote("Loaded Plugin: " + plugin.getClass().getCanonicalName());
       for (final Class<?> provide : plugin.provides()) {
         defaultScope.pluginProvided(provide.getCanonicalName());
       }

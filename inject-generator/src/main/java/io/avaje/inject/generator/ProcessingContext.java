@@ -45,7 +45,6 @@ final class ProcessingContext {
       boolean moduleValdation) {
     moduleValidation = moduleValdation;
     CTX.set(new Ctx(moduleFileProvided));
-    APContext.init(processingEnv);
   }
 
   public static void testInit() {
