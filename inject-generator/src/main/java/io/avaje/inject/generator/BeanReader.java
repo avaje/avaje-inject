@@ -23,6 +23,7 @@ final class BeanReader {
   private final List<FieldReader> injectFields;
   private final List<MethodReader> injectMethods;
   private final List<MethodReader> factoryMethods;
+  private final List<MethodReader> observerMethods;
   private final Element postConstructMethod;
   private final Element preDestroyMethod;
 
@@ -64,6 +65,7 @@ final class BeanReader {
     this.preDestroyMethod = typeReader.preDestroyMethod();
     this.preDestroyPriority = typeReader.preDestroyPriority();
     this.constructor = typeReader.constructor();
+    this.observerMethods = typeReader.observerMethods();
     this.importedComponent = importedComponent && (constructor != null && constructor.isPublic());
 
     if (ProxyPrism.isPresent(beanType)) {
@@ -131,6 +133,9 @@ final class BeanReader {
       method.addImports(importTypes);
       method.checkRequest(requestParams);
     }
+    for (MethodReader method : observerMethods) {
+      method.addImports(importTypes);
+    }
     for (MethodReader factoryMethod : factoryMethods) {
       factoryMethod.addImports(importTypes);
     }
@@ -150,6 +155,18 @@ final class BeanReader {
         }
       }
     }
+
+    observerMethods.stream()
+        .flatMap(m -> m.params().stream().skip(1))
+        .forEach(
+            param -> {
+              Dependency dependsOn = param.dependsOn();
+              // BeanScope is always injectable with no impact on injection ordering
+              if (!Constants.BEANSCOPE.equals(dependsOn.dependsOn())) {
+                list.add(dependsOn);
+              }
+            });
+
     conditions.requireTypes.stream()
       .map(t -> new Dependency("con:" + t))
       .forEach(list::add);
@@ -187,6 +204,14 @@ final class BeanReader {
     for (MethodReader method : injectMethods) {
       method.addDependsOnGeneric(allUTypes);
     }
+
+    for (MethodReader method : observerMethods) {
+      var utype = method.observeParam().getFullUType();
+      if (utype.isGeneric()) {
+        allUTypes.add(utype);
+      }
+    }
+
     if (constructor != null) {
       constructor.addDependsOnGeneric(allUTypes);
     }
@@ -425,6 +450,10 @@ final class BeanReader {
 
   List<MethodReader> injectMethods() {
     return typeReader.injectMethods();
+  }
+
+  List<MethodReader> observerMethods() {
+    return observerMethods;
   }
 
   boolean isGenerateProxy() {

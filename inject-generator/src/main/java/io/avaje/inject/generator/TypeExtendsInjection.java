@@ -22,6 +22,8 @@ final class TypeExtendsInjection {
   private final Map<String, MethodReader> injectMethods = new LinkedHashMap<>();
   private final Set<String> notInjectMethods = new HashSet<>();
   private final List<AspectMethod> aspectMethods = new ArrayList<>();
+  private final List<MethodReader> observerMethods = new ArrayList<>();
+
   private final Map<String, Integer> nameIndex = new HashMap<>();
 
   private final ImportTypeMap importTypes;
@@ -105,13 +107,17 @@ final class TypeExtendsInjection {
     }
     var inject = InjectPrism.isPresent(element);
     final String methodKey = methodElement.getSimpleName().toString();
-    if (inject && !notInjectMethods.contains(methodKey)) {
-      if (!injectMethods.containsKey(methodKey)) {
-        MethodReader methodReader = new MethodReader(methodElement, type, importTypes).read();
-        if (methodReader.isNotPrivate()) {
-          injectMethods.put(methodKey, methodReader);
-          checkAspect = false;
-        }
+
+    if (methodElement.getParameters().stream().anyMatch(ObservesPrism::isPresent)) {
+      MethodReader methodReader = new MethodReader(methodElement, type, importTypes).read();
+      if (methodReader.isNotPrivate()) {
+        observerMethods.add(methodReader);
+      }
+    } else if (inject && !notInjectMethods.contains(methodKey)) {
+      MethodReader methodReader = new MethodReader(methodElement, type, importTypes).read();
+      if (!injectMethods.containsKey(methodKey) && methodReader.isNotPrivate()) {
+        injectMethods.put(methodKey, methodReader);
+        checkAspect = false;
       }
     } else {
       notInjectMethods.add(methodKey);
@@ -192,6 +198,10 @@ final class TypeExtendsInjection {
 
   List<MethodReader> factoryMethods() {
     return factoryMethods;
+  }
+
+  List<MethodReader> observerMethods() {
+    return observerMethods;
   }
 
   Element postConstructMethod() {

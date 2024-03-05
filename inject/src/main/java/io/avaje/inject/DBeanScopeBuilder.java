@@ -1,20 +1,34 @@
 package io.avaje.inject;
 
-import io.avaje.applog.AppLog;
-import io.avaje.inject.spi.Module;
-import io.avaje.inject.spi.*;
-import io.avaje.lang.NonNullApi;
-import io.avaje.lang.Nullable;
-import jakarta.inject.Provider;
-
-import java.lang.reflect.Type;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
 import static java.lang.System.Logger.Level.DEBUG;
 import static java.lang.System.Logger.Level.INFO;
 import static java.util.Collections.emptySet;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.ServiceLoader;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+import io.avaje.applog.AppLog;
+import io.avaje.inject.event.ObserverManager;
+import io.avaje.inject.spi.Builder;
+import io.avaje.inject.spi.ClosePair;
+import io.avaje.inject.spi.EnrichBean;
+import io.avaje.inject.spi.Module;
+import io.avaje.inject.spi.Plugin;
+import io.avaje.inject.spi.PropertyRequiresPlugin;
+import io.avaje.inject.spi.SuppliedBean;
+import io.avaje.lang.NonNullApi;
+import io.avaje.lang.Nullable;
+import jakarta.inject.Provider;
 
 /** Build a bean scope with options for shutdown hook and supplying test doubles. */
 @NonNullApi
@@ -248,6 +262,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     if (propertyRequiresPlugin == null) {
       initPropertyPlugin();
     }
+
+    provideDefault(ObserverManager.class, DObserverManager::new);
 
     ServiceLoader.load(Plugin.class, classLoader).forEach(plugin -> plugin.apply(this));
     // sort factories by dependsOn

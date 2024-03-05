@@ -35,6 +35,7 @@ final class MethodReader {
   private final TypeReader typeReader;
   private final boolean optionalType;
   private final BeanConditions conditions = new BeanConditions();
+  private MethodParam observeParameter;
 
   MethodReader(ExecutableElement element, TypeElement beanType, ImportTypeMap importTypes) {
     this(element, beanType, null, null, importTypes);
@@ -114,6 +115,8 @@ final class MethodReader {
     for (VariableElement p : ps) {
       params.add(new MethodParam(p));
     }
+    observeParameter = params.stream().filter(MethodParam::observeEvent).findFirst().orElse(null);
+
     return this;
   }
 
@@ -377,6 +380,10 @@ final class MethodReader {
     return element;
   }
 
+  public MethodParam observeParam() {
+    return observeParameter;
+  }
+
   static class MethodParam {
 
     private final VariableElement element;
@@ -391,6 +398,7 @@ final class MethodReader {
     private String requestParamName;
     private final boolean isBeanMap;
     private final boolean isAssisted;
+    private final boolean isObserveEvent;
 
     MethodParam(VariableElement param) {
       this.element = param;
@@ -403,6 +411,7 @@ final class MethodReader {
       this.genericType = utilType.toUType();
       this.fullUType = UType.parse(param.asType());
       this.isAssisted = AssistedPrism.isPresent(param);
+      this.isObserveEvent = ObservesPrism.isPresent(param);
 
       if (nullable || param.asType().toString().startsWith("java.util.Optional<")) {
         ProcessingContext.addOptionalType(paramType);
@@ -470,6 +479,9 @@ final class MethodReader {
     }
 
     void addImports(ImportTypeMap importTypes) {
+      if (isObserveEvent) {
+        importTypes.add("java.util.function.Consumer");
+      }
       importTypes.addAll(fullUType.importTypes());
       Util.getNullableAnnotation(element).map(Object::toString).ifPresent(importTypes::add);
     }
@@ -532,8 +544,21 @@ final class MethodReader {
       return isAssisted;
     }
 
+    boolean observeEvent() {
+      return isObserveEvent;
+    }
+
     Element element() {
       return element;
+    }
+
+    public UType getFullUType() {
+      return fullUType;
+    }
+
+    public String qualifier() {
+
+      return named != null ? named : "";
     }
   }
 }
