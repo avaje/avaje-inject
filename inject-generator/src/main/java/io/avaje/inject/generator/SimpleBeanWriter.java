@@ -2,6 +2,7 @@ package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.createSourceFile;
 import static io.avaje.inject.generator.APContext.logError;
+import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -69,13 +70,19 @@ final class SimpleBeanWriter {
 
   private void writeGenericTypeFields() {
     // collect all types to prevent duplicates
-    Set<UType> genericTypes = beanReader.allGenericTypes();
+    Set<UType> genericTypes =
+        beanReader.allGenericTypes().stream()
+            .map(Util::unwrapProvider)
+            .filter(UType::isGeneric)
+            .collect(toSet());
     if (!genericTypes.isEmpty()) {
 
       final Map<String, String> seenShortNames = new HashMap<>();
       final Set<String> writtenFields = new HashSet<>();
 
-      for (final UType type : genericTypes) {
+      for (UType utype : genericTypes) {
+
+        var type = Util.unwrapProvider(utype);
         final var fieldName = Util.shortName(type).replace(".", "_");
         final var components = type.componentTypes();
         if (components.size() == 1 && components.get(0).kind() == TypeKind.WILDCARD

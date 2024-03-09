@@ -1,5 +1,7 @@
 package io.avaje.inject.generator;
 
+import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
+
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -19,7 +21,8 @@ final class TypeAppender {
     this.importTypes = importTypes;
   }
 
-  void add(UType type) {
+  void add(UType utype) {
+    var type = Util.unwrapProvider(utype);
     var components = type.componentTypes();
     if (isAddGenericType(type, components)) {
       addUType(type);
