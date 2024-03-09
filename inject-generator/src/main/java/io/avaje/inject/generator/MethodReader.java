@@ -424,8 +424,6 @@ final class MethodReader {
       writer.append(builderName).append(".").append(utilType.getMethod(nullable, isBeanMap));
       if (!genericType.isGeneric() || genericType.param0().kind() == TypeKind.WILDCARD) {
         writer.append(Util.shortName(genericType.mainType())).append(".class");
-      } else if (isProvider()) {
-        writer.append(providerParam()).append(".class");
       } else {
         writer.append("TYPE_").append(Util.shortName(genericType).replace(".", "_"));
       }
