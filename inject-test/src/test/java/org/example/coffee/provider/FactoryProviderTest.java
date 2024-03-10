@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.spi.GenericType;
-import jakarta.inject.Provider;
 
 class FactoryProviderTest {
 
