@@ -32,6 +32,7 @@ final class BeanReader {
   private final boolean prototype;
   private final boolean primary;
   private final boolean secondary;
+  private final boolean lazy;
   private final boolean proxy;
   private final BeanAspects aspects;
   private final BeanConditions conditions = new BeanConditions();
@@ -50,6 +51,7 @@ final class BeanReader {
     this.prototype = PrototypePrism.isPresent(beanType);
     this.primary = PrimaryPrism.isPresent(beanType);
     this.secondary = !primary && SecondaryPrism.isPresent(beanType);
+    this.lazy = !FactoryPrism.isPresent(beanType) && LazyPrism.isPresent(beanType);
     this.typeReader = new TypeReader(UType.parse(beanType.asType()), beanType, importTypes, factory);
 
     typeReader.process();
@@ -110,8 +112,12 @@ final class BeanReader {
     return aspects;
   }
 
-  boolean prototype() {
-    return prototype;
+  boolean registerProvider() {
+    return prototype || lazy;
+  }
+
+  boolean lazy() {
+    return lazy;
   }
 
   boolean importedComponent() {
@@ -261,7 +267,7 @@ final class BeanReader {
   }
 
   void buildRegister(Append writer) {
-    if (prototype) {
+    if (prototype || lazy) {
       return;
     }
     writer.indent("      ");
@@ -278,11 +284,13 @@ final class BeanReader {
   }
 
   void addLifecycleCallbacks(Append writer, String indent) {
-    if (postConstructMethod != null && !prototype) {
+
+    if (postConstructMethod != null) {
+      lifeCycleNotSupported("@PostConstruct");
       writer.indent(indent).append(" builder.addPostConstruct($bean::%s);", postConstructMethod.getSimpleName()).eol();
     }
     if (preDestroyMethod != null) {
-      prototypeNotSupported("@PreDestroy");
+      lifeCycleNotSupported("@PreDestroy");
       var priority = preDestroyPriority == null || preDestroyPriority == 1000 ? "" : ", " + preDestroyPriority;
       writer.indent(indent).append(" builder.addPreDestroy($bean::%s%s);", preDestroyMethod.getSimpleName(), priority).eol();
     } else if (typeReader.isClosable() && !prototype) {
@@ -296,9 +304,13 @@ final class BeanReader {
     }
   }
 
-  private void prototypeNotSupported(String lifecycle) {
-    if (prototype) {
-      logError(beanType, "@Prototype scoped bean does not support %s lifecycle method", lifecycle);
+  private void lifeCycleNotSupported(String lifecycle) {
+    if (registerProvider()) {
+      logError(
+          beanType,
+          "%s scoped bean does not support the %s lifecycle method",
+          prototype ? "@Prototype" : "@Lazy",
+          lifecycle);
     }
   }
 
