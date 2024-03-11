@@ -195,6 +195,7 @@ final class MethodReader {
       return;
     }
     String indent = "    ";
+
     writer.indent(indent).append("  builder");
     if (prototype) {
       writer.append(".asPrototype()").eol();

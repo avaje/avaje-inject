@@ -71,17 +71,16 @@ final class SimpleBeanWriter {
   private void writeGenericTypeFields() {
     // collect all types to prevent duplicates
     Set<UType> genericTypes =
-        beanReader.allGenericTypes().stream()
-            .map(Util::unwrapProvider)
-            .filter(UType::isGeneric)
-            .collect(toSet());
-    if (!genericTypes.isEmpty()) {
+      beanReader.allGenericTypes().stream()
+        .map(Util::unwrapProvider)
+        .filter(UType::isGeneric)
+        .collect(toSet());
 
+    if (!genericTypes.isEmpty()) {
       final Map<String, String> seenShortNames = new HashMap<>();
       final Set<String> writtenFields = new HashSet<>();
 
-      for (UType utype : genericTypes) {
-
+      for (final UType utype : genericTypes) {
         var type = Util.unwrapProvider(utype);
         final var fieldName = Util.shortName(type).replace(".", "_");
         final var components = type.componentTypes();
@@ -93,7 +92,6 @@ final class SimpleBeanWriter {
 
         writer.append("  public static final Type TYPE_%s =", fieldName).eol()
           .append("      new GenericType<");
-
         writeGenericType(type, seenShortNames, writer);
         // use fully qualified types here rather than use type.writeShort(writer)
         writer.append(">(){}.type();").eol();

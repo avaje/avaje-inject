@@ -13,10 +13,10 @@ class FactoryProviderTest {
 
   @Test
   void test() {
-    var scope = BeanScope.builder().build();
-
-    Supplier<String> prov = BeanScope.builder().build().get(new GenericType<Supplier<String>>() {});
-    assertThat(prov.get()).isEqualTo("Stand proud Provider, you were strong");
-    assertThat(scope.get(String.class, "second")).isEqualTo("Nah, I'd win");
+    try (var scope = BeanScope.builder().build()) {
+      Supplier<String> prov = scope.get(new GenericType<Supplier<String>>() {});
+      assertThat(prov.get()).isEqualTo("Stand proud Provider, you were strong");
+      assertThat(scope.get(String.class, "second")).isEqualTo("Nah, I'd win");
+    }
   }
 }
