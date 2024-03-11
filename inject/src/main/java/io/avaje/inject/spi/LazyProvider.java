@@ -4,9 +4,7 @@ import jakarta.inject.Provider;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-/**
- * Wrap a Provider for lazy initialisation.
- */
+/** Wrap a Provider for lazy initialisation. */
 final class LazyProvider<T> implements Provider<T> {
 
   private final ReentrantLock lock = new ReentrantLock();
@@ -19,6 +17,9 @@ final class LazyProvider<T> implements Provider<T> {
 
   @Override
   public T get() {
+    if (lazy != null) {
+      return lazy;
+    }
     lock.lock();
     try {
       if (lazy == null) {
