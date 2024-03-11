@@ -33,13 +33,13 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-jsonb</artifactId>
-      <version>1.9</version>
+      <version>1.10</version>
     </dependency>
 
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-config</artifactId>
-      <version>3.11</version>
+      <version>3.12</version>
     </dependency>
 
     <dependency>
