@@ -181,19 +181,22 @@ final class MethodReader {
 
   void builderAddBeanProvider(Append writer) {
     if (isVoid) {
-      writer.append("Error - void @Prototype method ?").eol();
+      APContext.logError("Error - void @Prototype method ?", element);
       return;
     }
     if (optionalType) {
-      writer.append("Error - Optional type with @Prototype method is not supported").eol();
+      APContext.logError("Error - Optional type with @Prototype method is not supported", element);
       return;
     }
     String indent = "    ";
+    writer.indent(indent).append("  builder.");
     if (prototype) {
-      writer.indent(indent).append("  builder.asPrototype().registerProvider(() -> {").eol();
-    } else {
-      writer.indent(indent).append("  builder.asSecondary().registerProvider(() -> {").eol();
+      writer.append("asPrototype()").eol();
+    } else if(secondary) {
+      writer.append("asSecondary()").eol();
     }
+    writer.indent(".registerProvider(() -> {");
+
     writer.indent(indent).append("    return ");
     writer.append("factory.%s(", methodName);
     for (int i = 0; i < params.size(); i++) {
@@ -224,7 +227,11 @@ final class MethodReader {
       } else if (secondary) {
         writer.append(".asSecondary()");
       }
-      writer.append(".register(bean);").eol();
+      if (Util.isProvider(returnTypeRaw)) {
+        writer.append(".registerProvider(bean);").eol();
+      } else {
+        writer.append(".register(bean);").eol();
+      }
       if (notEmpty(initMethod)) {
         writer.indent(indent).append("builder.addPostConstruct($bean::%s);", initMethod).eol();
       }
@@ -340,7 +347,7 @@ final class MethodReader {
   }
 
   boolean isUseProviderForSecondary() {
-    return secondary && !optionalType;
+    return secondary && !optionalType && !Util.isProvider(returnTypeRaw);
   }
 
   boolean isPublic() {
@@ -424,8 +431,6 @@ final class MethodReader {
       writer.append(builderName).append(".").append(utilType.getMethod(nullable, isBeanMap));
       if (!genericType.isGeneric() || genericType.param0().kind() == TypeKind.WILDCARD) {
         writer.append(Util.shortName(genericType.mainType())).append(".class");
-      } else if (isProvider()) {
-        writer.append(providerParam()).append(".class");
       } else {
         writer.append("TYPE_").append(Util.shortName(genericType).replace(".", "_"));
       }
