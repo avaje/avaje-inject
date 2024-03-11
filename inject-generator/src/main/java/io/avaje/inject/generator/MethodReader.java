@@ -21,6 +21,7 @@ final class MethodReader {
   private final boolean prototype;
   private final boolean primary;
   private final boolean secondary;
+  private final boolean lazy;
   private final String returnTypeRaw;
   private final UType genericType;
   private final String shortName;
@@ -46,11 +47,13 @@ final class MethodReader {
       prototype = PrototypePrism.isPresent(element);
       primary = PrimaryPrism.isPresent(element);
       secondary = SecondaryPrism.isPresent(element);
+      lazy = LazyPrism.isPresent(element) || LazyPrism.isPresent(element.getEnclosingElement());
       conditions.readAll(element);
     } else {
       prototype = false;
       primary = false;
       secondary = false;
+      lazy = false;
     }
     this.methodName = element.getSimpleName().toString();
     TypeMirror returnMirror = element.getReturnType();
@@ -86,6 +89,9 @@ final class MethodReader {
       MethodLifecycleReader lifecycleReader = new MethodLifecycleReader(returnElement, initMethod, destroyMethod);
       this.initMethod = lifecycleReader.initMethod();
       this.destroyMethod = lifecycleReader.destroyMethod();
+    }
+    if (lazy && prototype) {
+      APContext.logError("Cannot use both @Lazy and @Prototype");
     }
   }
 
@@ -189,13 +195,15 @@ final class MethodReader {
       return;
     }
     String indent = "    ";
-    writer.indent(indent).append("  builder.");
+
+    writer.indent(indent).append("  builder");
     if (prototype) {
-      writer.append("asPrototype()").eol();
+      writer.append(".asPrototype()").eol();
     } else if(secondary) {
-      writer.append("asSecondary()").eol();
+      writer.append(".asSecondary()").eol();
     }
-    writer.indent(".registerProvider(() -> {");
+
+    writer.indent(String.format(".%s(() -> {", lazy ? "registerLazy" : "registerProvider")).eol();
 
     writer.indent(indent).append("    return ");
     writer.append("factory.%s(", methodName);
@@ -338,12 +346,16 @@ final class MethodReader {
     }
   }
 
-  public void commentBuildMethod(Append writer) {
+  void commentBuildMethod(Append writer) {
     writer.append(CODE_COMMENT_BUILD_FACTORYBEAN, shortName, factoryShortName, methodName).eol();
   }
 
   boolean isProtoType() {
     return prototype;
+  }
+
+  boolean isLazy() {
+    return lazy;
   }
 
   boolean isUseProviderForSecondary() {
@@ -450,10 +462,6 @@ final class MethodReader {
       writer.append(")");
     }
 
-    private String providerParam() {
-      return Util.shortName(Util.unwrapProvider(paramType));
-    }
-
     String simpleName() {
       return simpleName;
     }
@@ -541,4 +549,5 @@ final class MethodReader {
       return element;
     }
   }
+
 }

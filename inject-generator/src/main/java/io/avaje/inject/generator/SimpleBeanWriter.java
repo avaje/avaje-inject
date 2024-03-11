@@ -145,7 +145,7 @@ final class SimpleBeanWriter {
     method.buildAddFor(writer);
     method.builderGetFactory(writer, beanReader.hasConditions());
     method.startTry(writer);
-    if (method.isProtoType() || method.isUseProviderForSecondary()) {
+    if (method.isLazy() || method.isProtoType() || method.isUseProviderForSecondary()) {
       method.builderAddBeanProvider(writer);
       method.endTry(writer);
     } else {
@@ -175,9 +175,9 @@ final class SimpleBeanWriter {
   private void writeAddFor(MethodReader constructor) {
     beanReader.buildConditional(writer);
     beanReader.buildAddFor(writer);
-    if (beanReader.prototype()) {
+    if (beanReader.registerProvider()) {
       indent += "  ";
-      writer.append("      builder.asPrototype().registerProvider(() -> {", shortName, shortName).eol();
+      writer.append("      builder.%s(() -> {", beanReader.lazy() ? "registerLazy" : "asPrototype().registerProvider").eol();
     }
     constructor.startTry(writer);
     writeCreateBean(constructor);
@@ -186,7 +186,7 @@ final class SimpleBeanWriter {
     if (beanReader.isExtraInjectionRequired()) {
       writeExtraInjection();
     }
-    if (beanReader.prototype()) {
+    if (beanReader.registerProvider()) {
       beanReader.prototypePostConstruct(writer, indent);
       writer.indent("        return bean;").eol();
       writer.indent("      });").eol();
@@ -196,7 +196,7 @@ final class SimpleBeanWriter {
   }
 
   private void writeBuildMethodStart() {
-    if (beanReader.prototype()) {
+    if (beanReader.registerProvider()) {
       writer.append(CODE_COMMENT_BUILD_PROVIDER, shortName).eol();
     } else {
       writer.append(CODE_COMMENT_BUILD, shortName).eol();
@@ -213,20 +213,20 @@ final class SimpleBeanWriter {
   }
 
   private void writeExtraInjection() {
-    if (!beanReader.prototype()) {
+    if (!beanReader.registerProvider()) {
       writer.indent("      ").append("builder.addInjector(b -> {").eol();
       writer.indent("      ").append("  // field and method injection").eol();
     }
     injectFields();
     injectMethods();
-    if (!beanReader.prototype()) {
+    if (!beanReader.registerProvider()) {
       writer.indent("      });").eol();
     }
   }
 
   private void injectFields() {
-    String bean = beanReader.prototype() ? "bean" : "$bean";
-    String builder = beanReader.prototype() ? "builder" : "b";
+    String bean = beanReader.registerProvider() ? "bean" : "$bean";
+    String builder = beanReader.registerProvider() ? "builder" : "b";
     for (FieldReader fieldReader : beanReader.injectFields()) {
       String fieldName = fieldReader.fieldName();
       String getDependency = fieldReader.builderGetDependency(builder);
@@ -236,8 +236,8 @@ final class SimpleBeanWriter {
 
   private void injectMethods() {
     final var needsTry = beanReader.needsTryForMethodInjection();
-    final var bean = beanReader.prototype() ? "bean" : "$bean";
-    final var builder = beanReader.prototype() ? "builder" : "b";
+    final var bean = beanReader.registerProvider() ? "bean" : "$bean";
+    final var builder = beanReader.registerProvider() ? "builder" : "b";
     if (needsTry) {
       writer.indent("        try {").eol();
     }

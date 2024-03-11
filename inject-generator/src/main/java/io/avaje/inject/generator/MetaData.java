@@ -78,7 +78,10 @@ final class MetaData {
   }
 
   private String trimName(String name) {
-    return "".equals(name) ? null : name;
+    if (name == null || name.isEmpty()) {
+      return null;
+    }
+    return name.replace("\\\"", "'");
   }
 
   String buildName() {
