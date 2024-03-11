@@ -77,6 +77,13 @@ public interface Builder {
   <T> void registerProvider(Provider<T> provider);
 
   /**
+   * Register a lazy provider into the context.
+   */
+  default <T> void registerLazy(Provider<T> original) {
+    registerProvider(new LazyProvider<>(original));
+  }
+
+  /**
    * Register the bean instance into the context.
    *
    * @param bean The bean instance that has been created.

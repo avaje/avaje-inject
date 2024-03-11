@@ -1,10 +1,11 @@
-package io.avaje.inject.generator.models.valid.provider;
+package org.example.coffee.provider;
 
 import java.util.function.Supplier;
 
 import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
 import io.avaje.inject.Secondary;
+import jakarta.inject.Named;
 import jakarta.inject.Provider;
 
 @Factory
@@ -12,12 +13,13 @@ public class FactoryProvider {
 
   @Bean
   @Secondary
-  Provider<Grinder> grinder() {
-    return Grinder::new;
+  @Named("second")
+  Provider<String> second() {
+    return () -> "Nah, I'd win";
   }
 
   @Bean
   Provider<Supplier<String>> supply() {
-    return () -> () -> "";
+    return () -> () -> "Stand proud Provider, you were strong";
   }
 }

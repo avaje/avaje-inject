@@ -78,17 +78,17 @@ final class MetaData {
   }
 
   private String trimName(String name) {
-    return "".equals(name) ? null : name;
+    if (name == null || name.isEmpty()) {
+      return null;
+    }
+    return name.replace("\\\"", "'");
   }
 
   String buildName() {
     if (Util.isVoid(type)) {
       return "void_" + Util.trimMethod(method);
     } else {
-      final String trimType =
-          Util.isProvider(type)
-              ? Util.trimMethod(Util.unwrapProvider(type))
-              : Util.trimMethod(type);
+      final String trimType = Util.trimMethod(Util.unwrapProvider(type));
       if (name != null) {
         return trimType + "_" + name.replaceAll("[^a-zA-Z0-9_$]+", "_");
       } else {
