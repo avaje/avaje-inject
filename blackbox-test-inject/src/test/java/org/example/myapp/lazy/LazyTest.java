@@ -13,18 +13,22 @@ class LazyTest {
   @Test
   void test() {
     var initialized = new AtomicBoolean();
-    var scope = BeanScope.builder().beans(initialized).build();
-    assertThat(initialized).isFalse();
-    LazyBean prov = scope.get(LazyBean.class, "single");
-    assertThat(initialized).isTrue();
+    try (var scope = BeanScope.builder().beans(initialized).build()) {
+      assertThat(initialized).isFalse();
+      LazyBean prov = scope.get(LazyBean.class, "single");
+      assertThat(initialized).isTrue();
+      assertThat(prov).isNotNull();
+    }
   }
 
   @Test
   void testFactory() {
     var initialized = new AtomicBoolean();
-    var scope = BeanScope.builder().beans(initialized).build();
-    assertThat(initialized).isFalse();
-    LazyBean prov = scope.get(LazyBean.class, "factory");
-    assertThat(initialized).isTrue();
+    try (var scope = BeanScope.builder().beans(initialized).build()) {
+      assertThat(initialized).isFalse();
+      LazyBean prov = scope.get(LazyBean.class, "factory");
+      assertThat(initialized).isTrue();
+      assertThat(prov).isNotNull();
+    }
   }
 }

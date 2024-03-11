@@ -1,14 +1,14 @@
 package io.avaje.inject.spi;
 
+import io.avaje.inject.BeanScope;
+import jakarta.inject.Provider;
+
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-
-import io.avaje.inject.BeanScope;
-import jakarta.inject.Provider;
 
 /**
  * Mutable builder object used when building a bean scope.
@@ -76,27 +76,11 @@ public interface Builder {
    */
   <T> void registerProvider(Provider<T> provider);
 
-  /** Register a lazy provider into the context. */
+  /**
+   * Register a lazy provider into the context.
+   */
   default <T> void registerLazy(Provider<T> original) {
-    registerProvider(
-        new Provider<T>() {
-          Provider<T> delegate = this::firstTime;
-          boolean initialized;
-
-          @Override
-          public T get() {
-            return delegate.get();
-          }
-
-          private synchronized T firstTime() {
-            if (!initialized) {
-              T value = original.get();
-              delegate = () -> value;
-              initialized = true;
-            }
-            return delegate.get();
-          }
-        });
+    registerProvider(new LazyProvider<>(original));
   }
 
   /**

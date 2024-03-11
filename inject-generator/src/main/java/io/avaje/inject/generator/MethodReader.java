@@ -346,12 +346,16 @@ final class MethodReader {
     }
   }
 
-  public void commentBuildMethod(Append writer) {
+  void commentBuildMethod(Append writer) {
     writer.append(CODE_COMMENT_BUILD_FACTORYBEAN, shortName, factoryShortName, methodName).eol();
   }
 
   boolean isProtoType() {
     return prototype;
+  }
+
+  boolean isLazy() {
+    return lazy;
   }
 
   boolean isUseProviderForSecondary() {
@@ -546,7 +550,4 @@ final class MethodReader {
     }
   }
 
-  public boolean isLazy() {
-    return lazy;
-  }
 }

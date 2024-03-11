@@ -314,10 +314,10 @@ final class BeanReader {
   private void lifeCycleNotSupported(String lifecycle) {
     if (registerProvider()) {
       logError(
-          beanType,
-          "%s scoped bean does not support the %s lifecycle method",
-          prototype ? "@Prototype" : "@Lazy",
-          lifecycle);
+        beanType,
+        "%s scoped bean does not support the %s lifecycle method",
+        prototype ? "@Prototype" : "@Lazy",
+        lifecycle);
     }
   }
 
