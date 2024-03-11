@@ -91,6 +91,14 @@ final class Util {
     }
   }
 
+  static UType unwrapProvider(UType maybeProvider) {
+    if (isProvider(maybeProvider.mainType())) {
+      return maybeProvider.param0();
+    } else {
+      return maybeProvider;
+    }
+  }
+
   static String initLower(String name) {
     final StringBuilder sb = new StringBuilder(name.length());
     boolean upper = true;
