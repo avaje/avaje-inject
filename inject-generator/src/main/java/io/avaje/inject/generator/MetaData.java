@@ -85,10 +85,7 @@ final class MetaData {
     if (Util.isVoid(type)) {
       return "void_" + Util.trimMethod(method);
     } else {
-      final String trimType =
-          Util.isProvider(type)
-              ? Util.trimMethod(Util.unwrapProvider(type))
-              : Util.trimMethod(type);
+      final String trimType = Util.trimMethod(Util.unwrapProvider(type));
       if (name != null) {
         return trimType + "_" + name.replaceAll("[^a-zA-Z0-9_$]+", "_");
       } else {

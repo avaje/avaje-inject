@@ -195,7 +195,6 @@ final class MethodReader {
     } else if(secondary) {
       writer.append("asSecondary()").eol();
     }
-
     writer.indent(".registerProvider(() -> {");
 
     writer.indent(indent).append("    return ");
