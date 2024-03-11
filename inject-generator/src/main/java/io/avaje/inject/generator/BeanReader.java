@@ -3,6 +3,7 @@ package io.avaje.inject.generator;
 import static io.avaje.inject.generator.APContext.logError;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 
@@ -299,7 +300,14 @@ final class BeanReader {
 
   void prototypePostConstruct(Append writer, String indent) {
     if (postConstructMethod != null) {
-      writer.append("%s bean.%s();", indent, postConstructMethod.getSimpleName()).eol();
+      var postConstruct = (ExecutableElement) postConstructMethod;
+      writer.append("%s bean.%s(", indent, postConstructMethod.getSimpleName());
+      if (postConstruct.getParameters().isEmpty()) {
+        writer.append(");").eol();
+      } else {
+        writer.append("builder.get(io.avaje.inject.BeanScope.class));").eol();
+      }
+      writer.eol();
     }
   }
 
