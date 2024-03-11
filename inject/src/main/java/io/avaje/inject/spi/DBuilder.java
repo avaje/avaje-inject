@@ -289,10 +289,7 @@ class DBuilder implements Builder {
     if (runningPostConstruct) {
       return obtainProvider(type, name);
     }
-    // use injectors to delay obtaining the provider until end of build
-    final ProviderPromise<T> promise = new ProviderPromise<>(type, name, this);
-    injectors.add(promise);
-    return promise;
+    return new ProviderPromise<>(type, name, this);
   }
 
   <T> Provider<T> obtainProvider(Type type, String name) {

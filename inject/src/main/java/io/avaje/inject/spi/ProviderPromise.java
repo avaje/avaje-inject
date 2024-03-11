@@ -1,14 +1,13 @@
 package io.avaje.inject.spi;
 
-import jakarta.inject.Provider;
-
 import java.lang.reflect.Type;
-import java.util.function.Consumer;
+
+import jakarta.inject.Provider;
 
 /**
  * Provides late binding of Provider (like field/setter injection).
  */
-final class ProviderPromise<T> implements Provider<T>, Consumer<Builder> {
+final class ProviderPromise<T> implements Provider<T> {
 
   private final Type type;
   private final String name;
@@ -22,13 +21,10 @@ final class ProviderPromise<T> implements Provider<T>, Consumer<Builder> {
   }
 
   @Override
-  public void accept(Builder _builder) {
-    this.provider = builder.obtainProvider(type, name);
-  }
-
-  @Override
   public T get() {
+    if (provider == null) {
+      this.provider = builder.obtainProvider(type, name);
+    }
     return provider.get();
   }
-
 }

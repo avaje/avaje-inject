@@ -19,7 +19,8 @@ public class FactoryProvider {
   }
 
   @Bean
-  Provider<Supplier<String>> supply() {
+  Provider<Supplier<String>> supply(@Named("second") Provider<String> second) {
+    second.get();
     return () -> () -> "Stand proud Provider, you were strong";
   }
 }
