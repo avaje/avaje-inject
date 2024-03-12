@@ -1,7 +1,6 @@
 package io.avaje.inject.aop;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -51,15 +50,6 @@ public interface Invocation {
    * Return the arguments used for this invocation.
    */
   Object[] arguments();
-
-  /**
-   * @deprecated migrate to using {@link AOPFallback} to specify fallback method.
-   * That then removes the need to use this method altogether.
-   * <p>
-   * Return the arguments additionally appending the throwable.
-   */
-  @Deprecated(forRemoval = true)
-  Object[] arguments(Throwable e);
 
   /**
    * Return the method being called for this invocation.
@@ -124,17 +114,6 @@ public interface Invocation {
     @Override
     public Object[] arguments() {
       return args;
-    }
-
-    @Override
-    public Object[] arguments(Throwable e) {
-      if (args == null || args.length == 0) {
-        return new Object[]{e};
-      } else {
-        Object[] newArgs = Arrays.copyOf(args, args.length + 1);
-        newArgs[args.length] = e;
-        return newArgs;
-      }
     }
 
     @Override
