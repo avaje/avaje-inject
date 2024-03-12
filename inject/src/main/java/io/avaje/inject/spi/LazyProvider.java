@@ -19,6 +19,9 @@ final class LazyProvider<T> implements Provider<T> {
 
   @Override
   public T get() {
+    if (lazy != null) {
+      return lazy;
+    }
     lock.lock();
     try {
       if (lazy == null) {
