@@ -23,8 +23,8 @@ final class Constants {
 
   static final String AT_SINGLETON = "@Singleton";
   static final String AT_PROXY = "@Proxy";
-  static final String AT_GENERATED = "@Generated(\"io.avaje.inject.generator\")";
-  static final String AT_GENERATED_COMMENT = "(\"io.avaje.inject.generator\")";
+  static final String AT_GENERATED = "@Generated(\"io.avaje.inject.generator:9.12-RC3\")";
+  static final String AT_GENERATED_COMMENT = "(\"io.avaje.inject.generator:9.12-RC3\")";
   static final String META_INF_MODULE = "META-INF/services/io.avaje.inject.spi.Module";
   static final String META_INF_TESTMODULE = "META-INF/services/io.avaje.inject.test.TestModule";
   static final String META_INF_CUSTOM = "META-INF/services/io.avaje.inject.spi.Module.Custom";
