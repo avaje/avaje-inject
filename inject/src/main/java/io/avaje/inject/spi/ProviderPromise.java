@@ -30,7 +30,7 @@ final class ProviderPromise<T> implements Provider<T>, Consumer<Builder> {
   public T get() {
     if (provider == null) {
       throw new IllegalStateException("Illegal to call Provider.get() method during DI wiring. " +
-        "Look to use @PostConstruct or perhaps use java.util.function.Supplier");
+        "Use a @PostConstruct method and call Provider.get() in there or perhaps use java.util.function.Supplier");
     }
     return provider.get();
   }
