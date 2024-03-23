@@ -25,7 +25,7 @@ public interface Plugin {
   /**
    * Return the classes that the plugin provides.
    */
-  default Class<?>[] provides() {
+  default Type[] provides() {
     return EMPTY_CLASSES;
   }
 

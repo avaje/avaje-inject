@@ -90,10 +90,10 @@ public class AutoProvidesMojo extends AbstractMojo {
     for (final var plugin : ServiceLoader.load(Plugin.class, newClassLoader)) {
       log.info("Loaded Plugin: " + plugin.getClass().getCanonicalName());
 
-      for (final Class<?> provide : plugin.provides()) {
-        providedTypes.add(provide.getCanonicalName());
+      for (final var provide : plugin.provides()) {
+        providedTypes.add(provide.getTypeName());
       }
-      for (final Class<?> provide : plugin.providesAspects()) {
+      for (final var provide : plugin.providesAspects()) {
         providedTypes.add(wrapAspect(provide.getCanonicalName()));
       }
     }
@@ -111,13 +111,13 @@ public class AutoProvidesMojo extends AbstractMojo {
     for (final var module : ServiceLoader.load(Module.class, newClassLoader)) {
       log.info("Detected External Module: " + module.getClass().getCanonicalName());
 
-      for (final Class<?> provide : module.provides()) {
-        providedTypes.add(provide.getCanonicalName());
+      for (final var provide : module.provides()) {
+        providedTypes.add(provide.getTypeName());
       }
-      for (final Class<?> provide : module.autoProvides()) {
-        providedTypes.add(provide.getCanonicalName());
+      for (final var provide : module.autoProvides()) {
+        providedTypes.add(provide.getTypeName());
       }
-      for (final Class<?> provide : module.autoProvidesAspects()) {
+      for (final var provide : module.autoProvidesAspects()) {
         providedTypes.add(wrapAspect(provide.getCanonicalName()));
       }
     }
