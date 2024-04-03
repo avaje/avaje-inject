@@ -145,7 +145,7 @@ public final class ExampleModule implements Module {
 
 - Specifically Aimed for server-side development (rather than Android)
 - Provides API to obtain all bean instances that implement an interface
-- Lifecycle methods with `@PostConstruct` and `@PreDestory`
+- Lifecycle methods with `@PostConstruct` and `@PreDestroy`
 - Spring-like factory classes with `@Factory` and `@Bean`
 - Conditional Wiring based on active profiles or existing beans/properties
 
