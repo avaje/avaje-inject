@@ -1,8 +1,9 @@
+[![Discord](https://img.shields.io/discord/1074074312421683250?color=%237289da&label=discord)](https://discord.gg/Qcqf9R27BR)
 [![Build](https://github.com/avaje/avaje-inject/actions/workflows/build.yml/badge.svg)](https://github.com/avaje/avaje-inject/actions/workflows/build.yml)
 [![JDK EA](https://github.com/avaje/avaje-inject/actions/workflows/jdk-ea.yml/badge.svg)](https://github.com/avaje/avaje-inject/actions/workflows/jdk-ea.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/avaje/avaje-inject/blob/master/LICENSE)
 [![Maven Central : avaje-inject](https://img.shields.io/maven-central/v/io.avaje/avaje-inject.svg?label=Maven%20Central)](https://maven-badges.herokuapp.com/maven-central/io.avaje/avaje-inject)
-[![Discord](https://img.shields.io/discord/1074074312421683250?color=%237289da&label=discord)](https://discord.gg/Qcqf9R27BR)
+[![javadoc](https://javadoc.io/badge2/io.avaje/avaje-inject/javadoc.svg?color=purple)](https://javadoc.io/doc/io.avaje/avaje-inject)
 
 # [Avaje-Inject](https://avaje.io/inject)
 APT-based dependency injection for server-side developers - https://avaje.io/inject
@@ -23,19 +24,6 @@ APT-based dependency injection for server-side developers - https://avaje.io/inj
   <version>${avaje.inject.version}</version>
   <scope>provided</scope>
 </dependency>
-```
-
-**JDK 23+**
-
-In JDK 23+, annotation processors are disabled by default, you will need to add a flag in maven to re-enable the processor.
-```xml
-<plugin>
-  <groupId>org.apache.maven.plugins</groupId>
-  <artifactId>maven-compiler-plugin</artifactId>
-  <configuration>
-    <compilerArgument>-proc:full</compilerArgument>
-  </configuration>
-</plugin>
 ```
 
 #### 3. Create a Bean Class annotated with @Singleton
@@ -81,60 +69,6 @@ module org.example {
   requires io.avaje.inject;
   // you must define the fully qualified class name of the generated classes. if you use an import statement, compilation will fail
   provides Module with org.example.ExampleModule;
-}
-```
-
-## Similar to [Dagger](https://google.github.io/dagger/)
-
-- Uses Java annotation processing for dependency injection
-- Generates source code
-- Avoids any use of reflection or classpath scanning (so low overhead and fast startup)
-
-## Differences to Dagger
-
-- Aimed specifically for server-side development (rather than Android)
-- Supports lifecycle methods with `@PostConstruct` and `@PreDestory`
-- Supports `@Factory` and `@Bean`
-- Provides API to obtain all bean instances that implement an interface
-- Provides API to obtain all bean instances that have an annotation
-- Integration with server-side web frameworks Javalin, Helidon
-
-## Spring DI comparison
-
-|  Avaje | Spring
-| :--- | :---  |
-| [@Singleton](https://avaje.io/inject/#singleton) | @Component, @Service, @Repository |
-| [Provider&lt;T>](https://avaje.io/inject/#provider) | FactoryBean&lt;T> |
-| [@Inject](https://avaje.io/inject/#inject) | @Inject, @Autowired |
-| [@Inject @Nullable](https://avaje.io/inject/#nullable) or [@Inject Optional&lt;T>](https://avaje.io/inject/#optional) | @Autowired(required=false) |
-| [@PostConstruct](https://avaje.io/inject/#post-construct) | @PostConstruct|
-| [@PreDestroy](https://avaje.io/inject/#pre-destroy) | @PreDestroy |
-| [@Factory and @Bean](https://avaje.io/inject/#factory) | @Configuration and @Bean |
-| [@RequiresBean and @RequiresProperty](https://avaje.io/inject/#conditional) | @Conditional |
-| [@Primary](https://avaje.io/inject/#primary) | @Primary |
-| [@Secondary](https://avaje.io/inject/#secondary) | @Secondary |
-| [@AssistFactory](https://avaje.io/inject/#assistInject) | - |
-
-## Generated Code
-
-### DI classes
-
-DI classes will be generated to call the constructors for annotated type/factory methods. Below is the class generated for the `Example` class in the above quickstart.
-
-```java
-@Generated("io.avaje.inject.generator")
-public final class Example$DI  {
-
-  /**
-   * Create and register Example.
-   */
-  public static void build(Builder builder) {
-    if (builder.isAddBeanFor(Example.class)) {
-      var bean = new Example(builder.get(DependencyClass.class,"!d1"), builder.get(DependencyClass2.class,"!d2"));
-      builder.register(bean);
-      // depending on the type of bean, callbacks for field/method injection, and lifecycle support will be generated here as well.
-    }
-  }
 }
 ```
 
@@ -200,3 +134,35 @@ public final class ExampleModule implements Module {
   }
 }
 ```
+
+## Similar to [Dagger](https://google.github.io/dagger/)
+
+- Uses Java annotation processing for dependency injection
+- Generates source code
+- Avoids any use of reflection or classpath scanning (so low overhead and fast startup)
+
+## Differences to Dagger
+
+- Specifically Aimed for server-side development (rather than Android)
+- Provides API to obtain all bean instances that implement an interface
+- Lifecycle methods with `@PostConstruct` and `@PreDestroy`
+- Spring-like factory classes with `@Factory` and `@Bean`
+- Conditional Wiring based on active profiles or existing beans/properties
+
+## DI Framework comparison
+
+|  Avaje | Dagger | Spring
+| :--- | :---  | :---  |
+| [@Singleton](https://avaje.io/inject/#singleton) | @Singleton | @Component, @Service, @Repository |
+| [Provider&lt;T>](https://avaje.io/inject/#provider) | Provider&lt;T> | FactoryBean&lt;T>
+| [@Inject](https://avaje.io/inject/#inject) | @Inject | @Inject, @Autowired 
+| [@Inject @Nullable](https://avaje.io/inject/#nullable) or [@Inject Optional&lt;T>](https://avaje.io/inject/#optional) | @Inject @Nullable | @Autowired(required=false)
+| [@Qualifier/@Named](https://avaje.io/inject/#qualifiers) | @Qualifier/@Named | @Qualifier
+| [@AssistFactory](https://avaje.io/inject/#assistInject) | @AssistedFactory | - |
+| [@PostConstruct](https://avaje.io/inject/#post-construct) | - | @PostConstruct
+| [@PreDestroy](https://avaje.io/inject/#pre-destroy) | - | @PreDestroy 
+| [@Factory and @Bean](https://avaje.io/inject/#factory) | - | @Configuration and @Bean 
+| [@RequiresBean and @RequiresProperty](https://avaje.io/inject/#conditional) | - | @Conditional 
+| [@Primary](https://avaje.io/inject/#primary) | - | @Primary 
+| [@Secondary](https://avaje.io/inject/#secondary) | - | @Secondary 
+| [@InjectTest](https://avaje.io/inject/#component-testing) | - | @SpringBootTest 

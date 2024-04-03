@@ -78,14 +78,17 @@ final class MetaData {
   }
 
   private String trimName(String name) {
-    return "".equals(name) ? null : name;
+    if (name == null || name.isEmpty()) {
+      return null;
+    }
+    return name.replace("\\\"", "'");
   }
 
   String buildName() {
     if (Util.isVoid(type)) {
       return "void_" + Util.trimMethod(method);
     } else {
-      final String trimType = Util.trimMethod(type);
+      final String trimType = Util.trimMethod(Util.unwrapProvider(type));
       if (name != null) {
         return trimType + "_" + name.replaceAll("[^a-zA-Z0-9_$]+", "_");
       } else {
@@ -243,7 +246,11 @@ final class MetaData {
     if (size > 1) {
       sb.eol().append("        ");
     }
+    var seen = new HashSet<String>();
     for (int i = 0; i < types.size(); i++) {
+      if (!seen.add(types.get(i))) {
+        continue;
+      }
       if (i > 0) {
         sb.append(",").eol().append("        ");
       }

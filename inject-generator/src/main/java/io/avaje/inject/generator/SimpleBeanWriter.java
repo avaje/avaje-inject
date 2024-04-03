@@ -4,6 +4,7 @@ import static io.avaje.inject.generator.APContext.createSourceFile;
 import static io.avaje.inject.generator.APContext.logError;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -74,13 +75,18 @@ final class SimpleBeanWriter {
 
   private void writeGenericTypeFields() {
     // collect all types to prevent duplicates
-    Set<UType> genericTypes = beanReader.allGenericTypes();
-    if (!genericTypes.isEmpty()) {
+    Set<UType> genericTypes =
+      beanReader.allGenericTypes().stream()
+        .map(Util::unwrapProvider)
+        .filter(UType::isGeneric)
+        .collect(toSet());
 
+    if (!genericTypes.isEmpty()) {
       final Map<String, String> seenShortNames = new HashMap<>();
       final Set<String> writtenFields = new HashSet<>();
 
-      for (final UType type : genericTypes) {
+      for (final UType utype : genericTypes) {
+        var type = Util.unwrapProvider(utype);
         final var fieldName = Util.shortName(type).replace(".", "_");
         final var components = type.componentTypes();
         if (components.size() == 1 && components.get(0).kind() == TypeKind.WILDCARD
@@ -91,7 +97,6 @@ final class SimpleBeanWriter {
 
         writer.append("  public static final Type TYPE_%s =", fieldName).eol()
           .append("      new GenericType<");
-
         writeGenericType(type, seenShortNames, writer);
         // use fully qualified types here rather than use type.writeShort(writer)
         writer.append(">(){}.type();").eol();
@@ -145,7 +150,7 @@ final class SimpleBeanWriter {
     method.buildAddFor(writer);
     method.builderGetFactory(writer, beanReader.hasConditions());
     method.startTry(writer);
-    if (method.isProtoType() || method.isUseProviderForSecondary()) {
+    if (method.isLazy() || method.isProtoType() || method.isUseProviderForSecondary()) {
       method.builderAddBeanProvider(writer);
       method.endTry(writer);
     } else {
@@ -175,9 +180,9 @@ final class SimpleBeanWriter {
   private void writeAddFor(MethodReader constructor) {
     beanReader.buildConditional(writer);
     beanReader.buildAddFor(writer);
-    if (beanReader.prototype()) {
+    if (beanReader.registerProvider()) {
       indent += "  ";
-      writer.append("      builder.asPrototype().registerProvider(() -> {", shortName, shortName).eol();
+      writer.append("      builder.%s(() -> {", beanReader.lazy() ? "registerLazy" : "asPrototype().registerProvider").eol();
     }
     constructor.startTry(writer);
     writeCreateBean(constructor);
@@ -186,7 +191,7 @@ final class SimpleBeanWriter {
     if (beanReader.isExtraInjectionRequired()) {
       writeExtraInjection();
     }
-    if (beanReader.prototype()) {
+    if (beanReader.registerProvider()) {
       beanReader.prototypePostConstruct(writer, indent);
       writer.indent("        return bean;").eol();
       writer.indent("      });").eol();
@@ -197,7 +202,7 @@ final class SimpleBeanWriter {
   }
 
   private void writeBuildMethodStart() {
-    if (beanReader.prototype()) {
+    if (beanReader.registerProvider()) {
       writer.append(CODE_COMMENT_BUILD_PROVIDER, shortName).eol();
     } else {
       writer.append(CODE_COMMENT_BUILD, shortName).eol();
@@ -214,13 +219,13 @@ final class SimpleBeanWriter {
   }
 
   private void writeExtraInjection() {
-    if (!beanReader.prototype()) {
+    if (!beanReader.registerProvider()) {
       writer.indent("      ").append("builder.addInjector(b -> {").eol();
       writer.indent("      ").append("  // field and method injection").eol();
     }
     injectFields();
     injectMethods();
-    if (!beanReader.prototype()) {
+    if (!beanReader.registerProvider()) {
       writer.indent("      });").eol();
     }
   }
@@ -278,8 +283,8 @@ final class SimpleBeanWriter {
   }
 
   private void injectFields() {
-    String bean = beanReader.prototype() ? "bean" : "$bean";
-    String builder = beanReader.prototype() ? "builder" : "b";
+    String bean = beanReader.registerProvider() ? "bean" : "$bean";
+    String builder = beanReader.registerProvider() ? "builder" : "b";
     for (FieldReader fieldReader : beanReader.injectFields()) {
       String fieldName = fieldReader.fieldName();
       String getDependency = fieldReader.builderGetDependency(builder);
@@ -289,8 +294,8 @@ final class SimpleBeanWriter {
 
   private void injectMethods() {
     final var needsTry = beanReader.needsTryForMethodInjection();
-    final var bean = beanReader.prototype() ? "bean" : "$bean";
-    final var builder = beanReader.prototype() ? "builder" : "b";
+    final var bean = beanReader.registerProvider() ? "bean" : "$bean";
+    final var builder = beanReader.registerProvider() ? "builder" : "b";
     if (needsTry) {
       writer.indent("        try {").eol();
     }
