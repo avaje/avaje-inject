@@ -205,6 +205,7 @@ final class MethodReader {
 
     writer.indent(String.format(".%s(() -> {", lazy ? "registerLazy" : "registerProvider")).eol();
 
+    startTry(writer);
     writer.indent(indent).append("    return ");
     writer.append("factory.%s(", methodName);
     for (int i = 0; i < params.size(); i++) {
@@ -214,6 +215,7 @@ final class MethodReader {
       params.get(i).builderGetDependency(writer, "builder");
     }
     writer.append(");").eol();
+    endTry(writer);
     writer.indent(indent).append("  });").eol();
     writer.indent(indent).append("}").eol();
   }
