@@ -14,7 +14,6 @@ import org.example.myapp.other.SimulateExternalPub2;
 
 @Component.Import(value = {SimulateExternal.class, SimulateExternal2.class, SimulateExternalPub.class, SimulateExternalPub2.class}) //, packagePrivate = true)
 @Import(MyExternalAspect.class)
-@InjectModule(strictWiring = true)
 public class Main {
 
   public static void main(String[] args) {
