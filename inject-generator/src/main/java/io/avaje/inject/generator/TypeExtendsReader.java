@@ -118,11 +118,11 @@ final class TypeExtendsReader {
       return List.of();
     }
     if (baseTypeIsInterface) {
-      return List.of(Util.unwrapProvider(baseType.asType()));
+      return List.of(Util.unwrapProvider(baseUType));
     }
     var autoProvides = new ArrayList<>(interfaceTypes);
     autoProvides.addAll(extendsTypes);
-    autoProvides.add(Util.unwrapProvider(baseType.asType()));
+    autoProvides.add(Util.unwrapProvider(baseUType));
     return autoProvides;
   }
 
