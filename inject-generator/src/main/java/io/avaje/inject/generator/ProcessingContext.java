@@ -1,7 +1,6 @@
 package io.avaje.inject.generator;
 
 import javax.annotation.processing.FilerException;
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.FileObject;
@@ -19,9 +18,9 @@ final class ProcessingContext {
 
   private static final ThreadLocal<Ctx> CTX = new ThreadLocal<>();
   private static boolean processingOver;
+  private static boolean moduleValidation;
 
-  private ProcessingContext() {
-  }
+  private ProcessingContext() {}
 
   static final class Ctx {
     private final Set<String> uniqueModuleNames = new HashSet<>();
@@ -31,21 +30,20 @@ final class ProcessingContext {
     private final List<TypeElement> delayQueue = new ArrayList<>();
     private boolean validated;
 
-    public Ctx(Set<String> moduleFileProvided) {
+    Ctx(Set<String> moduleFileProvided) {
       ExternalProvider.registerModuleProvidedTypes(providedTypes);
       providedTypes.addAll(moduleFileProvided);
     }
 
-    public Ctx() {
-    }
+    Ctx() {}
   }
 
-  public static void init(ProcessingEnvironment processingEnv, Set<String> moduleFileProvided) {
+  static void init(Set<String> moduleFileProvided, boolean performModuleValidation) {
+    ProcessingContext.moduleValidation = performModuleValidation;
     CTX.set(new Ctx(moduleFileProvided));
-    APContext.init(processingEnv);
   }
 
-  public static void testInit() {
+  static void testInit() {
     CTX.set(new Ctx());
   }
 
@@ -142,18 +140,13 @@ final class ProcessingContext {
 
   static void validateModule(String injectFQN) {
     var module = getProjectModuleElement();
-    if (module != null && !CTX.get().validated && !module.isUnnamed()) {
-
+    if (moduleValidation && module != null && !CTX.get().validated && !module.isUnnamed()) {
       CTX.get().validated = true;
-
       try (var reader = getModuleInfoReader()) {
-
         var noProvides = reader.lines().noneMatch(s -> s.contains(injectFQN));
-
         if (noProvides) {
           logError(module, "Missing \"provides io.avaje.inject.spi.Module with %s;\"", injectFQN);
         }
-
       } catch (Exception e) {
         // can't read module
       }
