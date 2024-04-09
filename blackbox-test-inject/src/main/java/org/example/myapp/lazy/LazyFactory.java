@@ -20,4 +20,10 @@ public class LazyFactory {
     if (initialized != null) initialized.set(true);
     return new LazyBean();
   }
+
+  @Bean
+  @Named("factoryThrows")
+  LazyBean lazyIntThrows(@Nullable AtomicBoolean initialized) throws Exception {
+    return lazyInt(initialized);
+  }
 }

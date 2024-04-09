@@ -48,6 +48,12 @@ public class AppConfig {
     return new Builder();
   }
 
+  @Prototype
+  @Bean
+  public BuilderThrows newBuilderThrows() throws Exception {
+    return new BuilderThrows();
+  }
+
   @Bean
   Generated newGenerated() {
     return new Generated();
@@ -57,6 +63,12 @@ public class AppConfig {
   @Bean
   public MySecType generalSecondary() {
     return new MySecType();
+  }
+
+  @Secondary
+  @Bean
+  public MySecTypeThrows generalSecondaryThrows() throws Exception {
+    return new MySecTypeThrows();
   }
 
   @Secondary
@@ -100,10 +112,16 @@ public class AppConfig {
   public static class Builder {
   }
 
+  public static class BuilderThrows {
+  }
+
   public static class Generated {
   }
 
   public static class MySecType {
+  }
+
+  public static class MySecTypeThrows {
   }
 
   public static class MySecOptType {
