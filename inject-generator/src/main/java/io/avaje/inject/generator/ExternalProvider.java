@@ -49,9 +49,8 @@ final class ExternalProvider {
   static void registerModuleProvidedTypes(Set<String> providedTypes) {
     if (!injectAvailable) {
       if (!pluginExists("build/avaje-plugin-exists.txt")
-          && !pluginExists("target/avaje-plugin-exists.txt")) {
-        APContext.logNote(
-            "Unable to detect Avaje Inject in Annotation Processor ClassPath, use the Avaje Inject Maven/Gradle plugin for detecting Inject Modules from dependencies");
+        && !pluginExists("target/avaje-plugin-exists.txt")) {
+        APContext.logNote("Unable to detect Avaje Inject in Annotation Processor ClassPath, use the Avaje Inject Maven/Gradle plugin for detecting Inject Modules from dependencies");
       }
       return;
     }
@@ -87,7 +86,7 @@ final class ExternalProvider {
   static void registerPluginProvidedTypes(ScopeInfo defaultScope) {
     avajePlugins.forEach((k, v) -> {
       if (APContext.typeElement(k) != null) {
-    	APContext.logNote("Loaded Plugin: " + k);
+        APContext.logNote("Loaded Plugin: " + k);
         v.forEach(defaultScope::pluginProvided);
       }
     });
@@ -112,12 +111,12 @@ final class ExternalProvider {
   private static boolean pluginExists(String relativeName) {
     try {
       final String resource =
-          APContext.filer()
-              .getResource(StandardLocation.CLASS_OUTPUT, "", relativeName)
-              .toUri()
-              .toString()
-              .replaceFirst("/target/classes", "")
-              .replaceFirst("/build/classes/java/main", "");
+        APContext.filer()
+          .getResource(StandardLocation.CLASS_OUTPUT, "", relativeName)
+          .toUri()
+          .toString()
+          .replaceFirst("/target/classes", "")
+          .replaceFirst("/build/classes/java/main", "");
       return Paths.get(new URI(resource)).toFile().exists();
     } catch (final Exception e) {
       return false;

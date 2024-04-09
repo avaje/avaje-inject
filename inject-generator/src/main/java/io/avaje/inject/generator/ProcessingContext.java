@@ -1,7 +1,6 @@
 package io.avaje.inject.generator;
 
 import javax.annotation.processing.FilerException;
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.FileObject;
@@ -31,23 +30,20 @@ final class ProcessingContext {
     private final List<TypeElement> delayQueue = new ArrayList<>();
     private boolean validated;
 
-    public Ctx(Set<String> moduleFileProvided) {
+    Ctx(Set<String> moduleFileProvided) {
       ExternalProvider.registerModuleProvidedTypes(providedTypes);
       providedTypes.addAll(moduleFileProvided);
     }
 
-    public Ctx() {}
+    Ctx() {}
   }
 
-  public static void init(
-      ProcessingEnvironment processingEnv,
-      Set<String> moduleFileProvided,
-      boolean moduleValdation) {
-    moduleValidation = moduleValdation;
+  static void init(Set<String> moduleFileProvided, boolean performModuleValidation) {
+    ProcessingContext.moduleValidation = performModuleValidation;
     CTX.set(new Ctx(moduleFileProvided));
   }
 
-  public static void testInit() {
+  static void testInit() {
     CTX.set(new Ctx());
   }
 
@@ -90,9 +86,9 @@ final class ProcessingContext {
 
   static FileObject createMetaInfWriter(ScopeInfo.Type scopeType) throws IOException {
     final var serviceName =
-        scopeType == ScopeInfo.Type.DEFAULT
-            ? Constants.META_INF_MODULE
-            : Constants.META_INF_TESTMODULE;
+      scopeType == ScopeInfo.Type.DEFAULT
+        ? Constants.META_INF_MODULE
+        : Constants.META_INF_TESTMODULE;
     return createMetaInfWriterFor(serviceName);
   }
 
@@ -145,17 +141,12 @@ final class ProcessingContext {
   static void validateModule(String injectFQN) {
     var module = getProjectModuleElement();
     if (moduleValidation && module != null && !CTX.get().validated && !module.isUnnamed()) {
-
       CTX.get().validated = true;
-
       try (var reader = getModuleInfoReader()) {
-
         var noProvides = reader.lines().noneMatch(s -> s.contains(injectFQN));
-
         if (noProvides) {
           logError(module, "Missing \"provides io.avaje.inject.spi.Module with %s;\"", injectFQN);
         }
-
       } catch (Exception e) {
         // can't read module
       }
@@ -168,10 +159,10 @@ final class ProcessingContext {
 
   static Set<TypeElement> delayedElements() {
     var set =
-        CTX.get().delayQueue.stream()
-            .map(t -> t.getQualifiedName().toString())
-            .map(APContext::typeElement)
-            .collect(toSet());
+      CTX.get().delayQueue.stream()
+        .map(t -> t.getQualifiedName().toString())
+        .map(APContext::typeElement)
+        .collect(toSet());
     CTX.get().delayQueue.clear();
     return set;
   }
