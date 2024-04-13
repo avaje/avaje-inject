@@ -203,7 +203,7 @@ final class MethodReader {
       writer.append(".asSecondary()").eol();
     }
 
-    writer.indent(String.format(".%s(() -> {", lazy ? "registerLazy" : "registerProvider")).eol();
+    writer.indent(".registerProvider(() -> {").eol();
 
     writer.indent(indent).append("    return ");
     writer.append("factory.%s(", methodName);
