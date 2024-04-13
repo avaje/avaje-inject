@@ -8,13 +8,13 @@ import jakarta.inject.Singleton;
 @Singleton
 public class ProtoTypeNumberGetter {
 
-  private final Provider<Integer> nProv;
+  private final Provider<Long> nProv;
 
-  public ProtoTypeNumberGetter(Provider<Integer> nProv) {
+  public ProtoTypeNumberGetter(Provider<Long> nProv) {
     this.nProv = nProv;
   }
 
-  Integer number() {
+  Long number() {
     return nProv.get();
   }
 }

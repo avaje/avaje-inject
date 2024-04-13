@@ -27,7 +27,7 @@ public class FactoryProvider {
 
   @Bean
   @Prototype
-  Provider<Integer> random() {
-    return new Random()::nextInt;
+  Provider<Long> random() {
+    return new Random()::nextLong;
   }
 }
