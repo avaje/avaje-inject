@@ -195,17 +195,17 @@ final class MethodReader {
       return;
     }
     String indent = "    ";
-
     writer.indent(indent).append("  builder");
     if (prototype) {
-      writer.append(".asPrototype()").eol();
+      writer.append(".asPrototype()");
     } else if(secondary) {
-      writer.append(".asSecondary()").eol();
+      writer.append(".asSecondary()");
     }
 
     writer.indent(".registerProvider(() -> {").eol();
 
-    writer.indent(indent).append("    return ");
+    startTry(writer, "  ");
+    writer.indent(indent).append("  return ");
     writer.append("factory.%s(", methodName);
     for (int i = 0; i < params.size(); i++) {
       if (i > 0) {
@@ -214,6 +214,7 @@ final class MethodReader {
       params.get(i).builderGetDependency(writer, "builder");
     }
     writer.append(");").eol();
+    endTry(writer, "  ");
     writer.indent(indent).append("  });").eol();
     writer.indent(indent).append("}").eol();
   }
@@ -306,18 +307,26 @@ final class MethodReader {
   }
 
   void startTry(Append writer) {
+    startTry(writer, "");
+  }
+
+  void startTry(Append writer, String indent) {
     if (methodThrows()) {
-      writer.append("      try {").eol();
-      writer.setExtraIndent("  ");
+      writer.append(indent).append("      try {").eol();
+      writer.setExtraIndent("  " + indent);
     }
   }
 
   void endTry(Append writer) {
+    endTry(writer, "");
+  }
+
+  void endTry(Append writer, String indent) {
     if (methodThrows()) {
       writer.setExtraIndent(null);
-      writer.append("      } catch (Throwable e) {").eol();
-      writer.append("        throw new RuntimeException(\"Error during wiring\", e);").eol();
-      writer.append("      }").eol();
+      writer.append(indent).append("      } catch (Throwable e) {").eol();
+      writer.append(indent).append("        throw new RuntimeException(\"Error during wiring\", e);").eol();
+      writer.append(indent).append("      }").eol();
     }
   }
 

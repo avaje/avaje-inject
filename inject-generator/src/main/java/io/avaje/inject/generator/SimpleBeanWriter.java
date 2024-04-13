@@ -144,11 +144,10 @@ final class SimpleBeanWriter {
     method.buildConditional(writer);
     method.buildAddFor(writer);
     method.builderGetFactory(writer, beanReader.hasConditions());
-    method.startTry(writer);
     if (method.isLazy() || method.isProtoType() || method.isUseProviderForSecondary()) {
       method.builderAddBeanProvider(writer);
-      method.endTry(writer);
     } else {
+      method.startTry(writer);
       method.builderBuildBean(writer);
       method.builderBuildAddBean(writer);
       method.endTry(writer);

@@ -143,7 +143,7 @@ public final class ExampleModule implements Module {
 
 ## Differences to Dagger
 
-- Specifically Aimed for server-side development (rather than Android)
+- Specifically aimed for server-side development (rather than Android)
 - Provides API to obtain all bean instances that implement an interface
 - Lifecycle methods with `@PostConstruct` and `@PreDestroy`
 - Spring-like factory classes with `@Factory` and `@Bean`
