@@ -235,6 +235,8 @@ final class MethodReader {
         writer.append(".asPrimary()");
       } else if (secondary) {
         writer.append(".asSecondary()");
+      } else if (prototype) {
+        writer.append(".asPrototype()");
       }
       if (Util.isProvider(returnTypeRaw)) {
         writer.append(".registerProvider(bean);").eol();
@@ -360,7 +362,7 @@ final class MethodReader {
   }
 
   boolean isProtoType() {
-    return prototype;
+    return prototype && !Util.isProvider(returnTypeRaw);
   }
 
   boolean isLazy() {
