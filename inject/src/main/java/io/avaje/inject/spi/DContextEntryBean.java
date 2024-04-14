@@ -4,6 +4,7 @@ import io.avaje.inject.BeanEntry;
 
 import jakarta.inject.Provider;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Holds either the bean itself or a provider of the bean.
@@ -136,6 +137,7 @@ class DContextEntryBean {
    */
   static final class OnceProvider extends DContextEntryBean {
 
+    private final ReentrantLock lock = new ReentrantLock();
     private final Provider<?> provider;
     private Object bean;
 
@@ -146,11 +148,14 @@ class DContextEntryBean {
 
     @Override
     Object bean() {
-      synchronized (this) {
+      lock.lock();
+      try {
         if (bean == null) {
           bean = provider.get();
         }
         return bean;
+      } finally {
+        lock.unlock();
       }
     }
   }
