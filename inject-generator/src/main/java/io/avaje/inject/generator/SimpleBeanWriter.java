@@ -176,7 +176,7 @@ final class SimpleBeanWriter {
     beanReader.buildAddFor(writer);
     if (beanReader.registerProvider()) {
       indent += "  ";
-      writer.append("      builder.%s(() -> {", beanReader.lazy() ? "registerLazy" : "asPrototype().registerProvider").eol();
+      writer.append("      builder.%s(() -> {", beanReader.lazy() ? "registerProvider" : "asPrototype().registerProvider").eol();
     }
     constructor.startTry(writer);
     writeCreateBean(constructor);
