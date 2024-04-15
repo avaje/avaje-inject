@@ -3,6 +3,7 @@ package io.avaje.inject.generator;
 import static java.util.Map.entry;
 import static java.util.stream.Collectors.toList;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -75,32 +76,32 @@ final class ExternalProvider {
     while (iterator.hasNext()) {
       try {
         final var module = iterator.next();
-        final var name = module.getClass().getCanonicalName();
+        final var name = module.getClass().getTypeName();
 
         final var provides = new ArrayList<String>();
         System.out.println("Detected Module: " + name);
-        for (final Class<?> provide : module.provides()) {
-          providedTypes.add(provide.getCanonicalName());
-          provides.add(provide.getCanonicalName());
+        for (final var provide : module.provides()) {
+          providedTypes.add(provide.getTypeName());
+          provides.add(provide.getTypeName());
         }
-        for (final Class<?> provide : module.autoProvides()) {
-          providedTypes.add(provide.getCanonicalName());
-          provides.add(provide.getCanonicalName());
+        for (final var provide : module.autoProvides()) {
+          providedTypes.add(provide.getTypeName());
+          provides.add(provide.getTypeName());
         }
-        for (final Class<?> provide : module.autoProvidesAspects()) {
-          final var aspectType = Util.wrapAspect(provide.getCanonicalName());
+        for (final var provide : module.autoProvidesAspects()) {
+          final var aspectType = Util.wrapAspect(provide.getTypeName());
           providedTypes.add(aspectType);
           provides.add(aspectType);
         }
         final var requires =
-            Arrays.stream(module.requires()).map(Class::getCanonicalName).collect(toList());
+            Arrays.stream(module.requires()).map(Type::getTypeName).collect(toList());
 
-        Arrays.stream(module.autoRequires()).map(Class::getCanonicalName).forEach(requires::add);
+        Arrays.stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
         Arrays.stream(module.requiresPackages())
-            .map(Class::getCanonicalName)
+            .map(Type::getTypeName)
             .forEach(requires::add);
         Arrays.stream(module.autoRequiresAspects())
-            .map(Class::getCanonicalName)
+            .map(Type::getTypeName)
             .map(Util::wrapAspect)
             .forEach(requires::add);
         ProcessingContext.addAvajeModule(new AvajeModule(name, provides, requires));
@@ -125,16 +126,16 @@ final class ExternalProvider {
       return;
     }
     for (final Plugin plugin : ServiceLoader.load(Plugin.class, Processor.class.getClassLoader())) {
-      var name = plugin.getClass().getCanonicalName();
+      var name = plugin.getClass().getTypeName();
       if (avajePlugins.containsKey(name)) {
         continue;
       }
-      APContext.logNote("Loaded Plugin: " + plugin.getClass().getCanonicalName());
-      for (final Class<?> provide : plugin.provides()) {
-        defaultScope.pluginProvided(provide.getCanonicalName());
+      APContext.logNote("Loaded Plugin: " + plugin.getClass().getTypeName());
+      for (final var provide : plugin.provides()) {
+        defaultScope.pluginProvided(provide.getTypeName());
       }
-      for (final Class<?> provide : plugin.providesAspects()) {
-        defaultScope.pluginProvided(Util.wrapAspect(provide.getCanonicalName()));
+      for (final var provide : plugin.providesAspects()) {
+        defaultScope.pluginProvided(Util.wrapAspect(provide.getTypeName()));
       }
     }
   }

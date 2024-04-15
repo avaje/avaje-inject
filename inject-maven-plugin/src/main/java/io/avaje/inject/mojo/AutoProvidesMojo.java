@@ -6,6 +6,7 @@ import static java.util.stream.Collectors.toList;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -47,7 +48,7 @@ public class AutoProvidesMojo extends AbstractMojo {
   @Parameter(defaultValue = "${project}", readonly = true, required = true)
   private MavenProject project;
 
-  List<AvajeModule> modules = new ArrayList<>();
+  private final List<AvajeModule> modules = new ArrayList<>();
 
   @Override
   public void execute() throws MojoExecutionException {
@@ -102,13 +103,13 @@ public class AutoProvidesMojo extends AbstractMojo {
 
     final Log log = getLog();
     for (final var plugin : ServiceLoader.load(Plugin.class, newClassLoader)) {
-      log.info("Loaded Plugin: " + plugin.getClass().getCanonicalName());
+      log.info("Loaded Plugin: " + plugin.getClass().getTypeName());
 
-      for (final Class<?> provide : plugin.provides()) {
-        providedTypes.add(provide.getCanonicalName());
+      for (final Type provide : plugin.provides()) {
+        providedTypes.add(provide.getTypeName());
       }
-      for (final Class<?> provide : plugin.providesAspects()) {
-        providedTypes.add(wrapAspect(provide.getCanonicalName()));
+      for (final Type provide : plugin.providesAspects()) {
+        providedTypes.add(wrapAspect(provide.getTypeName()));
       }
     }
 
@@ -125,33 +126,33 @@ public class AutoProvidesMojo extends AbstractMojo {
     final Log log = getLog();
     for (final var module : ServiceLoader.load(Module.class, newClassLoader)) {
 
-      final var name = module.getClass().getCanonicalName();
+      final var name = module.getClass().getTypeName();
       log.info("Detected External Module: " + name);
 
       final var provides = new ArrayList<String>();
-      for (final Class<?> provide : module.provides()) {
-        var type = provide.getCanonicalName();
+      for (final Type provide : module.provides()) {
+        var type = provide.getTypeName();
         providedTypes.add(type);
         provides.add(type);
       }
-      for (final Class<?> provide : module.autoProvides()) {
-        var type = provide.getCanonicalName();
+      for (final Type provide : module.autoProvides()) {
+        var type = provide.getTypeName();
         providedTypes.add(type);
         provides.add(type);
       }
-      for (final Class<?> provide : module.autoProvidesAspects()) {
-        var type = wrapAspect(provide.getCanonicalName());
+      for (final Type provide : module.autoProvidesAspects()) {
+        var type = wrapAspect(provide.getTypeName());
         providedTypes.add(type);
         provides.add(type);
       }
 
       final var requires =
-          Arrays.stream(module.requires()).map(Class::getCanonicalName).collect(toList());
+          Arrays.<Type>stream(module.requires()).map(Type::getTypeName).collect(toList());
 
-      Arrays.stream(module.autoRequires()).map(Class::getCanonicalName).forEach(requires::add);
-      Arrays.stream(module.requiresPackages()).map(Class::getCanonicalName).forEach(requires::add);
-      Arrays.stream(module.autoRequiresAspects())
-          .map(Class::getCanonicalName)
+      Arrays.<Type>stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
+      Arrays.<Type>stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
+      Arrays.<Type>stream(module.autoRequiresAspects())
+          .map(Type::getTypeName)
           .map(AutoProvidesMojo::wrapAspect)
           .forEach(requires::add);
       modules.add(new AvajeModule(name, provides, requires));
