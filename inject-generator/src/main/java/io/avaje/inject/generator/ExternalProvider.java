@@ -1,6 +1,9 @@
 package io.avaje.inject.generator;
 
 import static java.util.Map.entry;
+
+import java.net.URI;
+import java.nio.file.Paths;
 import static java.util.List.of;
 
 import java.util.List;
@@ -8,6 +11,8 @@ import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.Set;
+
+import javax.tools.StandardLocation;
 
 import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.Plugin;
@@ -43,13 +48,16 @@ final class ExternalProvider {
 
   static void registerModuleProvidedTypes(Set<String> providedTypes) {
     if (!injectAvailable) {
-      System.out.println("Unable to detect Avaje Inject in Annotation Processor ClassPath, use the Avaje Inject Maven/Gradle plugin for detecting Inject Modules from dependencies");
+      if (!pluginExists("build/avaje-plugin-exists.txt")
+        && !pluginExists("target/avaje-plugin-exists.txt")) {
+        APContext.logNote("Unable to detect Avaje Inject in Annotation Processor ClassPath, use the Avaje Inject Maven/Gradle plugin for detecting Inject Modules from dependencies");
+      }
       return;
     }
 
     final var iterator = ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader()).iterator();
     if (!iterator.hasNext()) {
-      System.out.println("No external modules detected");
+      APContext.logNote("No external modules detected");
       return;
     }
     while (iterator.hasNext()) {
@@ -78,7 +86,7 @@ final class ExternalProvider {
   static void registerPluginProvidedTypes(ScopeInfo defaultScope) {
     avajePlugins.forEach((k, v) -> {
       if (APContext.typeElement(k) != null) {
-        System.out.println("Loaded Plugin: " + k);
+        APContext.logNote("Loaded Plugin: " + k);
         v.forEach(defaultScope::pluginProvided);
       }
     });
@@ -90,13 +98,28 @@ final class ExternalProvider {
       if (avajePlugins.containsKey(name)) {
         continue;
       }
-      System.out.println("Loaded Plugin: " + plugin.getClass().getCanonicalName());
+      APContext.logNote("Loaded Plugin: " + plugin.getClass().getCanonicalName());
       for (final var provide : plugin.provides()) {
-        defaultScope.pluginProvided(provide.getTypeName());
+        defaultScope.pluginProvided(provide.getCanonicalName());
       }
       for (final var provide : plugin.providesAspects()) {
         defaultScope.pluginProvided(Util.wrapAspect(provide.getTypeName()));
       }
+    }
+  }
+
+  private static boolean pluginExists(String relativeName) {
+    try {
+      final String resource =
+        APContext.filer()
+          .getResource(StandardLocation.CLASS_OUTPUT, "", relativeName)
+          .toUri()
+          .toString()
+          .replaceFirst("/target/classes", "")
+          .replaceFirst("/build/classes/java/main", "");
+      return Paths.get(new URI(resource)).toFile().exists();
+    } catch (final Exception e) {
+      return false;
     }
   }
 }

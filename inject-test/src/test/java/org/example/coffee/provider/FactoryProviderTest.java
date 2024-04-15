@@ -19,4 +19,12 @@ class FactoryProviderTest {
       assertThat(scope.get(String.class, "second")).isEqualTo("Nah, I'd win");
     }
   }
+
+  @Test
+  void testProtoType() {
+    try (var scope = BeanScope.builder().build()) {
+      var numberGetter = scope.get(ProtoTypeNumberGetter.class);
+      assertThat(numberGetter.number()).isNotEqualTo(numberGetter.number());
+    }
+  }
 }
