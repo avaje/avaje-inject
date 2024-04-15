@@ -100,7 +100,7 @@ final class ExternalProvider {
       }
       APContext.logNote("Loaded Plugin: " + plugin.getClass().getCanonicalName());
       for (final var provide : plugin.provides()) {
-        defaultScope.pluginProvided(provide.getCanonicalName());
+        defaultScope.pluginProvided(provide.getTypeName());
       }
       for (final var provide : plugin.providesAspects()) {
         defaultScope.pluginProvided(Util.wrapAspect(provide.getTypeName()));
