@@ -15,9 +15,12 @@ class LazyTest {
     var initialized = new AtomicBoolean();
     try (var scope = BeanScope.builder().beans(initialized).build()) {
       assertThat(initialized).isFalse();
-      LazyBean prov = scope.get(LazyBean.class, "single");
+      LazyBean lazy = scope.get(LazyBean.class, "single");
       assertThat(initialized).isTrue();
-      assertThat(prov).isNotNull();
+      assertThat(lazy).isNotNull();
+
+      LazyBean lazyAgain = scope.get(LazyBean.class, "single");
+      assertThat(lazyAgain).isSameAs(lazy);
     }
   }
 

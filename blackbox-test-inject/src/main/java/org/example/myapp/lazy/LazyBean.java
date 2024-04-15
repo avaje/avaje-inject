@@ -19,7 +19,6 @@ public class LazyBean {
 
   @PostConstruct
   void init(BeanScope scope) {
-
     // note that nested test scopes will not be lazy
     if (initialized != null) initialized.set(true);
   }
