@@ -5,7 +5,7 @@
   <parent>
     <artifactId>avaje-inject-parent</artifactId>
     <groupId>io.avaje</groupId>
-    <version>9.12-RC2</version>
+    <version>9.13-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -33,7 +33,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-jsonb</artifactId>
-      <version>1.10</version>
+      <version>1.11</version>
     </dependency>
 
     <dependency>
@@ -73,7 +73,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>junit</artifactId>
-      <version>1.4</version>
+      <version>1.5</version>
       <scope>test</scope>
     </dependency>
 
