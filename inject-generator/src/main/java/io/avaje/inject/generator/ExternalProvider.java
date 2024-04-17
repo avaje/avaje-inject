@@ -64,14 +64,14 @@ final class ExternalProvider {
       try {
         final var module = iterator.next();
         System.out.println("Detected Module: " + module.getClass().getCanonicalName());
-        for (final Class<?> provide : module.provides()) {
-          providedTypes.add(provide.getCanonicalName());
+        for (final var provide : module.provides()) {
+          providedTypes.add(provide.getTypeName());
         }
-        for (final Class<?> provide : module.autoProvides()) {
-          providedTypes.add(provide.getCanonicalName());
+        for (final var provide : module.autoProvides()) {
+          providedTypes.add(provide.getTypeName());
         }
-        for (final Class<?> provide : module.autoProvidesAspects()) {
-          providedTypes.add(Util.wrapAspect(provide.getCanonicalName()));
+        for (final var provide : module.autoProvidesAspects()) {
+          providedTypes.add(Util.wrapAspect(provide.getTypeName()));
         }
       } catch (final ServiceConfigurationError expected) {
         // ignore expected error reading the module that we are also writing
@@ -99,11 +99,11 @@ final class ExternalProvider {
         continue;
       }
       APContext.logNote("Loaded Plugin: " + plugin.getClass().getCanonicalName());
-      for (final Class<?> provide : plugin.provides()) {
-        defaultScope.pluginProvided(provide.getCanonicalName());
+      for (final var provide : plugin.provides()) {
+        defaultScope.pluginProvided(provide.getTypeName());
       }
-      for (final Class<?> provide : plugin.providesAspects()) {
-        defaultScope.pluginProvided(Util.wrapAspect(provide.getCanonicalName()));
+      for (final var provide : plugin.providesAspects()) {
+        defaultScope.pluginProvided(Util.wrapAspect(provide.getTypeName()));
       }
     }
   }

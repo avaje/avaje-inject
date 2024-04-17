@@ -54,4 +54,7 @@ final class Constants {
   static final String DEPENDENCYMETA = "io.avaje.inject.spi.DependencyMeta";
   static final String MODULE = "io.avaje.inject.spi.Module";
   static final String GENERICTYPE = "io.avaje.inject.spi.GenericType";
+
+  static final String CONDITIONAL_DEPENDENCY = "con:";
+  static final String SOFT_DEPENDENCY = "soft:";
 }

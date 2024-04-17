@@ -1,5 +1,7 @@
 package io.avaje.inject.spi;
 
+import java.lang.reflect.Type;
+
 import io.avaje.inject.InjectModule;
 
 /**
@@ -15,21 +17,21 @@ public interface Module {
   /**
    * Return the set of types this module explicitly provides to other modules.
    */
-  default Class<?>[] provides() {
+  default Type[] provides() {
     return EMPTY_CLASSES;
   }
 
   /**
    * Return the types this module needs to be provided externally or via other modules.
    */
-  default Class<?>[] requires() {
+  default Type[] requires() {
     return EMPTY_CLASSES;
   }
 
   /**
    * Return the packages this module needs to be provided via other modules.
    */
-  default Class<?>[] requiresPackages() {
+  default Type[] requiresPackages() {
     return EMPTY_CLASSES;
   }
 
@@ -39,7 +41,7 @@ public interface Module {
    * This is a convenience when using multiple modules that is otherwise controlled manually by
    * explicitly using {@link InjectModule#provides()}.
    */
-  default Class<?>[] autoProvides() {
+  default Type[] autoProvides() {
     return EMPTY_CLASSES;
   }
 
@@ -60,7 +62,7 @@ public interface Module {
    * This is a convenience when using multiple modules that is otherwise controlled manually by
    * explicitly using {@link InjectModule#requires()} or {@link InjectModule#requiresPackages()}.
    */
-  default Class<?>[] autoRequires() {
+  default Type[] autoRequires() {
     return EMPTY_CLASSES;
   }
 
