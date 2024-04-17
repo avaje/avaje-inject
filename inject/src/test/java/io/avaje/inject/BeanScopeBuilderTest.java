@@ -112,7 +112,7 @@ class BeanScopeBuilderTest {
     factoryOrder.add(bc("two", EMPTY_CLASSES, of(new GenericType<Map<String, MyFeature>>() {})));
     factoryOrder.add(bc("one", of(new GenericType<Map<String, MyFeature>>() {}), EMPTY_CLASSES));
     factoryOrder.add(bc("three", of(new GenericType<Map<String, MyFeature>>() {}), EMPTY_CLASSES));
-    factoryOrder.orderFactories();
+    factoryOrder.orderModules();
 
     assertThat(names(factoryOrder.factories())).containsExactly("one", "three", "two");
   }
