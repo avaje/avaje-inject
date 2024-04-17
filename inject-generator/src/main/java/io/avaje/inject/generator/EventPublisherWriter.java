@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.createSourceFile;
+import static io.avaje.inject.generator.APContext.logError;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -30,14 +31,11 @@ final class EventPublisherWriter {
 
   EventPublisherWriter(Element element) {
     this.packageName = APContext.elements().getPackageOf(element).getQualifiedName().toString();
-
     this.utype = UType.parse(element.asType());
     this.originName = utype.mainType() + "Publisher";
     importTypes.addAll(utype.importTypes());
     if (utype.isGeneric()) {
-      APContext.logError(
-          element,
-          "Event publishers generation may not be used for generic classes. Generic event publishers must be constructed manually");
+      APContext.logError(element, "Event publishers generation may not be used for generic classes. Generic event publishers must be constructed manually");
     }
     write();
   }
@@ -53,6 +51,8 @@ final class EventPublisherWriter {
       writer.append(MessageFormat.format(TEMPLATE, packageName, imports(), utype.shortType()));
       writer.close();
     } catch (Exception e) {
+      e.printStackTrace();
+      logError("Failed to write EventPublisher class " + e);
     }
   }
 

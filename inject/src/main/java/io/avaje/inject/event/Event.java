@@ -14,25 +14,29 @@ import java.util.concurrent.CompletionStage;
  * <p>Beans fire events via an instance of the <code>Event</code> abstract class, which may be
  * injected:
  *
- * <pre>
- * &#064;Inject
- * Event&lt;LoggedInEvent&gt; loggedInEvent;
- * </pre>
+ * <pre>{@code
+ *
+ *   @Inject
+ *   Event<LoggedInEvent> loggedInEvent;
+ *
+ * }</pre>
  *
  * <p>The <code>fire()</code> method accepts an event object:
  *
- * <pre>
- * public void login() {
- *    ...
- *    loggedInEvent.fire(new LoggedInEvent(user));
- * }
- * </pre>
+ * <pre>{@code
+ *
+ *   public void login() {
+ *     ...
+ *     loggedInEvent.fire(new LoggedInEvent(user));
+ *   }
+ *
+ * }</pre>
  *
  * @param <T> the type of the event object
  */
 public abstract class Event<T> {
 
-  private final List<Observer<T>> observers;
+  protected final List<Observer<T>> observers;
 
   protected Event(ObserverManager manager, Type type) {
     this.observers = manager.observersByType(type);
@@ -62,30 +66,25 @@ public abstract class Event<T> {
     var exceptionHandler = new CollectingExceptionHandler();
 
     return observers.stream()
-        .sorted(Comparator.comparing(Observer::priority))
-        .reduce(
-            CompletableFuture.<Void>completedFuture(null),
-            (future, observer) ->
-                future.thenRun(
-                    () -> {
-                      try {
-                        observer.observe(event, qualifier, true);
-                      } catch (Exception e) {
-                        exceptionHandler.handle(e);
-                      }
-                    }),
-            (future1, future2) -> future1)
-        .thenApply(
-            v -> {
-              handleExceptions(exceptionHandler);
-              return event;
-            });
+      .sorted(Comparator.comparing(Observer::priority))
+      .reduce(CompletableFuture.<Void>completedFuture(null), (future, observer) ->
+          future.thenRun(() -> {
+            try {
+              observer.observe(event, qualifier, true);
+            } catch (Exception e) {
+              exceptionHandler.handle(e);
+            }
+          }),
+        (future1, future2) -> future1)
+      .thenApply(v -> {
+        handleExceptions(exceptionHandler);
+        return event;
+      });
   }
 
   /**
    * Fires an event and notifies observers with no qualifier.
    *
-   * @param qualifier qualifier for this event
    * @param event the event object
    */
   public void fire(T event) {
@@ -96,7 +95,6 @@ public abstract class Event<T> {
    * Fires an event to asynchronous observers without qualifiers
    *
    * @param event the event object
-   * @param qualifier the qualifier for this event
    * @return a {@link CompletionStage} allowing further pipeline composition on the asynchronous
    *     operation.
    */
@@ -129,9 +127,9 @@ public abstract class Event<T> {
     var handledExceptions = handler.getHandledExceptions();
     if (!handledExceptions.isEmpty()) {
       var exception =
-          handledExceptions.size() == 1
-              ? new CompletionException(handledExceptions.get(0))
-              : new CompletionException(null);
+        handledExceptions.size() == 1
+          ? new CompletionException(handledExceptions.get(0))
+          : new CompletionException(null);
 
       for (Throwable handledException : handledExceptions) {
         exception.addSuppressed(handledException);

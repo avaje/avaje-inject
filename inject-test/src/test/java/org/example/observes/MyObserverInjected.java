@@ -4,10 +4,13 @@ import io.avaje.inject.event.Observes;
 import jakarta.inject.Singleton;
 
 @Singleton
-public class Observer {
-  boolean invoked = false;
+public class MyObserverInjected {
 
-  void observe(@Observes CustomEvent e) {
+  boolean invoked = false;
+  CustomEvent event;
+
+  void observe(@Observes CustomEvent e, MyObserver observer) {
     invoked = true;
+    event = e;
   }
 }

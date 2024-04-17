@@ -21,13 +21,19 @@ public class Observer<T> {
     this.qualifierString = qualifierString;
   }
 
+  /**
+   * Return the priority.
+   */
   public int priority() {
     return priority;
   }
 
+  /**
+   * Invoke the registered consumer when matching qualifier and async processing.
+   */
   void observe(T event, String qualifier, boolean async) {
-
-    if (this.async == async && event != null && qualifierString.equalsIgnoreCase(qualifier))
+    if (this.async == async && event != null && qualifierString.equalsIgnoreCase(qualifier)) {
       method.accept(event);
+    }
   }
 }

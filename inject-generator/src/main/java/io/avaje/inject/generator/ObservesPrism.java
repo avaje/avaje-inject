@@ -13,7 +13,7 @@ import io.avaje.prism.GeneratePrism;
     name = "ObservesSyncPrism",
     superInterfaces = ObservesPrism.class)
 @GeneratePrism(value = ObservesAsync.class, superInterfaces = ObservesPrism.class)
-public interface ObservesPrism {
+interface ObservesPrism {
 
   static boolean isPresent(Element e) {
     return ObservesSyncPrism.isPresent(e) || ObservesAsyncPrism.isPresent(e);
@@ -22,14 +22,12 @@ public interface ObservesPrism {
   Integer priority();
 
   static Optional<ObservesPrism> getOptionalOn(Element e) {
-
     return Optional.<ObservesPrism>empty()
         .or(() -> ObservesSyncPrism.getOptionalOn(e))
         .or(() -> ObservesAsyncPrism.getOptionalOn(e));
   }
 
   static ObservesPrism getInstanceOn(Element e) {
-
     return Optional.<ObservesPrism>ofNullable(ObservesSyncPrism.getInstanceOn(e))
         .orElse(ObservesAsyncPrism.getInstanceOn(e));
   }

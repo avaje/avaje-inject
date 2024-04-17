@@ -10,9 +10,11 @@ import java.lang.annotation.Target;
  * Identifies the event parameter of an observer method. May be applied to a parameter of a method
  * of a bean class.
  *
- * <pre>
- * public void afterLogin(&#064;Observes LoggedInEvent event) { ... }
- * </pre>
+ * <pre>{@code
+ *
+ *   public void afterLogin(@Observes LoggedInEvent event) { ... }
+ *
+ * }</pre>
  *
  * <p>An observer method is a non-abstract method of a managed bean class.
  *
@@ -30,9 +32,11 @@ import java.lang.annotation.Target;
  * may declare qualifiers. These additional parameters are beans that will be injected when an event
  * has occurred.
  *
- * <pre>
- * public void afterLogin(&#064;Observes LoggedInEvent event, &#064;Manager User user, Logger log) { ... }
- * </pre>
+ * <pre>{@code
+ *
+ *   public void afterLogin(@Observes LoggedInEvent event, @Manager User user, Logger log) { ... }
+ *
+ * }</pre>
  */
 @Target(PARAMETER)
 @Retention(SOURCE)

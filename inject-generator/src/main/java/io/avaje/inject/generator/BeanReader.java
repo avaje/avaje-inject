@@ -164,15 +164,14 @@ final class BeanReader {
     }
 
     observerMethods.stream()
-        .flatMap(m -> m.params().stream().skip(1))
-        .forEach(
-            param -> {
-              Dependency dependsOn = param.dependsOn();
-              // BeanScope is always injectable with no impact on injection ordering
-              if (!Constants.BEANSCOPE.equals(dependsOn.dependsOn())) {
-                list.add(dependsOn);
-              }
-            });
+      .flatMap(m -> m.params().stream().skip(1))
+      .forEach(param -> {
+        Dependency dependsOn = param.dependsOn();
+        // BeanScope is always injectable with no impact on injection ordering
+        if (!Constants.BEANSCOPE.equals(dependsOn.dependsOn())) {
+          list.add(dependsOn);
+        }
+      });
 
     conditions.requireTypes.stream()
       .map(t -> new Dependency("con:" + t))

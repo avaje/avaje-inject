@@ -246,38 +246,35 @@ final class SimpleBeanWriter {
         writer.append(";").eol();
       }
 
-      writer
-          .indent(indent)
-          .append("Consumer<%s> %s = ", shortWithoutAnnotations, methodReader.name());
+      writer.indent(indent).append("Consumer<%s> %s = ", shortWithoutAnnotations, methodReader.name());
 
       var observeTypeString =
-          !observeUtype.isGeneric() || observeUtype.param0().kind() == TypeKind.WILDCARD
-              ? Util.shortName(observeUtype.mainType()) + ".class"
-              : "TYPE_" + Util.shortName(observeUtype).replace(".", "_");
+        !observeUtype.isGeneric() || observeUtype.param0().kind() == TypeKind.WILDCARD
+          ? Util.shortName(observeUtype.mainType()) + ".class"
+          : "TYPE_" + Util.shortName(observeUtype).replace(".", "_");
 
       if (methodReader.params().size() == 1) {
         writer.append("%s::%s;", bean, methodReader.name());
       } else {
-        var injectParamNames =
-            injectParams.stream()
-                .map(p -> methodReader.name() + "$" + p.simpleName())
-                .collect(joining(", "));
+        var injectParamNames = injectParams.stream()
+          .map(p -> methodReader.name() + "$" + p.simpleName())
+          .collect(joining(", "));
         writer.append("e -> bean.%s(e, %s);", methodReader.name(), injectParamNames);
       }
       final var observesPrism = ObservesPrism.getInstanceOn(observeEvent.element());
       writer
-          .eol()
-          .indent(indent)
-          .append(
-              "%s.<%s>registerObserver(%s, %s, %s, %s, \"%s\");",
-              builder,
-              shortWithoutAnnotations,
-              observeTypeString,
-              observesPrism.priority(),
-              observesPrism.async(),
-              methodReader.name(),
-              observeEvent.qualifier())
-          .eol();
+        .eol()
+        .indent(indent)
+        .append(
+          "%s.<%s>registerObserver(%s, %s, %s, %s, \"%s\");",
+          builder,
+          shortWithoutAnnotations,
+          observeTypeString,
+          observesPrism.priority(),
+          observesPrism.async(),
+          methodReader.name(),
+          observeEvent.qualifier())
+        .eol();
     }
   }
 

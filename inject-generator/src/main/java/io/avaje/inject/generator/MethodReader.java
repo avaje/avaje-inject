@@ -122,7 +122,6 @@ final class MethodReader {
       params.add(new MethodParam(p));
     }
     observeParameter = params.stream().filter(MethodParam::observeEvent).findFirst().orElse(null);
-
     return this;
   }
 
@@ -410,7 +409,7 @@ final class MethodReader {
     return element;
   }
 
-  public MethodParam observeParam() {
+  MethodParam observeParam() {
     return observeParameter;
   }
 
@@ -576,12 +575,11 @@ final class MethodReader {
       return element;
     }
 
-    public UType getFullUType() {
+    UType getFullUType() {
       return fullUType;
     }
 
-    public String qualifier() {
-
+    String qualifier() {
       return named != null ? named : "";
     }
   }
