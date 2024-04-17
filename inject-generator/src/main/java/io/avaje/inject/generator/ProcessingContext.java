@@ -35,17 +35,18 @@ final class ProcessingContext {
     private String injectFqn;
     private String orderFqn;
 
-    Ctx(Set<String> moduleFileProvided) {
+    Ctx() {}
+
+    void registerProvidedTypes(Set<String> moduleFileProvided) {
       ExternalProvider.registerModuleProvidedTypes(providedTypes);
       providedTypes.addAll(moduleFileProvided);
     }
-
-    Ctx() {}
   }
 
   static void init(Set<String> moduleFileProvided, boolean performModuleValidation) {
     ProcessingContext.moduleValidation = performModuleValidation;
-    CTX.set(new Ctx(moduleFileProvided));
+    CTX.set(new Ctx());
+    CTX.get().registerProvidedTypes(moduleFileProvided);
   }
 
   static void testInit() {
