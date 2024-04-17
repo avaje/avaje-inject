@@ -2,6 +2,8 @@ package io.avaje.inject.generator;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
+
 import java.util.List;
 import java.util.Set;
 
@@ -44,6 +46,7 @@ final class TypeReader {
 
   List<String> autoProvides() {
     return extendsReader.autoProvides().stream()
+        .filter(u -> u.componentTypes().stream().noneMatch(p -> p.kind() == TypeKind.TYPEVAR))
         .map(UType::full)
         .collect(toList());
   }
@@ -70,6 +73,10 @@ final class TypeReader {
 
   List<MethodReader> factoryMethods() {
     return extendsReader.factoryMethods();
+  }
+
+  List<MethodReader> observerMethods() {
+    return extendsReader.observerMethods();
   }
 
   Element postConstructMethod() {

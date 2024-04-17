@@ -122,6 +122,7 @@ final class ExternalProvider {
         v.forEach(defaultScope::pluginProvided);
       }
     });
+    defaultScope.pluginProvided("io.avaje.inject.event.ObserverManager");
     if (!injectAvailable) {
       return;
     }

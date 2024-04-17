@@ -2,12 +2,15 @@ package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.createSourceFile;
 import static io.avaje.inject.generator.APContext.logError;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -15,6 +18,8 @@ import java.util.Set;
 
 import javax.lang.model.type.TypeKind;
 import javax.tools.JavaFileObject;
+
+import io.avaje.inject.generator.MethodReader.MethodParam;
 
 /**
  * Write the source code for the bean.
@@ -190,6 +195,7 @@ final class SimpleBeanWriter {
       writer.indent("        return bean;").eol();
       writer.indent("      });").eol();
     }
+    writeObserveMethods();
     constructor.endTry(writer);
     writer.append("    }").eol();
   }
@@ -220,6 +226,55 @@ final class SimpleBeanWriter {
     injectMethods();
     if (!beanReader.registerProvider()) {
       writer.indent("      });").eol();
+    }
+  }
+
+  private void writeObserveMethods() {
+    final var bean = "bean";
+    final var builder = "builder";
+
+    final var indent = "      ";
+    for (MethodReader methodReader : beanReader.observerMethods()) {
+      var observeEvent = methodReader.observeParam();
+      var observeUtype = observeEvent.getFullUType();
+      final var shortWithoutAnnotations = observeUtype.shortWithoutAnnotations();
+      var injectParams = methodReader.params().stream().skip(1).collect(toList());
+
+      for (MethodParam param : injectParams) {
+        writer.indent(indent).append("var %s = ", methodReader.name() + "$" + param.simpleName());
+        param.builderGetDependency(writer, builder);
+        writer.append(";").eol();
+      }
+
+      writer.indent(indent).append("Consumer<%s> %s = ", shortWithoutAnnotations, methodReader.name());
+
+      var observeTypeString =
+        !observeUtype.isGeneric() || observeUtype.param0().kind() == TypeKind.WILDCARD
+          ? Util.shortName(observeUtype.mainType()) + ".class"
+          : "TYPE_" + Util.shortName(observeUtype).replace(".", "_");
+
+      if (methodReader.params().size() == 1) {
+        writer.append("%s::%s;", bean, methodReader.name());
+      } else {
+        var injectParamNames = injectParams.stream()
+          .map(p -> methodReader.name() + "$" + p.simpleName())
+          .collect(joining(", "));
+        writer.append("e -> bean.%s(e, %s);", methodReader.name(), injectParamNames);
+      }
+      final var observesPrism = ObservesPrism.getInstanceOn(observeEvent.element());
+      writer
+        .eol()
+        .indent(indent)
+        .append(
+          "%s.<%s>registerObserver(%s, %s, %s, %s, \"%s\");",
+          builder,
+          shortWithoutAnnotations,
+          observeTypeString,
+          observesPrism.priority(),
+          observesPrism.async(),
+          methodReader.name(),
+          observeEvent.qualifier())
+        .eol();
     }
   }
 

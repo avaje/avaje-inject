@@ -106,7 +106,7 @@ final class SimpleModuleWriter {
         autoProvidesAspects.add(aspect);
       }
       final var forExternal = metaData.autoProvides();
-      if (forExternal != null && !forExternal.isEmpty() && !forExternal.contains("<")) {
+      if (forExternal != null && !forExternal.isEmpty()) {
         autoProvides.addAll(forExternal);
       }
     }
@@ -139,7 +139,7 @@ final class SimpleModuleWriter {
     Set<String> allClasses = distinctPublicClasses();
     writer.append("  @Override").eol();
     writer.append("  public Class<?>[] classes() {").eol();
-    writer.append("    return new Class<?>[]{").eol();
+    writer.append("    return new Class<?>[] {").eol();
     for (String rawType : new TreeSet<>(allClasses)) {
       writer.append("      %s.class,", rawType).eol();
     }
@@ -205,6 +205,8 @@ final class SimpleModuleWriter {
   private Set<String> factoryImportTypes() {
     Set<String> importTypes = new TreeSet<>();
     importTypes.add(Constants.GENERATED);
+    importTypes.add(Constants.GENERICTYPE);
+    importTypes.add("java.lang.reflect.Type");
     importTypes.add(Constants.BEANSCOPE);
     importTypes.add(Constants.INJECTMODULE);
     importTypes.add(Constants.DEPENDENCYMETA);

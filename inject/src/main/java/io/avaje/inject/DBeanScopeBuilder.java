@@ -1,20 +1,34 @@
 package io.avaje.inject;
 
-import io.avaje.applog.AppLog;
-import io.avaje.inject.spi.Module;
-import io.avaje.inject.spi.*;
-import io.avaje.lang.NonNullApi;
-import io.avaje.lang.Nullable;
-import jakarta.inject.Provider;
-
-import java.lang.reflect.Type;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
 import static java.lang.System.Logger.Level.DEBUG;
 import static java.lang.System.Logger.Level.INFO;
 import static java.util.Collections.emptySet;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.ServiceLoader;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+import io.avaje.applog.AppLog;
+import io.avaje.inject.event.ObserverManager;
+import io.avaje.inject.spi.Builder;
+import io.avaje.inject.spi.ClosePair;
+import io.avaje.inject.spi.EnrichBean;
+import io.avaje.inject.spi.Module;
+import io.avaje.inject.spi.Plugin;
+import io.avaje.inject.spi.PropertyRequiresPlugin;
+import io.avaje.inject.spi.SuppliedBean;
+import io.avaje.lang.NonNullApi;
+import io.avaje.lang.Nullable;
+import jakarta.inject.Provider;
 
 /** Build a bean scope with options for shutdown hook and supplying test doubles. */
 @NonNullApi
@@ -249,6 +263,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       initPropertyPlugin();
     }
 
+    provideDefault(ObserverManager.class, DObserverManager::new);
+
     ServiceLoader.load(Plugin.class, classLoader).forEach(plugin -> plugin.apply(this));
     // sort factories by dependsOn
     ModuleOrdering factoryOrder =
@@ -342,8 +358,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       }
     }
 
-    private void addFactoryProvides(FactoryState factoryState, Class<?>[] provides) {
-      for (final Class<?> feature : provides) {
+    private void addFactoryProvides(FactoryState factoryState, Type[] provides) {
+      for (final var feature : provides) {
         providesMap.computeIfAbsent(feature.getTypeName(), s -> new FactoryList()).add(factoryState);
       }
     }
@@ -401,8 +417,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       }
     }
 
-    private void unsatisfiedRequires(StringBuilder sb, Class<?>[] requiredType, String requires) {
-      for (final Class<?> depModuleName : requiredType) {
+    private void unsatisfiedRequires(StringBuilder sb, Type[] requiredType, String requires) {
+      for (final var depModuleName : requiredType) {
         if (notProvided(depModuleName.getTypeName())) {
           sb.append(String.format(" %s [%s]", requires, depModuleName.getTypeName()));
         }
@@ -445,8 +461,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         && satisfiedDependencies(factory.autoRequires());
     }
 
-    private boolean satisfiedDependencies(Class<?>[] requires) {
-      for (final Class<?> dependency : requires) {
+    private boolean satisfiedDependencies(Type[] requires) {
+      for (final var dependency : requires) {
         if (notProvided(dependency.getTypeName())) {
           return false;
         }
@@ -483,19 +499,19 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       return factory;
     }
 
-    Class<?>[] requires() {
+    Type[] requires() {
       return factory.requires();
     }
 
-    Class<?>[] requiresPackages() {
+    Type[] requiresPackages() {
       return factory.requiresPackages();
     }
 
-    Class<?>[] autoRequires() {
+    Type[] autoRequires() {
       return factory.autoRequires();
     }
 
-    Class<?>[] autoRequiresAspects() {
+    Type[] autoRequiresAspects() {
       return factory.autoRequiresAspects();
     }
 
@@ -513,7 +529,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       return !isEmpty(factory.provides());
     }
 
-    private boolean isEmpty(@Nullable Class<?>[] values) {
+    private boolean isEmpty(@Nullable Type[] values) {
       return values == null || values.length == 0;
     }
   }

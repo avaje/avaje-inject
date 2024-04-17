@@ -104,12 +104,11 @@ public class AutoProvidesMojo extends AbstractMojo {
     final Log log = getLog();
     for (final var plugin : ServiceLoader.load(Plugin.class, newClassLoader)) {
       log.info("Loaded Plugin: " + plugin.getClass().getTypeName());
-
-      for (final Type provide : plugin.provides()) {
+      for (final var provide : plugin.provides()) {
         providedTypes.add(provide.getTypeName());
       }
-      for (final Type provide : plugin.providesAspects()) {
-        providedTypes.add(wrapAspect(provide.getTypeName()));
+      for (final var provide : plugin.providesAspects()) {
+        providedTypes.add(wrapAspect(provide.getCanonicalName()));
       }
     }
 
@@ -130,24 +129,23 @@ public class AutoProvidesMojo extends AbstractMojo {
       log.info("Detected External Module: " + name);
 
       final var provides = new ArrayList<String>();
-      for (final Type provide : module.provides()) {
+      for (final var provide : module.provides()) {
         var type = provide.getTypeName();
         providedTypes.add(type);
         provides.add(type);
       }
-      for (final Type provide : module.autoProvides()) {
+      for (final var provide : module.autoProvides()) {
         var type = provide.getTypeName();
         providedTypes.add(type);
         provides.add(type);
       }
-      for (final Type provide : module.autoProvidesAspects()) {
+      for (final var provide : module.autoProvidesAspects()) {
         var type = wrapAspect(provide.getTypeName());
         providedTypes.add(type);
         provides.add(type);
       }
 
-      final var requires =
-          Arrays.<Type>stream(module.requires()).map(Type::getTypeName).collect(toList());
+      final var requires = Arrays.<Type>stream(module.requires()).map(Type::getTypeName).collect(toList());
 
       Arrays.<Type>stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
       Arrays.<Type>stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);

@@ -1,8 +1,8 @@
 package io.avaje.inject;
 
-import io.avaje.inject.spi.Builder;
-import io.avaje.inject.spi.Module;
-import org.junit.jupiter.api.Test;
+import static io.avaje.inject.spi.Module.EMPTY_CLASSES;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -12,9 +12,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static io.avaje.inject.spi.Module.EMPTY_CLASSES;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.junit.jupiter.api.Test;
+
+import io.avaje.inject.spi.Builder;
+import io.avaje.inject.spi.GenericType;
+import io.avaje.inject.spi.Module;
 
 @SuppressWarnings("all")
 class BeanScopeBuilderTest {
@@ -105,6 +107,18 @@ class BeanScopeBuilderTest {
   }
 
   @Test
+  void feature_depends_generic() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
+    factoryOrder.add(bc("two", EMPTY_CLASSES, of(new GenericType<Map<String, MyFeature>>() {})));
+    factoryOrder.add(bc("one", of(new GenericType<Map<String, MyFeature>>() {}), EMPTY_CLASSES));
+    factoryOrder.add(bc("three", of(new GenericType<Map<String, MyFeature>>() {}), EMPTY_CLASSES));
+    factoryOrder.orderFactories();
+
+    assertThat(names(factoryOrder.factories())).containsExactly("one", "three", "two");
+  }
+
+
+  @Test
   void feature_depends2() {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
     factoryOrder.add(bc("two", EMPTY_CLASSES, of(MyFeature.class)));
@@ -171,22 +185,22 @@ class BeanScopeBuilderTest {
       .collect(Collectors.toList());
   }
 
-  private TDModule bc(String name, Class<?>[] provides, Class<?>[] requires) {
+  private TDModule bc(String name, Type[] provides, Type[] requires) {
     return bc(name, provides, requires, new Class[0]);
   }
 
-  private TDModule bc(String name, Class<?>[] provides, Class<?>[] requires, Class<?>[] requiresPkg) {
+  private TDModule bc(String name, Type[] provides, Type[] requires, Type[] requiresPkg) {
     return new TDModule(name, provides, requires, requiresPkg);
   }
 
   private static class TDModule implements Module {
 
     final String name;
-    final Class<?>[] provides;
-    final Class<?>[] requires;
-    final Class<?>[] requiresPackages;
+    final Type[] provides;
+    final Type[] requires;
+    final Type[] requiresPackages;
 
-    private TDModule(String name, Class<?>[] provides, Class<?>[] requires, Class<?>[] requiresPackages) {
+    private TDModule(String name, Type[] provides, Type[] requires, Type[] requiresPackages) {
       this.name = name;
       this.provides = provides;
       this.requires = requires;
@@ -199,7 +213,7 @@ class BeanScopeBuilderTest {
     }
 
     @Override
-    public Class<?>[] provides() {
+    public Type[] provides() {
       return provides;
     }
 
@@ -209,12 +223,12 @@ class BeanScopeBuilderTest {
     }
 
     @Override
-    public Class<?>[] requires() {
+    public Type[] requires() {
       return requires;
     }
 
     @Override
-    public Class<?>[] requiresPackages() {
+    public Type[] requiresPackages() {
       return requiresPackages;
     }
 
@@ -224,8 +238,8 @@ class BeanScopeBuilderTest {
     }
   }
 
-  Class<?>[] of(Class<?>... cls) {
-    return cls != null ? cls : new Class<?>[0];
+  Type[] of(Type... cls) {
+    return cls != null ? cls : new Type[0];
   }
 
   class MyFeature {
@@ -241,7 +255,7 @@ class BeanScopeBuilderTest {
 
     final String containsType;
 
-    TDBeanScope(Class<?> containsType) {
+    TDBeanScope(Type containsType) {
       this.containsType = containsType.getTypeName();
     }
 
