@@ -91,14 +91,7 @@
 				<groupId>io.avaje</groupId>
 				<artifactId>avaje-inject-maven-plugin</artifactId>
 				<version>10.0-RC2</version>
-				<executions>
-					<execution>
-						<phase>process-sources</phase>
-						<goals>
-							<goal>provides</goal>
-						</goals>
-					</execution>
-				</executions>
+        <extensions>true</extensions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
