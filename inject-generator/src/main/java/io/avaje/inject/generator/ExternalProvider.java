@@ -30,22 +30,17 @@ import io.avaje.inject.spi.Plugin;
 final class ExternalProvider {
 
   private static final boolean injectAvailable = moduleCP();
-  private static final Map<String, List<String>> avajePlugins =
-      Map.ofEntries(
-          entry("io.avaje.jsonb.inject.DefaultJsonbProvider", of("io.avaje.jsonb.Jsonb")),
-          entry(
-              "io.avaje.http.inject.DefaultResolverProvider",
-              of("io.avaje.http.api.context.RequestContextResolver")),
-          entry(
-              "io.avaje.nima.provider.DefaultConfigProvider",
-              of(
-                  "io.helidon.webserver.WebServerConfig.Builder",
-                  "io.helidon.webserver.http.HttpRouting.Builder")),
-          entry(
-              "io.avaje.validation.inject.spi.DefaultValidatorProvider",
-              of(
-                  "io.avaje.validation.Validator",
-                  "io.avaje.inject.aop.AspectProvider<io.avaje.validation.ValidMethod>")));
+  private static final Map<String, List<String>> avajePlugins = Map.ofEntries(
+      entry("io.avaje.jsonb.inject.DefaultJsonbProvider", of("io.avaje.jsonb.Jsonb")),
+      entry("io.avaje.http.inject.DefaultResolverProvider", of("io.avaje.http.api.context.RequestContextResolver")),
+      entry("io.avaje.nima.provider.DefaultConfigProvider",
+        of(
+          "io.helidon.webserver.WebServerConfig.Builder",
+          "io.helidon.webserver.http.HttpRouting.Builder")),
+      entry("io.avaje.validation.inject.spi.DefaultValidatorProvider",
+        of(
+          "io.avaje.validation.Validator",
+          "io.avaje.inject.aop.AspectProvider<io.avaje.validation.ValidMethod>")));
 
   private ExternalProvider() {}
 
@@ -67,8 +62,7 @@ final class ExternalProvider {
       return;
     }
 
-    final var iterator =
-        ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader()).iterator();
+    final var iterator = ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader()).iterator();
     if (!iterator.hasNext()) {
       APContext.logNote("No external modules detected");
       return;
@@ -93,17 +87,12 @@ final class ExternalProvider {
           providedTypes.add(aspectType);
           provides.add(aspectType);
         }
-        final var requires =
-            Arrays.stream(module.requires()).map(Type::getTypeName).collect(toList());
+        final var requires = Arrays.stream(module.requires()).map(Type::getTypeName).collect(toList());
 
         Arrays.stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
-        Arrays.stream(module.requiresPackages())
-            .map(Type::getTypeName)
-            .forEach(requires::add);
-        Arrays.stream(module.autoRequiresAspects())
-            .map(Type::getTypeName)
-            .map(Util::wrapAspect)
-            .forEach(requires::add);
+        Arrays.stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
+        Arrays.stream(module.autoRequiresAspects()).map(Type::getTypeName).map(Util::wrapAspect).forEach(requires::add);
+
         ProcessingContext.addAvajeModule(new AvajeModule(name, provides, requires));
       } catch (final ServiceConfigurationError expected) {
         // ignore expected error reading the module that we are also writing

@@ -23,15 +23,14 @@ class FactoryOrder {
   private final List<String> loadedModules = new ArrayList<>();
 
   FactoryOrder(Collection<AvajeModule> includeModules, Set<String> pluginProvided) {
-    includeModules.forEach(
-        m -> {
-          add(m);
-          loadedModules.add(m.name());
-        });
+    includeModules.forEach(m -> {
+      add(m);
+      loadedModules.add(m.name());
+    });
     this.pluginProvided = pluginProvided;
   }
 
-  public void add(AvajeModule module) {
+  void add(AvajeModule module) {
     final FactoryState factoryState = new FactoryState(module);
     providesMap.computeIfAbsent(module.name(), s -> new FactoryList()).add(factoryState);
     addFactoryProvides(factoryState, module.provides());
@@ -63,7 +62,7 @@ class FactoryOrder {
     moduleNames.add(factory.factory().name());
   }
 
-  public Set<String> orderModules() {
+  Set<String> orderModules() {
     // push the 'no dependency' modules after the 'provides only' ones
     // as this is more intuitive for the simple (only provides modules case)
     for (final FactoryState factoryState : queueNoDependencies) {
@@ -87,8 +86,8 @@ class FactoryOrder {
         unsatisfiedRequires(sb, factory.factory);
       }
       sb.append(" - none of the loaded modules ")
-          .append(loadedModules)
-          .append(" explicitly provide the dependencies.");
+        .append(loadedModules)
+        .append(" explicitly provide the dependencies.");
       if (ProcessingContext.strictWiring()) {
         APContext.logError(sb.toString());
       } else {
@@ -101,8 +100,8 @@ class FactoryOrder {
     for (final var depModuleName : module.requires()) {
       if (notProvided(depModuleName)) {
         unsatisfiedDependencies
-            .computeIfAbsent(module.name(), k -> new ArrayList<>())
-            .add(depModuleName);
+          .computeIfAbsent(module.name(), k -> new ArrayList<>())
+          .add(depModuleName);
         sb.append(String.format(" requires [%s]", depModuleName));
       }
     }
@@ -110,8 +109,7 @@ class FactoryOrder {
 
   private boolean notProvided(String dependency) {
     final FactoryList factoryList = providesMap.get(dependency);
-    return (factoryList == null || !factoryList.allPushed())
-        && !pluginProvided.contains(dependency);
+    return (factoryList == null || !factoryList.allPushed()) && !pluginProvided.contains(dependency);
   }
 
   /**
@@ -144,7 +142,7 @@ class FactoryOrder {
     return true;
   }
 
-  public boolean isEmpty() {
+  boolean isEmpty() {
     return factories.isEmpty();
   }
 
@@ -209,7 +207,7 @@ class FactoryOrder {
     }
   }
 
-  public Map<String, List<String>> unsatisfied() {
+  Map<String, List<String>> unsatisfied() {
     return unsatisfiedDependencies;
   }
 }

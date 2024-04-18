@@ -9,21 +9,21 @@ final class AvajeModule {
   private final List<String> provides = new ArrayList<>();
   private final List<String> requires = new ArrayList<>();
 
-  public AvajeModule(String name, List<String> provides, List<String> requires) {
+  AvajeModule(String name, List<String> provides, List<String> requires) {
     this.fqn = name;
     this.provides.addAll(provides);
     this.requires.addAll(requires);
   }
 
-  public List<String> provides() {
+  List<String> provides() {
     return provides;
   }
 
-  public List<String> requires() {
+  List<String> requires() {
     return requires;
   }
 
-  public String name() {
+  String name() {
     return fqn;
   }
 }

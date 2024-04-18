@@ -148,7 +148,7 @@ final class ProcessingContext {
     CTX.get().injectFqn = fqn;
   }
 
-  public static void setOrderFQN(String fqn) {
+  static void setOrderFQN(String fqn) {
     CTX.get().orderFqn = fqn;
   }
 
@@ -161,19 +161,18 @@ final class ProcessingContext {
         var orderFQN = CTX.get().orderFqn;
         var providers = new ModuleInfoReader(module, reader).provides();
         var noProvides =
-            injectFQN != null
-                && providers.stream().noneMatch(s -> s.implementations().contains(injectFQN));
+          injectFQN != null
+            && providers.stream().noneMatch(s -> s.implementations().contains(injectFQN));
         var noProvidesOrder =
-            orderFQN != null
-                && providers.stream().noneMatch(s -> s.implementations().contains(orderFQN));
+          orderFQN != null
+            && providers.stream().noneMatch(s -> s.implementations().contains(orderFQN));
 
         if (noProvides) {
           logError(module, "Missing \"provides io.avaje.inject.spi.Module with %s;\"", injectFQN);
         }
 
         if (noProvidesOrder) {
-          logError(
-              module, "Missing \"provides io.avaje.inject.spi.ModuleOrdering with %s;\"", orderFQN);
+          logError(module, "Missing \"provides io.avaje.inject.spi.ModuleOrdering with %s;\"", orderFQN);
         }
 
       } catch (Exception e) {
@@ -208,19 +207,19 @@ final class ProcessingContext {
     APContext.clear();
   }
 
-  public static void addAvajeModule(AvajeModule module) {
+  static void addAvajeModule(AvajeModule module) {
     CTX.get().avajeModules.add(module);
   }
 
-  public static List<AvajeModule> avajeModules() {
+  static List<AvajeModule> avajeModules() {
     return CTX.get().avajeModules;
   }
 
-  public static void strictWiring(boolean strictWiring) {
+  static void strictWiring(boolean strictWiring) {
     CTX.get().strictWiring = strictWiring;
   }
 
-  public static boolean strictWiring() {
+  static boolean strictWiring() {
     return CTX.get().strictWiring;
   }
 

@@ -47,8 +47,9 @@ import java.lang.annotation.Target;
 public @interface InjectModule {
 
   /**
-   * Optimizes module wiring by enforcing multi-module wiring checks at compile-time. Will throw a compilation error if all
-   * inter-module {@link InjectModule#requires requires} dependencies are not satisfied.
+   * Optimizes module wiring by enforcing multi-module wiring checks at compile-time.
+   * Will throw a compilation error if all inter-module {@link InjectModule#requires requires}
+   * dependencies are not satisfied.
    *
    * <p>Set true if your project:
    *
@@ -59,7 +60,9 @@ public @interface InjectModule {
    */
   boolean strictWiring() default false;
 
-  /** Explicitly specify the name of the module. */
+  /**
+   * Explicitly specify the name of the module.
+   */
   String name() default "";
 
   /**
