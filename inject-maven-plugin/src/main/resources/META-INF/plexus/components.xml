@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<component-set>
+  <components>
+    <component>
+      <role>org.apache.maven.lifecycle.Lifecycle</role>
+      <implementation>org.apache.maven.lifecycle.Lifecycle</implementation>
+      <role-hint>avaje-inject-maven-plugin</role-hint>
+      <configuration>
+        <id>avaje-inject-maven-pluginn</id>
+        <phases>
+          <phase>avaje-inject-maven-plugin-not-used-phase</phase>
+        </phases>
+        <default-phases>
+          <process-sources>
+            io.avaje:avaje-inject-maven-plugin:${project.version}:provides
+          </process-sources>
+        </default-phases>
+      </configuration>
+    </component>
+  </components>
+</component-set>
