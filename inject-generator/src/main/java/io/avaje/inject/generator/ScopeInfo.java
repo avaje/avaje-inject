@@ -11,6 +11,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.annotation.processing.FilerException;
 import javax.lang.model.element.Element;
@@ -173,6 +174,10 @@ final class ScopeInfo {
     return requires;
   }
 
+  Set<String> provides() {
+    return provides;
+  }
+
   Set<String> pluginProvided() {
     return pluginProvided;
   }
@@ -237,6 +242,7 @@ final class ScopeInfo {
     }
     final MetaDataOrdering ordering = new MetaDataOrdering(meta, this);
     final int remaining = ordering.processQueue();
+
     if (remaining > 0) {
       ordering.logWarnings();
     }
@@ -405,21 +411,17 @@ final class ScopeInfo {
   private void buildProvidesMethod(Append writer, String fieldName, Set<String> types) {
     writer.append("  @Override").eol();
     final var arrayType = fieldName.contains("Aspects") ? "Class<?>" : "Type";
-    writer.append("  public %s[] %s() {\n    return %s;\n  }", arrayType, fieldName, fieldName).eol();
-    writer.append("  private final %s[] %s = {", arrayType, fieldName).eol();
+    writer.append("  public %s[] %s() {", arrayType, fieldName).eol();
+    writer.append("    return new %s[] {", arrayType).eol();
     for (final String rawType : types) {
       if (rawType.contains("<")) {
-        writer.append("    new GenericType<%s>(){},", rawType).eol();
+        writer.append("      new GenericType<%s>(){},", rawType).eol();
       } else {
-        writer.append("    %s.class,", trimGenerics(rawType)).eol();
+        writer.append("      %s.class,", rawType).eol();
       }
     }
-    writer.append("  };").eol().eol();
-  }
-
-  static String trimGenerics(String rawType) {
-    final var pos = rawType.indexOf("<");
-    return pos == -1 ? rawType : rawType.substring(0, pos);
+    writer.append("    };").eol();
+    writer.append("  }").eol().eol();
   }
 
   void buildAutoProvides(Append writer, Set<String> autoProvides) {

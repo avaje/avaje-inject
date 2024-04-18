@@ -6,6 +6,7 @@ import static io.avaje.inject.generator.ProcessingContext.createMetaInfWriter;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +78,7 @@ final class SimpleModuleWriter {
       writeServicesFile(scopeType);
     }
     if (!ordering.ordered().isEmpty()) {
-      ProcessingContext.validateModule(fullName);
+      ProcessingContext.setInjectModuleFQN(fullName);
     }
   }
 
@@ -123,6 +124,15 @@ final class SimpleModuleWriter {
     if (!autoRequiresAspects.isEmpty()) {
       scopeInfo.buildAutoRequiresAspects(writer, autoRequiresAspects);
     }
+
+    var requires = new ArrayList<>(scopeInfo.requires());
+    var provides = new ArrayList<>(scopeInfo.provides());
+    requires.addAll(autoRequires);
+    autoRequiresAspects.stream().map(Util::wrapAspect).forEach(requires::add);
+    provides.addAll(autoProvides);
+    autoProvidesAspects.stream().map(Util::wrapAspect).forEach(provides::add);
+
+    ProcessingContext.addAvajeModule(new AvajeModule(fullName, provides, requires));
   }
 
   private void writeClassesMethod() {

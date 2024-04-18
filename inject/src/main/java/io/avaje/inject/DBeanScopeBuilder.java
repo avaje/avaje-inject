@@ -19,13 +19,8 @@ import java.util.function.Supplier;
 
 import io.avaje.applog.AppLog;
 import io.avaje.inject.event.ObserverManager;
-import io.avaje.inject.spi.Builder;
-import io.avaje.inject.spi.ClosePair;
-import io.avaje.inject.spi.EnrichBean;
+import io.avaje.inject.spi.*;
 import io.avaje.inject.spi.Module;
-import io.avaje.inject.spi.Plugin;
-import io.avaje.inject.spi.PropertyRequiresPlugin;
-import io.avaje.inject.spi.SuppliedBean;
 import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
 import jakarta.inject.Provider;
@@ -247,10 +242,10 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private void initProfiles() {
     if (profiles == null) {
       profiles =
-          propertyRequiresPlugin
-              .get("avaje.profiles")
-              .map(p -> Set.of(p.split(",")))
-              .orElse(emptySet());
+        propertyRequiresPlugin
+          .get("avaje.profiles")
+          .map(p -> Set.of(p.split(",")))
+          .orElse(emptySet());
     }
   }
 
@@ -267,18 +262,21 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
     ServiceLoader.load(Plugin.class, classLoader).forEach(plugin -> plugin.apply(this));
     // sort factories by dependsOn
-    final FactoryOrder factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
+    ModuleOrdering factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
+
     if (factoryOrder.isEmpty()) {
+      // prefer generated ModuleOrdering if provided
+      factoryOrder = ServiceLoader.load(ModuleOrdering.class, classLoader).findFirst().orElse(factoryOrder);
       ServiceLoader.load(Module.class, classLoader).forEach(factoryOrder::add);
     }
 
-    final Set<String> moduleNames = factoryOrder.orderFactories();
+    final Set<String> moduleNames = factoryOrder.orderModules();
     if (moduleNames.isEmpty()) {
       throw new IllegalStateException(
-          "Could not find any avaje modules."
-              + " Perhaps using Gradle and IDEA but with a setup issue?"
-              + " Review IntelliJ Settings / Build / Build tools / Gradle - 'Build and run using' value and set that to 'Gradle'. "
-              + " Refer to https://avaje.io/inject#gradle");
+        "Could not find any avaje modules."
+          + " Perhaps using Gradle and IDEA but with a setup issue?"
+          + " Review IntelliJ Settings / Build / Build tools / Gradle - 'Build and run using' value and set that to 'Gradle'. "
+          + " Refer to https://avaje.io/inject#gradle");
     }
 
     final var level = propertyRequiresPlugin.contains("printModules") ? INFO : DEBUG;
@@ -310,7 +308,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   /** Helper to order the BeanContextFactory based on dependsOn. */
-  static class FactoryOrder {
+  static class FactoryOrder implements ModuleOrdering {
 
     private final BeanScope parent;
     private final boolean suppliedBeans;
@@ -330,9 +328,13 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       }
     }
 
-    void add(Module module) {
+    @Override
+    public void add(Module module) {
       final FactoryState factoryState = new FactoryState(module);
-      providesMap.computeIfAbsent(module.getClass().getTypeName(), s -> new FactoryList()).add(factoryState);
+      providesMap
+        .computeIfAbsent(module.getClass().getTypeName(), s -> new FactoryList())
+        .add(factoryState);
+
       addFactoryProvides(factoryState, module.provides());
       addFactoryProvides(factoryState, module.autoProvides());
       addFactoryProvides(factoryState, module.autoProvidesAspects());
@@ -364,8 +366,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       moduleNames.add(factory.factory().getClass().getName());
     }
 
-    /** Order the factories returning the ordered list of module names. */
-    Set<String> orderFactories() {
+    @Override
+    public Set<String> orderModules() {
       // push the 'no dependency' modules after the 'provides only' ones
       // as this is more intuitive for the simple (only provides modules case)
       for (final FactoryState factoryState : queueNoDependencies) {
@@ -375,8 +377,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       return moduleNames;
     }
 
-    /** Return the list of factories in the order they should be built. */
-    List<Module> factories() {
+    @Override
+    public List<Module> factories() {
       return factories;
     }
 
@@ -463,7 +465,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       return true;
     }
 
-    boolean isEmpty() {
+    @Override
+    public boolean isEmpty() {
       return factories.isEmpty();
     }
   }

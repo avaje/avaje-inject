@@ -1,6 +1,8 @@
 package org.example.myapp;
 
 import io.avaje.inject.Component;
+import io.avaje.inject.InjectModule;
+
 import org.example.external.aspect.MyExternalAspect;
 
 import io.avaje.inject.BeanScope;
@@ -22,6 +24,6 @@ public class Main {
     String greeting = helloService.hello();
     System.out.println("Greeting: " + greeting);
 
-    assert greeting.equals("hello+AppHelloData");
+    assert "hello+AppHelloData".equals(greeting);
   }
 }

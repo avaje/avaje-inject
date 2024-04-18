@@ -1,6 +1,11 @@
 package io.avaje.inject.generator;
 
 import static java.util.Map.entry;
+import static java.util.stream.Collectors.toList;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import java.net.URI;
 import java.nio.file.Paths;
@@ -26,14 +31,16 @@ final class ExternalProvider {
 
   private static final boolean injectAvailable = moduleCP();
   private static final Map<String, List<String>> avajePlugins = Map.ofEntries(
-    entry("io.avaje.jsonb.inject.DefaultJsonbProvider",
-      of("io.avaje.jsonb.Jsonb")),
-    entry("io.avaje.http.inject.DefaultResolverProvider",
-      of("io.avaje.http.api.context.RequestContextResolver")),
-    entry("io.avaje.nima.provider.DefaultConfigProvider",
-      of("io.helidon.webserver.WebServerConfig.Builder", "io.helidon.webserver.http.HttpRouting.Builder")),
-    entry("io.avaje.validation.inject.spi.DefaultValidatorProvider",
-      of("io.avaje.validation.Validator", "io.avaje.inject.aop.AspectProvider<io.avaje.validation.ValidMethod>")));
+      entry("io.avaje.jsonb.inject.DefaultJsonbProvider", of("io.avaje.jsonb.Jsonb")),
+      entry("io.avaje.http.inject.DefaultResolverProvider", of("io.avaje.http.api.context.RequestContextResolver")),
+      entry("io.avaje.nima.provider.DefaultConfigProvider",
+        of(
+          "io.helidon.webserver.WebServerConfig.Builder",
+          "io.helidon.webserver.http.HttpRouting.Builder")),
+      entry("io.avaje.validation.inject.spi.DefaultValidatorProvider",
+        of(
+          "io.avaje.validation.Validator",
+          "io.avaje.inject.aop.AspectProvider<io.avaje.validation.ValidMethod>")));
 
   private ExternalProvider() {}
 
@@ -48,8 +55,8 @@ final class ExternalProvider {
 
   static void registerModuleProvidedTypes(Set<String> providedTypes) {
     if (!injectAvailable) {
-      if (!pluginExists("build/avaje-plugin-exists.txt")
-        && !pluginExists("target/avaje-plugin-exists.txt")) {
+      if (!pluginExists("build/avaje-module-provides.txt")
+        && !pluginExists("target/avaje-module-provides.txt")) {
         APContext.logNote("Unable to detect Avaje Inject in Annotation Processor ClassPath, use the Avaje Inject Maven/Gradle plugin for detecting Inject Modules from dependencies");
       }
       return;
@@ -63,16 +70,30 @@ final class ExternalProvider {
     while (iterator.hasNext()) {
       try {
         final var module = iterator.next();
-        System.out.println("Detected Module: " + module.getClass().getCanonicalName());
+        final var name = module.getClass().getTypeName();
+
+        final var provides = new ArrayList<String>();
+        System.out.println("Detected Module: " + name);
         for (final var provide : module.provides()) {
           providedTypes.add(provide.getTypeName());
+          provides.add(provide.getTypeName());
         }
         for (final var provide : module.autoProvides()) {
           providedTypes.add(provide.getTypeName());
+          provides.add(provide.getTypeName());
         }
         for (final var provide : module.autoProvidesAspects()) {
-          providedTypes.add(Util.wrapAspect(provide.getTypeName()));
+          final var aspectType = Util.wrapAspect(provide.getTypeName());
+          providedTypes.add(aspectType);
+          provides.add(aspectType);
         }
+        final var requires = Arrays.stream(module.requires()).map(Type::getTypeName).collect(toList());
+
+        Arrays.stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
+        Arrays.stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
+        Arrays.stream(module.autoRequiresAspects()).map(Type::getTypeName).map(Util::wrapAspect).forEach(requires::add);
+
+        ProcessingContext.addAvajeModule(new AvajeModule(name, provides, requires));
       } catch (final ServiceConfigurationError expected) {
         // ignore expected error reading the module that we are also writing
       }
@@ -95,11 +116,11 @@ final class ExternalProvider {
       return;
     }
     for (final Plugin plugin : ServiceLoader.load(Plugin.class, Processor.class.getClassLoader())) {
-      var name = plugin.getClass().getCanonicalName();
+      var name = plugin.getClass().getTypeName();
       if (avajePlugins.containsKey(name)) {
         continue;
       }
-      APContext.logNote("Loaded Plugin: " + plugin.getClass().getCanonicalName());
+      APContext.logNote("Loaded Plugin: " + plugin.getClass().getTypeName());
       for (final var provide : plugin.provides()) {
         defaultScope.pluginProvided(provide.getTypeName());
       }

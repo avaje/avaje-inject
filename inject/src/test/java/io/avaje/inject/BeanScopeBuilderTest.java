@@ -25,7 +25,7 @@ class BeanScopeBuilderTest {
   void depends_providedByParent() {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(new TDBeanScope(MyFeature.class), Collections.emptySet(), false);
     factoryOrder.add(bc("1", EMPTY_CLASSES, of(MyFeature.class)));
-    factoryOrder.orderFactories();
+    factoryOrder.orderModules();
 
     assertThat(names(factoryOrder.factories())).containsExactly("1");
   }
@@ -34,7 +34,7 @@ class BeanScopeBuilderTest {
   void depends_notProvidedByParent_expect_IllegalStateException() {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(new TDBeanScope(FeatureA.class), Collections.emptySet(), false);
     factoryOrder.add(bc("1", EMPTY_CLASSES, of(MyFeature.class)));
-    assertThatThrownBy(factoryOrder::orderFactories)
+    assertThatThrownBy(factoryOrder::orderModules)
       .isInstanceOf(IllegalStateException.class)
       .hasMessageContaining("Module [io.avaje.inject.BeanScopeBuilderTest$TDModule] has unsatisfied requires [io.avaje.inject.BeanScopeBuilderTest$MyFeature]");
   }
@@ -45,7 +45,7 @@ class BeanScopeBuilderTest {
     factoryOrder.add(bc("1", EMPTY_CLASSES, EMPTY_CLASSES));
     factoryOrder.add(bc("2", EMPTY_CLASSES, EMPTY_CLASSES));
     factoryOrder.add(bc("3", EMPTY_CLASSES, EMPTY_CLASSES));
-    factoryOrder.orderFactories();
+    factoryOrder.orderModules();
 
     assertThat(names(factoryOrder.factories())).containsExactly("1", "2", "3");
   }
@@ -55,7 +55,7 @@ class BeanScopeBuilderTest {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
     factoryOrder.add(bc("two", EMPTY_CLASSES, EMPTY_CLASSES));
     factoryOrder.add(bc("one", of(Mod3.class), EMPTY_CLASSES));
-    factoryOrder.orderFactories();
+    factoryOrder.orderModules();
 
     assertThat(names(factoryOrder.factories())).containsExactly("one", "two");
   }
@@ -65,7 +65,7 @@ class BeanScopeBuilderTest {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
     factoryOrder.add(bc("two", EMPTY_CLASSES, of(Mod3.class)));
     factoryOrder.add(bc("one", EMPTY_CLASSES, EMPTY_CLASSES));
-    factoryOrder.orderFactories();
+    factoryOrder.orderModules();
 
     assertThat(names(factoryOrder.factories())).containsExactly("one", "two");
   }
@@ -78,7 +78,7 @@ class BeanScopeBuilderTest {
     factoryOrder.add(bc("3", of(Mod3.class), of(Mod4.class)));
     factoryOrder.add(bc("4", of(Mod4.class), null));
 
-    factoryOrder.orderFactories();
+    factoryOrder.orderModules();
 
     assertThat(names(factoryOrder.factories())).containsExactly("4", "2", "3", "1");
   }
@@ -91,7 +91,7 @@ class BeanScopeBuilderTest {
     factoryOrder.add(bc("3", of(Mod3.class), of(Mod4.class)));
     factoryOrder.add(bc("4", of(Mod4.class), null));
 
-    factoryOrder.orderFactories();
+    factoryOrder.orderModules();
 
     assertThat(names(factoryOrder.factories())).containsExactly("4", "3", "1", "2");
   }
@@ -101,7 +101,7 @@ class BeanScopeBuilderTest {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
     factoryOrder.add(bc("two", EMPTY_CLASSES, of(MyFeature.class)));
     factoryOrder.add(bc("one", of(MyFeature.class), null));
-    factoryOrder.orderFactories();
+    factoryOrder.orderModules();
 
     assertThat(names(factoryOrder.factories())).containsExactly("one", "two");
   }
@@ -112,7 +112,7 @@ class BeanScopeBuilderTest {
     factoryOrder.add(bc("two", EMPTY_CLASSES, of(new GenericType<Map<String, MyFeature>>() {})));
     factoryOrder.add(bc("one", of(new GenericType<Map<String, MyFeature>>() {}), EMPTY_CLASSES));
     factoryOrder.add(bc("three", of(new GenericType<Map<String, MyFeature>>() {}), EMPTY_CLASSES));
-    factoryOrder.orderFactories();
+    factoryOrder.orderModules();
 
     assertThat(names(factoryOrder.factories())).containsExactly("one", "three", "two");
   }
@@ -124,7 +124,7 @@ class BeanScopeBuilderTest {
     factoryOrder.add(bc("two", EMPTY_CLASSES, of(MyFeature.class)));
     factoryOrder.add(bc("one", of(MyFeature.class), EMPTY_CLASSES));
     factoryOrder.add(bc("three", of(MyFeature.class), EMPTY_CLASSES));
-    factoryOrder.orderFactories();
+    factoryOrder.orderModules();
 
     assertThat(names(factoryOrder.factories())).containsExactly("one", "three", "two");
   }
@@ -137,7 +137,7 @@ class BeanScopeBuilderTest {
     factoryOrder.add(bc("3", of(Mod3.class), new Class[0], of(Mod4.class)));
     factoryOrder.add(bc("4", of(Mod4.class), new Class[0]));
 
-    factoryOrder.orderFactories();
+    factoryOrder.orderModules();
 
     assertThat(names(factoryOrder.factories())).containsExactly("4", "2", "3", "1");
   }
@@ -150,7 +150,7 @@ class BeanScopeBuilderTest {
     factoryOrder.add(bc("3", of(Mod3.class), new Class[0], of(Mod4.class)));
     factoryOrder.add(bc("4", of(Mod4.class), new Class[0]));
 
-    factoryOrder.orderFactories();
+    factoryOrder.orderModules();
 
     assertThat(names(factoryOrder.factories())).containsExactly("4", "2", "3", "1");
   }
@@ -162,7 +162,7 @@ class BeanScopeBuilderTest {
     factoryOrder.add(bc("2", EMPTY_CLASSES, of(Mod4.class), new Class[0]));
     factoryOrder.add(bc("4", of(Mod4.class), new Class[0]));
 
-    assertThatThrownBy(factoryOrder::orderFactories)
+    assertThatThrownBy(factoryOrder::orderModules)
       .isInstanceOf(IllegalStateException.class)
       .hasMessageContaining("has unsatisfied requiresPackages [io.avaje.inject.BeanScopeBuilderTest$Mod3] ");
   }
@@ -174,7 +174,7 @@ class BeanScopeBuilderTest {
     factoryOrder.add(bc("2", EMPTY_CLASSES, of(Mod4.class), new Class[0]));
     factoryOrder.add(bc("4", of(Mod4.class), new Class[0]));
 
-    assertThatThrownBy(factoryOrder::orderFactories)
+    assertThatThrownBy(factoryOrder::orderModules)
       .isInstanceOf(IllegalStateException.class)
       .hasMessageContaining("has unsatisfied requires [io.avaje.inject.BeanScopeBuilderTest$Mod3] ");
   }

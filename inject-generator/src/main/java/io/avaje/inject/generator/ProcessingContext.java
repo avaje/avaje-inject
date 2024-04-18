@@ -1,14 +1,15 @@
 package io.avaje.inject.generator;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.LineNumberReader;
+import java.nio.file.NoSuchFileException;
+
 import javax.annotation.processing.FilerException;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.LineNumberReader;
-import java.nio.file.NoSuchFileException;
 import java.util.*;
 
 import static io.avaje.inject.generator.APContext.*;
@@ -27,20 +28,25 @@ final class ProcessingContext {
     private final Set<String> providedTypes = new HashSet<>();
     private final Set<String> optionalTypes = new LinkedHashSet<>();
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
+    private final List<AvajeModule> avajeModules = new ArrayList<>();
     private final List<TypeElement> delayQueue = new ArrayList<>();
     private boolean validated;
+    private boolean strictWiring;
+    private String injectFqn;
+    private String orderFqn;
 
-    Ctx(Set<String> moduleFileProvided) {
+    Ctx() {}
+
+    void registerProvidedTypes(Set<String> moduleFileProvided) {
       ExternalProvider.registerModuleProvidedTypes(providedTypes);
       providedTypes.addAll(moduleFileProvided);
     }
-
-    Ctx() {}
   }
 
   static void init(Set<String> moduleFileProvided, boolean performModuleValidation) {
     ProcessingContext.moduleValidation = performModuleValidation;
-    CTX.set(new Ctx(moduleFileProvided));
+    CTX.set(new Ctx());
+    CTX.get().registerProvidedTypes(moduleFileProvided);
   }
 
   static void testInit() {
@@ -92,7 +98,7 @@ final class ProcessingContext {
     return createMetaInfWriterFor(serviceName);
   }
 
-  private static FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
+  static FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
     return filer().createResource(StandardLocation.CLASS_OUTPUT, "", interfaceType);
   }
 
@@ -138,15 +144,37 @@ final class ProcessingContext {
     CTX.get().aspectImportPrisms.putAll(importedMap);
   }
 
-  static void validateModule(String injectFQN) {
+  static void setInjectModuleFQN(String fqn) {
+    CTX.get().injectFqn = fqn;
+  }
+
+  static void setOrderFQN(String fqn) {
+    CTX.get().orderFqn = fqn;
+  }
+
+  static void validateModule() {
     var module = getProjectModuleElement();
     if (moduleValidation && module != null && !CTX.get().validated && !module.isUnnamed()) {
       CTX.get().validated = true;
       try (var reader = getModuleInfoReader()) {
-        var noProvides = reader.lines().noneMatch(s -> s.contains(injectFQN));
+        var injectFQN = CTX.get().injectFqn;
+        var orderFQN = CTX.get().orderFqn;
+        var providers = new ModuleInfoReader(module, reader).provides();
+        var noProvides =
+          injectFQN != null
+            && providers.stream().noneMatch(s -> s.implementations().contains(injectFQN));
+        var noProvidesOrder =
+          orderFQN != null
+            && providers.stream().noneMatch(s -> s.implementations().contains(orderFQN));
+
         if (noProvides) {
           logError(module, "Missing \"provides io.avaje.inject.spi.Module with %s;\"", injectFQN);
         }
+
+        if (noProvidesOrder) {
+          logError(module, "Missing \"provides io.avaje.inject.spi.ModuleOrdering with %s;\"", orderFQN);
+        }
+
       } catch (Exception e) {
         // can't read module
       }
@@ -177,6 +205,22 @@ final class ProcessingContext {
   static void clear() {
     CTX.remove();
     APContext.clear();
+  }
+
+  static void addAvajeModule(AvajeModule module) {
+    CTX.get().avajeModules.add(module);
+  }
+
+  static List<AvajeModule> avajeModules() {
+    return CTX.get().avajeModules;
+  }
+
+  static void strictWiring(boolean strictWiring) {
+    CTX.get().strictWiring = strictWiring;
+  }
+
+  static boolean strictWiring() {
+    return CTX.get().strictWiring;
   }
 
   static void processingOver(boolean over) {
