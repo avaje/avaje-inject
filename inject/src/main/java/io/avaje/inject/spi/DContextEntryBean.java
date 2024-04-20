@@ -53,7 +53,7 @@ class DContextEntryBean {
       "source=" + source +
       ", name='" + name + '\'' +
       ", flag=" + flag +
-      '}';
+      ", sourceModule=" + sourceModule + '}';
   }
 
   final DEntry entry() {
