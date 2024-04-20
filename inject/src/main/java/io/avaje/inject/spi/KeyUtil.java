@@ -8,7 +8,7 @@ import java.lang.reflect.Type;
 final class KeyUtil {
 
   static String lower(String name) {
-    return name == null ? null : name.toLowerCase();
+    return name == null ? null : name;
   }
 
   static String key(Type type, String name) {

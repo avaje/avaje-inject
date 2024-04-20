@@ -18,13 +18,13 @@ class StoreManagerWithNamedTest {
       String store = manager.store();
       assertThat(store).isEqualTo("blue");
 
-      SomeStore greenStore = beanScope.get(SomeStore.class, "green");
-      SomeStore blueStore = beanScope.get(SomeStore.class, "blue");
+      SomeStore greenStore = beanScope.get(SomeStore.class, "Green");
+      SomeStore blueStore = beanScope.get(SomeStore.class, "Blue");
       Map<String, SomeStore> stores = beanScope.map(SomeStore.class);
 
-      SomeStore green = stores.get("green");
+      SomeStore green = stores.get("Green");
       assertThat(green).isSameAs(greenStore);
-      SomeStore blue = stores.get("blue");
+      SomeStore blue = stores.get("Blue");
       assertThat(blue).isSameAs(blueStore);
 
       // a map with unnamed component

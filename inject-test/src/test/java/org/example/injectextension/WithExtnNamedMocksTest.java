@@ -19,7 +19,7 @@ class WithExtnNamedMocksTest {
 
   @Mock @Blue SomeStore blueStore;
 
-  @Mock @Named("green") SomeStore greenStore;
+  @Mock @Named("Green") SomeStore greenStore;
 
   @Inject StoreManagerWithSetterQualifier storeManager;
 
@@ -40,11 +40,11 @@ class WithExtnNamedMocksTest {
       try (BeanScope beanScope = BeanScope.builder()
         .forTesting()
         .mock(SomeStore.class, "Blue")
-        .mock(SomeStore.class, "green")
+        .mock(SomeStore.class, "Green")
         .build()) {
 
-        final SomeStore greenStore = beanScope.get(SomeStore.class, "green");
-        final SomeStore blueStore = beanScope.get(SomeStore.class, "blue");
+        final SomeStore greenStore = beanScope.get(SomeStore.class, "Green");
+        final SomeStore blueStore = beanScope.get(SomeStore.class, "Blue");
         when(blueStore.store()).thenReturn("BlueStoreStub");
         when(greenStore.store()).thenReturn("GreenStoreStub");
 

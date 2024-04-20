@@ -10,7 +10,7 @@ public class UseNamedPEmailer {
   private final PEmailer other;
   private final PEmailer otherPEmailer;
 
-  public UseNamedPEmailer(@Named("Other") PEmailer emailer, PEmailer other, PEmailer otherPEmailer) {
+  public UseNamedPEmailer(@Named("Other") PEmailer emailer, @Named("Other") PEmailer other, PEmailer otherPEmailer) {
     this.emailer = emailer;
     this.other = other;
     this.otherPEmailer = otherPEmailer;

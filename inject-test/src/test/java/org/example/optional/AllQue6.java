@@ -16,7 +16,7 @@ public class AllQue6 {
   @Inject @Named("sam") Que sam;
   @Inject @Nullable @Named("bilbo") Que bilbo;
 
-  AllQue6(@Named("frodo") Que frodo) {
+  AllQue6(@Named("Frodo") Que frodo) {
     this.frodo = frodo;
   }
 

@@ -20,7 +20,7 @@ class WithExtnNamedSpyTest {
   @Spy @Blue
   SomeStore blueStore;
 
-  @Spy @Named("green")
+  @Spy @Named("Green")
   SomeStore greenStore;
 
   @Inject
@@ -43,18 +43,18 @@ class WithExtnNamedSpyTest {
 
       try (BeanScope beanScope = BeanScope.builder()
         .forTesting()
-        .spy(SomeStore.class, "blue")
+        .spy(SomeStore.class, "Blue")
         .spy(SomeStore.class, "Green")
         .build()) {
 
         final StoreManagerWithSetterQualifier storeManager = beanScope.get(StoreManagerWithSetterQualifier.class);
         assertThat(storeManager.blueStore()).isEqualTo("blue");
 
-        final SomeStore blueStore = beanScope.get(SomeStore.class, "blue");
+        final SomeStore blueStore = beanScope.get(SomeStore.class, "Blue");
         verify(blueStore).store();
 
         assertThat(storeManager.greenStore()).isEqualTo("green");
-        final SomeStore greenStore = beanScope.get(SomeStore.class, "green");
+        final SomeStore greenStore = beanScope.get(SomeStore.class, "Green");
         verify(greenStore).store();
       }
 

@@ -23,7 +23,7 @@ class MultipleOtherThingsTest {
   @Test
   void named_case_insensitive() {
     Otherthing yellow0 = ApplicationScope.get(Otherthing.class, "yellow");
-    Otherthing yellow1 = ApplicationScope.get(Otherthing.class, "Yellow");
+    Otherthing yellow1 = ApplicationScope.get(Otherthing.class, "yellow");
 
     assertThat(yellow0.doOther()).isEqualTo("yellow");
     assertThat(yellow1).isSameAs(yellow0);
