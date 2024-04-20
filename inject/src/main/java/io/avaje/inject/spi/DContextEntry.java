@@ -29,28 +29,26 @@ final class DContextEntry {
     entries.add(entryBean);
   }
 
-  Provider<?> provider(String name) {
+  Provider<?> provider(String name, Class<? extends Module> currentModule) {
     if (entries.size() == 1) {
       return entries.get(0).provider();
     }
-    return new EntryMatcher(name).provider(entries);
+    return new EntryMatcher(name, currentModule).provider(entries);
   }
 
-  /**
-   * Get with strict name match for the single entry case.
-   */
+  Object get(String name, Class<? extends Module> currentModule) {
+    if (entries.size() == 1) {
+      return entries.get(0).bean();
+    }
+    return new EntryMatcher(name, currentModule).match(entries);
+  }
+
+  /** Get with strict name match for the single entry case. */
   Object getStrict(String name) {
     if (entries.size() == 1) {
       return entries.get(0).beanIfNameMatch(name);
     }
-    return new EntryMatcher(name).match(entries);
-  }
-
-  Object get(String name) {
-    if (entries.size() == 1) {
-      return entries.get(0).bean();
-    }
-    return new EntryMatcher(name).match(entries);
+    return new EntryMatcher(name, null).match(entries);
   }
 
   /**
@@ -98,8 +96,9 @@ final class DContextEntry {
     private final boolean impliedName;
     private DContextEntryBean match;
     private DContextEntryBean ignoredSecondaryMatch;
+    private final Class<? extends Module> currentModule;
 
-    EntryMatcher(String name) {
+    EntryMatcher(String name, Class<? extends Module> currentModule) {
       if (name != null && name.startsWith("!")) {
         this.name = name.substring(1);
         this.impliedName = true;
@@ -107,6 +106,7 @@ final class DContextEntry {
         this.name = name;
         this.impliedName = false;
       }
+      this.currentModule = currentModule;
     }
 
     private Provider<?> provider(List<DContextEntryBean> entries) {
@@ -175,6 +175,14 @@ final class DContextEntry {
         ignoredSecondaryMatch = entry;
         return;
       } else if (!match.isNameEqual(name) && entry.isNameEqual(name)) {
+        match = entry;
+        return;
+      }
+      // if all else fails use the one provided by the current module.
+      if (match.sourceModule() == currentModule && entry.sourceModule() != currentModule) {
+        ignoredSecondaryMatch = entry;
+        return;
+      } else if (match.sourceModule() != currentModule && entry.sourceModule() == currentModule) {
         match = entry;
         return;
       }

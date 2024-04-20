@@ -285,6 +285,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
     final Builder builder = Builder.newBuilder(profiles, propertyRequiresPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
     for (final Module factory : factoryOrder.factories()) {
+      builder.currentModule(factory.getClass());
       factory.build(builder);
     }
 

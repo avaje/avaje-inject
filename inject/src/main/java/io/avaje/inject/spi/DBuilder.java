@@ -37,12 +37,19 @@ class DBuilder implements Builder {
   private boolean runningPostConstruct;
 
   private DBeanScopeProxy beanScopeProxy;
+  protected Class<? extends Module> currentModule;
 
   DBuilder(Set<String> profiles, PropertyRequiresPlugin propertyRequires, BeanScope parent, boolean parentOverride) {
     this.propertyRequires = propertyRequires;
     this.parent = parent;
     this.parentOverride = parentOverride;
     this.profiles = profiles;
+  }
+
+  @Override
+  public void currentModule(Class<? extends Module> currentModule) {
+
+    this.currentModule = currentModule;
   }
 
   @Override
@@ -156,7 +163,7 @@ class DBuilder implements Builder {
   @Override
   public final <T> T register(T bean) {
     bean = enrich(bean, beanMap.next());
-    beanMap.register(bean);
+    beanMap.register(bean, currentModule);
     return bean;
   }
 
@@ -181,20 +188,20 @@ class DBuilder implements Builder {
   @Override
   public final <T> void registerProvider(Provider<T> provider) {
     // no enrichment
-    beanMap.register(provider);
+    beanMap.register(provider, currentModule);
   }
 
   @Override
   public <T> void registerObserver(Type type, int priority, boolean sync, Consumer<T> observer, String qualifier) {
     get(ObserverManager.class)
-        .registerObserver(type, new Observer<T>(priority, sync, observer, qualifier));
+        .registerObserver(type, new Observer<>(priority, sync, observer, qualifier));
   }
 
   @Override
   public final <T> void withBean(Class<T> type, T bean) {
     next(null, type);
     beanMap.nextPriority(BeanEntry.SUPPLIED);
-    beanMap.register(bean);
+    beanMap.register(bean, currentModule);
   }
 
   @Override

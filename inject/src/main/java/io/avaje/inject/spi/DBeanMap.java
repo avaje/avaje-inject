@@ -63,35 +63,26 @@ final class DBeanMap {
     }
   }
 
-  void register(Object bean) {
+  void register(Object bean, Class<? extends Module> sourceModule) {
     if (bean == null || EMPTY.equals(bean)) {
       return;
     }
     var name = nextBean.name;
     qualifiers.add(name);
-    DContextEntryBean entryBean = DContextEntryBean.of(bean, name, nextBean.priority);
+    DContextEntryBean entryBean = DContextEntryBean.of(bean, name, nextBean.priority, sourceModule);
     for (Type type : nextBean.types) {
       beans.computeIfAbsent(type.getTypeName(), s -> new DContextEntry()).add(entryBean);
     }
   }
 
-  void register(Provider<?> provider) {
+  void register(Provider<?> provider, Class<? extends Module> sourceModule) {
     qualifiers.add(nextBean.name);
-    DContextEntryBean entryBean = DContextEntryBean.provider(nextBean.prototype, provider, nextBean.name, nextBean.priority);
+    DContextEntryBean entryBean =
+        DContextEntryBean.provider(
+            nextBean.prototype, provider, nextBean.name, nextBean.priority, sourceModule);
     for (Type type : nextBean.types) {
       beans.computeIfAbsent(type.getTypeName(), s -> new DContextEntry()).add(entryBean);
     }
-  }
-
-  /**
-   * Get with a strict match on name for the single entry case.
-   */
-  Object getStrict(Type type, String name) {
-    DContextEntry entry = beans.get(type.getTypeName());
-    if (entry == null) {
-      return null;
-    }
-    return entry.getStrict(KeyUtil.lower(name));
   }
 
   boolean contains(String type) {
@@ -106,22 +97,39 @@ final class DBeanMap {
     return qualifiers.contains(type);
   }
 
-  @SuppressWarnings("unchecked")
   <T> T get(Type type, String name) {
-    DContextEntry entry = beans.get(type.getTypeName());
-    if (entry == null) {
-      return null;
-    }
-    return (T) entry.get(KeyUtil.lower(name));
+    return get(type, name, null);
   }
 
   @SuppressWarnings("unchecked")
-  <T> Provider<T> provider(Type type, String name) {
+  <T> T get(Type type, String name, Class<? extends Module> currentModule) {
     DContextEntry entry = beans.get(type.getTypeName());
     if (entry == null) {
       return null;
     }
-    return (Provider<T>) entry.provider(KeyUtil.lower(name));
+    return (T) entry.get(KeyUtil.lower(name), currentModule);
+  }
+  /**
+   * Get with a strict match on name for the single entry case.
+   */
+  Object getStrict(Type type, String name) {
+    DContextEntry entry = beans.get(type.getTypeName());
+    if (entry == null) {
+      return null;
+    }
+    return entry.getStrict(KeyUtil.lower(name));
+  }
+  <T> Provider<T> provider(Type type, String name) {
+    return provider(type, name, null);
+  }
+
+  @SuppressWarnings("unchecked")
+  <T> Provider<T> provider(Type type, String name, Class<? extends Module> currentModule) {
+    DContextEntry entry = beans.get(type.getTypeName());
+    if (entry == null) {
+      return null;
+    }
+    return (Provider<T>) entry.provider(KeyUtil.lower(name), currentModule);
   }
 
   /**

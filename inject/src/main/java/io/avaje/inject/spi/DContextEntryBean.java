@@ -11,40 +11,40 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 class DContextEntryBean {
 
-  /**
-   * Create taking into account if it is a Provider or the bean itself.
-   */
-  static DContextEntryBean of(Object source, String name, int flag) {
+  /** Create taking into account if it is a Provider or the bean itself. */
+  static DContextEntryBean of(Object source, String name, int flag, Class<? extends Module> currentModule) {
     if (source instanceof Provider) {
-      return new ProtoProvider((Provider<?>)source, name, flag);
+      return new ProtoProvider((Provider<?>) source, name, flag, currentModule);
     } else {
-      return new DContextEntryBean(source, name, flag);
+      return new DContextEntryBean(source, name, flag, currentModule);
     }
   }
 
-  /**
-   * Create an entry with supplied Providers using a 'Once' / 'one instance' provider.
-   */
+  /** Create an entry with supplied Providers using a 'Once' / 'one instance' provider. */
   static DContextEntryBean supplied(Object source, String name, int flag) {
     if (source instanceof Provider) {
-      return new OnceProvider((Provider<?>)source, name, flag);
+      return new OnceProvider((Provider<?>) source, name, flag, null);
     } else {
-      return new DContextEntryBean(source, name, flag);
+      return new DContextEntryBean(source, name, flag, null);
     }
   }
 
-  static DContextEntryBean provider(boolean prototype, Provider<?> provider, String name, int flag) {
-    return prototype ? new ProtoProvider(provider, name, flag) : new OnceProvider(provider, name, flag);
+  static DContextEntryBean provider(boolean prototype, Provider<?> provider, String name, int flag, Class<? extends Module> sourceModule2) {
+    return prototype
+        ? new ProtoProvider(provider, name, flag, sourceModule2)
+        : new OnceProvider(provider, name, flag, sourceModule2);
   }
 
   protected final Object source;
   protected final String name;
   private final int flag;
+  private final Class<? extends Module> sourceModule;
 
-  private DContextEntryBean(Object source, String name, int flag) {
+  private DContextEntryBean(Object source, String name, int flag, Class<? extends Module> currentModule) {
     this.source = source;
     this.name = KeyUtil.lower(name);
     this.flag = flag;
+    this.sourceModule = currentModule;
   }
 
   @Override
@@ -109,15 +109,18 @@ class DContextEntryBean {
     return flag == BeanEntry.SUPPLIED && (qualifierName == null || qualifierName.equals(name));
   }
 
-  /**
-   * Prototype scope Provider based entry.
-   */
+  final Class<? extends Module> sourceModule() {
+    return sourceModule;
+  }
+
+  /** Prototype scope Provider based entry. */
   static final class ProtoProvider extends DContextEntryBean {
 
     private final Provider<?> provider;
 
-    private ProtoProvider(Provider<?> provider, String name, int flag) {
-      super(provider, name, flag);
+    private ProtoProvider(
+        Provider<?> provider, String name, int flag, Class<? extends Module> currentModule) {
+      super(provider, name, flag, currentModule);
       this.provider = provider;
     }
 
@@ -141,8 +144,8 @@ class DContextEntryBean {
     private final Provider<?> provider;
     private Object bean;
 
-    private OnceProvider(Provider<?> provider, String name, int flag) {
-      super(provider, name, flag);
+    private OnceProvider(Provider<?> provider, String name, int flag, Class<? extends Module> sourceModule) {
+      super(provider, name, flag, sourceModule);
       this.provider = provider;
     }
 
