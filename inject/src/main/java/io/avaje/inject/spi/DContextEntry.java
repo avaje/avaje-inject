@@ -186,8 +186,16 @@ final class DContextEntry {
         match = entry;
         return;
       }
-      throw new IllegalStateException("Expecting only 1 bean match but have multiple matching beans " + match.bean()
-        + " and " + entry.bean() + ". Maybe need a rebuild is required after adding a @Named qualifier?");
+      throw new IllegalStateException(
+          "Expecting only 1 bean match but have multiple matching beans "
+              + match.bean()
+              + " from avaje module: "
+              + match.sourceModule()
+              + " and "
+              + entry.bean()
+              + " from avaje module: "
+              + entry.sourceModule()
+              + ". Maybe need a rebuild is required after adding a @Named qualifier?");
     }
 
     private DContextEntryBean candidate() {
