@@ -17,6 +17,6 @@ class INeedBeanScope {
   }
 
   Que getQueue() {
-    return beanScope.get(Que.class, "Frodo");
+    return beanScope.get(Que.class, "frodo");
   }
 }

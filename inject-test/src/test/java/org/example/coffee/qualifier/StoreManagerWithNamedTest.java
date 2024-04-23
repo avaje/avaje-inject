@@ -18,8 +18,8 @@ class StoreManagerWithNamedTest {
       String store = manager.store();
       assertThat(store).isEqualTo("blue");
 
-      SomeStore greenStore = beanScope.get(SomeStore.class, "Green");
-      SomeStore blueStore = beanScope.get(SomeStore.class, "Blue");
+      SomeStore greenStore = beanScope.get(SomeStore.class, "green");
+      SomeStore blueStore = beanScope.get(SomeStore.class, "blue");
       Map<String, SomeStore> stores = beanScope.map(SomeStore.class);
 
       SomeStore green = stores.get("Green");

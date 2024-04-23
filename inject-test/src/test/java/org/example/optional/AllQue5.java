@@ -17,7 +17,7 @@ public class AllQue5 {
   /**
    * Use Nullable with constructor argument.
    */
-  AllQue5(@Named("Frodo") Que frodo, @Named("sam") Que sam, @Nullable @Named("bilbo") Que bilbo) {
+  AllQue5(@Named("frodo") Que frodo, @Named("sam") Que sam, @Nullable @Named("bilbo") Que bilbo) {
     this.frodo = frodo;
     this.sam = sam;
     this.bilbo = bilbo;
