@@ -17,16 +17,7 @@ class PayUserTest {
       assertThat(payUser.keys()).contains("Accepts(value=MASTERCARD)", "Accepts(value=VISA)");
 
       // string manipulation into an EnumMap assumes ... *(value=<EnumKey>)
-      var asEnumMap = new EnumMap<PaymentMethod,PayStore>(PaymentMethod.class);
-
-      for (var entry : payUser.entries()) {
-        String key = entry.getKey();
-        int open = key.indexOf("(value=");
-        int close = key.lastIndexOf(')');
-        String enumKey = key.substring(open + 7, close);
-        PaymentMethod paymentMethod = PaymentMethod.valueOf(enumKey);
-        asEnumMap.put(paymentMethod, entry.getValue());
-      }
+      EnumMap<PaymentMethod,PayStore> asEnumMap = beanScope.enumMap(PaymentMethod.class, PayStore.class);
 
       PayStore payStore = asEnumMap.get(PaymentMethod.MixedCase);
       assertThat(payStore).isInstanceOf(MixedCasePayStore.class);

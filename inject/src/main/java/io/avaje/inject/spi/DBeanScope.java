@@ -154,6 +154,11 @@ final class DBeanScope implements BeanScope {
   }
 
   @Override
+  public <E extends Enum<E>, T> EnumMap<E, T> enumMap(Class<E> enumType, Class<T> type) {
+    return EnumUtil.toEnumMap(enumType, map(type));
+  }
+
+  @Override
   public <T> List<T> list(Class<T> type) {
     return listOf(type);
   }

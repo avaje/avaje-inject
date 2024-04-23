@@ -2,6 +2,7 @@ package io.avaje.inject.spi;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -128,11 +129,19 @@ final class DBeanScopeProxy implements BeanScope {
 
   @Override
   public <T> Map<String, T> map(Type type) {
-
     if (delegate != null) {
       return delegate.map(type);
     } else {
       return builder.map(type);
+    }
+  }
+
+  @Override
+  public <E extends Enum<E>, T> EnumMap<E, T> enumMap(Class<E> enumType, Class<T> type) {
+    if (delegate != null) {
+      return delegate.enumMap(enumType, type);
+    } else {
+      return builder.enumMap(enumType, type);
     }
   }
 

@@ -2,6 +2,7 @@ package io.avaje.inject;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -231,6 +232,12 @@ public interface BeanScope extends AutoCloseable {
    * Beans with no qualifier name get a generated unique key to use instead.
    */
   <T> Map<String, T> map(Type type);
+
+  /**
+   * Return the beans for this type assuming qualifier uses a single enum member
+   * and that enum type is the one specified calling this method.
+   */
+  <E extends Enum<E>, T> EnumMap<E, T> enumMap(Class<E> enumType, Class<T> type);
 
   /**
    * Return all the bean entries from the scope.

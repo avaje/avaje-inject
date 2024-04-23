@@ -4,10 +4,7 @@ import io.avaje.inject.BeanScope;
 import jakarta.inject.Provider;
 
 import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -243,6 +240,10 @@ public interface Builder {
    * Return a map of dependencies for the generic type keyed by qualifier name.
    */
   <T> Map<String, T> map(Type type);
+
+  <E extends Enum<E>, T> EnumMap<E, T> enumMap(Class<E> enumType, Class<T> type);
+
+  <E extends Enum<E>, T> EnumMap<E, T> enumMap(Class<E> enumType, Type type);
 
   /**
    * Return true if the builder contains the given type.

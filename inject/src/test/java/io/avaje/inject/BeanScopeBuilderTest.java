@@ -6,10 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
@@ -317,6 +314,11 @@ class BeanScopeBuilderTest {
     @Override
     public <T> Map<String, T> map(Type type) {
       return Collections.emptyMap();
+    }
+
+    @Override
+    public <E extends Enum<E>, T> EnumMap<E, T> enumMap(Class<E> enumType, Class<T> payStoreClass) {
+      return new EnumMap(enumType);
     }
 
     @Override

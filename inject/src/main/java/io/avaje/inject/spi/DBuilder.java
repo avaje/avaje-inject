@@ -134,6 +134,16 @@ class DBuilder implements Builder {
     return mapOf(type);
   }
 
+  @Override
+  public <E extends Enum<E>, T> EnumMap<E, T> enumMap(Class<E> enumType, Class<T> type) {
+    return EnumUtil.toEnumMap(enumType, mapOf(type));
+  }
+
+  @Override
+  public <E extends Enum<E>, T> EnumMap<E, T> enumMap(Class<E> enumType, Type type) {
+    return EnumUtil.toEnumMap(enumType, mapOf(type));
+  }
+
   @SuppressWarnings("unchecked")
   private <T> Map<String, T> mapOf(Type type) {
     return (Map<String, T>) beanMap.map(type, parent);
