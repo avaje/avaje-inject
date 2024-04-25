@@ -152,7 +152,7 @@ final class TypeExtendsReader {
         final String baseName = baseType.getSimpleName().toString();
         final String superName = superElement.getSimpleName().toString();
         if (baseName.endsWith(superName)) {
-          qualifierName = baseName.substring(0, baseName.length() - superName.length()).toLowerCase();
+          qualifierName = baseName.substring(0, baseName.length() - superName.length());
         }
       }
       addSuperType(superElement, superMirror, proxyBean);
@@ -226,7 +226,7 @@ final class TypeExtendsReader {
         final String iShortName = Util.shortName(mainType);
         if (beanSimpleName.endsWith(iShortName)) {
           // derived qualifier name based on prefix to interface short name
-          qualifierName = beanSimpleName.substring(0, beanSimpleName.length() - iShortName.length()).toLowerCase();
+          qualifierName = beanSimpleName.substring(0, beanSimpleName.length() - iShortName.length());
         }
       }
       interfaceTypes.add(rawUType);

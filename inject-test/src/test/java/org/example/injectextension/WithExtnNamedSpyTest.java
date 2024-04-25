@@ -44,7 +44,7 @@ class WithExtnNamedSpyTest {
       try (BeanScope beanScope = BeanScope.builder()
         .forTesting()
         .spy(SomeStore.class, "blue")
-        .spy(SomeStore.class, "Green")
+        .spy(SomeStore.class, "green")
         .build()) {
 
         final StoreManagerWithSetterQualifier storeManager = beanScope.get(StoreManagerWithSetterQualifier.class);

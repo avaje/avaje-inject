@@ -22,9 +22,9 @@ class StoreManagerWithNamedTest {
       SomeStore blueStore = beanScope.get(SomeStore.class, "blue");
       Map<String, SomeStore> stores = beanScope.map(SomeStore.class);
 
-      SomeStore green = stores.get("green");
+      SomeStore green = stores.get("Green");
       assertThat(green).isSameAs(greenStore);
-      SomeStore blue = stores.get("blue");
+      SomeStore blue = stores.get("Blue");
       assertThat(blue).isSameAs(blueStore);
 
       // a map with unnamed component

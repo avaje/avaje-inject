@@ -90,7 +90,7 @@ class CustomScopeTest {
 
       assertThat(customBeanEntry).isPresent();
       assertThat(customBeanEntry.get().bean()).isSameAs(customBean);
-      assertThat(customBeanEntry.get().qualifierName()).isEqualTo("hello");
+      assertThat(customBeanEntry.get().qualifierName()).isEqualTo("Hello");
       assertThat(customBeanEntry.get().priority()).isEqualTo(0);
       assertThat(customBeanEntry.get().keys()).containsExactly(CustomBean.class.getCanonicalName());
 

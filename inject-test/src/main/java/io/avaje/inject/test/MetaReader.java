@@ -157,7 +157,7 @@ final class MetaReader {
   private String name(Field field) {
     final Named named = field.getAnnotation(Named.class);
     if (named != null) {
-      return named.value().toLowerCase();
+      return named.value();
     }
     for (Annotation annotation : field.getAnnotations()) {
       final var annotationType = annotation.annotationType();
@@ -165,8 +165,7 @@ final class MetaReader {
         if (metaAnnotation.annotationType().equals(Qualifier.class)) {
           return AnnotationReader.simplifyAnnotation(annotation.toString())
             .replaceFirst(annotationType.getCanonicalName(), annotationType.getSimpleName())
-            .replace("()", "").substring(1)
-            .toLowerCase();
+            .replace("()", "").substring(1);
         }
       }
     }
