@@ -35,6 +35,10 @@ class InjectProcessorTest {
           .map(Path::toFile)
           .forEach(File::delete);
       Paths.get("io.avaje.inject.spi.Module").toAbsolutePath().toFile().delete();
+      Paths.get("io.avaje.inject.spi.ModuleOrdering")
+          .toAbsolutePath()
+          .toFile()
+          .delete();
     } catch (final Exception e) {
     }
   }
@@ -64,7 +68,7 @@ class InjectProcessorTest {
             List.of("--release=" + Integer.getInteger("java.specification.version")),
             null,
             files);
-    task.setProcessors(Arrays.asList(new Processor()));
+    task.setProcessors(Arrays.asList(new InjectProcessor()));
 
     assertThat(task.call()).isTrue();
   }

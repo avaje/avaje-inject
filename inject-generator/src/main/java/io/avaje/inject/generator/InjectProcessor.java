@@ -29,21 +29,22 @@ import static io.avaje.inject.generator.ProcessingContext.*;
 @GenerateAPContext
 @GenerateModuleInfoReader
 @SupportedAnnotationTypes({
+  ApplicationEventPrism.PRISM_TYPE,
+  AspectImportPrism.PRISM_TYPE,
   AssistFactoryPrism.PRISM_TYPE,
-  InjectModulePrism.PRISM_TYPE,
-  FactoryPrism.PRISM_TYPE,
-  SingletonPrism.PRISM_TYPE,
   ComponentPrism.PRISM_TYPE,
-  PrototypePrism.PRISM_TYPE,
-  ScopePrism.PRISM_TYPE,
   Constants.TESTSCOPE,
   Constants.CONTROLLER,
+  ExternalPrism.PRISM_TYPE,
+  FactoryPrism.PRISM_TYPE,
   ImportPrism.PRISM_TYPE,
-  AspectImportPrism.PRISM_TYPE,
-  ApplicationEventPrism.PRISM_TYPE,
-  QualifierPrism.PRISM_TYPE
+  InjectModulePrism.PRISM_TYPE,
+  PrototypePrism.PRISM_TYPE,
+  QualifierPrism.PRISM_TYPE,
+  ScopePrism.PRISM_TYPE,
+  SingletonPrism.PRISM_TYPE,
 })
-public final class Processor extends AbstractProcessor {
+public final class InjectProcessor extends AbstractProcessor {
 
   private Elements elementUtils;
   private ScopeInfo defaultScope;
@@ -88,6 +89,7 @@ public final class Processor extends AbstractProcessor {
     Stream.concat(
         lines("target/avaje-module-dependencies.csv").stream().skip(1),
         lines("build/avaje-module-dependencies.csv").stream().skip(1))
+      .distinct()
       .map(l -> l.split("\\|"))
       .map(AvajeModule::new)
       .forEach(ProcessingContext::addAvajeModule);
@@ -142,6 +144,13 @@ public final class Processor extends AbstractProcessor {
       .flatMap(Set::stream)
       .forEach(EventPublisherWriter::new);
 
+    maybeElements(roundEnv, ExternalPrism.PRISM_TYPE).stream()
+        .flatMap(Set::stream)
+        .map(Element::asType)
+        .map(UType::parse)
+        .map(u -> "java.util.List".equals(u.mainType()) ? u.param0() : u)
+        .map(UType::fullWithoutAnnotations)
+        .forEach(ProcessingContext::addOptionalType);
     allScopes.readBeans(roundEnv);
     defaultScope.write(processingOver);
     allScopes.write(processingOver);

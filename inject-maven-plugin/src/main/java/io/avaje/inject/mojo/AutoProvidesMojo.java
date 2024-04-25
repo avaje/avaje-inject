@@ -93,7 +93,7 @@ public class AutoProvidesMojo extends AbstractMojo {
   }
 
   private FileWriter createFileWriter(String string) throws IOException {
-    return new FileWriter(new File(project.getBuild().getDirectory(), string));
+    return new FileWriter(new File(project.getBuild().getDirectory(), string), true);
   }
 
   private void writeProvidedPlugins(URLClassLoader newClassLoader, FileWriter pluginWriter) throws IOException {
