@@ -64,11 +64,11 @@ class CoffeeMakerTest {
       assertThat(bsomeEntry).isPresent();
 
       final BeanEntry entry = bsomeEntry.get();
-      assertThat(entry.qualifierName()).isEqualTo("b");
+      assertThat(entry.qualifierName()).isEqualTo("B");
       assertThat(entry.keys()).containsExactlyInAnyOrder(name(BSomei.class), name(Somei.class));
       assertThat(entry.type()).isEqualTo(BSomei.class);
       assertThat(entry.priority()).isEqualTo(0);
-      assertThat(entry.bean()).isEqualTo(context.get(Somei.class, "b"));
+      assertThat(entry.bean()).isEqualTo(context.get(Somei.class, "B"));
       assertThat(entry.bean()).isEqualTo(context.get(BSomei.class));
     }
   }

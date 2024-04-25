@@ -36,7 +36,7 @@ class InjectListTest {
     try (BeanScope context = BeanScope.builder().build()) {
       CombinedMapSomei bean = context.get(CombinedMapSomei.class);
       List<String> keys = bean.someKeys();
-      assertThat(keys).containsOnly("a", "b", "a2");
+      assertThat(keys).containsOnly("A", "B", "A2");
       List<String> vals = bean.someVals();
       assertThat(vals).containsOnly("a", "b", "a2");
     }

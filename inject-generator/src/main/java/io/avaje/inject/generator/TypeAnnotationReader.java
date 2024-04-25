@@ -36,8 +36,7 @@ final class TypeAnnotationReader {
         var shortName = Util.shortName(annotationType.toString());
         qualifierName = AnnotationCopier.toSimpleAnnotationString(annotationMirror)
           .replaceFirst(annotationType.toString(), shortName)
-          .replace("\"", "\\\"")
-          .toLowerCase();
+          .replace("\"", "\\\"");
 
       } else if (annType.indexOf('.') == -1) {
         logWarn("skip when no package on annotation " + annType);

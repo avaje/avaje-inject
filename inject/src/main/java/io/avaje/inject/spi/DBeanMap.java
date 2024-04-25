@@ -107,7 +107,7 @@ final class DBeanMap {
     if (entry == null) {
       return null;
     }
-    return (T) entry.get(KeyUtil.lower(name), currentModule);
+    return (T) entry.get(name, currentModule);
   }
   /**
    * Get with a strict match on name for the single entry case.
@@ -117,7 +117,7 @@ final class DBeanMap {
     if (entry == null) {
       return null;
     }
-    return entry.getStrict(KeyUtil.lower(name));
+    return entry.getStrict(name);
   }
   <T> Provider<T> provider(Type type, String name) {
     return provider(type, name, null);
@@ -129,7 +129,7 @@ final class DBeanMap {
     if (entry == null) {
       return null;
     }
-    return (Provider<T>) entry.provider(KeyUtil.lower(name), currentModule);
+    return (Provider<T>) entry.provider(name, currentModule);
   }
 
   /**
