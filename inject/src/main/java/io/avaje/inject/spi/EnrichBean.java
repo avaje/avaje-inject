@@ -16,7 +16,7 @@ public final class EnrichBean<B> {
 
   public EnrichBean(Type type, String name, Consumer<B> consumer) {
     this.type = type;
-    this.name = KeyUtil.lower(name);
+    this.name = name;
     this.consumer = consumer;
   }
 

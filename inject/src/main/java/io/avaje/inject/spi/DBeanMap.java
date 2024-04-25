@@ -91,7 +91,7 @@ final class DBeanMap {
     if (entry == null) {
       return null;
     }
-    return entry.getStrict(KeyUtil.lower(name));
+    return entry.getStrict(name);
   }
 
   boolean contains(String type) {
@@ -112,7 +112,7 @@ final class DBeanMap {
     if (entry == null) {
       return null;
     }
-    return (T) entry.get(KeyUtil.lower(name));
+    return (T) entry.get(name);
   }
 
   @SuppressWarnings("unchecked")
@@ -121,7 +121,7 @@ final class DBeanMap {
     if (entry == null) {
       return null;
     }
-    return (Provider<T>) entry.provider(KeyUtil.lower(name));
+    return (Provider<T>) entry.provider(name);
   }
 
   /**

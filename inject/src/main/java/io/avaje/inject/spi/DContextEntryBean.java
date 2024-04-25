@@ -43,7 +43,7 @@ class DContextEntryBean {
 
   private DContextEntryBean(Object source, String name, int flag) {
     this.source = source;
-    this.name = KeyUtil.lower(name);
+    this.name = name;
     this.flag = flag;
   }
 
@@ -64,14 +64,14 @@ class DContextEntryBean {
    * Return true if qualifierName is null or matched.
    */
   final boolean isNameMatch(String qualifierName) {
-    return qualifierName == null || qualifierName.equals(name);
+    return qualifierName == null || qualifierName.equalsIgnoreCase(name);
   }
 
   /**
    * Return true if qualifierName is matched including null.
    */
   final boolean isNameEqual(String qualifierName) {
-    return Objects.equals(qualifierName, name);
+    return qualifierName == null ? name == null : qualifierName.equalsIgnoreCase(name);
   }
 
   /**
