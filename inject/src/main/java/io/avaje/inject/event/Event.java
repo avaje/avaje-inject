@@ -90,7 +90,7 @@ public abstract class Event<T> {
   }
 
   /**
-   * Fires an event and notifies observers with no qualifier.
+   * Fires an event and notifies observers with the qualifier set for this instance.
    *
    * @param event the event object
    */
@@ -99,7 +99,7 @@ public abstract class Event<T> {
   }
 
   /**
-   * Fires an event to asynchronous observers without qualifiers
+   * Fires an event to asynchronous observers with the qualifier set for this instance.
    *
    * @param event the event object
    * @return a {@link CompletionStage} allowing further pipeline composition on the asynchronous
