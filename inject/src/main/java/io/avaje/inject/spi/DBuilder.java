@@ -185,9 +185,9 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public <T> void registerObserver(Type type, int priority, boolean sync, Consumer<T> observer, String qualifier) {
+  public <T> void registerObserver(Type type, int priority, boolean async, Consumer<T> observer, String qualifier) {
     get(ObserverManager.class)
-        .registerObserver(type, new Observer<T>(priority, sync, observer, qualifier));
+        .registerObserver(type, new Observer<>(priority, async, observer, qualifier));
   }
 
   @Override
