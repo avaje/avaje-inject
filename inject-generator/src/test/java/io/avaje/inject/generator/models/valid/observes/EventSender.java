@@ -3,9 +3,6 @@ package io.avaje.inject.generator.models.valid.observes;
 import java.util.List;
 
 import io.avaje.inject.event.Event;
-import io.avaje.inject.generator.models.valid.nested.A1;
-import io.avaje.inject.generator.models.valid.qualifier.TempQualifier;
-import io.avaje.inject.generator.models.valid.qualifier.TempQualifier.Scale;
 import io.avaje.inject.spi.GenericType;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -15,7 +12,7 @@ import jakarta.inject.Singleton;
 public class EventSender {
   private final Event<CustomEvent> event;
 
-  @Inject Event<GenericType<List<String>>> list;
+  @Inject Event<List<String>> fieldInject;
 
   public EventSender(
       @Named("same") Event<CustomEvent> event,
