@@ -48,6 +48,7 @@ final class EventPublisherWriter {
                 .getPackageOf(APContext.typeElement(utype.mainType()))
                 .getQualifiedName()
                 .toString()
+                .replaceFirst("java.", "")
             + ".events";
     qualifier = Optional.ofNullable(Util.getNamed(element)).orElse("");
     var className =

@@ -33,7 +33,7 @@ class InjectProcessorTest {
     try {
       Stream.concat(
               Files.walk(Paths.get("io").toAbsolutePath()),
-              Files.walk(Paths.get("java").toAbsolutePath()))
+              Files.walk(Paths.get("lang").toAbsolutePath()))
           .sorted(Comparator.reverseOrder())
           .map(Path::toFile)
           .forEach(File::delete);
