@@ -57,6 +57,7 @@ final class TypeExtendsReader {
     return publicAccess
         && !FactoryPrism.isPresent(baseType)
         && !ProxyPrism.isPresent(baseType)
+        && !GeneratedPrism.isPresent(baseType)
         && !isController();
   }
 
@@ -118,15 +119,12 @@ final class TypeExtendsReader {
   }
 
   List<UType> autoProvides() {
-    if (!autoProvide || !providesAspect.isEmpty()) {
-      return List.of();
-    }
     if (baseTypeIsInterface) {
       return List.of(Util.unwrapProvider(baseUType));
     }
     var autoProvides = new ArrayList<>(interfaceTypes);
     autoProvides.addAll(extendsTypes);
-    if (GeneratedPrism.isPresent(baseType)) {
+    if (!autoProvide || !providesAspect.isEmpty()) {
       autoProvides.remove(baseUType);
     } else {
       autoProvides.add(Util.unwrapProvider(baseUType));
