@@ -3,6 +3,7 @@ package io.avaje.inject.generator.models.valid.observes;
 import java.util.List;
 
 import io.avaje.inject.event.Event;
+import io.avaje.inject.generator.models.valid.nested.A1;
 import io.avaje.inject.generator.models.valid.qualifier.TempQualifier;
 import io.avaje.inject.generator.models.valid.qualifier.TempQualifier.Scale;
 import io.avaje.inject.spi.GenericType;
@@ -24,5 +25,5 @@ public class EventSender {
   }
 
   @Inject
-  public void methodInject(@Named("method") Event<CustomEvent> celsius) {}
+  public void methodInject(@Named("method") Event<String> celsius) {}
 }

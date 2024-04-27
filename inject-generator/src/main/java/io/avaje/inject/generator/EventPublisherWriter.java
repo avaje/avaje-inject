@@ -40,9 +40,15 @@ final class EventPublisherWriter {
   private final String qualifier;
 
   EventPublisherWriter(Element element) {
+    final var asType = element.asType();
+    this.utype = UType.parse(asType).param0();
+
     this.packageName =
-        APContext.elements().getPackageOf(element).getQualifiedName().toString() + ".events";
-    this.utype = UType.parse(element.asType()).param0();
+        APContext.elements()
+                .getPackageOf(APContext.typeElement(utype.mainType()))
+                .getQualifiedName()
+                .toString()
+            + ".events";
     qualifier = Optional.ofNullable(Util.getNamed(element)).orElse("");
     var className =
         packageName
