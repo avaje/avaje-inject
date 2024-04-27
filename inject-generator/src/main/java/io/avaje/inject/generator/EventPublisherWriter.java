@@ -39,7 +39,11 @@ final class EventPublisherWriter {
   private final String packageName;
   private final String qualifier;
 
-  EventPublisherWriter(Element element) {
+  static void write(Element element) {
+    new EventPublisherWriter(element);
+  }
+
+  private EventPublisherWriter(Element element) {
     final var asType = element.asType();
     this.utype = UType.parse(asType).param0();
 

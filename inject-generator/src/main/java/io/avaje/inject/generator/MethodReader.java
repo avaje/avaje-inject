@@ -447,7 +447,7 @@ final class MethodReader {
       }
 
       if (fullUType.fullWithoutAnnotations().startsWith("io.avaje.inject.event.Event")) {
-        new EventPublisherWriter(param);
+        EventPublisherWriter.write(param);
       }
     }
 

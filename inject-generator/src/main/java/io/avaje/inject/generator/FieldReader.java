@@ -30,7 +30,7 @@ final class FieldReader {
       ProcessingContext.addOptionalType(fieldType);
     }
     if (type.fullWithoutAnnotations().startsWith("io.avaje.inject.event.Event")) {
-      new EventPublisherWriter(element);
+      EventPublisherWriter.write(element);
     }
   }
 
