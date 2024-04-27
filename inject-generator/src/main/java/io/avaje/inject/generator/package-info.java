@@ -1,5 +1,4 @@
 @GeneratePrism(AOPFallback.class)
-@GeneratePrism(ApplicationEvent.class)
 @GeneratePrism(Aspect.class)
 @GeneratePrism(value = Aspect.Import.class, name = "AspectImportPrism")
 @GeneratePrism(Assisted.class)

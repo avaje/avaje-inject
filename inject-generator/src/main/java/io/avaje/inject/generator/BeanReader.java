@@ -102,6 +102,27 @@ final class BeanReader {
       .anyMatch(t -> t.getKind() == TypeKind.ERROR);
   }
 
+  /**
+   * delay until next round if types cannot be resolved
+   */
+  private boolean createEventPublishers() {
+    var construct = Optional.ofNullable(constructor)
+      .map(MethodReader::params).stream()
+      .flatMap(List::stream)
+      .map(MethodParam::element);
+
+    var fields = injectFields.stream().map(FieldReader::element);
+    var constructFields = Stream.concat(construct, fields);
+    var methods = injectMethods.stream()
+      .map(MethodReader::params)
+      .flatMap(List::stream)
+      .map(MethodParam::element);
+
+    return Stream.concat(constructFields, methods)
+      .map(Element::asType)
+      .anyMatch(t -> t.getKind() == TypeKind.ERROR);
+  }
+
   @Override
   public String toString() {
     return beanType.toString();

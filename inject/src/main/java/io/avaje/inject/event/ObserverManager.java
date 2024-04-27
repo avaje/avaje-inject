@@ -13,16 +13,16 @@ public interface ObserverManager {
   /**
    * Registers the given Consumer as an observer.
    *
-   * @param <T>       the type of the event
+   * @param <T> the type of the event
    * @param eventType the type of the event ()
-   * @param observer  the consumer to execute when a matching event is found
+   * @param observer the consumer to execute when a matching event is found
    */
   <T> void registerObserver(Type eventType, Observer<T> observer);
 
   /**
    * Retrieves a list of all Observers registered by the given type
    *
-   * @param <T>       the Type of the Event
+   * @param <T> the Type of the Event
    * @param eventType the type of the event
    * @return all observers registered
    */

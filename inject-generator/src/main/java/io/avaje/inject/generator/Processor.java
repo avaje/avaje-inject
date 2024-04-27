@@ -40,7 +40,6 @@ import static io.avaje.inject.generator.ProcessingContext.*;
   Constants.CONTROLLER,
   ImportPrism.PRISM_TYPE,
   AspectImportPrism.PRISM_TYPE,
-  ApplicationEventPrism.PRISM_TYPE,
   QualifierPrism.PRISM_TYPE
 })
 public final class Processor extends AbstractProcessor {
@@ -138,15 +137,12 @@ public final class Processor extends AbstractProcessor {
     maybeElements(roundEnv, Constants.CONTROLLER).ifPresent(this::readBeans);
     maybeElements(roundEnv, ProxyPrism.PRISM_TYPE).ifPresent(this::readBeans);
     maybeElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
-    maybeElements(roundEnv, ApplicationEventPrism.PRISM_TYPE).stream()
-      .flatMap(Set::stream)
-      .forEach(EventPublisherWriter::new);
 
     allScopes.readBeans(roundEnv);
     defaultScope.write(processingOver);
     allScopes.write(processingOver);
 
-    if (roundEnv.processingOver()) {
+    if (processingOver) {
       var order =
         new FactoryOrder(ProcessingContext.avajeModules(), defaultScope.pluginProvided())
           .orderModules();
