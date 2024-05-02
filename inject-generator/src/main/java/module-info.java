@@ -7,5 +7,5 @@ module io.avaje.inject.generator {
   uses io.avaje.inject.spi.Plugin;
   uses io.avaje.inject.spi.Module;
 
-  provides javax.annotation.processing.Processor with io.avaje.inject.generator.Processor;
+  provides javax.annotation.processing.Processor with io.avaje.inject.generator.InjectProcessor;
 }

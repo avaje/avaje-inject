@@ -93,7 +93,7 @@ public class AutoProvidesMojo extends AbstractMojo {
   }
 
   private FileWriter createFileWriter(String string) throws IOException {
-    return new FileWriter(new File(project.getBuild().getDirectory(), string));
+    return new FileWriter(new File(project.getBuild().getDirectory(), string), true);
   }
 
   private void writeProvidedPlugins(URLClassLoader newClassLoader, FileWriter pluginWriter) throws IOException {
@@ -160,7 +160,7 @@ public class AutoProvidesMojo extends AbstractMojo {
   }
 
   private void writeModuleCSV(FileWriter moduleWriter) throws IOException {
-    moduleWriter.write("External Module Type|Provides|Requires");
+    moduleWriter.write("\nExternal Module Type|Provides|Requires");
     for (AvajeModule avajeModule : modules) {
       moduleWriter.write("\n");
       moduleWriter.write(avajeModule.name());
