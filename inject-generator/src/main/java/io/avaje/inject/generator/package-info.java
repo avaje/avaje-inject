@@ -7,6 +7,7 @@
 @GeneratePrism(Component.class)
 @GeneratePrism(Component.Import.class)
 @GeneratePrism(DependencyMeta.class)
+@GeneratePrism(External.class)
 @GeneratePrism(Factory.class)
 @GeneratePrism(Generated.class)
 @GeneratePrism(Inject.class)

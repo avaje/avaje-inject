@@ -24,8 +24,13 @@ final class DBeanMap {
   private final Set<String> qualifiers = new HashSet<>();
 
   private NextBean nextBean;
+  private Class<? extends Module> currentModule;
 
   DBeanMap() {
+  }
+
+  void currentModule(Class<? extends Module> currentModule) {
+    this.currentModule = currentModule;
   }
 
   @Override
@@ -69,7 +74,7 @@ final class DBeanMap {
     }
     var name = nextBean.name;
     qualifiers.add(name);
-    DContextEntryBean entryBean = DContextEntryBean.of(bean, name, nextBean.priority);
+    var entryBean = DContextEntryBean.of(bean, name, nextBean.priority, currentModule);
     for (Type type : nextBean.types) {
       beans.computeIfAbsent(type.getTypeName(), s -> new DContextEntry()).add(entryBean);
     }
@@ -77,7 +82,7 @@ final class DBeanMap {
 
   void register(Provider<?> provider) {
     qualifiers.add(nextBean.name);
-    DContextEntryBean entryBean = DContextEntryBean.provider(nextBean.prototype, provider, nextBean.name, nextBean.priority);
+    var entryBean = DContextEntryBean.provider(nextBean.prototype, provider, nextBean.name, nextBean.priority, currentModule);
     for (Type type : nextBean.types) {
       beans.computeIfAbsent(type.getTypeName(), s -> new DContextEntry()).add(entryBean);
     }
@@ -112,7 +117,7 @@ final class DBeanMap {
     if (entry == null) {
       return null;
     }
-    return (T) entry.get(name);
+    return (T) entry.get(name, currentModule);
   }
 
   @SuppressWarnings("unchecked")
@@ -121,7 +126,7 @@ final class DBeanMap {
     if (entry == null) {
       return null;
     }
-    return (Provider<T>) entry.provider(name);
+    return (Provider<T>) entry.provider(name, currentModule);
   }
 
   /**

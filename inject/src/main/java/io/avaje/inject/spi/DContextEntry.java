@@ -29,11 +29,11 @@ final class DContextEntry {
     entries.add(entryBean);
   }
 
-  Provider<?> provider(String name) {
+  Provider<?> provider(String name, Class<? extends Module> currentModule) {
     if (entries.size() == 1) {
       return entries.get(0).provider();
     }
-    return new EntryMatcher(name).provider(entries);
+    return new EntryMatcher(name, currentModule).provider(entries);
   }
 
   /**
@@ -43,14 +43,14 @@ final class DContextEntry {
     if (entries.size() == 1) {
       return entries.get(0).beanIfNameMatch(name);
     }
-    return new EntryMatcher(name).match(entries);
+    return new EntryMatcher(name, null).match(entries);
   }
 
-  Object get(String name) {
+  Object get(String name, Class<? extends Module> currentModule) {
     if (entries.size() == 1) {
       return entries.get(0).bean();
     }
-    return new EntryMatcher(name).match(entries);
+    return new EntryMatcher(name, currentModule).match(entries);
   }
 
   /**
@@ -96,10 +96,12 @@ final class DContextEntry {
 
     private final String name;
     private final boolean impliedName;
+    private final Class<? extends Module> currentModule;
     private DContextEntryBean match;
     private DContextEntryBean ignoredSecondaryMatch;
 
-    EntryMatcher(String name) {
+    EntryMatcher(String name, Class<? extends Module> currentModule) {
+      this.currentModule = currentModule;
       if (name != null && name.startsWith("!")) {
         this.name = name.substring(1);
         this.impliedName = true;
@@ -175,6 +177,15 @@ final class DContextEntry {
         ignoredSecondaryMatch = entry;
         return;
       } else if (!match.isNameEqual(name) && entry.isNameEqual(name)) {
+        match = entry;
+        return;
+      }
+      // if all else fails use the one provided by the current module
+      if (entry.sourceModule() != currentModule) {
+        ignoredSecondaryMatch = entry;
+        return;
+      } else if (entry.sourceModule() == currentModule && match.sourceModule() != currentModule) {
+        // match on module
         match = entry;
         return;
       }

@@ -46,6 +46,11 @@ class DBuilder implements Builder {
   }
 
   @Override
+  public void currentModule(Class<? extends Module> currentModule) {
+    beanMap.currentModule(currentModule);
+  }
+
+  @Override
   public final boolean isAddBeanFor(Type... types) {
     return isAddBeanFor(null, types);
   }

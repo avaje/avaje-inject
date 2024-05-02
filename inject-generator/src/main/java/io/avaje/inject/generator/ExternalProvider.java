@@ -116,7 +116,7 @@ final class ExternalProvider {
     if (!injectAvailable) {
       return;
     }
-    for (final Plugin plugin : ServiceLoader.load(Plugin.class, Processor.class.getClassLoader())) {
+    for (final Plugin plugin : ServiceLoader.load(Plugin.class, InjectProcessor.class.getClassLoader())) {
       var name = plugin.getClass().getTypeName();
       if (avajePlugins.containsKey(name)) {
         continue;
