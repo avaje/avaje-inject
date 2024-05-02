@@ -4,6 +4,8 @@ import java.util.List;
 
 import io.avaje.inject.event.Event;
 import io.avaje.inject.spi.GenericType;
+import io.avaje.inject.generator.models.valid.qualifier.TempQualifier;
+import io.avaje.inject.generator.models.valid.qualifier.TempQualifier.Scale;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
@@ -17,7 +19,7 @@ public class EventSender {
   public EventSender(
       @Named("same") Event<CustomEvent> event,
       @Named("same") Event<CustomEvent> dup,
-      @Named("different") Event<CustomEvent> celsius) {
+      @TempQualifier(value = Scale.CELSIUS, someOtherString = "celsi") Event<CustomEvent> celsius) {
     this.event = event;
   }
 
