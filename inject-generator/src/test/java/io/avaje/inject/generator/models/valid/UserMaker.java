@@ -7,7 +7,7 @@ import jakarta.inject.Named;
 @Factory
 public class UserMaker {
   @Bean
-  @Named("User-  ;():	\"'\" []{}/*&^%$#@<>?|+-= Id")
+  @Named("User-  ;():	' []{}/*&^%$#@<>?|+-= Id")
   String userId() {
     return "bla bla";
   }

@@ -55,10 +55,10 @@ final class TypeExtendsReader {
 
   private boolean autoProvide() {
     return publicAccess
-        && !FactoryPrism.isPresent(baseType)
-        && !ProxyPrism.isPresent(baseType)
-        && !GeneratedPrism.isPresent(baseType)
-        && !isController();
+      && !FactoryPrism.isPresent(baseType)
+      && !ProxyPrism.isPresent(baseType)
+      && !GeneratedPrism.isPresent(baseType)
+      && !isController();
   }
 
   @SuppressWarnings("unchecked")
