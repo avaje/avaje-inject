@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.tools.JavaCompiler;
 import javax.tools.JavaCompiler.CompilationTask;
@@ -30,7 +31,9 @@ class InjectProcessorTest {
   @AfterEach
   void deleteGeneratedFiles() throws IOException {
     try {
-      Files.walk(Paths.get("io").toAbsolutePath())
+      Stream.concat(
+              Files.walk(Paths.get("io").toAbsolutePath()),
+              Files.walk(Paths.get("lang").toAbsolutePath()))
           .sorted(Comparator.reverseOrder())
           .map(Path::toFile)
           .forEach(File::delete);

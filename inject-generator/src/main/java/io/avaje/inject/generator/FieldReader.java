@@ -29,6 +29,9 @@ final class FieldReader {
     if (nullable || element.asType().toString().startsWith("java.util.Optional<")) {
       ProcessingContext.addOptionalType(fieldType);
     }
+    if (type.fullWithoutAnnotations().startsWith("io.avaje.inject.event.Event")) {
+      EventPublisherWriter.write(element);
+    }
   }
 
   boolean isGenericParam() {

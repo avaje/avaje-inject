@@ -37,9 +37,16 @@ import java.util.concurrent.CompletionStage;
 public abstract class Event<T> {
 
   protected final List<Observer<T>> observers;
+  protected final String defaultQualifier;
 
   protected Event(ObserverManager manager, Type type) {
     this.observers = manager.observersByType(type);
+    this.defaultQualifier = "";
+  }
+
+  protected Event(ObserverManager manager, Type type, String qualifier) {
+    this.observers = manager.observersByType(type);
+    this.defaultQualifier = qualifier;
   }
 
   /**
@@ -83,26 +90,26 @@ public abstract class Event<T> {
   }
 
   /**
-   * Fires an event and notifies observers with no qualifier.
+   * Fires an event and notifies observers with the qualifier set for this instance.
    *
    * @param event the event object
    */
   public void fire(T event) {
-    fire(event, "");
+    fire(event, defaultQualifier);
   }
 
   /**
-   * Fires an event to asynchronous observers without qualifiers
+   * Fires an event to asynchronous observers with the qualifier set for this instance.
    *
    * @param event the event object
    * @return a {@link CompletionStage} allowing further pipeline composition on the asynchronous
    *     operation.
    */
   public CompletionStage<T> fireAsync(T event) {
-    return fireAsync(event, "");
+    return fireAsync(event, defaultQualifier);
   }
 
-  private static class CollectingExceptionHandler {
+  private static final class CollectingExceptionHandler {
 
     private final List<Exception> throwables;
 
@@ -114,17 +121,17 @@ public abstract class Event<T> {
       this.throwables = throwables;
     }
 
-    public void handle(Exception throwable) {
+    void handle(Exception throwable) {
       throwables.add(throwable);
     }
 
-    public List<Exception> getHandledExceptions() {
+    List<Exception> handledExceptions() {
       return throwables;
     }
   }
 
   private void handleExceptions(CollectingExceptionHandler handler) {
-    var handledExceptions = handler.getHandledExceptions();
+    var handledExceptions = handler.handledExceptions();
     if (!handledExceptions.isEmpty()) {
       var exception =
         handledExceptions.size() == 1

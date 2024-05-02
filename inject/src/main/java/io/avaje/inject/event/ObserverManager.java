@@ -5,8 +5,8 @@ import java.util.List;
 
 /**
  * Manages all {@link Observer} instances in the BeanScope.
- *
- * <p>A default implementation is provided by avaje-inject.
+ * <p>
+ * A default implementation is provided by avaje-inject.
  */
 public interface ObserverManager {
 

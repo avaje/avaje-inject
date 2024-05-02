@@ -29,7 +29,6 @@ import static io.avaje.inject.generator.ProcessingContext.*;
 @GenerateAPContext
 @GenerateModuleInfoReader
 @SupportedAnnotationTypes({
-  ApplicationEventPrism.PRISM_TYPE,
   AspectImportPrism.PRISM_TYPE,
   AssistFactoryPrism.PRISM_TYPE,
   ComponentPrism.PRISM_TYPE,
@@ -146,9 +145,6 @@ public final class InjectProcessor extends AbstractProcessor {
     maybeElements(roundEnv, Constants.CONTROLLER).ifPresent(this::readBeans);
     maybeElements(roundEnv, ProxyPrism.PRISM_TYPE).ifPresent(this::readBeans);
     maybeElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
-    maybeElements(roundEnv, ApplicationEventPrism.PRISM_TYPE).stream()
-      .flatMap(Set::stream)
-      .forEach(EventPublisherWriter::new);
 
     maybeElements(roundEnv, ExternalPrism.PRISM_TYPE).stream()
       .flatMap(Set::stream)
@@ -157,11 +153,12 @@ public final class InjectProcessor extends AbstractProcessor {
       .map(u -> "java.util.List".equals(u.mainType()) ? u.param0() : u)
       .map(UType::fullWithoutAnnotations)
       .forEach(ProcessingContext::addOptionalType);
+
     allScopes.readBeans(roundEnv);
     defaultScope.write(processingOver);
     allScopes.write(processingOver);
 
-    if (roundEnv.processingOver()) {
+    if (processingOver) {
       var order =
         new FactoryOrder(ProcessingContext.avajeModules(), defaultScope.pluginProvided())
           .orderModules();

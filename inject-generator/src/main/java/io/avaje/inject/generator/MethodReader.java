@@ -445,6 +445,10 @@ final class MethodReader {
       if (nullable || param.asType().toString().startsWith("java.util.Optional<")) {
         ProcessingContext.addOptionalType(paramType);
       }
+
+      if (fullUType.fullWithoutAnnotations().startsWith("io.avaje.inject.event.Event")) {
+        EventPublisherWriter.write(param);
+      }
     }
 
     @Override
