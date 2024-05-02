@@ -37,16 +37,16 @@ import java.util.concurrent.CompletionStage;
 public abstract class Event<T> {
 
   protected final List<Observer<T>> observers;
-  protected final String qualifier;
+  protected final String defaultQualifier;
 
   protected Event(ObserverManager manager, Type type) {
     this.observers = manager.observersByType(type);
-    this.qualifier = "";
+    this.defaultQualifier = "";
   }
 
   protected Event(ObserverManager manager, Type type, String qualifier) {
     this.observers = manager.observersByType(type);
-    this.qualifier = qualifier;
+    this.defaultQualifier = qualifier;
   }
 
   /**
@@ -95,7 +95,7 @@ public abstract class Event<T> {
    * @param event the event object
    */
   public void fire(T event) {
-    fire(event, qualifier);
+    fire(event, defaultQualifier);
   }
 
   /**
@@ -106,7 +106,7 @@ public abstract class Event<T> {
    *     operation.
    */
   public CompletionStage<T> fireAsync(T event) {
-    return fireAsync(event, qualifier);
+    return fireAsync(event, defaultQualifier);
   }
 
   private static final class CollectingExceptionHandler {
@@ -125,13 +125,13 @@ public abstract class Event<T> {
       throwables.add(throwable);
     }
 
-    List<Exception> getHandledExceptions() {
+    List<Exception> handledExceptions() {
       return throwables;
     }
   }
 
   private void handleExceptions(CollectingExceptionHandler handler) {
-    var handledExceptions = handler.getHandledExceptions();
+    var handledExceptions = handler.handledExceptions();
     if (!handledExceptions.isEmpty()) {
       var exception =
         handledExceptions.size() == 1
