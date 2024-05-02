@@ -76,7 +76,9 @@ public interface Builder {
    */
   <T> void registerProvider(Provider<T> provider);
 
-  /** Register the observer into the context. */
+  /**
+   * Register the observer into the context.
+   */
   <T> void registerObserver(Type type, int priority, boolean async, Consumer<T> observer, String qualifier);
 
   /**
