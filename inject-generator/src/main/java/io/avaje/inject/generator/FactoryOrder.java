@@ -110,8 +110,8 @@ class FactoryOrder {
   private boolean notProvided(String dependency) {
     final FactoryList factoryList = providesMap.get(dependency);
     return (factoryList == null || !factoryList.allPushed())
-        && !pluginProvided.contains(dependency)
-        && !ProcessingContext.externallyProvided(dependency);
+      && !pluginProvided.contains(dependency)
+      && !ProcessingContext.externallyProvided(dependency);
   }
 
   /**
