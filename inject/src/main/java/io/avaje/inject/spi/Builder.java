@@ -279,4 +279,8 @@ public interface Builder {
    */
   BeanScope build(boolean withShutdownHook, long start);
 
+  /**
+   * Set the current module being wired.
+   */
+  void currentModule(Class<? extends Module> currentModule);
 }

@@ -3,7 +3,6 @@ package io.avaje.inject.spi;
 import io.avaje.inject.BeanEntry;
 
 import jakarta.inject.Provider;
-import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -14,11 +13,11 @@ class DContextEntryBean {
   /**
    * Create taking into account if it is a Provider or the bean itself.
    */
-  static DContextEntryBean of(Object source, String name, int flag) {
+  static DContextEntryBean of(Object source, String name, int flag, Class<? extends Module> currentModule) {
     if (source instanceof Provider) {
-      return new ProtoProvider((Provider<?>)source, name, flag);
+      return new ProtoProvider((Provider<?>)source, name, flag, currentModule);
     } else {
-      return new DContextEntryBean(source, name, flag);
+      return new DContextEntryBean(source, name, flag, currentModule);
     }
   }
 
@@ -27,24 +26,26 @@ class DContextEntryBean {
    */
   static DContextEntryBean supplied(Object source, String name, int flag) {
     if (source instanceof Provider) {
-      return new OnceProvider((Provider<?>)source, name, flag);
+      return new OnceProvider((Provider<?>)source, name, flag, null);
     } else {
-      return new DContextEntryBean(source, name, flag);
+      return new DContextEntryBean(source, name, flag, null);
     }
   }
 
-  static DContextEntryBean provider(boolean prototype, Provider<?> provider, String name, int flag) {
-    return prototype ? new ProtoProvider(provider, name, flag) : new OnceProvider(provider, name, flag);
+  static DContextEntryBean provider(boolean prototype, Provider<?> provider, String name, int flag, Class<? extends Module> currentModule) {
+    return prototype ? new ProtoProvider(provider, name, flag, currentModule) : new OnceProvider(provider, name, flag, currentModule);
   }
 
   protected final Object source;
   protected final String name;
+  protected final Class<? extends Module> sourceModule;
   private final int flag;
 
-  private DContextEntryBean(Object source, String name, int flag) {
+  private DContextEntryBean(Object source, String name, int flag, Class<? extends Module> currentModule) {
     this.source = source;
     this.name = name;
     this.flag = flag;
+    this.sourceModule = currentModule;
   }
 
   @Override
@@ -53,6 +54,7 @@ class DContextEntryBean {
       "source=" + source +
       ", name='" + name + '\'' +
       ", flag=" + flag +
+      ", sourceModule=" + sourceModule +
       '}';
   }
 
@@ -72,6 +74,10 @@ class DContextEntryBean {
    */
   final boolean isNameEqual(String qualifierName) {
     return qualifierName == null ? name == null : qualifierName.equalsIgnoreCase(name);
+  }
+
+  final Class<? extends Module> sourceModule() {
+    return sourceModule;
   }
 
   /**
@@ -116,8 +122,8 @@ class DContextEntryBean {
 
     private final Provider<?> provider;
 
-    private ProtoProvider(Provider<?> provider, String name, int flag) {
-      super(provider, name, flag);
+    private ProtoProvider(Provider<?> provider, String name, int flag, Class<? extends Module> currentModule) {
+      super(provider, name, flag, currentModule);
       this.provider = provider;
     }
 
@@ -141,8 +147,8 @@ class DContextEntryBean {
     private final Provider<?> provider;
     private Object bean;
 
-    private OnceProvider(Provider<?> provider, String name, int flag) {
-      super(provider, name, flag);
+    private OnceProvider(Provider<?> provider, String name, int flag, Class<? extends Module> currentModule) {
+      super(provider, name, flag, currentModule);
       this.provider = provider;
     }
 
