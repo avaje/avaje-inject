@@ -110,7 +110,7 @@ final class TypeReader {
   String name() {
     NamedPrism named = NamedPrism.getInstanceOn(beanType);
     if (named != null) {
-      return named.value();
+      return named.value().replace("\"", "\\\"");
     }
     if (annotationReader.hasQualifierName()) {
       return annotationReader.qualifierName();
