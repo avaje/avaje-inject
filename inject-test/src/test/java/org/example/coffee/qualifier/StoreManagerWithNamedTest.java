@@ -20,6 +20,14 @@ class StoreManagerWithNamedTest {
 
       SomeStore greenStore = beanScope.get(SomeStore.class, "green");
       SomeStore blueStore = beanScope.get(SomeStore.class, "blue");
+      SomeStore unNamedStore = beanScope.get(SomeStore.class);
+      assertThat(blueStore.store()).isEqualTo("blue");
+      assertThat(greenStore.store()).isEqualTo("green");
+      assertThat(unNamedStore.store()).isEqualTo("noName");
+      assertThat(greenStore).isInstanceOf(GreenStore.class);
+      assertThat(blueStore).isInstanceOf(BlueStore.class);
+      assertThat(unNamedStore).isInstanceOf(NoNameStore.class);
+
       Map<String, SomeStore> stores = beanScope.map(SomeStore.class);
 
       SomeStore green = stores.get("Green");
@@ -42,7 +50,7 @@ class StoreManagerWithNamedTest {
 
       try (BeanScope beanScope = BeanScope.builder().parent(parent).build()) {
         Map<String, SomeStore> stores = beanScope.map(SomeStore.class);
-        assertThat(stores).hasSize(3);
+        assertThat(stores).hasSize(4);
       }
     }
   }
