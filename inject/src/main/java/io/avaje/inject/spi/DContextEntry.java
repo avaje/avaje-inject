@@ -123,12 +123,20 @@ final class DContextEntry {
 
     private DContextEntryBean findMatch(List<DContextEntryBean> entries) {
       for (DContextEntryBean entry : entries) {
-        if (entry.isNameMatch(name)) {
+        if (entry.isNameEqual(name)) {
           checkMatch(entry);
         }
       }
       if (match == null && impliedName) {
-        // search again as if the implied name wasn't there, name = null
+        // match without implied name, name = null to match against beans with no qualifier
+        for (DContextEntryBean entry : entries) {
+          if (entry.isNameEqual(null)) {
+            checkMatch(entry);
+          }
+        }
+      }
+      if (match == null && (name == null || impliedName)) {
+        // match no qualifier injection point to any beans
         for (DContextEntryBean entry : entries) {
           checkMatch(entry);
         }
