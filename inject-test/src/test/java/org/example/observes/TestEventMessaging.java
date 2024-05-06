@@ -2,6 +2,7 @@ package org.example.observes;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import jakarta.inject.Named;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +16,11 @@ class TestEventMessaging {
   @Inject MyObserver observer;
   @Inject MyQualifiedObserver qualifiedObserver;
   @Inject MyObserverInjected observerInjected;
+  @Inject MyStrQualifiedObserver strQualifiedObserver;
   @Inject Event<CustomEvent> event;
+  @Inject EventSender2 sender2;
+  // @Inject @StrQualifier(value = "foo") Event<CustomEvent> strEvent; Bug: This is not supported yet.
+  @Inject @Named("StrQualifier(value=\"foo\")") Event<CustomEvent> strEvent;
 
   @BeforeEach
   void before() {
@@ -52,5 +57,20 @@ class TestEventMessaging {
     assertThat(qualifiedObserver.event).isSameAs(message);
     assertThat(observerInjected.invoked).isFalse();
     assertThat(observerInjected.event).isNull();
+  }
+
+  @Test
+  void testStringQualifiedEvent() {
+    var message = new CustomEvent("hi!");
+
+    sender2.event.fire(message);
+    assertThat(strQualifiedObserver.invoked).isTrue();
+    assertThat(strQualifiedObserver.event).isSameAs(message);
+
+    strQualifiedObserver.clear();
+    strEvent.fire(message);
+
+    assertThat(strQualifiedObserver.invoked).isTrue();
+    assertThat(strQualifiedObserver.event).isSameAs(message);
   }
 }
