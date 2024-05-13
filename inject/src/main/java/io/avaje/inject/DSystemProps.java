@@ -2,9 +2,9 @@ package io.avaje.inject;
 
 import java.util.Optional;
 
-import io.avaje.inject.spi.PropertyPlugin;
+import io.avaje.inject.spi.ConfigPropertyPlugin;
 
-final class DSystemProps implements PropertyPlugin {
+final class DSystemProps implements ConfigPropertyPlugin {
 
   @Override
   public Optional<String> get(String property) {

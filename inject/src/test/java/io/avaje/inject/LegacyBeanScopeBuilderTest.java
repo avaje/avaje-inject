@@ -41,7 +41,7 @@ class LegacyBeanScopeBuilderTest {
     assertThatThrownBy(factoryOrder::orderModules)
         .isInstanceOf(IllegalStateException.class)
         .hasMessageContaining(
-            "AvajeModule [io.avaje.inject.BeanScopeBuilderTest$TDModule] has unsatisfied requires [io.avaje.inject.BeanScopeBuilderTest$MyFeature]");
+            "Module [io.avaje.inject.LegacyBeanScopeBuilderTest$TDModule] has unsatisfied requires [io.avaje.inject.LegacyBeanScopeBuilderTest$MyFeature]");
   }
 
   @Test
@@ -168,7 +168,7 @@ class LegacyBeanScopeBuilderTest {
     assertThatThrownBy(factoryOrder::orderModules)
         .isInstanceOf(IllegalStateException.class)
         .hasMessageContaining(
-            "has unsatisfied requiresPackages [io.avaje.inject.BeanScopeBuilderTest$Mod3] ");
+            "has unsatisfied requiresPackages [io.avaje.inject.LegacyBeanScopeBuilderTest$Mod3] ");
   }
 
   @Test
@@ -182,7 +182,7 @@ class LegacyBeanScopeBuilderTest {
     assertThatThrownBy(factoryOrder::orderModules)
         .isInstanceOf(IllegalStateException.class)
         .hasMessageContaining(
-            "has unsatisfied requires [io.avaje.inject.BeanScopeBuilderTest$Mod3] ");
+            "has unsatisfied requires [io.avaje.inject.LegacyBeanScopeBuilderTest$Mod3] ");
   }
 
   private List<String> names(List<AvajeModule> factories) {

@@ -1,7 +1,8 @@
 package io.avaje.inject;
 
 import io.avaje.inject.spi.AvajeModule;
-import io.avaje.inject.spi.PropertyPlugin;
+import io.avaje.inject.spi.ConfigPropertyPlugin;
+import io.avaje.inject.spi.PropertyRequiresPlugin;
 import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
 
@@ -80,17 +81,26 @@ public interface BeanScopeBuilder {
   BeanScopeBuilder modules(AvajeModule... modules);
 
   /**
-   * Set the PropertyPlugin used for this scope. This is serviceloaded automatically of not set
+   * Return the PropertyRequiresPlugin used for this scope. This is useful for plugins that want to
+   * use the scopes wiring properties.
+   *
+   * @deprecated use {@link #configPlugin()} instead
+   */
+  @Deprecated(forRemoval = true)
+  PropertyRequiresPlugin propertyPlugin();
+
+  /**
+   * Set the ConfigPropertyPlugin used for this scope. This is serviceloaded automatically of not set
    *
    * @param propertyRequiresPlugin The plugin for conditions based on properties
    */
-  void propertyPlugin(PropertyPlugin propertyRequiresPlugin);
+  void configPlugin(ConfigPropertyPlugin propertyPlugin);
 
   /**
-   * Return the PropertyPlugin used for this scope. This is useful for plugins that want to use
+   * Return the ConfigPropertyPlugin used for this scope. This is useful for plugins that want to use
    * the scopes wiring properties.
    */
-  PropertyPlugin propertyPlugin();
+  ConfigPropertyPlugin configPlugin();
 
   /**
    * Supply a bean to the scope that will be used instead of any similar bean in the scope.

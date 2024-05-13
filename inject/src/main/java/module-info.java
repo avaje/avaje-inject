@@ -10,7 +10,7 @@ module io.avaje.inject {
   requires transitive jakarta.inject;
   requires static io.avaje.config;
   requires static org.mockito;
-  requires static transitive io.avaje.spi;
+  requires static io.avaje.spi;
 
   uses io.avaje.inject.spi.InjectSPI;
   uses io.avaje.inject.spi.Module;
