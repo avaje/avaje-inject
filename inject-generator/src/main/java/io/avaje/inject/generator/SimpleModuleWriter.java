@@ -2,13 +2,12 @@ package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.logError;
 import static io.avaje.inject.generator.APContext.typeElement;
-import static io.avaje.inject.generator.ProcessingContext.createMetaInfWriter;
+import static io.avaje.inject.generator.ProcessingContext.createMetaInfWriterFor;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -34,7 +33,7 @@ final class SimpleModuleWriter {
       " *   module example {\n" +
       " *     requires io.avaje.inject;\n" +
       " *     \n" +
-      " *     provides io.avaje.inject.spi.Module with %s.%s;\n" +
+      " *     provides io.avaje.inject.spi.InjectSPI with %s.%s;\n" +
       " *     \n" +
       " *   }\n" +
       " * \n" +
@@ -84,7 +83,13 @@ final class SimpleModuleWriter {
 
   private void writeServicesFile(ScopeInfo.Type scopeType) {
     try {
-      FileObject jfo = createMetaInfWriter(scopeType);
+
+      if (scopeType == ScopeInfo.Type.DEFAULT) {
+        ProcessingContext.addInjectSPI(fullName);
+        return;
+      }
+
+      FileObject jfo = createMetaInfWriterFor(Constants.META_INF_TESTMODULE);
       if (jfo != null) {
         Writer writer = jfo.openWriter();
         writer.write(fullName);
@@ -132,7 +137,7 @@ final class SimpleModuleWriter {
     provides.addAll(autoProvides);
     autoProvidesAspects.stream().map(Util::wrapAspect).forEach(provides::add);
 
-    ProcessingContext.addAvajeModule(new AvajeModule(fullName, provides, requires));
+    ProcessingContext.addAvajeModule(new AvajeModuleData(fullName, provides, requires));
   }
 
   private void writeClassesMethod() {

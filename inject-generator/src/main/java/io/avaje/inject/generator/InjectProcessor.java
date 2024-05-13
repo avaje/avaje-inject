@@ -95,7 +95,7 @@ public final class InjectProcessor extends AbstractProcessor {
       .filter(s -> !s.startsWith("External Module Type"))
       .distinct()
       .map(l -> l.split("\\|"))
-      .map(AvajeModule::new)
+      .map(AvajeModuleData::new)
       .peek(m -> APContext.logNote(m.toString()))
       .forEach(ProcessingContext::addAvajeModule);
   }
@@ -170,6 +170,7 @@ public final class InjectProcessor extends AbstractProcessor {
           logError("FilerException trying to write wiring order class " + e.getMessage());
         }
       }
+      ProcessingContext.writeSPIServicesFile();
       ProcessingContext.validateModule();
       ProcessingContext.clear();
     }

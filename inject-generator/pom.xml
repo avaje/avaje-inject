@@ -30,6 +30,12 @@
       <optional>true</optional>
       <scope>provided</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-spi-service</artifactId>
+      <version>1.4</version>
+    </dependency>
 
     <!-- test dependencies -->
     <dependency>

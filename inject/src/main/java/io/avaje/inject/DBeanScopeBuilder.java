@@ -3,12 +3,10 @@ package io.avaje.inject;
 import static java.lang.System.Logger.Level.DEBUG;
 import static java.lang.System.Logger.Level.INFO;
 import static java.util.Collections.emptySet;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +32,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private final List<SuppliedBean> suppliedBeans = new ArrayList<>();
   @SuppressWarnings("rawtypes")
   private final List<EnrichBean> enrichBeans = new ArrayList<>();
-  private final Set<Module> includeModules = new LinkedHashSet<>();
+  private final Set<AvajeModule> includeModules = new LinkedHashSet<>();
   private final List<Runnable> postConstructList = new ArrayList<>();
   private final List<Consumer<BeanScope>> postConstructConsumerList = new ArrayList<>();
   private final List<ClosePair> preDestroyList = new ArrayList<>();
@@ -42,7 +40,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private boolean parentOverride = true;
   private boolean shutdownHook;
   private ClassLoader classLoader;
-  private PropertyRequiresPlugin propertyRequiresPlugin;
+  private PropertyPlugin propertyPlugin;
   private Set<String> profiles;
 
   /** Create a BeanScopeBuilder to ultimately load and return a new BeanScope. */
@@ -60,23 +58,22 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  public BeanScopeBuilder modules(Module... modules) {
+  public BeanScopeBuilder modules(AvajeModule... modules) {
     this.includeModules.addAll(Arrays.asList(modules));
     return this;
   }
 
   @Override
-  public void propertyPlugin(PropertyRequiresPlugin propertyRequiresPlugin) {
-    this.propertyRequiresPlugin = propertyRequiresPlugin;
+  public void propertyPlugin(PropertyPlugin propertyPlugin) {
+    this.propertyPlugin = propertyPlugin;
   }
 
   @Override
-  public PropertyRequiresPlugin propertyPlugin() {
-    if (propertyRequiresPlugin == null) {
-      initClassLoader();
-      initPropertyPlugin();
+  public PropertyPlugin propertyPlugin() {
+    if (propertyPlugin == null) {
+      propertyPlugin = defaultPropertyPlugin();
     }
-    return propertyRequiresPlugin;
+    return propertyPlugin;
   }
 
   @Override
@@ -215,15 +212,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       classLoader = Thread.currentThread().getContextClassLoader();
     }
   }
-
-  private void initPropertyPlugin() {
-    propertyRequiresPlugin =
-      ServiceLoader.load(PropertyRequiresPlugin.class, classLoader)
-        .findFirst()
-        .orElse(defaultPropertyPlugin());
-  }
-
-  private PropertyRequiresPlugin defaultPropertyPlugin() {
+  private PropertyPlugin defaultPropertyPlugin() {
     return detectAvajeConfig() ? new DConfigProps() : new DSystemProps();
   }
 
@@ -242,7 +231,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private void initProfiles() {
     if (profiles == null) {
       profiles =
-        propertyRequiresPlugin
+        propertyPlugin
           .get("avaje.profiles")
           .map(p -> Set.of(p.split(",")))
           .orElse(emptySet());
@@ -254,23 +243,45 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     final var start = System.currentTimeMillis();
     // load and apply plugins first
     initClassLoader();
-    if (propertyRequiresPlugin == null) {
-      initPropertyPlugin();
-    }
 
     provideDefault(ObserverManager.class, DObserverManager::new);
 
-    ServiceLoader.load(Plugin.class, classLoader).forEach(plugin -> plugin.apply(this));
+    List<InjectPlugin> plugins = new ArrayList<>();
+    List<AvajeModule> spiModules = new ArrayList<>();
+    ModuleOrdering spiOrdering = null;
+    //TODO make a sealed switch when we upgrade to 17
+    for (var spi : ServiceLoader.load(InjectSPI.class)) {
+      if (spi instanceof InjectPlugin) {
+        plugins.add((InjectPlugin) spi);
+      } else if (spi instanceof AvajeModule) {
+        spiModules.add((AvajeModule) spi);
+      } else if (spi instanceof ModuleOrdering) {
+        spiOrdering = (ModuleOrdering) spi;
+      } else if (propertyPlugin == null && spi instanceof PropertyPlugin) {
+        propertyPlugin = (PropertyPlugin) spi;
+      }
+    }
+
+    if (propertyPlugin == null) {
+      propertyPlugin = defaultPropertyPlugin();
+    }
+
+    plugins.forEach(plugin -> plugin.apply(this));
+
+    ServiceLoader.load(Plugin.class).forEach(plugin -> plugin.apply(this));
+
     // sort factories by dependsOn
     ModuleOrdering factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
 
     if (factoryOrder.isEmpty()) {
       // prefer generated ModuleOrdering if provided
-      factoryOrder = ServiceLoader.load(ModuleOrdering.class, classLoader).findFirst().orElse(factoryOrder);
-      ServiceLoader.load(Module.class, classLoader).forEach(factoryOrder::add);
+      factoryOrder = spiOrdering != null ? spiOrdering : factoryOrder;
+
+      spiModules.forEach(factoryOrder::add);
+      ServiceLoader.load(Module.class).forEach(factoryOrder::add);
     }
 
-    final Set<String> moduleNames = factoryOrder.orderModules();
+    final var moduleNames = factoryOrder.orderModules();
     if (moduleNames.isEmpty()) {
       throw new IllegalStateException(
         "Could not find any avaje modules."
@@ -279,12 +290,12 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
           + " Refer to https://avaje.io/inject#gradle");
     }
 
-    final var level = propertyRequiresPlugin.contains("printModules") ? INFO : DEBUG;
+    final var level = propertyPlugin.contains("printModules") ? INFO : DEBUG;
     initProfiles();
     log.log(level, "building with avaje modules {0} profiles {1}", moduleNames, profiles);
 
-    final Builder builder = Builder.newBuilder(profiles, propertyRequiresPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
-    for (final Module factory : factoryOrder.factories()) {
+    final var builder = Builder.newBuilder(profiles, propertyPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
+    for (final var factory : factoryOrder.factories()) {
       builder.currentModule(factory.getClass());
       factory.build(builder);
     }
@@ -302,10 +313,9 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     final Class<?> suppliedSuper = suppliedClass.getSuperclass();
     if (Object.class.equals(suppliedSuper)) {
       return suppliedClass;
-    } else {
-      // prefer to use the super type of the supplied bean (test double)
-      return suppliedSuper;
     }
+  // prefer to use the super type of the supplied bean (test double)
+    return suppliedSuper;
   }
 
   /** Helper to order the BeanContextFactory based on dependsOn. */
@@ -314,24 +324,24 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     private final BeanScope parent;
     private final boolean suppliedBeans;
     private final Set<String> moduleNames = new LinkedHashSet<>();
-    private final List<Module> factories = new ArrayList<>();
+    private final List<AvajeModule> factories = new ArrayList<>();
     private final List<FactoryState> queue = new ArrayList<>();
     private final List<FactoryState> queueNoDependencies = new ArrayList<>();
 
     private final Map<String, FactoryList> providesMap = new HashMap<>();
 
-    FactoryOrder(BeanScope parent, Set<Module> includeModules, boolean suppliedBeans) {
+    FactoryOrder(BeanScope parent, Set<AvajeModule> includeModules, boolean suppliedBeans) {
       this.parent = parent;
       this.factories.addAll(includeModules);
       this.suppliedBeans = suppliedBeans;
-      for (final Module includeModule : includeModules) {
+      for (final AvajeModule includeModule : includeModules) {
         moduleNames.add(includeModule.getClass().getName());
       }
     }
 
     @Override
-    public void add(Module module) {
-      final FactoryState factoryState = new FactoryState(module);
+    public void add(AvajeModule module) {
+      final var factoryState = new FactoryState(module);
       providesMap
         .computeIfAbsent(module.getClass().getTypeName(), s -> new FactoryList())
         .add(factoryState);
@@ -379,7 +389,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
 
     @Override
-    public List<Module> factories() {
+    public List<AvajeModule> factories() {
       return factories;
     }
 
@@ -397,7 +407,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
           push(factoryState);
         }
       } else if (!queue.isEmpty()) {
-        final StringBuilder sb = new StringBuilder();
+        final var sb = new StringBuilder();
         for (final FactoryState factory : queue) {
           sb.append("Module [").append(factory).append("] has unsatisfied");
           unsatisfiedRequires(sb, factory.requires(), "requires");
@@ -425,7 +435,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       if (parent != null && parent.contains(dependency)) {
         return false;
       }
-      final FactoryList factoryList = providesMap.get(dependency);
+      final var factoryList = providesMap.get(dependency);
       return (factoryList == null || !factoryList.allPushed());
     }
 
@@ -435,10 +445,10 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
      * <p>This returns the number of factories added so once this returns 0 it is done.
      */
     private int processQueuedFactories() {
-      int count = 0;
-      final Iterator<FactoryState> it = queue.iterator();
+      var count = 0;
+      final var it = queue.iterator();
       while (it.hasNext()) {
-        final FactoryState factory = it.next();
+        final var factory = it.next();
         if (satisfiedDependencies(factory)) {
           // push the factory onto the build order
           it.remove();
@@ -475,10 +485,10 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   /** Wrapper on Factory holding the pushed state. */
   private static class FactoryState {
 
-    private final Module factory;
+    private final AvajeModule factory;
     private boolean pushed;
 
-    private FactoryState(Module factory) {
+    private FactoryState(AvajeModule factory) {
       this.factory = factory;
     }
 
@@ -491,7 +501,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       return pushed;
     }
 
-    Module factory() {
+    AvajeModule factory() {
       return factory;
     }
 

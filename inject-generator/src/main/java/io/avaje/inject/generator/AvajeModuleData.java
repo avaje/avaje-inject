@@ -6,19 +6,19 @@ import static java.util.stream.Collectors.toList;
 import java.util.Arrays;
 import java.util.List;
 
-final class AvajeModule {
+final class AvajeModuleData {
 
   private final String fqn;
   private final List<String> provides;
   private final List<String> requires;
 
-  AvajeModule(String name, List<String> provides, List<String> requires) {
+  AvajeModuleData(String name, List<String> provides, List<String> requires) {
     this.fqn = name;
     this.provides = provides;
     this.requires = requires;
   }
 
-  AvajeModule(String[] moduleCsv) {
+  AvajeModuleData(String[] moduleCsv) {
     this.fqn = moduleCsv[0];
     this.provides = Arrays.stream(moduleCsv[1].split(",")).filter(not(String::isBlank)).collect(toList());
     this.requires = Arrays.stream(moduleCsv[2].split(",")).filter(not(String::isBlank)).collect(toList());
@@ -38,6 +38,6 @@ final class AvajeModule {
 
   @Override
   public String toString() {
-    return "AvajeModule [fqn=" + fqn + ", provides=" + provides + ", requires=" + requires + "]";
+    return "AvajeModule2 [fqn=" + fqn + ", provides=" + provides + ", requires=" + requires + "]";
   }
 }

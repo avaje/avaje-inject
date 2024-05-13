@@ -8,7 +8,7 @@ import org.other.one.OtherComponent2;
 import java.util.Optional;
 
 @Component.Import(value = OtherComponent2.class)
-public class ConfigPropertiesPlugin implements PropertyRequiresPlugin {
+public class ConfigPropertiesPlugin implements PropertyPlugin {
 
   @Override
   public Optional<String> get(String property) {

@@ -1,14 +1,14 @@
 package io.avaje.inject;
 
 import io.avaje.config.Config;
-import io.avaje.inject.spi.PropertyRequiresPlugin;
+import io.avaje.inject.spi.PropertyPlugin;
 
 import java.util.Optional;
 
 /**
- * Avaje-Config based implementation of PropertyRequiresPlugin.
+ * Avaje-Config based implementation of PropertyPlugin.
  */
-final class DConfigProps implements PropertyRequiresPlugin {
+final class DConfigProps implements PropertyPlugin {
 
   @Override
   public Optional<String> get(String property) {

@@ -25,9 +25,9 @@ final class Constants {
   static final String AT_PROXY = "@Proxy";
   static final String AT_GENERATED = "@Generated(\"io.avaje.inject.generator\")";
   static final String AT_GENERATED_COMMENT = "(\"io.avaje.inject.generator\")";
-  static final String META_INF_MODULE = "META-INF/services/io.avaje.inject.spi.Module";
+  static final String META_INF_SPI = "META-INF/services/io.avaje.inject.spi.InjectSPI";
   static final String META_INF_TESTMODULE = "META-INF/services/io.avaje.inject.test.TestModule";
-  static final String META_INF_CUSTOM = "META-INF/services/io.avaje.inject.spi.Module.Custom";
+  static final String META_INF_CUSTOM = "META-INF/services/io.avaje.inject.spi.AvajeModule.Custom";
 
   static final String BEANSCOPE = "io.avaje.inject.BeanScope";
   static final String INJECTMODULE = "io.avaje.inject.InjectModule";
@@ -52,7 +52,7 @@ final class Constants {
   static final String BEAN_FACTORY2 = "io.avaje.inject.spi.BeanFactory2";
   static final String BUILDER = "io.avaje.inject.spi.Builder";
   static final String DEPENDENCYMETA = "io.avaje.inject.spi.DependencyMeta";
-  static final String MODULE = "io.avaje.inject.spi.Module";
+  static final String MODULE = "io.avaje.inject.spi.AvajeModule";
   static final String GENERICTYPE = "io.avaje.inject.spi.GenericType";
 
   static final String CONDITIONAL_DEPENDENCY = "con:";

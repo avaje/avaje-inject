@@ -2,7 +2,7 @@ package org.example.custom2;
 
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.spi.Builder;
-import io.avaje.inject.spi.Module;
+import io.avaje.inject.spi.AvajeModule;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -64,7 +64,7 @@ class ParentScopeSpyTest {
     }
   }
 
-  static class MyTestModule implements Module.Custom {
+  static class MyTestModule implements AvajeModule.Custom {
 
     private final Class<?>[] provides = new Class<?>[]{};
     private final Class<?>[] requires = new Class<?>[]{};

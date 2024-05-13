@@ -37,17 +37,7 @@ final class SimpleOrderWriter {
   }
 
   private void writeServicesFile() {
-    try {
-      FileObject jfo = createMetaInfWriterFor("META-INF/services/io.avaje.inject.spi.ModuleOrdering");
-      if (jfo != null) {
-        Writer writer = jfo.openWriter();
-        writer.write(fullName);
-        writer.close();
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
-      logError("Failed to write services file " + e.getMessage());
-    }
+    ProcessingContext.addInjectSPI(fullName);
   }
 
   private void writePackage() {
@@ -62,7 +52,7 @@ final class SimpleOrderWriter {
           + "import java.util.Set;\n"
           + "import io.avaje.inject.spi.Generated;\n"
           + "import io.avaje.inject.spi.ModuleOrdering;\n"
-          + "import io.avaje.inject.spi.Module;")
+          + "import io.avaje.inject.spi.AvajeModule;")
       .eol();
 
     writer.eol();
@@ -78,7 +68,7 @@ final class SimpleOrderWriter {
     writer.append(Constants.AT_GENERATED).eol();
     writer.append("public final class %s implements ModuleOrdering {", shortName).eol().eol();
 
-    writer.append("  private final Module[] sortedModules = new Module[%s];", ordering.size()).eol();
+    writer.append("  private final AvajeModule[] sortedModules = new AvajeModule[%s];", ordering.size()).eol();
     writer.append("  private static final Map<String, Integer> INDEXES = Map.ofEntries(").eol();
     var size = ordering.size();
     var count = 0;
@@ -96,7 +86,7 @@ final class SimpleOrderWriter {
     writer.append(
       "\n"
         + "  @Override\n"
-        + "  public List<Module> factories() {\n"
+        + "  public List<AvajeModule> factories() {\n"
         + "    return List.of(sortedModules);\n"
         + "  }\n"
         + "\n"
@@ -106,7 +96,7 @@ final class SimpleOrderWriter {
         + "  }\n"
         + "\n"
         + "  @Override\n"
-        + "  public void add(Module module) {\n"
+        + "  public void add(AvajeModule module) {\n"
         + "    final var index = INDEXES.get(module.getClass().getTypeName());\n"
         + "    if (index != null) {\n"
         + "      sortedModules[index] = module;\n"

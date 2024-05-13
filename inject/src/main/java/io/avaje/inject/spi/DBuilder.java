@@ -15,7 +15,7 @@ import static io.avaje.inject.spi.DBeanScope.combine;
 
 class DBuilder implements Builder {
 
-  private final PropertyRequiresPlugin propertyRequires;
+  private final PropertyPlugin propertyRequires;
   private final Set<String> profiles;
   /** List of Lifecycle methods. */
   private final List<Runnable> postConstruct = new ArrayList<>();
@@ -38,7 +38,7 @@ class DBuilder implements Builder {
 
   private DBeanScopeProxy beanScopeProxy;
 
-  DBuilder(Set<String> profiles, PropertyRequiresPlugin propertyRequires, BeanScope parent, boolean parentOverride) {
+  DBuilder(Set<String> profiles, PropertyPlugin propertyRequires, BeanScope parent, boolean parentOverride) {
     this.propertyRequires = propertyRequires;
     this.parent = parent;
     this.parentOverride = parentOverride;
@@ -46,7 +46,7 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public void currentModule(Class<? extends Module> currentModule) {
+  public void currentModule(Class<? extends AvajeModule> currentModule) {
     beanMap.currentModule(currentModule);
   }
 
@@ -386,7 +386,7 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public PropertyRequiresPlugin property() {
+  public PropertyPlugin property() {
     return propertyRequires;
   }
 

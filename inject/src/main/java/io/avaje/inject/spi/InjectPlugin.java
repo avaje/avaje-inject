@@ -5,26 +5,33 @@ import io.avaje.inject.BeanScopeBuilder;
 import java.lang.reflect.Type;
 
 /**
- * A InjectPlugin that can be applied when creating a bean scope.
+ * A Plugin that can be applied when creating a bean scope.
  *
  * <p>Typically, a plugin might provide a default dependency via {@link
  * BeanScopeBuilder#provideDefault(Type, java.util.function.Supplier)}.
  */
-@Deprecated(forRemoval = true)
-public interface Plugin extends InjectPlugin {
+public interface InjectPlugin extends InjectSPI {
 
-  /** Apply the plugin to the scope builder. */
-  @Override
+  /**
+   * Empty array of classes.
+   */
+  Class<?>[] EMPTY_CLASSES = {};
+
+  /**
+   * Apply the plugin to the scope builder.
+   */
   void apply(BeanScopeBuilder builder);
 
-  /** Return the classes that the plugin provides. */
-  @Override
-  default Class<?>[] provides() {
+  /**
+   * Return the classes that the plugin provides.
+   */
+  default Type[] provides() {
     return EMPTY_CLASSES;
   }
 
-  /** Return the aspect classes that the plugin provides. */
-  @Override
+  /**
+   * Return the aspect classes that the plugin provides.
+   */
   default Class<?>[] providesAspects() {
     return EMPTY_CLASSES;
   }
