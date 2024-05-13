@@ -38,6 +38,6 @@ final class AvajeModuleData {
 
   @Override
   public String toString() {
-    return "AvajeModule2 [fqn=" + fqn + ", provides=" + provides + ", requires=" + requires + "]";
+    return "AvajeModuleData [fqn=" + fqn + ", provides=" + provides + ", requires=" + requires + "]";
   }
 }
