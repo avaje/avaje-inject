@@ -28,7 +28,7 @@ final class ProcessingContext {
     private final Set<String> providedTypes = new HashSet<>();
     private final Set<String> optionalTypes = new LinkedHashSet<>();
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
-    private final List<AvajeModule> avajeModules = new ArrayList<>();
+    private final List<AvajeModuleData> avajeModules = new ArrayList<>();
     private final List<TypeElement> delayQueue = new ArrayList<>();
     private boolean validated;
     private boolean strictWiring;
@@ -207,11 +207,11 @@ final class ProcessingContext {
     APContext.clear();
   }
 
-  static void addAvajeModule(AvajeModule module) {
+  static void addAvajeModule(AvajeModuleData module) {
     CTX.get().avajeModules.add(module);
   }
 
-  static List<AvajeModule> avajeModules() {
+  static List<AvajeModuleData> avajeModules() {
     return CTX.get().avajeModules;
   }
 

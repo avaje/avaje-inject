@@ -2,7 +2,7 @@ package org.example.coffee;
 
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.spi.Builder;
-import io.avaje.inject.spi.Module;
+import io.avaje.inject.spi.AvajeModule;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -28,7 +28,7 @@ public class BeanScopeBuilderAddTest {
     }
   }
 
-  public static class SillyModule implements Module {
+  public static class SillyModule implements AvajeModule {
 
     @Override
     public Class<?>[] requires() {

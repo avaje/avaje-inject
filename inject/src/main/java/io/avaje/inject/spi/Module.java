@@ -6,13 +6,11 @@ import io.avaje.inject.InjectModule;
 
 /**
  * A Module that can be included in BeanScope.
+ *
+ * @deprecated use {@link io.avaje.inject.spi.AvajeModule AvajeModule}
  */
-public interface Module {
-
-  /**
-   * Empty array of classes.
-   */
-  Class<?>[] EMPTY_CLASSES = {};
+@Deprecated(forRemoval = true)
+public interface Module extends AvajeModule {
 
   /**
    * Return the set of types this module explicitly provides to other modules.

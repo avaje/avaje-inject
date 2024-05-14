@@ -1,6 +1,6 @@
 package io.avaje.inject;
 
-import io.avaje.inject.spi.Module;
+import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.PropertyRequiresPlugin;
 import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
@@ -77,7 +77,7 @@ public interface BeanScopeBuilder {
    * @param modules The modules that we want to include in dependency injection.
    * @return This BeanScopeBuilder
    */
-  BeanScopeBuilder modules(Module... modules);
+  BeanScopeBuilder modules(AvajeModule... modules);
 
   /**
    * Set the PropertyPlugin used for this scope. This is serviceloaded automatically of not set

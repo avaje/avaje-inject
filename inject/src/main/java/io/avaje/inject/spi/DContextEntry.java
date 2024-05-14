@@ -29,7 +29,7 @@ final class DContextEntry {
     entries.add(entryBean);
   }
 
-  Provider<?> provider(String name, Class<? extends Module> currentModule) {
+  Provider<?> provider(String name, Class<? extends AvajeModule> currentModule) {
     if (entries.size() == 1) {
       return entries.get(0).provider();
     }
@@ -46,7 +46,7 @@ final class DContextEntry {
     return new EntryMatcher(name, null).match(entries);
   }
 
-  Object get(String name, Class<? extends Module> currentModule) {
+  Object get(String name, Class<? extends AvajeModule> currentModule) {
     if (entries.size() == 1) {
       return entries.get(0).bean();
     }
@@ -96,11 +96,11 @@ final class DContextEntry {
 
     private final String name;
     private final boolean impliedName;
-    private final Class<? extends Module> currentModule;
+    private final Class<? extends AvajeModule> currentModule;
     private DContextEntryBean match;
     private DContextEntryBean ignoredSecondaryMatch;
 
-    EntryMatcher(String name, Class<? extends Module> currentModule) {
+    EntryMatcher(String name, Class<? extends AvajeModule> currentModule) {
       this.currentModule = currentModule;
       if (name != null && name.startsWith("!")) {
         this.name = name.substring(1);

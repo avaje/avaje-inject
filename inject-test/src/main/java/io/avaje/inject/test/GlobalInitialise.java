@@ -1,7 +1,7 @@
 package io.avaje.inject.test;
 
 import io.avaje.inject.BeanScope;
-import io.avaje.inject.spi.Module;
+import io.avaje.inject.spi.AvajeModule;
 import io.avaje.lang.Nullable;
 
 import java.io.IOException;
@@ -81,7 +81,7 @@ final class GlobalInitialise {
 
   private BeanScope buildFromModules(List<TestModule> testModules) {
     return BeanScope.builder()
-      .modules(testModules.toArray(Module[]::new))
+      .modules(testModules.toArray(AvajeModule[]::new))
       .shutdownHook(shutdownHook)
       .build();
   }

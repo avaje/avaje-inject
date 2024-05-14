@@ -95,8 +95,7 @@ public final class InjectProcessor extends AbstractProcessor {
       .filter(s -> !s.startsWith("External Module Type"))
       .distinct()
       .map(l -> l.split("\\|"))
-      .map(AvajeModule::new)
-      .peek(m -> APContext.logNote(m.toString()))
+      .map(AvajeModuleData::new)
       .forEach(ProcessingContext::addAvajeModule);
   }
 

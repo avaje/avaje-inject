@@ -4,13 +4,13 @@ APT based dependency injection for server side developers - https://avaje.io/inj
 ### Example module use
 
 ```java
-import io.avaje.inject.spi.Module;
+import io.avaje.inject.spi.AvajeModule;
 
 module org.example {
 
     requires io.avaje.inject;
 
-    provides io.avaje.inject.spi.Module with org.example.ExampleModule;
+    provides io.avaje.inject.spi.AvajeModule with org.example.ExampleModule;
 }
 ```
 

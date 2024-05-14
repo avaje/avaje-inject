@@ -24,12 +24,12 @@ final class DBeanMap {
   private final Set<String> qualifiers = new HashSet<>();
 
   private NextBean nextBean;
-  private Class<? extends Module> currentModule;
+  private Class<? extends AvajeModule> currentModule;
 
   DBeanMap() {
   }
 
-  void currentModule(Class<? extends Module> currentModule) {
+  void currentModule(Class<? extends AvajeModule> currentModule) {
     this.currentModule = currentModule;
   }
 

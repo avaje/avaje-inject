@@ -9,27 +9,21 @@ import java.lang.reflect.Type;
  *
  * <p>Typically, a plugin might provide a default dependency via {@link
  * BeanScopeBuilder#provideDefault(Type, java.util.function.Supplier)}.
- *
- * @deprecated use {@link io.avaje.inject.spi.InjectPlugin InjectPlugin}
  */
-@Deprecated(forRemoval = true)
-public interface Plugin extends InjectPlugin {
+public interface InjectPlugin {
 
-  /**
-   * Apply the plugin to the scope builder.
-   */
+  /** Empty array of classes. */
+  Class<?>[] EMPTY_CLASSES = {};
+
+  /** Apply the plugin to the scope builder. */
   void apply(BeanScopeBuilder builder);
 
-  /**
-   * Return the classes that the plugin provides.
-   */
+  /** Return the classes that the plugin provides. */
   default Type[] provides() {
     return EMPTY_CLASSES;
   }
 
-  /**
-   * Return the aspect classes that the plugin provides.
-   */
+  /** Return the aspect classes that the plugin provides. */
   default Class<?>[] providesAspects() {
     return EMPTY_CLASSES;
   }
