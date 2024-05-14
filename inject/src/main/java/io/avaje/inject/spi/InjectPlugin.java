@@ -19,7 +19,7 @@ public interface InjectPlugin {
   void apply(BeanScopeBuilder builder);
 
   /** Return the classes that the plugin provides. */
-  default Class<?>[] provides() {
+  default Type[] provides() {
     return EMPTY_CLASSES;
   }
 

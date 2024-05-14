@@ -18,18 +18,21 @@ public interface Plugin extends InjectPlugin {
   /**
    * Apply the plugin to the scope builder.
    */
+  @Override
   void apply(BeanScopeBuilder builder);
 
   /**
    * Return the classes that the plugin provides.
    */
-  default Type[] provides() {
+  @Override
+  default Class<?>[] provides() {
     return EMPTY_CLASSES;
   }
 
   /**
    * Return the aspect classes that the plugin provides.
    */
+  @Override
   default Class<?>[] providesAspects() {
     return EMPTY_CLASSES;
   }
