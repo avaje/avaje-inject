@@ -32,7 +32,6 @@ final class ExternalProvider {
 
   private static final ClassLoader CLASS_LOADER = ExternalProvider.class.getClassLoader();
   private static final boolean injectAvailable = moduleCP();
-
   private static final Map<String, List<String>> avajePlugins = Map.ofEntries(
       entry("io.avaje.jsonb.inject.DefaultJsonbProvider", of("io.avaje.jsonb.Jsonb")),
       entry("io.avaje.http.inject.DefaultResolverProvider", of("io.avaje.http.api.context.RequestContextResolver")),
@@ -43,7 +42,8 @@ final class ExternalProvider {
       entry("io.avaje.validation.inject.spi.DefaultValidatorProvider",
         of(
           "io.avaje.validation.Validator",
-          "io.avaje.inject.aop.AspectProvider<io.avaje.validation.ValidMethod>")));
+          "io.avaje.inject.aop.AspectProvider<io.avaje.validation.ValidMethod>")),
+      entry("io.avaje.validation.http.HttpValidatorProvider", of("io.avaje.http.api.Validator")));
 
   private ExternalProvider() {}
 
