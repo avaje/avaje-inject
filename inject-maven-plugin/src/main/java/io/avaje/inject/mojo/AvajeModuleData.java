@@ -3,7 +3,7 @@ package io.avaje.inject.mojo;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class AvajeModuleData {
+final class AvajeModuleData {
 
   private final String fqn;
   private final List<String> provides = new ArrayList<>();

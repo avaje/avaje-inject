@@ -64,7 +64,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  public ConfigPropertyPlugin propertyPlugin() {
+  public PropertyRequiresPlugin propertyPlugin() {
     if (propertyPlugin == null) {
       propertyPlugin = defaultPropertyPlugin();
     }

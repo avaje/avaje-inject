@@ -198,7 +198,7 @@ class LegacyBeanScopeBuilderTest {
     return new TDModule(name, provides, requires, requiresPkg);
   }
 
-  private static class TDModule implements AvajeModule {
+  private static class TDModule implements Module {
 
     final String name;
     final Class<?>[] provides;

@@ -32,24 +32,18 @@ final class ExternalProvider {
 
   private static final ClassLoader CLASS_LOADER = ExternalProvider.class.getClassLoader();
   private static final boolean injectAvailable = moduleCP();
-  private static final Map<String, List<String>> avajePlugins =
-      Map.ofEntries(
-          entry("io.avaje.jsonb.inject.DefaultJsonbProvider", of("io.avaje.jsonb.Jsonb")),
-          entry(
-              "io.avaje.http.inject.DefaultResolverProvider",
-              of("io.avaje.http.api.context.RequestContextResolver")),
-          entry(
-              "io.avaje.nima.provider.DefaultConfigProvider",
-              of(
-                  "io.helidon.webserver.WebServerConfig.Builder",
-                  "io.helidon.webserver.http.HttpRouting.Builder")),
-          entry(
-              "io.avaje.validation.inject.spi.DefaultValidatorProvider",
-              of(
-                  "io.avaje.validation.Validator",
-                  "io.avaje.inject.aop.AspectProvider<io.avaje.validation.ValidMethod>")),
-          entry(
-              "io.avaje.validation.http.HttpValidatorProvider", of("io.avaje.http.api.Validator")));
+
+  private static final Map<String, List<String>> avajePlugins = Map.ofEntries(
+      entry("io.avaje.jsonb.inject.DefaultJsonbProvider", of("io.avaje.jsonb.Jsonb")),
+      entry("io.avaje.http.inject.DefaultResolverProvider", of("io.avaje.http.api.context.RequestContextResolver")),
+      entry("io.avaje.nima.provider.DefaultConfigProvider",
+        of(
+          "io.helidon.webserver.WebServerConfig.Builder",
+          "io.helidon.webserver.http.HttpRouting.Builder")),
+      entry("io.avaje.validation.inject.spi.DefaultValidatorProvider",
+        of(
+          "io.avaje.validation.Validator",
+          "io.avaje.inject.aop.AspectProvider<io.avaje.validation.ValidMethod>")));
 
   private ExternalProvider() {}
 
@@ -74,8 +68,9 @@ final class ExternalProvider {
 
     List<AvajeModule> modules = new ArrayList<>();
 
+    // load using older Module
     ServiceLoader.load(Module.class, CLASS_LOADER).forEach(modules::add);
-
+    // load newer AvajeModule
     final var iterator = ServiceLoader.load(InjectSPI.class, CLASS_LOADER).iterator();
     if (!iterator.hasNext()) {
       return;
@@ -98,7 +93,7 @@ final class ExternalProvider {
         final var name = module.getClass().getTypeName();
 
         final var provides = new ArrayList<String>();
-        System.out.println("Detected AvajeModule: " + name);
+        APContext.logNote("Detected Module: " + name);
         for (final var provide : module.provides()) {
           providedTypes.add(provide.getTypeName());
           provides.add(provide.getTypeName());
@@ -112,15 +107,12 @@ final class ExternalProvider {
           providedTypes.add(aspectType);
           provides.add(aspectType);
         }
-        final var requires =
-            Arrays.stream(module.requires()).map(Type::getTypeName).collect(toList());
+
+        final var requires = Arrays.stream(module.requires()).map(Type::getTypeName).collect(toList());
 
         Arrays.stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
         Arrays.stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
-        Arrays.stream(module.autoRequiresAspects())
-            .map(Type::getTypeName)
-            .map(Util::wrapAspect)
-            .forEach(requires::add);
+        Arrays.stream(module.autoRequiresAspects()).map(Type::getTypeName).map(Util::wrapAspect).forEach(requires::add);
 
         ProcessingContext.addAvajeModule(new AvajeModuleData(name, provides, requires));
       } catch (final ServiceConfigurationError expected) {
@@ -134,13 +126,13 @@ final class ExternalProvider {
    * types and the only thing providing them is the plugin.
    */
   static void registerPluginProvidedTypes(ScopeInfo defaultScope) {
-    avajePlugins.forEach(
-        (k, v) -> {
-          if (APContext.typeElement(k) != null) {
-            APContext.logNote("Loaded InjectPlugin: " + k);
-            v.forEach(defaultScope::pluginProvided);
-          }
-        });
+    avajePlugins.forEach((k, v) -> {
+      if (APContext.typeElement(k) != null) {
+        APContext.logNote("Loaded Plugin: " + k);
+        v.forEach(defaultScope::pluginProvided);
+      }
+    });
+
     defaultScope.pluginProvided("io.avaje.inject.event.ObserverManager");
     if (!injectAvailable) {
       return;
@@ -159,7 +151,7 @@ final class ExternalProvider {
       if (avajePlugins.containsKey(name)) {
         continue;
       }
-      APContext.logNote("Loaded InjectPlugin: " + plugin.getClass().getTypeName());
+      APContext.logNote("Loaded Plugin: " + plugin.getClass().getTypeName());
       for (final var provide : plugin.provides()) {
         defaultScope.pluginProvided(provide.getTypeName());
       }
@@ -173,11 +165,11 @@ final class ExternalProvider {
     try {
       final String resource =
           APContext.filer()
-              .getResource(StandardLocation.CLASS_OUTPUT, "", relativeName)
-              .toUri()
-              .toString()
-              .replaceFirst("/target/classes", "")
-              .replaceFirst("/build/classes/java/main", "");
+          .getResource(StandardLocation.CLASS_OUTPUT, "", relativeName)
+          .toUri()
+          .toString()
+          .replaceFirst("/target/classes", "")
+          .replaceFirst("/build/classes/java/main", "");
       return Paths.get(new URI(resource)).toFile().exists();
     } catch (final Exception e) {
       return false;

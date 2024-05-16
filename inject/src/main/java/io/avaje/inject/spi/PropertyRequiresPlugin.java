@@ -5,7 +5,7 @@ import java.util.Optional;
 import io.avaje.lang.NonNullApi;
 
 /**
- * InjectPlugin interface which contains the application properties used for wiring. Used with {@link
+ * Plugin interface which contains the application properties used for wiring. Used with {@link
  * io.avaje.inject.RequiresProperty} and {@link io.avaje.inject.Profile}.
  *
  * <p>The plugin is loaded via ServiceLoader and defaults to an implementation that uses {@link

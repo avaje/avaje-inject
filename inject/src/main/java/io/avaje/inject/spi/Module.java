@@ -1,26 +1,36 @@
 package io.avaje.inject.spi;
 
+import java.lang.reflect.Type;
+
+import io.avaje.inject.InjectModule;
+
 /**
  * A Module that can be included in BeanScope.
  *
- * @deprecated use {@link io.avaje.inject.spi.AvajeModule AvajeModule}
+ * @deprecated migrate to {@link AvajeModule}
  */
 @Deprecated(forRemoval = true)
 public interface Module extends AvajeModule {
 
-  /** Return the set of types this module explicitly provides to other modules. */
+  /**
+   * Return the set of types this module explicitly provides to other modules.
+   */
   @Override
   default Class<?>[] provides() {
     return EMPTY_CLASSES;
   }
 
-  /** Return the types this module needs to be provided externally or via other modules. */
+  /**
+   * Return the types this module needs to be provided externally or via other modules.
+   */
   @Override
   default Class<?>[] requires() {
     return EMPTY_CLASSES;
   }
 
-  /** Return the packages this module needs to be provided via other modules. */
+  /**
+   * Return the packages this module needs to be provided via other modules.
+   */
   @Override
   default Class<?>[] requiresPackages() {
     return EMPTY_CLASSES;
@@ -28,9 +38,9 @@ public interface Module extends AvajeModule {
 
   /**
    * Return the classes that this module provides that we allow other modules to auto depend on.
-   *
-   * <p>This is a convenience when using multiple modules that is otherwise controlled manually by
-   * explicitly using {@link AvajeModule#provides()}.
+   * <p>
+   * This is a convenience when using multiple modules that is otherwise controlled manually by
+   * explicitly using {@link InjectModule#provides()}.
    */
   @Override
   default Class<?>[] autoProvides() {
@@ -39,9 +49,9 @@ public interface Module extends AvajeModule {
 
   /**
    * Return the aspects that this module provides.
-   *
-   * <p>This is a convenience when using multiple modules that we otherwise manually specify via
-   * {@link AvajeModule#provides()}.
+   * <p>
+   * This is a convenience when using multiple modules that we otherwise manually specify via
+   * {@link InjectModule#provides()}.
    */
   @Override
   default Class<?>[] autoProvidesAspects() {
@@ -49,11 +59,11 @@ public interface Module extends AvajeModule {
   }
 
   /**
-   * These are the classes that this module requires for wiring that are provided by other external
-   * modules (that are in the classpath at compile time).
-   *
-   * <p>This is a convenience when using multiple modules that is otherwise controlled manually by
-   * explicitly using {@link AvajeModule#requires()} or {@link AvajeModule#requiresPackages()}.
+   * These are the classes that this module requires for wiring that are provided by other
+   * external modules (that are in the classpath at compile time).
+   * <p>
+   * This is a convenience when using multiple modules that is otherwise controlled manually by
+   * explicitly using {@link InjectModule#requires()} or {@link InjectModule#requiresPackages()}.
    */
   @Override
   default Class<?>[] autoRequires() {
@@ -61,15 +71,33 @@ public interface Module extends AvajeModule {
   }
 
   /**
-   * These are the apects that this module requires whose implementations are provided by other
-   * external modules (that are in the classpath at compile time).
+   * These are the apects that this module requires whose implementations are provided by other external
+   * modules (that are in the classpath at compile time).
    */
   @Override
   default Class<?>[] autoRequiresAspects() {
     return EMPTY_CLASSES;
   }
 
+  /**
+   * Return public classes of the beans that would be registered by this module.
+   * <p>
+   * This method allows code to use reflection to inspect the modules classes
+   * before the module is wired. This method is not required for DI wiring.
+   */
+  @Override
+  Class<?>[] classes();
 
-  /** Marker for custom scoped modules. */
-  interface Custom extends Module {}
+  /**
+   * Build all the beans.
+   */
+  @Override
+  void build(Builder builder);
+
+  /**
+   * Marker for custom scoped modules.
+   */
+  interface Custom extends Module {
+
+  }
 }
