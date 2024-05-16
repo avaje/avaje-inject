@@ -1,5 +1,7 @@
 package io.avaje.inject.plugin;
 
+import io.avaje.inject.spi.AvajeModule;
+import io.avaje.inject.spi.InjectPlugin;
 import org.gradle.api.*;
 
 import java.io.File;
@@ -54,7 +56,11 @@ public class AvajeInjectPlugin implements Plugin<Project> {
   private void writeProvidedPlugins(ClassLoader cl, FileWriter pluginWriter) throws IOException {
     final Set<String> providedTypes = new HashSet<>();
 
-    for (final var plugin : ServiceLoader.load(io.avaje.inject.spi.Plugin.class, cl)) {
+    List<InjectPlugin> allPlugins = new ArrayList<>();
+    ServiceLoader.load(io.avaje.inject.spi.Plugin.class, cl).forEach(allPlugins::add);
+    ServiceLoader.load(io.avaje.inject.spi.InjectPlugin.class, cl).forEach(allPlugins::add);
+
+    for (final var plugin : allPlugins) {
       System.out.println("Loaded Plugin: " + plugin.getClass().getCanonicalName());
       for (final var provide : plugin.provides()) {
         providedTypes.add(provide.getTypeName());
@@ -72,7 +78,11 @@ public class AvajeInjectPlugin implements Plugin<Project> {
 
   private void writeProvidedModules(ClassLoader classLoader, FileWriter moduleWriter) throws IOException {
     final Set<String> providedTypes = new HashSet<>();
-    for (final io.avaje.inject.spi.Module module : ServiceLoader.load(io.avaje.inject.spi.Module.class, classLoader)) {
+    List<AvajeModule> allModules = new ArrayList<>();
+    ServiceLoader.load(io.avaje.inject.spi.Module.class, classLoader).forEach(allModules::add);
+    ServiceLoader.load(AvajeModule.class, classLoader).forEach(allModules::add);
+
+    for (final AvajeModule module : allModules) {
       System.out.println("Detected External Module: " + module.getClass().getCanonicalName());
       for (final var provide : module.provides()) {
         providedTypes.add(provide.getTypeName());
