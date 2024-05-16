@@ -148,20 +148,11 @@ final class ExternalProvider {
     List<InjectPlugin> plugins = new ArrayList<>();
 
     ServiceLoader.load(Plugin.class, CLASS_LOADER).forEach(plugins::add);
-
-    final var iterator = ServiceLoader.load(InjectSPI.class, CLASS_LOADER).iterator();
-    if (!iterator.hasNext()) {
-      return;
-    }
-    while (iterator.hasNext()) {
-      try {
-        final var spi = iterator.next();
-        if (spi instanceof InjectPlugin) plugins.add((InjectPlugin) spi);
-
-      } catch (final ServiceConfigurationError expected) {
-        // ignore expected error reading the module that we are also writing
-      }
-    }
+    ServiceLoader.load(InjectSPI.class, CLASS_LOADER)
+        .forEach(
+            spi -> {
+              if (spi instanceof InjectPlugin) plugins.add((InjectPlugin) spi);
+            });
 
     for (final var plugin : plugins) {
       var name = plugin.getClass().getTypeName();
