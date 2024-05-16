@@ -33,17 +33,17 @@ final class ExternalProvider {
   private static final ClassLoader CLASS_LOADER = ExternalProvider.class.getClassLoader();
   private static final boolean injectAvailable = moduleCP();
   private static final Map<String, List<String>> avajePlugins = Map.ofEntries(
-      entry("io.avaje.jsonb.inject.DefaultJsonbProvider", of("io.avaje.jsonb.Jsonb")),
-      entry("io.avaje.http.inject.DefaultResolverProvider", of("io.avaje.http.api.context.RequestContextResolver")),
-      entry("io.avaje.nima.provider.DefaultConfigProvider",
-        of(
-          "io.helidon.webserver.WebServerConfig.Builder",
-          "io.helidon.webserver.http.HttpRouting.Builder")),
-      entry("io.avaje.validation.inject.spi.DefaultValidatorProvider",
-        of(
-          "io.avaje.validation.Validator",
-          "io.avaje.inject.aop.AspectProvider<io.avaje.validation.ValidMethod>")),
-      entry("io.avaje.validation.http.HttpValidatorProvider", of("io.avaje.http.api.Validator")));
+    entry("io.avaje.jsonb.inject.DefaultJsonbProvider", of("io.avaje.jsonb.Jsonb")),
+    entry("io.avaje.http.inject.DefaultResolverProvider", of("io.avaje.http.api.context.RequestContextResolver")),
+    entry("io.avaje.nima.provider.DefaultConfigProvider",
+      of(
+        "io.helidon.webserver.WebServerConfig.Builder",
+        "io.helidon.webserver.http.HttpRouting.Builder")),
+    entry("io.avaje.validation.inject.spi.DefaultValidatorProvider",
+      of(
+        "io.avaje.validation.Validator",
+        "io.avaje.inject.aop.AspectProvider<io.avaje.validation.ValidMethod>")),
+    entry("io.avaje.validation.http.HttpValidatorProvider", of("io.avaje.http.api.Validator")));
 
   private ExternalProvider() {}
 
@@ -60,8 +60,7 @@ final class ExternalProvider {
     if (!injectAvailable) {
       if (!pluginExists("build/avaje-module-provides.txt")
           && !pluginExists("target/avaje-module-provides.txt")) {
-        APContext.logNote(
-            "Unable to detect Avaje Inject in Annotation Processor ClassPath, use the Avaje Inject Maven/Gradle plugin for detecting Inject Modules from dependencies");
+        APContext.logNote("Unable to detect Avaje Inject in Annotation Processor ClassPath, use the Avaje Inject Maven/Gradle plugin for detecting Inject Modules from dependencies");
       }
       return;
     }
