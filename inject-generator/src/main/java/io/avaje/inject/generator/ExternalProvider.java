@@ -67,18 +67,13 @@ final class ExternalProvider {
     }
 
     List<AvajeModule> modules = new ArrayList<>();
-
+    // load using older Module
     ServiceLoader.load(Module.class, CLASS_LOADER).forEach(modules::add);
-
+    // load newer AvajeModule
     final var iterator = ServiceLoader.load(AvajeModule.class, CLASS_LOADER).iterator();
-    if (!iterator.hasNext()) {
-      return;
-    }
     while (iterator.hasNext()) {
       try {
-        final var spi = iterator.next();
-        if (spi instanceof AvajeModule) modules.add(spi);
-
+        modules.add(iterator.next());
       } catch (final ServiceConfigurationError expected) {
         // ignore expected error reading the module that we are also writing
       }
@@ -136,7 +131,6 @@ final class ExternalProvider {
     }
 
     List<InjectPlugin> plugins = new ArrayList<>();
-
     ServiceLoader.load(Plugin.class, CLASS_LOADER).forEach(plugins::add);
     ServiceLoader.load(InjectPlugin.class, CLASS_LOADER).forEach(plugins::add);
 

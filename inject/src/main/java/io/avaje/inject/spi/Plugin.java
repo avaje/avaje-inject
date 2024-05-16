@@ -10,7 +10,7 @@ import java.lang.reflect.Type;
  * <p>Typically, a plugin might provide a default dependency via {@link
  * BeanScopeBuilder#provideDefault(Type, java.util.function.Supplier)}.
  *
- * @deprecated use {@link io.avaje.inject.spi.InjectPlugin InjectPlugin}
+ * @deprecated migrate to {@link InjectPlugin}
  */
 @Deprecated(forRemoval = true)
 public interface Plugin extends InjectPlugin {
