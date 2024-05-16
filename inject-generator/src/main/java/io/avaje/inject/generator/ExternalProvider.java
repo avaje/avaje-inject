@@ -19,6 +19,8 @@ import java.util.Set;
 
 import javax.tools.StandardLocation;
 
+import io.avaje.inject.spi.AvajeModule;
+import io.avaje.inject.spi.InjectPlugin;
 import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.Plugin;
 
@@ -29,6 +31,7 @@ import io.avaje.inject.spi.Plugin;
  */
 final class ExternalProvider {
 
+  private static final ClassLoader CLASS_LOADER = ExternalProvider.class.getClassLoader();
   private static final boolean injectAvailable = moduleCP();
   private static final Map<String, List<String>> avajePlugins = Map.ofEntries(
     entry("io.avaje.jsonb.inject.DefaultJsonbProvider", of("io.avaje.jsonb.Jsonb")),
@@ -63,14 +66,24 @@ final class ExternalProvider {
       return;
     }
 
-    final var iterator = ServiceLoader.load(Module.class, ExternalProvider.class.getClassLoader()).iterator();
-    if (!iterator.hasNext()) {
+    List<AvajeModule> modules = new ArrayList<>();
+    // load using older Module
+    ServiceLoader.load(Module.class, CLASS_LOADER).forEach(modules::add);
+    // load newer AvajeModule
+    final var iterator = ServiceLoader.load(AvajeModule.class, CLASS_LOADER).iterator();
+    while (iterator.hasNext()) {
+      try {
+        modules.add(iterator.next());
+      } catch (final ServiceConfigurationError expected) {
+        // ignore expected error reading the module that we are also writing
+      }
+    }
+    if (modules.isEmpty()) {
       APContext.logNote("No external modules detected");
       return;
     }
-    while (iterator.hasNext()) {
+    for (final var module : modules) {
       try {
-        final var module = iterator.next();
         final var name = module.getClass().getTypeName();
 
         final var provides = new ArrayList<String>();
@@ -94,7 +107,7 @@ final class ExternalProvider {
         Arrays.stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
         Arrays.stream(module.autoRequiresAspects()).map(Type::getTypeName).map(Util::wrapAspect).forEach(requires::add);
 
-        ProcessingContext.addAvajeModule(new AvajeModule(name, provides, requires));
+        ProcessingContext.addAvajeModule(new AvajeModuleData(name, provides, requires));
       } catch (final ServiceConfigurationError expected) {
         // ignore expected error reading the module that we are also writing
       }
@@ -116,7 +129,12 @@ final class ExternalProvider {
     if (!injectAvailable) {
       return;
     }
-    for (final Plugin plugin : ServiceLoader.load(Plugin.class, InjectProcessor.class.getClassLoader())) {
+
+    List<InjectPlugin> plugins = new ArrayList<>();
+    ServiceLoader.load(Plugin.class, CLASS_LOADER).forEach(plugins::add);
+    ServiceLoader.load(InjectPlugin.class, CLASS_LOADER).forEach(plugins::add);
+
+    for (final var plugin : plugins) {
       var name = plugin.getClass().getTypeName();
       if (avajePlugins.containsKey(name)) {
         continue;

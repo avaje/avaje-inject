@@ -46,7 +46,7 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public void currentModule(Class<? extends Module> currentModule) {
+  public void currentModule(Class<? extends AvajeModule> currentModule) {
     beanMap.currentModule(currentModule);
   }
 

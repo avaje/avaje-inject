@@ -13,7 +13,7 @@ import java.util.Set;
 class FactoryOrder {
 
   private final Set<String> moduleNames = new LinkedHashSet<>();
-  private final List<AvajeModule> factories = new ArrayList<>();
+  private final List<AvajeModuleData> factories = new ArrayList<>();
   private final List<FactoryState> queue = new ArrayList<>();
   private final List<FactoryState> queueNoDependencies = new ArrayList<>();
   private final Map<String, List<String>> unsatisfiedDependencies = new HashMap<>();
@@ -22,7 +22,7 @@ class FactoryOrder {
   private final Set<String> pluginProvided;
   private final List<String> loadedModules = new ArrayList<>();
 
-  FactoryOrder(Collection<AvajeModule> includeModules, Set<String> pluginProvided) {
+  FactoryOrder(Collection<AvajeModuleData> includeModules, Set<String> pluginProvided) {
     includeModules.forEach(m -> {
       add(m);
       loadedModules.add(m.name());
@@ -30,7 +30,7 @@ class FactoryOrder {
     this.pluginProvided = pluginProvided;
   }
 
-  void add(AvajeModule module) {
+  void add(AvajeModuleData module) {
     final FactoryState factoryState = new FactoryState(module);
     providesMap.computeIfAbsent(module.name(), s -> new FactoryList()).add(factoryState);
     addFactoryProvides(factoryState, module.provides());
@@ -96,7 +96,7 @@ class FactoryOrder {
     }
   }
 
-  private void unsatisfiedRequires(StringBuilder sb, AvajeModule module) {
+  private void unsatisfiedRequires(StringBuilder sb, AvajeModuleData module) {
     for (final var depModuleName : module.requires()) {
       if (notProvided(depModuleName)) {
         unsatisfiedDependencies
@@ -171,10 +171,10 @@ class FactoryOrder {
   /** Wrapper on Factory holding the pushed state. */
   static class FactoryState {
 
-    private final AvajeModule factory;
+    private final AvajeModuleData factory;
     private boolean pushed;
 
-    FactoryState(AvajeModule factory) {
+    FactoryState(AvajeModuleData factory) {
       this.factory = factory;
     }
 
@@ -187,7 +187,7 @@ class FactoryOrder {
       return pushed;
     }
 
-    AvajeModule factory() {
+    AvajeModuleData factory() {
       return factory;
     }
 

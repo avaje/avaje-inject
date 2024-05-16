@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.ServiceLoader.Provider;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
@@ -28,6 +29,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
+import io.avaje.inject.spi.AvajeModule;
+import io.avaje.inject.spi.InjectPlugin;
 import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.Plugin;
 
@@ -48,7 +51,7 @@ public class AutoProvidesMojo extends AbstractMojo {
   @Parameter(defaultValue = "${project}", readonly = true, required = true)
   private MavenProject project;
 
-  private final List<AvajeModule> modules = new ArrayList<>();
+  private final List<AvajeModuleData> modules = new ArrayList<>();
 
   @Override
   public void execute() throws MojoExecutionException {
@@ -100,7 +103,16 @@ public class AutoProvidesMojo extends AbstractMojo {
     final Set<String> providedTypes = new HashSet<>();
 
     final Log log = getLog();
-    for (final var plugin : ServiceLoader.load(Plugin.class, newClassLoader)) {
+
+    final List<InjectPlugin> plugins = new ArrayList<>();
+    ServiceLoader.load(Plugin.class, newClassLoader).forEach(plugins::add);
+    ServiceLoader.load(InjectPlugin.class, newClassLoader).stream()
+        .map(Provider::get)
+        .filter(InjectPlugin.class::isInstance)
+        .map(InjectPlugin.class::cast)
+        .forEach(plugins::add);
+
+    for (final var plugin : plugins) {
       log.info("Loaded Plugin: " + plugin.getClass().getTypeName());
       for (final var provide : plugin.provides()) {
         providedTypes.add(provide.getTypeName());
@@ -120,7 +132,14 @@ public class AutoProvidesMojo extends AbstractMojo {
     final Set<String> providedTypes = new HashSet<>();
 
     final Log log = getLog();
-    for (final var module : ServiceLoader.load(Module.class, newClassLoader)) {
+    final List<AvajeModule> avajeModules = new ArrayList<>();
+    ServiceLoader.load(Module.class, newClassLoader).forEach(avajeModules::add);
+    ServiceLoader.load(AvajeModule.class, newClassLoader).stream()
+        .map(Provider::get)
+        .filter(AvajeModule.class::isInstance)
+        .map(AvajeModule.class::cast)
+        .forEach(avajeModules::add);
+    for (final var module : avajeModules) {
 
       final var name = module.getClass().getTypeName();
       log.info("Detected External Module: " + name);
@@ -142,7 +161,8 @@ public class AutoProvidesMojo extends AbstractMojo {
         provides.add(type);
       }
 
-      final var requires = Arrays.<Type>stream(module.requires()).map(Type::getTypeName).collect(toList());
+      final var requires =
+          Arrays.<Type>stream(module.requires()).map(Type::getTypeName).collect(toList());
 
       Arrays.<Type>stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
       Arrays.<Type>stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
@@ -150,7 +170,7 @@ public class AutoProvidesMojo extends AbstractMojo {
         .map(Type::getTypeName)
         .map(AutoProvidesMojo::wrapAspect)
         .forEach(requires::add);
-      modules.add(new AvajeModule(name, provides, requires));
+      modules.add(new AvajeModuleData(name, provides, requires));
     }
 
     for (final String providedType : providedTypes) {
@@ -161,7 +181,7 @@ public class AutoProvidesMojo extends AbstractMojo {
 
   private void writeModuleCSV(FileWriter moduleWriter) throws IOException {
     moduleWriter.write("\nExternal Module Type|Provides|Requires");
-    for (AvajeModule avajeModule : modules) {
+    for (AvajeModuleData avajeModule : modules) {
       moduleWriter.write("\n");
       moduleWriter.write(avajeModule.name());
       moduleWriter.write("|");

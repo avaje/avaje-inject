@@ -16,7 +16,7 @@ public interface ModuleOrdering {
   /**
    * The list of factories in the order they should be built.
    */
-  List<Module> factories();
+  List<AvajeModule> factories();
 
   /**
    * Whether no modules are available
@@ -26,5 +26,5 @@ public interface ModuleOrdering {
   /**
    * Accept a module for ordering
    */
-  void add(Module module);
+  void add(AvajeModule module);
 }

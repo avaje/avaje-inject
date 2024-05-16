@@ -6,17 +6,16 @@ import io.avaje.inject.InjectModule;
 
 /**
  * A Module that can be included in BeanScope.
+ *
+ * @deprecated migrate to {@link AvajeModule}
  */
-public interface Module {
-
-  /**
-   * Empty array of classes.
-   */
-  Class<?>[] EMPTY_CLASSES = {};
+@Deprecated(forRemoval = true)
+public interface Module extends AvajeModule {
 
   /**
    * Return the set of types this module explicitly provides to other modules.
    */
+  @Override
   default Type[] provides() {
     return EMPTY_CLASSES;
   }
@@ -24,6 +23,7 @@ public interface Module {
   /**
    * Return the types this module needs to be provided externally or via other modules.
    */
+  @Override
   default Type[] requires() {
     return EMPTY_CLASSES;
   }
@@ -31,6 +31,7 @@ public interface Module {
   /**
    * Return the packages this module needs to be provided via other modules.
    */
+  @Override
   default Type[] requiresPackages() {
     return EMPTY_CLASSES;
   }
@@ -41,6 +42,7 @@ public interface Module {
    * This is a convenience when using multiple modules that is otherwise controlled manually by
    * explicitly using {@link InjectModule#provides()}.
    */
+  @Override
   default Type[] autoProvides() {
     return EMPTY_CLASSES;
   }
@@ -51,6 +53,7 @@ public interface Module {
    * This is a convenience when using multiple modules that we otherwise manually specify via
    * {@link InjectModule#provides()}.
    */
+  @Override
   default Class<?>[] autoProvidesAspects() {
     return EMPTY_CLASSES;
   }
@@ -62,6 +65,7 @@ public interface Module {
    * This is a convenience when using multiple modules that is otherwise controlled manually by
    * explicitly using {@link InjectModule#requires()} or {@link InjectModule#requiresPackages()}.
    */
+  @Override
   default Type[] autoRequires() {
     return EMPTY_CLASSES;
   }
@@ -70,6 +74,7 @@ public interface Module {
    * These are the apects that this module requires whose implementations are provided by other external
    * modules (that are in the classpath at compile time).
    */
+  @Override
   default Class<?>[] autoRequiresAspects() {
     return EMPTY_CLASSES;
   }
@@ -80,11 +85,13 @@ public interface Module {
    * This method allows code to use reflection to inspect the modules classes
    * before the module is wired. This method is not required for DI wiring.
    */
+  @Override
   Class<?>[] classes();
 
   /**
    * Build all the beans.
    */
+  @Override
   void build(Builder builder);
 
   /**
