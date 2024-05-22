@@ -5,18 +5,14 @@ import java.util.Optional;
 import io.avaje.lang.NonNullApi;
 
 /**
- * Plugin interface which contains the application properties used for wiring. Used with {@link
- * io.avaje.inject.RequiresProperty} and {@link io.avaje.inject.Profile}.
+ * InjectPlugin interface which contains the application properties used for wiring. Used with
+ * {@link io.avaje.inject.RequiresProperty} and {@link io.avaje.inject.Profile}.
  *
  * <p>The plugin is loaded via ServiceLoader and defaults to an implementation that uses {@link
  * System#getProperty(String)} and {@link System#getenv(String)}.
- *
- * @deprecated use ConfigPropertyPlugin Instead
- *
  */
 @NonNullApi
-@Deprecated(forRemoval = true)
-public interface PropertyRequiresPlugin {
+public interface PropertyRequiresPlugin extends InjectSPI {
 
   /**
    * Return a configuration value that might not exist.
@@ -40,5 +36,4 @@ public interface PropertyRequiresPlugin {
   default boolean notEqualTo(String property, String value) {
     return !equalTo(property, value);
   }
-
 }

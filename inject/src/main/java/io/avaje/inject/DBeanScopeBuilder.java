@@ -40,7 +40,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private boolean parentOverride = true;
   private boolean shutdownHook;
   private ClassLoader classLoader;
-  private ConfigPropertyPlugin propertyPlugin;
+  private PropertyRequiresPlugin propertyPlugin;
   private Set<String> profiles;
 
   /** Create a BeanScopeBuilder to ultimately load and return a new BeanScope. */
@@ -64,20 +64,12 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  public PropertyRequiresPlugin propertyPlugin() {
-    if (propertyPlugin == null) {
-      propertyPlugin = defaultPropertyPlugin();
-    }
-    return configPlugin();
-  }
-
-  @Override
-  public void configPlugin(ConfigPropertyPlugin propertyPlugin) {
+  public void propertyPlugin(PropertyRequiresPlugin propertyPlugin) {
     this.propertyPlugin = propertyPlugin;
   }
 
   @Override
-  public ConfigPropertyPlugin configPlugin() {
+  public PropertyRequiresPlugin propertyPlugin() {
     if (propertyPlugin == null) {
       propertyPlugin = defaultPropertyPlugin();
     }
@@ -220,7 +212,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       classLoader = Thread.currentThread().getContextClassLoader();
     }
   }
-  private ConfigPropertyPlugin defaultPropertyPlugin() {
+  private PropertyRequiresPlugin defaultPropertyPlugin() {
     return detectAvajeConfig() ? new DConfigProps() : new DSystemProps();
   }
 
@@ -265,8 +257,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         spiModules.add((AvajeModule) spi);
       } else if (spi instanceof ModuleOrdering) {
         spiOrdering = (ModuleOrdering) spi;
-      } else if (propertyPlugin == null && spi instanceof ConfigPropertyPlugin) {
-        propertyPlugin = (ConfigPropertyPlugin) spi;
+      } else if (propertyPlugin == null && spi instanceof PropertyRequiresPlugin) {
+        propertyPlugin = (PropertyRequiresPlugin) spi;
       }
     }
 

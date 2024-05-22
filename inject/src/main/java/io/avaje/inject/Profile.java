@@ -24,12 +24,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * }</pre>
  *
  * <p>In the sample above, the MyService bean will get wired only if <code>avaje.profiles</code> is
- * set to "test" in the {@link io.avaje.inject.spi.ConfigPropertyPlugin}.
+ * set to "test" in the {@link io.avaje.inject.spi.PropertyRequiresPlugin}.
  *
  * <p>Avaje Config provides an implementation and if it is included in the classpath then Avaje
  * Config will be used to test the property conditions.
  *
- * <p>If no ConfigPropertyPlugin is found then the default implementation is used which uses
+ * <p>If no PropertyRequiresPlugin is found then the default implementation is used which uses
  * {@link System#getProperty(String)} and {@link System#getenv(String)}.
  */
 @Retention(RUNTIME)

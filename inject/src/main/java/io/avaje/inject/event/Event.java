@@ -36,6 +36,7 @@ import java.util.concurrent.CompletionStage;
  */
 public abstract class Event<T> {
 
+  private static final Comparator<Observer<?>> PRIORITY = Comparator.comparing(Observer::priority);
   protected final List<Observer<T>> observers;
   protected final String defaultQualifier;
 
@@ -57,7 +58,7 @@ public abstract class Event<T> {
    */
   public void fire(T event, String qualifier) {
     observers.stream()
-        .sorted(Comparator.comparing(Observer::priority))
+        .sorted(PRIORITY)
         .forEach(observer -> observer.observe(event, qualifier, false));
   }
 
@@ -73,7 +74,7 @@ public abstract class Event<T> {
     var exceptionHandler = new CollectingExceptionHandler();
 
     return observers.stream()
-      .sorted(Comparator.comparing(Observer::priority))
+      .sorted(PRIORITY)
       .reduce(CompletableFuture.<Void>completedFuture(null), (future, observer) ->
           future.thenRun(() -> {
             try {
