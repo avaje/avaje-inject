@@ -12,7 +12,7 @@ import io.avaje.lang.NonNullApi;
  * System#getProperty(String)} and {@link System#getenv(String)}.
  */
 @NonNullApi
-public interface ConfigPropertyPlugin extends InjectSPI, PropertyRequiresPlugin {
+public interface PropertyRequiresPlugin extends InjectSPI {
 
   /**
    * Return a configuration value that might not exist.

@@ -40,7 +40,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private boolean parentOverride = true;
   private boolean shutdownHook;
   private ClassLoader classLoader;
-  private PropertyRequiresPlugin propertyPlugin;
+  private PropertyRequiresPlugin propertyRequiresPlugin;
   private Set<String> profiles;
 
   /** Create a BeanScopeBuilder to ultimately load and return a new BeanScope. */
@@ -65,15 +65,15 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   @Override
   public PropertyRequiresPlugin propertyPlugin() {
-    if (propertyPlugin == null) {
-      propertyPlugin = defaultPropertyPlugin();
+    if (propertyRequiresPlugin == null) {
+      propertyRequiresPlugin = defaultPropertyPlugin();
     }
-    return propertyPlugin;
+    return propertyRequiresPlugin;
   }
 
   @Override
   public void propertyPlugin(PropertyRequiresPlugin propertyPlugin) {
-    this.propertyPlugin = propertyPlugin;
+    this.propertyRequiresPlugin = propertyPlugin;
   }
 
   @Override
@@ -231,7 +231,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private void initProfiles() {
     if (profiles == null) {
       profiles =
-        propertyPlugin
+          propertyRequiresPlugin
           .get("avaje.profiles")
           .map(p -> Set.of(p.split(",")))
           .orElse(emptySet());
@@ -257,13 +257,13 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         spiModules.add((AvajeModule) spi);
       } else if (spi instanceof ModuleOrdering) {
         spiOrdering = (ModuleOrdering) spi;
-      } else if (propertyPlugin == null && spi instanceof PropertyRequiresPlugin) {
-        propertyPlugin = (PropertyRequiresPlugin) spi;
+      } else if (propertyRequiresPlugin == null && spi instanceof PropertyRequiresPlugin) {
+        propertyRequiresPlugin = (PropertyRequiresPlugin) spi;
       }
     }
 
-    if (propertyPlugin == null) {
-      propertyPlugin = defaultPropertyPlugin();
+    if (propertyRequiresPlugin == null) {
+      propertyRequiresPlugin = defaultPropertyPlugin();
     }
 
     plugins.forEach(plugin -> plugin.apply(this));
@@ -290,7 +290,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
           + " Refer to https://avaje.io/inject#gradle");
     }
 
-    final var level = propertyPlugin.contains("printModules") ? INFO : DEBUG;
+    final var level = propertyRequiresPlugin.contains("printModules") ? INFO : DEBUG;
     initProfiles();
     log.log(level, "building with avaje modules {0} profiles {1}", moduleNames, profiles);
 
