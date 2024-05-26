@@ -87,7 +87,7 @@ final class ExternalProvider {
         final var name = module.getClass().getTypeName();
 
         final var provides = new ArrayList<String>();
-        System.out.println("Detected Module: " + name);
+        APContext.logNote("Detected Module: " + name);
         for (final var provide : module.provides()) {
           providedTypes.add(provide.getTypeName());
           provides.add(provide.getTypeName());

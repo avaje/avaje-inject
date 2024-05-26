@@ -285,7 +285,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     initProfiles();
     log.log(level, "building with avaje modules {0} profiles {1}", moduleNames, profiles);
 
-    final Builder builder = Builder.newBuilder(profiles, propertyRequiresPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
+    final var builder = Builder.newBuilder(profiles, propertyRequiresPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
     for (final var factory : factoryOrder.factories()) {
       builder.currentModule(factory.getClass());
       factory.build(builder);
@@ -332,7 +332,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
     @Override
     public void add(AvajeModule module) {
-      final FactoryState factoryState = new FactoryState(module);
+      final var factoryState = new FactoryState(module);
       providesMap
         .computeIfAbsent(module.getClass().getTypeName(), s -> new FactoryList())
         .add(factoryState);
@@ -398,7 +398,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
           push(factoryState);
         }
       } else if (!queue.isEmpty()) {
-        final StringBuilder sb = new StringBuilder();
+        final var sb = new StringBuilder();
         for (final FactoryState factory : queue) {
           sb.append("Module [").append(factory).append("] has unsatisfied");
           unsatisfiedRequires(sb, factory.requires(), "requires");
@@ -426,7 +426,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       if (parent != null && parent.contains(dependency)) {
         return false;
       }
-      final FactoryList factoryList = providesMap.get(dependency);
+      final var factoryList = providesMap.get(dependency);
       return (factoryList == null || !factoryList.allPushed());
     }
 
