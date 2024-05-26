@@ -16,7 +16,7 @@ public interface Module extends AvajeModule {
    * Return the set of types this module explicitly provides to other modules.
    */
   @Override
-  default Type[] provides() {
+  default Class<?>[] provides() {
     return EMPTY_CLASSES;
   }
 
@@ -24,7 +24,7 @@ public interface Module extends AvajeModule {
    * Return the types this module needs to be provided externally or via other modules.
    */
   @Override
-  default Type[] requires() {
+  default Class<?>[] requires() {
     return EMPTY_CLASSES;
   }
 
@@ -32,7 +32,7 @@ public interface Module extends AvajeModule {
    * Return the packages this module needs to be provided via other modules.
    */
   @Override
-  default Type[] requiresPackages() {
+  default Class<?>[] requiresPackages() {
     return EMPTY_CLASSES;
   }
 
@@ -43,7 +43,7 @@ public interface Module extends AvajeModule {
    * explicitly using {@link InjectModule#provides()}.
    */
   @Override
-  default Type[] autoProvides() {
+  default Class<?>[] autoProvides() {
     return EMPTY_CLASSES;
   }
 
@@ -66,7 +66,7 @@ public interface Module extends AvajeModule {
    * explicitly using {@link InjectModule#requires()} or {@link InjectModule#requiresPackages()}.
    */
   @Override
-  default Type[] autoRequires() {
+  default Class<?>[] autoRequires() {
     return EMPTY_CLASSES;
   }
 
