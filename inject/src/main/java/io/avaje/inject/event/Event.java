@@ -37,6 +37,7 @@ import java.util.concurrent.CompletionStage;
 public abstract class Event<T> {
 
   private static final Comparator<Observer<?>> PRIORITY = Comparator.comparing(Observer::priority);
+
   protected final List<Observer<T>> observers;
   protected final String defaultQualifier;
 
