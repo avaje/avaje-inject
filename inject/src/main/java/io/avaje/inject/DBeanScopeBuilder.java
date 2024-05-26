@@ -40,7 +40,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private boolean parentOverride = true;
   private boolean shutdownHook;
   private ClassLoader classLoader;
-  private ConfigPropertyPlugin propertyPlugin;
+  private PropertyRequiresPlugin propertyPlugin;
   private Set<String> profiles;
 
   /** Create a BeanScopeBuilder to ultimately load and return a new BeanScope. */
@@ -68,20 +68,12 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     if (propertyPlugin == null) {
       propertyPlugin = defaultPropertyPlugin();
     }
-    return configPlugin();
-  }
-
-  @Override
-  public void configPlugin(ConfigPropertyPlugin propertyPlugin) {
-    this.propertyPlugin = propertyPlugin;
-  }
-
-  @Override
-  public ConfigPropertyPlugin configPlugin() {
-    if (propertyPlugin == null) {
-      propertyPlugin = defaultPropertyPlugin();
-    }
     return propertyPlugin;
+  }
+
+  @Override
+  public void propertyPlugin(PropertyRequiresPlugin propertyPlugin) {
+    this.propertyPlugin = propertyPlugin;
   }
 
   @Override
@@ -220,7 +212,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       classLoader = Thread.currentThread().getContextClassLoader();
     }
   }
-  private ConfigPropertyPlugin defaultPropertyPlugin() {
+  private PropertyRequiresPlugin defaultPropertyPlugin() {
     return detectAvajeConfig() ? new DConfigProps() : new DSystemProps();
   }
 
@@ -265,8 +257,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         spiModules.add((AvajeModule) spi);
       } else if (spi instanceof ModuleOrdering) {
         spiOrdering = (ModuleOrdering) spi;
-      } else if (propertyPlugin == null && spi instanceof ConfigPropertyPlugin) {
-        propertyPlugin = (ConfigPropertyPlugin) spi;
+      } else if (propertyPlugin == null && spi instanceof PropertyRequiresPlugin) {
+        propertyPlugin = (PropertyRequiresPlugin) spi;
       }
     }
 
@@ -302,7 +294,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     initProfiles();
     log.log(level, "building with avaje modules {0} profiles {1}", moduleNames, profiles);
 
-    final var builder = Builder.newBuilder(profiles, propertyPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
+    final var builder = Builder.newBuilder(profiles, propertyRequiresPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
     for (final var factory : factoryOrder.factories()) {
       builder.currentModule(factory.getClass());
       factory.build(builder);
