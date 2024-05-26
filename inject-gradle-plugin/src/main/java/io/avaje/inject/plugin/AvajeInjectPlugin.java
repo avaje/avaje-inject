@@ -1,21 +1,30 @@
 package io.avaje.inject.plugin;
 
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+
 import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.InjectPlugin;
+import io.avaje.inject.spi.InjectSPI;
+import io.avaje.inject.spi.Module;
 import org.gradle.api.*;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.ServiceLoader.Provider;
 
 /**
  * Plugin that discovers external avaje inject modules and plugins.
  */
 public class AvajeInjectPlugin implements Plugin<Project> {
+
+  private final List<AvajeModuleData> modules = new ArrayList<>();
 
   @Override
   public void apply(Project project) {
@@ -36,14 +45,16 @@ public class AvajeInjectPlugin implements Plugin<Project> {
         System.err.println("Unsuccessful creating build directory");
       }
     }
-    try {
-      final var classLoader = classLoader(project);
-      try (var moduleWriter = createFileWriter(outputDir.getPath(), "avaje-module-provides.txt");
-          var pluginWriter = createFileWriter(outputDir.getPath(), "avaje-plugin-provides.txt")) {
+
+    try (var classLoader = classLoader(project);
+        var moduleWriter = createFileWriter(outputDir.getPath(), "avaje-module-provides.txt");
+        var pluginWriter = createFileWriter(outputDir.getPath(), "avaje-plugin-provides.txt");
+        var moduleCSV = createFileWriter(outputDir.getPath(), "avaje-module-dependencies.csv")) {
 
         writeProvidedPlugins(classLoader, pluginWriter);
         writeProvidedModules(classLoader, moduleWriter);
-      }
+        writeModuleCSV(moduleCSV);
+
     } catch (IOException e) {
       throw new GradleException("Failed to write avaje-module-provides", e);
     }
@@ -78,21 +89,46 @@ public class AvajeInjectPlugin implements Plugin<Project> {
 
   private void writeProvidedModules(ClassLoader classLoader, FileWriter moduleWriter) throws IOException {
     final Set<String> providedTypes = new HashSet<>();
-    List<AvajeModule> allModules = new ArrayList<>();
-    ServiceLoader.load(io.avaje.inject.spi.Module.class, classLoader).forEach(allModules::add);
-    ServiceLoader.load(AvajeModule.class, classLoader).forEach(allModules::add);
 
-    for (final AvajeModule module : allModules) {
-      System.out.println("Detected External Module: " + module.getClass().getCanonicalName());
+    final List<AvajeModule> avajeModules = new ArrayList<>();
+    ServiceLoader.load(Module.class, classLoader).forEach(avajeModules::add);
+    ServiceLoader.load(InjectSPI.class, classLoader).stream()
+        .map(Provider::get)
+        .filter(AvajeModule.class::isInstance)
+        .map(AvajeModule.class::cast)
+        .forEach(avajeModules::add);
+    for (final var module : avajeModules) {
+
+      final var name = module.getClass().getTypeName();
+      System.out.println("Detected External Module: " + name);
+
+      final var provides = new ArrayList<String>();
       for (final var provide : module.provides()) {
-        providedTypes.add(provide.getTypeName());
+        var type = provide.getTypeName();
+        providedTypes.add(type);
+        provides.add(type);
       }
       for (final var provide : module.autoProvides()) {
-        providedTypes.add(provide.getTypeName());
+        var type = provide.getTypeName();
+        providedTypes.add(type);
+        provides.add(type);
       }
       for (final var provide : module.autoProvidesAspects()) {
-        providedTypes.add(wrapAspect(provide.getCanonicalName()));
+        var type = wrapAspect(provide.getTypeName());
+        providedTypes.add(type);
+        provides.add(type);
       }
+
+      final var requires =
+          Arrays.<Type>stream(module.requires()).map(Type::getTypeName).collect(toList());
+
+      Arrays.<Type>stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
+      Arrays.<Type>stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
+      Arrays.<Type>stream(module.autoRequiresAspects())
+          .map(Type::getTypeName)
+          .map(AvajeInjectPlugin::wrapAspect)
+          .forEach(requires::add);
+      modules.add(new AvajeModuleData(name, provides, requires));
     }
 
     for (final String providedType : providedTypes) {
@@ -105,7 +141,7 @@ public class AvajeInjectPlugin implements Plugin<Project> {
     return "io.avaje.inject.aop.AspectProvider<" + aspect + ">";
   }
 
-  private ClassLoader classLoader(Project project) {
+  private URLClassLoader classLoader(Project project) {
     final URL[] urls = createClassPath(project);
     return new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
   }
@@ -120,6 +156,20 @@ public class AvajeInjectPlugin implements Plugin<Project> {
       return urls.toArray(new URL[0]);
     } catch (MalformedURLException e) {
       throw new GradleException("Error building classpath", e);
+    }
+  }
+
+  private void writeModuleCSV(FileWriter moduleWriter) throws IOException {
+    moduleWriter.write("\nExternal Module Type|Provides|Requires");
+    for (AvajeModuleData avajeModule : modules) {
+      moduleWriter.write("\n");
+      moduleWriter.write(avajeModule.name());
+      moduleWriter.write("|");
+      var provides = avajeModule.provides().stream().collect(joining(","));
+      moduleWriter.write(provides.isEmpty() ? " " : provides);
+      moduleWriter.write("|");
+      var requires = avajeModule.requires().stream().collect(joining(","));
+      moduleWriter.write(requires.isEmpty() ? " " : requires);
     }
   }
 }
