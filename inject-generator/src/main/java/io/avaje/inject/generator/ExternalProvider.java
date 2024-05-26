@@ -71,9 +71,6 @@ final class ExternalProvider {
     ServiceLoader.load(Module.class, CLASS_LOADER).forEach(modules::add);
     // load newer AvajeModule
     final var iterator = ServiceLoader.load(InjectSPI.class, CLASS_LOADER).iterator();
-    if (!iterator.hasNext()) {
-      return;
-    }
     while (iterator.hasNext()) {
       try {
         final var spi = iterator.next();
