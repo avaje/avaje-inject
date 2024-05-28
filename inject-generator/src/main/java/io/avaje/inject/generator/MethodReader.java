@@ -86,7 +86,7 @@ final class MethodReader {
     String destroyMethod = (bean == null) ? null : bean.destroyMethod();
     this.destroyPriority = (bean == null) ? null : bean.destroyPriority();
     this.beanCloseable = (bean != null) && bean.autoCloseable();
-    this.name = qualifierName;
+    this.name = multiRegister && qualifierName == null ? "multi" : qualifierName;
     TypeElement returnElement =
         multiRegister ? APContext.typeElement(uType.mainType()) : asElement(returnMirror);
     if (returnElement == null) {
