@@ -293,8 +293,8 @@ final class MethodReader {
 
         var addAutoClosable =
             multiRegister
-                ? "bean.forEach(b -> builder.addPreDestroy(b::close%s));"
-                : "builder.addPreDestroy(bean::close%s);";
+                ? "bean.forEach(builder::addAutoClosable);"
+                : "builder.addAutoClosable(bean);";
         writer.indent(indent).append(addAutoClosable).eol();
       }
 
