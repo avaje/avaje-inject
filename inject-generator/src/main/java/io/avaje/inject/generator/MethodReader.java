@@ -272,7 +272,10 @@ final class MethodReader {
         var beanRegister = multiRegister ? "::register)" + lineEnd : ".register(bean);";
         writer.append(beanRegister).eol();
       }
-      if (notEmpty(initMethod)) {
+
+      final var hasInitMethod = notEmpty(initMethod);
+
+      if (hasInitMethod) {
 
         var addPostConstruct =
             multiRegister
@@ -303,7 +306,7 @@ final class MethodReader {
                 ? "    .forEach(builder::addAutoClosable);"
                 : "builder.addAutoClosable(bean);";
         writer.indent(indent).append(addAutoClosable).eol();
-      } else if (multiRegister) {
+      } else if (multiRegister && hasInitMethod) {
         writer.indent(indent).append("    .forEach(x -> {});").eol();
       }
 
