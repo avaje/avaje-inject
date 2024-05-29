@@ -247,7 +247,7 @@ final class MethodReader {
       var hasLifecycleMethods = hasLifecycleMethods();
 
       if (hasLifecycleMethods && multiRegister) {
-        writer.append("bean.stream().map(");
+        writer.append("bean.stream()").eol().indent(indent).append("    .map(");
       } else if (hasLifecycleMethods) {
         writer.append("var $bean = ");
       } else if (multiRegister) {
@@ -272,12 +272,11 @@ final class MethodReader {
         var beanRegister = multiRegister ? "::register)" + lineEnd : ".register(bean);";
         writer.append(beanRegister).eol();
       }
-
       if (notEmpty(initMethod)) {
 
         var addPostConstruct =
             multiRegister
-                ? ".forEach(b -> builder.addPostConstruct(b::%s));"
+                ? "    .peek(b -> builder.addPostConstruct(b::%s))"
                 : "builder.addPostConstruct($bean::%s);";
         writer.indent(indent).append(addPostConstruct, initMethod).eol();
       }
@@ -286,14 +285,14 @@ final class MethodReader {
       if (notEmpty(destroyMethod)) {
         var addPreDestroy =
             multiRegister
-                ? ".forEach(b -> builder.addPreDestroy(b::%s%s));"
+                ? "    .forEach(b -> builder.addPreDestroy(b::%s%s));"
                 : "builder.addPreDestroy($bean::%s%s);";
         writer.indent(indent).append(addPreDestroy, destroyMethod, priority).eol();
       } else if (typeReader != null && typeReader.isClosable()) {
 
         var addPreDestroy =
             multiRegister
-                ? "bean.forEach(b -> builder.addPreDestroy(b::close%s));"
+                ? "    .forEach(b -> builder.addPreDestroy(b::close%s));"
                 : "builder.addPreDestroy($bean::close%s);";
         writer.indent(indent).append(addPreDestroy, priority).eol();
 
@@ -301,9 +300,11 @@ final class MethodReader {
 
         var addAutoClosable =
             multiRegister
-                ? "bean.forEach(builder::addAutoClosable);"
+                ? "    .forEach(builder::addAutoClosable);"
                 : "builder.addAutoClosable(bean);";
         writer.indent(indent).append(addAutoClosable).eol();
+      } else if (multiRegister) {
+        writer.indent(indent).append("    .forEach(x -> {});").eol();
       }
 
       if (optionalType) {
