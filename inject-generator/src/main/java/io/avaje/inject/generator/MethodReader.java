@@ -244,9 +244,14 @@ final class MethodReader {
       }
       String indent = optionalType ? "        " : "      ";
       writer.indent(indent);
+      var hasLifecycleMethods = hasLifecycleMethods();
 
-      if(multiRegister) {
-       writer.append("bean.forEach(");
+      if (hasLifecycleMethods && multiRegister) {
+        writer.append("bean.stream().map(");
+      } else if (hasLifecycleMethods) {
+        writer.append("var $bean = ");
+      } else if (multiRegister) {
+        writer.append("bean.forEach(");
       }
 
       writer.append("builder");
@@ -257,11 +262,14 @@ final class MethodReader {
       } else if (prototype) {
         writer.append(".asPrototype()");
       }
+      var lineEnd = hasLifecycleMethods ? "" : ";";
+
       if (Util.isProvider(returnTypeRaw)) {
-        var providerRegister = multiRegister ? "::registerProvider);" : ".registerProvider(bean);";
+        var providerRegister =
+            multiRegister ? "::registerProvider)" + lineEnd : ".registerProvider(bean);";
         writer.append(providerRegister).eol();
       } else {
-        var beanRegister = multiRegister ? "::register);" : ".register(bean);";
+        var beanRegister = multiRegister ? "::register)" + lineEnd : ".register(bean);";
         writer.append(beanRegister).eol();
       }
 
@@ -269,8 +277,8 @@ final class MethodReader {
 
         var addPostConstruct =
             multiRegister
-                ? "bean.forEach(b -> builder.addPostConstruct(b::%s));"
-                : "builder.addPostConstruct(bean::%s);";
+                ? ".forEach(b -> builder.addPostConstruct(b::%s));"
+                : "builder.addPostConstruct($bean::%s);";
         writer.indent(indent).append(addPostConstruct, initMethod).eol();
       }
 
@@ -278,15 +286,15 @@ final class MethodReader {
       if (notEmpty(destroyMethod)) {
         var addPreDestroy =
             multiRegister
-                ? "bean.forEach(b -> builder.addPreDestroy(b::%s%s));"
-                : "builder.addPreDestroy(bean::%s%s);";
+                ? ".forEach(b -> builder.addPreDestroy(b::%s%s));"
+                : "builder.addPreDestroy($bean::%s%s);";
         writer.indent(indent).append(addPreDestroy, destroyMethod, priority).eol();
       } else if (typeReader != null && typeReader.isClosable()) {
 
         var addPreDestroy =
             multiRegister
                 ? "bean.forEach(b -> builder.addPreDestroy(b::close%s));"
-                : "builder.addPreDestroy(bean::close%s);";
+                : "builder.addPreDestroy($bean::close%s);";
         writer.indent(indent).append(addPreDestroy, priority).eol();
 
       } else if (beanCloseable) {
@@ -302,6 +310,12 @@ final class MethodReader {
         writer.append("      }").eol();
       }
     }
+  }
+
+  private boolean hasLifecycleMethods() {
+    return notEmpty(initMethod)
+        || notEmpty(destroyMethod)
+        || (typeReader != null && typeReader.isClosable() || beanCloseable);
   }
 
   private boolean notEmpty(String value) {
