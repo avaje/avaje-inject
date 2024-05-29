@@ -81,17 +81,17 @@ public interface BeanScopeBuilder {
   BeanScopeBuilder modules(AvajeModule... modules);
 
   /**
-   * Return the PropertyRequiresPlugin used for this scope. This is useful for plugins that want to
-   * use the scopes wiring properties.
-   */
-  PropertyRequiresPlugin propertyPlugin();
-
-  /**
-   * Set the PropertyRequiresPlugin used for this scope. This is serviceloaded automatically of not set
+   * Set the PropertyPlugin used for this scope. This is serviceloaded automatically of not set
    *
    * @param propertyRequiresPlugin The plugin for conditions based on properties
    */
   void propertyPlugin(PropertyRequiresPlugin propertyRequiresPlugin);
+
+  /**
+   * Return the PropertyPlugin used for this scope. This is useful for plugins that want to use
+   * the scopes wiring properties.
+   */
+  PropertyRequiresPlugin propertyPlugin();
 
   /**
    * Supply a bean to the scope that will be used instead of any similar bean in the scope.

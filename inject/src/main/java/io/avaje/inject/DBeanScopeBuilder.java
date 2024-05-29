@@ -64,16 +64,16 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
+  public void propertyPlugin(PropertyRequiresPlugin propertyPlugin) {
+    this.propertyRequiresPlugin = propertyPlugin;
+  }
+
+  @Override
   public PropertyRequiresPlugin propertyPlugin() {
     if (propertyRequiresPlugin == null) {
       propertyRequiresPlugin = defaultPropertyPlugin();
     }
     return propertyRequiresPlugin;
-  }
-
-  @Override
-  public void propertyPlugin(PropertyRequiresPlugin propertyPlugin) {
-    this.propertyRequiresPlugin = propertyPlugin;
   }
 
   @Override
