@@ -250,7 +250,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     List<AvajeModule> spiModules = new ArrayList<>();
     ModuleOrdering spiOrdering = null;
     //TODO make a sealed switch when we upgrade to 17
-    for (var spi : ServiceLoader.load(InjectSPI.class)) {
+    for (var spi : ServiceLoader.load(InjectSPI.class, classLoader)) {
       if (spi instanceof InjectPlugin) {
         plugins.add((InjectPlugin) spi);
       } else if (spi instanceof AvajeModule) {
@@ -268,7 +268,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
     plugins.forEach(plugin -> plugin.apply(this));
 
-    ServiceLoader.load(Plugin.class).forEach(plugin -> plugin.apply(this));
+    ServiceLoader.load(Plugin.class, classLoader).forEach(plugin -> plugin.apply(this));
 
     // sort factories by dependsOn
     ModuleOrdering factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
@@ -278,7 +278,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       factoryOrder = spiOrdering != null ? spiOrdering : factoryOrder;
 
       spiModules.forEach(factoryOrder::add);
-      ServiceLoader.load(Module.class).forEach(factoryOrder::add);
+      ServiceLoader.load(Module.class, classLoader).forEach(factoryOrder::add);
     }
 
     final var moduleNames = factoryOrder.orderModules();
