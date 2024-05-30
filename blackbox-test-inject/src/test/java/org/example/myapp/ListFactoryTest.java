@@ -7,6 +7,9 @@ import org.junit.jupiter.api.Test;
 import io.avaje.inject.test.InjectTest;
 import jakarta.inject.Inject;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @InjectTest
 class ListFactoryTest {
 
@@ -16,5 +19,14 @@ class ListFactoryTest {
   void test() {
 
     assertThat(list.strings()).contains("test1", "test1", "test3");
+
+    List<ListFactory.Some> somes = list.somes();
+    assertThat(somes).hasSize(4);
+
+    var names = somes.stream()
+      .map(ListFactory.Some::name)
+      .collect(Collectors.toList());
+
+    assertThat(names).contains("m1", "m2", "m3", "s1");
   }
 }
