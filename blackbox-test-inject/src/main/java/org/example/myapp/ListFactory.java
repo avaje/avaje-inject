@@ -6,6 +6,7 @@ import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
 import io.avaje.inject.PostConstruct;
 import io.avaje.inject.PreDestroy;
+import jakarta.inject.Named;
 
 @Factory
 public class ListFactory {
@@ -20,14 +21,9 @@ public class ListFactory {
     return "test3";
   }
 
-  @Bean
+  @Bean(initMethod = "initMe")
   List<Some> multiple() {
     return List.of(new Some("m1"), new Some("m2"), new Some("m3"));
-  }
-
-  @Bean(initMethod = "initMe")
-  List<Some> multiple2() {
-    return List.of(new Some("mx1"), new Some("mx2"));
   }
 
   @Bean(initMethod = "postInit")
@@ -35,6 +31,7 @@ public class ListFactory {
     return new Some("s1");
   }
 
+  @Named("multipleVanilla")
   @Bean
   List<Some2> multipleVanilla() {
     return List.of(new Some2("v1"), new Some2("v2"));

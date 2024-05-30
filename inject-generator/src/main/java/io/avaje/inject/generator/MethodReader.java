@@ -86,6 +86,8 @@ final class MethodReader {
     String destroyMethod = (bean == null) ? null : bean.destroyMethod();
     this.destroyPriority = (bean == null) ? null : bean.destroyPriority();
     this.beanCloseable = (bean != null) && bean.autoCloseable();
+    // for multiRegister we desire a qualifier name such that builder.isAddBeanFor() uses it and allows
+    // other beans of the same type to also register, otherwise it defaults to slightly confusing behaviour
     this.name = multiRegister && qualifierName == null ? "multi" : qualifierName;
     TypeElement returnElement = multiRegister ? APContext.typeElement(uType.mainType()) : asElement(returnMirror);
     if (returnElement == null) {
