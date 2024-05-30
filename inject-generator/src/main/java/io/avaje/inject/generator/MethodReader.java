@@ -87,8 +87,7 @@ final class MethodReader {
     this.destroyPriority = (bean == null) ? null : bean.destroyPriority();
     this.beanCloseable = (bean != null) && bean.autoCloseable();
     this.name = multiRegister && qualifierName == null ? "multi" : qualifierName;
-    TypeElement returnElement =
-        multiRegister ? APContext.typeElement(uType.mainType()) : asElement(returnMirror);
+    TypeElement returnElement = multiRegister ? APContext.typeElement(uType.mainType()) : asElement(returnMirror);
     if (returnElement == null) {
       this.typeReader = null;
       this.initMethod = initMethod;
@@ -262,11 +261,10 @@ final class MethodReader {
       } else if (prototype) {
         writer.append(".asPrototype()");
       }
-      var lineEnd = hasLifecycleMethods ? "" : ";";
 
+      var lineEnd = hasLifecycleMethods ? "" : ";";
       if (Util.isProvider(returnTypeRaw)) {
-        var providerRegister =
-            multiRegister ? "::registerProvider)" + lineEnd : ".registerProvider(bean);";
+        var providerRegister = multiRegister ? "::registerProvider)" + lineEnd : ".registerProvider(bean);";
         writer.append(providerRegister).eol();
       } else {
         var beanRegister = multiRegister ? "::register)" + lineEnd : ".register(bean);";
@@ -274,38 +272,36 @@ final class MethodReader {
       }
 
       final var hasInitMethod = notEmpty(initMethod);
-
       if (hasInitMethod) {
-
         var addPostConstruct =
-            multiRegister
-                ? "    .peek(b -> builder.addPostConstruct(b::%s))"
-                : "builder.addPostConstruct($bean::%s);";
+          multiRegister
+            ? "    .peek(b -> builder.addPostConstruct(b::%s))"
+            : "builder.addPostConstruct($bean::%s);";
         writer.indent(indent).append(addPostConstruct, initMethod).eol();
       }
 
       var priority = destroyPriority == null || destroyPriority == 1000 ? "" : ", " + destroyPriority;
       if (notEmpty(destroyMethod)) {
         var addPreDestroy =
-            multiRegister
-                ? "    .forEach(b -> builder.addPreDestroy(b::%s%s));"
-                : "builder.addPreDestroy($bean::%s%s);";
+          multiRegister
+            ? "    .forEach(b -> builder.addPreDestroy(b::%s%s));"
+            : "builder.addPreDestroy($bean::%s%s);";
         writer.indent(indent).append(addPreDestroy, destroyMethod, priority).eol();
-      } else if (typeReader != null && typeReader.isClosable()) {
 
+      } else if (typeReader != null && typeReader.isClosable()) {
         var addPreDestroy =
-            multiRegister
-                ? "    .forEach(b -> builder.addPreDestroy(b::close%s));"
-                : "builder.addPreDestroy($bean::close%s);";
+          multiRegister
+            ? "    .forEach(b -> builder.addPreDestroy(b::close%s));"
+            : "builder.addPreDestroy($bean::close%s);";
         writer.indent(indent).append(addPreDestroy, priority).eol();
 
       } else if (beanCloseable) {
-
         var addAutoClosable =
-            multiRegister
-                ? "    .forEach(builder::addAutoClosable);"
-                : "builder.addAutoClosable(bean);";
+          multiRegister
+            ? "    .forEach(builder::addAutoClosable);"
+            : "builder.addAutoClosable(bean);";
         writer.indent(indent).append(addAutoClosable).eol();
+
       } else if (multiRegister && hasInitMethod) {
         writer.indent(indent).append("    .forEach(x -> {});").eol();
       }
