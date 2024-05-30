@@ -317,9 +317,7 @@ final class MethodReader {
   }
 
   private boolean hasLifecycleMethods() {
-    return notEmpty(initMethod)
-        || notEmpty(destroyMethod)
-        || (typeReader != null && typeReader.isClosable() || beanCloseable);
+    return notEmpty(initMethod) || notEmpty(destroyMethod) || (typeReader != null && typeReader.isClosable() || beanCloseable);
   }
 
   private boolean notEmpty(String value) {
