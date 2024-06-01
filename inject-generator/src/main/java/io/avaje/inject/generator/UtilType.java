@@ -23,14 +23,14 @@ final class UtilType {
     this.uType = uType;
   }
 
-  static UtilType of(String rawType, TypeMirror mirror) {
+  static UtilType of(String rawType, boolean beanMap, TypeMirror mirror) {
     var uType = UType.parse(mirror);
     if (rawType.startsWith("java.util.List<")) {
       return new UtilType(Type.LIST, rawType, uType.param0());
     } else if (rawType.startsWith("java.util.Set<")) {
       return new UtilType(Type.SET, rawType, uType.param0());
     } else if (rawType.startsWith("java.util.Map<java.lang.String,")) {
-      return new UtilType(Type.MAP, rawType, uType.param1());
+      return new UtilType(Type.MAP, rawType, beanMap ? uType.param1() : uType);
     } else if (rawType.startsWith("java.util.Optional<")) {
       return new UtilType(Type.OPTIONAL, rawType, uType.param0());
     } else if (Util.isProvider(rawType)) {

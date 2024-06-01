@@ -208,8 +208,8 @@ final class Util {
     return valType;
   }
 
-  static UtilType determineType(TypeMirror rawType) {
-    return UtilType.of(rawType.toString(), rawType);
+  static UtilType determineType(TypeMirror rawType, boolean beanMap) {
+    return UtilType.of(rawType.toString(), beanMap, rawType);
   }
 
   /**
