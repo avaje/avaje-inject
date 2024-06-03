@@ -57,7 +57,6 @@ final class ProcessingContext {
   }
 
   static String loadMetaInfServices() {
-
     return loadMetaInf(Constants.META_INF_SPI).stream()
         .filter(
             spi -> {

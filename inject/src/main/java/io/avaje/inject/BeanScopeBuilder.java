@@ -103,6 +103,12 @@ public interface BeanScopeBuilder {
   ConfigPropertyPlugin configPlugin();
 
   /**
+   * Return the PropertyPlugin used for this scope. This is useful for plugins that want to use
+   * the scopes wiring properties.
+   */
+  PropertyRequiresPlugin propertyPlugin();
+
+  /**
    * Supply a bean to the scope that will be used instead of any similar bean in the scope.
    *
    * <p>This is typically expected to be used in tests and the bean supplied is typically a test

@@ -64,6 +64,11 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
+  public void propertyPlugin(PropertyRequiresPlugin propertyRequiresPlugin) {
+    this.propertyRequiresPlugin = propertyRequiresPlugin;
+  }
+
+  @Override
   public PropertyRequiresPlugin propertyPlugin() {
     if (propertyPlugin == null) {
       propertyPlugin = defaultPropertyPlugin();
@@ -258,7 +263,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     List<AvajeModule> spiModules = new ArrayList<>();
     ModuleOrdering spiOrdering = null;
     //TODO make a sealed switch when we upgrade to 17
-    for (var spi : ServiceLoader.load(InjectSPI.class)) {
+    for (var spi : ServiceLoader.load(InjectSPI.class, classLoader)) {
       if (spi instanceof InjectPlugin) {
         plugins.add((InjectPlugin) spi);
       } else if (spi instanceof AvajeModule) {
@@ -276,8 +281,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
     plugins.forEach(plugin -> plugin.apply(this));
 
-    ServiceLoader.load(Plugin.class).forEach(plugin -> plugin.apply(this));
-
+    ServiceLoader.load(Plugin.class, classLoader).forEach(plugin -> plugin.apply(this));
     // sort factories by dependsOn
     ModuleOrdering factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
 
@@ -286,7 +290,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       factoryOrder = spiOrdering != null ? spiOrdering : factoryOrder;
 
       spiModules.forEach(factoryOrder::add);
-      ServiceLoader.load(Module.class).forEach(factoryOrder::add);
+      ServiceLoader.load(Module.class, classLoader).forEach(factoryOrder::add);
     }
 
     final var moduleNames = factoryOrder.orderModules();
@@ -453,10 +457,10 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
      * <p>This returns the number of factories added so once this returns 0 it is done.
      */
     private int processQueuedFactories() {
-      var count = 0;
+      int count = 0;
       final var it = queue.iterator();
       while (it.hasNext()) {
-        final var factory = it.next();
+        final FactoryState factory = it.next();
         if (satisfiedDependencies(factory)) {
           // push the factory onto the build order
           it.remove();
