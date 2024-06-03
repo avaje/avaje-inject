@@ -93,16 +93,14 @@ public class AutoProvidesMojo extends AbstractMojo {
   }
 
   private URLClassLoader createClassLoader(List<URL> listUrl) {
-    return new URLClassLoader(
-        listUrl.toArray(new URL[listUrl.size()]), Thread.currentThread().getContextClassLoader());
+    return new URLClassLoader(listUrl.toArray(new URL[listUrl.size()]), Thread.currentThread().getContextClassLoader());
   }
 
   private FileWriter createFileWriter(String string) throws IOException {
     return new FileWriter(new File(project.getBuild().getDirectory(), string), true);
   }
 
-  private void writeProvidedPlugins(URLClassLoader newClassLoader, FileWriter pluginWriter)
-      throws IOException {
+  private void writeProvidedPlugins(URLClassLoader newClassLoader, FileWriter pluginWriter) throws IOException {
     final Set<String> providedTypes = new HashSet<>();
 
     final Log log = getLog();
@@ -131,8 +129,7 @@ public class AutoProvidesMojo extends AbstractMojo {
     }
   }
 
-  private void writeProvidedModules(URLClassLoader newClassLoader, FileWriter moduleWriter)
-      throws IOException {
+  private void writeProvidedModules(URLClassLoader newClassLoader, FileWriter moduleWriter) throws IOException {
     final Set<String> providedTypes = new HashSet<>();
 
     final Log log = getLog();
@@ -144,7 +141,6 @@ public class AutoProvidesMojo extends AbstractMojo {
         .map(AvajeModule.class::cast)
         .forEach(avajeModules::add);
     for (final var module : avajeModules) {
-
       final var name = module.getClass().getTypeName();
       log.info("Detected External Module: " + name);
 
@@ -171,9 +167,9 @@ public class AutoProvidesMojo extends AbstractMojo {
       Arrays.<Type>stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
       Arrays.<Type>stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
       Arrays.<Type>stream(module.autoRequiresAspects())
-          .map(Type::getTypeName)
-          .map(AutoProvidesMojo::wrapAspect)
-          .forEach(requires::add);
+        .map(Type::getTypeName)
+        .map(AutoProvidesMojo::wrapAspect)
+        .forEach(requires::add);
       modules.add(new AvajeModuleData(name, provides, requires));
     }
 

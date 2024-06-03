@@ -1,14 +1,16 @@
 package io.avaje.inject.generator;
 
-import static java.util.List.of;
 import static java.util.Map.entry;
 import static java.util.stream.Collectors.toList;
 
 import java.lang.reflect.Type;
-import java.net.URI;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import java.net.URI;
+import java.nio.file.Paths;
+import static java.util.List.of;
+
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceConfigurationError;
@@ -59,14 +61,13 @@ final class ExternalProvider {
   static void registerModuleProvidedTypes(Set<String> providedTypes) {
     if (!injectAvailable) {
       if (!pluginExists("build/avaje-module-provides.txt")
-          && !pluginExists("target/avaje-module-provides.txt")) {
+        && !pluginExists("target/avaje-module-provides.txt")) {
         APContext.logNote("Unable to detect Avaje Inject in Annotation Processor ClassPath, use the Avaje Inject Maven/Gradle plugin for detecting Inject Modules from dependencies");
       }
       return;
     }
 
     List<AvajeModule> modules = new ArrayList<>();
-
     // load using older Module
     ServiceLoader.load(Module.class, CLASS_LOADER).forEach(modules::add);
     // load newer AvajeModule
@@ -75,7 +76,6 @@ final class ExternalProvider {
       try {
         final var spi = iterator.next();
         if (spi instanceof AvajeModule) modules.add((AvajeModule) spi);
-
       } catch (final ServiceConfigurationError expected) {
         // ignore expected error reading the module that we are also writing
       }
@@ -103,7 +103,6 @@ final class ExternalProvider {
           providedTypes.add(aspectType);
           provides.add(aspectType);
         }
-
         final var requires = Arrays.stream(module.requires()).map(Type::getTypeName).collect(toList());
 
         Arrays.stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
@@ -128,13 +127,12 @@ final class ExternalProvider {
         v.forEach(defaultScope::pluginProvided);
       }
     });
-
     defaultScope.pluginProvided("io.avaje.inject.event.ObserverManager");
     if (!injectAvailable) {
       return;
     }
-    List<InjectPlugin> plugins = new ArrayList<>();
 
+    List<InjectPlugin> plugins = new ArrayList<>();
     ServiceLoader.load(Plugin.class, CLASS_LOADER).forEach(plugins::add);
     ServiceLoader.load(InjectSPI.class, CLASS_LOADER)
         .forEach(
@@ -160,7 +158,7 @@ final class ExternalProvider {
   private static boolean pluginExists(String relativeName) {
     try {
       final String resource =
-          APContext.filer()
+        APContext.filer()
           .getResource(StandardLocation.CLASS_OUTPUT, "", relativeName)
           .toUri()
           .toString()

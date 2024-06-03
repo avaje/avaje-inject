@@ -64,8 +64,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  public void propertyPlugin(PropertyRequiresPlugin propertyPlugin) {
-    this.propertyRequiresPlugin = propertyPlugin;
+  public void propertyPlugin(PropertyRequiresPlugin propertyRequiresPlugin) {
+    this.propertyRequiresPlugin = propertyRequiresPlugin;
   }
 
   @Override
@@ -231,7 +231,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private void initProfiles() {
     if (profiles == null) {
       profiles =
-          propertyRequiresPlugin
+        propertyRequiresPlugin
           .get("avaje.profiles")
           .map(p -> Set.of(p.split(",")))
           .orElse(emptySet());
@@ -269,7 +269,6 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     plugins.forEach(plugin -> plugin.apply(this));
 
     ServiceLoader.load(Plugin.class, classLoader).forEach(plugin -> plugin.apply(this));
-
     // sort factories by dependsOn
     ModuleOrdering factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
 
@@ -445,10 +444,10 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
      * <p>This returns the number of factories added so once this returns 0 it is done.
      */
     private int processQueuedFactories() {
-      var count = 0;
+      int count = 0;
       final var it = queue.iterator();
       while (it.hasNext()) {
-        final var factory = it.next();
+        final FactoryState factory = it.next();
         if (satisfiedDependencies(factory)) {
           // push the factory onto the build order
           it.remove();
