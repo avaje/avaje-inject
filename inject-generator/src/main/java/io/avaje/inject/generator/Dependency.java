@@ -24,11 +24,11 @@ final class Dependency {
       this.conditionalDependency = false;
       nameStr = ProcessorUtils.trimAnnotations(name);
     }
-    this.name = nameStr.replace(",", ", ");
+    this.name = nameStr.replace(", ", ",");
   }
 
   Dependency(String name, boolean softDependency) {
-    this.name = ProcessorUtils.trimAnnotations(name).replace(",", ", ");
+    this.name = ProcessorUtils.trimAnnotations(name).replace(", ", ",");
     this.softDependency = softDependency;
     this.conditionalDependency = false;
   }

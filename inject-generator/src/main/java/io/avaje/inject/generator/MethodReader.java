@@ -486,8 +486,8 @@ final class MethodReader {
       this.simpleName = param.getSimpleName().toString();
       this.named = Util.getNamed(param);
       this.nullable = Util.isNullable(param);
-      this.utilType = Util.determineType(param.asType());
       this.isBeanMap = QualifiedMapPrism.isPresent(param);
+      this.utilType = Util.determineType(param.asType(), isBeanMap);
       this.paramType = utilType.rawType(isBeanMap);
       this.genericType = utilType.toUType();
       this.fullUType = UType.parse(param.asType());
