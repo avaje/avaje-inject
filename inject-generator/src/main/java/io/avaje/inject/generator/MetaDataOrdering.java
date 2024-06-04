@@ -59,7 +59,7 @@ final class MetaDataOrdering {
   }
 
   private ProviderList providerAdd(String requireType) {
-    return providers.computeIfAbsent(requireType, s -> new ProviderList());
+    return providers.computeIfAbsent(requireType.replace(", ", ","), s -> new ProviderList());
   }
 
   int processQueue() {

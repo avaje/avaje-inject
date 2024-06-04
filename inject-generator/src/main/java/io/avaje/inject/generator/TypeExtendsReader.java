@@ -3,16 +3,12 @@ package io.avaje.inject.generator;
 import static io.avaje.inject.generator.APContext.logWarn;
 import static io.avaje.inject.generator.APContext.types;
 import static io.avaje.inject.generator.ProcessingContext.asElement;
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
@@ -34,6 +30,8 @@ final class TypeExtendsReader {
   private final boolean publicAccess;
   private final boolean autoProvide;
   private final boolean proxyBean;
+  private final boolean controller;
+  private final boolean generatedBeanFactory;
   private boolean closeable;
   /**
    * The implied qualifier name based on naming convention.
@@ -51,23 +49,26 @@ final class TypeExtendsReader {
     this.publicAccess = baseType.getModifiers().contains(Modifier.PUBLIC);
     this.autoProvide = autoProvide();
     this.proxyBean = proxyBean;
+    this.controller = hasAnnotation(Constants.CONTROLLER) || hasAnnotation(Constants.HTTP_GENERATED);
+    this.generatedBeanFactory = GeneratedPrism.isPresent(baseType);
   }
 
   private boolean autoProvide() {
     return publicAccess
+      && !controller
+      && !generatedBeanFactory
       && !FactoryPrism.isPresent(baseType)
-      && !ProxyPrism.isPresent(baseType)
-      && !GeneratedPrism.isPresent(baseType)
-      && !isController();
+      && !ProxyPrism.isPresent(baseType);
   }
 
-  @SuppressWarnings("unchecked")
-  private boolean isController() {
-    try {
-      return baseType.getAnnotation((Class<Annotation>) Class.forName(Constants.CONTROLLER)) != null;
-    } catch (final ClassNotFoundException e) {
-      return false;
+  private boolean hasAnnotation(String annotationFQN) {
+    for (final var m : baseType.getAnnotationMirrors()) {
+      final CharSequence mfqn = ((TypeElement) m.getAnnotationType().asElement()).getQualifiedName();
+      if (annotationFQN.contentEquals(mfqn)) {
+        return true;
+      }
     }
+    return false;
   }
 
   UType baseType() {
@@ -119,6 +120,10 @@ final class TypeExtendsReader {
   }
 
   List<UType> autoProvides() {
+    if (controller || implementsBeanFactory()) {
+      // http controller, http route, or http request scoped controller via BeanFactory
+      return List.of();
+    }
     if (baseTypeIsInterface) {
       return List.of(Util.unwrapProvider(baseUType));
     }
@@ -130,6 +135,15 @@ final class TypeExtendsReader {
       autoProvides.add(Util.unwrapProvider(baseUType));
     }
     return autoProvides;
+  }
+
+  private boolean implementsBeanFactory() {
+    for (UType interfaceType : interfaceTypes) {
+      if (Constants.BEAN_FACTORY.equals(interfaceType.mainType())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   List<UType> provides() {

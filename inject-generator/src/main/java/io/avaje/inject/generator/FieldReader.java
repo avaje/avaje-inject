@@ -21,8 +21,8 @@ final class FieldReader {
     this.element = element;
     this.name = Util.getNamed(element);
     this.nullable = Util.isNullable(element);
-    this.utype = Util.determineType(element.asType());
     this.isBeanMap = QualifiedMapPrism.isPresent(element);
+    this.utype = Util.determineType(element.asType(), isBeanMap);
     this.fieldType = Util.unwrapProvider(utype.rawType(isBeanMap));
     this.type = utype.toUType();
     this.assisted = AssistedPrism.isPresent(element);
