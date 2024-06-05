@@ -19,8 +19,6 @@ final class ProcessingContext {
 
   private static final ThreadLocal<Ctx> CTX = new ThreadLocal<>();
   private static boolean processingOver;
-  private static boolean moduleValidation;
-
   private ProcessingContext() {}
 
   static final class Ctx {
@@ -30,10 +28,7 @@ final class ProcessingContext {
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
     private final List<AvajeModuleData> avajeModules = new ArrayList<>();
     private final List<TypeElement> delayQueue = new ArrayList<>();
-    private boolean validated;
     private boolean strictWiring;
-    private String injectFqn;
-    private String orderFqn;
 
     Ctx() {}
 
@@ -44,7 +39,6 @@ final class ProcessingContext {
   }
 
   static void init(Set<String> moduleFileProvided, boolean performModuleValidation) {
-    ProcessingContext.moduleValidation = performModuleValidation;
     CTX.set(new Ctx());
     CTX.get().registerProvidedTypes(moduleFileProvided);
   }
@@ -142,43 +136,6 @@ final class ProcessingContext {
 
   static void addImportedAspects(Map<String, AspectImportPrism> importedMap) {
     CTX.get().aspectImportPrisms.putAll(importedMap);
-  }
-
-  static void setInjectModuleFQN(String fqn) {
-    CTX.get().injectFqn = fqn;
-  }
-
-  static void setOrderFQN(String fqn) {
-    CTX.get().orderFqn = fqn;
-  }
-
-  static void validateModule() {
-    var module = getProjectModuleElement();
-    if (moduleValidation && module != null && !CTX.get().validated && !module.isUnnamed()) {
-      CTX.get().validated = true;
-      try (var reader = getModuleInfoReader()) {
-        var injectFQN = CTX.get().injectFqn;
-        var orderFQN = CTX.get().orderFqn;
-        var providers = new ModuleInfoReader(module, reader).provides();
-        var noProvides =
-          injectFQN != null
-            && providers.stream().noneMatch(s -> s.implementations().contains(injectFQN));
-        var noProvidesOrder =
-          orderFQN != null
-            && providers.stream().noneMatch(s -> s.implementations().contains(orderFQN));
-
-        if (noProvides) {
-          logError(module, "Missing \"provides io.avaje.inject.spi.Module with %s;\"", injectFQN);
-        }
-
-        if (noProvidesOrder) {
-          logError(module, "Missing \"provides io.avaje.inject.spi.ModuleOrdering with %s;\"", orderFQN);
-        }
-
-      } catch (Exception e) {
-        // can't read module
-      }
-    }
   }
 
   static Optional<AspectImportPrism> getImportedAspect(String type) {

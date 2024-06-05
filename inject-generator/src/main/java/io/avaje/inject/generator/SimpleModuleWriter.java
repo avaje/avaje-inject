@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -76,9 +75,6 @@ final class SimpleModuleWriter {
     writer.close();
     if (scopeType != ScopeInfo.Type.CUSTOM) {
       writeServicesFile(scopeType);
-    }
-    if (!ordering.ordered().isEmpty()) {
-      ProcessingContext.setInjectModuleFQN(fullName);
     }
   }
 
