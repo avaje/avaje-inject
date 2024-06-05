@@ -92,9 +92,17 @@ final class MetaData {
       if (name != null) {
         return trimType + "_" + name.replaceAll("[^a-zA-Z0-9_$]+", "_");
       } else {
+        if (buildNameIncludeMethod()) {
+          return trimType + "__" + Util.trimMethod(method);
+        }
         return trimType;
       }
     }
+  }
+
+  private boolean buildNameIncludeMethod() {
+    // generic type created via factory bean method
+    return type.contains("<") && hasMethod();
   }
 
   public String key() {
