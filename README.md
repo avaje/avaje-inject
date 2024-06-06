@@ -62,23 +62,23 @@ Example ex = beanScope.get(Example.class);
 ### Java Module Usage
 When working with Java modules you need to add a `provides` statement in your `module-info.java` with the generated class.
 ```java
-import io.avaje.inject.spi.Module;
+import io.avaje.inject.spi.InjectSPI;
 
 module org.example {
 
   requires io.avaje.inject;
   // you must define the fully qualified class name of the generated classes. if you use an import statement, compilation will fail
-  provides Module with org.example.ExampleModule;
+  provides InjectSPI with org.example.ExampleModule;
 }
 ```
 
 ### Generated Wiring Class
-The inject annotation processor determines the dependency wiring order and generates a `Module` class that calls all the generated DI classes.
+The inject annotation processor determines the dependency wiring order and generates an `AvajeModule` class that calls all the generated DI classes.
 
 ```java
 @Generated("io.avaje.inject.generator")
 @InjectModule
-public final class ExampleModule implements Module {
+public final class ExampleModule implements AvajeModule {
 
   private Builder builder;
 
