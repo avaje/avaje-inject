@@ -21,7 +21,6 @@ final class TypeExtendsReader {
 
   private static final Set<String> ROUTE_TYPES = Set.of(
     "io.avaje.http.api.AvajeJavalinPlugin",
-    "io.javalin.Javalin",
     "io.helidon.webserver.http.HttpFeature");
 
   private static final String JAVA_LANG_OBJECT = "java.lang.Object";
