@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.ServiceLoader.Provider;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
@@ -30,6 +31,7 @@ import org.apache.maven.project.MavenProject;
 
 import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.InjectPlugin;
+import io.avaje.inject.spi.InjectSPI;
 import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.Plugin;
 
@@ -105,7 +107,11 @@ public class AutoProvidesMojo extends AbstractMojo {
 
     final List<InjectPlugin> plugins = new ArrayList<>();
     ServiceLoader.load(Plugin.class, newClassLoader).forEach(plugins::add);
-    ServiceLoader.load(InjectPlugin.class, newClassLoader).forEach(plugins::add);
+    ServiceLoader.load(InjectSPI.class, newClassLoader).stream()
+        .map(Provider::get)
+        .filter(InjectPlugin.class::isInstance)
+        .map(InjectPlugin.class::cast)
+        .forEach(plugins::add);
 
     for (final var plugin : plugins) {
       log.info("Loaded Plugin: " + plugin.getClass().getTypeName());
@@ -129,8 +135,11 @@ public class AutoProvidesMojo extends AbstractMojo {
     final Log log = getLog();
     final List<AvajeModule> avajeModules = new ArrayList<>();
     ServiceLoader.load(Module.class, newClassLoader).forEach(avajeModules::add);
-    ServiceLoader.load(AvajeModule.class, newClassLoader).forEach(avajeModules::add);
-
+    ServiceLoader.load(InjectSPI.class, newClassLoader).stream()
+        .map(Provider::get)
+        .filter(AvajeModule.class::isInstance)
+        .map(AvajeModule.class::cast)
+        .forEach(avajeModules::add);
     for (final var module : avajeModules) {
       final var name = module.getClass().getTypeName();
       log.info("Detected External Module: " + name);

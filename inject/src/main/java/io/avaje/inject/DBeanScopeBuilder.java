@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -18,7 +17,6 @@ import java.util.function.Supplier;
 import io.avaje.applog.AppLog;
 import io.avaje.inject.event.ObserverManager;
 import io.avaje.inject.spi.*;
-import io.avaje.inject.spi.Module;
 import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
 import jakarta.inject.Provider;
@@ -71,8 +69,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   @Override
   public PropertyRequiresPlugin propertyPlugin() {
     if (propertyRequiresPlugin == null) {
-      initClassLoader();
-      initPropertyPlugin();
+      propertyRequiresPlugin = defaultPropertyPlugin();
     }
     return propertyRequiresPlugin;
   }
@@ -213,14 +210,6 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       classLoader = Thread.currentThread().getContextClassLoader();
     }
   }
-
-  private void initPropertyPlugin() {
-    propertyRequiresPlugin =
-      ServiceLoader.load(PropertyRequiresPlugin.class, classLoader)
-        .findFirst()
-        .orElse(defaultPropertyPlugin());
-  }
-
   private PropertyRequiresPlugin defaultPropertyPlugin() {
     return detectAvajeConfig() ? new DConfigProps() : new DSystemProps();
   }
@@ -252,24 +241,21 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     final var start = System.currentTimeMillis();
     // load and apply plugins first
     initClassLoader();
-
     provideDefault(ObserverManager.class, DObserverManager::new);
 
+    var serviceLoader = new DServiceLoader(classLoader);
     if (propertyRequiresPlugin == null) {
-      initPropertyPlugin();
+      propertyRequiresPlugin = serviceLoader.propertyPlugin().orElseGet(this::defaultPropertyPlugin);
     }
 
-    ServiceLoader.load(InjectPlugin.class, classLoader).forEach(plugin -> plugin.apply(this));
-    ServiceLoader.load(Plugin.class, classLoader).forEach(plugin -> plugin.apply(this));
+    serviceLoader.plugins().forEach(plugin -> plugin.apply(this));
+
     // sort factories by dependsOn
     ModuleOrdering factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
-
     if (factoryOrder.isEmpty()) {
       // prefer generated ModuleOrdering if provided
-      factoryOrder = ServiceLoader.load(ModuleOrdering.class, classLoader).findFirst().orElse(factoryOrder);
-
-      ServiceLoader.load(AvajeModule.class).forEach(factoryOrder::add);
-      ServiceLoader.load(Module.class).forEach(factoryOrder::add);
+      factoryOrder = serviceLoader.moduleOrdering().orElse(factoryOrder);
+      serviceLoader.modules().forEach(factoryOrder::add);
     }
 
     final var moduleNames = factoryOrder.orderModules();

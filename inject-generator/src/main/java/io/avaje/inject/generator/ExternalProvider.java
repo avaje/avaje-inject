@@ -14,15 +14,12 @@ import static java.util.List.of;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceConfigurationError;
-import java.util.ServiceLoader;
 import java.util.Set;
 
 import javax.tools.StandardLocation;
 
 import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.InjectPlugin;
-import io.avaje.inject.spi.Module;
-import io.avaje.inject.spi.Plugin;
 
 /**
  * The types provided by other modules in the classpath at compile time.
@@ -66,18 +63,7 @@ final class ExternalProvider {
       return;
     }
 
-    List<AvajeModule> modules = new ArrayList<>();
-    // load using older Module
-    ServiceLoader.load(Module.class, CLASS_LOADER).forEach(modules::add);
-    // load newer AvajeModule
-    final var iterator = ServiceLoader.load(AvajeModule.class, CLASS_LOADER).iterator();
-    while (iterator.hasNext()) {
-      try {
-        modules.add(iterator.next());
-      } catch (final ServiceConfigurationError expected) {
-        // ignore expected error reading the module that we are also writing
-      }
-    }
+    List<AvajeModule> modules = LoadServices.loadModules(CLASS_LOADER);
     if (modules.isEmpty()) {
       APContext.logNote("No external modules detected");
       return;
@@ -85,7 +71,6 @@ final class ExternalProvider {
     for (final var module : modules) {
       try {
         final var name = module.getClass().getTypeName();
-
         final var provides = new ArrayList<String>();
         APContext.logNote("Detected Module: " + name);
         for (final var provide : module.provides()) {
@@ -130,10 +115,7 @@ final class ExternalProvider {
       return;
     }
 
-    List<InjectPlugin> plugins = new ArrayList<>();
-    ServiceLoader.load(Plugin.class, CLASS_LOADER).forEach(plugins::add);
-    ServiceLoader.load(InjectPlugin.class, CLASS_LOADER).forEach(plugins::add);
-
+    List<InjectPlugin> plugins = LoadServices.loadPlugins(CLASS_LOADER);
     for (final var plugin : plugins) {
       var name = plugin.getClass().getTypeName();
       if (avajePlugins.containsKey(name)) {

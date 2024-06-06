@@ -169,6 +169,7 @@ public final class InjectProcessor extends AbstractProcessor {
           logError("FilerException trying to write wiring order class " + e.getMessage());
         }
       }
+      ProcessingContext.writeSPIServicesFile();
       ProcessingContext.validateModule();
       ProcessingContext.clear();
     }

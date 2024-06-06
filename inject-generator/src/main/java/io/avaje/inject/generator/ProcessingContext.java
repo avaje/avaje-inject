@@ -3,6 +3,7 @@ package io.avaje.inject.generator;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.io.Writer;
 import java.nio.file.NoSuchFileException;
 
 import javax.annotation.processing.FilerException;
@@ -13,6 +14,7 @@ import javax.tools.StandardLocation;
 import java.util.*;
 
 import static io.avaje.inject.generator.APContext.*;
+import static io.avaje.inject.generator.ProcessingContext.addInjectSPI;
 import static java.util.stream.Collectors.toSet;
 
 final class ProcessingContext {
@@ -30,6 +32,7 @@ final class ProcessingContext {
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
     private final List<AvajeModuleData> avajeModules = new ArrayList<>();
     private final List<TypeElement> delayQueue = new ArrayList<>();
+    private final List<String> spiServices = new ArrayList<>();
     private boolean validated;
     private boolean strictWiring;
     private String injectFqn;
@@ -54,8 +57,15 @@ final class ProcessingContext {
   }
 
   static String loadMetaInfServices() {
-    final var lines = loadMetaInf(Constants.META_INF_MODULE);
-    return lines.isEmpty() ? null : lines.get(0);
+    return loadMetaInf(Constants.META_INF_SPI).stream()
+        .filter(ProcessingContext::isAvajeModule)
+        .findFirst()
+        .orElse(null);
+  }
+
+  private static boolean isAvajeModule(String spi) {
+    var moduleType = APContext.typeElement(spi);
+    return moduleType != null && moduleType.getSuperclass().toString().contains("AvajeModule");
   }
 
   static List<String> loadMetaInfCustom() {
@@ -84,18 +94,13 @@ final class ProcessingContext {
     } catch (final FilerException e) {
       logNote("FilerException reading services file");
     } catch (final Exception e) {
-      e.printStackTrace();
       logWarn("Error reading services file: " + e.getMessage());
     }
     return Collections.emptyList();
   }
 
-  static FileObject createMetaInfWriter(ScopeInfo.Type scopeType) throws IOException {
-    final var serviceName =
-      scopeType == ScopeInfo.Type.DEFAULT
-        ? Constants.META_INF_MODULE
-        : Constants.META_INF_TESTMODULE;
-    return createMetaInfWriterFor(serviceName);
+  static void addInjectSPI(String type) {
+    CTX.get().spiServices.add(type);
   }
 
   static FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
@@ -168,11 +173,10 @@ final class ProcessingContext {
             && providers.stream().noneMatch(s -> s.implementations().contains(orderFQN));
 
         if (noProvides) {
-          logError(module, "Missing \"provides io.avaje.inject.spi.Module with %s;\"", injectFQN);
+          logError(module, "Missing \"provides io.avaje.inject.spi.InjectSPI with %s;\"", injectFQN);
         }
-
         if (noProvidesOrder) {
-          logError(module, "Missing \"provides io.avaje.inject.spi.ModuleOrdering with %s;\"", orderFQN);
+          logError(module, "Missing \"provides io.avaje.inject.spi.InjectSPI with %s,%s;\"", injectFQN, orderFQN);
         }
 
       } catch (Exception e) {
@@ -225,5 +229,21 @@ final class ProcessingContext {
 
   static void processingOver(boolean over) {
     processingOver = over;
+  }
+
+  static void writeSPIServicesFile() {
+    try {
+      FileObject jfo = createMetaInfWriterFor(Constants.META_INF_SPI);
+      if (jfo != null) {
+        var writer = new Append(jfo.openWriter());
+        for (var service : CTX.get().spiServices) {
+          writer.append(service).eol();
+        }
+        writer.close();
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+      logError("Failed to write services file " + e.getMessage());
+    }
   }
 }

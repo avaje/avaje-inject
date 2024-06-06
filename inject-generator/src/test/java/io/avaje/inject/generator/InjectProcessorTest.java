@@ -37,8 +37,7 @@ class InjectProcessorTest {
           .sorted(Comparator.reverseOrder())
           .map(Path::toFile)
           .forEach(File::delete);
-      Paths.get("io.avaje.inject.spi.AvajeModule").toAbsolutePath().toFile().delete();
-      Paths.get("io.avaje.inject.spi.ModuleOrdering").toAbsolutePath().toFile().delete();
+      Paths.get("io.avaje.inject.spi.InjectSPI").toAbsolutePath().toFile().delete();
     } catch (final Exception e) {
     }
   }

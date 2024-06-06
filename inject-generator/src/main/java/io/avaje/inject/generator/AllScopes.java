@@ -63,7 +63,7 @@ final class AllScopes {
   void readModules(List<String> customScopeModules) {
     for (String customScopeModule : customScopeModules) {
       final TypeElement module = typeElement(customScopeModule);
-      if (module != null) {
+      if (module != null && module.getSuperclass().toString().contains("Module")) {
         InjectModulePrism injectModule = InjectModulePrism.getInstanceOn(module);
         if (injectModule != null) {
           final String customScopeType = injectModule.customScopeType();
