@@ -76,14 +76,10 @@ final class SimpleModuleWriter {
     if (scopeType != ScopeInfo.Type.CUSTOM) {
       writeServicesFile(scopeType);
     }
-    if (!ordering.ordered().isEmpty()) {
-      ProcessingContext.setInjectModuleFQN(fullName);
-    }
   }
 
   private void writeServicesFile(ScopeInfo.Type scopeType) {
     try {
-
       if (scopeType == ScopeInfo.Type.DEFAULT) {
         ProcessingContext.addInjectSPI(fullName);
         return;

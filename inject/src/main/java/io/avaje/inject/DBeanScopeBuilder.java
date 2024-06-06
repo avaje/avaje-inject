@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -18,7 +17,6 @@ import java.util.function.Supplier;
 import io.avaje.applog.AppLog;
 import io.avaje.inject.event.ObserverManager;
 import io.avaje.inject.spi.*;
-import io.avaje.inject.spi.Module;
 import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
 import jakarta.inject.Provider;
@@ -40,7 +38,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private boolean parentOverride = true;
   private boolean shutdownHook;
   private ClassLoader classLoader;
-  private ConfigPropertyPlugin propertyPlugin;
+  private PropertyRequiresPlugin propertyRequiresPlugin;
   private Set<String> profiles;
 
   /** Create a BeanScopeBuilder to ultimately load and return a new BeanScope. */
@@ -64,24 +62,16 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
+  public void propertyPlugin(PropertyRequiresPlugin propertyRequiresPlugin) {
+    this.propertyRequiresPlugin = propertyRequiresPlugin;
+  }
+
+  @Override
   public PropertyRequiresPlugin propertyPlugin() {
-    if (propertyPlugin == null) {
-      propertyPlugin = defaultPropertyPlugin();
+    if (propertyRequiresPlugin == null) {
+      propertyRequiresPlugin = defaultPropertyPlugin();
     }
-    return configPlugin();
-  }
-
-  @Override
-  public void configPlugin(ConfigPropertyPlugin propertyPlugin) {
-    this.propertyPlugin = propertyPlugin;
-  }
-
-  @Override
-  public ConfigPropertyPlugin configPlugin() {
-    if (propertyPlugin == null) {
-      propertyPlugin = defaultPropertyPlugin();
-    }
-    return propertyPlugin;
+    return propertyRequiresPlugin;
   }
 
   @Override
@@ -220,7 +210,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       classLoader = Thread.currentThread().getContextClassLoader();
     }
   }
-  private ConfigPropertyPlugin defaultPropertyPlugin() {
+  private PropertyRequiresPlugin defaultPropertyPlugin() {
     return detectAvajeConfig() ? new DConfigProps() : new DSystemProps();
   }
 
@@ -239,7 +229,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private void initProfiles() {
     if (profiles == null) {
       profiles =
-        propertyPlugin
+        propertyRequiresPlugin
           .get("avaje.profiles")
           .map(p -> Set.of(p.split(",")))
           .orElse(emptySet());
@@ -251,41 +241,21 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     final var start = System.currentTimeMillis();
     // load and apply plugins first
     initClassLoader();
-
     provideDefault(ObserverManager.class, DObserverManager::new);
 
-    List<InjectPlugin> plugins = new ArrayList<>();
-    List<AvajeModule> spiModules = new ArrayList<>();
-    ModuleOrdering spiOrdering = null;
-    //TODO make a sealed switch when we upgrade to 17
-    for (var spi : ServiceLoader.load(InjectSPI.class, classLoader)) {
-      if (spi instanceof InjectPlugin) {
-        plugins.add((InjectPlugin) spi);
-      } else if (spi instanceof AvajeModule) {
-        spiModules.add((AvajeModule) spi);
-      } else if (spi instanceof ModuleOrdering) {
-        spiOrdering = (ModuleOrdering) spi;
-      } else if (propertyPlugin == null && spi instanceof ConfigPropertyPlugin) {
-        propertyPlugin = (ConfigPropertyPlugin) spi;
-      }
+    var serviceLoader = new DServiceLoader(classLoader);
+    if (propertyRequiresPlugin == null) {
+      propertyRequiresPlugin = serviceLoader.propertyPlugin().orElseGet(this::defaultPropertyPlugin);
     }
 
-    if (propertyPlugin == null) {
-      propertyPlugin = defaultPropertyPlugin();
-    }
+    serviceLoader.plugins().forEach(plugin -> plugin.apply(this));
 
-    plugins.forEach(plugin -> plugin.apply(this));
-
-    ServiceLoader.load(Plugin.class, classLoader).forEach(plugin -> plugin.apply(this));
     // sort factories by dependsOn
     ModuleOrdering factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
-
     if (factoryOrder.isEmpty()) {
       // prefer generated ModuleOrdering if provided
-      factoryOrder = spiOrdering != null ? spiOrdering : factoryOrder;
-
-      spiModules.forEach(factoryOrder::add);
-      ServiceLoader.load(Module.class, classLoader).forEach(factoryOrder::add);
+      factoryOrder = serviceLoader.moduleOrdering().orElse(factoryOrder);
+      serviceLoader.modules().forEach(factoryOrder::add);
     }
 
     final var moduleNames = factoryOrder.orderModules();
@@ -297,11 +267,11 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
           + " Refer to https://avaje.io/inject#gradle");
     }
 
-    final var level = propertyPlugin.contains("printModules") ? INFO : DEBUG;
+    final var level = propertyRequiresPlugin.contains("printModules") ? INFO : DEBUG;
     initProfiles();
     log.log(level, "building with avaje modules {0} profiles {1}", moduleNames, profiles);
 
-    final var builder = Builder.newBuilder(profiles, propertyPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
+    final var builder = Builder.newBuilder(profiles, propertyRequiresPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
     for (final var factory : factoryOrder.factories()) {
       builder.currentModule(factory.getClass());
       factory.build(builder);

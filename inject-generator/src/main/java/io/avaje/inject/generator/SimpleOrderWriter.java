@@ -24,7 +24,6 @@ final class SimpleOrderWriter {
     this.modulePackage = scopeInfo.modulePackage();
     this.shortName = "CompiledOrder";
     this.fullName = modulePackage + "." + shortName;
-    ProcessingContext.setOrderFQN(fullName);
   }
 
   void write() throws IOException {
