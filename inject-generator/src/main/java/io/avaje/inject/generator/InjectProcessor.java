@@ -325,9 +325,10 @@ public final class InjectProcessor extends AbstractProcessor {
         if (scope == null) {
           // it it not a custom scope annotation
           final var annotation = InjectModulePrism.getInstanceOn(element);
-
-          defaultScope.details(annotation.name(), element);
-          ProcessingContext.strictWiring(annotation.strictWiring());
+          if (annotation != null) {
+            defaultScope.details(annotation.name(), element);
+            ProcessingContext.strictWiring(annotation.strictWiring());
+          }
         }
       });
   }
