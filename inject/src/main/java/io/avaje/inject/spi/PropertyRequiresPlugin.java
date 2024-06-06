@@ -10,9 +10,12 @@ import io.avaje.lang.NonNullApi;
  *
  * <p>The plugin is loaded via ServiceLoader and defaults to an implementation that uses {@link
  * System#getProperty(String)} and {@link System#getenv(String)}.
+ *
+ * @deprecated use ConfigPropertyPlugin Instead
  */
 @NonNullApi
-public interface PropertyRequiresPlugin extends InjectSPI {
+@Deprecated(forRemoval = true)
+public interface PropertyRequiresPlugin {
 
   /**
    * Return a configuration value that might not exist.

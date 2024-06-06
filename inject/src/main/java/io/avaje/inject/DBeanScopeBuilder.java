@@ -38,7 +38,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private boolean parentOverride = true;
   private boolean shutdownHook;
   private ClassLoader classLoader;
-  private PropertyRequiresPlugin propertyRequiresPlugin;
+  private ConfigPropertyPlugin propertyRequiresPlugin;
   private Set<String> profiles;
 
   /** Create a BeanScopeBuilder to ultimately load and return a new BeanScope. */
@@ -62,12 +62,20 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  public void propertyPlugin(PropertyRequiresPlugin propertyRequiresPlugin) {
-    this.propertyRequiresPlugin = propertyRequiresPlugin;
+  public PropertyRequiresPlugin propertyPlugin() {
+    if (propertyRequiresPlugin == null) {
+      propertyRequiresPlugin = defaultPropertyPlugin();
+    }
+    return propertyRequiresPlugin;
   }
 
   @Override
-  public PropertyRequiresPlugin propertyPlugin() {
+  public void configPlugin(ConfigPropertyPlugin propertyPlugin) {
+    this.propertyRequiresPlugin = propertyPlugin;
+  }
+
+  @Override
+  public ConfigPropertyPlugin configPlugin() {
     if (propertyRequiresPlugin == null) {
       propertyRequiresPlugin = defaultPropertyPlugin();
     }
@@ -210,7 +218,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       classLoader = Thread.currentThread().getContextClassLoader();
     }
   }
-  private PropertyRequiresPlugin defaultPropertyPlugin() {
+  private ConfigPropertyPlugin defaultPropertyPlugin() {
     return detectAvajeConfig() ? new DConfigProps() : new DSystemProps();
   }
 
