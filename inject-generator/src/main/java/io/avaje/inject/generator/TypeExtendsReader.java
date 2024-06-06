@@ -6,6 +6,8 @@ import static io.avaje.inject.generator.ProcessingContext.asElement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.*;
@@ -16,6 +18,11 @@ import javax.lang.model.type.TypeMirror;
  * Read the inheritance types for a given bean type.
  */
 final class TypeExtendsReader {
+
+  private static final Set<String> ROUTE_TYPES = Set.of(
+    "io.avaje.http.api.AvajeJavalinPlugin",
+    "io.javalin.Javalin",
+    "io.helidon.webserver.http.HttpFeature");
 
   private static final String JAVA_LANG_OBJECT = "java.lang.Object";
   private static final String JAVA_LANG_RECORD = "java.lang.Record";
@@ -31,7 +38,6 @@ final class TypeExtendsReader {
   private final boolean autoProvide;
   private final boolean proxyBean;
   private final boolean controller;
-  private final boolean generatedBeanFactory;
   private boolean closeable;
   /**
    * The implied qualifier name based on naming convention.
@@ -47,16 +53,14 @@ final class TypeExtendsReader {
 
     this.baseTypeIsInterface = baseType.getKind() == ElementKind.INTERFACE;
     this.publicAccess = baseType.getModifiers().contains(Modifier.PUBLIC);
-    this.autoProvide = autoProvide();
     this.proxyBean = proxyBean;
-    this.controller = hasAnnotation(Constants.CONTROLLER) || hasAnnotation(Constants.HTTP_GENERATED);
-    this.generatedBeanFactory = GeneratedPrism.isPresent(baseType);
+    this.controller = hasAnnotation(Constants.CONTROLLER);
+    this.autoProvide = autoProvide();
   }
 
   private boolean autoProvide() {
     return publicAccess
       && !controller
-      && !generatedBeanFactory
       && !FactoryPrism.isPresent(baseType)
       && !ProxyPrism.isPresent(baseType);
   }
@@ -121,8 +125,14 @@ final class TypeExtendsReader {
 
   List<UType> autoProvides() {
     if (controller || implementsBeanFactory()) {
-      // http controller, http route, or http request scoped controller via BeanFactory
+      // http controller, or request scoped controller via BeanFactory
       return List.of();
+    }
+    if (hasAnnotation(Constants.HTTP_GENERATED)) {
+      // http route
+      return providesTypes.stream()
+        .filter(ut -> ROUTE_TYPES.contains(ut.mainType()))
+        .collect(Collectors.toList());
     }
     if (baseTypeIsInterface) {
       return List.of(Util.unwrapProvider(baseUType));
