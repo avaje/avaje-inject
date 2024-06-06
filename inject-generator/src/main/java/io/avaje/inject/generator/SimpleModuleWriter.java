@@ -83,7 +83,6 @@ final class SimpleModuleWriter {
 
   private void writeServicesFile(ScopeInfo.Type scopeType) {
     try {
-
       if (scopeType == ScopeInfo.Type.DEFAULT) {
         ProcessingContext.addInjectSPI(fullName);
         return;

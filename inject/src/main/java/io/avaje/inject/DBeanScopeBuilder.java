@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -18,7 +17,6 @@ import java.util.function.Supplier;
 import io.avaje.applog.AppLog;
 import io.avaje.inject.event.ObserverManager;
 import io.avaje.inject.spi.*;
-import io.avaje.inject.spi.Module;
 import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
 import jakarta.inject.Provider;
@@ -243,41 +241,21 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     final var start = System.currentTimeMillis();
     // load and apply plugins first
     initClassLoader();
-
     provideDefault(ObserverManager.class, DObserverManager::new);
 
-    List<InjectPlugin> plugins = new ArrayList<>();
-    List<AvajeModule> spiModules = new ArrayList<>();
-    ModuleOrdering spiOrdering = null;
-    //TODO make a sealed switch when we upgrade to 17
-    for (var spi : ServiceLoader.load(InjectSPI.class, classLoader)) {
-      if (spi instanceof InjectPlugin) {
-        plugins.add((InjectPlugin) spi);
-      } else if (spi instanceof AvajeModule) {
-        spiModules.add((AvajeModule) spi);
-      } else if (spi instanceof ModuleOrdering) {
-        spiOrdering = (ModuleOrdering) spi;
-      } else if (propertyRequiresPlugin == null && spi instanceof PropertyRequiresPlugin) {
-        propertyRequiresPlugin = (PropertyRequiresPlugin) spi;
-      }
-    }
-
+    var serviceLoader = new DServiceLoader(classLoader);
     if (propertyRequiresPlugin == null) {
-      propertyRequiresPlugin = defaultPropertyPlugin();
+      propertyRequiresPlugin = serviceLoader.propertyPlugin().orElseGet(this::defaultPropertyPlugin);
     }
 
-    plugins.forEach(plugin -> plugin.apply(this));
+    serviceLoader.plugins().forEach(plugin -> plugin.apply(this));
 
-    ServiceLoader.load(Plugin.class, classLoader).forEach(plugin -> plugin.apply(this));
     // sort factories by dependsOn
     ModuleOrdering factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
-
     if (factoryOrder.isEmpty()) {
       // prefer generated ModuleOrdering if provided
-      factoryOrder = spiOrdering != null ? spiOrdering : factoryOrder;
-
-      spiModules.forEach(factoryOrder::add);
-      ServiceLoader.load(Module.class, classLoader).forEach(factoryOrder::add);
+      factoryOrder = serviceLoader.moduleOrdering().orElse(factoryOrder);
+      serviceLoader.modules().forEach(factoryOrder::add);
     }
 
     final var moduleNames = factoryOrder.orderModules();

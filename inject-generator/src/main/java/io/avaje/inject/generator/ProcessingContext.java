@@ -58,14 +58,14 @@ final class ProcessingContext {
 
   static String loadMetaInfServices() {
     return loadMetaInf(Constants.META_INF_SPI).stream()
-        .filter(
-            spi -> {
-              var moduleType = APContext.typeElement(spi);
-              return moduleType != null
-                  && moduleType.getSuperclass().toString().contains("AvajeModule");
-            })
+        .filter(ProcessingContext::isAvajeModule)
         .findFirst()
         .orElse(null);
+  }
+
+  private static boolean isAvajeModule(String spi) {
+    var moduleType = APContext.typeElement(spi);
+    return moduleType != null && moduleType.getSuperclass().toString().contains("AvajeModule");
   }
 
   static List<String> loadMetaInfCustom() {
@@ -94,7 +94,6 @@ final class ProcessingContext {
     } catch (final FilerException e) {
       logNote("FilerException reading services file");
     } catch (final Exception e) {
-      e.printStackTrace();
       logWarn("Error reading services file: " + e.getMessage());
     }
     return Collections.emptyList();
@@ -176,13 +175,8 @@ final class ProcessingContext {
         if (noProvides) {
           logError(module, "Missing \"provides io.avaje.inject.spi.InjectSPI with %s;\"", injectFQN);
         }
-
         if (noProvidesOrder) {
-          logError(
-              module,
-              "Missing \"provides io.avaje.inject.spi.InjectSPI with %s,%s;\"",
-              injectFQN,
-              orderFQN);
+          logError(module, "Missing \"provides io.avaje.inject.spi.InjectSPI with %s,%s;\"", injectFQN, orderFQN);
         }
 
       } catch (Exception e) {

@@ -97,8 +97,8 @@ public class AvajeInjectPlugin implements Plugin<Project> {
         .filter(AvajeModule.class::isInstance)
         .map(AvajeModule.class::cast)
         .forEach(avajeModules::add);
-    for (final var module : avajeModules) {
 
+    for (final var module : avajeModules) {
       final var name = module.getClass().getTypeName();
       System.out.println("Detected External Module: " + name);
 
@@ -119,8 +119,7 @@ public class AvajeInjectPlugin implements Plugin<Project> {
         provides.add(type);
       }
 
-      final var requires =
-          Arrays.<Type>stream(module.requires()).map(Type::getTypeName).collect(toList());
+      final var requires = Arrays.<Type>stream(module.requires()).map(Type::getTypeName).collect(toList());
 
       Arrays.<Type>stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
       Arrays.<Type>stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);

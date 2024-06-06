@@ -2,7 +2,6 @@ package io.avaje.inject;
 
 import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.PropertyRequiresPlugin;
-import io.avaje.inject.spi.PropertyRequiresPlugin;
 import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
 
