@@ -36,7 +36,7 @@
       <optional>true</optional>
       <scope>provided</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-spi-service</artifactId>
