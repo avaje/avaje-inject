@@ -2,6 +2,7 @@
 name: avaje-inject EA
 
 on:
+  push:
   workflow_dispatch:
   schedule:
     - cron: '39 1 * * 1,3,5'
