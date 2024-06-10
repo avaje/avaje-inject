@@ -3,6 +3,7 @@ module io.avaje.inject.test {
   exports io.avaje.inject.test;
 
   requires transitive io.avaje.inject;
+  requires transitive io.avaje.inject.aop;
   requires transitive org.junit.jupiter.engine;
   requires transitive org.junit.jupiter.api;
   requires static org.apiguardian.api; // needed for javadoc
