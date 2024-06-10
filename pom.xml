@@ -26,6 +26,7 @@
     <module>inject</module>
     <module>inject-generator</module>
     <module>inject-test</module>
+    <module>inject-aop</module>
   </modules>
 
   <profiles>
