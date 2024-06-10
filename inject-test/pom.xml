@@ -146,6 +146,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <useModulePath>false</useModulePath>
+          <argLine>-Dnet.bytebuddy.experimental=true</argLine>
         </configuration>
       </plugin>
     </plugins>
