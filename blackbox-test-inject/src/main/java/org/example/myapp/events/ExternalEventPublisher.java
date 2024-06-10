@@ -4,6 +4,7 @@ import org.example.external.aspect.MyExternalAspect;
 import org.other.one.SomeOptionalDep;
 
 import io.avaje.inject.Component;
+import io.avaje.inject.events.Event;
 
 @Component
 public class ExternalEventPublisher {

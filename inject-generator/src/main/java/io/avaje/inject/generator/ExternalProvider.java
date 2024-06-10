@@ -31,7 +31,7 @@ final class ExternalProvider {
   private static final ClassLoader CLASS_LOADER = ExternalProvider.class.getClassLoader();
   private static final boolean injectAvailable = moduleCP();
   private static final Map<String, List<String>> avajePlugins = Map.ofEntries(
-    entry("io.avaje.inject.events.spi.ObserverManagerPlugin", of("io.avaje.inject.events.spi.ObserverManager")),
+    entry("io.avaje.inject.events.spi.ObserverManagerPlugin", of("io.avaje.inject.events.ObserverManager")),
     entry("io.avaje.jsonb.inject.DefaultJsonbProvider", of("io.avaje.jsonb.Jsonb")),
     entry("io.avaje.http.inject.DefaultResolverProvider", of("io.avaje.http.api.context.RequestContextResolver")),
     entry("io.avaje.nima.provider.DefaultConfigProvider",

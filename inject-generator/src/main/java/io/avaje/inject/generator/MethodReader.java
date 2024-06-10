@@ -498,7 +498,7 @@ final class MethodReader {
         ProcessingContext.addOptionalType(paramType);
       }
 
-      if (fullUType.fullWithoutAnnotations().startsWith("io.avaje.inject.event.Event")) {
+      if (fullUType.fullWithoutAnnotations().startsWith("io.avaje.inject.events.Event")) {
         EventPublisherWriter.write(param);
       }
     }
