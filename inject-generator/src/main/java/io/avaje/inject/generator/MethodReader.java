@@ -560,6 +560,8 @@ final class MethodReader {
     void addImports(ImportTypeMap importTypes) {
       if (isObserveEvent) {
         importTypes.add("java.util.function.Consumer");
+        importTypes.add("io.avaje.inject.events.Observer");
+        importTypes.add("io.avaje.inject.events.ObserverManager");
       }
       importTypes.addAll(fullUType.importTypes());
       Util.getNullableAnnotation(element).map(Object::toString).ifPresent(importTypes::add);

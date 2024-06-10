@@ -8,6 +8,7 @@ module io.avaje.inject.test {
   requires static org.apiguardian.api; // needed for javadoc
   requires transitive org.mockito;
   requires transitive org.mockito.junit.jupiter;
+  requires static io.avaje.inject.events;
 //  requires transitive org.assertj.core;
 //  requires transitive net.bytebuddy;
   requires static java.net.http; // for testing only
