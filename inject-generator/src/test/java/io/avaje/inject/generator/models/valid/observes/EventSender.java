@@ -2,8 +2,7 @@ package io.avaje.inject.generator.models.valid.observes;
 
 import java.util.List;
 
-import io.avaje.inject.event.Event;
-import io.avaje.inject.spi.GenericType;
+import io.avaje.inject.events.Event;
 import io.avaje.inject.generator.models.valid.qualifier.TempQualifier;
 import io.avaje.inject.generator.models.valid.qualifier.TempQualifier.Scale;
 import jakarta.inject.Inject;

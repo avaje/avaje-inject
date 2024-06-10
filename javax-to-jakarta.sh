@@ -4,6 +4,7 @@
 
 sed -i 's/\(<version>[^<]*\)-javax\([^<]*<\/version>\)/\1\2/' pom.xml
 sed -i 's/\(<version>[^<]*\)-javax\([^<]*<\/version>\)/\1\2/' inject/pom.xml
+sed -i 's/\(<version>[^<]*\)-javax\([^<]*<\/version>\)/\1\2/' inject-events/pom.xml
 sed -i 's/\(<version>[^<]*\)-javax\([^<]*<\/version>\)/\1\2/' inject-generator/pom.xml
 sed -i 's/\(<version>[^<]*\)-javax\([^<]*<\/version>\)/\1\2/' inject-test/pom.xml
 sed -i 's/\(<version>[^<]*\)-javax\([^<]*<\/version>\)/\1\2/' blackbox-aspect/pom.xml

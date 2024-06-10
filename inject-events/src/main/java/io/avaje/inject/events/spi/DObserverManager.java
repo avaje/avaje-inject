@@ -1,4 +1,4 @@
-package io.avaje.inject;
+package io.avaje.inject.events.spi;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.avaje.inject.event.Observer;
-import io.avaje.inject.event.ObserverManager;
+import io.avaje.inject.events.Observer;
+import io.avaje.inject.events.ObserverManager;
 
 final class DObserverManager implements ObserverManager {
 

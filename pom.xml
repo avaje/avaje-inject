@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.avaje</groupId>
   <artifactId>avaje-inject-parent</artifactId>
-  <version>10.0-RC5</version>
+  <version>10.0-RC6</version>
   <packaging>pom</packaging>
   <name>avaje inject parent</name>
   <description>parent pom for avaje inject library</description>
@@ -24,6 +24,7 @@
 
   <modules>
     <module>inject</module>
+    <module>inject-events</module>
     <module>inject-generator</module>
     <module>inject-test</module>
   </modules>

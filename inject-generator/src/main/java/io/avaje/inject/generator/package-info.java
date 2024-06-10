@@ -32,7 +32,6 @@ package io.avaje.inject.generator;
 
 import io.avaje.inject.*;
 import io.avaje.inject.aop.*;
-import io.avaje.inject.event.*;
 import io.avaje.inject.spi.*;
 import io.avaje.prism.GeneratePrism;
 import jakarta.inject.Inject;

@@ -2,7 +2,7 @@ package org.example.myapp.events;
 
 import org.other.one.SomeOptionalDep;
 
-import io.avaje.inject.event.Observes;
+import io.avaje.inject.events.Observes;
 import jakarta.inject.Singleton;
 
 @Singleton

@@ -1,4 +1,4 @@
-package io.avaje.inject.event;
+package io.avaje.inject.events;
 
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;

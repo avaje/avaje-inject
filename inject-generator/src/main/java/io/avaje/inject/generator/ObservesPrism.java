@@ -4,8 +4,8 @@ import java.util.Optional;
 
 import javax.lang.model.element.Element;
 
-import io.avaje.inject.event.Observes;
-import io.avaje.inject.event.ObservesAsync;
+import io.avaje.inject.events.Observes;
+import io.avaje.inject.events.ObservesAsync;
 import io.avaje.prism.GeneratePrism;
 
 @GeneratePrism(
