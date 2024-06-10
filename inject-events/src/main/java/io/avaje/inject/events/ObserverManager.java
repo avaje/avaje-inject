@@ -3,8 +3,6 @@ package io.avaje.inject.events;
 import java.lang.reflect.Type;
 import java.util.List;
 
-import io.avaje.inject.events.Observer;
-
 /**
  * Manages all {@link Observer} instances in the BeanScope.
  * <p>

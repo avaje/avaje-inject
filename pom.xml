@@ -20,7 +20,6 @@
 
   <properties>
     <nexus.staging.autoReleaseAfterClose>true</nexus.staging.autoReleaseAfterClose>
-    <maven.compiler.proc>full</maven.compiler.proc>
   </properties>
 
   <modules>
