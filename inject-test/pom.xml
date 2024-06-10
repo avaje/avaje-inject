@@ -25,6 +25,18 @@
 
     <dependency>
       <groupId>io.avaje</groupId>
+      <artifactId>avaje-inject-aop</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-inject-events</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.avaje</groupId>
       <artifactId>avaje-inject-generator</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
