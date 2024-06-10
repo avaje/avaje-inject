@@ -15,7 +15,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import io.avaje.applog.AppLog;
-import io.avaje.inject.event.ObserverManager;
 import io.avaje.inject.spi.*;
 import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
@@ -249,7 +248,6 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     final var start = System.currentTimeMillis();
     // load and apply plugins first
     initClassLoader();
-    provideDefault(ObserverManager.class, DObserverManager::new);
 
     var serviceLoader = new DServiceLoader(classLoader);
     if (propertyRequiresPlugin == null) {

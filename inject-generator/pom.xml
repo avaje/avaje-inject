@@ -6,14 +6,14 @@
   <parent>
     <groupId>io.avaje</groupId>
     <artifactId>avaje-inject-parent</artifactId>
-    <version>10.0-RC5</version>
+    <version>10.0-RC6</version>
   </parent>
 
   <artifactId>avaje-inject-generator</artifactId>
   <name>avaje inject generator</name>
   <description>annotation processor generating source code for avaje-inject dependency injection</description>
   <properties>
-    <avaje.prisms.version>1.23</avaje.prisms.version>
+    <avaje.prisms.version>1.24</avaje.prisms.version>
   </properties>
   <dependencies>
 

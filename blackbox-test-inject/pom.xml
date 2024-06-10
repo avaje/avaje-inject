@@ -5,7 +5,7 @@
   <parent>
     <artifactId>avaje-inject-parent</artifactId>
     <groupId>io.avaje</groupId>
-    <version>10.0-RC5</version>
+    <version>10.0-RC6</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -14,6 +14,7 @@
 
   <properties>
     <maven.compiler.release>11</maven.compiler.release>
+    <argLine>-Dnet.bytebuddy.experimental=true</argLine>
   </properties>
 
   <dependencies>

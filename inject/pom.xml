@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.avaje</groupId>
     <artifactId>avaje-inject-parent</artifactId>
-    <version>10.0-RC5</version>
+    <version>10.0-RC6</version>
   </parent>
 
   <artifactId>avaje-inject</artifactId>
@@ -18,6 +18,12 @@
       <version>2.0.1</version> <!-- jakarta -->
     </dependency>
 
+    <dependency>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-inject-aop</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-lang</artifactId>
@@ -40,7 +46,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-spi-service</artifactId>
-      <version>1.8</version>
+      <version>1.9</version>
       <optional>true</optional>
     </dependency>
 
@@ -49,6 +55,12 @@
       <artifactId>mockito-core</artifactId>
       <version>5.12.0</version>
       <optional>true</optional>
+    </dependency>
+    
+     <dependency>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-inject-events</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <!-- test dependencies -->
