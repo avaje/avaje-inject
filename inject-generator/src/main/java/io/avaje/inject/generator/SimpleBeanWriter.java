@@ -264,11 +264,17 @@ final class SimpleBeanWriter {
       writer
           .eol()
           .indent(indent)
+          .append(builder)
+          .eol()
+          .indent(indent)
+          .append("    .get(ObserverManager.class)")
+          .eol()
+          .indent(indent)
+          .append("    .<%s>registerObserver(", shortWithoutAnnotations)
+          .eol()
+          .indent(indent)
           .append(
-              "%s.get(ObserverManager.class).<%s>registerObserver",
-              builder, shortWithoutAnnotations)
-          .append(
-              "(%s, new Observer<>(%s, %s, %s, \"%s\"));",
+              "        %s, new Observer<>(%s, %s, %s, \"%s\"));",
               observeTypeString,
               observesPrism.priority(),
               observesPrism.async(),
