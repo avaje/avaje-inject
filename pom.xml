@@ -7,7 +7,7 @@
   <packaging>pom</packaging>
   <name>avaje inject parent</name>
   <description>parent pom for avaje inject library</description>
- 
+
   <parent>
     <groupId>org.avaje</groupId>
     <artifactId>java11-oss</artifactId>
@@ -25,9 +25,9 @@
 
   <modules>
     <module>inject</module>
+    <module>inject-events</module>
     <module>inject-generator</module>
     <module>inject-test</module>
-    <module>avaje-inject-events</module>
   </modules>
 
   <profiles>
