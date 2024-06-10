@@ -1,6 +1,6 @@
 package io.avaje.inject.generator.models.valid.observes;
 
-import io.avaje.inject.event.ObservesAsync;
+import io.avaje.inject.events.ObservesAsync;
 import jakarta.inject.Singleton;
 
 @Singleton

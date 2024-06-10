@@ -2,13 +2,13 @@ package org.example.observes;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import jakarta.inject.Named;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import io.avaje.inject.event.Event;
+import io.avaje.inject.events.Event;
 import io.avaje.inject.test.InjectTest;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @InjectTest
 class TestEventMessaging {

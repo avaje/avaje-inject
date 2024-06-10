@@ -2,8 +2,6 @@ package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
-import io.avaje.inject.event.Observer;
-import io.avaje.inject.event.ObserverManager;
 import jakarta.inject.Provider;
 
 import java.lang.reflect.Type;
@@ -187,12 +185,6 @@ class DBuilder implements Builder {
   public final <T> void registerProvider(Provider<T> provider) {
     // no enrichment
     beanMap.register(provider);
-  }
-
-  @Override
-  public <T> void registerObserver(Type type, int priority, boolean async, Consumer<T> observer, String qualifier) {
-    get(ObserverManager.class)
-        .registerObserver(type, new Observer<>(priority, async, observer, qualifier));
   }
 
   @Override

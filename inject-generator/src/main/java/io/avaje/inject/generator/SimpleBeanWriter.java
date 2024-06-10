@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -263,18 +262,25 @@ final class SimpleBeanWriter {
       }
       final var observesPrism = ObservesPrism.getInstanceOn(observeEvent.element());
       writer
-        .eol()
-        .indent(indent)
-        .append(
-          "%s.<%s>registerObserver(%s, %s, %s, %s, \"%s\");",
-          builder,
-          shortWithoutAnnotations,
-          observeTypeString,
-          observesPrism.priority(),
-          observesPrism.async(),
-          methodReader.name(),
-          observeEvent.qualifier())
-        .eol();
+          .eol()
+          .indent(indent)
+          .append(builder)
+          .eol()
+          .indent(indent)
+          .append("    .get(ObserverManager.class)")
+          .eol()
+          .indent(indent)
+          .append("    .<%s>registerObserver(", shortWithoutAnnotations)
+          .eol()
+          .indent(indent)
+          .append(
+              "        %s, new Observer<>(%s, %s, %s, \"%s\"));",
+              observeTypeString,
+              observesPrism.priority(),
+              observesPrism.async(),
+              methodReader.name(),
+              observeEvent.qualifier())
+          .eol();
     }
   }
 

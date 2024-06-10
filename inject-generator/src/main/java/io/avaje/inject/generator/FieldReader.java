@@ -29,7 +29,7 @@ final class FieldReader {
     if (nullable || element.asType().toString().startsWith("java.util.Optional<")) {
       ProcessingContext.addOptionalType(fieldType);
     }
-    if (type.fullWithoutAnnotations().startsWith("io.avaje.inject.event.Event")) {
+    if (type.fullWithoutAnnotations().startsWith("io.avaje.inject.events.Event")) {
       EventPublisherWriter.write(element);
     }
   }

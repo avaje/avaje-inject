@@ -1,11 +1,13 @@
 package org.other.one.events;
 
-import io.avaje.inject.Component;
-import io.avaje.inject.event.Event;
-import io.avaje.inject.event.ObserverManager;
-import io.avaje.inject.spi.Generated;
 import java.lang.reflect.Type;
+
 import org.other.one.SomeOptionalDep;
+
+import io.avaje.inject.Component;
+import io.avaje.inject.events.Event;
+import io.avaje.inject.events.ObserverManager;
+import io.avaje.inject.spi.Generated;
 
 @Component
 @Generated("avaje-inject-generator")
