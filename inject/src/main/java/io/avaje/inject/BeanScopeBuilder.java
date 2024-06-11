@@ -92,7 +92,7 @@ public interface BeanScopeBuilder {
   /**
    * Set the ConfigPropertyPlugin used for this scope. This is serviceloaded automatically of not set
    *
-   * @param propertyRequiresPlugin The plugin for conditions based on properties
+   * @param propertyPlugin The plugin for conditions based on properties
    */
   void configPlugin(ConfigPropertyPlugin propertyPlugin);
 
