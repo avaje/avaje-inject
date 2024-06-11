@@ -1,6 +1,6 @@
 package org.example.myapp;
 
-import io.avaje.inject.test.InjectExtension;
+import io.avaje.inject.test.InjectJunitExtension;
 import jakarta.inject.Inject;
 import org.example.myapp.testconfig.CountTestScopeStart;
 import org.junit.jupiter.api.Test;
@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ExtendWith(InjectExtension.class)
+@ExtendWith(InjectJunitExtension.class)
 class InjectExtension_injectFromTestModule_Test {
 
   @Inject

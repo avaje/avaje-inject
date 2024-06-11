@@ -7,7 +7,7 @@ module io.avaje.inject.generator {
 
   requires static io.avaje.prism;
 
-  uses io.avaje.inject.spi.InjectSPI;
+  uses io.avaje.inject.spi.InjectExtension;
   uses io.avaje.inject.spi.Plugin;
   uses io.avaje.inject.spi.Module;
   uses io.avaje.inject.spi.InjectPlugin;

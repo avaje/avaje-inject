@@ -1,6 +1,6 @@
 package org.example.inherit;
 
-import io.avaje.inject.test.InjectExtension;
+import io.avaje.inject.test.InjectJunitExtension;
 import jakarta.inject.Inject;
 import org.example.inherit.notpublic.PubExposed;
 import org.junit.jupiter.api.Test;
@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(InjectExtension.class)
+@ExtendWith(InjectJunitExtension.class)
 public class MyOneTest extends MyOneAbstract {
 
   @Inject

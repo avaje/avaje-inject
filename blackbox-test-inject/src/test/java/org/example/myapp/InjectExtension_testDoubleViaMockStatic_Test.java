@@ -1,6 +1,6 @@
 package org.example.myapp;
 
-import io.avaje.inject.test.InjectExtension;
+import io.avaje.inject.test.InjectJunitExtension;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,7 +10,7 @@ import org.mockito.Mockito;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(InjectExtension.class)
+@ExtendWith(InjectJunitExtension.class)
 class InjectExtension_testDoubleViaMockStatic_Test {
 
   static @Inject HelloService helloService;

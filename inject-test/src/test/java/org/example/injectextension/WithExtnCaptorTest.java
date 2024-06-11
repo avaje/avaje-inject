@@ -1,6 +1,6 @@
 package org.example.injectextension;
 
-import io.avaje.inject.test.InjectExtension;
+import io.avaje.inject.test.InjectJunitExtension;
 import jakarta.inject.Inject;
 import org.example.coffee.fruit.AppleService;
 import org.example.coffee.fruit.PeachService;
@@ -13,7 +13,7 @@ import org.mockito.Mock;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
-@ExtendWith(InjectExtension.class)
+@ExtendWith(InjectJunitExtension.class)
 class WithExtnCaptorTest {
 
   ArgumentCaptor<String> plainCaptor = ArgumentCaptor.forClass(String.class);

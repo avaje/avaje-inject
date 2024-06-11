@@ -18,6 +18,13 @@
       <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-inject-events</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
 
     <!-- annotation processor -->
     <dependency>

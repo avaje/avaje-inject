@@ -1,7 +1,7 @@
 package org.example.injectextension;
 
 import io.avaje.inject.BeanScope;
-import io.avaje.inject.test.InjectExtension;
+import io.avaje.inject.test.InjectJunitExtension;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import org.example.coffee.qualifier.Blue;
@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(InjectExtension.class)
+@ExtendWith(InjectJunitExtension.class)
 class WithExtnNamedMocksTest {
 
   @Mock @Blue SomeStore blueStore;

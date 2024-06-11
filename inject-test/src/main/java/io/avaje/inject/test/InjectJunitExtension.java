@@ -12,7 +12,7 @@ import java.lang.reflect.Method;
  * <p>
  * Supports injection for fields annotated with <code>@Mock, @Spy, @Captor, @Inject</code>.
  */
-public final class InjectExtension implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback {
+public final class InjectJunitExtension implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback {
 
   private static final System.Logger log = AppLog.getLogger("io.avaje.inject");
   private static final Namespace INJECT_NS = Namespace.create("io.avaje.inject.InjectTest");

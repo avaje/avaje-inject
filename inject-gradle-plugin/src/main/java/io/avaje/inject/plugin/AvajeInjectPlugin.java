@@ -5,7 +5,7 @@ import static java.util.stream.Collectors.toList;
 
 import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.InjectPlugin;
-import io.avaje.inject.spi.InjectSPI;
+import io.avaje.inject.spi.InjectExtension;
 import io.avaje.inject.spi.Module;
 import org.gradle.api.*;
 
@@ -69,7 +69,11 @@ public class AvajeInjectPlugin implements Plugin<Project> {
 
     List<InjectPlugin> allPlugins = new ArrayList<>();
     ServiceLoader.load(io.avaje.inject.spi.Plugin.class, cl).forEach(allPlugins::add);
-    ServiceLoader.load(io.avaje.inject.spi.InjectPlugin.class, cl).forEach(allPlugins::add);
+    ServiceLoader.load(InjectExtension.class, classLoader).stream()
+        .map(Provider::get)
+        .filter(InjectPlugin.class::isInstance)
+        .map(InjectPlugin.class::cast)
+        .forEach(allPlugins::add);
 
     for (final var plugin : allPlugins) {
       System.out.println("Loaded Plugin: " + plugin.getClass().getCanonicalName());
@@ -92,7 +96,7 @@ public class AvajeInjectPlugin implements Plugin<Project> {
 
     final List<AvajeModule> avajeModules = new ArrayList<>();
     ServiceLoader.load(Module.class, classLoader).forEach(avajeModules::add);
-    ServiceLoader.load(InjectSPI.class, classLoader).stream()
+    ServiceLoader.load(InjectExtension.class, classLoader).stream()
         .map(Provider::get)
         .filter(AvajeModule.class::isInstance)
         .map(AvajeModule.class::cast)

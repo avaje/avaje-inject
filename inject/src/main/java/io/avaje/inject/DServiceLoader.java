@@ -19,7 +19,7 @@ final class DServiceLoader {
   private PropertyRequiresPlugin propertyPlugin;
 
   DServiceLoader(ClassLoader classLoader) {
-    for (var spi : ServiceLoader.load(InjectSPI.class, classLoader)) {
+    for (var spi : ServiceLoader.load(InjectExtension.class, classLoader)) {
       if (spi instanceof InjectPlugin) {
         plugins.add((InjectPlugin) spi);
       } else if (spi instanceof AvajeModule) {

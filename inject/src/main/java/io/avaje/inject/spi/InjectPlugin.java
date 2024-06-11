@@ -10,7 +10,7 @@ import java.lang.reflect.Type;
  * <p>Typically, a plugin might provide a default dependency via {@link
  * BeanScopeBuilder#provideDefault(Type, java.util.function.Supplier)}.
  */
-public interface InjectPlugin extends InjectSPI {
+public interface InjectPlugin extends InjectExtension {
 
   /**
    * Empty array of classes.

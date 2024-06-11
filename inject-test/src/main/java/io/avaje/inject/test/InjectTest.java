@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  *
  * <p>This is a JUnit 5 extension.
  */
-@ExtendWith(InjectExtension.class)
+@ExtendWith(InjectJunitExtension.class)
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface InjectTest {
