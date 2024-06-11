@@ -25,7 +25,7 @@ public interface Builder {
    * @param parentOverride When false do not add beans that already exist on the parent
    */
   @SuppressWarnings("rawtypes")
-  static Builder newBuilder(Set<String> profiles, PropertyRequiresPlugin plugin, List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans, BeanScope parent, boolean parentOverride) {
+  static Builder newBuilder(Set<String> profiles, ConfigPropertyPlugin plugin, List<SuppliedBean> suppliedBeans, List<EnrichBean> enrichBeans, BeanScope parent, boolean parentOverride) {
     if (suppliedBeans.isEmpty() && enrichBeans.isEmpty()) {
       // simple case, no mocks or spies
       return new DBuilder(profiles, plugin, parent, parentOverride);
@@ -270,7 +270,7 @@ public interface Builder {
   /**
    * Return the plugin for required properties.
    */
-  PropertyRequiresPlugin property();
+  ConfigPropertyPlugin property();
 
   /**
    * Build and return the bean scope.

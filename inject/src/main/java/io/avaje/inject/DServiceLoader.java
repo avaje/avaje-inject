@@ -16,7 +16,7 @@ final class DServiceLoader {
   private final List<InjectPlugin> plugins = new ArrayList<>();
   private final List<AvajeModule> modules = new ArrayList<>();
   private ModuleOrdering moduleOrdering;
-  private PropertyRequiresPlugin propertyPlugin;
+  private ConfigPropertyPlugin propertyPlugin;
 
   DServiceLoader(ClassLoader classLoader) {
     for (var spi : ServiceLoader.load(InjectExtension.class, classLoader)) {
@@ -26,8 +26,8 @@ final class DServiceLoader {
         modules.add((AvajeModule) spi);
       } else if (spi instanceof ModuleOrdering) {
         moduleOrdering = (ModuleOrdering) spi;
-      } else if (spi instanceof PropertyRequiresPlugin) {
-        propertyPlugin = (PropertyRequiresPlugin) spi;
+      } else if (spi instanceof ConfigPropertyPlugin) {
+        propertyPlugin = (ConfigPropertyPlugin) spi;
       }
     }
     // older plugins and modules
@@ -47,7 +47,7 @@ final class DServiceLoader {
     return Optional.ofNullable(moduleOrdering);
   }
 
-  Optional<PropertyRequiresPlugin> propertyPlugin() {
+  Optional<ConfigPropertyPlugin> propertyPlugin() {
     return Optional.ofNullable(propertyPlugin);
   }
 }
