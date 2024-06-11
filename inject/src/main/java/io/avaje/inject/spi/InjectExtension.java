@@ -4,4 +4,4 @@ import io.avaje.spi.Service;
 
 /** Superclass for all Inject SPI classes */
 @Service
-public interface InjectSPI {}
+public interface InjectExtension {}

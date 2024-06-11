@@ -10,7 +10,7 @@ module io.avaje.inject {
   requires static org.mockito;
   requires static io.avaje.spi;
 
-  uses io.avaje.inject.spi.InjectSPI;
+  uses io.avaje.inject.spi.InjectExtension;
   uses io.avaje.inject.spi.Module;
   uses io.avaje.inject.spi.Plugin;
 

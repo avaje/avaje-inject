@@ -15,7 +15,7 @@ import io.avaje.lang.NonNullApi;
  */
 @NonNullApi
 @Deprecated(forRemoval = true)
-public interface PropertyRequiresPlugin {
+public interface PropertyRequiresPlugin extends InjectExtension {
 
   /**
    * Return a configuration value that might not exist.

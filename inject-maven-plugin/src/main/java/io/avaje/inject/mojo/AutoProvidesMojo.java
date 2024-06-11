@@ -30,8 +30,8 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 import io.avaje.inject.spi.AvajeModule;
+import io.avaje.inject.spi.InjectExtension;
 import io.avaje.inject.spi.InjectPlugin;
-import io.avaje.inject.spi.InjectSPI;
 import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.Plugin;
 
@@ -107,7 +107,7 @@ public class AutoProvidesMojo extends AbstractMojo {
 
     final List<InjectPlugin> plugins = new ArrayList<>();
     ServiceLoader.load(Plugin.class, newClassLoader).forEach(plugins::add);
-    ServiceLoader.load(InjectSPI.class, newClassLoader).stream()
+    ServiceLoader.load(InjectExtension.class, newClassLoader).stream()
         .map(Provider::get)
         .filter(InjectPlugin.class::isInstance)
         .map(InjectPlugin.class::cast)
@@ -135,7 +135,7 @@ public class AutoProvidesMojo extends AbstractMojo {
     final Log log = getLog();
     final List<AvajeModule> avajeModules = new ArrayList<>();
     ServiceLoader.load(Module.class, newClassLoader).forEach(avajeModules::add);
-    ServiceLoader.load(InjectSPI.class, newClassLoader).stream()
+    ServiceLoader.load(InjectExtension.class, newClassLoader).stream()
         .map(Provider::get)
         .filter(AvajeModule.class::isInstance)
         .map(AvajeModule.class::cast)

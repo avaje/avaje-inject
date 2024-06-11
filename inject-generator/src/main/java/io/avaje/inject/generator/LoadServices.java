@@ -15,7 +15,7 @@ final class LoadServices {
     // load using older Module
     ServiceLoader.load(Module.class, classLoader).forEach(modules::add);
     // load newer AvajeModule
-    final var iterator = ServiceLoader.load(InjectSPI.class, classLoader).iterator();
+    final var iterator = ServiceLoader.load(InjectExtension.class, classLoader).iterator();
     while (iterator.hasNext()) {
       try {
         final var spi = iterator.next();
@@ -32,7 +32,7 @@ final class LoadServices {
   static List<InjectPlugin> loadPlugins(ClassLoader classLoader) {
     List<InjectPlugin> plugins = new ArrayList<>();
     ServiceLoader.load(Plugin.class, classLoader).forEach(plugins::add);
-    ServiceLoader.load(InjectSPI.class, classLoader).forEach(spi -> {
+    ServiceLoader.load(InjectExtension.class, classLoader).forEach(spi -> {
       if (spi instanceof InjectPlugin) {
         plugins.add((InjectPlugin) spi);
       }
