@@ -62,13 +62,13 @@ Example ex = beanScope.get(Example.class);
 ### Java Module Usage
 When working with Java modules you need to add a `provides` statement in your `module-info.java` with the generated class.
 ```java
-import io.avaje.inject.spi.InjectSPI;
+import io.avaje.inject.spi.InjectExtension;
 
 module org.example {
 
   requires io.avaje.inject;
   // you must define the fully qualified class name of the generated classes. if you use an import statement, compilation will fail
-  provides InjectSPI with org.example.ExampleModule;
+  provides InjectExtension with org.example.ExampleModule;
 }
 ```
 
