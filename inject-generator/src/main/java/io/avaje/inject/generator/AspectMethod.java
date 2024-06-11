@@ -6,6 +6,7 @@ import static java.util.stream.Collectors.toList;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
@@ -17,7 +18,7 @@ final class AspectMethod {
   private final List<AspectPair> aspectPairs;
   private final ExecutableElement method;
   private final List<MethodReader.MethodParam> params;
-  private final String rawReturn;
+  private final UType returnUtype;
   private final String simpleName;
   private final List<? extends TypeMirror> thrownTypes;
   private final String localName;
@@ -29,7 +30,7 @@ final class AspectMethod {
     this.method = method;
     this.simpleName = method.getSimpleName().toString();
     this.params = initParams(method.getParameters());
-    this.rawReturn = method.getReturnType().toString();
+    this.returnUtype = UType.parse(method.getReturnType());
     this.thrownTypes = method.getThrownTypes();
     this.localName = simpleName + nameIndex;
     this.fallback = findFallback(method);
@@ -62,8 +63,8 @@ final class AspectMethod {
     if (fallback == null) {
       return;
     }
-    var returnType = ProcessorUtils.trimAnnotations(fallback.getReturnType().toString());
-    if (!returnType.contains(Util.shortName(rawReturn))) {
+    var returnType = UType.parse(fallback.getReturnType()).fullWithoutAnnotations();
+    if (!returnType.equals(returnUtype.fullWithoutAnnotations())) {
       APContext.logError(fallback, "An AOP fallback method must have the same return type as the target method");
     }
 
@@ -100,10 +101,11 @@ final class AspectMethod {
   }
 
   boolean isVoid() {
-    return "void".equals(rawReturn);
+    return returnUtype.kind() == TypeKind.VOID;
   }
 
   void addImports(ImportTypeMap importTypes) {
+    importTypes.addAll(returnUtype.importTypes());
     for (AspectPair aspect : aspectPairs) {
       aspect.addImports(importTypes);
     }
@@ -117,7 +119,7 @@ final class AspectMethod {
 
   void writeMethod(Append writer) {
     writer.eol().append("  @Override").eol();
-    writer.append("  public %s %s(", rawReturn, simpleName);
+    writer.append("  public %s %s(", returnUtype.shortType(), simpleName);
     for (int i = 0, size = params.size(); i < size; i++) {
       if (i > 0) {
         writer.append(", ");
@@ -174,8 +176,8 @@ final class AspectMethod {
     }
   }
 
-  void writeSetupForMethods(Append writer, String shortName) {
-    writer.append("      %s = %s.class.getDeclaredMethod(\"%s\"", localName, shortName, simpleName);
+  void writeSetupForMethods(Append writer) {
+    writer.append("      %s = target$Class.getDeclaredMethod(\"%s\"", localName, simpleName);
     for (MethodReader.MethodParam param : params) {
       writer.append(", ");
       param.writeMethodParamTypeAspect(writer);
