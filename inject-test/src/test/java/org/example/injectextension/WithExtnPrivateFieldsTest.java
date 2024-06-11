@@ -1,6 +1,6 @@
 package org.example.injectextension;
 
-import io.avaje.inject.test.InjectExtension;
+import io.avaje.inject.test.InjectJunitExtension;
 import jakarta.inject.Inject;
 import org.example.coffee.CoffeeMaker;
 import org.example.coffee.Pump;
@@ -13,7 +13,7 @@ import org.mockito.Spy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(InjectExtension.class)
+@ExtendWith(InjectJunitExtension.class)
 public class WithExtnPrivateFieldsTest {
 
   @Mock

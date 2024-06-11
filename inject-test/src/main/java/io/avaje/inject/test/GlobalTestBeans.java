@@ -36,7 +36,7 @@ final class GlobalTestBeans implements ExtensionContext.Store.CloseableResource 
   private void initialise(ExtensionContext context) {
     globalBeans = GlobalInitialise.initialise(false);
     log.log(TRACE, "register global test BeanScope with beans {0}", globalBeans);
-    context.getRoot().getStore(ExtensionContext.Namespace.GLOBAL).put(InjectExtension.class.getCanonicalName(), this);
+    context.getRoot().getStore(ExtensionContext.Namespace.GLOBAL).put(InjectJunitExtension.class.getCanonicalName(), this);
   }
 
   /**

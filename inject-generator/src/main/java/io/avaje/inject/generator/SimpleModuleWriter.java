@@ -33,7 +33,7 @@ final class SimpleModuleWriter {
       " *   module example {\n" +
       " *     requires io.avaje.inject;\n" +
       " *     \n" +
-      " *     provides io.avaje.inject.spi.InjectSPI with %s.%s;\n" +
+      " *     provides io.avaje.inject.spi.InjectExtension with %s.%s;\n" +
       " *     \n" +
       " *   }\n" +
       " * \n" +

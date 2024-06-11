@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(InjectExtension.class)
+@ExtendWith(InjectJunitExtension.class)
 class InjectExtension_injectLocalMock_Test {
 
   @Inject HelloService helloService;

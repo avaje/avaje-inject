@@ -6,7 +6,7 @@ import java.util.Set;
 /**
  * Determines Wiring order.
  */
-public interface ModuleOrdering extends InjectSPI {
+public interface ModuleOrdering extends InjectExtension {
 
   /**
    * Order the factories, returning the ordered list of module names.

@@ -5,7 +5,7 @@ import java.lang.reflect.Type;
 /**
  * A AvajeModule that can be included in BeanScope.
  */
-public interface AvajeModule extends InjectSPI {
+public interface AvajeModule extends InjectExtension {
 
   /**
    * Empty array of classes.
