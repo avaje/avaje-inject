@@ -64,11 +64,11 @@ public class AvajeInjectPlugin implements Plugin<Project> {
     return new FileWriter(new File(dir, file));
   }
 
-  private void writeProvidedPlugins(ClassLoader cl, FileWriter pluginWriter) throws IOException {
+  private void writeProvidedPlugins(ClassLoader classLoader, FileWriter pluginWriter) throws IOException {
     final Set<String> providedTypes = new HashSet<>();
 
     List<InjectPlugin> allPlugins = new ArrayList<>();
-    ServiceLoader.load(io.avaje.inject.spi.Plugin.class, cl).forEach(allPlugins::add);
+    ServiceLoader.load(io.avaje.inject.spi.Plugin.class, classLoader).forEach(allPlugins::add);
     ServiceLoader.load(InjectExtension.class, classLoader).stream()
         .map(Provider::get)
         .filter(InjectPlugin.class::isInstance)
