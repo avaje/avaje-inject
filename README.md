@@ -165,5 +165,5 @@ public final class ExampleModule implements AvajeModule {
 | [@Factory and @Bean](https://avaje.io/inject/#factory) | - | @Configuration and @Bean
 | [@RequiresBean and @RequiresProperty](https://avaje.io/inject/#conditional) | - | @Conditional
 | [@Primary](https://avaje.io/inject/#primary) | - | @Primary
-| [@Secondary](https://avaje.io/inject/#secondary) | - | @Secondary
+| [@Secondary](https://avaje.io/inject/#secondary) | - | @Fallback
 | [@InjectTest](https://avaje.io/inject/#component-testing) | - | @SpringBootTest
