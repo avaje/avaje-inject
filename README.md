@@ -144,6 +144,7 @@ public final class ExampleModule implements AvajeModule {
 ## Differences to Dagger
 
 - Specifically aimed for server-side development (rather than Android)
+- Supports "component testing" via `avaje-inject-test` and `@InjectTest`
 - Provides API to obtain all bean instances that implement an interface
 - Lifecycle methods with `@PostConstruct` and `@PreDestroy`
 - Spring-like factory classes with `@Factory` and `@Bean`
@@ -155,14 +156,14 @@ public final class ExampleModule implements AvajeModule {
 | :--- | :---  | :---  |
 | [@Singleton](https://avaje.io/inject/#singleton) | @Singleton | @Component, @Service, @Repository |
 | [Provider&lt;T>](https://avaje.io/inject/#provider) | Provider&lt;T> | FactoryBean&lt;T>
-| [@Inject](https://avaje.io/inject/#inject) | @Inject | @Inject, @Autowired 
+| [@Inject](https://avaje.io/inject/#inject) | @Inject | @Inject, @Autowired
 | [@Inject @Nullable](https://avaje.io/inject/#nullable) or [@Inject Optional&lt;T>](https://avaje.io/inject/#optional) | @Inject @Nullable | @Autowired(required=false)
 | [@Qualifier/@Named](https://avaje.io/inject/#qualifiers) | @Qualifier/@Named | @Qualifier
 | [@AssistFactory](https://avaje.io/inject/#assistInject) | @AssistedFactory | - |
 | [@PostConstruct](https://avaje.io/inject/#post-construct) | - | @PostConstruct
-| [@PreDestroy](https://avaje.io/inject/#pre-destroy) | - | @PreDestroy 
-| [@Factory and @Bean](https://avaje.io/inject/#factory) | - | @Configuration and @Bean 
-| [@RequiresBean and @RequiresProperty](https://avaje.io/inject/#conditional) | - | @Conditional 
-| [@Primary](https://avaje.io/inject/#primary) | - | @Primary 
-| [@Secondary](https://avaje.io/inject/#secondary) | - | @Secondary 
-| [@InjectTest](https://avaje.io/inject/#component-testing) | - | @SpringBootTest 
+| [@PreDestroy](https://avaje.io/inject/#pre-destroy) | - | @PreDestroy
+| [@Factory and @Bean](https://avaje.io/inject/#factory) | - | @Configuration and @Bean
+| [@RequiresBean and @RequiresProperty](https://avaje.io/inject/#conditional) | - | @Conditional
+| [@Primary](https://avaje.io/inject/#primary) | - | @Primary
+| [@Secondary](https://avaje.io/inject/#secondary) | - | @Secondary
+| [@InjectTest](https://avaje.io/inject/#component-testing) | - | @SpringBootTest
