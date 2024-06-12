@@ -99,16 +99,16 @@ class DContextEntryTest {
   void getWithName_when_currentModule() {
 
     DContextEntry entry = new DContextEntry();
-    entry.add(DContextEntryBean.of("N1", "same", BeanEntry.NORMAL, AvajeModule.class));
+    entry.add(DContextEntryBean.of("N1", "same", BeanEntry.NORMAL, InjectModule.class));
     entry.add(DContextEntryBean.of("N2", "same", BeanEntry.NORMAL, null));
     entry.add(DContextEntryBean.of("N3", "same", BeanEntry.NORMAL, OtherModule.class));
 
     assertEquals(entry.get("same", null), "N2");
-    assertEquals(entry.get("same", AvajeModule.class), "N1");
+    assertEquals(entry.get("same", InjectModule.class), "N1");
     assertEquals(entry.get("same", OtherModule.class), "N3");
 
     assertEquals(entry.get(null, null), "N2");
-    assertEquals(entry.get(null, AvajeModule.class), "N1");
+    assertEquals(entry.get(null, InjectModule.class), "N1");
     assertEquals(entry.get(null, OtherModule.class), "N3");
   }
 
@@ -116,16 +116,16 @@ class DContextEntryTest {
   void getWithoutName_when_currentModule() {
 
     DContextEntry entry = new DContextEntry();
-    entry.add(DContextEntryBean.of("N1", null, BeanEntry.NORMAL, AvajeModule.class));
+    entry.add(DContextEntryBean.of("N1", null, BeanEntry.NORMAL, InjectModule.class));
     entry.add(DContextEntryBean.of("N2", null, BeanEntry.NORMAL, null));
     entry.add(DContextEntryBean.of("N3", null, BeanEntry.NORMAL, OtherModule.class));
 
     assertEquals(entry.get(null, null), "N2");
-    assertEquals(entry.get(null, AvajeModule.class), "N1");
+    assertEquals(entry.get(null, InjectModule.class), "N1");
     assertEquals(entry.get(null, OtherModule.class), "N3");
 
     assertNull(entry.get("notThere", null));
-    assertNull(entry.get("notThere", AvajeModule.class));
+    assertNull(entry.get("notThere", InjectModule.class));
     assertNull(entry.get("notThere", OtherModule.class));
   }
 
@@ -133,12 +133,12 @@ class DContextEntryTest {
   void getWithName_expect_matchOnName() {
 
     DContextEntry entry = new DContextEntry();
-    entry.add(DContextEntryBean.of("N1", "same", BeanEntry.NORMAL, AvajeModule.class));
+    entry.add(DContextEntryBean.of("N1", "same", BeanEntry.NORMAL, InjectModule.class));
     entry.add(DContextEntryBean.of("N2", null, BeanEntry.NORMAL, null));
     entry.add(DContextEntryBean.of("N3", null, BeanEntry.NORMAL, OtherModule.class));
 
     assertEquals(entry.get("same", null), "N1");
-    assertEquals(entry.get("same", AvajeModule.class), "N1");
+    assertEquals(entry.get("same", InjectModule.class), "N1");
     assertEquals(entry.get("same", OtherModule.class), "N1");
   }
 
@@ -146,12 +146,12 @@ class DContextEntryTest {
   void getWithoutName_expect_matchOnNoName() {
 
     DContextEntry entry = new DContextEntry();
-    entry.add(DContextEntryBean.of("N1", null, BeanEntry.NORMAL, AvajeModule.class));
+    entry.add(DContextEntryBean.of("N1", null, BeanEntry.NORMAL, InjectModule.class));
     entry.add(DContextEntryBean.of("N2", "same", BeanEntry.NORMAL, null));
     entry.add(DContextEntryBean.of("N3", "same", BeanEntry.NORMAL, OtherModule.class));
 
     assertEquals(entry.get(null, null), "N1");
-    assertEquals(entry.get(null, AvajeModule.class), "N1");
+    assertEquals(entry.get(null, InjectModule.class), "N1");
     assertEquals(entry.get(null, OtherModule.class), "N1");
   }
 
@@ -159,11 +159,11 @@ class DContextEntryTest {
   void when_noQualifier_expect_matchedToNoQualider() {
 
     DContextEntry entry = new DContextEntry();
-    entry.add(DContextEntryBean.of("N1", null, BeanEntry.NORMAL, AvajeModule.class));
-    entry.add(DContextEntryBean.of("N2", "myName", BeanEntry.NORMAL, AvajeModule.class));
+    entry.add(DContextEntryBean.of("N1", null, BeanEntry.NORMAL, InjectModule.class));
+    entry.add(DContextEntryBean.of("N2", "myName", BeanEntry.NORMAL, InjectModule.class));
 
-    assertEquals(entry.get("myName", AvajeModule.class), "N2");
-    assertEquals(entry.get(null, AvajeModule.class), "N1");
+    assertEquals(entry.get("myName", InjectModule.class), "N2");
+    assertEquals(entry.get(null, InjectModule.class), "N1");
   }
 
   @Test
@@ -173,11 +173,11 @@ class DContextEntryTest {
     entry.add(DContextEntryBean.of("N1", null, BeanEntry.NORMAL, null));
     entry.add(DContextEntryBean.of("N2", "myName", BeanEntry.NORMAL, null));
 
-    assertEquals(entry.get("myName", AvajeModule.class), "N2");
-    assertEquals(entry.get(null, AvajeModule.class), "N1");
+    assertEquals(entry.get("myName", InjectModule.class), "N2");
+    assertEquals(entry.get(null, InjectModule.class), "N1");
   }
 
-  class OtherModule implements AvajeModule {
+  class OtherModule implements InjectModule {
     @Override
     public Class<?>[] classes() {
       return new Class[0];

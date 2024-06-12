@@ -18,7 +18,7 @@ import java.util.Set;
 
 import javax.tools.StandardLocation;
 
-import io.avaje.inject.spi.AvajeModule;
+import io.avaje.inject.spi.InjectModule;
 import io.avaje.inject.spi.InjectPlugin;
 
 /**
@@ -64,7 +64,7 @@ final class ExternalProvider {
       return;
     }
 
-    List<AvajeModule> modules = LoadServices.loadModules(CLASS_LOADER);
+    List<InjectModule> modules = LoadServices.loadModules(CLASS_LOADER);
     if (modules.isEmpty()) {
       APContext.logNote("No external modules detected");
       return;

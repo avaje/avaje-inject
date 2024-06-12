@@ -1,16 +1,12 @@
 package io.avaje.inject.spi;
 
-import java.lang.reflect.Type;
-
-import io.avaje.inject.InjectModule;
-
 /**
  * A Module that can be included in BeanScope.
  *
- * @deprecated migrate to {@link AvajeModule}
+ * @deprecated migrate to {@link InjectModule}
  */
 @Deprecated(forRemoval = true)
-public interface Module extends AvajeModule {
+public interface Module extends InjectModule {
 
   /**
    * Return the set of types this module explicitly provides to other modules.
@@ -40,7 +36,7 @@ public interface Module extends AvajeModule {
    * Return the classes that this module provides that we allow other modules to auto depend on.
    * <p>
    * This is a convenience when using multiple modules that is otherwise controlled manually by
-   * explicitly using {@link InjectModule#provides()}.
+   * explicitly using {@link io.avaje.inject.InjectModule#provides()}.
    */
   @Override
   default Class<?>[] autoProvides() {
@@ -51,7 +47,7 @@ public interface Module extends AvajeModule {
    * Return the aspects that this module provides.
    * <p>
    * This is a convenience when using multiple modules that we otherwise manually specify via
-   * {@link InjectModule#provides()}.
+   * {@link io.avaje.inject.InjectModule#provides()}.
    */
   @Override
   default Class<?>[] autoProvidesAspects() {
@@ -63,7 +59,7 @@ public interface Module extends AvajeModule {
    * external modules (that are in the classpath at compile time).
    * <p>
    * This is a convenience when using multiple modules that is otherwise controlled manually by
-   * explicitly using {@link InjectModule#requires()} or {@link InjectModule#requiresPackages()}.
+   * explicitly using {@link io.avaje.inject.InjectModule#requires()} or {@link io.avaje.inject.InjectModule#requiresPackages()}.
    */
   @Override
   default Class<?>[] autoRequires() {

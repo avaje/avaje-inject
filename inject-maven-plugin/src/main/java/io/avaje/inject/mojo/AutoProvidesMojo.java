@@ -29,7 +29,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
-import io.avaje.inject.spi.AvajeModule;
+import io.avaje.inject.spi.InjectModule;
 import io.avaje.inject.spi.InjectExtension;
 import io.avaje.inject.spi.InjectPlugin;
 import io.avaje.inject.spi.Module;
@@ -133,12 +133,12 @@ public class AutoProvidesMojo extends AbstractMojo {
     final Set<String> providedTypes = new HashSet<>();
 
     final Log log = getLog();
-    final List<AvajeModule> avajeModules = new ArrayList<>();
+    final List<InjectModule> avajeModules = new ArrayList<>();
     ServiceLoader.load(Module.class, newClassLoader).forEach(avajeModules::add);
     ServiceLoader.load(InjectExtension.class, newClassLoader).stream()
         .map(Provider::get)
-        .filter(AvajeModule.class::isInstance)
-        .map(AvajeModule.class::cast)
+        .filter(InjectModule.class::isInstance)
+        .map(InjectModule.class::cast)
         .forEach(avajeModules::add);
     for (final var module : avajeModules) {
       final var name = module.getClass().getTypeName();

@@ -1,6 +1,6 @@
 package io.avaje.inject;
 
-import static io.avaje.inject.spi.AvajeModule.EMPTY_CLASSES;
+import static io.avaje.inject.spi.InjectModule.EMPTY_CLASSES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -12,9 +12,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import io.avaje.inject.spi.InjectModule;
 import org.junit.jupiter.api.Test;
 
-import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.Builder;
 import io.avaje.inject.spi.Module;
 
@@ -185,8 +185,8 @@ class LegacyBeanScopeBuilderTest {
             "has unsatisfied requires [io.avaje.inject.LegacyBeanScopeBuilderTest$Mod3] ");
   }
 
-  private List<String> names(List<AvajeModule> factories) {
-    return factories.stream().map(AvajeModule::toString).collect(Collectors.toList());
+  private List<String> names(List<InjectModule> factories) {
+    return factories.stream().map(InjectModule::toString).collect(Collectors.toList());
   }
 
   private TDModule bc(String name, Class<?>[] provides, Class<?>[] requires) {

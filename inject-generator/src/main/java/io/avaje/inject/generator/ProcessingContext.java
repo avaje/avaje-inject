@@ -57,7 +57,7 @@ final class ProcessingContext {
 
   private static boolean isInjectModule(String spi) {
     var moduleType = APContext.typeElement(spi);
-    return moduleType != null && moduleType.getSuperclass().toString().contains("AvajeModule");
+    return moduleType != null && moduleType.getSuperclass().toString().contains("InjectModule");
   }
 
   static List<String> loadMetaInfCustom() {

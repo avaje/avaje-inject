@@ -3,7 +3,7 @@ package io.avaje.inject.plugin;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-import io.avaje.inject.spi.AvajeModule;
+import io.avaje.inject.spi.InjectModule;
 import io.avaje.inject.spi.InjectPlugin;
 import io.avaje.inject.spi.InjectExtension;
 import io.avaje.inject.spi.Module;
@@ -94,12 +94,12 @@ public class AvajeInjectPlugin implements Plugin<Project> {
   private void writeProvidedModules(ClassLoader classLoader, FileWriter moduleWriter) throws IOException {
     final Set<String> providedTypes = new HashSet<>();
 
-    final List<AvajeModule> avajeModules = new ArrayList<>();
+    final List<InjectModule> avajeModules = new ArrayList<>();
     ServiceLoader.load(Module.class, classLoader).forEach(avajeModules::add);
     ServiceLoader.load(InjectExtension.class, classLoader).stream()
         .map(Provider::get)
-        .filter(AvajeModule.class::isInstance)
-        .map(AvajeModule.class::cast)
+        .filter(InjectModule.class::isInstance)
+        .map(InjectModule.class::cast)
         .forEach(avajeModules::add);
 
     for (final var module : avajeModules) {

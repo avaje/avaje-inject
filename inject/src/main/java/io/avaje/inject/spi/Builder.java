@@ -280,5 +280,5 @@ public interface Builder {
   /**
    * Set the current module being wired.
    */
-  void currentModule(Class<? extends AvajeModule> currentModule);
+  void currentModule(Class<? extends InjectModule> currentModule);
 }

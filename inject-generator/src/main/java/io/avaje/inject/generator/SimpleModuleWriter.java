@@ -211,7 +211,6 @@ final class SimpleModuleWriter {
     importTypes.add(Constants.BEANSCOPE);
     importTypes.add(Constants.INJECTMODULE);
     importTypes.add(Constants.DEPENDENCYMETA);
-    importTypes.add(Constants.MODULE);
     importTypes.add(Constants.BUILDER);
     return importTypes;
   }

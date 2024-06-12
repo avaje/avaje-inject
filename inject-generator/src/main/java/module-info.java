@@ -1,3 +1,5 @@
+import io.avaje.inject.spi.InjectModule;
+
 module io.avaje.inject.generator {
 
   requires java.compiler;
@@ -11,7 +13,7 @@ module io.avaje.inject.generator {
   uses io.avaje.inject.spi.Plugin;
   uses io.avaje.inject.spi.Module;
   uses io.avaje.inject.spi.InjectPlugin;
-  uses io.avaje.inject.spi.AvajeModule;
+  uses InjectModule;
 
   provides javax.annotation.processing.Processor with io.avaje.inject.generator.InjectProcessor;
 }

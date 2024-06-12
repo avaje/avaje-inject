@@ -1,6 +1,7 @@
 package io.avaje.inject;
 
 import io.avaje.inject.spi.*;
+import io.avaje.inject.spi.InjectModule;
 import io.avaje.inject.spi.Module;
 
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.ServiceLoader;
 final class DServiceLoader {
 
   private final List<InjectPlugin> plugins = new ArrayList<>();
-  private final List<AvajeModule> modules = new ArrayList<>();
+  private final List<InjectModule> modules = new ArrayList<>();
   private ModuleOrdering moduleOrdering;
   private ConfigPropertyPlugin propertyPlugin;
 
@@ -22,8 +23,8 @@ final class DServiceLoader {
     for (var spi : ServiceLoader.load(InjectExtension.class, classLoader)) {
       if (spi instanceof InjectPlugin) {
         plugins.add((InjectPlugin) spi);
-      } else if (spi instanceof AvajeModule) {
-        modules.add((AvajeModule) spi);
+      } else if (spi instanceof InjectModule) {
+        modules.add((InjectModule) spi);
       } else if (spi instanceof ModuleOrdering) {
         moduleOrdering = (ModuleOrdering) spi;
       } else if (spi instanceof ConfigPropertyPlugin) {
@@ -39,7 +40,7 @@ final class DServiceLoader {
     return plugins;
   }
 
-  List<AvajeModule> modules() {
+  List<InjectModule> modules() {
     return modules;
   }
 

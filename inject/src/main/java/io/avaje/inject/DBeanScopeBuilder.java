@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 
 import io.avaje.applog.AppLog;
 import io.avaje.inject.spi.*;
+import io.avaje.inject.spi.InjectModule;
 import io.avaje.lang.NonNullApi;
 import io.avaje.lang.Nullable;
 import jakarta.inject.Provider;
@@ -29,7 +30,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private final List<SuppliedBean> suppliedBeans = new ArrayList<>();
   @SuppressWarnings("rawtypes")
   private final List<EnrichBean> enrichBeans = new ArrayList<>();
-  private final Set<AvajeModule> includeModules = new LinkedHashSet<>();
+  private final Set<InjectModule> includeModules = new LinkedHashSet<>();
   private final List<Runnable> postConstructList = new ArrayList<>();
   private final List<Consumer<BeanScope>> postConstructConsumerList = new ArrayList<>();
   private final List<ClosePair> preDestroyList = new ArrayList<>();
@@ -55,7 +56,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  public BeanScopeBuilder modules(AvajeModule... modules) {
+  public BeanScopeBuilder modules(InjectModule... modules) {
     this.includeModules.addAll(Arrays.asList(modules));
     return this;
   }
@@ -307,23 +308,23 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     private final BeanScope parent;
     private final boolean suppliedBeans;
     private final Set<String> moduleNames = new LinkedHashSet<>();
-    private final List<AvajeModule> factories = new ArrayList<>();
+    private final List<InjectModule> factories = new ArrayList<>();
     private final List<FactoryState> queue = new ArrayList<>();
     private final List<FactoryState> queueNoDependencies = new ArrayList<>();
 
     private final Map<String, FactoryList> providesMap = new HashMap<>();
 
-    FactoryOrder(BeanScope parent, Set<AvajeModule> includeModules, boolean suppliedBeans) {
+    FactoryOrder(BeanScope parent, Set<InjectModule> includeModules, boolean suppliedBeans) {
       this.parent = parent;
       this.factories.addAll(includeModules);
       this.suppliedBeans = suppliedBeans;
-      for (final AvajeModule includeModule : includeModules) {
+      for (final InjectModule includeModule : includeModules) {
         moduleNames.add(includeModule.getClass().getName());
       }
     }
 
     @Override
-    public void add(AvajeModule module) {
+    public void add(InjectModule module) {
       final var factoryState = new FactoryState(module);
       providesMap
         .computeIfAbsent(module.getClass().getTypeName(), s -> new FactoryList())
@@ -372,7 +373,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
 
     @Override
-    public List<AvajeModule> factories() {
+    public List<InjectModule> factories() {
       return factories;
     }
 
@@ -468,10 +469,10 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   /** Wrapper on Factory holding the pushed state. */
   private static class FactoryState {
 
-    private final AvajeModule factory;
+    private final InjectModule factory;
     private boolean pushed;
 
-    private FactoryState(AvajeModule factory) {
+    private FactoryState(InjectModule factory) {
       this.factory = factory;
     }
 
@@ -484,7 +485,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       return pushed;
     }
 
-    AvajeModule factory() {
+    InjectModule factory() {
       return factory;
     }
 

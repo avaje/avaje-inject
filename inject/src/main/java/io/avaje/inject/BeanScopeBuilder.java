@@ -1,6 +1,6 @@
 package io.avaje.inject;
 
-import io.avaje.inject.spi.AvajeModule;
+import io.avaje.inject.spi.InjectModule;
 import io.avaje.inject.spi.ConfigPropertyPlugin;
 import io.avaje.inject.spi.PropertyRequiresPlugin;
 import io.avaje.lang.NonNullApi;
@@ -78,7 +78,7 @@ public interface BeanScopeBuilder {
    * @param modules The modules that we want to include in dependency injection.
    * @return This BeanScopeBuilder
    */
-  BeanScopeBuilder modules(AvajeModule... modules);
+  BeanScopeBuilder modules(InjectModule... modules);
 
   /**
    * Return the PropertyRequiresPlugin used for this scope. This is useful for plugins that want to

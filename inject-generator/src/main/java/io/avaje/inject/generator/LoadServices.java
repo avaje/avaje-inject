@@ -10,17 +10,17 @@ import java.util.ServiceLoader;
 
 final class LoadServices {
 
-  static List<AvajeModule> loadModules(ClassLoader classLoader) {
-    List<AvajeModule> modules = new ArrayList<>();
+  static List<InjectModule> loadModules(ClassLoader classLoader) {
+    List<InjectModule> modules = new ArrayList<>();
     // load using older Module
     ServiceLoader.load(Module.class, classLoader).forEach(modules::add);
-    // load newer AvajeModule
+    // load newer InjectModule
     final var iterator = ServiceLoader.load(InjectExtension.class, classLoader).iterator();
     while (iterator.hasNext()) {
       try {
         final var spi = iterator.next();
-        if (spi instanceof AvajeModule) {
-          modules.add((AvajeModule) spi);
+        if (spi instanceof InjectModule) {
+          modules.add((InjectModule) spi);
         }
       } catch (final ServiceConfigurationError expected) {
         // ignore expected error reading the module that we are also writing

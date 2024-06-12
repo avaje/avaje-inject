@@ -13,7 +13,7 @@ class DContextEntryBean {
   /**
    * Create taking into account if it is a Provider or the bean itself.
    */
-  static DContextEntryBean of(Object source, String name, int flag, Class<? extends AvajeModule> currentModule) {
+  static DContextEntryBean of(Object source, String name, int flag, Class<? extends InjectModule> currentModule) {
     if (source instanceof Provider) {
       return new ProtoProvider((Provider<?>)source, name, flag, currentModule);
     } else {
@@ -32,16 +32,16 @@ class DContextEntryBean {
     }
   }
 
-  static DContextEntryBean provider(boolean prototype, Provider<?> provider, String name, int flag, Class<? extends AvajeModule> currentModule) {
+  static DContextEntryBean provider(boolean prototype, Provider<?> provider, String name, int flag, Class<? extends InjectModule> currentModule) {
     return prototype ? new ProtoProvider(provider, name, flag, currentModule) : new OnceProvider(provider, name, flag, currentModule);
   }
 
   protected final Object source;
   protected final String name;
-  protected final Class<? extends AvajeModule> sourceModule;
+  protected final Class<? extends InjectModule> sourceModule;
   private final int flag;
 
-  private DContextEntryBean(Object source, String name, int flag, Class<? extends AvajeModule> currentModule) {
+  private DContextEntryBean(Object source, String name, int flag, Class<? extends InjectModule> currentModule) {
     this.source = source;
     this.name = name;
     this.flag = flag;
@@ -76,7 +76,7 @@ class DContextEntryBean {
     return qualifierName == null ? name == null : qualifierName.equalsIgnoreCase(name);
   }
 
-  final Class<? extends AvajeModule> sourceModule() {
+  final Class<? extends InjectModule> sourceModule() {
     return sourceModule;
   }
 
@@ -122,7 +122,7 @@ class DContextEntryBean {
 
     private final Provider<?> provider;
 
-    private ProtoProvider(Provider<?> provider, String name, int flag, Class<? extends AvajeModule> currentModule) {
+    private ProtoProvider(Provider<?> provider, String name, int flag, Class<? extends InjectModule> currentModule) {
       super(provider, name, flag, currentModule);
       this.provider = provider;
     }
@@ -147,7 +147,7 @@ class DContextEntryBean {
     private final Provider<?> provider;
     private Object bean;
 
-    private OnceProvider(Provider<?> provider, String name, int flag, Class<? extends AvajeModule> currentModule) {
+    private OnceProvider(Provider<?> provider, String name, int flag, Class<? extends InjectModule> currentModule) {
       super(provider, name, flag, currentModule);
       this.provider = provider;
     }

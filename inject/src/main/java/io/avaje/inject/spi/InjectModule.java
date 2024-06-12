@@ -5,7 +5,7 @@ import java.lang.reflect.Type;
 /**
  * A AvajeModule that can be included in BeanScope.
  */
-public interface AvajeModule extends InjectExtension {
+public interface InjectModule extends InjectExtension {
 
   /**
    * Empty array of classes.
@@ -37,7 +37,7 @@ public interface AvajeModule extends InjectExtension {
    * Return the classes that this module provides that we allow other modules to auto depend on.
    *
    * <p>This is a convenience when using multiple modules that is otherwise controlled manually by
-   * explicitly using {@link AvajeModule#provides()}.
+   * explicitly using {@link InjectModule#provides()}.
    */
   default Type[] autoProvides() {
     return EMPTY_CLASSES;
@@ -47,7 +47,7 @@ public interface AvajeModule extends InjectExtension {
    * Return the aspects that this module provides.
    *
    * <p>This is a convenience when using multiple modules that we otherwise manually specify via
-   * {@link AvajeModule#provides()}.
+   * {@link InjectModule#provides()}.
    */
   default Class<?>[] autoProvidesAspects() {
     return EMPTY_CLASSES;
@@ -58,7 +58,7 @@ public interface AvajeModule extends InjectExtension {
    * modules (that are in the classpath at compile time).
    *
    * <p>This is a convenience when using multiple modules that is otherwise controlled manually by
-   * explicitly using {@link AvajeModule#requires()} or {@link AvajeModule#requiresPackages()}.
+   * explicitly using {@link InjectModule#requires()} or {@link InjectModule#requiresPackages()}.
    */
   default Type[] autoRequires() {
     return EMPTY_CLASSES;
@@ -88,6 +88,6 @@ public interface AvajeModule extends InjectExtension {
   /**
    * Marker for custom scoped modules.
    */
-  interface Custom extends AvajeModule {
+  interface Custom extends InjectModule {
   }
 }

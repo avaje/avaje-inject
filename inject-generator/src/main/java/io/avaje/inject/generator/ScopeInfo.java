@@ -26,11 +26,11 @@ final class ScopeInfo {
     /**
      * Default scope.
      */
-    DEFAULT("AvajeModule"),
+    DEFAULT("io.avaje.inject.spi.InjectModule"),
     /**
      * Custom scope.
      */
-    CUSTOM("AvajeModule.Custom"),
+    CUSTOM("io.avaje.inject.spi.InjectModule.Custom"),
     /**
      * Built-in Test scope.
      */

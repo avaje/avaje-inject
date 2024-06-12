@@ -16,7 +16,7 @@ public interface ModuleOrdering extends InjectExtension {
   /**
    * The list of factories in the order they should be built.
    */
-  List<AvajeModule> factories();
+  List<InjectModule> factories();
 
   /**
    * Whether no modules are available
@@ -26,5 +26,5 @@ public interface ModuleOrdering extends InjectExtension {
   /**
    * Accept a module for ordering
    */
-  void add(AvajeModule module);
+  void add(InjectModule module);
 }
