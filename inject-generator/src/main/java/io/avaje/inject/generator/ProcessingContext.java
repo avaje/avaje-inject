@@ -3,7 +3,6 @@ package io.avaje.inject.generator;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.LineNumberReader;
-import java.io.Writer;
 import java.nio.file.NoSuchFileException;
 
 import javax.annotation.processing.FilerException;
@@ -14,7 +13,6 @@ import javax.tools.StandardLocation;
 import java.util.*;
 
 import static io.avaje.inject.generator.APContext.*;
-import static io.avaje.inject.generator.ProcessingContext.addInjectSPI;
 import static java.util.stream.Collectors.toSet;
 
 final class ProcessingContext {
@@ -28,7 +26,7 @@ final class ProcessingContext {
     private final Set<String> providedTypes = new HashSet<>();
     private final Set<String> optionalTypes = new LinkedHashSet<>();
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
-    private final List<AvajeModuleData> avajeModules = new ArrayList<>();
+    private final List<ModuleData> modules = new ArrayList<>();
     private final List<TypeElement> delayQueue = new ArrayList<>();
     private final List<String> spiServices = new ArrayList<>();
     private boolean strictWiring;
@@ -52,12 +50,12 @@ final class ProcessingContext {
 
   static String loadMetaInfServices() {
     return loadMetaInf(Constants.META_INF_SPI).stream()
-        .filter(ProcessingContext::isAvajeModule)
+        .filter(ProcessingContext::isInjectModule)
         .findFirst()
         .orElse(null);
   }
 
-  private static boolean isAvajeModule(String spi) {
+  private static boolean isInjectModule(String spi) {
     var moduleType = APContext.typeElement(spi);
     return moduleType != null && moduleType.getSuperclass().toString().contains("AvajeModule");
   }
@@ -169,12 +167,12 @@ final class ProcessingContext {
     APContext.clear();
   }
 
-  static void addAvajeModule(AvajeModuleData module) {
-    CTX.get().avajeModules.add(module);
+  static void addModule(ModuleData module) {
+    CTX.get().modules.add(module);
   }
 
-  static List<AvajeModuleData> avajeModules() {
-    return CTX.get().avajeModules;
+  static List<ModuleData> modules() {
+    return CTX.get().modules;
   }
 
   static void strictWiring(boolean strictWiring) {

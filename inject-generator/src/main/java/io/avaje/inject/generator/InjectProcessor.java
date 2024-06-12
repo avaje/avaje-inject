@@ -93,8 +93,8 @@ public final class InjectProcessor extends AbstractProcessor {
       .filter(s -> !s.startsWith("External Module Type"))
       .distinct()
       .map(l -> l.split("\\|"))
-      .map(AvajeModuleData::new)
-      .forEach(ProcessingContext::addAvajeModule);
+      .map(ModuleData::new)
+      .forEach(ProcessingContext::addModule);
   }
 
   private List<String> lines(String relativeName) {
@@ -156,7 +156,7 @@ public final class InjectProcessor extends AbstractProcessor {
 
     if (processingOver) {
       var order =
-        new FactoryOrder(ProcessingContext.avajeModules(), defaultScope.pluginProvided())
+        new FactoryOrder(ProcessingContext.modules(), defaultScope.pluginProvided())
           .orderModules();
 
       if (ProcessingContext.strictWiring()) {

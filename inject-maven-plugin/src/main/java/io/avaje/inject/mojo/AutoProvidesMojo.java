@@ -52,7 +52,7 @@ public class AutoProvidesMojo extends AbstractMojo {
   @Parameter(defaultValue = "${project}", readonly = true, required = true)
   private MavenProject project;
 
-  private final List<AvajeModuleData> modules = new ArrayList<>();
+  private final List<ModuleData> modules = new ArrayList<>();
 
   @Override
   public void execute() throws MojoExecutionException {
@@ -170,7 +170,7 @@ public class AutoProvidesMojo extends AbstractMojo {
         .map(Type::getTypeName)
         .map(AutoProvidesMojo::wrapAspect)
         .forEach(requires::add);
-      modules.add(new AvajeModuleData(name, provides, requires));
+      modules.add(new ModuleData(name, provides, requires));
     }
 
     for (final String providedType : providedTypes) {
@@ -181,7 +181,7 @@ public class AutoProvidesMojo extends AbstractMojo {
 
   private void writeModuleCSV(FileWriter moduleWriter) throws IOException {
     moduleWriter.write("\nExternal Module Type|Provides|Requires");
-    for (AvajeModuleData avajeModule : modules) {
+    for (ModuleData avajeModule : modules) {
       moduleWriter.write("\n");
       moduleWriter.write(avajeModule.name());
       moduleWriter.write("|");

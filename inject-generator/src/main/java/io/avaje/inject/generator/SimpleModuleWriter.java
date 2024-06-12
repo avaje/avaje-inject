@@ -133,7 +133,7 @@ final class SimpleModuleWriter {
     provides.addAll(autoProvides);
     autoProvidesAspects.stream().map(Util::wrapAspect).forEach(provides::add);
 
-    ProcessingContext.addAvajeModule(new AvajeModuleData(fullName, provides, requires));
+    ProcessingContext.addModule(new ModuleData(fullName, provides, requires));
   }
 
   private void writeClassesMethod() {
