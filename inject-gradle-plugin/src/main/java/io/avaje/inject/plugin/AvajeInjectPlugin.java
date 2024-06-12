@@ -24,7 +24,7 @@ import java.util.ServiceLoader.Provider;
  */
 public class AvajeInjectPlugin implements Plugin<Project> {
 
-  private final List<AvajeModuleData> modules = new ArrayList<>();
+  private final List<ModuleData> modules = new ArrayList<>();
 
   @Override
   public void apply(Project project) {
@@ -131,7 +131,7 @@ public class AvajeInjectPlugin implements Plugin<Project> {
           .map(Type::getTypeName)
           .map(AvajeInjectPlugin::wrapAspect)
           .forEach(requires::add);
-      modules.add(new AvajeModuleData(name, provides, requires));
+      modules.add(new ModuleData(name, provides, requires));
     }
 
     for (final String providedType : providedTypes) {
@@ -164,7 +164,7 @@ public class AvajeInjectPlugin implements Plugin<Project> {
 
   private void writeModuleCSV(FileWriter moduleWriter) throws IOException {
     moduleWriter.write("\nExternal Module Type|Provides|Requires");
-    for (AvajeModuleData avajeModule : modules) {
+    for (ModuleData avajeModule : modules) {
       moduleWriter.write("\n");
       moduleWriter.write(avajeModule.name());
       moduleWriter.write("|");

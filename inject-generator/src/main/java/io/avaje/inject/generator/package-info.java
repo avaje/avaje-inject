@@ -31,8 +31,11 @@
 package io.avaje.inject.generator;
 
 import io.avaje.inject.*;
-import io.avaje.inject.aop.*;
-import io.avaje.inject.spi.*;
+import io.avaje.inject.aop.Aspect;
+import io.avaje.inject.aop.AOPFallback;
+import io.avaje.inject.spi.DependencyMeta;
+import io.avaje.inject.spi.Generated;
+import io.avaje.inject.spi.Proxy;
 import io.avaje.prism.GeneratePrism;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;

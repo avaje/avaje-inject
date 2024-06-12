@@ -93,7 +93,7 @@ final class ExternalProvider {
         Arrays.stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
         Arrays.stream(module.autoRequiresAspects()).map(Type::getTypeName).map(Util::wrapAspect).forEach(requires::add);
 
-        ProcessingContext.addAvajeModule(new AvajeModuleData(name, provides, requires));
+        ProcessingContext.addModule(new ModuleData(name, provides, requires));
       } catch (final ServiceConfigurationError expected) {
         // ignore expected error reading the module that we are also writing
       }
