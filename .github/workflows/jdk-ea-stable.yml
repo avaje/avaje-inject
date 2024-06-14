@@ -1,0 +1,44 @@
+
+name: avaje-inject EA stable
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '39 1 * * 1,3,5'
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      packages: write
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        java_version: [GA,EA] ## valhalla (fails javadoc)
+#        os: [ubuntu-latest]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Java
+      uses: oracle-actions/setup-java@v1
+      with:
+        website: jdk.java.net
+        release: ea
+        version: stable
+    - name: Maven cache
+      uses: actions/cache@v3
+      env:
+        cache-name: maven-cache
+      with:
+        path:
+          ~/.m2
+        key: build-${{ env.cache-name }}
+    - name: Maven version
+      run: mvn --version
+    - name: Build with Maven
+      run: mvn package
+
