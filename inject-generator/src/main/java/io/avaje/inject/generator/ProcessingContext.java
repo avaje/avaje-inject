@@ -96,7 +96,11 @@ final class ProcessingContext {
   }
 
   static FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
-    return filer().createResource(StandardLocation.CLASS_OUTPUT, "", interfaceType);
+    return filer()
+        .createResource(
+            StandardLocation.CLASS_OUTPUT,
+            "",
+            interfaceType.replace("META-INF/services/", "META-INF/generated-services/"));
   }
 
   static TypeElement elementMaybe(String rawType) {

@@ -26,6 +26,8 @@ import javax.tools.ToolProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import io.avaje.spi.internal.ServiceProcessor;
+
 class InjectProcessorTest {
 
   @AfterEach
@@ -67,7 +69,7 @@ class InjectProcessorTest {
             List.of("--release=" + Integer.getInteger("java.specification.version")),
             null,
             files);
-    task.setProcessors(Arrays.asList(new InjectProcessor()));
+    task.setProcessors(Arrays.asList(new InjectProcessor(), new ServiceProcessor()));
 
     assertThat(task.call()).isTrue();
   }
