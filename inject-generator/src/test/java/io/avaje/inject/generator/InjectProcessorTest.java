@@ -8,7 +8,6 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -69,7 +68,7 @@ class InjectProcessorTest {
             List.of("--release=" + Integer.getInteger("java.specification.version")),
             null,
             files);
-    task.setProcessors(Arrays.asList(new InjectProcessor(), new ServiceProcessor()));
+    task.setProcessors(List.of(new InjectProcessor(), new ServiceProcessor()));
 
     assertThat(task.call()).isTrue();
   }
