@@ -53,7 +53,7 @@ class InjectProcessorTest {
     final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
     final StandardJavaFileManager manager = compiler.getStandardFileManager(null, null, null);
 
-    manager.setLocation(StandardLocation.SOURCE_PATH, Arrays.asList(new File(source)));
+    manager.setLocation(StandardLocation.SOURCE_PATH, List.of(new File(source)));
 
     final Set<Kind> fileKinds = Collections.singleton(Kind.SOURCE);
 
