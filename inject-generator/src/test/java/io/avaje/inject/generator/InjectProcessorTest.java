@@ -8,7 +8,6 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -25,6 +24,8 @@ import javax.tools.ToolProvider;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
+import io.avaje.spi.internal.ServiceProcessor;
 
 class InjectProcessorTest {
 
@@ -52,7 +53,7 @@ class InjectProcessorTest {
     final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
     final StandardJavaFileManager manager = compiler.getStandardFileManager(null, null, null);
 
-    manager.setLocation(StandardLocation.SOURCE_PATH, Arrays.asList(new File(source)));
+    manager.setLocation(StandardLocation.SOURCE_PATH, List.of(new File(source)));
 
     final Set<Kind> fileKinds = Collections.singleton(Kind.SOURCE);
 
@@ -67,7 +68,7 @@ class InjectProcessorTest {
             List.of("--release=" + Integer.getInteger("java.specification.version")),
             null,
             files);
-    task.setProcessors(Arrays.asList(new InjectProcessor()));
+    task.setProcessors(List.of(new InjectProcessor(), new ServiceProcessor()));
 
     assertThat(task.call()).isTrue();
   }
