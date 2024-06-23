@@ -29,6 +29,8 @@ final class ProcessingContext {
     private final List<ModuleData> modules = new ArrayList<>();
     private final List<TypeElement> delayQueue = new ArrayList<>();
     private final List<String> spiServices = new ArrayList<>();
+    private final boolean spiPresent =
+        APContext.typeElement("io.avaje.spi.internal.ServiceProcessor") != null;
     private boolean strictWiring;
 
     Ctx() {}
@@ -96,11 +98,13 @@ final class ProcessingContext {
   }
 
   static FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
-    return filer()
-        .createResource(
-            StandardLocation.CLASS_OUTPUT,
-            "",
-            interfaceType.replace("META-INF/services/", "META-INF/generated-services/"));
+
+    var serviceFile =
+        CTX.get().spiPresent
+            ? interfaceType.replace("META-INF/services/", "META-INF/generated-services/")
+            : interfaceType;
+
+    return filer().createResource(StandardLocation.CLASS_OUTPUT, "", serviceFile);
   }
 
   static TypeElement elementMaybe(String rawType) {
