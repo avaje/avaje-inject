@@ -27,7 +27,6 @@ class UtilTest {
 
   @Test
   void nestedPackageOf() {
-    ProcessingContext.testInit();
     assertEquals(Util.nestedPackageOf("com.example.Foo.Bar"), "com.example");
     assertEquals(Util.nestedPackageOf("com.example.other.foo.Bar"), "com.example.other");
   }

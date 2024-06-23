@@ -29,6 +29,7 @@ final class ProcessingContext {
     private final List<ModuleData> modules = new ArrayList<>();
     private final List<TypeElement> delayQueue = new ArrayList<>();
     private final List<String> spiServices = new ArrayList<>();
+    private final boolean spiPresent = APContext.typeElement("io.avaje.spi.internal.ServiceProcessor") != null;
     private boolean strictWiring;
 
     void registerProvidedTypes(Set<String> moduleFileProvided) {
@@ -40,10 +41,6 @@ final class ProcessingContext {
   static void init(Set<String> moduleFileProvided, boolean performModuleValidation) {
     CTX.set(new Ctx());
     CTX.get().registerProvidedTypes(moduleFileProvided);
-  }
-
-  static void testInit() {
-    CTX.set(new Ctx());
   }
 
   static String loadMetaInfServices() {
@@ -94,11 +91,10 @@ final class ProcessingContext {
   }
 
   static FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
-
     var serviceFile =
-        APContext.typeElement("io.avaje.spi.internal.ServiceProcessor") != null
-            ? interfaceType.replace("META-INF/services/", "META-INF/generated-services/")
-            : interfaceType;
+      CTX.get().spiPresent
+        ? interfaceType.replace("META-INF/services/", "META-INF/generated-services/")
+        : interfaceType;
 
     return filer().createResource(StandardLocation.CLASS_OUTPUT, "", serviceFile);
   }
@@ -202,7 +198,6 @@ final class ProcessingContext {
         writer.close();
       }
     } catch (IOException e) {
-      e.printStackTrace();
       logError("Failed to write services file " + e.getMessage());
     }
   }
