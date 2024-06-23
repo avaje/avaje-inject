@@ -29,11 +29,7 @@ final class ProcessingContext {
     private final List<ModuleData> modules = new ArrayList<>();
     private final List<TypeElement> delayQueue = new ArrayList<>();
     private final List<String> spiServices = new ArrayList<>();
-    private final boolean spiPresent =
-        APContext.typeElement("io.avaje.spi.internal.ServiceProcessor") != null;
     private boolean strictWiring;
-
-    Ctx() {}
 
     void registerProvidedTypes(Set<String> moduleFileProvided) {
       ExternalProvider.registerModuleProvidedTypes(providedTypes);
@@ -100,7 +96,7 @@ final class ProcessingContext {
   static FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
 
     var serviceFile =
-        CTX.get().spiPresent
+        APContext.typeElement("io.avaje.spi.internal.ServiceProcessor") != null
             ? interfaceType.replace("META-INF/services/", "META-INF/generated-services/")
             : interfaceType;
 
