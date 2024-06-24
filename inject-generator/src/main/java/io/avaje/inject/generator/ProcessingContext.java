@@ -1,7 +1,9 @@
 package io.avaje.inject.generator;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.nio.file.NoSuchFileException;
 
@@ -28,8 +30,7 @@ final class ProcessingContext {
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
     private final List<ModuleData> modules = new ArrayList<>();
     private final List<TypeElement> delayQueue = new ArrayList<>();
-    private final List<String> spiServices = new ArrayList<>();
-    private final boolean spiPresent = APContext.typeElement("io.avaje.spi.internal.ServiceProcessor") != null;
+    private final Set<String> spiServices = new HashSet<>();
     private boolean strictWiring;
 
     void registerProvidedTypes(Set<String> moduleFileProvided) {
@@ -91,12 +92,8 @@ final class ProcessingContext {
   }
 
   static FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
-    var serviceFile =
-      CTX.get().spiPresent
-        ? interfaceType.replace("META-INF/services/", "META-INF/generated-services/")
-        : interfaceType;
 
-    return filer().createResource(StandardLocation.CLASS_OUTPUT, "", serviceFile);
+    return filer().createResource(StandardLocation.CLASS_OUTPUT, "", interfaceType);
   }
 
   static TypeElement elementMaybe(String rawType) {
@@ -139,6 +136,19 @@ final class ProcessingContext {
 
   static void addImportedAspects(Map<String, AspectImportPrism> importedMap) {
     CTX.get().aspectImportPrisms.putAll(importedMap);
+  }
+
+  static void validateModule() {
+    var module = getProjectModuleElement();
+    if (module != null) {
+      try (var reader = getModuleInfoReader()) {
+        new ModuleInfoReader(module, reader)
+            .validateServices("io.avaje.inject.spi.InjectExtension", CTX.get().spiServices);
+
+      } catch (Exception e) {
+        // can't read module
+      }
+    }
   }
 
   static Optional<AspectImportPrism> getImportedAspect(String type) {
@@ -188,7 +198,28 @@ final class ProcessingContext {
   }
 
   static void writeSPIServicesFile() {
+
+    try (final var file =
+            APContext.filer()
+                .getResource(StandardLocation.CLASS_OUTPUT, "", Constants.META_INF_SPI)
+                .toUri()
+                .toURL()
+                .openStream();
+        final var buffer = new BufferedReader(new InputStreamReader(file)); ) {
+
+      String line;
+      while ((line = buffer.readLine()) != null) {
+        line.replaceAll("\\s", "")
+            .replace(",", "\n")
+            .lines()
+            .forEach(ProcessingContext::addInjectSPI);
+      }
+    } catch (Exception e) {
+      // not a critical error
+    }
+
     try {
+
       FileObject jfo = createMetaInfWriterFor(Constants.META_INF_SPI);
       if (jfo != null) {
         var writer = new Append(jfo.openWriter());

@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import io.avaje.prism.GenerateAPContext;
+import io.avaje.prism.GenerateModuleInfoReader;
 import io.avaje.prism.GenerateUtils;
 
 import javax.annotation.processing.*;
@@ -26,6 +27,7 @@ import static io.avaje.inject.generator.ProcessingContext.*;
 
 @GenerateUtils
 @GenerateAPContext
+@GenerateModuleInfoReader
 @SupportedAnnotationTypes({
   AspectImportPrism.PRISM_TYPE,
   AssistFactoryPrism.PRISM_TYPE,
@@ -115,6 +117,7 @@ public final class InjectProcessor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+    APContext.setProjectModuleElement(annotations, roundEnv);
     readModule(roundEnv);
 
     final var processingOver = roundEnv.processingOver();
@@ -167,6 +170,7 @@ public final class InjectProcessor extends AbstractProcessor {
         }
       }
       ProcessingContext.writeSPIServicesFile();
+      ProcessingContext.validateModule();
       ProcessingContext.clear();
     }
     return false;
