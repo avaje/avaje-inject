@@ -70,7 +70,6 @@ final class ExternalProvider {
       return;
     }
     for (final var module : modules) {
-      try {
         final var name = module.getClass().getTypeName();
         final var provides = new ArrayList<String>();
         APContext.logNote("Detected Module: " + name);
@@ -94,9 +93,6 @@ final class ExternalProvider {
         Arrays.stream(module.autoRequiresAspects()).map(Type::getTypeName).map(Util::wrapAspect).forEach(requires::add);
 
         ProcessingContext.addModule(new ModuleData(name, provides, requires));
-      } catch (final ServiceConfigurationError expected) {
-        // ignore expected error reading the module that we are also writing
-      }
     }
   }
 
