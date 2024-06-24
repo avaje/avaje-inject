@@ -13,7 +13,7 @@
   <name>avaje inject generator</name>
   <description>annotation processor generating source code for avaje-inject dependency injection</description>
   <properties>
-    <avaje.prisms.version>1.24</avaje.prisms.version>
+    <avaje.prisms.version>1.26</avaje.prisms.version>
   </properties>
   <dependencies>
 
@@ -26,7 +26,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-spi-service</artifactId>
-      <version>1.10</version>
+      <version>1.11</version>
     </dependency>
 
     <dependency>
