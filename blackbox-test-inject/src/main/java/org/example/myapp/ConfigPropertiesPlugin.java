@@ -3,10 +3,13 @@ package org.example.myapp;
 import io.avaje.config.Config;
 import io.avaje.inject.Component;
 import io.avaje.inject.spi.ConfigPropertyPlugin;
+import io.avaje.inject.spi.InjectSpi;
+
 import org.other.one.OtherComponent2;
 
 import java.util.Optional;
 
+@InjectSpi
 @Component.Import(value = OtherComponent2.class)
 public class ConfigPropertiesPlugin implements ConfigPropertyPlugin {
 

@@ -11,6 +11,7 @@
 @GeneratePrism(Factory.class)
 @GeneratePrism(Generated.class)
 @GeneratePrism(Inject.class)
+@GeneratePrism(InjectSpi.class)
 @GeneratePrism(InjectModule.class)
 @GeneratePrism(Lazy.class)
 @GeneratePrism(Named.class)
@@ -33,9 +34,7 @@ package io.avaje.inject.generator;
 import io.avaje.inject.*;
 import io.avaje.inject.aop.Aspect;
 import io.avaje.inject.aop.AOPFallback;
-import io.avaje.inject.spi.DependencyMeta;
-import io.avaje.inject.spi.Generated;
-import io.avaje.inject.spi.Proxy;
+import io.avaje.inject.spi.*;
 import io.avaje.prism.GeneratePrism;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
