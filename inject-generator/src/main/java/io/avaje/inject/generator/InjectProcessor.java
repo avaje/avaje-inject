@@ -38,11 +38,11 @@ import static io.avaje.inject.generator.ProcessingContext.*;
   FactoryPrism.PRISM_TYPE,
   ImportPrism.PRISM_TYPE,
   InjectModulePrism.PRISM_TYPE,
-  InjectSpiPrism.PRISM_TYPE,
   PrototypePrism.PRISM_TYPE,
   QualifierPrism.PRISM_TYPE,
   ScopePrism.PRISM_TYPE,
   SingletonPrism.PRISM_TYPE,
+  "io.avaje.spi.ServiceProvider"
 })
 public final class InjectProcessor extends AbstractProcessor {
 
@@ -154,7 +154,7 @@ public final class InjectProcessor extends AbstractProcessor {
       .map(UType::fullWithoutAnnotations)
       .forEach(ProcessingContext::addOptionalType);
 
-    maybeElements(roundEnv, InjectSpiPrism.PRISM_TYPE).ifPresent(this::registerSPI);
+    maybeElements(roundEnv, "io.avaje.spi.ServiceProvider").ifPresent(this::registerSPI);
     allScopes.readBeans(roundEnv);
     defaultScope.write(processingOver);
     allScopes.write(processingOver);

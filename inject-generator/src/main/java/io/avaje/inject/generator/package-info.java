@@ -11,7 +11,6 @@
 @GeneratePrism(Factory.class)
 @GeneratePrism(Generated.class)
 @GeneratePrism(Inject.class)
-@GeneratePrism(InjectSpi.class)
 @GeneratePrism(InjectModule.class)
 @GeneratePrism(Lazy.class)
 @GeneratePrism(Named.class)
