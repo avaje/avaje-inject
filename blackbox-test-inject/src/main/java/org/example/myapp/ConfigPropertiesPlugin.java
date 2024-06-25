@@ -4,10 +4,12 @@ import io.avaje.config.Config;
 import io.avaje.inject.Component;
 import io.avaje.inject.spi.ConfigPropertyPlugin;
 
+import io.avaje.spi.ServiceProvider;
 import org.other.one.OtherComponent2;
 
 import java.util.Optional;
 
+@ServiceProvider
 @Component.Import(value = OtherComponent2.class)
 public class ConfigPropertiesPlugin implements ConfigPropertyPlugin {
 
