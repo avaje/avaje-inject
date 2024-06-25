@@ -23,7 +23,7 @@ final class LoadServices {
           modules.add((AvajeModule) spi);
         }
       } catch (final ServiceConfigurationError expected) {
-        // ignore expected error reading the module that we are also writing
+        // ignore expected error reading the extensions not compiled yet
       }
     }
     return modules;
@@ -32,11 +32,18 @@ final class LoadServices {
   static List<InjectPlugin> loadPlugins(ClassLoader classLoader) {
     List<InjectPlugin> plugins = new ArrayList<>();
     ServiceLoader.load(Plugin.class, classLoader).forEach(plugins::add);
-    ServiceLoader.load(InjectExtension.class, classLoader).forEach(spi -> {
-      if (spi instanceof InjectPlugin) {
-        plugins.add((InjectPlugin) spi);
+    
+    final var iterator = ServiceLoader.load(InjectExtension.class, classLoader).iterator();
+    while (iterator.hasNext()) {
+      try {
+        final var spi = iterator.next();
+        if (spi instanceof InjectPlugin) {
+          plugins.add((InjectPlugin) spi);
+        }
+      } catch (final ServiceConfigurationError expected) {
+        // ignore expected error reading  the extensions not compiled yet
       }
-    });
+    }
     return plugins;
   }
 }
