@@ -30,7 +30,7 @@ final class ProcessingContext {
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
     private final List<ModuleData> modules = new ArrayList<>();
     private final List<TypeElement> delayQueue = new ArrayList<>();
-    private final Set<String> spiServices = new HashSet<>();
+    private final Set<String> spiServices = new TreeSet<>();
     private boolean strictWiring;
 
     void registerProvidedTypes(Set<String> moduleFileProvided) {
@@ -92,7 +92,6 @@ final class ProcessingContext {
   }
 
   static FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
-
     return filer().createResource(StandardLocation.CLASS_OUTPUT, "", interfaceType);
   }
 
@@ -198,28 +197,8 @@ final class ProcessingContext {
   }
 
   static void writeSPIServicesFile() {
-
-    try (final var file =
-            APContext.filer()
-                .getResource(StandardLocation.CLASS_OUTPUT, "", Constants.META_INF_SPI)
-                .toUri()
-                .toURL()
-                .openStream();
-        final var buffer = new BufferedReader(new InputStreamReader(file)); ) {
-
-      String line;
-      while ((line = buffer.readLine()) != null) {
-        line.replaceAll("\\s", "")
-            .replace(",", "\n")
-            .lines()
-            .forEach(ProcessingContext::addInjectSPI);
-      }
-    } catch (Exception e) {
-      // not a critical error
-    }
-
+    readExistingMetaInfServices();
     try {
-
       FileObject jfo = createMetaInfWriterFor(Constants.META_INF_SPI);
       if (jfo != null) {
         var writer = new Append(jfo.openWriter());
@@ -230,6 +209,27 @@ final class ProcessingContext {
       }
     } catch (IOException e) {
       logError("Failed to write services file " + e.getMessage());
+    }
+  }
+
+  private static void readExistingMetaInfServices() {
+    try (final var file =
+           APContext.filer()
+             .getResource(StandardLocation.CLASS_OUTPUT, "", Constants.META_INF_SPI)
+             .toUri()
+             .toURL()
+             .openStream();
+         final var buffer = new BufferedReader(new InputStreamReader(file));) {
+
+      String line;
+      while ((line = buffer.readLine()) != null) {
+        line.replaceAll("\\s", "")
+          .replace(",", "\n")
+          .lines()
+          .forEach(ProcessingContext::addInjectSPI);
+      }
+    } catch (Exception e) {
+      // not a critical error
     }
   }
 }
