@@ -25,12 +25,10 @@ import javax.tools.ToolProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import io.avaje.spi.internal.ServiceProcessor;
-
 class InjectProcessorTest {
 
   @AfterEach
-  void deleteGeneratedFiles() throws IOException {
+  void deleteGeneratedFiles() {
     try {
       Stream.concat(
               Files.walk(Paths.get("io").toAbsolutePath()),
@@ -68,7 +66,7 @@ class InjectProcessorTest {
             List.of("--release=" + Integer.getInteger("java.specification.version")),
             null,
             files);
-    task.setProcessors(List.of(new InjectProcessor(), new ServiceProcessor()));
+    task.setProcessors(List.of(new InjectProcessor()));
 
     assertThat(task.call()).isTrue();
   }

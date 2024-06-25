@@ -44,13 +44,6 @@
     </dependency>
 
     <dependency>
-      <groupId>io.avaje</groupId>
-      <artifactId>avaje-spi-service</artifactId>
-      <version>1.11</version>
-      <optional>true</optional>
-    </dependency>
-
-    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <version>5.12.0</version>
