@@ -84,7 +84,6 @@ final class SimpleModuleWriter {
         ProcessingContext.addInjectSPI(fullName);
         return;
       }
-
       FileObject jfo = createMetaInfWriterFor(Constants.META_INF_TESTMODULE);
       if (jfo != null) {
         Writer writer = jfo.openWriter();
@@ -92,7 +91,6 @@ final class SimpleModuleWriter {
         writer.close();
       }
     } catch (IOException e) {
-      e.printStackTrace();
       logError("Failed to write services file " + e.getMessage());
     }
   }
