@@ -13,7 +13,6 @@ import static java.util.List.of;
 
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceConfigurationError;
 import java.util.Set;
 
 import javax.tools.StandardLocation;
@@ -70,33 +69,29 @@ final class ExternalProvider {
       return;
     }
     for (final var module : modules) {
-      try {
-        final var name = module.getClass().getTypeName();
-        final var provides = new ArrayList<String>();
-        APContext.logNote("Detected Module: " + name);
-        for (final var provide : module.provides()) {
-          providedTypes.add(provide.getTypeName());
-          provides.add(provide.getTypeName());
-        }
-        for (final var provide : module.autoProvides()) {
-          providedTypes.add(provide.getTypeName());
-          provides.add(provide.getTypeName());
-        }
-        for (final var provide : module.autoProvidesAspects()) {
-          final var aspectType = Util.wrapAspect(provide.getTypeName());
-          providedTypes.add(aspectType);
-          provides.add(aspectType);
-        }
-        final var requires = Arrays.stream(module.requires()).map(Type::getTypeName).collect(toList());
-
-        Arrays.stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
-        Arrays.stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
-        Arrays.stream(module.autoRequiresAspects()).map(Type::getTypeName).map(Util::wrapAspect).forEach(requires::add);
-
-        ProcessingContext.addModule(new ModuleData(name, provides, requires));
-      } catch (final ServiceConfigurationError expected) {
-        // ignore expected error reading the module that we are also writing
+      final var name = module.getClass().getTypeName();
+      final var provides = new ArrayList<String>();
+      APContext.logNote("Detected Module: " + name);
+      for (final var provide : module.provides()) {
+        providedTypes.add(provide.getTypeName());
+        provides.add(provide.getTypeName());
       }
+      for (final var provide : module.autoProvides()) {
+        providedTypes.add(provide.getTypeName());
+        provides.add(provide.getTypeName());
+      }
+      for (final var provide : module.autoProvidesAspects()) {
+        final var aspectType = Util.wrapAspect(provide.getTypeName());
+        providedTypes.add(aspectType);
+        provides.add(aspectType);
+      }
+      final var requires = Arrays.stream(module.requires()).map(Type::getTypeName).collect(toList());
+
+      Arrays.stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
+      Arrays.stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
+      Arrays.stream(module.autoRequiresAspects()).map(Type::getTypeName).map(Util::wrapAspect).forEach(requires::add);
+
+      ProcessingContext.addModule(new ModuleData(name, provides, requires));
     }
   }
 
