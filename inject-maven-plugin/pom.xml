@@ -5,6 +5,7 @@
     <groupId>org.avaje</groupId>
     <artifactId>java11-oss</artifactId>
     <version>4.3</version>
+    <relativePath/>
   </parent>
 
   <groupId>io.avaje</groupId>
