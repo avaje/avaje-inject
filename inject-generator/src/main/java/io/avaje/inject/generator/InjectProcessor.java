@@ -11,7 +11,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.tools.StandardLocation;
@@ -338,24 +337,14 @@ public final class InjectProcessor extends AbstractProcessor {
 
   private void registerSPI(Set<? extends Element> beans) {
     ElementFilter.typesIn(beans).stream()
-      .filter(InjectProcessor::isInjectExtension)
+      .filter(this::isExtension)
       .map(TypeElement::getQualifiedName)
       .map(Object::toString)
       .forEach(ProcessingContext::addInjectSPI);
   }
 
-  private static boolean isInjectExtension(TypeElement te) {
-    return te.getInterfaces().stream()
-      .map(TypeMirror::toString)
-      .anyMatch(EXTENSION_TYPES::contains);
+  private boolean isExtension(TypeElement te) {
+    return APContext.isAssignable(te, "io.avaje.inject.spi.InjectExtension");
   }
-
-  private static final Set<String> EXTENSION_TYPES = Set.of(
-    "io.avaje.inject.spi.ModuleOrdering",
-    "io.avaje.inject.spi.AvajeModule",
-    "io.avaje.inject.spi.InjectPlugin",
-    "io.avaje.inject.spi.ConfigPropertyPlugin",
-    "io.avaje.inject.spi.PropertyRequiresPlugin"
-  );
 
 }
