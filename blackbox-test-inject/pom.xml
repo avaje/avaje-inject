@@ -97,7 +97,7 @@
 			<plugin>
 				<groupId>io.avaje</groupId>
 				<artifactId>avaje-inject-maven-plugin</artifactId>
-				<version>10.0-RC7</version>
+				<version>10.0-RC9</version>
 				<executions>
 					<execution>
 						<phase>process-sources</phase>
