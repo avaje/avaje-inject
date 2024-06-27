@@ -2,7 +2,7 @@ package io.avaje.inject;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.PARAMETER;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -17,6 +17,6 @@ import java.lang.reflect.Type;
  * {@link BeanScopeBuilder#bean(String, Type, Object)}.
  */
 @Documented
-@Retention(RUNTIME)
+@Retention(SOURCE)
 @Target({FIELD, PARAMETER})
 public @interface External {}

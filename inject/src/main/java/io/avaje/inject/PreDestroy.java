@@ -1,11 +1,11 @@
 package io.avaje.inject;
 
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * The <code>PreDestroy</code> annotation is used on a method as a callback notification
@@ -26,7 +26,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * </ul>
  */
 @Documented
-@Retention(RUNTIME)
+@Retention(SOURCE)
 @Target(METHOD)
 public @interface PreDestroy {
 

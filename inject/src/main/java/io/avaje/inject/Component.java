@@ -49,7 +49,7 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
  * @see InjectModule#ignoreSingleton()
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 public @interface Component {
 
   /**

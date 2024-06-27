@@ -7,5 +7,5 @@ import java.lang.annotation.Target;
 
 /** Marks the type as being a Proxy. */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 public @interface Proxy {}

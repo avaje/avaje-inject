@@ -54,7 +54,7 @@ import java.lang.annotation.Target;
  * }</pre>
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 public @interface AssistFactory {
 
   /** Specify the factory interface for which the implementation will be generated. */
