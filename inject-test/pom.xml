@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.avaje</groupId>
     <artifactId>avaje-inject-parent</artifactId>
-    <version>10.0-RC8</version>
+    <version>10.0-RC9</version>
   </parent>
 
   <artifactId>avaje-inject-test</artifactId>
@@ -77,7 +77,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-http-api</artifactId>
-      <version>2.5</version>
+      <version>2.6</version>
       <scope>test</scope>
     </dependency>
 
