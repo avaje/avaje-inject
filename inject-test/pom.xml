@@ -11,7 +11,7 @@
   <description>testing support for avaje-inject dependency injection</description>
 
   <properties>
-    <jupiter.version>5.10.2</jupiter.version>
+    <jupiter.version>5.10.3</jupiter.version>
     <mockito.version>5.12.0</mockito.version>
   </properties>
 
@@ -105,7 +105,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.32</version>
+      <version>1.18.34</version>
       <scope>test</scope>
     </dependency>
 
