@@ -15,6 +15,7 @@ import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -77,11 +78,18 @@ public final class InjectProcessor extends AbstractProcessor {
     try {
 
       var file = APContext.getBuildResource("avaje-processors.txt");
-      var addition =
-          file.toFile().exists()
-              ? Files.lines(file).distinct().collect(joining("\n")) + "\navaje-inject-generator"
-              : "avaje-inject-generator";
-      Files.writeString(file, addition, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+      var addition = new StringBuilder();
+      //if file exists, dedup and append current processor
+      if (file.toFile().exists()) {
+        var result =
+            Stream.concat(Files.lines(file), Stream.of("avaje-inject-generator"))
+                .distinct()
+                .collect(joining("\n"));
+        addition.append(result);
+      } else {
+        addition.append("avaje-inject-generator");
+      }
+      Files.writeString(file, addition.toString(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
     } catch (IOException e) {
       // not an issue worth failing over
     }
