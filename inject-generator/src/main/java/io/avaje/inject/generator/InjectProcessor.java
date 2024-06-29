@@ -13,8 +13,12 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
+
+import static java.util.stream.Collectors.joining;
+
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -72,8 +76,12 @@ public final class InjectProcessor extends AbstractProcessor {
     // write a note in target so that other apts can know inject is running
     try {
 
-      var file = APContext.getBuildResource("avaje-processors/avaje-inject-generator");
-      Files.writeString(file, "avaje-inject-generator initialized");
+      var file = APContext.getBuildResource("avaje-processors.txt");
+      var addition =
+          file.toFile().exists()
+              ? Files.lines(file).distinct().collect(joining("\n")) + "\navaje-inject-generator"
+              : "avaje-inject-generator";
+      Files.writeString(file, addition, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
     } catch (IOException e) {
       // not an issue worth failing over
     }
