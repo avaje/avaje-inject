@@ -10,3 +10,5 @@ build/
 *.processors
 */bin/
 
+inject-generator/avaje-inject
+inject-generator/avaje-inject-generator

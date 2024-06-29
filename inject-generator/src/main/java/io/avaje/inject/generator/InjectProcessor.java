@@ -13,11 +13,8 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
-import javax.tools.StandardLocation;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -71,6 +68,15 @@ public final class InjectProcessor extends AbstractProcessor {
     this.defaultScope = allScopes.defaultScope();
     ExternalProvider.registerPluginProvidedTypes(defaultScope);
     pluginFileProvided.forEach(defaultScope::pluginProvided);
+
+    // write a note in target so that other apts can know inject is running
+    try {
+
+      var file = APContext.getBuildResource("avaje-processors/avaje-inject-generator");
+      Files.writeString(file, "avaje-inject-generator initialized");
+    } catch (IOException e) {
+      // not an issue worth failing over
+    }
   }
 
   /**
@@ -78,12 +84,9 @@ public final class InjectProcessor extends AbstractProcessor {
    */
   void loadProvidedFiles() {
     this.performModuleValidation =
-      lines("target/avaje-plugin-exists.txt").isEmpty()
-        && lines("build/avaje-plugin-exists.txt").isEmpty();
-    pluginFileProvided.addAll(lines("target/avaje-plugin-provides.txt"));
-    moduleFileProvided.addAll(lines("target/avaje-module-provides.txt"));
-    pluginFileProvided.addAll(lines("build/avaje-plugin-provides.txt"));
-    moduleFileProvided.addAll(lines("build/avaje-module-provides.txt"));
+      lines("avaje-plugin-exists.txt").isEmpty();
+    pluginFileProvided.addAll(lines("avaje-plugin-provides.txt"));
+    moduleFileProvided.addAll(lines("avaje-module-provides.txt"));
   }
 
   /**
@@ -91,8 +94,8 @@ public final class InjectProcessor extends AbstractProcessor {
    */
   private void loadOrderFiles() {
     Stream.concat(
-        lines("target/avaje-module-dependencies.csv").stream().skip(1),
-        lines("build/avaje-module-dependencies.csv").stream().skip(1))
+        lines("avaje-module-dependencies.csv").stream().skip(1),
+        lines("avaje-module-dependencies.csv").stream().skip(1))
       .filter(s -> !s.startsWith("External Module Type"))
       .distinct()
       .map(l -> l.split("\\|"))
@@ -102,15 +105,8 @@ public final class InjectProcessor extends AbstractProcessor {
 
   private List<String> lines(String relativeName) {
     try {
-      final String resource =
-        processingEnv
-          .getFiler()
-          .getResource(StandardLocation.CLASS_OUTPUT, "", relativeName)
-          .toUri()
-          .toString()
-          .replaceFirst("/target/classes", "")
-          .replaceFirst("/build/classes/java/main", "");
-      return Files.readAllLines(Paths.get(new URI(resource)));
+
+      return Files.readAllLines(APContext.getBuildResource(relativeName));
     } catch (final Exception e) {
       return Collections.emptyList();
     }
