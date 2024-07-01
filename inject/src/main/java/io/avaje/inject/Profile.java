@@ -1,10 +1,12 @@
 package io.avaje.inject;
 
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Expresses a requirement for a bean to be wired/registered into the {@link BeanScope}.
@@ -32,7 +34,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <p>If no ConfigPropertyPlugin is found then the default implementation is used which uses
  * {@link System#getProperty(String)} and {@link System#getenv(String)}.
  */
-@Retention(RUNTIME)
+@Retention(SOURCE)
 @Target({TYPE, METHOD, ANNOTATION_TYPE})
 public @interface Profile {
 

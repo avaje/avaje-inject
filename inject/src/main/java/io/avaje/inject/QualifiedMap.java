@@ -1,11 +1,11 @@
 package io.avaje.inject;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.PARAMETER;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
  * Marks an <code>Map&lt;String, T&gt; </code> field/parameter to receive a map of beans keyed
@@ -25,6 +25,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * }</pre>
  */
 @Target({PARAMETER, FIELD})
-@Retention(RUNTIME)
+@Retention(SOURCE)
 public @interface QualifiedMap {
 }

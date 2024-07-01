@@ -1,11 +1,14 @@
 package io.avaje.inject;
 
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Expresses a requirement for a bean to be wired/registered into the {@link BeanScope}.
@@ -27,7 +30,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <p>In the sample above the MyService bean will get wired only if a bean of type {@code
  * OtherService} is already registered in the {@link BeanScope}.
  */
-@Retention(RUNTIME)
+@Retention(SOURCE)
 @Repeatable(RequiresBean.Container.class)
 @Target({TYPE, METHOD, ANNOTATION_TYPE})
 public @interface RequiresBean {
