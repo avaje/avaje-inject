@@ -1,14 +1,11 @@
 package io.avaje.inject;
 
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static java.lang.annotation.ElementType.MODULE;
-import static java.lang.annotation.ElementType.PACKAGE;
-import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.CLASS;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Identify a bean as component with singleton scope that avaje-inject will use.
@@ -48,8 +45,8 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
  *
  * @see InjectModule#ignoreSingleton()
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.SOURCE)
+@Target(TYPE)
+@Retention(RUNTIME)
 public @interface Component {
 
   /**
@@ -70,7 +67,9 @@ public @interface Component {
   @Target({TYPE, PACKAGE, MODULE})
   @interface Import {
 
-    /** Types to generate DI classes for. */
+    /**
+     * Types to generate DI classes for.
+     */
     Class<?>[] value();
   }
 }
