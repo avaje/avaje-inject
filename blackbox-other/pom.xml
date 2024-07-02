@@ -6,7 +6,7 @@
   <parent>
     <artifactId>avaje-inject-parent</artifactId>
     <groupId>io.avaje</groupId>
-    <version>10.0-RC9</version>
+    <version>10.0-RC10</version>
   </parent>
 
   <artifactId>blackbox-other</artifactId>
