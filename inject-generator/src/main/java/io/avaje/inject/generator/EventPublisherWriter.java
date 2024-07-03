@@ -19,7 +19,7 @@ import javax.tools.JavaFileObject;
 /** Write the source code for the bean. */
 final class EventPublisherWriter {
   private static final Map<String, String> GENERATED_PUBLISHERS = new HashMap<>();
-  private final String TEMPLATE =
+  private static final String TEMPLATE =
       "package {0};\n\n"
           + "{1}"
           + "@Component\n"
@@ -131,7 +131,7 @@ final class EventPublisherWriter {
 
     StringBuilder writer = new StringBuilder();
     for (String importType : importTypes.forImport()) {
-      if (Util.validImportType(importType)) {
+      if (Util.validImportType(importType, packageName)) {
         writer.append(String.format("import %s;\n", Util.sanitizeImports(importType)));
       }
     }

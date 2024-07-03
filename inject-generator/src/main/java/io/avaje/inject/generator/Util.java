@@ -6,6 +6,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 final class Util {
@@ -24,8 +25,19 @@ final class Util {
     return "void".equalsIgnoreCase(type);
   }
 
-  static boolean validImportType(String type) {
-    return type.indexOf('.') > 0;
+  static boolean validImportType(String type, String packageName) {
+    return type.indexOf('.') > -1
+      && !type.startsWith("java.lang.")
+      && importDifferentPackage(type, packageName)
+      || importJavaLangSubpackage(type);
+  }
+
+  private static boolean importDifferentPackage(String type, String packageName) {
+    return type.replace(packageName + '.', "").indexOf('.') > -1;
+  }
+
+  private static boolean importJavaLangSubpackage(String type) {
+    return type.startsWith("java.lang.") && importDifferentPackage(type, "java.lang");
   }
 
   static String classOfMethod(String method) {

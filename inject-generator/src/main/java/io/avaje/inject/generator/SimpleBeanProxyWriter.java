@@ -95,7 +95,7 @@ final class SimpleBeanProxyWriter {
     writer.append("import %s;", Constants.INVOCATION_EXCEPTION).eol();
     writer.append("import %s;", Constants.METHOD_INTERCEPTOR).eol();
     writer.append("import %s;", Constants.PROXY).eol();
-    beanReader.writeImports(writer);
+    beanReader.writeImports(writer, packageName);
   }
 
   private void writeClassEnd() {

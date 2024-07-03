@@ -98,15 +98,16 @@ class UtilTest {
 
   @Test
   void validImportType() {
-    assertTrue(Util.validImportType("my.Foo"));
-    assertTrue(Util.validImportType("other.pack.Foo"));
+    assertTrue(Util.validImportType("java.lang.something.Foo", "org.foo"));
+    assertTrue(Util.validImportType("org.foo.some.Bar", "org.foo"));
+    assertTrue(Util.validImportType("org.other.Bar", "org.foo"));
   }
 
   @Test
   void validImportType_not() {
-    assertFalse(Util.validImportType("void"));
-    assertFalse(Util.validImportType("Foo"));
-    assertFalse(Util.validImportType("NoPackage"));
+    assertFalse(Util.validImportType("int", "org.foo"));
+    assertFalse(Util.validImportType("java.lang.Integer", "org.foo"));
+    assertFalse(Util.validImportType("org.foo.Bar", "org.foo"));
   }
 
   @Test

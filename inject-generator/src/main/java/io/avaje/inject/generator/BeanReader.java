@@ -346,9 +346,7 @@ final class BeanReader {
   }
 
   private Set<String> importTypes() {
-    if (Util.validImportType(type)) {
-      importTypes.add(type);
-    }
+    importTypes.add(type);
     typeReader.extraImports(importTypes);
     requestParams.addImports(importTypes);
     aspects.extraImports(importTypes);
@@ -365,7 +363,7 @@ final class BeanReader {
     if (!suppressGeneratedImport){
       importTypes.add(Constants.GENERATED);
     }
-    if (!suppressBuilderImport) {
+    if (!suppressBuilderImport && !isGenerateProxy()) {
       importTypes.add(Constants.BUILDER);
     }
     return importTypes.forImport();
@@ -384,13 +382,13 @@ final class BeanReader {
     return suppressGeneratedImport ? "@io.avaje.inject.spi.Generated" : "@Generated";
   }
 
-  void writeImports(Append writer) {
+  void writeImports(Append writer, String pkgName) {
     if (!allGenericTypes().isEmpty()) {
       importTypes.add(Constants.TYPE);
       importTypes.add(Constants.GENERICTYPE);
     }
     for (String importType : importTypes()) {
-      if (Util.validImportType(importType)) {
+      if (Util.validImportType(importType, pkgName)) {
         writer.append("import %s;", Util.sanitizeImports(importType)).eol();
       }
     }
