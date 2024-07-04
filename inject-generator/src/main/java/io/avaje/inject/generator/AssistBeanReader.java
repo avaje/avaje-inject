@@ -140,12 +140,8 @@ final class AssistBeanReader {
   }
 
   private Set<String> importTypes() {
-    importTypes.add("io.avaje.inject.AssistFactory");
     Optional.ofNullable(targetType).ifPresent(t -> importTypes.add(t.getQualifiedName().toString()));
 
-    if (Util.validImportType(type)) {
-      importTypes.add(type);
-    }
     if (qualifierName != null) {
       importTypes.add(NamedPrism.PRISM_TYPE);
     }
@@ -159,13 +155,13 @@ final class AssistBeanReader {
     return importTypes.forImport();
   }
 
-  void writeImports(Append writer) {
+  void writeImports(Append writer, String pkgName) {
     importTypes.add(Constants.COMPONENT);
     if (!injectFields().isEmpty()) {
       importTypes.add(Constants.TYPE);
     }
     for (String importType : importTypes()) {
-      if (Util.validImportType(importType)) {
+      if (Util.validImportType(importType, pkgName)) {
         writer.append("import %s;", Util.sanitizeImports(importType)).eol();
       }
     }
