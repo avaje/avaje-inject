@@ -1,13 +1,7 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.APContext.logError;
-import static io.avaje.inject.generator.ProcessingContext.createMetaInfWriterFor;
-
 import java.io.IOException;
-import java.io.Writer;
 import java.util.Set;
-
-import javax.tools.FileObject;
 
 /** Write the source code for the factory. */
 final class SimpleOrderWriter {
@@ -44,7 +38,6 @@ final class SimpleOrderWriter {
     writer
       .append(
         "import static java.util.Map.entry;\n"
-          + "import static java.util.List.of;\n"
           + "\n"
           + "import java.util.List;\n"
           + "import java.util.Map;\n"

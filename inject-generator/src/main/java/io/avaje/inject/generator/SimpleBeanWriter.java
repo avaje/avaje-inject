@@ -325,7 +325,7 @@ final class SimpleBeanWriter {
   }
 
   private void writeImports() {
-    beanReader.writeImports(writer);
+    beanReader.writeImports(writer, packageName);
   }
 
   private void writeClassEnd() {

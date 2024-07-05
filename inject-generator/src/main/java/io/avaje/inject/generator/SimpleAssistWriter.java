@@ -72,7 +72,7 @@ final class SimpleAssistWriter {
   }
 
   private void writeImports() {
-    beanReader.writeImports(writer);
+    beanReader.writeImports(writer, packageName);
   }
 
   private void writeClassStart() {

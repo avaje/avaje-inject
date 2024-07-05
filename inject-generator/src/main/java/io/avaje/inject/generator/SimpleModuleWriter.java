@@ -194,7 +194,7 @@ final class SimpleModuleWriter {
       writer.append("import %s;", type).eol();
     }
     for (String type : scopeInfo.initModuleDependencies(ordering.importTypes())) {
-      if (Util.validImportType(type)) {
+      if (Util.validImportType(type, modulePackage)) {
         writer.append("import %s;", type).eol();
       }
     }
