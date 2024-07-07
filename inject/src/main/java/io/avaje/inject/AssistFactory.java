@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotate a bean for which we want avaje-inject to generate a factory.
+ * Annotate a bean for which we want to generate a factory.
  *
  * <p>The bean will have some properties of normal dependency injection components and others that
  * will be parameters to the method on the factory - these parameters are annotated with
@@ -14,11 +14,9 @@ import java.lang.annotation.Target;
  *
  * <h3>Example</h3>
  *
- * <p>Create an interface which we want avaje-inject to generate an implementation. We desire this
- * because the factory has some managed dependencies that should be injected for us and some
- * dependencies that are provided by the application (and annotated with {@code Assisted}).
+ * <p>Create an interface for which to generate an implementation.
  *
- * <p>The factory supertype must be a functional interface, or an abstract class with only one
+ * <p>The factory interface must either be a functional interface, or an abstract class with only one
  * abstract method defined.
  *
  * <pre>{@code
@@ -29,9 +27,9 @@ import java.lang.annotation.Target;
  *
  * }</pre>
  *
- * <p>Create a bean annotated with {@code @AssistFactory} that specifies the factory. Any
- * dependencies that are annotated with {@code Assisted} will be parameters of the factory method,
- * the other dependencies will be managed and injected by avaje-inject.
+ * <p>Create a bean annotated with {@code @AssistFactory} that specifies the same factory interface. Any
+ * dependencies annotated with {@code Assisted} must be parameters of the factory method,
+ * the other dependencies will be managed and injected.
  *
  * <p>The {@code Assisted} parameters must match the factory method parameters by name and type. In
  * this example, {@code Path myPath} match in both CssScanner and in CssFactory.

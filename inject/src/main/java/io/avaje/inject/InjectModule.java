@@ -9,7 +9,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Used to explicitly specify if it depends on externally provided beans or provides.
+ * Used to explicitly specify whether the current module depends on/provides beans or aspects.
  *
  * <h3>External dependencies</h3>
  * <p>

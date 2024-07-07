@@ -3,9 +3,9 @@ package io.avaje.inject.spi;
 import java.lang.reflect.Type;
 
 /**
- * Represents a full type including generics declaration, to avoid information loss due to type erasure.
+ * Represents a full type including generic declarations, to avoid information loss due to type erasure.
  * <p>
- * This is a cut down version of Helidon GenericType Apache 2 license.
+ * This is a cut down version of Helidon GenericType under the Apache 2 license.
  *
  * @param <T> the generic type parameter
  */

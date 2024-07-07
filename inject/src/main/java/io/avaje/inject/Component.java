@@ -50,7 +50,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface Component {
 
   /**
-   * Specify types to generate DI classes for. To avoid package splitting, the imported DI classes
+   * Specify types to generate DI classes for.
    *
    * <p>These types are typically in an external project / dependency or otherwise types that we
    * can't or don't want to explicitly annotate with {@code @Singleton}/{@code @Component}.

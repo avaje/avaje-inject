@@ -55,13 +55,12 @@ public @interface Bean {
    * Specify the priority of the destroy method to control its execution
    * order relative to other destroy methods.
    * <p>
-   * Low values execute earlier than high values. All destroy methods without
-   * any explicit priority are given a value of 1000.
+   * Low values execute earlier than high values.
    */
   int destroyPriority() default 0;
 
   /**
-   * Specify that the concrete instance of the bean is an AutoCloseable. Use if your bean interface
+   * Specify that the concrete instance of the bean is an AutoCloseable. Use if the bean interface
    * doesn't extend AutoCloseable but the concrete class implements it.
    */
   boolean autoCloseable() default false;

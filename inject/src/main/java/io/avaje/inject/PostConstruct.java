@@ -20,13 +20,13 @@ import java.lang.annotation.Target;
  * The method on which the <code>PostConstruct</code> annotation is applied must fulfill
  * the following criteria:
  * <ul>
- * <li>The method must not have any parameters.</li>
+ * <li>The method must have a single {@link BeanScope} parameter or else have no parameters.</li>
  * <li>The method may be public, protected or package private.</li>
  * <li>The method must not be static.</li>
  * </ul>
  */
 @Documented
-@Retention(RUNTIME)
 @Target(METHOD)
+@Retention(RUNTIME)
 public @interface PostConstruct {
 }

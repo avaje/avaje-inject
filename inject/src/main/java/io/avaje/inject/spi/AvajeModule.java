@@ -3,7 +3,7 @@ package io.avaje.inject.spi;
 import java.lang.reflect.Type;
 
 /**
- * A AvajeModule that can be included in BeanScope.
+ * A Module containing dependencies that will be included in BeanScope.
  */
 public interface AvajeModule extends InjectExtension {
 

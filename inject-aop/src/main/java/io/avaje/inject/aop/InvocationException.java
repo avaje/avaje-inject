@@ -1,7 +1,7 @@
 package io.avaje.inject.aop;
 
 /**
- * Exception occurring during method interception.
+ * Represents an exception occurring during method interception.
  * <p>
  * When using aspects and {@link MethodInterceptor} any throwable that is undeclared on the
  * method is caught and re-thrown as an InvocationException.

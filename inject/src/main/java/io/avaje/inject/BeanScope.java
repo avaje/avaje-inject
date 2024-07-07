@@ -35,31 +35,22 @@ import io.avaje.lang.Nullable;
  *
  * <h3>External dependencies</h3>
  * <p>
- * We can supporting external dependencies when creating the BeanScope. We need to do 2 things.
- * we need to specify these via
- * </p>
- * <ul>
- *   <li>
- *       1. Specify the external dependency via {@code @InjectModule(requires=...)}.
- *       Otherwise at compile time the annotation processor detects it as a missing dependency and we can't compile.
- *   </li>
- *   <li>
- *       2. Provide the dependency when creating the BeanScope
- *   </li>
- * </ul>
+ * We can supporting external dependencies when creating the BeanScope.
+ * Use the {@link io.avaje.inject.External @External} annotation.
  * <p>
  * For example, given we have Pump as an externally provided dependency.
  *
  * <pre>{@code
  *
- *   // tell the annotation processor Pump is provided externally
- *   // otherwise it thinks we have a missing dependency
- *
- *   @InjectModule(requires=Pump.class)
- *
+ *   class CoffeeMaker {
+ *     // tell the annotation processor Pump is provided externally at runtime
+ *     // otherwise it thinks we have a missing dependency
+ *     @External Pump pump;
+ *   }
  * }</pre>
  * <p>
- * When we build the BeanScope provide the dependency via {@link BeanScopeBuilder#bean(Class, Object)}.
+ * When building the BeanScope, the dependency must be provided manually via
+ * {@link BeanScopeBuilder#bean(Class, Object)}.
  *
  * <pre>{@code
  *
