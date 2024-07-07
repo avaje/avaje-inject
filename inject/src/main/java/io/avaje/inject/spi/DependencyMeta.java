@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Hold bean dependency metadata intended for internal use by code generation (Java annotation processing).
+ * Hold bean dependency metadata intended for internal use by the annotation processor.
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.CLASS)

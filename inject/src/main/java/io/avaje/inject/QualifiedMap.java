@@ -8,7 +8,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Marks an <code>Map&lt;String, T&gt; </code> field/parameter to receive a map of beans keyed
+ * Marks an <code>Map&lt;String, T&gt;</code> field/parameter to receive a map of beans keyed
  * by qualifier name.
  *
  * <pre>{@code

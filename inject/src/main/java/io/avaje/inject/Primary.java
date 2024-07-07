@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Identify a bean as being the preferred bean to inject when multiple beans implement
+ * Identify a bean as the preferred bean to inject when multiple beans implement
  * the intended interface.
  *
  * <pre>{@code

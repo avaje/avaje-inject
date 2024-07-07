@@ -4,7 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 /**
- * Provides method interception such that logic can be provided both before and after method invocation.
+ * Provides method interception logic that can be executed before, during, and after a method invocation.
  * <p>
  * MethodInterceptor instances are provided by {@link AspectProvider#interceptor(Method, Annotation)}.
  */
@@ -12,11 +12,9 @@ import java.lang.reflect.Method;
 public interface MethodInterceptor {
 
   /**
-   * Implementation can perform before and after invocation logic.
+   * Intercepts the method invocation.
    * <p>
-   * If a method interceptor wants to replace the result it does this via {@link Invocation#result(Object)}.
-   * This is a little different to traditional method interceptors (i.e. <code>org.org.aopalliance.intercept.MethodInterceptor</code>).
-   * It is done this way to handle implied generic return types in the generated source code.
+   * If the interceptor wants to replace the result, it can be done via {@link Invocation#result(Object)}.
    *
    * @param invocation The invocation being intercepted
    * @throws Throwable If the interception or underlying invocation throws an exception

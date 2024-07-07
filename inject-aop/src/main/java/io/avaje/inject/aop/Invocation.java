@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Method invocation using in {@link MethodInterceptor#invoke(Invocation)} for Aspects.
+ * Method invocation used in {@link MethodInterceptor#invoke(Invocation)} for Aspects.
  * <p>
  * Represents a method invocation that can be intercepted with additional before and after
  * invocation logic.

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Determines Wiring order.
+ * Determines Multi-Module wiring order.
  */
 public interface ModuleOrdering extends InjectExtension {
 

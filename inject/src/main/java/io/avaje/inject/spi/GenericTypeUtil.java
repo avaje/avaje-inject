@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Deque;
 
 /**
- * Cut down version of GenericTypeUtil from Helidon project Apache 2 license.
+ * Cut down version of GenericTypeUtil from Helidon project under the Apache 2 license.
  */
 final class GenericTypeUtil {
 
