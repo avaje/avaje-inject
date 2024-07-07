@@ -2,16 +2,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.avaje</groupId>
-    <artifactId>java11-oss</artifactId>
-    <version>4.3</version>
-    <relativePath/>
+    <artifactId>avaje-inject-parent</artifactId>
+    <groupId>io.avaje</groupId>
+    <version>10.0-RC11</version>
   </parent>
 
-  <groupId>io.avaje</groupId>
   <artifactId>avaje-inject-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>10.0-RC9</version>
 
   <dependencies>
     <dependency>
