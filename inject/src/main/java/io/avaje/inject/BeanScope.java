@@ -33,11 +33,10 @@ import io.avaje.lang.Nullable;
  *
  * }</pre>
  *
- * <h3>Runtime dependencies</h3>
+ * <h3>External dependencies</h3>
  * <p>
- * As the dependency graph is validated at compile-time, providing beans at runtime requires an extra step.
- * To support external dependencies when creating the BeanScope, we can use the {@link io.avaje.inject.External @External} annotation.
- * </p>
+ * We can supporting external dependencies when creating the BeanScope.
+ * Use the {@link io.avaje.inject.External @External} annotation.
  * <p>
  * For example, given we have Pump as an externally provided dependency.
  *
@@ -50,7 +49,8 @@ import io.avaje.lang.Nullable;
  *   }
  * }</pre>
  * <p>
- * When building the BeanScope, the dependency must be provided manually via {@link BeanScopeBuilder#bean(Class, Object)}.
+ * When building the BeanScope, the dependency must be provided manually via
+ * {@link BeanScopeBuilder#bean(Class, Object)}.
  *
  * <pre>{@code
  *
