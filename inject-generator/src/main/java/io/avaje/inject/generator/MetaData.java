@@ -1,9 +1,10 @@
 package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.typeElement;
-
+import static java.util.stream.Collectors.toList;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -46,9 +47,17 @@ final class MetaData {
     this.shortType = Util.shortName(type);
     this.method = meta.method();
     this.providesAspect = meta.providesAspect();
-    this.provides = meta.provides();
+    this.provides =
+        Stream.concat(
+                meta.provides().stream().map(s -> Util.addQualifierSuffix(name, s)),
+                meta.provides().stream())
+            .collect(toList());
     this.dependsOn = meta.dependsOn().stream().map(Dependency::new).collect(Collectors.toList());
-    this.autoProvides = meta.autoProvides();
+    this.autoProvides =
+        Stream.concat(
+                meta.autoProvides().stream().map(s -> Util.addQualifierSuffix(name, s)),
+                meta.autoProvides().stream())
+            .collect(toList());
     this.importedComponent = meta.importedComponent();
   }
 
@@ -249,6 +258,7 @@ final class MetaData {
   }
 
   private void appendProvides(Append sb, String attribute, List<String> types) {
+
     sb.append(",").eol().append("      ").append(attribute).append(" = {");
     final var size = types.size();
     if (size > 1) {
@@ -256,14 +266,16 @@ final class MetaData {
     }
     var seen = new HashSet<String>();
     for (int i = 0; i < types.size(); i++) {
-      if (!seen.add(types.get(i))) {
+
+      final var depType = types.get(i);
+      if (!"dependsOn".equals(attribute) && depType.contains(":") || !seen.add(depType)) {
         continue;
       }
       if (i > 0) {
         sb.append(",").eol().append("        ");
       }
       sb.append("\"");
-      sb.append(types.get(i));
+      sb.append(depType);
       sb.append("\"");
     }
     if (size > 1) {

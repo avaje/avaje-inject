@@ -34,6 +34,7 @@ final class MetaDataOrdering {
         queue.add(metaData);
       }
       // register into map keyed by provider
+      providerAdd(metaData.toString()).add(metaData);
       providerAdd(metaData.type()).add(metaData);
       for (String provide : metaData.provides()) {
         providerAdd(provide).add(metaData);
@@ -106,7 +107,7 @@ final class MetaDataOrdering {
 
   private MetaData findCircularDependency(List<MetaData> remainder, Dependency dependency) {
     for (MetaData metaData : remainder) {
-      if (metaData.type().equals(dependency.name())) {
+      if (metaData.toString().contains(dependency.name())) {
         return metaData;
       }
       final List<String> provides = metaData.provides();
@@ -156,12 +157,10 @@ final class MetaDataOrdering {
   private void warnOnDependencies() {
     if (!missingDependencyTypes.isEmpty()) {
       logError("Dependencies %s are not provided - missing @Singleton, @Component, @Factory/@Bean or specify external dependency via @InjectModule requires attribute", missingDependencyTypes);
-    } else {
-      if (!queue.isEmpty()) {
-        logWarn("There are " + queue.size() + " beans with unsatisfied dependencies (assuming external dependencies)");
-        for (MetaData m : queue) {
-          logWarn("Unsatisfied dependencies on %s dependsOn %s", m, m.dependsOn());
-        }
+    } else if (!queue.isEmpty()) {
+      logWarn("There are " + queue.size() + " beans with unsatisfied dependencies (assuming external dependencies)");
+      for (MetaData m : queue) {
+        logWarn("Unsatisfied dependencies on %s dependsOn %s", m, m.dependsOn());
       }
     }
   }

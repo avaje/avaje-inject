@@ -5,6 +5,9 @@ import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+
+import static java.util.function.Predicate.not;
+
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -348,5 +351,10 @@ final class Util {
 
   static String trimAnnotationString(String input) {
     return ANNOTATION_TYPE_PATTERN.matcher(input).replaceAll("@");
+  }
+
+  static String addQualifierSuffix(String named, String type) {
+    return type
+        + Optional.ofNullable(named).filter(not(String::isBlank)).map(s -> ":" + s).orElse("");
   }
 }

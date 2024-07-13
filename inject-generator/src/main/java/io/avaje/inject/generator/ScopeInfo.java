@@ -413,6 +413,11 @@ final class ScopeInfo {
     writer.append("  public %s[] %s() {", arrayType, fieldName).eol();
     writer.append("    return new %s[] {", arrayType).eol();
     for (final String rawType : types) {
+
+      if (rawType.contains(":")) {
+        continue;
+      }
+
       if (rawType.contains("<")) {
         writer.append("      new GenericType<%s>(){},", rawType).eol();
       } else {

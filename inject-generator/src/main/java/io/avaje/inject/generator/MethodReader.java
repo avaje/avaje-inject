@@ -3,10 +3,15 @@ package io.avaje.inject.generator;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+
+import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static io.avaje.inject.generator.ProcessingContext.asElement;
 import static io.avaje.inject.generator.Constants.*;
@@ -157,12 +162,26 @@ final class MethodReader {
       .filter(t -> !t.equals(returnTypeRaw))
       .map(t -> CONDITIONAL_DEPENDENCY + t)
       .forEach(dependsOn::add);
+
     for (final MethodParam param : params) {
-      dependsOn.add(Util.trimWildcard(param.paramType));
+      var dep = Util.addQualifierSuffix(param.named, Util.trimWildcard(param.paramType));
+      dependsOn.add(dep);
     }
     metaData.setDependsOn(dependsOn);
-    metaData.setProvides(typeReader == null ? Collections.emptyList() : typeReader.provides());
-    metaData.setAutoProvides(typeReader == null ? List.of() : typeReader.autoProvides());
+    metaData.setProvides(
+        typeReader == null
+            ? Collections.emptyList()
+            : Stream.concat(
+                    typeReader.provides().stream().map(s -> Util.addQualifierSuffix(name, s)),
+                    typeReader.provides().stream())
+                .collect(toList()));
+    metaData.setAutoProvides(
+        typeReader == null
+            ? List.of()
+            : Stream.concat(
+                    typeReader.autoProvides().stream().map(s -> Util.addQualifierSuffix(name, s)),
+                    typeReader.autoProvides().stream())
+                .collect(toList()));
     metaData.setProvidesAspect(typeReader == null ? "" : typeReader.providesAspect());
     return metaData;
   }
@@ -554,7 +573,9 @@ final class MethodReader {
     }
 
     Dependency dependsOn() {
-      return new Dependency(paramType, utilType.isCollection());
+      return new Dependency(
+          Util.addQualifierSuffix(named, paramType),
+          utilType.isCollection());
     }
 
     void addImports(ImportTypeMap importTypes) {
