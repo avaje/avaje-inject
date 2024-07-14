@@ -513,7 +513,7 @@ final class MethodReader {
       this.isObserveEvent = ObservesPrism.isPresent(param);
 
       if (nullable || param.asType().toString().startsWith("java.util.Optional<")) {
-        ProcessingContext.addOptionalType(paramType);
+        ProcessingContext.addOptionalType(paramType, named);
       }
 
       if (fullUType.fullWithoutAnnotations().startsWith("io.avaje.inject.events.Event")) {
