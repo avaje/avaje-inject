@@ -180,12 +180,12 @@ final class BeanReader {
       });
 
     conditions.requireTypes.stream()
-      .map(t -> new Dependency(Constants.CONDITIONAL_DEPENDENCY + t))
-      .forEach(list::add);
+        .map(t -> new Dependency(Constants.CONDITIONAL_DEPENDENCY + t, ""))
+        .forEach(list::add);
     conditions.missingTypes.stream()
-      .filter(t -> !t.equals(type))
-      .map(t -> new Dependency(Constants.CONDITIONAL_DEPENDENCY + t))
-      .forEach(list::add);
+        .filter(t -> !t.equals(type))
+        .map(t -> new Dependency(Constants.CONDITIONAL_DEPENDENCY + t, ""))
+        .forEach(list::add);
     return list;
   }
 

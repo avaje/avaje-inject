@@ -9,7 +9,6 @@ import static java.util.stream.Collectors.toList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -167,7 +166,7 @@ final class MethodReader {
       var dep = Util.addQualifierSuffix(param.named, Util.trimWildcard(param.paramType));
       dependsOn.add(dep);
     }
-    metaData.setDependsOn(dependsOn);
+    metaData.setDependsOn(dependsOn, name);
     metaData.setProvides(
         typeReader == null
             ? Collections.emptyList()
@@ -573,9 +572,7 @@ final class MethodReader {
     }
 
     Dependency dependsOn() {
-      return new Dependency(
-          Util.addQualifierSuffix(named, paramType),
-          utilType.isCollection());
+      return new Dependency(paramType, named, utilType.isCollection());
     }
 
     void addImports(ImportTypeMap importTypes) {

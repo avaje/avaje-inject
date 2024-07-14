@@ -147,6 +147,8 @@ final class MetaDataOrdering {
         TypeElement element = elementMaybe(metaData.type());
         logError(element, "No dependency provided for " + dependency + " on " + metaData.type());
         missingDependencyTypes.add(dependency.name());
+        //io.avaje.inject.events.Event<io.avaje.inject.generator.models.valid.observes.CustomEvent>:tempqualifier(defaultval=0,inject={@nestedannotation(inject={})},someotherstring=\"celsi\",value={celsius})
+        //io.avaje.inject.events.Event<io.avaje.inject.generator.models.valid.observes.CustomEvent>:tempqualifier(defaultval=0, inject={@nestedannotation(inject={})}, someotherstring=\"celsi\", value={celsius})
       }
     }
   }
@@ -156,7 +158,7 @@ final class MetaDataOrdering {
    */
   private void warnOnDependencies() {
     if (!missingDependencyTypes.isEmpty()) {
-      logError("Dependencies %s are not provided - missing @Singleton, @Component, @Factory/@Bean or specify external dependency via @InjectModule requires attribute", missingDependencyTypes);
+      logError("Dependencies %s are not provided - missing @Singleton, @Component, @Factory/@Bean or specify external dependency via @External", missingDependencyTypes);
     } else if (!queue.isEmpty()) {
       logWarn("There are " + queue.size() + " beans with unsatisfied dependencies (assuming external dependencies)");
       for (MetaData m : queue) {

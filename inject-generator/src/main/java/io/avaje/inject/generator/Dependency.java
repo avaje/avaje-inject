@@ -9,26 +9,27 @@ final class Dependency {
   private boolean softDependency;
   private final boolean conditionalDependency;
 
-  Dependency(String name) {
+  Dependency(String type, String qualifier) {
     String nameStr;
-    if (name.startsWith(SOFT_DEPENDENCY)) {
+    if (type.startsWith(SOFT_DEPENDENCY)) {
       this.softDependency = true;
       this.conditionalDependency = false;
-      nameStr = ProcessorUtils.trimAnnotations(name.substring(5));
-    } else if (name.startsWith(CONDITIONAL_DEPENDENCY)) {
+      nameStr = ProcessorUtils.trimAnnotations(type.substring(5));
+    } else if (type.startsWith(CONDITIONAL_DEPENDENCY)) {
       this.softDependency = true;
       this.conditionalDependency = true;
-      nameStr = ProcessorUtils.trimAnnotations(name.substring(4));
+      nameStr = ProcessorUtils.trimAnnotations(type.substring(4));
     } else {
       this.softDependency = false;
       this.conditionalDependency = false;
-      nameStr = ProcessorUtils.trimAnnotations(name);
+      nameStr = ProcessorUtils.trimAnnotations(type);
     }
-    this.name = nameStr.replace(", ", ",");
+    this.name = Util.addQualifierSuffix(qualifier, nameStr).replace(", ", ",");
   }
 
-  Dependency(String name, boolean softDependency) {
-    this.name = ProcessorUtils.trimAnnotations(name).replace(", ", ",");
+  Dependency(String name, String qualifier, boolean softDependency) {
+    this.name =
+        Util.addQualifierSuffix(qualifier, ProcessorUtils.trimAnnotations(name)).replace(", ", ",");
     this.softDependency = softDependency;
     this.conditionalDependency = false;
   }

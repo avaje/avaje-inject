@@ -52,7 +52,8 @@ final class MetaData {
                 meta.provides().stream().map(s -> Util.addQualifierSuffix(name, s)),
                 meta.provides().stream())
             .collect(toList());
-    this.dependsOn = meta.dependsOn().stream().map(Dependency::new).collect(Collectors.toList());
+    this.dependsOn =
+        meta.dependsOn().stream().map(d -> new Dependency(d, name)).collect(Collectors.toList());
     this.autoProvides =
         Stream.concat(
                 meta.autoProvides().stream().map(s -> Util.addQualifierSuffix(name, s)),
@@ -258,6 +259,9 @@ final class MetaData {
   }
 
   private void appendProvides(Append sb, String attribute, List<String> types) {
+    if (!"dependsOn".equals(attribute)) {
+      types.removeIf(s -> s.contains(":"));
+    }
 
     sb.append(",").eol().append("      ").append(attribute).append(" = {");
     final var size = types.size();
@@ -268,7 +272,7 @@ final class MetaData {
     for (int i = 0; i < types.size(); i++) {
 
       final var depType = types.get(i);
-      if (!"dependsOn".equals(attribute) && depType.contains(":") || !seen.add(depType)) {
+      if (!seen.add(depType)) {
         continue;
       }
       if (i > 0) {
@@ -288,8 +292,9 @@ final class MetaData {
     this.provides = provides;
   }
 
-  void setDependsOn(List<String> dependsOn) {
-    this.dependsOn = dependsOn.stream().map(Dependency::new).collect(Collectors.toList());
+  void setDependsOn(List<String> dependsOn, String name) {
+    this.dependsOn =
+        dependsOn.stream().map(d -> new Dependency(d, "")).collect(Collectors.toList());
   }
 
   void setMethod(String method) {

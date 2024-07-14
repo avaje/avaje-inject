@@ -355,6 +355,9 @@ final class Util {
 
   static String addQualifierSuffix(String named, String type) {
     return type
-        + Optional.ofNullable(named).filter(not(String::isBlank)).map(s -> ":" + s).orElse("");
+        + Optional.ofNullable(named)
+            .filter(not(String::isBlank))
+            .map(s -> ":" + s)
+            .orElse("");
   }
 }
