@@ -65,6 +65,9 @@ final class EventPublisherWriter {
     originName = getUniqueClassName(className, 0);
 
     if (GENERATED_PUBLISHERS.containsKey(originName)) {
+      //in super niche situations when compiling the same module, we need to tell avaje that these types already exist
+      //got this when running both my eclipse compiler and then the terminal build
+      ProcessingContext.addOptionalType(UType.parse(asType).fullWithoutAnnotations(), Util.getNamed(element));
       return;
     }
     importTypes.addAll(utype.importTypes());
