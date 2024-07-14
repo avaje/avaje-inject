@@ -6,6 +6,9 @@ import static io.avaje.inject.generator.ProcessingContext.elementMaybe;
 import static io.avaje.inject.generator.ProcessingContext.externallyProvided;
 
 import javax.lang.model.element.TypeElement;
+
+import static java.util.stream.Collectors.toList;
+
 import java.util.*;
 
 final class MetaDataOrdering {
@@ -147,8 +150,6 @@ final class MetaDataOrdering {
         TypeElement element = elementMaybe(metaData.type());
         logError(element, "No dependency provided for " + dependency + " on " + metaData.type());
         missingDependencyTypes.add(dependency.name());
-        //io.avaje.inject.events.Event<io.avaje.inject.generator.models.valid.observes.CustomEvent>:tempqualifier(defaultval=0,inject={@nestedannotation(inject={})},someotherstring=\"celsi\",value={celsius})
-        //io.avaje.inject.events.Event<io.avaje.inject.generator.models.valid.observes.CustomEvent>:tempqualifier(defaultval=0, inject={@nestedannotation(inject={})}, someotherstring=\"celsi\", value={celsius})
       }
     }
   }
@@ -158,7 +159,13 @@ final class MetaDataOrdering {
    */
   private void warnOnDependencies() {
     if (!missingDependencyTypes.isEmpty()) {
-      logError("Dependencies %s are not provided - missing @Singleton, @Component, @Factory/@Bean or specify external dependency via @External", missingDependencyTypes);
+      var missingMessage =
+          missingDependencyTypes.stream()
+              .map(s -> s.replaceFirst(":", " with qualifier: "))
+              .collect(toList());
+      logError(
+          "Dependencies %s are not provided - there are no @Singleton, @Component, @Factory/@Bean that currently provide this type. If this is an external dependency consider specifying via @External",
+          missingMessage);
     } else if (!queue.isEmpty()) {
       logWarn("There are " + queue.size() + " beans with unsatisfied dependencies (assuming external dependencies)");
       for (MetaData m : queue) {

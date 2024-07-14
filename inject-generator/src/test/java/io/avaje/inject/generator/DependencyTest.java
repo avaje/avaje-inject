@@ -34,7 +34,7 @@ class DependencyTest {
   void dependsOn_qualifier() {
     Dependency dependency = new Dependency("org.foo.Bar", "sus");
 
-    assertThat(dependency.dependsOn()).isEqualTo("org.foo.Bar");
+    assertThat(dependency.dependsOn()).isEqualTo("org.foo.Bar:sus");
     assertThat(dependency.isSoftDependency()).isFalse();
     assertThat(dependency.name()).isEqualTo("org.foo.Bar:sus");
   }
