@@ -47,13 +47,9 @@ public class AvajeInjectPlugin implements Plugin<Project> {
     }
 
     try (var classLoader = classLoader(project);
-        var moduleWriter = createFileWriter(outputDir.getPath(), "avaje-module-provides.txt");
         var pluginWriter = createFileWriter(outputDir.getPath(), "avaje-plugin-provides.txt");
         var moduleCSV = createFileWriter(outputDir.getPath(), "avaje-module-dependencies.csv")) {
-
-        writeProvidedPlugins(classLoader, pluginWriter);
-        writeProvidedModules(classLoader, moduleWriter);
-        writeModuleCSV(moduleCSV);
+        writeModuleCSV(classLoader, moduleCSV);
 
     } catch (IOException e) {
       throw new GradleException("Failed to write avaje-module-provides", e);
@@ -91,7 +87,29 @@ public class AvajeInjectPlugin implements Plugin<Project> {
     }
   }
 
-  private void writeProvidedModules(ClassLoader classLoader, FileWriter moduleWriter) throws IOException {
+  private static String wrapAspect(String aspect) {
+    return "io.avaje.inject.aop.AspectProvider<" + aspect + ">";
+  }
+
+  private URLClassLoader classLoader(Project project) {
+    final URL[] urls = createClassPath(project);
+    return new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
+  }
+
+  private static URL[] createClassPath(Project project) {
+    try {
+      Set<File> compileClasspath = project.getConfigurations().getByName("compileClasspath").resolve();
+      final List<URL> urls = new ArrayList<>(compileClasspath.size());
+      for (File file : compileClasspath) {
+        urls.add(file.toURI().toURL());
+      }
+      return urls.toArray(new URL[0]);
+    } catch (MalformedURLException e) {
+      throw new GradleException("Error building classpath", e);
+    }
+  }
+
+  private void writeModuleCSV(ClassLoader classLoader, FileWriter moduleWriter) throws IOException {
     final Set<String> providedTypes = new HashSet<>();
 
     final List<AvajeModule> avajeModules = new ArrayList<>();
@@ -133,36 +151,7 @@ public class AvajeInjectPlugin implements Plugin<Project> {
           .forEach(requires::add);
       modules.add(new ModuleData(name, provides, requires));
     }
-
-    for (final String providedType : providedTypes) {
-      moduleWriter.write(providedType);
-      moduleWriter.write("\n");
-    }
-  }
-
-  private static String wrapAspect(String aspect) {
-    return "io.avaje.inject.aop.AspectProvider<" + aspect + ">";
-  }
-
-  private URLClassLoader classLoader(Project project) {
-    final URL[] urls = createClassPath(project);
-    return new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
-  }
-
-  private static URL[] createClassPath(Project project) {
-    try {
-      Set<File> compileClasspath = project.getConfigurations().getByName("compileClasspath").resolve();
-      final List<URL> urls = new ArrayList<>(compileClasspath.size());
-      for (File file : compileClasspath) {
-        urls.add(file.toURI().toURL());
-      }
-      return urls.toArray(new URL[0]);
-    } catch (MalformedURLException e) {
-      throw new GradleException("Error building classpath", e);
-    }
-  }
-
-  private void writeModuleCSV(FileWriter moduleWriter) throws IOException {
+    
     moduleWriter.write("\nExternal Module Type|Provides|Requires");
     for (ModuleData avajeModule : modules) {
       moduleWriter.write("\n");
