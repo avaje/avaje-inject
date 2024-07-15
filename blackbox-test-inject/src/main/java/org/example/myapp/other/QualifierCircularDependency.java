@@ -1,22 +1,22 @@
-package io.avaje.inject.generator.models.valid;
+package org.example.myapp.other;
 
 import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
 import jakarta.inject.Named;
 
 @Factory
-public class IncorrectCircularDependency {
+public class QualifierCircularDependency {
 
   @Bean
   @Named("parent") // for clarity, not necessary
   public String parent(@Named("child") String child) {
-    throw new AssertionError("Method body unimportant");
+    return "parent-"+ child;
   }
 
   @Bean
   @Named("child")
   public String child() {
-    throw new AssertionError("Method body unimportant");
+    return "child";
   }
 
 //  @Bean compilation rightly fails when this is uncommented
