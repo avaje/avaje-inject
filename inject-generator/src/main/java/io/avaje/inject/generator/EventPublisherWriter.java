@@ -46,21 +46,19 @@ final class EventPublisherWriter {
   private EventPublisherWriter(Element element) {
     final var asType = element.asType();
     this.utype = UType.parse(asType).param0();
-
-    this.packageName =
-        APContext.elements()
-                .getPackageOf(APContext.typeElement(utype.mainType()))
-                .getQualifiedName()
-                .toString()
-                .replaceFirst("java.", "")
-            + ".events";
+    this.packageName = APContext.elements()
+      .getPackageOf(APContext.typeElement(utype.mainType()))
+      .getQualifiedName()
+      .toString()
+      .replaceFirst("java.", "")
+      + ".events";
     qualifier = Optional.ofNullable(Util.getNamed(element)).orElse("");
     var className =
-        packageName
-            + "."
-            + (qualifier.isEmpty() ? "" : "Qualified")
-            + Util.shortName(utype).replace(".", "_")
-            + "$Publisher";
+      packageName
+        + "."
+        + (qualifier.isEmpty() ? "" : "Qualified")
+        + Util.shortName(utype).replace(".", "_")
+        + "$Publisher";
 
     originName = getUniqueClassName(className, 0);
 
@@ -76,13 +74,10 @@ final class EventPublisherWriter {
   }
 
   private String getUniqueClassName(String className, Integer recursiveIndex) {
-
-    Optional.ofNullable(APContext.typeElement(className))
-        .ifPresent(
-            e ->
-                GENERATED_PUBLISHERS.put(
-                    e.getQualifiedName().toString(),
-                    Optional.ofNullable(Util.getNamed(e)).orElse("")));
+    Optional.ofNullable(APContext.typeElement(className)).ifPresent(e ->
+      GENERATED_PUBLISHERS.put(
+        e.getQualifiedName().toString(),
+        Optional.ofNullable(Util.getNamed(e)).orElse("")));
 
     if (Optional.ofNullable(GENERATED_PUBLISHERS.get(className))
         .filter(not(qualifier::equals))
@@ -102,18 +97,14 @@ final class EventPublisherWriter {
   void write() {
     try {
       var writer = new Append(createFileWriter());
-
       final var shortType = utype.shortWithoutAnnotations();
       var typeString = utype.isGeneric() ? getGenericType() : shortType + ".class";
 
       var name = qualifier.isBlank() ? "" : "@Named(\"" + qualifier + "\")\n";
       var className = originName.replace(packageName + ".", "");
-      writer.append(
-          MessageFormat.format(
-              TEMPLATE, packageName, imports(), name, className, shortType, typeString, qualifier));
+      writer.append(MessageFormat.format(TEMPLATE, packageName, imports(), name, className, shortType, typeString, qualifier));
       writer.close();
     } catch (Exception e) {
-      e.printStackTrace();
       logError("Failed to write EventPublisher class " + e);
     }
   }
@@ -128,7 +119,6 @@ final class EventPublisherWriter {
       importTypes.add(NamedPrism.PRISM_TYPE);
     }
     if (utype.isGeneric()) {
-
       importTypes.add("io.avaje.inject.spi.GenericType");
     }
 
@@ -149,13 +139,11 @@ final class EventPublisherWriter {
     return sb.toString();
   }
 
-  private void writeGenericType(
-      UType type, Map<String, String> seenShortNames, StringBuilder writer) {
+  private void writeGenericType(UType type, Map<String, String> seenShortNames, StringBuilder writer) {
     final var typeShortName = Util.shortName(type.mainType());
     final var mainType = seenShortNames.computeIfAbsent(typeShortName, k -> type.mainType());
     if (type.isGeneric()) {
-      final var shortName =
-          Objects.equals(type.mainType(), mainType) ? typeShortName : type.mainType();
+      final var shortName = Objects.equals(type.mainType(), mainType) ? typeShortName : type.mainType();
       writer.append(shortName);
       writer.append("<");
       boolean first = true;
@@ -170,8 +158,7 @@ final class EventPublisherWriter {
       }
       writer.append(">");
     } else {
-      final var shortName =
-          Objects.equals(type.mainType(), mainType) ? typeShortName : type.mainType();
+      final var shortName = Objects.equals(type.mainType(), mainType) ? typeShortName : type.mainType();
       writer.append(shortName);
     }
   }
