@@ -3,10 +3,14 @@ package io.avaje.inject.generator;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+
+import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static io.avaje.inject.generator.ProcessingContext.asElement;
 import static io.avaje.inject.generator.Constants.*;
@@ -157,12 +161,20 @@ final class MethodReader {
       .filter(t -> !t.equals(returnTypeRaw))
       .map(t -> CONDITIONAL_DEPENDENCY + t)
       .forEach(dependsOn::add);
+
     for (final MethodParam param : params) {
-      dependsOn.add(Util.trimWildcard(param.paramType));
+      var dep = Util.addQualifierSuffix(param.named, Util.trimWildcard(param.paramType));
+      dependsOn.add(dep);
     }
-    metaData.setDependsOn(dependsOn);
-    metaData.setProvides(typeReader == null ? Collections.emptyList() : typeReader.provides());
-    metaData.setAutoProvides(typeReader == null ? List.of() : typeReader.autoProvides());
+    metaData.setDependsOn(dependsOn, name);
+    metaData.setProvides(
+      typeReader == null
+        ? Collections.emptyList()
+        : Util.addQualifierSuffix(typeReader.provides(), name));
+    metaData.setAutoProvides(
+      typeReader == null
+        ? List.of()
+        : Util.addQualifierSuffix(typeReader.autoProvides(), name));
     metaData.setProvidesAspect(typeReader == null ? "" : typeReader.providesAspect());
     return metaData;
   }
@@ -495,7 +507,7 @@ final class MethodReader {
       this.isObserveEvent = ObservesPrism.isPresent(param);
 
       if (nullable || param.asType().toString().startsWith("java.util.Optional<")) {
-        ProcessingContext.addOptionalType(paramType);
+        ProcessingContext.addOptionalType(paramType, named);
       }
 
       if (fullUType.fullWithoutAnnotations().startsWith("io.avaje.inject.events.Event")) {
@@ -554,7 +566,7 @@ final class MethodReader {
     }
 
     Dependency dependsOn() {
-      return new Dependency(paramType, utilType.isCollection());
+      return new Dependency(paramType, named, utilType.isCollection());
     }
 
     void addImports(ImportTypeMap importTypes) {

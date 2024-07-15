@@ -1,6 +1,15 @@
 package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.logError;
+import static java.util.stream.Collectors.toList;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -8,9 +17,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 
 import io.avaje.inject.generator.MethodReader.MethodParam;
-
-import java.util.*;
-import java.util.stream.Stream;
 
 
 final class BeanReader {
@@ -188,11 +194,11 @@ final class BeanReader {
   }
 
   List<String> provides() {
-    return typeReader.provides();
+    return Util.addQualifierSuffix(typeReader.provides(), name);
   }
 
   List<String> autoProvides() {
-    return typeReader.autoProvides();
+    return Util.addQualifierSuffix(typeReader.autoProvides(), name);
   }
 
   String providesAspect() {

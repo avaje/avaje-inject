@@ -27,7 +27,7 @@ final class FieldReader {
     this.type = utype.toUType();
     this.assisted = AssistedPrism.isPresent(element);
     if (nullable || element.asType().toString().startsWith("java.util.Optional<")) {
-      ProcessingContext.addOptionalType(fieldType);
+      ProcessingContext.addOptionalType(fieldType, name);
     }
     if (type.fullWithoutAnnotations().startsWith("io.avaje.inject.events.Event")) {
       EventPublisherWriter.write(element);

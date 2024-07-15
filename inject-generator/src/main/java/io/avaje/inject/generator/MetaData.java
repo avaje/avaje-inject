@@ -1,9 +1,10 @@
 package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.typeElement;
-
+import static java.util.stream.Collectors.toList;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -46,9 +47,9 @@ final class MetaData {
     this.shortType = Util.shortName(type);
     this.method = meta.method();
     this.providesAspect = meta.providesAspect();
-    this.provides = meta.provides();
-    this.dependsOn = meta.dependsOn().stream().map(Dependency::new).collect(Collectors.toList());
-    this.autoProvides = meta.autoProvides();
+    this.dependsOn = meta.dependsOn().stream().map(d -> new Dependency(d, name)).collect(Collectors.toList());
+    this.provides = Util.addQualifierSuffix(meta.provides(), name);
+    this.autoProvides = Util.addQualifierSuffix(meta.autoProvides(), name);
     this.importedComponent = meta.importedComponent();
   }
 
@@ -249,6 +250,10 @@ final class MetaData {
   }
 
   private void appendProvides(Append sb, String attribute, List<String> types) {
+    if (!"dependsOn".equals(attribute)) {
+      types.removeIf(s -> s.contains(":"));
+    }
+
     sb.append(",").eol().append("      ").append(attribute).append(" = {");
     final var size = types.size();
     if (size > 1) {
@@ -256,14 +261,15 @@ final class MetaData {
     }
     var seen = new HashSet<String>();
     for (int i = 0; i < types.size(); i++) {
-      if (!seen.add(types.get(i))) {
+      final var depType = types.get(i);
+      if (!seen.add(depType)) {
         continue;
       }
       if (i > 0) {
         sb.append(",").eol().append("        ");
       }
       sb.append("\"");
-      sb.append(types.get(i));
+      sb.append(depType);
       sb.append("\"");
     }
     if (size > 1) {
@@ -276,7 +282,7 @@ final class MetaData {
     this.provides = provides;
   }
 
-  void setDependsOn(List<String> dependsOn) {
+  void setDependsOn(List<String> dependsOn, String name) {
     this.dependsOn = dependsOn.stream().map(Dependency::new).collect(Collectors.toList());
   }
 

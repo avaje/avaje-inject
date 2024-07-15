@@ -58,6 +58,7 @@ public class MyAutoNameFactory {
   }
 
   @Bean
+  @Named("one")
   AutoIface one() {
     return new DAutoIface("one");
   }
