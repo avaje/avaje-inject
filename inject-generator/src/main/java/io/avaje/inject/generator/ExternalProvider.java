@@ -6,19 +6,17 @@ import static java.util.stream.Collectors.toList;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 
+import java.net.URI;
+import java.nio.file.Paths;
 import static java.util.List.of;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.ElementFilter;
+import javax.tools.StandardLocation;
+
 import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.InjectPlugin;
 
@@ -44,7 +42,6 @@ final class ExternalProvider {
         "io.avaje.validation.Validator",
         "io.avaje.inject.aop.AspectProvider<io.avaje.validation.ValidMethod>")),
     entry("io.avaje.validation.http.HttpValidatorProvider", of("io.avaje.http.api.Validator")));
-  private static final List<MetaData> externalMeta = new ArrayList<>();
 
   private ExternalProvider() {}
 
@@ -72,12 +69,22 @@ final class ExternalProvider {
     }
     for (final var module : modules) {
       final var name = module.getClass().getTypeName();
+      final var provides = new ArrayList<String>();
       APContext.logNote("Detected Module: " + name);
-      registerExternalMetaData(name);
-      readMetaDataProvides(providedTypes);
-      final var provides = new ArrayList<>(providedTypes);
-      final var requires =
-          Arrays.stream(module.requires()).map(Type::getTypeName).collect(toList());
+      for (final var provide : module.provides()) {
+        providedTypes.add(provide.getTypeName());
+        provides.add(provide.getTypeName());
+      }
+      for (final var provide : module.autoProvides()) {
+        providedTypes.add(provide.getTypeName());
+        provides.add(provide.getTypeName());
+      }
+      for (final var provide : module.autoProvidesAspects()) {
+        final var aspectType = Util.wrapAspect(provide.getTypeName());
+        providedTypes.add(aspectType);
+        provides.add(aspectType);
+      }
+      final var requires = Arrays.stream(module.requires()).map(Type::getTypeName).collect(toList());
 
       Arrays.stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
       Arrays.stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
@@ -125,33 +132,5 @@ final class ExternalProvider {
     } catch (final Exception e) {
       return false;
     }
-  }
-
-  public static void registerExternalMetaData(String name) {
-    Optional.ofNullable(APContext.typeElement(name))
-        .map(TypeElement::getEnclosedElements)
-        .map(ElementFilter::methodsIn)
-        .stream()
-        .flatMap(List::stream)
-        .map(DependencyMetaPrism::getInstanceOn)
-        .filter(Objects::nonNull)
-        .map(MetaData::new)
-        .forEach(externalMeta::add);
-  }
-
-  public static void readMetaDataProvides(Collection<String> providedTypes) {
-    externalMeta.forEach(
-        meta -> {
-          providedTypes.add(meta.key());
-          providedTypes.add(meta.type());
-          Stream.concat(
-                  meta.provides().stream().map(s -> Util.addQualifierSuffix(meta.name(), s)),
-                  meta.provides().stream())
-              .forEach(providedTypes::add);
-          Stream.concat(
-                  meta.autoProvides().stream().map(s -> Util.addQualifierSuffix(meta.name(), s)),
-                  meta.autoProvides().stream())
-              .forEach(providedTypes::add);
-        });
   }
 }

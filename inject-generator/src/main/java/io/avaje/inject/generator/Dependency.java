@@ -7,32 +7,21 @@ final class Dependency {
 
   private final String name;
   private boolean softDependency;
+  private final boolean conditionalDependency;
 
-  Dependency(String type) {
-    final String nameStr;
-    if (type.startsWith(SOFT_DEPENDENCY)) {
-      this.softDependency = true;
-      nameStr = type.substring(5);
-    } else if (type.startsWith(CONDITIONAL_DEPENDENCY)) {
-      this.softDependency = true;
-      nameStr = type.substring(4);
-    } else {
-      this.softDependency = false;
-      nameStr = type;
-    }
-
-    this.name = nameStr.replace(", ", ",");
-  }
   Dependency(String type, String qualifier) {
     String nameStr;
     if (type.startsWith(SOFT_DEPENDENCY)) {
       this.softDependency = true;
+      this.conditionalDependency = false;
       nameStr = ProcessorUtils.trimAnnotations(type.substring(5));
     } else if (type.startsWith(CONDITIONAL_DEPENDENCY)) {
       this.softDependency = true;
+      this.conditionalDependency = true;
       nameStr = ProcessorUtils.trimAnnotations(type.substring(4));
     } else {
       this.softDependency = false;
+      this.conditionalDependency = false;
       nameStr = ProcessorUtils.trimAnnotations(type);
     }
     this.name = Util.addQualifierSuffix(qualifier, nameStr).replace(", ", ",");
@@ -42,6 +31,7 @@ final class Dependency {
     this.name =
         Util.addQualifierSuffix(qualifier, ProcessorUtils.trimAnnotations(name)).replace(", ", ",");
     this.softDependency = softDependency;
+    this.conditionalDependency = false;
   }
 
   @Override
@@ -60,6 +50,15 @@ final class Dependency {
    */
   boolean isSoftDependency() {
     return softDependency;
+  }
+
+  /**
+   * Return true if a conditional dependency which can be empty.
+   *
+   * <p>A conditional dependency isn't absolutely required to wire beans.
+   */
+  public boolean isConditionalDependency() {
+    return conditionalDependency;
   }
 
   String dependsOn() {

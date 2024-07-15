@@ -64,11 +64,13 @@ public class AutoProvidesMojo extends AbstractMojo {
     }
 
     try (var newClassLoader = createClassLoader(listUrl);
+        var moduleWriter = createFileWriter("avaje-module-provides.txt");
         var pluginWriter = createFileWriter("avaje-plugin-provides.txt");
         var moduleCSV = createFileWriter("avaje-module-dependencies.csv")) {
 
       writeProvidedPlugins(newClassLoader, pluginWriter);
-      writeModuleCSV(newClassLoader, moduleCSV);
+      writeProvidedModules(newClassLoader, moduleWriter);
+      writeModuleCSV(moduleCSV);
 
     } catch (final IOException e) {
       throw new MojoExecutionException("Failed to write spi classes", e);
@@ -127,9 +129,7 @@ public class AutoProvidesMojo extends AbstractMojo {
     }
   }
 
-  private void writeModuleCSV(ClassLoader newClassLoader, FileWriter moduleWriter)
-      throws IOException {
-
+  private void writeProvidedModules(URLClassLoader newClassLoader, FileWriter moduleWriter) throws IOException {
     final Set<String> providedTypes = new HashSet<>();
 
     final Log log = getLog();
@@ -177,7 +177,9 @@ public class AutoProvidesMojo extends AbstractMojo {
       moduleWriter.write(providedType);
       moduleWriter.write("\n");
     }
+  }
 
+  private void writeModuleCSV(FileWriter moduleWriter) throws IOException {
     moduleWriter.write("\nExternal Module Type|Provides|Requires");
     for (ModuleData avajeModule : modules) {
       moduleWriter.write("\n");
