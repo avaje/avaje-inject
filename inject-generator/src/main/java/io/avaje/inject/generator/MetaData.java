@@ -47,9 +47,17 @@ final class MetaData {
     this.shortType = Util.shortName(type);
     this.method = meta.method();
     this.providesAspect = meta.providesAspect();
-    this.dependsOn = meta.dependsOn().stream().map(d -> new Dependency(d, name)).collect(Collectors.toList());
-    this.provides = Util.addQualifierSuffix(meta.provides(), name);
-    this.autoProvides = Util.addQualifierSuffix(meta.autoProvides(), name);
+    this.provides =
+        Stream.concat(
+                meta.provides().stream().map(s -> Util.addQualifierSuffix(name, s)),
+                meta.provides().stream())
+            .collect(toList());
+    this.dependsOn = meta.dependsOn().stream().map(Dependency::new).collect(Collectors.toList());
+    this.autoProvides =
+        Stream.concat(
+                meta.autoProvides().stream().map(s -> Util.addQualifierSuffix(name, s)),
+                meta.autoProvides().stream())
+            .collect(toList());
     this.importedComponent = meta.importedComponent();
   }
 
@@ -136,6 +144,10 @@ final class MetaData {
     this.autoProvides = beanReader.autoProvides();
     this.generateProxy = beanReader.isGenerateProxy();
     this.importedComponent = beanReader.importedComponent();
+  }
+
+  String name() {
+    return name;
   }
 
   String type() {
