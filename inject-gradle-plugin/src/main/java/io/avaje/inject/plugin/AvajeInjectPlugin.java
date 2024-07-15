@@ -49,8 +49,8 @@ public class AvajeInjectPlugin implements Plugin<Project> {
     try (var classLoader = classLoader(project);
         var pluginWriter = createFileWriter(outputDir.getPath(), "avaje-plugin-provides.txt");
         var moduleCSV = createFileWriter(outputDir.getPath(), "avaje-module-dependencies.csv")) {
+        writeProvidedPlugins(classLoader, pluginWriter);
         writeModuleCSV(classLoader, moduleCSV);
-
     } catch (IOException e) {
       throw new GradleException("Failed to write avaje-module-provides", e);
     }
@@ -151,7 +151,7 @@ public class AvajeInjectPlugin implements Plugin<Project> {
           .forEach(requires::add);
       modules.add(new ModuleData(name, provides, requires));
     }
-    
+
     moduleWriter.write("\nExternal Module Type|Provides|Requires");
     for (ModuleData avajeModule : modules) {
       moduleWriter.write("\n");
