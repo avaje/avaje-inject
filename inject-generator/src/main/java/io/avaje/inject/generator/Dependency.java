@@ -9,6 +9,10 @@ final class Dependency {
   private boolean softDependency;
   private final boolean conditionalDependency;
 
+  Dependency(String type) {
+    this(type, "");
+  }
+
   Dependency(String type, String qualifier) {
     String nameStr;
     if (type.startsWith(SOFT_DEPENDENCY)) {
@@ -64,7 +68,9 @@ final class Dependency {
     return toString();
   }
 
-  /** External dependency */
+  /**
+   * External dependency
+   */
   void markExternal() {
     softDependency = true;
   }

@@ -15,7 +15,6 @@ import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -155,14 +154,13 @@ public final class InjectProcessor extends AbstractProcessor {
     maybeElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
 
     maybeElements(roundEnv, ExternalPrism.PRISM_TYPE).stream()
-        .flatMap(Set::stream)
-        .forEach(
-            e -> {
-              var type = UType.parse(e.asType());
-              type = "java.util.List".equals(type.mainType()) ? type.param0() : type;
-              ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), Util.getNamed(e));
-              ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), null);
-            });
+      .flatMap(Set::stream)
+      .forEach(e -> {
+        var type = UType.parse(e.asType());
+        type = "java.util.List".equals(type.mainType()) ? type.param0() : type;
+        ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), Util.getNamed(e));
+        ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), null);
+      });
 
     maybeElements(roundEnv, "io.avaje.spi.ServiceProvider").ifPresent(this::registerSPI);
     allScopes.readBeans(roundEnv);

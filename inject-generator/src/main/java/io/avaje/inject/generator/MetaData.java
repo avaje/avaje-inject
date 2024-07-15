@@ -261,7 +261,6 @@ final class MetaData {
     }
     var seen = new HashSet<String>();
     for (int i = 0; i < types.size(); i++) {
-
       final var depType = types.get(i);
       if (!seen.add(depType)) {
         continue;
@@ -284,8 +283,7 @@ final class MetaData {
   }
 
   void setDependsOn(List<String> dependsOn, String name) {
-    this.dependsOn =
-        dependsOn.stream().map(d -> new Dependency(d, "")).collect(Collectors.toList());
+    this.dependsOn = dependsOn.stream().map(Dependency::new).collect(Collectors.toList());
   }
 
   void setMethod(String method) {

@@ -159,13 +159,10 @@ final class MetaDataOrdering {
    */
   private void warnOnDependencies() {
     if (!missingDependencyTypes.isEmpty()) {
-      var missingMessage =
-          missingDependencyTypes.stream()
-              .map(s -> s.replaceFirst(":", " with qualifier: "))
-              .collect(toList());
-      logError(
-          "Dependencies %s are not provided - there are no @Singleton, @Component, @Factory/@Bean that currently provide this type. If this is an external dependency consider specifying via @External",
-          missingMessage);
+      var missingMessage = missingDependencyTypes.stream()
+        .map(s -> s.replaceFirst(":", " with qualifier: "))
+        .collect(toList());
+      logError("Dependencies %s are not provided - there are no @Singleton, @Component, @Factory/@Bean that currently provide this type. If this is an external dependency consider specifying via @External", missingMessage);
     } else if (!queue.isEmpty()) {
       logWarn("There are " + queue.size() + " beans with unsatisfied dependencies (assuming external dependencies)");
       for (MetaData m : queue) {
