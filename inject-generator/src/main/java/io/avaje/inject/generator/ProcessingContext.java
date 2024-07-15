@@ -129,7 +129,7 @@ final class ProcessingContext {
 
   static void addOptionalType(String paramType, String name) {
     if (!CTX.get().providedTypes.contains(paramType)) {
-      CTX.get().optionalTypes.add(Util.addQualifierSuffix(name, paramType).replace(", ", ","));
+      CTX.get().optionalTypes.add(Util.addQualifierSuffixTrim(name, paramType));
     }
   }
 

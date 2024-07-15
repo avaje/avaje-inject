@@ -168,19 +168,13 @@ final class MethodReader {
     }
     metaData.setDependsOn(dependsOn, name);
     metaData.setProvides(
-        typeReader == null
-            ? Collections.emptyList()
-            : Stream.concat(
-                    typeReader.provides().stream().map(s -> Util.addQualifierSuffix(name, s)),
-                    typeReader.provides().stream())
-                .collect(toList()));
+      typeReader == null
+        ? Collections.emptyList()
+        : Util.addQualifierSuffix(typeReader.provides(), name));
     metaData.setAutoProvides(
-        typeReader == null
-            ? List.of()
-            : Stream.concat(
-                    typeReader.autoProvides().stream().map(s -> Util.addQualifierSuffix(name, s)),
-                    typeReader.autoProvides().stream())
-                .collect(toList()));
+      typeReader == null
+        ? List.of()
+        : Util.addQualifierSuffix(typeReader.autoProvides(), name));
     metaData.setProvidesAspect(typeReader == null ? "" : typeReader.providesAspect());
     return metaData;
   }

@@ -180,12 +180,12 @@ final class BeanReader {
       });
 
     conditions.requireTypes.stream()
-        .map(t -> new Dependency(Constants.CONDITIONAL_DEPENDENCY + t, ""))
-        .forEach(list::add);
+      .map(t -> new Dependency(Constants.CONDITIONAL_DEPENDENCY + t, ""))
+      .forEach(list::add);
     conditions.missingTypes.stream()
-        .filter(t -> !t.equals(type))
-        .map(t -> new Dependency(Constants.CONDITIONAL_DEPENDENCY + t, ""))
-        .forEach(list::add);
+      .filter(t -> !t.equals(type))
+      .map(t -> new Dependency(Constants.CONDITIONAL_DEPENDENCY + t, ""))
+      .forEach(list::add);
     return list;
   }
 
@@ -194,20 +194,11 @@ final class BeanReader {
   }
 
   List<String> provides() {
-
-    return Stream.concat(
-            typeReader.provides().stream().map(s -> Util.addQualifierSuffix(name, s)),
-            typeReader.provides().stream())
-        .distinct()
-        .collect(toList());
+    return Util.addQualifierSuffix(typeReader.provides(), name);
   }
 
   List<String> autoProvides() {
-    return Stream.concat(
-            typeReader.autoProvides().stream().map(s -> Util.addQualifierSuffix(name, s)),
-            typeReader.autoProvides().stream())
-        .distinct()
-        .collect(toList());
+    return Util.addQualifierSuffix(typeReader.autoProvides(), name);
   }
 
   String providesAspect() {

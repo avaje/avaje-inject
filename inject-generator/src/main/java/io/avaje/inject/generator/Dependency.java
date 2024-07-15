@@ -24,12 +24,11 @@ final class Dependency {
       this.conditionalDependency = false;
       nameStr = ProcessorUtils.trimAnnotations(type);
     }
-    this.name = Util.addQualifierSuffix(qualifier, nameStr).replace(", ", ",");
+    this.name = Util.addQualifierSuffixTrim(qualifier, nameStr);
   }
 
   Dependency(String name, String qualifier, boolean softDependency) {
-    this.name =
-        Util.addQualifierSuffix(qualifier, ProcessorUtils.trimAnnotations(name)).replace(", ", ",");
+    this.name = Util.addQualifierSuffixTrim(qualifier, ProcessorUtils.trimAnnotations(name));
     this.softDependency = softDependency;
     this.conditionalDependency = false;
   }

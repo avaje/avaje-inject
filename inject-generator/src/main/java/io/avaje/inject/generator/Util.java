@@ -7,10 +7,12 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.toList;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 final class Util {
   static final String ASPECT_PROVIDER_PREFIX = "io.avaje.inject.aop.AspectProvider<";
@@ -353,11 +355,24 @@ final class Util {
     return ANNOTATION_TYPE_PATTERN.matcher(input).replaceAll("@");
   }
 
-  static String addQualifierSuffix(String named, String type) {
-    return type
-        + Optional.ofNullable(named)
-            .filter(not(String::isBlank))
-            .map(s -> ":" + s)
-            .orElse("");
+  static String addQualifierSuffixTrim(String named, String type) {
+    return addQualifierSuffix(named, type).replace(", ", ",");
   }
+
+  static String addQualifierSuffix(String named, String type) {
+    return type +
+      Optional.ofNullable(named)
+        .filter(not(String::isBlank))
+        .map(s -> ":" + s)
+        .orElse("");
+  }
+
+  static List<String> addQualifierSuffix(List<String> provides, String name) {
+    return Stream.concat(
+        provides.stream().map(s -> Util.addQualifierSuffix(name, s)),
+        provides.stream())
+      .distinct()
+      .collect(toList());
+  }
+
 }
