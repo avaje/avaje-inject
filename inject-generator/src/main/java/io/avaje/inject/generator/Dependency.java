@@ -20,9 +20,9 @@ final class Dependency {
       this.softDependency = false;
       nameStr = type;
     }
-
     this.name = nameStr.replace(", ", ",");
   }
+
   Dependency(String type, String qualifier) {
     String nameStr;
     if (type.startsWith(SOFT_DEPENDENCY)) {
@@ -65,7 +65,9 @@ final class Dependency {
     return toString();
   }
 
-  /** External dependency */
+  /**
+   * External dependency
+   */
   void markExternal() {
     softDependency = true;
   }

@@ -286,8 +286,8 @@ final class MetaData {
     this.provides = provides;
   }
 
-  void setDependsOn(List<String> dependsOn, String name) {
-    this.dependsOn = dependsOn.stream().map(d -> new Dependency(d, "")).collect(Collectors.toList());
+  void setDependsOn(List<String> dependsOn) {
+    this.dependsOn = dependsOn.stream().map(Dependency::new).collect(Collectors.toList());
   }
 
   void setMethod(String method) {
