@@ -100,17 +100,16 @@ public final class InjectProcessor extends AbstractProcessor {
     pluginFileProvided.addAll(lines("avaje-plugin-provides.txt"));
 
     lines("avaje-module-dependencies.csv").stream()
-        .skip(1)
-        .filter(s -> !s.startsWith("External Module Type"))
-        .distinct()
-        .map(l -> l.split("\\|"))
-        .map(ModuleData::new)
-        .forEach(
-            m -> {
-              ExternalProvider.registerExternalMetaData(m.name());
-              ExternalProvider.readMetaDataProvides(moduleFileProvided);
-              this.moduleData.add(m);
-            });
+      .skip(1)
+      .filter(s -> !s.startsWith("External Module Type"))
+      .distinct()
+      .map(l -> l.split("\\|"))
+      .map(ModuleData::new)
+      .forEach(m -> {
+        ExternalProvider.registerExternalMetaData(m.name());
+        ExternalProvider.readMetaDataProvides(moduleFileProvided);
+        this.moduleData.add(m);
+      });
   }
 
   private List<String> lines(String relativeName) {
@@ -152,14 +151,13 @@ public final class InjectProcessor extends AbstractProcessor {
     maybeElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
 
     maybeElements(roundEnv, ExternalPrism.PRISM_TYPE).stream()
-        .flatMap(Set::stream)
-        .forEach(
-            e -> {
-              var type = UType.parse(e.asType());
-              type = "java.util.List".equals(type.mainType()) ? type.param0() : type;
-              ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), Util.getNamed(e));
-              ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), null);
-            });
+      .flatMap(Set::stream)
+      .forEach(e -> {
+        var type = UType.parse(e.asType());
+        type = "java.util.List".equals(type.mainType()) ? type.param0() : type;
+        ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), Util.getNamed(e));
+        ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), null);
+      });
 
     maybeElements(roundEnv, "io.avaje.spi.ServiceProvider").ifPresent(this::registerSPI);
     allScopes.readBeans(roundEnv);

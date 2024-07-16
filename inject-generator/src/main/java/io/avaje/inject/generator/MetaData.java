@@ -47,17 +47,9 @@ final class MetaData {
     this.shortType = Util.shortName(type);
     this.method = meta.method();
     this.providesAspect = meta.providesAspect();
-    this.provides =
-        Stream.concat(
-                meta.provides().stream().map(s -> Util.addQualifierSuffix(name, s)),
-                meta.provides().stream())
-            .collect(toList());
-    this.dependsOn = meta.dependsOn().stream().map(Dependency::new).collect(Collectors.toList());
-    this.autoProvides =
-        Stream.concat(
-                meta.autoProvides().stream().map(s -> Util.addQualifierSuffix(name, s)),
-                meta.autoProvides().stream())
-            .collect(toList());
+    this.dependsOn = meta.dependsOn().stream().map(d -> new Dependency(d, name)).collect(Collectors.toList());
+    this.provides = Util.addQualifierSuffix(meta.provides(), name);
+    this.autoProvides = Util.addQualifierSuffix(meta.autoProvides(), name);
     this.importedComponent = meta.importedComponent();
   }
 
@@ -273,7 +265,6 @@ final class MetaData {
     }
     var seen = new HashSet<String>();
     for (int i = 0; i < types.size(); i++) {
-
       final var depType = types.get(i);
       if (!seen.add(depType)) {
         continue;
@@ -296,8 +287,7 @@ final class MetaData {
   }
 
   void setDependsOn(List<String> dependsOn, String name) {
-    this.dependsOn =
-        dependsOn.stream().map(d -> new Dependency(d, "")).collect(Collectors.toList());
+    this.dependsOn = dependsOn.stream().map(d -> new Dependency(d, "")).collect(Collectors.toList());
   }
 
   void setMethod(String method) {

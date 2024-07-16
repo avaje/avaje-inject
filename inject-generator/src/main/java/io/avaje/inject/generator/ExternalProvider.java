@@ -76,8 +76,7 @@ final class ExternalProvider {
       registerExternalMetaData(name);
       readMetaDataProvides(providedTypes);
       final var provides = new ArrayList<>(providedTypes);
-      final var requires =
-          Arrays.stream(module.requires()).map(Type::getTypeName).collect(toList());
+      final var requires = Arrays.stream(module.requires()).map(Type::getTypeName).collect(toList());
 
       Arrays.stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
       Arrays.stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
@@ -127,31 +126,24 @@ final class ExternalProvider {
     }
   }
 
-  public static void registerExternalMetaData(String name) {
+  static void registerExternalMetaData(String name) {
     Optional.ofNullable(APContext.typeElement(name))
-        .map(TypeElement::getEnclosedElements)
-        .map(ElementFilter::methodsIn)
-        .stream()
-        .flatMap(List::stream)
-        .map(DependencyMetaPrism::getInstanceOn)
-        .filter(Objects::nonNull)
-        .map(MetaData::new)
-        .forEach(externalMeta::add);
+      .map(TypeElement::getEnclosedElements)
+      .map(ElementFilter::methodsIn)
+      .stream()
+      .flatMap(List::stream)
+      .map(DependencyMetaPrism::getInstanceOn)
+      .filter(Objects::nonNull)
+      .map(MetaData::new)
+      .forEach(externalMeta::add);
   }
 
-  public static void readMetaDataProvides(Collection<String> providedTypes) {
-    externalMeta.forEach(
-        meta -> {
-          providedTypes.add(meta.key());
-          providedTypes.add(meta.type());
-          Stream.concat(
-                  meta.provides().stream().map(s -> Util.addQualifierSuffix(meta.name(), s)),
-                  meta.provides().stream())
-              .forEach(providedTypes::add);
-          Stream.concat(
-                  meta.autoProvides().stream().map(s -> Util.addQualifierSuffix(meta.name(), s)),
-                  meta.autoProvides().stream())
-              .forEach(providedTypes::add);
-        });
+  static void readMetaDataProvides(Collection<String> providedTypes) {
+    externalMeta.forEach(meta -> {
+      providedTypes.add(meta.key());
+      providedTypes.add(meta.type());
+      providedTypes.addAll(Util.addQualifierSuffix(meta.provides(), meta.name()));
+      providedTypes.addAll(Util.addQualifierSuffix(meta.autoProvides(), meta.name()));
+    });
   }
 }
