@@ -3,17 +3,13 @@ package io.avaje.inject.generator;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-
-import static java.util.stream.Collectors.toList;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
+import static io.avaje.inject.generator.Constants.CONDITIONAL_DEPENDENCY;
 import static io.avaje.inject.generator.ProcessingContext.asElement;
-import static io.avaje.inject.generator.Constants.*;
 
 final class MethodReader {
 
@@ -166,7 +162,7 @@ final class MethodReader {
       var dep = Util.addQualifierSuffix(param.named, Util.trimWildcard(param.paramType));
       dependsOn.add(dep);
     }
-    metaData.setDependsOn(dependsOn, name);
+    metaData.setDependsOn(dependsOn);
     metaData.setProvides(
       typeReader == null
         ? Collections.emptyList()
@@ -228,7 +224,7 @@ final class MethodReader {
     writer.indent(indent).append("  builder");
     if (prototype) {
       writer.append(".asPrototype()");
-    } else if(secondary) {
+    } else if (secondary) {
       writer.append(".asSecondary()");
     }
 

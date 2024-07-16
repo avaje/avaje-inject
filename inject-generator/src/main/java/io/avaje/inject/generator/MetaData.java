@@ -138,6 +138,10 @@ final class MetaData {
     this.importedComponent = beanReader.importedComponent();
   }
 
+  String name() {
+    return name;
+  }
+
   String type() {
     return type;
   }
@@ -282,7 +286,7 @@ final class MetaData {
     this.provides = provides;
   }
 
-  void setDependsOn(List<String> dependsOn, String name) {
+  void setDependsOn(List<String> dependsOn) {
     this.dependsOn = dependsOn.stream().map(Dependency::new).collect(Collectors.toList());
   }
 
