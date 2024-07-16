@@ -127,9 +127,7 @@ public class AutoProvidesMojo extends AbstractMojo {
     }
   }
 
-  private void writeModuleCSV(ClassLoader newClassLoader, FileWriter moduleWriter)
-      throws IOException {
-
+  private void writeModuleCSV(ClassLoader newClassLoader, FileWriter moduleWriter) throws IOException {
     final Set<String> providedTypes = new HashSet<>();
 
     final Log log = getLog();
