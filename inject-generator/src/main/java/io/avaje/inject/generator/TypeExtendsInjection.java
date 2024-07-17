@@ -53,6 +53,8 @@ final class TypeExtendsInjection {
         case METHOD:
           readMethod(element, type);
           break;
+        default:
+          break;
       }
     }
   }
@@ -152,12 +154,12 @@ final class TypeExtendsInjection {
     if (modifiers.contains(Modifier.PRIVATE) || modifiers.contains(Modifier.STATIC) || modifiers.contains(Modifier.ABSTRACT)) {
       return;
     }
-    int nameIndex = methodNameIndex(methodElement.getSimpleName().toString());
+    int methodNameIndex = methodNameIndex(methodElement.getSimpleName().toString());
     List<AspectPair> aspectPairs = readAspects(methodElement);
     aspectPairs.addAll(typeAspects);
 
     if (!aspectPairs.isEmpty()) {
-      aspectMethods.add(new AspectMethod(nameIndex, aspectPairs, methodElement));
+      aspectMethods.add(new AspectMethod(methodNameIndex, aspectPairs, methodElement));
     }
   }
 

@@ -10,6 +10,8 @@ import java.util.ServiceLoader;
 
 final class LoadServices {
 
+  private LoadServices() {}
+
   static List<AvajeModule> loadModules(ClassLoader classLoader) {
     List<AvajeModule> modules = new ArrayList<>();
     // load using older Module

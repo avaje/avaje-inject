@@ -15,8 +15,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
-
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import io.avaje.inject.spi.AvajeModule;
@@ -30,7 +28,7 @@ import io.avaje.inject.spi.InjectPlugin;
 final class ExternalProvider {
 
   private static final ClassLoader CLASS_LOADER = ExternalProvider.class.getClassLoader();
-  private static final boolean injectAvailable = moduleCP();
+  private static final boolean INJECT_AVAILABLE = moduleCP();
   private static final Map<String, List<String>> avajePlugins = Map.ofEntries(
     entry("io.avaje.inject.events.spi.ObserverManagerPlugin", of("io.avaje.inject.events.ObserverManager")),
     entry("io.avaje.jsonb.inject.DefaultJsonbProvider", of("io.avaje.jsonb.Jsonb")),
@@ -58,7 +56,7 @@ final class ExternalProvider {
   }
 
   static void registerModuleProvidedTypes(Set<String> providedTypes) {
-    if (!injectAvailable) {
+    if (!INJECT_AVAILABLE) {
       if (!pluginExists("avaje-module-provides.txt")) {
         APContext.logNote("Unable to detect Avaje Inject in Annotation Processor ClassPath, use the Avaje Inject Maven/Gradle plugin for detecting Inject Modules from dependencies");
       }
@@ -98,7 +96,7 @@ final class ExternalProvider {
       }
     });
     defaultScope.pluginProvided("io.avaje.inject.event.ObserverManager");
-    if (!injectAvailable) {
+    if (!INJECT_AVAILABLE) {
       return;
     }
 

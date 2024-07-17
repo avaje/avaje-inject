@@ -3,10 +3,11 @@ package io.avaje.inject.test;
 import io.avaje.inject.BeanScope;
 import io.avaje.lang.Nullable;
 
-import java.lang.reflect.Type;
 import java.util.ServiceLoader;
 
 final class PluginMgr {
+
+  private PluginMgr() {}
 
   private static final Plugin plugin = init();
 

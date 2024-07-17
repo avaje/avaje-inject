@@ -1,7 +1,5 @@
 package io.avaje.inject.generator;
 
-import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
-
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
