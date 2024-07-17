@@ -74,22 +74,20 @@ final class ExternalProvider {
     for (final var module : modules) {
       final var name = module.getClass().getTypeName();
       APContext.logNote("Detected Module: " + name);
-      final var provides = new HashSet<>(providedTypes);
+      final var provides = new HashSet<String>();
       for (final var provide : module.provides()) {
-        providedTypes.add(provide.getTypeName());
         provides.add(provide.getTypeName());
       }
       for (final var provide : module.autoProvides()) {
-        providedTypes.add(provide.getTypeName());
         provides.add(provide.getTypeName());
       }
       for (final var provide : module.autoProvidesAspects()) {
         final var aspectType = Util.wrapAspect(provide.getTypeName());
-        providedTypes.add(aspectType);
         provides.add(aspectType);
       }
       registerExternalMetaData(name);
-      readMetaDataProvides(providedTypes);
+      readMetaDataProvides(provides);
+      providedTypes.addAll(provides);
       final var requires = Arrays.stream(module.requires()).map(Type::getTypeName).collect(toList());
 
       Arrays.stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
