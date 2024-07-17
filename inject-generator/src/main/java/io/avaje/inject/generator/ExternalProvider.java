@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 
 import static java.util.List.of;
 
@@ -73,16 +74,29 @@ final class ExternalProvider {
     for (final var module : modules) {
       final var name = module.getClass().getTypeName();
       APContext.logNote("Detected Module: " + name);
+      final var provides = new HashSet<>(providedTypes);
+      for (final var provide : module.provides()) {
+        providedTypes.add(provide.getTypeName());
+        provides.add(provide.getTypeName());
+      }
+      for (final var provide : module.autoProvides()) {
+        providedTypes.add(provide.getTypeName());
+        provides.add(provide.getTypeName());
+      }
+      for (final var provide : module.autoProvidesAspects()) {
+        final var aspectType = Util.wrapAspect(provide.getTypeName());
+        providedTypes.add(aspectType);
+        provides.add(aspectType);
+      }
       registerExternalMetaData(name);
       readMetaDataProvides(providedTypes);
-      final var provides = new ArrayList<>(providedTypes);
       final var requires = Arrays.stream(module.requires()).map(Type::getTypeName).collect(toList());
 
       Arrays.stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
       Arrays.stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
       Arrays.stream(module.autoRequiresAspects()).map(Type::getTypeName).map(Util::wrapAspect).forEach(requires::add);
 
-      ProcessingContext.addModule(new ModuleData(name, provides, requires));
+      ProcessingContext.addModule(new ModuleData(name, new ArrayList<>(provides), requires));
     }
   }
 
