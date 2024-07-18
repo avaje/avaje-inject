@@ -12,7 +12,7 @@ import jakarta.inject.Singleton;
 @Singleton
 public class ExternalDeps {
 
-  @Nullable AtomicLong longyAtomicInteger;
+  @Nullable AtomicLong longy;
 
   public ExternalDeps(@External AtomicBoolean bool, @Nullable AtomicInteger inty) {}
 }
