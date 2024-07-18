@@ -1,12 +1,13 @@
 package io.avaje.inject.spi;
 
-import io.avaje.inject.BeanEntry;
-import io.avaje.lang.NonNullApi;
-
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-@NonNullApi
+import org.jspecify.annotations.NullMarked;
+
+import io.avaje.inject.BeanEntry;
+
+@NullMarked
 final class DEntry implements BeanEntry {
 
   private final String qualifierName;
