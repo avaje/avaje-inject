@@ -1,15 +1,16 @@
 package io.avaje.inject.test;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.BeanScopeBuilder;
-import io.avaje.lang.NonNullApi;
-import io.avaje.lang.Nullable;
 
 /**
  * Provides access to the global "test scope" and helper methods to use it.
  *
  */
-@NonNullApi
+@NullMarked
 public abstract class TestBeanScope {
 
   /**

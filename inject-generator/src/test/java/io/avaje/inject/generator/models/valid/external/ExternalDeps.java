@@ -3,8 +3,9 @@ package io.avaje.inject.generator.models.valid.external;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jspecify.annotations.Nullable;
+
 import io.avaje.inject.External;
-import io.avaje.lang.Nullable;
 import jakarta.inject.Singleton;
 
 @Singleton
