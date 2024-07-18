@@ -317,10 +317,13 @@ final class Util {
     return null;
   }
 
-  /**
-   * Return true if the element has a Nullable annotation.
-   */
+  /** Return true if the element has a Nullable annotation. */
   static boolean isNullable(Element p) {
+
+    if (ProcessorUtils.hasAnnotationWithName(p, NULLABLE)) {
+      return true;
+    }
+
     for (final AnnotationMirror mirror : UType.parse(p.asType()).annotations()) {
       if (NULLABLE.equals(shortName(mirror.getAnnotationType().toString()))) {
         return true;

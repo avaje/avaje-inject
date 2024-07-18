@@ -502,11 +502,11 @@ final class MethodReader {
       this.isAssisted = AssistedPrism.isPresent(param);
       this.isObserveEvent = ObservesPrism.isPresent(param);
 
-      if (nullable || fullUType.mainType().startsWith("java.util.Optional<")) {
-        ProcessingContext.addOptionalType(fullUType.fullWithoutAnnotations(), named);
+      if (nullable || param.asType().toString().startsWith("java.util.Optional<")) {
+        ProcessingContext.addOptionalType(paramType, named);
       }
 
-      if (fullUType.mainType().startsWith("io.avaje.inject.events.Event")) {
+      if (fullUType.fullWithoutAnnotations().startsWith("io.avaje.inject.events.Event")) {
         EventPublisherWriter.write(param);
       }
     }
