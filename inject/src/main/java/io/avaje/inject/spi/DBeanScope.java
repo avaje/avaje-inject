@@ -182,11 +182,10 @@ final class DBeanScope implements BeanScope {
   static <T> List<T> combine(List<T> values, List<T> parentValues) {
     if (values.isEmpty()) {
       return parentValues;
+    } else if (parentValues.isEmpty()) {
+      return values;
     } else {
-      if (parentValues.isEmpty()) {
-      } else {
-        values.addAll(parentValues);
-      }
+      values.addAll(parentValues);
       return values;
     }
   }
