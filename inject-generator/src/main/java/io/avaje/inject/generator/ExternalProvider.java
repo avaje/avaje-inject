@@ -1,14 +1,16 @@
 package io.avaje.inject.generator;
 
-import static java.util.Map.entry;
-import static java.util.stream.Collectors.toList;
+import io.avaje.inject.spi.AvajeModule;
+import io.avaje.inject.spi.InjectPlugin;
 
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.ElementFilter;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.*;
 
 import static java.util.List.of;
+import static java.util.Map.entry;
+import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.InjectPlugin;
+
 
 /**
  * The types provided by other modules in the classpath at compile time.
@@ -71,16 +74,27 @@ final class ExternalProvider {
     for (final var module : modules) {
       final var name = module.getClass().getTypeName();
       APContext.logNote("Detected Module: " + name);
+      final var provides = new TreeSet<String>();
+      for (final var provide : module.provides()) {
+        provides.add(provide.getTypeName());
+      }
+      for (final var provide : module.autoProvides()) {
+        provides.add(provide.getTypeName());
+      }
+      for (final var provide : module.autoProvidesAspects()) {
+        final var aspectType = Util.wrapAspect(provide.getTypeName());
+        provides.add(aspectType);
+      }
       registerExternalMetaData(name);
-      readMetaDataProvides(providedTypes);
-      final var provides = new ArrayList<>(providedTypes);
+      readMetaDataProvides(provides);
+      providedTypes.addAll(provides);
       final var requires = Arrays.stream(module.requires()).map(Type::getTypeName).collect(toList());
 
       Arrays.stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
       Arrays.stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
       Arrays.stream(module.autoRequiresAspects()).map(Type::getTypeName).map(Util::wrapAspect).forEach(requires::add);
 
-      ProcessingContext.addModule(new ModuleData(name, provides, requires));
+      ProcessingContext.addModule(new ModuleData(name, new ArrayList<>(provides), requires));
     }
   }
 

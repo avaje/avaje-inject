@@ -110,8 +110,7 @@ public class AvajeInjectPlugin implements Plugin<Project> {
   }
 
   private void writeModuleCSV(ClassLoader classLoader, FileWriter moduleWriter) throws IOException {
-    final Set<String> providedTypes = new HashSet<>();
-
+    
     final List<AvajeModule> avajeModules = new ArrayList<>();
     ServiceLoader.load(Module.class, classLoader).forEach(avajeModules::add);
     ServiceLoader.load(InjectExtension.class, classLoader).stream()
@@ -127,17 +126,14 @@ public class AvajeInjectPlugin implements Plugin<Project> {
       final var provides = new ArrayList<String>();
       for (final var provide : module.provides()) {
         var type = provide.getTypeName();
-        providedTypes.add(type);
         provides.add(type);
       }
       for (final var provide : module.autoProvides()) {
         var type = provide.getTypeName();
-        providedTypes.add(type);
         provides.add(type);
       }
       for (final var provide : module.autoProvidesAspects()) {
         var type = wrapAspect(provide.getTypeName());
-        providedTypes.add(type);
         provides.add(type);
       }
 
