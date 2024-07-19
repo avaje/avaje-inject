@@ -201,7 +201,6 @@ final class MetaDataOrdering {
       if (Util.isProvider(dependencyName) || Constants.BEANSCOPE.equals(dependencyName)) {
         continue;
       }
-
       if (!dependencySatisfied(dependency, includeExternal, queuedMeta)) {
         return false;
       }
@@ -209,18 +208,18 @@ final class MetaDataOrdering {
     return true;
   }
 
-  private boolean dependencySatisfied(
-      Dependency dependency, boolean includeExternal, MetaData queuedMeta) {
+  private boolean dependencySatisfied(Dependency dependency, boolean includeExternal, MetaData queuedMeta) {
     String dependencyName = dependency.name();
     var providerList = providers.get(dependencyName);
     if (providerList == null) {
-      if (!scopeInfo.providedByOther(dependency)) {
+      if (scopeInfo.providedByOther(dependency)) {
+        return true;
+      } else {
         return isExternal(dependencyName, includeExternal, queuedMeta);
       }
-    } else if (!providerList.isAllWired()) {
-      return false;
+    } else {
+      return providerList.isAllWired();
     }
-    return true;
   }
 
   private boolean isExternal(String dependencyName, boolean includeExternal, MetaData queuedMeta) {
