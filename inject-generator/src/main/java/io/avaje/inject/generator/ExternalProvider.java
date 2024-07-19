@@ -12,16 +12,6 @@ import static java.util.List.of;
 import static java.util.Map.entry;
 import static java.util.stream.Collectors.toList;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.ElementFilter;
-import io.avaje.inject.spi.AvajeModule;
-import io.avaje.inject.spi.InjectPlugin;
-
 
 /**
  * The types provided by other modules in the classpath at compile time.
@@ -47,7 +37,8 @@ final class ExternalProvider {
     entry("io.avaje.validation.http.HttpValidatorProvider", of("io.avaje.http.api.Validator")));
   private static final List<MetaData> externalMeta = new ArrayList<>();
 
-  private ExternalProvider() {}
+  private ExternalProvider() {
+  }
 
   private static boolean moduleCP() {
     try {
