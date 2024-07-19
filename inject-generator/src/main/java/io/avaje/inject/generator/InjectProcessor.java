@@ -100,17 +100,16 @@ public final class InjectProcessor extends AbstractProcessor {
     pluginFileProvided.addAll(lines("avaje-plugin-provides.txt"));
 
     lines("avaje-module-dependencies.csv").stream()
-        .filter(s -> s.contains("|") && !s.startsWith("External Module Type"))
-        .distinct()
-        .map(l -> l.split("\\|"))
-        .map(ModuleData::of)
-        .flatMap(Optional::stream)
-        .forEach(
-            m -> {
-              ExternalProvider.registerExternalMetaData(m.name());
-              ExternalProvider.readMetaDataProvides(moduleFileProvided);
-              this.moduleData.add(m);
-            });
+      .filter(s -> s.contains("|") && !s.startsWith("External Module Type"))
+      .distinct()
+      .map(l -> l.split("\\|"))
+      .map(ModuleData::of)
+      .flatMap(Optional::stream)
+      .forEach(m -> {
+        ExternalProvider.registerExternalMetaData(m.name());
+        ExternalProvider.readMetaDataProvides(moduleFileProvided);
+        this.moduleData.add(m);
+      });
   }
 
   private List<String> lines(String relativeName) {

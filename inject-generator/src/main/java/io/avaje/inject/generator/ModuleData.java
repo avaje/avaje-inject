@@ -22,12 +22,12 @@ final class ModuleData {
   static Optional<ModuleData> of(String[] moduleCsv) {
     try {
       return Optional.of(
-          new ModuleData(
-              moduleCsv[0],
-              Arrays.stream(moduleCsv[1].split(",")).filter(not(String::isBlank)).collect(toList()),
-              Arrays.stream(moduleCsv[2].split(","))
-                  .filter(not(String::isBlank))
-                  .collect(toList())));
+        new ModuleData(
+          moduleCsv[0],
+          Arrays.stream(moduleCsv[1].split(",")).filter(not(String::isBlank)).collect(toList()),
+          Arrays.stream(moduleCsv[2].split(","))
+            .filter(not(String::isBlank))
+            .collect(toList())));
 
     } catch (Exception e) {
       System.err.println("Failed to parse" + Arrays.toString(moduleCsv));

@@ -1,27 +1,16 @@
 package io.avaje.inject.generator;
 
-import static java.util.Map.entry;
-import static java.util.stream.Collectors.toList;
-
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-
-import static java.util.List.of;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
+import io.avaje.inject.spi.AvajeModule;
+import io.avaje.inject.spi.InjectPlugin;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
-import io.avaje.inject.spi.AvajeModule;
-import io.avaje.inject.spi.InjectPlugin;
+import java.lang.reflect.Type;
+import java.util.*;
+
+import static java.util.List.of;
+import static java.util.Map.entry;
+import static java.util.stream.Collectors.toList;
 
 /**
  * The types provided by other modules in the classpath at compile time.
@@ -74,7 +63,7 @@ final class ExternalProvider {
     for (final var module : modules) {
       final var name = module.getClass().getTypeName();
       APContext.logNote("Detected Module: " + name);
-      final var provides = new HashSet<String>();
+      final var provides = new TreeSet<String>();
       for (final var provide : module.provides()) {
         provides.add(provide.getTypeName());
       }
