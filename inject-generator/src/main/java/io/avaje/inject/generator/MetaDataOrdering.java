@@ -197,29 +197,42 @@ final class MetaDataOrdering {
 
   private boolean allDependenciesWired(MetaData queuedMeta, boolean includeExternal) {
     for (Dependency dependency : queuedMeta.dependsOn()) {
-      final var dependencyName = dependency.name();
-      if (!Util.isProvider(dependencyName) && !Constants.BEANSCOPE.equals(dependency.name())) {
-        // check non-provider dependency is satisfied
-        ProviderList providerList = providers.get(dependencyName);
-        if (providerList == null) {
-          if (!scopeInfo.providedByOther(dependency)) {
-            if (includeExternal && externallyProvided(dependencyName)) {
-              if (Util.isAspectProvider(dependencyName)) {
-                autoRequiresAspects.add(Util.extractAspectType(dependencyName));
-              } else {
-                autoRequires.add(dependencyName);
-              }
-              queuedMeta.markWithExternalDependency(dependencyName);
-            } else {
-              return false;
-            }
-          }
-        } else if (!providerList.isAllWired()) {
-          return false;
-        }
+      String dependencyName = dependency.name();
+      if (Util.isProvider(dependencyName) || Constants.BEANSCOPE.equals(dependencyName)) {
+        continue;
+      }
+      if (!dependencySatisfied(dependency, includeExternal, queuedMeta)) {
+        return false;
       }
     }
     return true;
+  }
+
+  private boolean dependencySatisfied(Dependency dependency, boolean includeExternal, MetaData queuedMeta) {
+    String dependencyName = dependency.name();
+    var providerList = providers.get(dependencyName);
+    if (providerList == null) {
+      if (scopeInfo.providedByOther(dependency)) {
+        return true;
+      } else {
+        return isExternal(dependencyName, includeExternal, queuedMeta);
+      }
+    } else {
+      return providerList.isAllWired();
+    }
+  }
+
+  private boolean isExternal(String dependencyName, boolean includeExternal, MetaData queuedMeta) {
+    if (includeExternal && externallyProvided(dependencyName)) {
+      if (Util.isAspectProvider(dependencyName)) {
+        autoRequiresAspects.add(Util.extractAspectType(dependencyName));
+      } else {
+        autoRequires.add(dependencyName);
+      }
+      queuedMeta.markWithExternalDependency(dependencyName);
+      return true;
+    }
+    return false;
   }
 
   Set<String> autoRequires() {

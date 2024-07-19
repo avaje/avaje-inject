@@ -311,9 +311,9 @@ final class DBeanScope implements BeanScope {
       try {
         final Annotation ann = bean.getClass().getDeclaredAnnotation(priorityAnnotation);
         if (ann != null) {
-          final int priority = (Integer) priorityAnnotation.getMethod("value").invoke(ann);
+          final int newPriority = (Integer) priorityAnnotation.getMethod("value").invoke(ann);
           priorityDefined = true;
-          return priority;
+          return newPriority;
         }
       } catch (Exception e) {
         // If this happens, something has gone very wrong since a non-confirming @Priority was found...

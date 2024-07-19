@@ -92,6 +92,8 @@ final class UtilType {
         return "getOptional(";
       case PROVIDER:
         return "getProvider(";
+      default:
+        break;
     }
     return nullable ? "getNullable(" : "get(";
   }

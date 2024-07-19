@@ -42,8 +42,7 @@ public abstract class Event<T> {
   protected final String defaultQualifier;
 
   protected Event(ObserverManager manager, Type type) {
-    this.observers = manager.observersByType(type);
-    this.defaultQualifier = "";
+    this(manager, type, "");
   }
 
   protected Event(ObserverManager manager, Type type, String qualifier) {
