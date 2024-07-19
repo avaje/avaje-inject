@@ -95,7 +95,7 @@ public class AutoProvidesMojo extends AbstractMojo {
   }
 
   private FileWriter createFileWriter(String string) throws IOException {
-    return new FileWriter(new File(project.getBuild().getDirectory(), string), true);
+    return new FileWriter(new File(project.getBuild().getDirectory(), string));
   }
 
   private void writeProvidedPlugins(URLClassLoader newClassLoader, FileWriter pluginWriter) throws IOException {
@@ -128,7 +128,6 @@ public class AutoProvidesMojo extends AbstractMojo {
   }
 
   private void writeModuleCSV(ClassLoader newClassLoader, FileWriter moduleWriter) throws IOException {
-    final Set<String> providedTypes = new HashSet<>();
 
     final Log log = getLog();
     final List<AvajeModule> avajeModules = new ArrayList<>();
@@ -145,17 +144,16 @@ public class AutoProvidesMojo extends AbstractMojo {
       final var provides = new ArrayList<String>();
       for (final var provide : module.provides()) {
         var type = provide.getTypeName();
-        providedTypes.add(type);
         provides.add(type);
       }
+
       for (final var provide : module.autoProvides()) {
         var type = provide.getTypeName();
-        providedTypes.add(type);
         provides.add(type);
       }
+
       for (final var provide : module.autoProvidesAspects()) {
         var type = wrapAspect(provide.getTypeName());
-        providedTypes.add(type);
         provides.add(type);
       }
 
@@ -171,12 +169,7 @@ public class AutoProvidesMojo extends AbstractMojo {
       modules.add(new ModuleData(name, provides, requires));
     }
 
-    for (final String providedType : providedTypes) {
-      moduleWriter.write(providedType);
-      moduleWriter.write("\n");
-    }
-
-    moduleWriter.write("\nExternal Module Type|Provides|Requires");
+    moduleWriter.write("External Module Type|Provides|Requires");
     for (ModuleData avajeModule : modules) {
       moduleWriter.write("\n");
       moduleWriter.write(avajeModule.name());
