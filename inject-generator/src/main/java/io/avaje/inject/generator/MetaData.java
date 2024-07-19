@@ -1,16 +1,16 @@
 package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.typeElement;
-import static java.util.stream.Collectors.toList;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 /**
  * Holds the data as per <code>@DependencyMeta</code>
  */
 final class MetaData {
+
+  private static final String INDENT = "      ";
 
   private static final String NEWLINE = "\n";
 
@@ -213,7 +213,7 @@ final class MetaData {
         || hasDependsOn
         || hasProvides
         || hasAutoProvides) {
-      append.eol().append("      ");
+      append.eol().append(INDENT);
     }
 
     append.append("type = \"").append(type).append("\"");
@@ -258,7 +258,7 @@ final class MetaData {
       types.removeIf(s -> s.contains(":"));
     }
 
-    sb.append(",").eol().append("      ").append(attribute).append(" = {");
+    sb.append(",").eol().append(INDENT).append(attribute).append(" = {");
     final var size = types.size();
     if (size > 1) {
       sb.eol().append("        ");
@@ -277,7 +277,7 @@ final class MetaData {
       sb.append("\"");
     }
     if (size > 1) {
-      sb.eol().append("      ");
+      sb.eol().append(INDENT);
     }
     sb.append("}");
   }

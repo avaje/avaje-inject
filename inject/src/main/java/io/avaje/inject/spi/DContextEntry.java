@@ -112,13 +112,13 @@ final class DContextEntry {
     }
 
     private Provider<?> provider(List<DContextEntryBean> entries) {
-      DContextEntryBean match = findMatch(entries);
-      return match == null ? null : match.provider();
+      DContextEntryBean foundMatch = findMatch(entries);
+      return foundMatch == null ? null : foundMatch.provider();
     }
 
     private Object match(List<DContextEntryBean> entries) {
-      DContextEntryBean match = findMatch(entries);
-      return match == null ? null : match.bean();
+      DContextEntryBean foundMatch = findMatch(entries);
+      return foundMatch == null ? null : foundMatch.bean();
     }
 
     private DContextEntryBean findMatch(List<DContextEntryBean> entries) {

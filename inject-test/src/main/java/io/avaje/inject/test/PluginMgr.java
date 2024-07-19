@@ -9,6 +9,8 @@ import io.avaje.inject.test.Plugin.Scope;
 
 final class PluginMgr {
 
+  private PluginMgr() {}
+
   private static final Plugin plugin = init();
 
   private static Plugin init() {

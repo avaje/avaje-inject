@@ -1,8 +1,6 @@
 package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.logError;
-import static java.util.stream.Collectors.toList;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -269,13 +267,13 @@ final class BeanReader {
   }
 
   MetaData createMeta() {
-    String type;
+    String metaType;
     if (beanType.getNestingKind().isNested()) {
-      type = beanType.getEnclosingElement().toString() + "$" + beanType.getSimpleName();
+      metaType = beanType.getEnclosingElement().toString() + "$" + beanType.getSimpleName();
     } else {
-      type = beanQualifiedName();
+      metaType = beanQualifiedName();
     }
-    MetaData metaData = new MetaData(type, name);
+    MetaData metaData = new MetaData(metaType, name);
     metaData.update(this);
     return metaData;
   }
