@@ -7,6 +7,7 @@ sed -i 's/\(<version>[^<]*\)-javax\([^<]*<\/version>\)/\1\2/' inject/pom.xml
 sed -i 's/\(<version>[^<]*\)-javax\([^<]*<\/version>\)/\1\2/' inject-aop/pom.xml
 sed -i 's/\(<version>[^<]*\)-javax\([^<]*<\/version>\)/\1\2/' inject-events/pom.xml
 sed -i 's/\(<version>[^<]*\)-javax\([^<]*<\/version>\)/\1\2/' inject-generator/pom.xml
+sed -i 's/\(<version>[^<]*\)-javax\([^<]*<\/version>\)/\1\2/' inject-maven-plugin/pom.xml
 sed -i 's/\(<version>[^<]*\)-javax\([^<]*<\/version>\)/\1\2/' inject-test/pom.xml
 sed -i 's/\(<version>[^<]*\)-javax\([^<]*<\/version>\)/\1\2/' blackbox-aspect/pom.xml
 sed -i 's/\(<version>[^<]*\)-javax\([^<]*<\/version>\)/\1\2/' blackbox-other/pom.xml

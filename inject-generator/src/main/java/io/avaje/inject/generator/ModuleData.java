@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 final class ModuleData {
 
@@ -18,10 +19,20 @@ final class ModuleData {
     this.requires = requires;
   }
 
-  ModuleData(String[] moduleCsv) {
-    this.fqn = moduleCsv[0];
-    this.provides = Arrays.stream(moduleCsv[1].split(",")).filter(not(String::isBlank)).collect(toList());
-    this.requires = Arrays.stream(moduleCsv[2].split(",")).filter(not(String::isBlank)).collect(toList());
+  static Optional<ModuleData> of(String[] moduleCsv) {
+    try {
+      return Optional.of(
+        new ModuleData(
+          moduleCsv[0],
+          Arrays.stream(moduleCsv[1].split(",")).filter(not(String::isBlank)).collect(toList()),
+          Arrays.stream(moduleCsv[2].split(","))
+            .filter(not(String::isBlank))
+            .collect(toList())));
+
+    } catch (Exception e) {
+      System.err.println("Failed to parse" + Arrays.toString(moduleCsv));
+    }
+    return Optional.empty();
   }
 
   List<String> provides() {
