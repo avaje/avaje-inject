@@ -492,7 +492,7 @@ final class MethodReader {
     MethodParam(VariableElement param) {
       this.element = param;
       this.simpleName = param.getSimpleName().toString();
-      this.named = Util.getNamed(param);
+      this.named = Util.named(param);
       this.nullable = Util.isNullable(param);
       this.isBeanMap = QualifiedMapPrism.isPresent(param);
       this.utilType = Util.determineType(param.asType(), isBeanMap);
@@ -572,7 +572,7 @@ final class MethodReader {
         importTypes.add("io.avaje.inject.events.ObserverManager");
       }
       importTypes.addAll(fullUType.importTypes());
-      Util.getNullableAnnotation(element).map(Object::toString).ifPresent(importTypes::add);
+      Util.nullableAnnotation(element).map(Object::toString).ifPresent(importTypes::add);
     }
 
     void checkRequest(BeanRequestParams requestParams) {

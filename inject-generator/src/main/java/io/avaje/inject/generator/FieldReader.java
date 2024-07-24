@@ -19,7 +19,7 @@ final class FieldReader {
 
   FieldReader(Element element) {
     this.element = element;
-    this.name = Util.getNamed(element);
+    this.name = Util.named(element);
     this.nullable = Util.isNullable(element);
     this.isBeanMap = QualifiedMapPrism.isPresent(element);
     this.utype = Util.determineType(element.asType(), isBeanMap);

@@ -52,7 +52,7 @@ final class EventPublisherWriter {
       .toString()
       .replaceFirst("java.", "")
       + ".events";
-    qualifier = Optional.ofNullable(Util.getNamed(element)).orElse("");
+    qualifier = Optional.ofNullable(Util.named(element)).orElse("");
     var className =
       packageName
         + "."
@@ -65,7 +65,7 @@ final class EventPublisherWriter {
     if (GENERATED_PUBLISHERS.containsKey(originName)) {
       //in super niche situations when compiling the same module, we need to tell avaje that these types already exist
       //got this when running both my eclipse compiler and then the terminal build
-      ProcessingContext.addOptionalType(UType.parse(asType).fullWithoutAnnotations(), Util.getNamed(element));
+      ProcessingContext.addOptionalType(UType.parse(asType).fullWithoutAnnotations(), Util.named(element));
       return;
     }
     importTypes.addAll(utype.importTypes());
@@ -77,7 +77,7 @@ final class EventPublisherWriter {
     Optional.ofNullable(APContext.typeElement(className)).ifPresent(e ->
       GENERATED_PUBLISHERS.put(
         e.getQualifiedName().toString(),
-        Optional.ofNullable(Util.getNamed(e)).orElse("")));
+        Optional.ofNullable(Util.named(e)).orElse("")));
 
     if (Optional.ofNullable(GENERATED_PUBLISHERS.get(className))
         .filter(not(qualifier::equals))
