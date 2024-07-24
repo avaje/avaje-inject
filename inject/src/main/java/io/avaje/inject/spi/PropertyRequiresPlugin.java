@@ -2,7 +2,7 @@ package io.avaje.inject.spi;
 
 import java.util.Optional;
 
-import io.avaje.lang.NonNullApi;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * Plugin interface which contains the application properties used for wiring. Used with {@link
@@ -13,7 +13,7 @@ import io.avaje.lang.NonNullApi;
  *
  * @deprecated use ConfigPropertyPlugin Instead
  */
-@NonNullApi
+@NullMarked
 @Deprecated(forRemoval = true)
 public interface PropertyRequiresPlugin extends InjectExtension {
 

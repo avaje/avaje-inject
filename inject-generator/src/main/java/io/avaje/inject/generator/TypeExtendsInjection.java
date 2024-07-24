@@ -165,7 +165,7 @@ final class TypeExtendsInjection {
 
 
   private void addFactoryMethod(ExecutableElement methodElement, BeanPrism bean) {
-    String qualifierName = Util.getNamed(methodElement);
+    String qualifierName = Util.named(methodElement);
     factoryMethods.add(new MethodReader(methodElement, baseType, bean, qualifierName, importTypes).read());
   }
 

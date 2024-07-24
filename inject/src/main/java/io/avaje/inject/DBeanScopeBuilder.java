@@ -3,6 +3,7 @@ package io.avaje.inject;
 import static java.lang.System.Logger.Level.DEBUG;
 import static java.lang.System.Logger.Level.INFO;
 import static java.util.Collections.emptySet;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,14 +15,20 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import io.avaje.applog.AppLog;
-import io.avaje.inject.spi.*;
-import io.avaje.lang.NonNullApi;
-import io.avaje.lang.Nullable;
+import io.avaje.inject.spi.AvajeModule;
+import io.avaje.inject.spi.Builder;
+import io.avaje.inject.spi.ClosePair;
+import io.avaje.inject.spi.ConfigPropertyPlugin;
+import io.avaje.inject.spi.EnrichBean;
+import io.avaje.inject.spi.ModuleOrdering;
+import io.avaje.inject.spi.PropertyRequiresPlugin;
+import io.avaje.inject.spi.SuppliedBean;
 import jakarta.inject.Provider;
 
 /** Build a bean scope with options for shutdown hook and supplying test doubles. */
-@NonNullApi
 final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   private static final System.Logger log = AppLog.getLogger("io.avaje.inject");

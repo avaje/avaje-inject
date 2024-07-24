@@ -155,7 +155,7 @@ public final class InjectProcessor extends AbstractProcessor {
       .forEach(e -> {
         var type = UType.parse(e.asType());
         type = "java.util.List".equals(type.mainType()) ? type.param0() : type;
-        ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), Util.getNamed(e));
+        ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), Util.named(e));
         ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), null);
       });
 

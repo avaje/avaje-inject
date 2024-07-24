@@ -2,7 +2,7 @@ package io.avaje.inject.test;
 
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.spi.AvajeModule;
-import io.avaje.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;

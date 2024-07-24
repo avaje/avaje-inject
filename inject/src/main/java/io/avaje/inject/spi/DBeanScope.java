@@ -1,24 +1,31 @@
 package io.avaje.inject.spi;
 
-import io.avaje.applog.AppLog;
-import io.avaje.inject.BeanEntry;
-import io.avaje.inject.BeanScope;
-import io.avaje.inject.Priority;
-import io.avaje.lang.NonNullApi;
-import io.avaje.lang.Nullable;
+import static java.lang.System.Logger.Level.INFO;
+import static java.lang.System.Logger.Level.TRACE;
 
 import java.lang.System.Logger.Level;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static java.lang.System.Logger.Level.INFO;
-import static java.lang.System.Logger.Level.TRACE;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
-@NonNullApi
+import io.avaje.applog.AppLog;
+import io.avaje.inject.BeanEntry;
+import io.avaje.inject.BeanScope;
+import io.avaje.inject.Priority;
+
+@NullMarked
 final class DBeanScope implements BeanScope {
 
   private static final System.Logger log = AppLog.getLogger("io.avaje.inject");

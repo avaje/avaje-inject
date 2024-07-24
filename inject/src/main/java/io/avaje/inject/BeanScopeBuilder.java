@@ -1,14 +1,14 @@
 package io.avaje.inject;
 
-import io.avaje.inject.spi.AvajeModule;
-import io.avaje.inject.spi.ConfigPropertyPlugin;
-import io.avaje.inject.spi.PropertyRequiresPlugin;
-import io.avaje.lang.NonNullApi;
-import io.avaje.lang.Nullable;
-
 import java.lang.reflect.Type;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import org.jspecify.annotations.Nullable;
+
+import io.avaje.inject.spi.AvajeModule;
+import io.avaje.inject.spi.ConfigPropertyPlugin;
+import io.avaje.inject.spi.PropertyRequiresPlugin;
 
 /**
  * Build a bean scope with options for shutdown hook and supplying external dependencies.
@@ -30,7 +30,6 @@ import java.util.function.Supplier;
  *
  * }</pre>
  */
-@NonNullApi
 public interface BeanScopeBuilder {
 
   /**

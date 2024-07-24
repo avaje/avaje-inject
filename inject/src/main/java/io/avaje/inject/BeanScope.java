@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import io.avaje.lang.NonNullApi;
-import io.avaje.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Holds beans created by dependency injection.
@@ -67,7 +66,6 @@ import io.avaje.lang.Nullable;
  *
  * }</pre>
  */
-@NonNullApi
 public interface BeanScope extends AutoCloseable {
 
   /**

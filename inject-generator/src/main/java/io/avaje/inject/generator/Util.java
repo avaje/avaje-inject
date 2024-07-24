@@ -183,16 +183,6 @@ final class Util {
     return shortName(type.mainType()).toLowerCase();
   }
 
-  String trimExtends(UType uType) {
-    String type = uType.mainType();
-    if (type != null && type.startsWith("? extends ")) {
-      return type.substring(10);
-    } else if ("?".equals(type)) {
-      return "Wildcard";
-    }
-    return type;
-  }
-
   static boolean isOptional(String rawType) {
     return rawType.startsWith(OPTIONAL_PREFIX);
   }
@@ -298,7 +288,7 @@ final class Util {
   /**
    * Return the name via <code>@Named</code> or a Qualifier annotation.
    */
-  static String getNamed(Element p) {
+  static String named(Element p) {
     final NamedPrism named = NamedPrism.getInstanceOn(p);
     if (named != null) {
       return named.value().replace("\"", "\\\"");
@@ -320,8 +310,11 @@ final class Util {
   /**
    * Return true if the element has a Nullable annotation.
    */
-  static boolean isNullable(Element p) {
-    for (final AnnotationMirror mirror : p.getAnnotationMirrors()) {
+  static boolean isNullable(Element element) {
+    if (ProcessorUtils.hasAnnotationWithName(element, NULLABLE)) {
+      return true;
+    }
+    for (final AnnotationMirror mirror : UType.parse(element.asType()).annotations()) {
       if (NULLABLE.equals(shortName(mirror.getAnnotationType().toString()))) {
         return true;
       }
@@ -329,8 +322,8 @@ final class Util {
     return false;
   }
 
-  static Optional<DeclaredType> getNullableAnnotation(Element p) {
-    for (final AnnotationMirror mirror : p.getAnnotationMirrors()) {
+  static Optional<DeclaredType> nullableAnnotation(Element element) {
+    for (final AnnotationMirror mirror : element.getAnnotationMirrors()) {
       if (NULLABLE.equals(shortName(mirror.getAnnotationType().toString()))) {
         return Optional.of(mirror.getAnnotationType());
       }

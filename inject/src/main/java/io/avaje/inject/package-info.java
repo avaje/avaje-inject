@@ -26,4 +26,5 @@
  *
  * }</pre>
  */
+@org.jspecify.annotations.NullMarked
 package io.avaje.inject;
