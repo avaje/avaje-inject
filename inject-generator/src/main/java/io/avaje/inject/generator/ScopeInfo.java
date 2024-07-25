@@ -458,7 +458,8 @@ final class ScopeInfo {
 
   void readModuleMetaData(TypeElement moduleType) {
     final InjectModulePrism module = InjectModulePrism.getInstanceOn(moduleType);
-    details(module.name(), moduleType);
+    final String name = module == null ? null : module.name();
+    details(name, moduleType);
     readFactoryMetaData(moduleType);
   }
 
