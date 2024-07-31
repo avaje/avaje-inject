@@ -2,6 +2,7 @@ package io.avaje.inject.generator;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -368,4 +369,12 @@ final class Util {
       .collect(toList());
   }
 
+  static String valhalla() {
+    try {
+      if (Modifier.valueOf("VALUE") != null && APContext.previewEnabled()) return "value ";
+    } catch (IllegalArgumentException e) {
+      // no valhalla
+    }
+    return "";
+  }
 }
