@@ -140,16 +140,11 @@ final class ProcessingContext {
   }
 
   static void validateModule() {
-    var module = getProjectModuleElement();
-    if (module != null) {
-      try (var reader = getModuleInfoReader()) {
-        new ModuleInfoReader(module, reader)
-            .validateServices("io.avaje.inject.spi.InjectExtension", CTX.get().spiServices);
-
-      } catch (Exception e) {
-        // can't read module
-      }
-    }
+    APContext.moduleInfoReader()
+        .ifPresent(
+            reader ->
+                reader.validateServices(
+                    "io.avaje.inject.spi.InjectExtension", CTX.get().spiServices));
   }
 
   static Optional<AspectImportPrism> getImportedAspect(String type) {
