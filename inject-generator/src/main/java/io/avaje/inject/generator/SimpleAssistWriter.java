@@ -91,7 +91,14 @@ final class SimpleAssistWriter {
     if (!beanReader.hasTargetFactory()) {
       writer.append("public ");
     }
-    writer.append("final class ").append(name).append(suffix);
+
+    var valhallaStr =
+        beanReader.injectFields().isEmpty()
+                || beanReader.injectFields().stream().noneMatch(FieldReader::assisted)
+            ? Util.valhalla()
+            : "";
+
+    writer.append("final %sclass ", valhallaStr).append(name).append(suffix);
 
     writeImplementsOrExtends();
     writer.append(" {").eol().eol();
