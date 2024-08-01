@@ -58,7 +58,7 @@ final class SimpleOrderWriter {
         " */\n"
     );
     writer.append(Constants.AT_GENERATED).eol();
-    writer.append("public final class %s implements ModuleOrdering {", shortName).eol().eol();
+    writer.append("public final %sclass %s implements ModuleOrdering {", Util.valhalla(), shortName).eol().eol();
 
     writer.append("  private final AvajeModule[] sortedModules = new AvajeModule[%s];", ordering.size()).eol();
     writer.append("  private static final Map<String, Integer> INDEXES = Map.ofEntries(").eol();

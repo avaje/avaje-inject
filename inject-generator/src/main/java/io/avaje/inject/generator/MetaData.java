@@ -238,7 +238,7 @@ final class MetaData {
       appendProvides(append, "autoProvides", autoProvides);
     }
     append.append(")").append(NEWLINE);
-    append.append("  private void build_").append(buildName()).append("() {").append(NEWLINE);
+    append.append("  private void build_").append(buildName()).append("(Builder builder) {").append(NEWLINE);
     if (hasMethod()) {
       append.append("    ").append(Util.shortMethod(method)).append("(builder");
     } else {

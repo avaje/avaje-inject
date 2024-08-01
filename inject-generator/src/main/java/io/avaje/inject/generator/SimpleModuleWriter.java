@@ -170,12 +170,11 @@ final class SimpleModuleWriter {
     if (scopeInfo.addWithBeans()) {
       writeWithBeans();
     }
-    writer.append("    this.builder = builder;").eol();
     writer.append("    // create beans in order based on constructor dependencies").eol();
     writer.append("    // i.e. \"provides\" followed by \"dependsOn\"").eol();
     for (MetaData metaData : ordering.ordered()) {
       if (!metaData.isGenerateProxy()) {
-        writer.append("    build_%s();", metaData.buildName()).eol();
+        writer.append("    build_%s(builder);", metaData.buildName()).eol();
       }
     }
     writer.append("  }").eol();
@@ -219,8 +218,7 @@ final class SimpleModuleWriter {
     scopeInfo.buildAtInjectModule(writer);
 
     String interfaceType = scopeInfo.type().type();
-    writer.append("public final class %s implements %s {", shortName, interfaceType).eol().eol();
-    writer.append("  private Builder builder;").eol().eol();
+    writer.append("public final %sclass %s implements %s {", Util.valhalla(), shortName, interfaceType).eol().eol();
     if (scopeInfo.addModuleConstructor()) {
       writeConstructor();
     }

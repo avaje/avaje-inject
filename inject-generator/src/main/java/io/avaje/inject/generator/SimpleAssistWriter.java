@@ -91,10 +91,21 @@ final class SimpleAssistWriter {
     if (!beanReader.hasTargetFactory()) {
       writer.append("public ");
     }
-    writer.append("final class ").append(name).append(suffix);
+    var valhallaStr = Util.valhalla();
+    if (!valhallaStr.isBlank() && hasAssistedFieldsOrParams()) {
+      valhallaStr = "";
+    }
 
+    writer.append("final %sclass ", valhallaStr).append(name).append(suffix);
     writeImplementsOrExtends();
     writer.append(" {").eol().eol();
+  }
+
+  private boolean hasAssistedFieldsOrParams() {
+    return beanReader.injectFields().stream().anyMatch(FieldReader::assisted)
+      || beanReader.injectMethods().stream()
+      .flatMap(m -> m.params().stream())
+      .anyMatch(MethodParam::assisted);
   }
 
   private void writeImplementsOrExtends() {

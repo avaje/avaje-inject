@@ -333,21 +333,26 @@ final class SimpleBeanWriter {
   }
 
   private void writeClassStart() {
-    if (beanReader.isRequestScopedController()) {
+    final var requestScopedController = beanReader.isRequestScopedController();
+    if (requestScopedController) {
       writer.append(CODE_COMMENT_FACTORY, shortName).eol();
     } else {
       writer.append(CODE_COMMENT, shortName).eol();
     }
     writer.append(beanReader.generatedType()).append(Constants.AT_GENERATED_COMMENT).eol();
-    if (beanReader.isRequestScopedController()) {
+    if (requestScopedController) {
       writer.append(Constants.AT_SINGLETON).eol();
     }
     String shortName = this.shortName;
     if (beanReader.beanType().getNestingKind().isNested()) {
       shortName = shortName.replace(".", "$");
     }
-    writer.append("public final class ").append(shortName).append(suffix).append(" ");
-    if (beanReader.isRequestScopedController()) {
+    writer
+      .append("public final %sclass ", requestScopedController ? "" : Util.valhalla())
+      .append(shortName)
+      .append(suffix)
+      .append(" ");
+    if (requestScopedController) {
       writer.append("implements ");
       beanReader.factoryInterface(writer);
     }
