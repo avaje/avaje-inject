@@ -348,10 +348,10 @@ final class SimpleBeanWriter {
       shortName = shortName.replace(".", "$");
     }
     writer
-        .append("public final %sclass ", requestScopedController ? "" : Util.valhalla())
-        .append(shortName)
-        .append(suffix)
-        .append(" ");
+      .append("public final %sclass ", requestScopedController ? "" : Util.valhalla())
+      .append(shortName)
+      .append(suffix)
+      .append(" ");
     if (requestScopedController) {
       writer.append("implements ");
       beanReader.factoryInterface(writer);
