@@ -91,12 +91,14 @@ final class SimpleAssistWriter {
     if (!beanReader.hasTargetFactory()) {
       writer.append("public ");
     }
-
-    var valhallaStr =
-        beanReader.injectFields().isEmpty()
-                || beanReader.injectFields().stream().noneMatch(FieldReader::assisted)
-            ? Util.valhalla()
-            : "";
+    var valhallaStr = Util.valhalla();
+    if (!valhallaStr.isBlank()
+        && (beanReader.injectFields().stream().anyMatch(FieldReader::assisted)
+            || beanReader.injectMethods().stream()
+                .flatMap(m -> m.params().stream())
+                .anyMatch(MethodParam::assisted))) {
+      valhallaStr = "";
+    }
 
     writer.append("final %sclass ", valhallaStr).append(name).append(suffix);
 
