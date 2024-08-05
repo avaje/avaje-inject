@@ -24,7 +24,6 @@ import io.avaje.inject.spi.ClosePair;
 import io.avaje.inject.spi.ConfigPropertyPlugin;
 import io.avaje.inject.spi.EnrichBean;
 import io.avaje.inject.spi.ModuleOrdering;
-import io.avaje.inject.spi.PropertyRequiresPlugin;
 import io.avaje.inject.spi.SuppliedBean;
 import jakarta.inject.Provider;
 
@@ -65,14 +64,6 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   public BeanScopeBuilder modules(AvajeModule... modules) {
     this.includeModules.addAll(Arrays.asList(modules));
     return this;
-  }
-
-  @Override
-  public PropertyRequiresPlugin propertyPlugin() {
-    if (propertyPlugin == null) {
-      propertyPlugin = defaultPropertyPlugin();
-    }
-    return propertyPlugin;
   }
 
   @Override

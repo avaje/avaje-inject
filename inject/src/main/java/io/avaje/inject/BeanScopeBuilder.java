@@ -8,7 +8,6 @@ import org.jspecify.annotations.Nullable;
 
 import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.ConfigPropertyPlugin;
-import io.avaje.inject.spi.PropertyRequiresPlugin;
 
 /**
  * Build a bean scope with options for shutdown hook and supplying external dependencies.
@@ -78,15 +77,6 @@ public interface BeanScopeBuilder {
    * @return This BeanScopeBuilder
    */
   BeanScopeBuilder modules(AvajeModule... modules);
-
-  /**
-   * Return the PropertyRequiresPlugin used for this scope. This is useful for plugins that want to
-   * use the scopes wiring properties.
-   *
-   * @deprecated use {@link #configPlugin()} instead
-   */
-  @Deprecated(forRemoval = true)
-  PropertyRequiresPlugin propertyPlugin();
 
   /**
    * Set the ConfigPropertyPlugin used for this scope. This is serviceloaded automatically of not set
