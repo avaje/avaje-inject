@@ -95,7 +95,7 @@ final class MethodReader {
       this.initMethod = initMethod;
       this.destroyMethod = destroyMethod;
     } else {
-      this.typeReader = new TypeReader(genericType, returnElement, importTypes);
+      this.typeReader = new TypeReader(BeanTypesPrism.getOptionalOn(element),genericType, returnElement, importTypes);
       typeReader.process();
       MethodLifecycleReader lifecycleReader = new MethodLifecycleReader(returnElement, initMethod, destroyMethod);
       this.initMethod = lifecycleReader.initMethod();
