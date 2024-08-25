@@ -3,6 +3,7 @@ package io.avaje.inject.generator;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +48,8 @@ final class TypeReader {
     this.injectsTypes =
         injectsTypes.map(BeanTypesPrism::value).stream()
             .flatMap(List::stream)
-            .map(UType::parse).collect(toList());
+            .map(UType::parse)
+            .collect(toList());
     this.forBean = forBean;
     this.beanType = beanType;
     this.importTypes = importTypes;
