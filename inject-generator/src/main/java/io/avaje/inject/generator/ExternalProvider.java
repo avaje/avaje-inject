@@ -51,7 +51,7 @@ final class ExternalProvider {
 
   static void registerModuleProvidedTypes(Set<String> providedTypes) {
     if (!INJECT_AVAILABLE) {
-      if (!pluginExists("avaje-module-provides.txt")) {
+      if (!pluginExists("avaje-module-dependencies.csv")) {
         APContext.logNote("Unable to detect Avaje Inject in Annotation Processor ClassPath, use the Avaje Inject Maven/Gradle plugin for detecting Inject Modules from dependencies");
       }
       return;
