@@ -2,7 +2,9 @@ package io.avaje.inject.generator;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -376,5 +378,17 @@ final class Util {
       // no valhalla
     }
     return "";
+  }
+
+  static void validateBeanTypes(Element origin, List<TypeMirror> beanType) {
+    TypeMirror targetType =
+      origin instanceof TypeElement
+        ? origin.asType()
+        : ((ExecutableElement) origin).getReturnType();
+    beanType.forEach(type -> {
+      if (!APContext.types().isAssignable(targetType, type)) {
+        APContext.logError(origin, "%s does not extend type %s", targetType, beanType);
+      }
+    });
   }
 }
