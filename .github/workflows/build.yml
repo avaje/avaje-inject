@@ -23,7 +23,7 @@ jobs:
         java-version: ${{ matrix.java_version }}
         distribution: 'zulu'
     - name: Maven cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       env:
         cache-name: maven-cache
       with:
