@@ -8,10 +8,8 @@ updates:
   ignore:
       - dependency-name: "jakarta.inject:jakarta.inject-api"
   groups:
-      dev-deps:
-        dependency-type: "development"
-      prod-deps:
-        dependency-type: "production"
+    patterns:
+      - "*"
 
 - package-ecosystem: "github-actions"
     directory: "/"
@@ -22,4 +20,7 @@ updates:
       prefix: "[workflow]"
     labels:
       - "dependencies"
-    target-branch: "master"
+    target-branch: "master"  
+    groups:
+      patterns:
+        - "*"
