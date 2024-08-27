@@ -61,12 +61,12 @@ final class BeanReader {
     final var beantypes = BeanTypesPrism.getOptionalOn(beanType);
     beantypes.ifPresent(p -> Util.validateBeanTypes(beanType, p.value()));
     this.typeReader =
-        new TypeReader(
-            beantypes,
-            UType.parse(beanType.asType()),
-            beanType,
-            importTypes,
-            factory);
+      new TypeReader(
+        beantypes,
+        UType.parse(beanType.asType()),
+        beanType,
+        importTypes,
+        factory);
 
     typeReader.process();
 

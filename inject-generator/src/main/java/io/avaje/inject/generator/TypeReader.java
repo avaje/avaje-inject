@@ -46,16 +46,15 @@ final class TypeReader {
       ImportTypeMap importTypes,
       boolean factory) {
     this.injectsTypes =
-        injectsTypes.map(BeanTypesPrism::value).stream()
-            .flatMap(List::stream)
-            .map(UType::parse)
-            .collect(toList());
+      injectsTypes.map(BeanTypesPrism::value).stream()
+        .flatMap(List::stream)
+        .map(UType::parse)
+        .collect(toList());
     this.forBean = forBean;
     this.beanType = beanType;
     this.importTypes = importTypes;
     final boolean proxyBean = forBean && ProxyPrism.isPresent(beanType);
-    this.extendsReader =
-        new TypeExtendsReader(genericType, beanType, factory, importTypes, proxyBean);
+    this.extendsReader = new TypeExtendsReader(genericType, beanType, factory, importTypes, proxyBean);
     this.annotationReader = new TypeAnnotationReader(beanType);
   }
 
@@ -74,11 +73,10 @@ final class TypeReader {
     if (!injectsTypes.isEmpty()) {
       return injectsTypes.stream().map(UType::full).collect(toList());
     }
-
     return extendsReader.autoProvides().stream()
-        .filter(u -> u.componentTypes().stream().noneMatch(p -> p.kind() == TypeKind.TYPEVAR))
-        .map(UType::full)
-        .collect(toList());
+      .filter(u -> u.componentTypes().stream().noneMatch(p -> p.kind() == TypeKind.TYPEVAR))
+      .map(UType::full)
+      .collect(toList());
   }
 
   String providesAspect() {
