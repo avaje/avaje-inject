@@ -26,6 +26,10 @@ final class ExternalProvider {
     entry("io.avaje.inject.events.spi.ObserverManagerPlugin", of("io.avaje.inject.events.ObserverManager")),
     entry("io.avaje.jsonb.inject.DefaultJsonbProvider", of("io.avaje.jsonb.Jsonb")),
     entry("io.avaje.http.inject.DefaultResolverProvider", of("io.avaje.http.api.context.RequestContextResolver")),
+    entry("io.avaje.htmx.nima.jstache.DefaultTemplateProvider",
+      of(
+        "io.avaje.htmx.nima.TemplateContentCache",
+        "io.avaje.htmx.nima.TemplateRender")),
     entry("io.avaje.nima.provider.DefaultConfigProvider",
       of(
         "io.helidon.webserver.WebServerConfig.Builder",
@@ -51,7 +55,7 @@ final class ExternalProvider {
 
   static void registerModuleProvidedTypes(Set<String> providedTypes) {
     if (!INJECT_AVAILABLE) {
-      if (!pluginExists("avaje-module-provides.txt")) {
+      if (!pluginExists("avaje-module-dependencies.csv")) {
         APContext.logNote("Unable to detect Avaje Inject in Annotation Processor ClassPath, use the Avaje Inject Maven/Gradle plugin for detecting Inject Modules from dependencies");
       }
       return;

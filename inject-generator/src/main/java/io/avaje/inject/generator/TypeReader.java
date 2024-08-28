@@ -3,10 +3,11 @@ package io.avaje.inject.generator;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-
 import static java.util.stream.Collectors.toList;
 
 final class TypeReader {
@@ -18,16 +19,37 @@ final class TypeReader {
   private final TypeAnnotationReader annotationReader;
   private Set<UType> genericTypes;
   private String typesRegister;
+  private final List<UType> injectsTypes;
 
-  TypeReader(UType genericType, TypeElement beanType, ImportTypeMap importTypes, boolean factory) {
-    this(genericType, true, beanType, importTypes, factory);
+  TypeReader(
+      Optional<BeanTypesPrism> injectsTypes,
+      UType genericType,
+      TypeElement beanType,
+      ImportTypeMap importTypes,
+      boolean factory) {
+    this(injectsTypes, genericType, true, beanType, importTypes, factory);
   }
 
-  TypeReader(UType genericType, TypeElement returnElement, ImportTypeMap importTypes) {
-    this(genericType, false, returnElement, importTypes, false);
+  TypeReader(
+      Optional<BeanTypesPrism> injectsTypes,
+      UType genericType,
+      TypeElement returnElement,
+      ImportTypeMap importTypes) {
+    this(injectsTypes, genericType, false, returnElement, importTypes, false);
   }
 
-  private TypeReader(UType genericType, boolean forBean, TypeElement beanType, ImportTypeMap importTypes, boolean factory) {
+  private TypeReader(
+      Optional<BeanTypesPrism> injectsTypes,
+      UType genericType,
+      boolean forBean,
+      TypeElement beanType,
+      ImportTypeMap importTypes,
+      boolean factory) {
+    this.injectsTypes =
+      injectsTypes.map(BeanTypesPrism::value).stream()
+        .flatMap(List::stream)
+        .map(UType::parse)
+        .collect(toList());
     this.forBean = forBean;
     this.beanType = beanType;
     this.importTypes = importTypes;
@@ -41,14 +63,20 @@ final class TypeReader {
   }
 
   List<String> provides() {
+    if (!injectsTypes.isEmpty()) {
+      return injectsTypes.stream().map(UType::full).collect(toList());
+    }
     return extendsReader.provides().stream().map(UType::full).collect(toList());
   }
 
   List<String> autoProvides() {
+    if (!injectsTypes.isEmpty()) {
+      return injectsTypes.stream().map(UType::full).collect(toList());
+    }
     return extendsReader.autoProvides().stream()
-        .filter(u -> u.componentTypes().stream().noneMatch(p -> p.kind() == TypeKind.TYPEVAR))
-        .map(UType::full)
-        .collect(toList());
+      .filter(u -> u.componentTypes().stream().noneMatch(p -> p.kind() == TypeKind.TYPEVAR))
+      .map(UType::full)
+      .collect(toList());
   }
 
   String providesAspect() {
@@ -120,8 +148,12 @@ final class TypeReader {
 
   private void initRegistrationTypes() {
     TypeAppender appender = new TypeAppender(importTypes);
-    appender.add(extendsReader.baseType());
-    appender.add(extendsReader.provides());
+    if (injectsTypes.isEmpty()) {
+      appender.add(extendsReader.baseType());
+      appender.add(extendsReader.provides());
+    } else {
+      appender.add(injectsTypes);
+    }
     this.genericTypes = appender.genericTypes();
     this.typesRegister = appender.asString();
   }

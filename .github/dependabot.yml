@@ -1,19 +1,21 @@
 version: 2
 updates:
-- package-ecosystem: maven
-  directory: "/"
-  schedule:
-    interval: "weekly"
-  open-pull-requests-limit: 10
-  ignore:
-      - dependency-name: "jakarta.inject:jakarta.inject-api"
-  groups:
-      dev-deps:
-        dependency-type: "development"
-      prod-deps:
-        dependency-type: "production"
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    ignore:
+       - dependency-name: "jakarta.inject:jakarta.inject-api"
+    groups:
+      dependencies:
+        patterns:
+        - "*"
+    labels:
+      - "dependencies"
+    target-branch: "master"
 
-- package-ecosystem: "github-actions"
+  - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
