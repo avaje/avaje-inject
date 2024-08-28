@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.avaje</groupId>
     <artifactId>java11-oss</artifactId>
-    <version>4.3</version>
+    <version>4.4</version>
   </parent>
   <scm>
     <developerConnection>scm:git:git@github.com:avaje/avaje-inject.git</developerConnection>
@@ -20,6 +20,8 @@
 
   <properties>
     <nexus.staging.autoReleaseAfterClose>true</nexus.staging.autoReleaseAfterClose>
+    <surefire.useModulePath>false</surefire.useModulePath>
+    <argLine>-Dnet.bytebuddy.experimental=true</argLine>
   </properties>
 
   <modules>
