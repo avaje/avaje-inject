@@ -102,17 +102,6 @@
         </executions>
       </plugin>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <argLine>
-            --add-opens io.avaje.inject/io.avaje.inject.spi=ALL-UNNAMED
-            --add-opens io.avaje.inject/io.avaje.inject.aop=ALL-UNNAMED
-          </argLine>
-        </configuration>
-      </plugin>
-
     </plugins>
   </build>
 
