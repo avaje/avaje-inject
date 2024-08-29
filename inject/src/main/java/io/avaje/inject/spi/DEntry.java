@@ -8,7 +8,7 @@ import org.jspecify.annotations.NullMarked;
 import io.avaje.inject.BeanEntry;
 
 @NullMarked
-final class DEntry implements BeanEntry {
+final /*value*/ class DEntry implements BeanEntry {
 
   private final String qualifierName;
   private final int priority;

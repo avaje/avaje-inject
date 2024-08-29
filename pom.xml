@@ -22,6 +22,10 @@
     <nexus.staging.autoReleaseAfterClose>true</nexus.staging.autoReleaseAfterClose>
     <surefire.useModulePath>false</surefire.useModulePath>
     <argLine>-Dnet.bytebuddy.experimental=true</argLine>
+    <!-- VALHALLA-START ___
+    <maven.compiler.release>23</maven.compiler.release>
+    <maven.compiler.enablePreview>true</maven.compiler.enablePreview>
+    ____ VALHALLA-END -->
   </properties>
 
   <modules>

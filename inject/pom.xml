@@ -91,6 +91,7 @@
           <show>public</show>
           <linksource>true</linksource>
           <overview>src/main/javadoc/overview.html</overview>
+          <!-- Javadoc-No-Preview -->
         </configuration>
         <executions>
           <execution>
