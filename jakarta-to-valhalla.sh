@@ -14,5 +14,6 @@ find . -type f -name 'pom.xml' -exec sed -i '' -e 's|<!-- Javadoc-No-Preview -->
 
 
 
+sed -i 's|//@Disabled|@Disabled|g'  ./inject-generator/src/test/java/io/avaje/inject/generator/InjectProcessorTest.java
 
 

@@ -11,3 +11,4 @@ find . -type f -name 'pom.xml' -exec sed -i '' -e 's|--enable-preview -Dnet.byte
 find . -type f -name 'pom.xml' -exec sed -i '' -e 's|<!-- VALHALLA-START -->|<!-- VALHALLA-START ___|g' {} +
 find . -type f -name 'pom.xml' -exec sed -i '' -e 's|<!-- VALHALLA-END -->|____ VALHALLA-END -->|g' {} +
 find . -type f -name 'pom.xml' -exec sed -i '' -e 's|<additionalOptions>--enable-preview</additionalOptions> <!-- Valhalla -->|<!-- Javadoc-No-Preview -->|g' {} +
+sed -i 's|@Disabled|//@Disabled|g' ./inject-generator/src/test/java/io/avaje/inject/generator/InjectProcessorTest.java
