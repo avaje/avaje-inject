@@ -287,7 +287,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     if (moduleNames.isEmpty()) {
       log.log(
           Level.ERROR,
-          "Could not find any AvajeModule instances to wire. Possible Causes: \n1. No beans have been defined.\n2. The inject-generator is not setup\n3. Perhaps using Gradle and a misconfigured IDE? Refer to https://avaje.io/inject#gradle");
+          "Could not find any AvajeModule instances to wire. Possible Causes: \n1. No beans have been defined.\n2. The avaje-inject-generator depedency was not available during compilation\n3. Perhaps using Gradle and a misconfigured IDE? Refer to https://avaje.io/inject#gradle");
     }
 
     postConstructList.forEach(builder::addPostConstruct);
