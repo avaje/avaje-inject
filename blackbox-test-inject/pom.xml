@@ -12,11 +12,6 @@
   <groupId>io.avaje.blackboxtest</groupId>
   <artifactId>blackbox-test-inject</artifactId>
 
-  <properties>
-    <maven.compiler.release>11</maven.compiler.release>
-    <argLine>-Dnet.bytebuddy.experimental=true</argLine>
-  </properties>
-
   <dependencies>
 
     <dependency>

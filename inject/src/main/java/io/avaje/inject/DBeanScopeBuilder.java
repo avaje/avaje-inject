@@ -4,6 +4,7 @@ import static java.lang.System.Logger.Level.DEBUG;
 import static java.lang.System.Logger.Level.INFO;
 import static java.util.Collections.emptySet;
 
+import java.lang.System.Logger.Level;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -263,13 +264,6 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
 
     final var moduleNames = factoryOrder.orderModules();
-    if (moduleNames.isEmpty()) {
-      throw new IllegalStateException(
-        "Could not find any avaje modules."
-          + " Perhaps using Gradle and IDEA but with a setup issue?"
-          + " Review IntelliJ Settings / Build / Build tools / Gradle - 'Build and run using' value and set that to 'Gradle'. "
-          + " Refer to https://avaje.io/inject#gradle");
-    }
 
     final var level = propertyPlugin.contains("printModules") ? INFO : DEBUG;
     initProfiles();
@@ -281,9 +275,15 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       factory.build(builder);
     }
 
+    if (moduleNames.isEmpty()) {
+      log.log(
+          Level.ERROR,
+          "Could not find any AvajeModule instances to wire. Possible Causes: \n1. No beans have been defined.\n2. The avaje-inject-generator depedency was not available during compilation\n3. Perhaps using Gradle and a misconfigured IDE? Refer to https://avaje.io/inject#gradle");
+    }
+
     postConstructList.forEach(builder::addPostConstruct);
     postConstructConsumerList.forEach(builder::addPostConstruct);
-    for (ClosePair closePair : preDestroyList) {
+    for (var closePair : preDestroyList) {
       builder.addPreDestroy(closePair.closeable(), closePair.priority());
     }
     return builder.build(shutdownHook, start);

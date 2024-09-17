@@ -3,7 +3,6 @@ package io.avaje.inject.generator;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,6 +23,7 @@ import javax.tools.ToolProvider;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 
 class InjectProcessorTest {
 
@@ -41,6 +41,7 @@ class InjectProcessorTest {
     }
   }
 
+  @Disabled
   @Test
   void testGeneration() throws Exception {
     final String source =

@@ -1,6 +1,6 @@
 package io.avaje.inject.spi;
 
-public final class ClosePair implements Comparable<ClosePair> {
+public final /*value*/ class ClosePair implements Comparable<ClosePair> {
 
   private final int priority;
   private final AutoCloseable closeable;

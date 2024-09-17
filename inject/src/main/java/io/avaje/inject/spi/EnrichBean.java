@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 /**
  * Holds Spy setup consumers for dependency injection using Mockito Spy.
  */
-public final class EnrichBean<B> {
+public final /*value*/ class EnrichBean<B> {
 
   private final Type type;
   private final String name;

@@ -20,7 +20,7 @@ import java.lang.reflect.*;
 /**
  * Factory methods for types.
  */
-final class RawType {
+final /*value*/ class RawType {
 
   private RawType() {
   }
