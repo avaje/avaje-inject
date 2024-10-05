@@ -12,7 +12,4 @@ module io.avaje.inject {
   requires static transitive org.jspecify;
 
   uses io.avaje.inject.spi.InjectExtension;
-  uses io.avaje.inject.spi.Module;
-  uses io.avaje.inject.spi.Plugin;
-
 }
