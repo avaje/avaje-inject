@@ -13,7 +13,7 @@
   <name>avaje inject generator</name>
   <description>annotation processor generating source code for avaje-inject dependency injection</description>
   <properties>
-    <avaje.prisms.version>1.31</avaje.prisms.version>
+    <avaje.prisms.version>1.32</avaje.prisms.version>
     <!-- VALHALLA-START ___
     <maven.compiler.enablePreview>false</maven.compiler.enablePreview>
     ____ VALHALLA-END -->
