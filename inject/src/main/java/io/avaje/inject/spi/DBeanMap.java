@@ -6,7 +6,6 @@ import jakarta.inject.Provider;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -134,7 +133,7 @@ final class DBeanMap {
    */
   List<Object> all(Type type) {
     DContextEntry entry = beans.get(type.getTypeName());
-    return entry != null ? entry.all() : Collections.emptyList();
+    return entry != null ? entry.all() : List.of();
   }
 
   /**
@@ -158,7 +157,7 @@ final class DBeanMap {
 
   private Map<String, Object> map(Type type) {
     DContextEntry entry = beans.get(type.getTypeName());
-    return entry != null ? entry.map() : Collections.emptyMap();
+    return entry != null ? entry.map() : Map.of();
   }
 
   /**

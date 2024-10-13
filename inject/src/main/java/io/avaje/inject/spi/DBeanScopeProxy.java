@@ -82,8 +82,7 @@ final class DBeanScopeProxy implements BeanScope {
     if (delegate != null) {
       return delegate.listByAnnotation(annotation);
     } else {
-      throw new IllegalStateException(
-          "Proxy BeanScope can't use listByAnnotation while scope is being built");
+      throw illegal("listByAnnotation");
     }
   }
 
@@ -111,8 +110,7 @@ final class DBeanScopeProxy implements BeanScope {
     if (delegate != null) {
       return delegate.listByPriority(type);
     } else {
-      throw new IllegalStateException(
-          "Proxy BeanScope can't use listByPriority while scope is being built");
+      throw illegal("listByPriority");
     }
   }
 
@@ -121,8 +119,7 @@ final class DBeanScopeProxy implements BeanScope {
     if (delegate != null) {
       return delegate.listByPriority(type, priority);
     } else {
-      throw new IllegalStateException(
-          "Proxy BeanScope can't use listByPriority while scope is being built");
+      throw illegal("listByPriority");
     }
   }
 
@@ -141,7 +138,7 @@ final class DBeanScopeProxy implements BeanScope {
     if (delegate != null) {
       return delegate.all();
     } else {
-      throw new IllegalStateException("Proxy BeanScope can't use all() while scope is being built");
+      throw illegal("all");
     }
   }
 
@@ -168,9 +165,12 @@ final class DBeanScopeProxy implements BeanScope {
     if (delegate != null) {
       delegate.close();
     } else {
-      throw new IllegalStateException(
-          "Proxy BeanScope can't use close() while scope is being built");
+      throw illegal("close");
     }
   }
 
+  IllegalStateException illegal(String name) {
+    return new IllegalStateException(
+        String.format("Proxy BeanScope can't use %s() while scope is being built", name));
+  }
 }
