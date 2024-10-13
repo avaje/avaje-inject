@@ -25,11 +25,6 @@ import io.avaje.inject.generator.MethodReader.MethodParam;
  */
 final class SimpleBeanWriter {
 
-  private static final String CODE_COMMENT = "/**\n * Generated source - dependency injection builder for %s.\n */";
-  private static final String CODE_COMMENT_FACTORY = "/**\n * Generated source - dependency injection factory for request scoped %s.\n */";
-  private static final String CODE_COMMENT_BUILD = "  /**\n   * Create and register %s.\n   */";
-  private static final String CODE_COMMENT_BUILD_PROVIDER = "  /**\n   * Register %s provider.\n   */";
-
   private final BeanReader beanReader;
   private final String originName;
   private final String shortName;
@@ -200,11 +195,6 @@ final class SimpleBeanWriter {
   }
 
   private void writeBuildMethodStart() {
-    if (beanReader.registerProvider()) {
-      writer.append(CODE_COMMENT_BUILD_PROVIDER, shortName).eol();
-    } else {
-      writer.append(CODE_COMMENT_BUILD, shortName).eol();
-    }
     writer.append("  public static void build(%s builder) {", beanReader.builderType()).eol();
   }
 
@@ -334,11 +324,6 @@ final class SimpleBeanWriter {
 
   private void writeClassStart() {
     final var requestScopedController = beanReader.isRequestScopedController();
-    if (requestScopedController) {
-      writer.append(CODE_COMMENT_FACTORY, shortName).eol();
-    } else {
-      writer.append(CODE_COMMENT, shortName).eol();
-    }
     writer.append(beanReader.generatedType()).append(Constants.AT_GENERATED_COMMENT).eol();
     if (requestScopedController) {
       writer.append(Constants.AT_SINGLETON).eol();
