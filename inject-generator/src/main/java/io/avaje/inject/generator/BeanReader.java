@@ -57,7 +57,7 @@ final class BeanReader {
     this.prototype = PrototypePrism.isPresent(beanType);
     this.primary = PrimaryPrism.isPresent(beanType);
     this.secondary = !primary && SecondaryPrism.isPresent(beanType);
-    this.lazy = !FactoryPrism.isPresent(beanType) && LazyPrism.isPresent(beanType);
+    this.lazy = !FactoryPrism.isPresent(beanType) && isLazy(beanType);
     final var beantypes = BeanTypesPrism.getOptionalOn(beanType);
     beantypes.ifPresent(p -> Util.validateBeanTypes(beanType, p.value()));
     this.typeReader =
@@ -91,6 +91,17 @@ final class BeanReader {
       this.proxy = false;
     }
     this.delayed = shouldDelay();
+  }
+
+  private boolean isLazy(Element element) {
+    if (element == null) {
+      return false;
+    }
+    if (LazyPrism.isPresent(beanType)) {
+      return true;
+    }
+
+    return isLazy(element.getEnclosingElement());
   }
 
   /**
