@@ -1,7 +1,6 @@
 package io.avaje.inject;
 
 import io.avaje.inject.spi.*;
-import io.avaje.inject.spi.Module;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,9 +29,6 @@ final class DServiceLoader {
         propertyPlugin = (ConfigPropertyPlugin) spi;
       }
     }
-    // older plugins and modules
-    ServiceLoader.load(Plugin.class, classLoader).forEach(plugins::add);
-    ServiceLoader.load(Module.class, classLoader).forEach(modules::add);
   }
 
   List<InjectPlugin> plugins() {
