@@ -32,8 +32,6 @@ import org.apache.maven.project.MavenProject;
 import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.InjectExtension;
 import io.avaje.inject.spi.InjectPlugin;
-import io.avaje.inject.spi.Module;
-import io.avaje.inject.spi.Plugin;
 
 /**
  * Plugin that generates <code>target/avaje-module-provides.txt</code> and <code>
@@ -103,23 +101,20 @@ public class AutoProvidesMojo extends AbstractMojo {
 
     final Log log = getLog();
 
-    final List<InjectPlugin> plugins = new ArrayList<>();
-    ServiceLoader.load(Plugin.class, newClassLoader).forEach(plugins::add);
     ServiceLoader.load(InjectExtension.class, newClassLoader).stream()
         .map(Provider::get)
         .filter(InjectPlugin.class::isInstance)
         .map(InjectPlugin.class::cast)
-        .forEach(plugins::add);
-
-    for (final var plugin : plugins) {
-      log.info("Loaded Plugin: " + plugin.getClass().getTypeName());
-      for (final var provide : plugin.provides()) {
-        providedTypes.add(provide.getTypeName());
-      }
-      for (final var provide : plugin.providesAspects()) {
-        providedTypes.add(wrapAspect(provide.getCanonicalName()));
-      }
-    }
+        .forEach(
+            plugin -> {
+              log.info("Loaded Plugin: " + plugin.getClass().getTypeName());
+              for (final var provide : plugin.provides()) {
+                providedTypes.add(provide.getTypeName());
+              }
+              for (final var provide : plugin.providesAspects()) {
+                providedTypes.add(wrapAspect(provide.getCanonicalName()));
+              }
+            });
 
     for (final var providedType : providedTypes) {
       pluginWriter.write(providedType);
@@ -130,44 +125,47 @@ public class AutoProvidesMojo extends AbstractMojo {
   private void writeModuleCSV(ClassLoader newClassLoader, FileWriter moduleWriter) throws IOException {
 
     final Log log = getLog();
-    final List<AvajeModule> avajeModules = new ArrayList<>();
-    ServiceLoader.load(Module.class, newClassLoader).forEach(avajeModules::add);
+
     ServiceLoader.load(InjectExtension.class, newClassLoader).stream()
         .map(Provider::get)
         .filter(AvajeModule.class::isInstance)
         .map(AvajeModule.class::cast)
-        .forEach(avajeModules::add);
-    for (final var module : avajeModules) {
-      final var name = module.getClass().getTypeName();
-      log.info("Detected External Module: " + name);
+        .forEach(
+            module -> {
+              final var name = module.getClass().getTypeName();
+              log.info("Detected External Module: " + name);
 
-      final var provides = new ArrayList<String>();
-      for (final var provide : module.provides()) {
-        var type = provide.getTypeName();
-        provides.add(type);
-      }
+              final var provides = new ArrayList<String>();
+              for (final var provide : module.provides()) {
+                var type = provide.getTypeName();
+                provides.add(type);
+              }
 
-      for (final var provide : module.autoProvides()) {
-        var type = provide.getTypeName();
-        provides.add(type);
-      }
+              for (final var provide : module.autoProvides()) {
+                var type = provide.getTypeName();
+                provides.add(type);
+              }
 
-      for (final var provide : module.autoProvidesAspects()) {
-        var type = wrapAspect(provide.getTypeName());
-        provides.add(type);
-      }
+              for (final var provide : module.autoProvidesAspects()) {
+                var type = wrapAspect(provide.getTypeName());
+                provides.add(type);
+              }
 
-      final var requires =
-          Arrays.<Type>stream(module.requires()).map(Type::getTypeName).collect(toList());
+              final var requires =
+                  Arrays.<Type>stream(module.requires()).map(Type::getTypeName).collect(toList());
 
-      Arrays.<Type>stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
-      Arrays.<Type>stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
-      Arrays.<Type>stream(module.autoRequiresAspects())
-        .map(Type::getTypeName)
-        .map(AutoProvidesMojo::wrapAspect)
-        .forEach(requires::add);
-      modules.add(new ModuleData(name, provides, requires));
-    }
+              Arrays.<Type>stream(module.autoRequires())
+                  .map(Type::getTypeName)
+                  .forEach(requires::add);
+              Arrays.<Type>stream(module.requiresPackages())
+                  .map(Type::getTypeName)
+                  .forEach(requires::add);
+              Arrays.<Type>stream(module.autoRequiresAspects())
+                  .map(Type::getTypeName)
+                  .map(AutoProvidesMojo::wrapAspect)
+                  .forEach(requires::add);
+              modules.add(new ModuleData(name, provides, requires));
+            });
 
     moduleWriter.write("External Module Type|Provides|Requires");
     for (ModuleData avajeModule : modules) {
