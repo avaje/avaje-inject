@@ -152,12 +152,10 @@ final class ProcessingContext {
   }
 
   static void validateModule() {
-    APContext.moduleInfoReader()
-        .ifPresent(
-            reader -> {
-              CTX.get().spiServices.remove(EVENTS_SPI);
-              reader.validateServices("io.avaje.inject.spi.InjectExtension", CTX.get().spiServices);
-            });
+    APContext.moduleInfoReader().ifPresent(reader -> {
+      CTX.get().spiServices.remove(EVENTS_SPI);
+      reader.validateServices("io.avaje.inject.spi.InjectExtension", CTX.get().spiServices);
+    });
   }
 
   static Optional<AspectImportPrism> getImportedAspect(String type) {
