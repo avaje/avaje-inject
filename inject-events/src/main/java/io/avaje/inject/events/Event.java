@@ -76,7 +76,7 @@ public abstract class Event<T> {
     return observers.stream()
       .sorted(PRIORITY)
       .reduce(CompletableFuture.<Void>completedFuture(null), (future, observer) ->
-          future.thenRun(() -> {
+          future.thenRunAsync(() -> {
             try {
               observer.observe(event, qualifier, true);
             } catch (Exception e) {
