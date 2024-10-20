@@ -19,6 +19,7 @@ import static java.util.stream.Collectors.toSet;
 
 final class ProcessingContext {
 
+  private static final String EVENTS_SPI = "io.avaje.inject.events.spi.ObserverManagerPlugin";
   private static final ThreadLocal<Ctx> CTX = new ThreadLocal<>();
   private static boolean processingOver;
   private ProcessingContext() {}
@@ -42,6 +43,17 @@ final class ProcessingContext {
   static void init(Set<String> moduleFileProvided, boolean performModuleValidation) {
     CTX.set(new Ctx());
     CTX.get().registerProvidedTypes(moduleFileProvided);
+    addEventSPI();
+  }
+
+  private static void addEventSPI() {
+    try {
+      if (typeElement(EVENTS_SPI) != null || Class.forName(EVENTS_SPI) != null) {
+        addInjectSPI(EVENTS_SPI);
+      }
+    } catch (final ClassNotFoundException e) {
+      // nothing
+    }
   }
 
   static String loadMetaInfServices() {
@@ -140,8 +152,10 @@ final class ProcessingContext {
   }
 
   static void validateModule() {
-    APContext.moduleInfoReader().ifPresent(reader ->
-      reader.validateServices("io.avaje.inject.spi.InjectExtension", CTX.get().spiServices));
+    APContext.moduleInfoReader().ifPresent(reader -> {
+      CTX.get().spiServices.remove(EVENTS_SPI);
+      reader.validateServices("io.avaje.inject.spi.InjectExtension", CTX.get().spiServices);
+    });
   }
 
   static Optional<AspectImportPrism> getImportedAspect(String type) {
