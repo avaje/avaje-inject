@@ -205,6 +205,11 @@ final class ProcessingContext {
   }
 
   static void writeSPIServicesFile() {
+
+    Optional.ofNullable(APContext.getProjectModuleElement())
+        .filter(m -> "io.avaje.inject.test".equals(m.getQualifiedName().toString()))
+        .ifPresent(m -> CTX.get().spiServices.remove(EVENTS_SPI));
+
     readExistingMetaInfServices();
     try {
       FileObject jfo = createMetaInfWriterFor(Constants.META_INF_SPI);
