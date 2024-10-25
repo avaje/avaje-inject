@@ -2,9 +2,12 @@ package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.ProcessingContext.*;
 import static io.avaje.inject.generator.APContext.*;
+import static java.util.stream.Collectors.toList;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -228,7 +231,10 @@ final class ScopeInfo {
     if (moduleWritten) {
       return;
     }
-    final Collection<MetaData> meta = metaData.values();
+    final Collection<MetaData> meta =
+        metaData.values().stream()
+            .sorted(Comparator.comparing(m -> String.join(",", m.autoProvides())))
+            .collect(toList());
     if (emptyModule) {
       // typically nothing in the default scope, only custom scopes
       if (meta.size() > 0) {
