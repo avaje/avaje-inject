@@ -22,9 +22,6 @@ final class TypeExtendsReader {
   private static final Set<String> ROUTE_TYPES = Set.of(
     "io.avaje.http.api.AvajeJavalinPlugin",
     "io.helidon.webserver.http.HttpFeature");
-
-  private static final String JAVA_LANG_OBJECT = "java.lang.Object";
-  private static final String JAVA_LANG_RECORD = "java.lang.Record";
   private final UType baseUType;
   private final TypeElement baseType;
   private final TypeExtendsInjection extendsInjection;
@@ -203,7 +200,7 @@ final class TypeExtendsReader {
   private void addSuperType(TypeElement element, TypeMirror mirror, boolean proxyBean) {
     readInterfaces(element);
     final String fullName = mirror.toString();
-    if (!JAVA_LANG_OBJECT.equals(fullName) && !JAVA_LANG_RECORD.equals(fullName)) {
+    if (Util.notJavaLang(fullName)) {
       final String type = Util.unwrapProvider(fullName);
 
       if (proxyBean || isPublic(element)) {
@@ -226,38 +223,37 @@ final class TypeExtendsReader {
   }
 
   private void readInterfaces(TypeElement type) {
-    for (final TypeMirror anInterface : type.getInterfaces()) {
-      if (isPublic(asElement(anInterface))) {
-        readInterfacesOf(anInterface);
+    if (Util.notJavaLang(type.getQualifiedName().toString())) {
+      for (final TypeMirror anInterface : type.getInterfaces()) {
+        if (isPublic(asElement(anInterface))) {
+          readInterfacesOf(anInterface);
+        }
       }
     }
   }
 
   private void readInterfacesOf(TypeMirror anInterface) {
-	  final String rawType = Util.unwrapProvider(anInterface.toString());
-	  final UType rawUType = Util.unwrapProvider(anInterface);
-	    if (JAVA_LANG_OBJECT.equals(rawType)) {
-      // we can stop
-      return;
-    }
-    if (rawType.indexOf('.') == -1) {
-      logWarn("skip when no package on interface " + rawType);
-    } else if (Constants.AUTO_CLOSEABLE.equals(rawType) || Constants.IO_CLOSEABLE.equals(rawType)) {
+    final String rawType = Util.unwrapProvider(anInterface.toString());
+    final UType rawUType = Util.unwrapProvider(anInterface);
+    if (Constants.AUTO_CLOSEABLE.equals(rawType) || Constants.IO_CLOSEABLE.equals(rawType)) {
       closeable = true;
+    } else if (!Util.notJavaLang(rawType)) {
+      // return
+    } else if (rawType.indexOf('.') == -1) {
+      logWarn("skip when no package on interface " + rawType);
     } else {
       if (qualifierName == null) {
         final String mainType = rawUType.mainType();
         final String iShortName = Util.shortName(mainType);
         if (beanSimpleName.endsWith(iShortName)) {
           // derived qualifier name based on prefix to interface short name
-          qualifierName = beanSimpleName.substring(0, beanSimpleName.length() - iShortName.length());
+          qualifierName =
+              beanSimpleName.substring(0, beanSimpleName.length() - iShortName.length());
         }
       }
       interfaceTypes.add(rawUType);
-      if (Util.notJavaLang(rawType)) {
-        for (final TypeMirror supertype : types().directSupertypes(anInterface)) {
-          readInterfacesOf(supertype);
-        }
+      for (final TypeMirror supertype : types().directSupertypes(anInterface)) {
+        readInterfacesOf(supertype);
       }
     }
   }
