@@ -11,7 +11,7 @@
   <description>testing support for avaje-inject dependency injection</description>
 
   <properties>
-    <jupiter.version>5.11.2</jupiter.version>
+    <jupiter.version>5.11.3</jupiter.version>
     <mockito.version>5.14.2</mockito.version>
   </properties>
 
@@ -45,12 +45,12 @@
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy</artifactId>
-      <version>1.15.5</version>
+      <version>1.15.7</version>
     </dependency>
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy-agent</artifactId>
-      <version>1.15.5</version>
+      <version>1.15.7</version>
     </dependency>
 
     <dependency>
