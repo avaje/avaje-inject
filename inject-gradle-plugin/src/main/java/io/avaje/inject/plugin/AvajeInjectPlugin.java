@@ -30,9 +30,9 @@ public class AvajeInjectPlugin implements Plugin<Project> {
   public void apply(Project project) {
     project.afterEvaluate(
         prj -> {
-          // run it automatically after clean
-          Task cleanTask = prj.getTasks().getByName("clean");
-          cleanTask.doLast(it -> writeProvides(project));
+          // run it automatically before build
+          Task buildTask = prj.getTasks().getByName("build");
+          buildTask.doFirst(it -> writeProvides(project));
         });
     // register a task to run it manually
     project.task("discoverModules").doLast(task -> writeProvides(project));
@@ -110,7 +110,7 @@ public class AvajeInjectPlugin implements Plugin<Project> {
   }
 
   private void writeModuleCSV(ClassLoader classLoader, FileWriter moduleWriter) throws IOException {
-    
+
     final List<AvajeModule> avajeModules = new ArrayList<>();
     ServiceLoader.load(Module.class, classLoader).forEach(avajeModules::add);
     ServiceLoader.load(InjectExtension.class, classLoader).stream()
