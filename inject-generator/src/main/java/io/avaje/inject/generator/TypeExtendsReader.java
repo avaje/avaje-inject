@@ -244,11 +244,10 @@ final class TypeExtendsReader {
     } else {
       if (qualifierName == null) {
         final String mainType = rawUType.mainType();
-        final String iShortName = Util.shortName(mainType);
-        if (beanSimpleName.endsWith(iShortName)) {
+        final String shortName = Util.shortName(mainType);
+        if (beanSimpleName.endsWith(shortName)) {
           // derived qualifier name based on prefix to interface short name
-          qualifierName =
-              beanSimpleName.substring(0, beanSimpleName.length() - iShortName.length());
+          qualifierName = beanSimpleName.substring(0, beanSimpleName.length() - shortName.length());
         }
       }
       interfaceTypes.add(rawUType);
