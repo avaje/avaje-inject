@@ -345,6 +345,7 @@ final class ScopeInfo {
     writeBeanHelpers();
     initialiseModule();
     if (processingOver && !metaData.isEmpty()) {
+      ProcessingContext.registerExternalProvidedTypes();
       writeModule();
     }
   }

@@ -1,16 +1,29 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.spi.AvajeModule;
-import io.avaje.inject.spi.InjectPlugin;
-
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.ElementFilter;
-import java.lang.reflect.Type;
-import java.util.*;
-
 import static java.util.List.of;
 import static java.util.Map.entry;
 import static java.util.stream.Collectors.toList;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.ElementFilter;
+
+import io.avaje.inject.spi.AvajeModule;
+import io.avaje.inject.spi.InjectPlugin;
 
 
 /**
@@ -54,16 +67,13 @@ final class ExternalProvider {
   }
 
   static void registerModuleProvidedTypes(Set<String> providedTypes) {
+
     if (!INJECT_AVAILABLE) {
-      if (!pluginExists("avaje-module-dependencies.csv")) {
-        APContext.logNote("Unable to detect Avaje Inject in Annotation Processor ClassPath, use the Avaje Inject Maven/Gradle plugin for detecting Inject Modules from dependencies");
-      }
       return;
     }
 
     List<AvajeModule> modules = LoadServices.loadModules(CLASS_LOADER);
     if (modules.isEmpty()) {
-      APContext.logNote("No external modules detected");
       return;
     }
     for (final var module : modules) {
@@ -89,9 +99,10 @@ final class ExternalProvider {
       Arrays.stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
       Arrays.stream(module.autoRequiresAspects()).map(Type::getTypeName).map(Util::wrapAspect).forEach(requires::add);
 
-      ProcessingContext.addModule(new ModuleData(name, new ArrayList<>(provides), requires));
+      ProcessingContext.addModule(new ModuleData(name, List.copyOf(provides), requires));
     }
   }
+
 
   /**
    * Register types provided by the plugin so no compiler error when we have a dependency on these
@@ -106,6 +117,10 @@ final class ExternalProvider {
     });
     defaultScope.pluginProvided("io.avaje.inject.event.ObserverManager");
     if (!INJECT_AVAILABLE) {
+      if (!pluginExists("avaje-module-dependencies.csv")) {
+        APContext.logNote(
+            "Unable to detect Avaje Inject in Annotation Processor ClassPath, use the Avaje Inject Maven/Gradle plugin for detecting Inject Plugins from dependencies");
+      }
       return;
     }
 
@@ -152,5 +167,63 @@ final class ExternalProvider {
       providedTypes.addAll(Util.addQualifierSuffix(meta.provides(), meta.name()));
       providedTypes.addAll(Util.addQualifierSuffix(meta.autoProvides(), meta.name()));
     });
+  }
+
+  public static void scanTheWorld(Collection<String> providedTypes) {
+
+    if (!externalMeta.isEmpty()) {
+
+      return;
+    }
+
+    var types = APContext.types();
+    var spi = APContext.typeElement("io.avaje.inject.spi.AvajeModule").asType();
+    APContext.elements().getAllModuleElements().stream()
+        .filter(m -> !m.getQualifiedName().toString().startsWith("java"))
+        .filter(m -> !m.getQualifiedName().toString().startsWith("jdk"))
+        // for whatever reason, compilation breaks if we don't filter out the current module
+        .filter(m -> m != APContext.getProjectModuleElement())
+        .flatMap(m -> m.getEnclosedElements().stream())
+        .flatMap(p -> p.getEnclosedElements().stream())
+        .map(TypeElement.class::cast)
+        .filter(t -> t.getKind() == ElementKind.CLASS)
+        .filter(t -> t.getModifiers().contains(Modifier.PUBLIC))
+        .filter(t -> t.getInterfaces().stream().anyMatch(i -> types.isAssignable(i, spi)))
+        .forEach(
+            t -> {
+              final var provides = new HashSet<String>();
+              final var requires = new HashSet<String>();
+              Optional.of(t)
+                  .map(TypeElement::getEnclosedElements)
+                  .map(ElementFilter::methodsIn)
+                  .stream()
+                  .flatMap(List::stream)
+                  .map(DependencyMetaPrism::getInstanceOn)
+                  .filter(Objects::nonNull)
+                  .map(MetaData::new)
+                  .forEach(
+                      m -> {
+                        externalMeta.add(m);
+                        provides.addAll(m.autoProvides());
+                        provides.addAll(m.provides());
+                        m.dependsOn().stream()
+                            .filter(d -> !d.isSoftDependency())
+                            .map(Dependency::name)
+                            .forEach(requires::add);
+
+                        providedTypes.add(m.key());
+                        providedTypes.add(m.type());
+                        providedTypes.addAll(Util.addQualifierSuffix(m.provides(), m.name()));
+                        providedTypes.addAll(Util.addQualifierSuffix(m.autoProvides(), m.name()));
+                      });
+
+              final var name = t.getQualifiedName().toString();
+              APContext.logNote("Detected Module: " + name);
+              ProcessingContext.addModule(
+                  new ModuleData(name, List.copyOf(provides), List.copyOf(requires)));
+            });
+    if (externalMeta.isEmpty()) {
+      APContext.logNote("No external modules detected");
+    }
   }
 }

@@ -40,7 +40,7 @@ final class ProcessingContext {
     }
   }
 
-  static void init(Set<String> moduleFileProvided, boolean performModuleValidation) {
+  static void init(Set<String> moduleFileProvided) {
     CTX.set(new Ctx());
     CTX.get().registerProvidedTypes(moduleFileProvided);
     addEventSPI();
@@ -247,5 +247,9 @@ final class ProcessingContext {
     } catch (Exception e) {
       // not a critical error
     }
+  }
+
+  static void registerExternalProvidedTypes() {
+    ExternalProvider.scanTheWorld(CTX.get().providedTypes);
   }
 }
