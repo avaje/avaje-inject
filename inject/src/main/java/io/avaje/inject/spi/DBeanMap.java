@@ -62,8 +62,10 @@ final class DBeanMap {
     qualifiers.add(supplied.name());
     DContextEntryBean entryBean = DContextEntryBean.supplied(supplied.source(), supplied.name(), supplied.priority());
     beans.computeIfAbsent(suppliedType.getTypeName(), s -> new DContextEntry()).add(entryBean);
-    for (Class<?> anInterface : supplied.interfaces()) {
-      beans.computeIfAbsent(anInterface.getTypeName(), s -> new DContextEntry()).add(entryBean);
+    if (!suppliedType.getTypeName().startsWith("java.lang")) {
+      for (Class<?> anInterface : supplied.interfaces()) {
+        beans.computeIfAbsent(anInterface.getTypeName(), s -> new DContextEntry()).add(entryBean);
+      }
     }
   }
 
