@@ -8,10 +8,14 @@ import java.util.stream.Collectors;
 /**
  * Holds the data as per <code>@DependencyMeta</code>
  */
-final class MetaData {
+final class MetaData implements Comparable<MetaData> {
+
+  private static final Comparator<MetaData> COMPARATOR =
+    Comparator.comparing(MetaData::type)
+      .thenComparing(MetaData::name, Comparator.nullsFirst(Comparator.naturalOrder()))
+      .thenComparing(MetaData::compareProvides);
 
   private static final String INDENT = "      ";
-
   private static final String NEWLINE = "\n";
 
   private final String type;
@@ -313,5 +317,14 @@ final class MetaData {
         dependency.markExternal();
       }
     }
+  }
+
+  private String compareProvides() {
+    return provides.toString();
+  }
+
+  @Override
+  public int compareTo(MetaData meta) {
+    return COMPARATOR.compare(this, meta);
   }
 }
