@@ -46,7 +46,8 @@ import io.avaje.inject.spi.Plugin;
 @Mojo(
     name = "provides",
     defaultPhase = LifecyclePhase.PROCESS_SOURCES,
-    requiresDependencyResolution = ResolutionScope.COMPILE)
+    requiresDependencyResolution = ResolutionScope.COMPILE,
+    threadSafe = true)
 public class AutoProvidesMojo extends AbstractMojo {
 
   @Parameter(defaultValue = "${project}", readonly = true, required = true)
