@@ -192,6 +192,7 @@ final class ScopeInfo {
         logWarn("FilerException to write $DI class " + beanReader.beanType() + " " + e.getMessage());
 
       } catch (IOException e) {
+        e.printStackTrace();
         logError(beanReader.beanType(), "Failed to write $DI class");
       }
     }
