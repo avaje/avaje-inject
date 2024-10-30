@@ -3,14 +3,8 @@ package io.avaje.inject.generator;
 import static io.avaje.inject.generator.ProcessingContext.*;
 import static io.avaje.inject.generator.APContext.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.annotation.processing.FilerException;
 import javax.lang.model.element.Element;
@@ -48,7 +42,7 @@ final class ScopeInfo {
   /**
    * Map to merge the existing meta data with partially compiled code. Keyed by type and qualifier/name.
    */
-  private final Map<String, MetaData> metaData = new LinkedHashMap<>();
+  private final Map<String, MetaData> metaData = new HashMap<>();
   private final Map<String, String> constructorDependencies = new LinkedHashMap<>();
   private final List<BeanReader> beanReaders = new ArrayList<>();
   private final Set<String> readBeans = new HashSet<>();
@@ -228,7 +222,7 @@ final class ScopeInfo {
     if (moduleWritten) {
       return;
     }
-    final Collection<MetaData> meta = metaData.values();
+    final Collection<MetaData> meta = metaData.values().stream().sorted().collect(Collectors.toList());
     if (emptyModule) {
       // typically nothing in the default scope, only custom scopes
       if (meta.size() > 0) {
