@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'io.avaje.inject'
-version '10.3'
+version '10.5-RC4'
 
 repositories {
   mavenLocal()
@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-  implementation 'io.avaje:avaje-inject:10.3'
+  implementation 'io.avaje:avaje-inject:10.5-RC4'
   implementation gradleApi()
 
   testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
