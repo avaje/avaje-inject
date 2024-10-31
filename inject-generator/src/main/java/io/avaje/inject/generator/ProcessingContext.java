@@ -249,7 +249,8 @@ final class ProcessingContext {
     }
   }
 
-  static void registerExternalProvidedTypes() {
-    ExternalProvider.scanTheWorld(CTX.get().providedTypes);
+  static void registerExternalProvidedTypes(ScopeInfo scopeInfo) {
+    ExternalProvider.scanAllInjectPlugins(scopeInfo);
+    ExternalProvider.scanAllAvajeModules(CTX.get().providedTypes);
   }
 }

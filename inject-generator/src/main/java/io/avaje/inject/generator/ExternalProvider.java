@@ -23,6 +23,8 @@ import javax.lang.model.element.ModuleElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 
+import org.jspecify.annotations.NonNull;
+
 import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.InjectPlugin;
 
@@ -118,7 +120,7 @@ final class ExternalProvider {
     if (!INJECT_AVAILABLE) {
       if (!pluginExists("avaje-module-dependencies.csv")) {
         APContext.logNote(
-          "Unable to detect Avaje Inject in Annotation Processor ClassPath, use the Avaje Inject Maven/Gradle plugin for detecting Inject Plugins from dependencies");
+            "Unable to detect Avaje Inject Maven/Gradle plugin, use the Avaje Inject Maven/Gradle plugin for auto detecting External Inject Plugins/Modules from dependencies");
       }
       return;
     }
@@ -168,70 +170,112 @@ final class ExternalProvider {
     });
   }
 
-  static void scanTheWorld(Collection<String> providedTypes) {
+  static void scanAllInjectPlugins(ScopeInfo defaultScope) {
+    if (!defaultScope.pluginProvided().isEmpty()) {
+      return;
+    }
+    var stream = getInjectExtensions();
+    stream
+        .filter(PluginProvidesPrism::isPresent)
+        .distinct()
+        .forEach(
+            t -> {
+              final var name = t.getQualifiedName().toString();
+              if (avajePlugins.containsKey(name)) {
+                return;
+              }
+
+              var prism = PluginProvidesPrism.getInstanceOn(t);
+
+              for (final var provide : prism.provides()) {
+                defaultScope.pluginProvided(provide.toString());
+              }
+              for (final var provide : prism.providesStrings()) {
+                defaultScope.pluginProvided(provide);
+              }
+              for (final var provide : prism.providesAspects()) {
+                defaultScope.pluginProvided(Util.wrapAspect(provide.toString()));
+              }
+
+              APContext.logNote("Loaded Plugin: %s", name);
+            });
+    if (defaultScope.pluginProvided().isEmpty()) {
+      APContext.logNote("No external plugins detected");
+    }
+  }
+
+  static void scanAllAvajeModules(Collection<String> providedTypes) {
     if (!externalMeta.isEmpty()) {
       return;
     }
-    var allModules =
-      APContext.elements().getAllModuleElements().stream()
-        .filter(m -> !m.getQualifiedName().toString().startsWith("java"))
-        .filter(m -> !m.getQualifiedName().toString().startsWith("jdk"))
-        // for whatever reason, compilation breaks if we don't filter out the current module
-        .filter(m -> m != APContext.getProjectModuleElement())
-        .collect(toList());
+    var stream = getInjectExtensions();
 
     var types = APContext.types();
     var spi = APContext.typeElement("io.avaje.inject.spi.AvajeModule").asType();
-    final var checkEnclosing =
-      allModules.stream()
-        .flatMap(m -> m.getEnclosedElements().stream())
-        .flatMap(p -> p.getEnclosedElements().stream())
-        .map(TypeElement.class::cast)
-        .filter(t -> t.getKind() == ElementKind.CLASS)
-        .filter(t -> t.getModifiers().contains(Modifier.PUBLIC));
+  stream
+        .filter(t -> t.getInterfaces().stream().anyMatch(i -> types.isAssignable(i, spi)))
+        .distinct()
+        .forEach(
+            t -> {
+              final var provides = new HashSet<String>();
+              final var requires = new HashSet<String>();
 
-    final var checkDirectives =
-      allModules.stream()
-        .flatMap(m -> ElementFilter.providesIn(m.getDirectives()).stream())
-        .filter(ExternalProvider::isInjectExtension)
-        .flatMap(p -> p.getImplementations().stream());
+              ElementFilter.methodsIn(t.getEnclosedElements()).stream()
+                  .map(DependencyMetaPrism::getInstanceOn)
+                  .filter(Objects::nonNull)
+                  .map(MetaData::new)
+                  .forEach(
+                      m -> {
+                        externalMeta.add(m);
+                        provides.addAll(m.autoProvides());
+                        provides.addAll(m.provides());
+                        m.dependsOn().stream()
+                            .filter(d -> !d.isSoftDependency())
+                            .map(Dependency::name)
+                            .forEach(requires::add);
 
-    Stream.concat(checkEnclosing, checkDirectives)
-      .filter(t -> t.getInterfaces().stream().anyMatch(i -> types.isAssignable(i, spi)))
-      .distinct()
-      .forEach(t -> {
-        final var provides = new HashSet<String>();
-        final var requires = new HashSet<String>();
+                        providedTypes.add(m.key());
+                        providedTypes.add(m.type());
+                        providedTypes.addAll(Util.addQualifierSuffix(m.provides(), m.name()));
+                        providedTypes.addAll(Util.addQualifierSuffix(m.autoProvides(), m.name()));
+                      });
 
-        ElementFilter.methodsIn(t.getEnclosedElements()).stream()
-          .map(DependencyMetaPrism::getInstanceOn)
-          .filter(Objects::nonNull)
-          .map(MetaData::new)
-          .forEach(m -> {
-            externalMeta.add(m);
-            provides.addAll(m.autoProvides());
-            provides.addAll(m.provides());
-            m.dependsOn().stream()
-              .filter(d -> !d.isSoftDependency())
-              .map(Dependency::name)
-              .forEach(requires::add);
-
-            providedTypes.add(m.key());
-            providedTypes.add(m.type());
-            providedTypes.addAll(Util.addQualifierSuffix(m.provides(), m.name()));
-            providedTypes.addAll(Util.addQualifierSuffix(m.autoProvides(), m.name()));
-          });
-
-        final var name = t.getQualifiedName().toString();
-        APContext.logNote("Detected Module: %s", name);
-        ProcessingContext.addModule(new ModuleData(name, List.copyOf(provides), List.copyOf(requires)));
-      });
+              final var name = t.getQualifiedName().toString();
+              APContext.logNote("Detected Module: %s", name);
+              ProcessingContext.addModule(
+                  new ModuleData(name, List.copyOf(provides), List.copyOf(requires)));
+            });
     if (externalMeta.isEmpty()) {
       APContext.logNote("No external modules detected");
     }
   }
 
+  private static Stream<TypeElement> getInjectExtensions() {
+    var allModules =
+        APContext.elements().getAllModuleElements().stream()
+            .filter(m -> !m.getQualifiedName().toString().startsWith("java"))
+            .filter(m -> !m.getQualifiedName().toString().startsWith("jdk"))
+            // for whatever reason, compilation breaks if we don't filter out the current module
+            .filter(m -> m != APContext.getProjectModuleElement())
+            .collect(toList());
+    final var checkEnclosing =
+        allModules.stream()
+            .flatMap(m -> m.getEnclosedElements().stream())
+            .flatMap(p -> p.getEnclosedElements().stream())
+            .map(TypeElement.class::cast)
+            .filter(t -> t.getKind() == ElementKind.CLASS)
+            .filter(t -> t.getModifiers().contains(Modifier.PUBLIC));
+
+    final var checkDirectives =
+        allModules.stream()
+            .flatMap(m -> ElementFilter.providesIn(m.getDirectives()).stream())
+            .filter(ExternalProvider::isInjectExtension)
+            .flatMap(p -> p.getImplementations().stream());
+    return Stream.concat(checkEnclosing, checkDirectives);
+  }
+
   private static boolean isInjectExtension(ModuleElement.ProvidesDirective p) {
-    return "io.avaje.inject.spi.InjectExtension".equals(p.getService().getQualifiedName().toString());
+    return "io.avaje.inject.spi.InjectExtension"
+        .equals(p.getService().getQualifiedName().toString());
   }
 }

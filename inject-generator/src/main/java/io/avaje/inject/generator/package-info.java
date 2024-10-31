@@ -15,6 +15,7 @@
 @GeneratePrism(BeanTypes.class)
 @GeneratePrism(Lazy.class)
 @GeneratePrism(Named.class)
+@GeneratePrism(PluginProvides.class)
 @GeneratePrism(PreDestroy.class)
 @GeneratePrism(Primary.class)
 @GeneratePrism(Profile.class)
@@ -29,6 +30,7 @@
 @GeneratePrism(Singleton.class)
 @GeneratePrism(Scope.class)
 @GeneratePrism(Secondary.class)
+@GeneratePrism(io.avaje.spi.ServiceProvider.class)
 package io.avaje.inject.generator;
 
 import io.avaje.inject.*;
