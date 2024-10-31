@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.lang.Comparable;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -168,6 +169,11 @@ final class DBeanScope implements BeanScope {
   @Override
   public <T> List<T> list(Type type) {
     return listOf(type);
+  }
+
+  @Override
+  public <T extends Comparable<T>> List<T> listComparable(Class<T> type) {
+    return listOf(type).stream().sorted().toList();
   }
 
   @SuppressWarnings("unchecked")

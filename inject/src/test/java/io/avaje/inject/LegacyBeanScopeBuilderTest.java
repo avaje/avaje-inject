@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.lang.Comparable;
 
 import org.junit.jupiter.api.Test;
 
@@ -304,6 +305,11 @@ class LegacyBeanScopeBuilderTest {
 
     @Override
     public <T> List<T> list(Type type) {
+      return null;
+    }
+
+    @Override
+    public <T extends Comparable<T>> List<T> listComparable(Class<T> type) {
       return null;
     }
 

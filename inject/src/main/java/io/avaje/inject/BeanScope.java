@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.lang.Comparable;
 
 import org.jspecify.annotations.Nullable;
 
@@ -197,6 +198,11 @@ public interface BeanScope extends AutoCloseable {
    * Return the list of beans that implement the given type.
    */
   <T> List<T> list(Type type);
+
+  /**
+   * Return the list of beans that implement the interface sorting by their compareTo function
+   */
+  <T extends Comparable<T>> List<T> listComparable(Class<T> type);
 
   /**
    * Return the list of beans that implement the interface sorting by priority.

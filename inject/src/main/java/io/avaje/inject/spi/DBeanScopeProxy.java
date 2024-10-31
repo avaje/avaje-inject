@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.lang.Comparable;
 
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
@@ -102,6 +103,15 @@ final class DBeanScopeProxy implements BeanScope {
       return delegate.list(type);
     } else {
       return builder.list(type);
+    }
+  }
+
+  @Override
+  public <T extends Comparable<T>> List<T> listComparable(Class<T> type) {
+    if (delegate != null) {
+      return delegate.list(type).stream().sorted().toList();
+    } else {
+      return builder.list(type).stream().sorted().toList();
     }
   }
 
