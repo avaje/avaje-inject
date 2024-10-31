@@ -209,16 +209,16 @@ final class MethodReader {
 
   void builderAddBeanProvider(Append writer) {
     if (isVoid) {
-      APContext.logError("Error - void @Prototype method ?", element);
+      APContext.logError(element,"Error - void @Prototype method ?");
       return;
     }
     if (optionalType) {
-      APContext.logError("Error - Optional type with @Prototype method is not supported", element);
+      APContext.logError(element, "Error - Optional type with @Prototype method is not supported");
       return;
     }
 
     if (multiRegister) {
-      APContext.logError("Error - List<Provider<>> type with @Prototype method is not supported", element);
+      APContext.logError(element,"Error - List<Provider<>> type with @Prototype method is not supported");
       return;
     }
 

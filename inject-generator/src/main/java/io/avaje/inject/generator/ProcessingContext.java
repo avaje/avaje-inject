@@ -96,7 +96,7 @@ final class ProcessingContext {
     } catch (final FilerException e) {
       logNote("FilerException reading services file");
     } catch (final Exception e) {
-      logWarn("Error reading services file: " + e.getMessage());
+      logWarn("Error reading services file: %s", e.getMessage());
     }
     return Collections.emptyList();
   }
@@ -224,7 +224,7 @@ final class ProcessingContext {
         writer.close();
       }
     } catch (IOException e) {
-      logError("Failed to write services file " + e.getMessage());
+      logError("Failed to write services file %s", e.getMessage());
     }
   }
 

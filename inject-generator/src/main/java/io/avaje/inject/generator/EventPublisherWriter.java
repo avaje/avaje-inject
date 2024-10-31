@@ -105,7 +105,7 @@ final class EventPublisherWriter {
       writer.append(MessageFormat.format(TEMPLATE, packageName, imports(), name, className, shortType, typeString, qualifier));
       writer.close();
     } catch (Exception e) {
-      logError("Failed to write EventPublisher class " + e);
+      logError("Failed to write EventPublisher class %s", e);
     }
   }
 

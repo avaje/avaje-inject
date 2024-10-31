@@ -240,7 +240,7 @@ final class TypeExtendsReader {
     } else if (!Util.notJavaLang(rawType)) {
       // return
     } else if (rawType.indexOf('.') == -1) {
-      logWarn("skip when no package on interface " + rawType);
+      logWarn("skip when no package on interface %s", rawType);
     } else {
       if (qualifierName == null) {
         final String mainType = rawUType.mainType();
