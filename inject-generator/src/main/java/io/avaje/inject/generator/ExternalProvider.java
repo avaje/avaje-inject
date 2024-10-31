@@ -206,11 +206,8 @@ final class ExternalProvider {
             t -> {
               final var provides = new HashSet<String>();
               final var requires = new HashSet<String>();
-              Optional.of(t)
-                  .map(TypeElement::getEnclosedElements)
-                  .map(ElementFilter::methodsIn)
-                  .stream()
-                  .flatMap(List::stream)
+
+              ElementFilter.methodsIn(t.getEnclosedElements()).stream()
                   .map(DependencyMetaPrism::getInstanceOn)
                   .filter(Objects::nonNull)
                   .map(MetaData::new)
