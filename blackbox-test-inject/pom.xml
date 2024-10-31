@@ -89,7 +89,7 @@
   </dependencies>
 	<build>
 		<plugins>
-			<plugin>
+			<!-- <plugin>
 				<groupId>io.avaje</groupId>
 				<artifactId>avaje-inject-maven-plugin</artifactId>
 				<version>${project.version}</version>
@@ -101,7 +101,7 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
