@@ -1,6 +1,7 @@
 module blackbox.aspect {
 
   exports org.example.external.aspect;
+  exports org.example.external.aspect.sub;
 
   requires io.avaje.inject;
   requires io.avaje.inject.aop;
