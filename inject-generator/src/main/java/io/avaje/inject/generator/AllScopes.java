@@ -69,7 +69,7 @@ final class AllScopes {
           final String customScopeType = injectModule.customScopeType();
           final TypeElement scopeType = typeElement(customScopeType);
           if (scopeType == null) {
-            logError(module, "customScopeType [" + customScopeType + "] is invalid? on " + module);
+            logError(module, "customScopeType [%s] is invalid? on %s", customScopeType, module);
           } else {
             final ScopeInfo scopeInfo = addScopeAnnotation(scopeType);
             scopeInfo.readModuleMetaData(module);

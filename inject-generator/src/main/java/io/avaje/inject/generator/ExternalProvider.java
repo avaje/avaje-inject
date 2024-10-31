@@ -77,7 +77,7 @@ final class ExternalProvider {
     }
     for (final var module : modules) {
       final var name = module.getClass().getTypeName();
-      APContext.logNote("Detected Module: " + name);
+      APContext.logNote("Detected Module: %s", name);
       final var provides = new TreeSet<String>();
       for (final var provide : module.provides()) {
         provides.add(provide.getTypeName());
@@ -109,7 +109,7 @@ final class ExternalProvider {
   static void registerPluginProvidedTypes(ScopeInfo defaultScope) {
     avajePlugins.forEach((k, v) -> {
       if (APContext.typeElement(k) != null) {
-        APContext.logNote("Loaded Plugin: " + k);
+        APContext.logNote("Loaded Plugin: %s", k);
         v.forEach(defaultScope::pluginProvided);
       }
     });
@@ -128,7 +128,7 @@ final class ExternalProvider {
       if (avajePlugins.containsKey(name)) {
         continue;
       }
-      APContext.logNote("Loaded Plugin: " + plugin.getClass().getTypeName());
+      APContext.logNote("Loaded Plugin: %s", plugin.getClass().getTypeName());
       for (final var provide : plugin.provides()) {
         defaultScope.pluginProvided(provide.getTypeName());
       }

@@ -189,11 +189,9 @@ final class ScopeInfo {
           beanReader.setWrittenToFile();
         }
       } catch (FilerException e) {
-        logWarn("FilerException to write $DI class " + beanReader.beanType() + " " + e.getMessage());
-
+        logWarn("FilerException to write $DI class %s %s", beanReader.beanType(), e.getMessage());
       } catch (IOException e) {
-        e.printStackTrace();
-        logError(beanReader.beanType(), "Failed to write $DI class");
+        logError(beanReader.beanType(), "Failed to write $DI class %s", e);
       }
     }
   }
@@ -213,7 +211,7 @@ final class ScopeInfo {
             "using @InjectModule(name), or changing the top level package used by the default scope";
           throw new IllegalStateException(msg);
         }
-        logError("Failed to create module filer " + e.getMessage());
+        logError("Failed to create module filer %s", e.getMessage());
       }
     }
   }
@@ -244,9 +242,9 @@ final class ScopeInfo {
       factoryWriter.write(type());
       moduleWritten = true;
     } catch (FilerException e) {
-      logWarn("FilerException trying to write factory " + e.getMessage());
+      logWarn("FilerException trying to write factory %s", e.getMessage());
     } catch (IOException e) {
-      logError("Failed to write factory " + e.getMessage());
+      logError("Failed to write factory %s", e.getMessage());
     }
   }
 
@@ -296,7 +294,7 @@ final class ScopeInfo {
    */
   private void readBeanMeta(TypeElement typeElement, boolean factory, boolean importedComponent) {
     if (typeElement.getKind() == ElementKind.ANNOTATION_TYPE) {
-      logNote("skipping annotation type " + typeElement);
+      logNote("skipping annotation type %s", typeElement);
       return;
     }
     var reader = new BeanReader(typeElement, factory, importedComponent).read();
@@ -313,7 +311,7 @@ final class ScopeInfo {
       // read a build method - DependencyMeta
       DependencyMetaPrism meta = DependencyMetaPrism.getInstanceOn(element);
       if (meta == null) {
-        logError("Missing @DependencyMeta on method " + simpleName);
+        logError("Missing @DependencyMeta on method %s", simpleName);
       } else {
         final MetaData metaData = new MetaData(meta);
         this.metaData.put(metaData.key(), metaData);
@@ -325,7 +323,7 @@ final class ScopeInfo {
     if (readBeans.add(element.toString())) {
       readBeanMeta(element, factory, importedComponent);
     } else {
-      logNote("skipping already processed bean " + element);
+      logNote("skipping already processed bean %s", element);
     }
   }
 
