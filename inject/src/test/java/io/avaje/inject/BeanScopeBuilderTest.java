@@ -307,7 +307,7 @@ class BeanScopeBuilderTest {
 
     @Override
     public <T extends Comparable<T>> List<T> listComparable(Class<T> type) {
-      return return null;
+      return null;
     }
 
     @Override
