@@ -109,9 +109,9 @@ final class DBeanScopeProxy implements BeanScope {
   @Override
   public <T extends Comparable<T>> List<T> listComparable(Class<T> type) {
     if (delegate != null) {
-      return delegate.list(type).stream().sorted().toList();
+      return delegate.list(type).stream().sorted().collect(Collectors.toList());
     } else {
-      return builder.list(type).stream().sorted().toList();
+      return builder.list(type).stream().sorted().collect(Collectors.toList());
     }
   }
 
