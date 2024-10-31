@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.lang.Comparable;
+import java.util.stream.Collectors;
 
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;

@@ -173,7 +173,7 @@ final class DBeanScope implements BeanScope {
 
   @Override
   public <T extends Comparable<T>> List<T> listComparable(Class<T> type) {
-    return listOf(type).stream().sorted().collect(Collectors.toList());
+    return <T>listOf(type).stream().sorted().collect(Collectors.toList());
   }
 
   @SuppressWarnings("unchecked")
