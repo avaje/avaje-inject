@@ -67,7 +67,6 @@ final class ExternalProvider {
   }
 
   static void registerModuleProvidedTypes(Set<String> providedTypes) {
-
     if (!INJECT_AVAILABLE) {
       return;
     }
@@ -102,7 +101,6 @@ final class ExternalProvider {
       ProcessingContext.addModule(new ModuleData(name, List.copyOf(provides), requires));
     }
   }
-
 
   /**
    * Register types provided by the plugin so no compiler error when we have a dependency on these
@@ -169,59 +167,54 @@ final class ExternalProvider {
     });
   }
 
-  public static void scanTheWorld(Collection<String> providedTypes) {
-
+  static void scanTheWorld(Collection<String> providedTypes) {
     if (!externalMeta.isEmpty()) {
-
       return;
     }
 
     var types = APContext.types();
     var spi = APContext.typeElement("io.avaje.inject.spi.AvajeModule").asType();
     APContext.elements().getAllModuleElements().stream()
-        .filter(m -> !m.getQualifiedName().toString().startsWith("java"))
-        .filter(m -> !m.getQualifiedName().toString().startsWith("jdk"))
-        // for whatever reason, compilation breaks if we don't filter out the current module
-        .filter(m -> m != APContext.getProjectModuleElement())
-        .flatMap(m -> m.getEnclosedElements().stream())
-        .flatMap(p -> p.getEnclosedElements().stream())
-        .map(TypeElement.class::cast)
-        .filter(t -> t.getKind() == ElementKind.CLASS)
-        .filter(t -> t.getModifiers().contains(Modifier.PUBLIC))
-        .filter(t -> t.getInterfaces().stream().anyMatch(i -> types.isAssignable(i, spi)))
-        .forEach(
-            t -> {
-              final var provides = new HashSet<String>();
-              final var requires = new HashSet<String>();
-              Optional.of(t)
-                  .map(TypeElement::getEnclosedElements)
-                  .map(ElementFilter::methodsIn)
-                  .stream()
-                  .flatMap(List::stream)
-                  .map(DependencyMetaPrism::getInstanceOn)
-                  .filter(Objects::nonNull)
-                  .map(MetaData::new)
-                  .forEach(
-                      m -> {
-                        externalMeta.add(m);
-                        provides.addAll(m.autoProvides());
-                        provides.addAll(m.provides());
-                        m.dependsOn().stream()
-                            .filter(d -> !d.isSoftDependency())
-                            .map(Dependency::name)
-                            .forEach(requires::add);
+      .filter(m -> !m.getQualifiedName().toString().startsWith("java"))
+      .filter(m -> !m.getQualifiedName().toString().startsWith("jdk"))
+      // for whatever reason, compilation breaks if we don't filter out the current module
+      .filter(m -> m != APContext.getProjectModuleElement())
+      .flatMap(m -> m.getEnclosedElements().stream())
+      .flatMap(p -> p.getEnclosedElements().stream())
+      .map(TypeElement.class::cast)
+      .filter(t -> t.getKind() == ElementKind.CLASS)
+      .filter(t -> t.getModifiers().contains(Modifier.PUBLIC))
+      .filter(t -> t.getInterfaces().stream().anyMatch(i -> types.isAssignable(i, spi)))
+      .forEach(t -> {
+        final var provides = new HashSet<String>();
+        final var requires = new HashSet<String>();
+        Optional.of(t)
+          .map(TypeElement::getEnclosedElements)
+          .map(ElementFilter::methodsIn)
+          .stream()
+          .flatMap(List::stream)
+          .map(DependencyMetaPrism::getInstanceOn)
+          .filter(Objects::nonNull)
+          .map(MetaData::new)
+          .forEach(m -> {
+            externalMeta.add(m);
+            provides.addAll(m.autoProvides());
+            provides.addAll(m.provides());
+            m.dependsOn().stream()
+              .filter(d -> !d.isSoftDependency())
+              .map(Dependency::name)
+              .forEach(requires::add);
 
-                        providedTypes.add(m.key());
-                        providedTypes.add(m.type());
-                        providedTypes.addAll(Util.addQualifierSuffix(m.provides(), m.name()));
-                        providedTypes.addAll(Util.addQualifierSuffix(m.autoProvides(), m.name()));
-                      });
+            providedTypes.add(m.key());
+            providedTypes.add(m.type());
+            providedTypes.addAll(Util.addQualifierSuffix(m.provides(), m.name()));
+            providedTypes.addAll(Util.addQualifierSuffix(m.autoProvides(), m.name()));
+          });
 
-              final var name = t.getQualifiedName().toString();
-              APContext.logNote("Detected Module: " + name);
-              ProcessingContext.addModule(
-                  new ModuleData(name, List.copyOf(provides), List.copyOf(requires)));
-            });
+        final var name = t.getQualifiedName().toString();
+        APContext.logNote("Detected Module: %s", name);
+        ProcessingContext.addModule(new ModuleData(name, List.copyOf(provides), List.copyOf(requires)));
+      });
     if (externalMeta.isEmpty()) {
       APContext.logNote("No external modules detected");
     }

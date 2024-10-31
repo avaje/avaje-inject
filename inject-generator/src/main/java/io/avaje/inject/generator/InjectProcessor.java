@@ -90,7 +90,6 @@ public final class InjectProcessor extends AbstractProcessor {
     } catch (IOException e) {
       // not an issue worth failing over
     }
-
   }
 
   /**
