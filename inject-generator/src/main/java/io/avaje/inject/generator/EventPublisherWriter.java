@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.PackageElement;
 import javax.tools.JavaFileObject;
 
 /** Write the source code for the bean. */
@@ -46,12 +47,14 @@ final class EventPublisherWriter {
   private EventPublisherWriter(Element element) {
     final var asType = element.asType();
     this.utype = UType.parse(asType).param0();
-    this.packageName = APContext.elements()
-      .getPackageOf(APContext.typeElement(utype.mainType()))
-      .getQualifiedName()
-      .toString()
-      .replaceFirst("java.", "")
-      + ".events";
+    this.packageName =
+        Optional.ofNullable(APContext.typeElement(utype.mainType()))
+                .map(APContext.elements()::getPackageOf)
+                .map(PackageElement::getQualifiedName)
+                .map(Object::toString)
+                .orElse("error.notype")
+                .replaceFirst("java.", "")
+            + ".events";
     qualifier = Optional.ofNullable(Util.named(element)).orElse("");
     var className =
       packageName
