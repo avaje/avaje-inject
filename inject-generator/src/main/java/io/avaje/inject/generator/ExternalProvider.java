@@ -2,8 +2,11 @@ package io.avaje.inject.generator;
 
 import static java.util.List.of;
 import static java.util.Map.entry;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,8 +25,6 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.ModuleElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
-
-import org.jspecify.annotations.NonNull;
 
 import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.InjectPlugin;
@@ -202,6 +203,20 @@ final class ExternalProvider {
     if (defaultScope.pluginProvided().isEmpty()) {
       APContext.logNote("No external plugins detected");
     }
+
+    // write detected plugins to a text file for test compilation
+    try (var pluginWriter =
+        new FileWriter(APContext.getBuildResource("avaje-plugin-provides.txt").toFile())) {
+
+      for (var providedType : defaultScope.pluginProvided()) {
+
+        pluginWriter.write(providedType);
+        pluginWriter.write("\n");
+      }
+
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   static void scanAllAvajeModules(Collection<String> providedTypes) {
@@ -247,6 +262,26 @@ final class ExternalProvider {
             });
     if (externalMeta.isEmpty()) {
       APContext.logNote("No external modules detected");
+    }
+
+    // write detected modules to a csv for test compilation
+    try (var moduleWriter =
+        new FileWriter(APContext.getBuildResource("avaje-module-dependencies.csv").toFile())) {
+
+      moduleWriter.write("External Module Type|Provides|Requires");
+      for (ModuleData avajeModule : ProcessingContext.modules()) {
+        moduleWriter.write("\n");
+        moduleWriter.write(avajeModule.name());
+        moduleWriter.write("|");
+        var provides = avajeModule.provides().stream().collect(joining(","));
+        moduleWriter.write(provides.isEmpty() ? " " : provides);
+        moduleWriter.write("|");
+        var requires = avajeModule.requires().stream().collect(joining(","));
+        moduleWriter.write(requires.isEmpty() ? " " : requires);
+      }
+
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
