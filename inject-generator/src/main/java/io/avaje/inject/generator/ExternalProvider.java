@@ -298,13 +298,18 @@ final class ExternalProvider {
             // for whatever reason, compilation breaks if we don't filter out the current module
             .filter(m -> m != APContext.getProjectModuleElement())
             .collect(toList());
+
+    var types = APContext.types();
+    var spi = APContext.typeElement("io.avaje.inject.spi.InjectExtension").asType();
+
     final var checkEnclosing =
         allModules.stream()
             .flatMap(m -> m.getEnclosedElements().stream())
             .flatMap(p -> p.getEnclosedElements().stream())
             .map(TypeElement.class::cast)
             .filter(t -> t.getKind() == ElementKind.CLASS)
-            .filter(t -> t.getModifiers().contains(Modifier.PUBLIC));
+            .filter(t -> t.getModifiers().contains(Modifier.PUBLIC))
+            .filter(t -> types.isAssignable(t.asType(), spi));
 
     final var checkDirectives =
         allModules.stream()
