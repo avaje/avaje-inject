@@ -212,7 +212,7 @@ final class ExternalProvider {
 
     var types = APContext.types();
     var spi = APContext.typeElement("io.avaje.inject.spi.AvajeModule").asType();
-  stream
+    stream
         .filter(t -> t.getInterfaces().stream().anyMatch(i -> types.isAssignable(i, spi)))
         .distinct()
         .forEach(
