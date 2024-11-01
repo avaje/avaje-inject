@@ -111,13 +111,6 @@ final class ExternalProvider {
    * types and the only thing providing them is the plugin.
    */
   static void registerPluginProvidedTypes(ScopeInfo defaultScope) {
-    avajePlugins.forEach((k, v) -> {
-      if (APContext.typeElement(k) != null) {
-        APContext.logNote("Loaded Plugin: %s", k);
-        v.forEach(defaultScope::pluginProvided);
-      }
-    });
-    defaultScope.pluginProvided("io.avaje.inject.event.ObserverManager");
     if (!INJECT_AVAILABLE) {
       if (!pluginExists("avaje-module-dependencies.csv")) {
         APContext.logNote(
@@ -172,9 +165,21 @@ final class ExternalProvider {
   }
 
   static void scanAllInjectPlugins(ScopeInfo defaultScope) {
-    if (!defaultScope.pluginProvided().isEmpty()) {
+    final var noPlugins = !defaultScope.pluginProvided().isEmpty();
+
+    avajePlugins.forEach(
+        (k, v) -> {
+          if (APContext.typeElement(k) != null) {
+            APContext.logNote("Loaded Plugin: %s", k);
+            v.forEach(defaultScope::pluginProvided);
+          }
+        });
+    defaultScope.pluginProvided("io.avaje.inject.event.ObserverManager");
+
+    if (noPlugins) {
       return;
     }
+
     var stream = getInjectExtensions();
     stream
         .filter(PluginProvidesPrism::isPresent)
