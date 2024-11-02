@@ -49,11 +49,6 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public final boolean isBeanAbsent(Type... types) {
-    return isBeanAbsent(null, types);
-  }
-
-  @Override
   public boolean isBeanAbsent(String name, Type... types) {
     parentMatch = null;
     next(name, types);

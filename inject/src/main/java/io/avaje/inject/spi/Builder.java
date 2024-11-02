@@ -46,13 +46,15 @@ public interface Builder {
 
   /**
    * Return true if the bean should be created and registered with the context.
-   * <p/>
-   * Returning false means there has been a supplied bean already registered and
-   * that we should skip the creation and registration for this bean.
+   *
+   * <p>Returning false means there has been a supplied bean already registered and that we should
+   * skip the creation and registration for this bean.
    *
    * @param types The types that the bean implements and provides
    */
-  boolean isBeanAbsent(Type... types);
+  default boolean isBeanAbsent(Type... types) {
+    return isBeanAbsent(null, types);
+  }
 
   /**
    * Return true if the bean should be created and registered with the context.
