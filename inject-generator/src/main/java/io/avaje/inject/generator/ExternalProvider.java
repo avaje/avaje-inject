@@ -296,7 +296,7 @@ final class ExternalProvider {
             .filter(m -> !m.getQualifiedName().toString().startsWith("java"))
             .filter(m -> !m.getQualifiedName().toString().startsWith("jdk"))
             // for whatever reason, compilation breaks if we don't filter out the current module
-            .filter(m -> m != APContext.getProjectModuleElement())
+            .filter(m -> !m.equals(APContext.getProjectModuleElement()))
             .collect(toList());
 
     var types = APContext.types();
