@@ -294,8 +294,8 @@ final class BeanReader {
     new ConditionalWriter(writer, conditions).write();
   }
 
-  void buildBeanAbsent(Append writer) {
-    writer.append("    if (builder.isBeanAbsent(");
+  void buildCanRegister(Append writer) {
+    writer.append("    if (builder.canRegister(");
     if (name != null && !name.isEmpty()) {
       writer.append("\"%s\", ", name);
     }

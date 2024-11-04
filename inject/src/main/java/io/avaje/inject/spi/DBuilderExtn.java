@@ -34,8 +34,8 @@ final class DBuilderExtn extends DBuilder {
   }
 
   @Override
-  public boolean isBeanAbsent(String qualifierName, Type... types) {
-    if (!super.isBeanAbsent(qualifierName, types)) {
+  public boolean canRegister(String qualifierName, Type... types) {
+    if (!super.canRegister(qualifierName, types)) {
       enrichParentMatch();
       return false;
     }
