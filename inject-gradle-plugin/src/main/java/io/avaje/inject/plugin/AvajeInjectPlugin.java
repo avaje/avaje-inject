@@ -31,7 +31,7 @@ public class AvajeInjectPlugin implements Plugin<Project> {
     project.afterEvaluate(
         prj -> {
           // run it automatically before build
-          Task buildTask = prj.getTasks().getByName("build");
+          Task buildTask = prj.getTasks().getByName("compileJava");
           buildTask.doFirst(it -> writeProvides(project));
         });
     // register a task to run it manually
