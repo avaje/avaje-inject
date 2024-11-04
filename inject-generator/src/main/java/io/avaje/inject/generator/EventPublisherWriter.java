@@ -47,15 +47,15 @@ final class EventPublisherWriter {
   private EventPublisherWriter(Element element) {
     final var asType = element.asType();
     this.utype = UType.parse(asType).param0();
-    this.packageName =
-        Optional.ofNullable(APContext.typeElement(utype.mainType()))
-                .map(APContext.elements()::getPackageOf)
-                .map(PackageElement::getQualifiedName)
-                .map(Object::toString)
-                .orElse("error.notype")
-                .replaceFirst("java.", "")
-            + ".events";
-    qualifier = Optional.ofNullable(Util.named(element)).orElse("");
+    this.packageName = Optional.ofNullable(APContext.typeElement(utype.mainType()))
+      .map(APContext.elements()::getPackageOf)
+      .map(PackageElement::getQualifiedName)
+      .map(Object::toString)
+      .orElse("error.notype")
+      .replaceFirst("java.", "")
+      + ".events";
+
+    this.qualifier = Optional.ofNullable(Util.named(element)).orElse("");
     var className =
       packageName
         + "."
@@ -63,8 +63,7 @@ final class EventPublisherWriter {
         + Util.shortName(utype).replace(".", "_")
         + "$Publisher";
 
-    originName = getUniqueClassName(className, 0);
-
+    this.originName = getUniqueClassName(className, 0);
     if (GENERATED_PUBLISHERS.containsKey(originName)) {
       //in super niche situations when compiling the same module, we need to tell avaje that these types already exist
       //got this when running both my eclipse compiler and then the terminal build
