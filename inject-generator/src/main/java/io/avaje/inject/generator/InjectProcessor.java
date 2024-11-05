@@ -39,11 +39,12 @@ import static io.avaje.inject.generator.ProcessingContext.*;
   FactoryPrism.PRISM_TYPE,
   ImportPrism.PRISM_TYPE,
   InjectModulePrism.PRISM_TYPE,
+  PluginProvidesPrism.PRISM_TYPE,
   PrototypePrism.PRISM_TYPE,
   QualifierPrism.PRISM_TYPE,
   ScopePrism.PRISM_TYPE,
   SingletonPrism.PRISM_TYPE,
-  "io.avaje.spi.ServiceProvider"
+  ServiceProviderPrism.PRISM_TYPE
 })
 public final class InjectProcessor extends AbstractProcessor {
 
@@ -158,7 +159,8 @@ public final class InjectProcessor extends AbstractProcessor {
         ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), null);
       });
 
-    maybeElements(roundEnv, "io.avaje.spi.ServiceProvider").ifPresent(this::registerSPI);
+    maybeElements(roundEnv, ServiceProviderPrism.PRISM_TYPE).ifPresent(this::registerSPI);
+    maybeElements(roundEnv, PluginProvidesPrism.PRISM_TYPE).ifPresent(this::registerSPI);
     allScopes.readBeans(roundEnv);
     defaultScope.write(processingOver);
     allScopes.write(processingOver);
@@ -348,6 +350,17 @@ public final class InjectProcessor extends AbstractProcessor {
   }
 
   private boolean isExtension(TypeElement te) {
+    PluginProvidesPrism.getOptionalOn(te).ifPresent(t -> {
+      if (!APContext.isAssignable(te, "io.avaje.inject.spi.InjectPlugin")) {
+        APContext.logError(te, "PluginProvides can only be placed on io.avaje.inject.spi.InjectPlugin");
+      }
+    });
+    ServiceProviderPrism.getOptionalOn(te).ifPresent(t -> {
+      if (APContext.isAssignable(te, "io.avaje.inject.spi.InjectPlugin")) {
+        APContext.logWarn(te, "PluginProvides should be used to auto register InjectPlugins");
+      }
+    });
+
     return APContext.isAssignable(te, "io.avaje.inject.spi.InjectExtension");
   }
 

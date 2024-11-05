@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.avaje</groupId>
     <artifactId>avaje-inject-parent</artifactId>
-    <version>10.5-RC4</version>
+    <version>10.5-RC5</version>
   </parent>
 
   <artifactId>avaje-inject-test</artifactId>
@@ -45,12 +45,12 @@
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy</artifactId>
-      <version>1.15.7</version>
+      <version>1.15.10</version>
     </dependency>
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy-agent</artifactId>
-      <version>1.15.7</version>
+      <version>1.15.10</version>
     </dependency>
 
     <dependency>
