@@ -2,7 +2,6 @@ package io.avaje.inject.generator;
 
 import static java.util.List.of;
 import static java.util.Map.entry;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 import java.io.FileWriter;
@@ -113,8 +112,7 @@ final class ExternalProvider {
   static void registerPluginProvidedTypes(ScopeInfo defaultScope) {
     if (!INJECT_AVAILABLE) {
       if (!pluginExists("avaje-module-dependencies.csv")) {
-        APContext.logNote(
-            "Unable to detect Avaje Inject Maven/Gradle plugin, use the Avaje Inject Maven/Gradle plugin for auto detecting External Inject Plugins/Modules from dependencies");
+        APContext.logNote("Unable to detect Avaje Inject Maven/Gradle plugin, use the Avaje Inject Maven/Gradle plugin for auto detecting External Inject Plugins/Modules from dependencies");
       }
       return;
     }
@@ -165,162 +163,155 @@ final class ExternalProvider {
   }
 
   static void scanAllInjectPlugins(ScopeInfo defaultScope) {
-    final var noPlugins = !defaultScope.pluginProvided().isEmpty();
-
-    avajePlugins.forEach(
-        (k, v) -> {
-          if (APContext.typeElement(k) != null) {
-            APContext.logNote("Loaded Plugin: %s", k);
-            v.forEach(defaultScope::pluginProvided);
-          }
-        });
+    final var hasPlugins = !defaultScope.pluginProvided().isEmpty();
+    avajePlugins.forEach((k, v) -> {
+      if (APContext.typeElement(k) != null) {
+        APContext.logNote("Loaded Plugin: %s", k);
+        v.forEach(defaultScope::pluginProvided);
+      }
+    });
     defaultScope.pluginProvided("io.avaje.inject.event.ObserverManager");
-
-    if (noPlugins) {
+    if (hasPlugins) {
       return;
     }
 
-    var stream = getInjectExtensions();
-    stream
-        .filter(PluginProvidesPrism::isPresent)
-        .distinct()
-        .forEach(
-            t -> {
-              final var name = t.getQualifiedName().toString();
-              if (avajePlugins.containsKey(name)) {
-                return;
-              }
+    injectExtensions()
+      .filter(PluginProvidesPrism::isPresent)
+      .distinct()
+      .forEach(pluginType -> addPluginToScope(defaultScope, pluginType));
 
-              var prism = PluginProvidesPrism.getInstanceOn(t);
-
-              for (final var provide : prism.provides()) {
-                defaultScope.pluginProvided(provide.toString());
-              }
-              for (final var provide : prism.providesStrings()) {
-                defaultScope.pluginProvided(provide);
-              }
-              for (final var provide : prism.providesAspects()) {
-                defaultScope.pluginProvided(Util.wrapAspect(provide.toString()));
-              }
-
-              APContext.logNote("Loaded Plugin: %s", name);
-            });
     if (defaultScope.pluginProvided().isEmpty()) {
       APContext.logNote("No external plugins detected");
     }
+    writePluginProvides(defaultScope);
+  }
 
+  private static void writePluginProvides(ScopeInfo defaultScope) {
     // write detected plugins to a text file for test compilation
-    try (var pluginWriter =
-        new FileWriter(APContext.getBuildResource("avaje-plugin-provides.txt").toFile())) {
-
+    try (final var pluginWriter = new FileWriter(APContext.getBuildResource("avaje-plugin-provides.txt").toFile())) {
       for (var providedType : defaultScope.pluginProvided()) {
-
         pluginWriter.write(providedType);
         pluginWriter.write("\n");
       }
-
     } catch (IOException e) {
-      e.printStackTrace();
+      APContext.logWarn("Failed to write avaje-plugin-provides.txt due to %s", e.getMessage());
     }
+  }
+
+  private static void addPluginToScope(ScopeInfo defaultScope, TypeElement pluginType) {
+    final var name = pluginType.getQualifiedName().toString();
+    if (avajePlugins.containsKey(name)) {
+      return;
+    }
+    var prism = PluginProvidesPrism.getInstanceOn(pluginType);
+    for (final var provide : prism.provides()) {
+      defaultScope.pluginProvided(provide.toString());
+    }
+    for (final var provide : prism.providesStrings()) {
+      defaultScope.pluginProvided(provide);
+    }
+    for (final var provide : prism.providesAspects()) {
+      defaultScope.pluginProvided(Util.wrapAspect(provide.toString()));
+    }
+    APContext.logNote("Loaded Plugin: %s", name);
   }
 
   static void scanAllAvajeModules(Collection<String> providedTypes) {
     if (!externalMeta.isEmpty()) {
       return;
     }
-    var stream = getInjectExtensions();
+    final var types = APContext.types();
+    final var avajeModuleType = APContext.typeElement("io.avaje.inject.spi.AvajeModule").asType();
+    injectExtensions()
+      .filter(t -> t.getInterfaces().stream().anyMatch(i -> types.isAssignable(i, avajeModuleType)))
+      .distinct()
+      .forEach(otherModule -> addOtherModuleProvides(providedTypes, otherModule));
 
-    var types = APContext.types();
-    var spi = APContext.typeElement("io.avaje.inject.spi.AvajeModule").asType();
-    stream
-        .filter(t -> t.getInterfaces().stream().anyMatch(i -> types.isAssignable(i, spi)))
-        .distinct()
-        .forEach(
-            t -> {
-              final var provides = new HashSet<String>();
-              final var requires = new HashSet<String>();
-
-              ElementFilter.methodsIn(t.getEnclosedElements()).stream()
-                  .map(DependencyMetaPrism::getInstanceOn)
-                  .filter(Objects::nonNull)
-                  .map(MetaData::new)
-                  .forEach(
-                      m -> {
-                        externalMeta.add(m);
-                        provides.addAll(m.autoProvides());
-                        provides.addAll(m.provides());
-                        m.dependsOn().stream()
-                            .filter(d -> !d.isSoftDependency())
-                            .map(Dependency::name)
-                            .forEach(requires::add);
-
-                        providedTypes.add(m.key());
-                        providedTypes.add(m.type());
-                        providedTypes.addAll(Util.addQualifierSuffix(m.provides(), m.name()));
-                        providedTypes.addAll(Util.addQualifierSuffix(m.autoProvides(), m.name()));
-                      });
-
-              final var name = t.getQualifiedName().toString();
-              APContext.logNote("Detected Module: %s", name);
-              ProcessingContext.addModule(
-                  new ModuleData(name, List.copyOf(provides), List.copyOf(requires)));
-            });
     if (externalMeta.isEmpty()) {
       APContext.logNote("No external modules detected");
     }
+    writeModuleDependencies();
+  }
 
+  private static void writeModuleDependencies() {
     // write detected modules to a csv for test compilation
-    try (var moduleWriter =
-        new FileWriter(APContext.getBuildResource("avaje-module-dependencies.csv").toFile())) {
-
+    try (final var moduleWriter = new FileWriter(APContext.getBuildResource("avaje-module-dependencies.csv").toFile())) {
       moduleWriter.write("External Module Type|Provides|Requires");
       for (ModuleData avajeModule : ProcessingContext.modules()) {
         moduleWriter.write("\n");
         moduleWriter.write(avajeModule.name());
         moduleWriter.write("|");
-        var provides = avajeModule.provides().stream().collect(joining(","));
+        var provides = String.join(",", avajeModule.provides());
         moduleWriter.write(provides.isEmpty() ? " " : provides);
         moduleWriter.write("|");
-        var requires = avajeModule.requires().stream().collect(joining(","));
+        var requires = String.join(",", avajeModule.requires());
         moduleWriter.write(requires.isEmpty() ? " " : requires);
       }
 
     } catch (IOException e) {
-      e.printStackTrace();
+      APContext.logWarn("Failed to write avaje-module-dependencies.csv due to %s", e.getMessage());
     }
   }
 
-  private static Stream<TypeElement> getInjectExtensions() {
-    var allModules =
-        APContext.elements().getAllModuleElements().stream()
-            .filter(m -> !m.getQualifiedName().toString().startsWith("java"))
-            .filter(m -> !m.getQualifiedName().toString().startsWith("jdk"))
-            // for whatever reason, compilation breaks if we don't filter out the current module
-            .filter(m -> !m.equals(APContext.getProjectModuleElement()))
-            .collect(toList());
+  private static void addOtherModuleProvides(Collection<String> providedTypes, TypeElement otherModule) {
+    final var provides = new HashSet<String>();
+    final var requires = new HashSet<String>();
 
-    var types = APContext.types();
-    var spi = APContext.typeElement("io.avaje.inject.spi.InjectExtension").asType();
+    ElementFilter.methodsIn(otherModule.getEnclosedElements()).stream()
+      .map(DependencyMetaPrism::getInstanceOn)
+      .filter(Objects::nonNull)
+      .map(MetaData::new)
+      .forEach(m -> {
+        externalMeta.add(m);
+        provides.addAll(m.autoProvides());
+        provides.addAll(m.provides());
+        m.dependsOn().stream()
+          .filter(d -> !d.isSoftDependency())
+          .map(Dependency::name)
+          .forEach(requires::add);
+
+        providedTypes.add(m.key());
+        providedTypes.add(m.type());
+        providedTypes.addAll(Util.addQualifierSuffix(m.provides(), m.name()));
+        providedTypes.addAll(Util.addQualifierSuffix(m.autoProvides(), m.name()));
+      });
+
+    final var name = otherModule.getQualifiedName().toString();
+    APContext.logNote("Detected Module: %s", name);
+    ProcessingContext.addModule(new ModuleData(name, List.copyOf(provides), List.copyOf(requires)));
+  }
+
+  private static Stream<TypeElement> injectExtensions() {
+    final var allModules =
+      APContext.elements().getAllModuleElements().stream()
+        .filter(m -> !m.getQualifiedName().toString().startsWith("java"))
+        .filter(m -> !m.getQualifiedName().toString().startsWith("jdk"))
+        // for whatever reason, compilation breaks if we don't filter out the current module
+        .filter(m -> !m.equals(APContext.getProjectModuleElement()))
+        .collect(toList());
+
+    final var types = APContext.types();
+    final var extensionType = APContext.typeElement("io.avaje.inject.spi.InjectExtension").asType();
 
     final var checkEnclosing =
-        allModules.stream()
-            .flatMap(m -> m.getEnclosedElements().stream())
-            .flatMap(p -> p.getEnclosedElements().stream())
-            .map(TypeElement.class::cast)
-            .filter(t -> t.getKind() == ElementKind.CLASS)
-            .filter(t -> t.getModifiers().contains(Modifier.PUBLIC))
-            .filter(t -> types.isAssignable(t.asType(), spi));
+      allModules.stream()
+        .flatMap(m -> m.getEnclosedElements().stream())
+        .flatMap(p -> p.getEnclosedElements().stream())
+        .map(TypeElement.class::cast)
+        .filter(t -> t.getKind() == ElementKind.CLASS)
+        .filter(t -> t.getModifiers().contains(Modifier.PUBLIC))
+        .filter(t -> types.isAssignable(t.asType(), extensionType));
 
     final var checkDirectives =
-        allModules.stream()
-            .flatMap(m -> ElementFilter.providesIn(m.getDirectives()).stream())
-            .filter(ExternalProvider::isInjectExtension)
-            .flatMap(p -> p.getImplementations().stream());
+      allModules.stream()
+        .flatMap(m -> ElementFilter.providesIn(m.getDirectives()).stream())
+        .filter(ExternalProvider::isInjectExtension)
+        .flatMap(p -> p.getImplementations().stream());
+
     return Stream.concat(checkEnclosing, checkDirectives);
   }
 
   private static boolean isInjectExtension(ModuleElement.ProvidesDirective p) {
-    return "io.avaje.inject.spi.InjectExtension"
-        .equals(p.getService().getQualifiedName().toString());
+    return "io.avaje.inject.spi.InjectExtension".equals(p.getService().getQualifiedName().toString());
   }
 }

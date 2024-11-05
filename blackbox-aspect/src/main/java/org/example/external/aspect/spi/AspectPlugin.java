@@ -11,7 +11,6 @@ public class AspectPlugin implements InjectPlugin {
 
   @Override
   public Class<?>[] provides() {
-
     return new Class<?>[] {PluginProvidedClass.class};
   }
 

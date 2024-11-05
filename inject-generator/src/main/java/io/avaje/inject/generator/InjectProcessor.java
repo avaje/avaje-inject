@@ -350,24 +350,16 @@ public final class InjectProcessor extends AbstractProcessor {
   }
 
   private boolean isExtension(TypeElement te) {
-
-    PluginProvidesPrism.getOptionalOn(te)
-        .ifPresent(
-            t -> {
-              if (!APContext.isAssignable(te, "io.avaje.inject.spi.InjectPlugin")) {
-                APContext.logError(
-                    te, "PluginProvides can only be placed on io.avaje.inject.spi.InjectPlugin");
-              }
-            });
-
-    ServiceProviderPrism.getOptionalOn(te)
-        .ifPresent(
-            t -> {
-              if (APContext.isAssignable(te, "io.avaje.inject.spi.InjectPlugin")) {
-                APContext.logWarn(
-                    te, "PluginProvides should be used to auto register InjectPlugins");
-              }
-            });
+    PluginProvidesPrism.getOptionalOn(te).ifPresent(t -> {
+      if (!APContext.isAssignable(te, "io.avaje.inject.spi.InjectPlugin")) {
+        APContext.logError(te, "PluginProvides can only be placed on io.avaje.inject.spi.InjectPlugin");
+      }
+    });
+    ServiceProviderPrism.getOptionalOn(te).ifPresent(t -> {
+      if (APContext.isAssignable(te, "io.avaje.inject.spi.InjectPlugin")) {
+        APContext.logWarn(te, "PluginProvides should be used to auto register InjectPlugins");
+      }
+    });
 
     return APContext.isAssignable(te, "io.avaje.inject.spi.InjectExtension");
   }
