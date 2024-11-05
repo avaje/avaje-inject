@@ -42,7 +42,7 @@ public interface Builder {
    * @param name  The qualifier name
    * @param types The types that the bean implements and provides
    */
-  boolean canRegister(String name, Type... types);
+  boolean isBeanAbsent(String name, Type... types);
 
   /**
    * Return true if the bean should be created and registered with the context.
@@ -52,8 +52,8 @@ public interface Builder {
    *
    * @param types The types that the bean implements and provides
    */
-  default boolean canRegister(Type... types) {
-    return canRegister(null, types);
+  default boolean isBeanAbsent(Type... types) {
+    return isBeanAbsent(null, types);
   }
 
   /**
@@ -64,11 +64,11 @@ public interface Builder {
    *
    * @param name The qualifier name
    * @param types The types that the bean implements and provides
-   * @deprecated use {@link #canRegister(String, Type...)}
+   * @deprecated use {@link #isBeanAbsent(String, Type...)}
    */
   @Deprecated(forRemoval = true)
   default boolean isAddBeanFor(String name, Type... types) {
-    return canRegister(name, types);
+    return isBeanAbsent(name, types);
   }
 
   /**
@@ -78,11 +78,11 @@ public interface Builder {
    * skip the creation and registration for this bean.
    *
    * @param types The types that the bean implements and provides
-   * @deprecated use {@link #canRegister(Type...)} instead
+   * @deprecated use {@link #isBeanAbsent(Type...)} instead
    */
   @Deprecated(forRemoval = true)
   default boolean isAddBeanFor(Type... types) {
-    return canRegister(types);
+    return isBeanAbsent(types);
   }
 
   /**

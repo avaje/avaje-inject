@@ -172,7 +172,7 @@ final class SimpleBeanWriter {
 
   private void writeAddFor(MethodReader constructor) {
     beanReader.buildConditional(writer);
-    beanReader.buildCanRegister(writer);
+    beanReader.buildBeanAbsent(writer);
     if (beanReader.registerProvider()) {
       indent += "  ";
       writer.append("      builder.%s(() -> {", beanReader.lazy() ? "registerProvider" : "asPrototype().registerProvider").eol();

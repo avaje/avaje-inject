@@ -49,7 +49,7 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public boolean canRegister(String name, Type... types) {
+  public boolean isBeanAbsent(String name, Type... types) {
     parentMatch = null;
     next(name, types);
     if (parentOverride || parent == null) {
