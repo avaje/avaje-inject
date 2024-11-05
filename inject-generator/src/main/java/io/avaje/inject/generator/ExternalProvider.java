@@ -204,7 +204,7 @@ final class ExternalProvider {
       return;
     }
     var prism = PluginProvidesPrism.getInstanceOn(pluginType);
-    for (final var provide : prism.provides()) {
+    for (final var provide : prism.value()) {
       defaultScope.pluginProvided(provide.toString());
     }
     for (final var provide : prism.providesStrings()) {
