@@ -6,7 +6,7 @@ import io.avaje.inject.BeanScopeBuilder;
 import io.avaje.inject.spi.InjectPlugin;
 import io.avaje.inject.spi.PluginProvides;
 
-@PluginProvides(provides = PluginProvidedClass.class)
+@PluginProvides(PluginProvidedClass.class)
 public class AspectPlugin implements InjectPlugin {
 
   @Override
