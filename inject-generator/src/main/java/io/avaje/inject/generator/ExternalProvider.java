@@ -312,6 +312,7 @@ final class ExternalProvider {
     return Stream.concat(checkEnclosing, checkDirectives);
   }
 
+  // when a project's module-info is misconfigured a certain way, getEnclosedElements throws an error
   private static Stream<? extends Element> getEnclosed(Element e) {
     try {
       return e.getEnclosedElements().stream();
