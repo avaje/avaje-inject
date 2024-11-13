@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.ModuleElement;
@@ -295,8 +296,8 @@ final class ExternalProvider {
 
     final var checkEnclosing =
       allModules.stream()
-        .flatMap(m -> m.getEnclosedElements().stream())
-        .flatMap(p -> p.getEnclosedElements().stream())
+        .flatMap(ExternalProvider::getEnclosed)
+        .flatMap(ExternalProvider::getEnclosed)
         .map(TypeElement.class::cast)
         .filter(t -> t.getKind() == ElementKind.CLASS)
         .filter(t -> t.getModifiers().contains(Modifier.PUBLIC))
@@ -309,6 +310,14 @@ final class ExternalProvider {
         .flatMap(p -> p.getImplementations().stream());
 
     return Stream.concat(checkEnclosing, checkDirectives);
+  }
+
+  private static Stream<? extends Element> getEnclosed(Element e) {
+    try {
+      return e.getEnclosedElements().stream();
+    } catch (Exception ex) {
+      return Stream.of();
+    }
   }
 
   private static boolean isInjectExtension(ModuleElement.ProvidesDirective p) {
