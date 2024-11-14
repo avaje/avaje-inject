@@ -12,11 +12,11 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
-import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
@@ -53,8 +53,6 @@ public class AutoProvidesMojo extends AbstractMojo {
   @Parameter(defaultValue = "${project}", readonly = true, required = true)
   private MavenProject project;
 
-  private final List<ModuleData> modules = new ArrayList<>();
-
   @Override
   public void execute() throws MojoExecutionException {
     final var listUrl = compileDependencies();
@@ -65,7 +63,7 @@ public class AutoProvidesMojo extends AbstractMojo {
     }
 
     try (var newClassLoader = createClassLoader(listUrl);
-        var pluginWriter = createFileWriter("avaje-plugin-provides.txt");
+        var pluginWriter = createFileWriter("avaje-plugins.csv");
         var moduleCSV = createFileWriter("avaje-module-dependencies.csv")) {
 
       writeProvidedPlugins(newClassLoader, pluginWriter);
@@ -100,7 +98,6 @@ public class AutoProvidesMojo extends AbstractMojo {
   }
 
   private void writeProvidedPlugins(URLClassLoader newClassLoader, FileWriter pluginWriter) throws IOException {
-    final Set<String> providedTypes = new HashSet<>();
 
     final Log log = getLog();
 
@@ -112,19 +109,28 @@ public class AutoProvidesMojo extends AbstractMojo {
         .map(InjectPlugin.class::cast)
         .forEach(plugins::add);
 
+    final Map<String, List<String>> pluginEntries = new HashMap<>();
     for (final var plugin : plugins) {
-      log.info("Loaded Plugin: " + plugin.getClass().getTypeName());
+
+      final List<String> provides = new ArrayList<>();
+      final var typeName = plugin.getClass().getTypeName();
+      log.info("Loaded Plugin: " + typeName);
       for (final var provide : plugin.provides()) {
-        providedTypes.add(provide.getTypeName());
+        provides.add(provide.getTypeName());
       }
       for (final var provide : plugin.providesAspects()) {
-        providedTypes.add(wrapAspect(provide.getCanonicalName()));
+        provides.add(wrapAspect(provide.getCanonicalName()));
       }
+      pluginEntries.put(typeName, provides);
     }
 
-    for (final var providedType : providedTypes) {
-      pluginWriter.write(providedType);
+    pluginWriter.write("External Plugin Type|Provides");
+    for (final var providedType : pluginEntries.entrySet()) {
       pluginWriter.write("\n");
+      pluginWriter.write(providedType.getKey());
+      pluginWriter.write("|");
+      var provides = providedType.getValue().stream().collect(joining(","));
+      pluginWriter.write(provides.isEmpty() ? " " : provides);
     }
   }
 
@@ -138,6 +144,8 @@ public class AutoProvidesMojo extends AbstractMojo {
         .filter(AvajeModule.class::isInstance)
         .map(AvajeModule.class::cast)
         .forEach(avajeModules::add);
+
+    List<ModuleData> modules = new ArrayList<>();
     for (final var module : avajeModules) {
       final var name = module.getClass().getTypeName();
       log.info("Detected External Module: " + name);
