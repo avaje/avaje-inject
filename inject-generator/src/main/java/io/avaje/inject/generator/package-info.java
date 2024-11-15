@@ -31,6 +31,10 @@
 @GeneratePrism(Scope.class)
 @GeneratePrism(Secondary.class)
 @GeneratePrism(io.avaje.spi.ServiceProvider.class)
+@GeneratePrism(io.avaje.http.api.Client.class)
+@GeneratePrism(io.avaje.http.api.Controller.class)
+@GeneratePrism(io.avaje.http.api.Path.class)
+@GeneratePrism(name = "HttpGeneratedPrism", value = io.avaje.http.api.Generated.class)
 package io.avaje.inject.generator;
 
 import io.avaje.inject.*;
