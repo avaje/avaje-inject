@@ -10,7 +10,6 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
@@ -99,24 +98,22 @@ public final class InjectProcessor extends AbstractProcessor {
    */
   void loadProvidedFiles() {
     pluginFileProvided.addAll(lines("avaje-plugin-provides.txt"));
-
     lines("avaje-module-dependencies.csv").stream()
-        .filter(s -> s.contains("|") && !s.startsWith("External Module Type"))
-        .distinct()
-        .map(l -> l.split("\\|"))
-        .map(ModuleData::of)
-        .flatMap(Optional::stream)
-        .forEach(
-            m -> {
-              ExternalProvider.registerExternalMetaData(m.name());
-              ExternalProvider.readMetaDataProvides(moduleFileProvided);
-              this.moduleData.add(m);
-            });
+      .filter(s -> s.contains("|") && !s.startsWith("External Module Type"))
+      .distinct()
+      .map(l -> l.split("\\|"))
+      .map(ModuleData::of)
+      .flatMap(Optional::stream)
+      .forEach(m -> {
+        ExternalProvider.registerExternalMetaData(m.name());
+        ExternalProvider.readMetaDataProvides(moduleFileProvided);
+        this.moduleData.add(m);
+      });
     lines("avaje-plugins.csv").stream()
-        .filter(s -> s.contains("|") && !s.startsWith("External Plugin Type"))
-        .distinct()
-        .map(l -> l.split("\\|")[1])
-        .forEach(pluginFileProvided::add);
+      .filter(s -> s.contains("|") && !s.startsWith("External Plugin Type"))
+      .distinct()
+      .map(l -> l.split("\\|")[1])
+      .forEach(pluginFileProvided::add);
   }
 
   private List<String> lines(String relativeName) {

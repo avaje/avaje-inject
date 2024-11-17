@@ -1,6 +1,5 @@
 package io.avaje.inject.mojo;
 
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 import java.io.File;
@@ -77,9 +76,7 @@ public class AutoProvidesMojo extends AbstractMojo {
   private List<URL> compileDependencies() throws MojoExecutionException {
     final List<URL> listUrl = new ArrayList<>();
     project.setArtifactFilter(new ScopeArtifactFilter("compile"));
-    final var deps = project.getArtifacts();
-
-    for (final Artifact artifact : deps) {
+    for (final Artifact artifact : project.getArtifacts()) {
       try {
         listUrl.add(artifact.getFile().toURI().toURL());
       } catch (final MalformedURLException e) {
@@ -98,7 +95,6 @@ public class AutoProvidesMojo extends AbstractMojo {
   }
 
   private void writeProvidedPlugins(URLClassLoader newClassLoader, FileWriter pluginWriter) throws IOException {
-
     final Log log = getLog();
 
     final List<InjectPlugin> plugins = new ArrayList<>();
@@ -111,7 +107,6 @@ public class AutoProvidesMojo extends AbstractMojo {
 
     final Map<String, List<String>> pluginEntries = new HashMap<>();
     for (final var plugin : plugins) {
-
       final List<String> provides = new ArrayList<>();
       final var typeName = plugin.getClass().getTypeName();
       log.info("Loaded Plugin: " + typeName);
@@ -129,13 +124,12 @@ public class AutoProvidesMojo extends AbstractMojo {
       pluginWriter.write("\n");
       pluginWriter.write(providedType.getKey());
       pluginWriter.write("|");
-      var provides = providedType.getValue().stream().collect(joining(","));
+      var provides = String.join(",", providedType.getValue());
       pluginWriter.write(provides.isEmpty() ? " " : provides);
     }
   }
 
   private void writeModuleCSV(ClassLoader newClassLoader, FileWriter moduleWriter) throws IOException {
-
     final Log log = getLog();
     final List<AvajeModule> avajeModules = new ArrayList<>();
     ServiceLoader.load(Module.class, newClassLoader).forEach(avajeModules::add);
@@ -183,10 +177,10 @@ public class AutoProvidesMojo extends AbstractMojo {
       moduleWriter.write("\n");
       moduleWriter.write(avajeModule.name());
       moduleWriter.write("|");
-      var provides = avajeModule.provides().stream().collect(joining(","));
+      var provides = String.join(",", avajeModule.provides());
       moduleWriter.write(provides.isEmpty() ? " " : provides);
       moduleWriter.write("|");
-      var requires = avajeModule.requires().stream().collect(joining(","));
+      var requires = String.join(",", avajeModule.requires());
       moduleWriter.write(requires.isEmpty() ? " " : requires);
     }
   }

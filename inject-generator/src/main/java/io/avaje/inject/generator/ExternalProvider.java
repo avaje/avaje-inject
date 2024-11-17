@@ -2,7 +2,6 @@ package io.avaje.inject.generator;
 
 import static java.util.List.of;
 import static java.util.Map.entry;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 import java.io.FileWriter;
@@ -167,7 +166,6 @@ final class ExternalProvider {
   }
 
   static void scanAllInjectPlugins(ScopeInfo defaultScope) {
-
     Map<String, List<String>> plugins = new HashMap<>();
     final var hasPlugins = !defaultScope.pluginProvided().isEmpty();
     avajePlugins.forEach((k, v) -> {
@@ -196,15 +194,13 @@ final class ExternalProvider {
 
   private static void writePluginProvides(Map<String, List<String>> plugins) {
     // write detected plugins to a text file for test compilation
-    try (final var pluginWriter =
-        new FileWriter(APContext.getBuildResource("avaje-plugins.csv").toFile())) {
-
+    try (final var pluginWriter = new FileWriter(APContext.getBuildResource("avaje-plugins.csv").toFile())) {
       pluginWriter.write("External Plugin Type|Provides");
       for (final var plugin : plugins.entrySet()) {
         pluginWriter.write("\n");
         pluginWriter.write(plugin.getKey());
         pluginWriter.write("|");
-        var provides = plugin.getValue().stream().collect(joining(","));
+        var provides = String.join(",", plugin.getValue());
         pluginWriter.write(provides.isEmpty() ? " " : provides);
       }
     } catch (IOException e) {
@@ -212,13 +208,11 @@ final class ExternalProvider {
     }
   }
 
-  private static void addPluginToScope(
-      ScopeInfo defaultScope, TypeElement pluginType, Map<String, List<String>> plugins) {
+  private static void addPluginToScope(ScopeInfo defaultScope, TypeElement pluginType, Map<String, List<String>> plugins) {
     final var name = pluginType.getQualifiedName().toString();
-
     ProcessingContext.addExternalInjectSPI(name);
     var prism = PluginProvidesPrism.getInstanceOn(pluginType);
-    List<String> provides=new ArrayList<>();
+    List<String> provides = new ArrayList<>();
     for (final var provide : prism.value()) {
       defaultScope.pluginProvided(provide.toString());
       provides.add(provide.toString());

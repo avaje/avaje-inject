@@ -33,8 +33,7 @@ final class ProcessingContext {
     private final List<TypeElement> delayQueue = new ArrayList<>();
     private final Set<String> spiServices = new TreeSet<>();
     private boolean strictWiring;
-    private final boolean mergeServices =
-        APContext.getOption("mergeServices").map(Boolean::valueOf).orElse(true);
+    private final boolean mergeServices = APContext.getOption("mergeServices").map(Boolean::valueOf).orElse(true);
 
     void registerProvidedTypes(Set<String> moduleFileProvided) {
       ExternalProvider.registerModuleProvidedTypes(providedTypes);
@@ -107,7 +106,6 @@ final class ProcessingContext {
   }
 
   static void addExternalInjectSPI(String type) {
-
     if (CTX.get().mergeServices) {
       CTX.get().spiServices.add(type);
     }
@@ -213,7 +211,6 @@ final class ProcessingContext {
   }
 
   static void writeSPIServicesFile() {
-
     readExistingMetaInfServices();
     if (CTX.get().spiServices.isEmpty()) {
       // no services to register
