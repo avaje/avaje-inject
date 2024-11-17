@@ -3,6 +3,7 @@
 @GeneratePrism(value = Aspect.Import.class, name = "AspectImportPrism")
 @GeneratePrism(Assisted.class)
 @GeneratePrism(AssistFactory.class)
+@GeneratePrism(AsyncBean.class)
 @GeneratePrism(Bean.class)
 @GeneratePrism(Component.class)
 @GeneratePrism(Component.Import.class)

@@ -41,7 +41,7 @@ class InjectProcessorTest {
     }
   }
 
-  @Disabled
+
   @Test
   void testGeneration() throws Exception {
     final String source =

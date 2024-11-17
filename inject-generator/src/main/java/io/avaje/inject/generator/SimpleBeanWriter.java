@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import javax.lang.model.type.TypeKind;
 import javax.tools.JavaFileObject;
@@ -175,7 +176,17 @@ final class SimpleBeanWriter {
     beanReader.buildAddFor(writer);
     if (beanReader.registerProvider()) {
       indent += "  ";
-      writer.append("      builder.%s(() -> {", beanReader.lazy() ? "registerProvider" : "asPrototype().registerProvider").eol();
+
+      final String registerProvider;
+      if (beanReader.async()) {
+        registerProvider = "registerProvider(CompletableFuture.supplyAsync";
+      } else if (beanReader.lazy()) {
+        registerProvider = "registerProvider";
+      } else {
+        registerProvider = "asPrototype().registerProvider";
+      }
+
+      writer.append("      builder.%s(() -> {", registerProvider).eol();
     }
     constructor.startTry(writer);
     writeCreateBean(constructor);
@@ -187,7 +198,7 @@ final class SimpleBeanWriter {
     if (beanReader.registerProvider()) {
       beanReader.prototypePostConstruct(writer, indent);
       writer.indent("        return bean;").eol();
-      writer.indent("      });").eol();
+      writer.indent("      })").append("%s;", beanReader.async() ? "::join)" : "").eol();
     }
     writeObserveMethods();
     constructor.endTry(writer);

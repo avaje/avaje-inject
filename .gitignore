@@ -13,3 +13,4 @@ build/
 inject-generator/avaje-inject
 inject-generator/avaje-inject-generator
 inject-generator/avaje-processors.txt
+*.csv

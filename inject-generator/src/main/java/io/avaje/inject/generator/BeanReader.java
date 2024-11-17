@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
@@ -38,6 +39,7 @@ final class BeanReader {
   private final boolean prototype;
   private final boolean primary;
   private final boolean secondary;
+  private final boolean async;
   private final boolean lazy;
   private final boolean proxy;
   private final BeanAspects aspects;
@@ -58,6 +60,7 @@ final class BeanReader {
     this.primary = PrimaryPrism.isPresent(beanType);
     this.secondary = !primary && SecondaryPrism.isPresent(beanType);
     this.lazy = !FactoryPrism.isPresent(beanType) && LazyPrism.isPresent(beanType);
+    this.async = !FactoryPrism.isPresent(beanType) && AsyncBeanPrism.isPresent(beanType);
     final var beantypes = BeanTypesPrism.getOptionalOn(beanType);
     beantypes.ifPresent(p -> Util.validateBeanTypes(beanType, p.value()));
     this.typeReader =
@@ -128,11 +131,15 @@ final class BeanReader {
   }
 
   boolean registerProvider() {
-    return prototype || lazy;
+    return prototype || async || lazy;
   }
 
   boolean lazy() {
     return lazy;
+  }
+
+  boolean async() {
+    return async;
   }
 
   boolean importedComponent() {
@@ -304,7 +311,7 @@ final class BeanReader {
   }
 
   void buildRegister(Append writer) {
-    if (prototype || lazy) {
+    if (prototype || lazy || async) {
       return;
     }
     writer.indent("      ");
@@ -349,15 +356,20 @@ final class BeanReader {
 
   private void lifeCycleNotSupported(String lifecycle) {
     if (registerProvider()) {
-      logError(
-        beanType,
-        "%s scoped bean does not support the %s lifecycle method",
-        prototype ? "@Prototype" : "@Lazy",
-        lifecycle);
+      String scope;
+      if (lazy) scope = "@Lazy";
+      if (async) scope = "@AsyncBean";
+      else scope = "@Prototype";
+
+      logError(beanType, "%s scoped bean does not support the %s lifecycle method", scope, lifecycle);
     }
   }
 
   private Set<String> importTypes() {
+    importTypes.add(type);
+    if (async) {
+      importTypes.add(CompletableFuture.class.getCanonicalName());
+    }
     importTypes.add(type);
     typeReader.extraImports(importTypes);
     requestParams.addImports(importTypes);
