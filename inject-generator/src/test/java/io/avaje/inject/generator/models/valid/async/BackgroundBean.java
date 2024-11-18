@@ -1,4 +1,4 @@
-package io.avaje.inject.generator.models.valid.lazy;
+package io.avaje.inject.generator.models.valid.async;
 
 import io.avaje.inject.AsyncBean;
 import jakarta.inject.Inject;

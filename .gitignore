@@ -14,3 +14,5 @@ inject-generator/avaje-inject
 inject-generator/avaje-inject-generator
 inject-generator/avaje-processors.txt
 *.csv
+inject-generator/util/events/ListString$Publisher$DI.java
+inject-generator/util/events/ListString$Publisher.java

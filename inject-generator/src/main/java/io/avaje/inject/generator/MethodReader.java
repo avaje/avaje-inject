@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import static io.avaje.inject.generator.Constants.CONDITIONAL_DEPENDENCY;
 import static io.avaje.inject.generator.ProcessingContext.asElement;
@@ -21,6 +22,7 @@ final class MethodReader {
   private final boolean prototype;
   private final boolean primary;
   private final boolean secondary;
+  private final boolean async;
   private final boolean lazy;
   private final String returnTypeRaw;
   private final UType genericType;
@@ -49,9 +51,11 @@ final class MethodReader {
       prototype = PrototypePrism.isPresent(element);
       primary = PrimaryPrism.isPresent(element);
       secondary = SecondaryPrism.isPresent(element);
+      async = AsyncBeanPrism.isPresent(element) || AsyncBeanPrism.isPresent(element.getEnclosingElement());
       lazy = LazyPrism.isPresent(element) || LazyPrism.isPresent(element.getEnclosingElement());
       conditions.readAll(element);
     } else {
+      async = false;
       prototype = false;
       primary = false;
       secondary = false;
@@ -103,8 +107,8 @@ final class MethodReader {
       this.initMethod = lifecycleReader.initMethod();
       this.destroyMethod = lifecycleReader.destroyMethod();
     }
-    if (lazy && prototype) {
-      APContext.logError("Cannot use both @Lazy and @Prototype");
+    if ((async||lazy) && prototype) {
+      APContext.logError("Cannot use both @AsyncBean/@Lazy and @Prototype");
     }
   }
 
@@ -230,7 +234,10 @@ final class MethodReader {
       writer.append(".asSecondary()");
     }
 
-    writer.indent(".registerProvider(() -> {").eol();
+    writer
+        .indent(".registerProvider(")
+        .append("%s() -> {", async ? "CompletableFuture.supplyAsync(" : "")
+        .eol();
 
     startTry(writer, "  ");
     writer.indent(indent).append("  return ");
@@ -243,7 +250,7 @@ final class MethodReader {
     }
     writer.append(");").eol();
     endTry(writer, "  ");
-    writer.indent(indent).append("  });").eol();
+    writer.indent(indent).append("  }%s);", async ? ")::join" : "").eol();
     writer.indent(indent).append("}").eol();
   }
 
@@ -340,6 +347,10 @@ final class MethodReader {
     if (optionalType) {
       importTypes.add(Constants.OPTIONAL);
     }
+
+    if (async) {
+      importTypes.add(CompletableFuture.class.getCanonicalName());
+    }
     conditions.addImports(importTypes);
   }
 
@@ -427,6 +438,10 @@ final class MethodReader {
 
   boolean isProtoType() {
     return prototype && !Util.isProvider(returnTypeRaw);
+  }
+
+  boolean isAsync() {
+    return async;
   }
 
   boolean isLazy() {

@@ -144,7 +144,7 @@ final class SimpleBeanWriter {
     method.buildConditional(writer);
     method.buildAddFor(writer);
     method.builderGetFactory(writer, beanReader.hasConditions());
-    if (method.isLazy() || method.isProtoType() || method.isUseProviderForSecondary()) {
+    if (method.isAsync() || method.isLazy() || method.isProtoType() || method.isUseProviderForSecondary()) {
       method.builderAddBeanProvider(writer);
     } else {
       method.startTry(writer);
@@ -198,11 +198,21 @@ final class SimpleBeanWriter {
     if (beanReader.registerProvider()) {
       beanReader.prototypePostConstruct(writer, indent);
       writer.indent("        return bean;").eol();
-      writer.indent("      })").append("%s;", beanReader.async() ? "::join)" : "").eol();
+      if (!constructor.methodThrows()) {
+        writer.indent("      }").append(beanReader.async() ? ")::join);" : ");").eol();
+      }
     }
     writeObserveMethods();
     constructor.endTry(writer);
-    writer.append("    }").eol();
+
+    writer.append("    }");
+
+    if (beanReader.registerProvider() && constructor.methodThrows()) {
+      writer.append("%s);", beanReader.async() ? ")::join" : "").eol();
+      writer.append("    }");
+    }
+
+    writer.eol();
   }
 
   private void writeBuildMethodStart() {

@@ -9,7 +9,7 @@ import io.avaje.inject.Lazy;
 public class LazyFactory {
 
   @Bean
-  Integer lazyInt() {
+  Integer lazyInt() throws Exception {
     return 0;
   }
 }
