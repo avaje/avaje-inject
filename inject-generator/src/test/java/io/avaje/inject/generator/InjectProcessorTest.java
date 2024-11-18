@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import javax.tools.JavaCompiler;
@@ -23,16 +24,17 @@ import javax.tools.ToolProvider;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Disabled;
 
 class InjectProcessorTest {
 
   @AfterEach
   void deleteGeneratedFiles() {
     try {
-      Stream.concat(
+      Stream.of(
               Files.walk(Paths.get("io").toAbsolutePath()),
-              Files.walk(Paths.get("lang").toAbsolutePath()))
+              Files.walk(Paths.get("lang").toAbsolutePath()),
+              Files.walk(Paths.get("util").toAbsolutePath()))
+          .flatMap(Function.identity())
           .sorted(Comparator.reverseOrder())
           .map(Path::toFile)
           .forEach(File::delete);
@@ -41,7 +43,7 @@ class InjectProcessorTest {
     }
   }
 
-
+  //@Disabled
   @Test
   void testGeneration() throws Exception {
     final String source =
