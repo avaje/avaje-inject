@@ -1,10 +1,11 @@
 package org.example.myapp.async;
 
+import java.time.Instant;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import io.avaje.inject.AsyncBean;
-import io.avaje.inject.BeanScope;
-import io.avaje.inject.PostConstruct;
 import io.avaje.lang.Nullable;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -15,10 +16,15 @@ import jakarta.inject.Singleton;
 @Named("single")
 public class BackgroundBean {
 
-  final long initTime;
+  final Instant initTime;
+  final String threadName = Thread.currentThread().getName();
 
-  public BackgroundBean() throws InterruptedException {
-    Thread.sleep(1000);
-    this.initTime = System.currentTimeMillis();
+  public BackgroundBean(@Nullable AtomicInteger intyAtomic) throws InterruptedException {
+    this.initTime = Instant.now();
+
+    if (intyAtomic != null) {
+      System.out.println("asyncCounter: " + intyAtomic.incrementAndGet());
+    }
+    Thread.sleep(2000);
   }
 }
