@@ -107,7 +107,7 @@ final class MethodReader {
       this.initMethod = lifecycleReader.initMethod();
       this.destroyMethod = lifecycleReader.destroyMethod();
     }
-    if ((async||lazy) && prototype) {
+    if ((async || lazy) && prototype) {
       APContext.logError("Cannot use both @AsyncBean/@Lazy and @Prototype");
     }
   }

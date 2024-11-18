@@ -23,8 +23,9 @@ public class BackgroundBean {
     this.initTime = Instant.now();
 
     if (intyAtomic != null) {
-      System.out.println("asyncCounter: " + intyAtomic.incrementAndGet());
+      intyAtomic.incrementAndGet();
     }
+
     Thread.sleep(2000);
   }
 }
