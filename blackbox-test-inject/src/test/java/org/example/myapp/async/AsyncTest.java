@@ -41,6 +41,9 @@ class AsyncTest {
       assertThat(Duration.between(start, Instant.now()).toMillis()).isLessThan(1000);
 
       var bean = scope.get(BackgroundBean.class, "factory");
+      // this works on my local but not on the CI for some unknown reason.
+      // var beforeGet = Instant.now();
+      // assertThat(bean.initTime.isBefore(beforeGet)).isTrue();
       assertThat(inty.get()).isEqualTo(2);
       assertThat(bean.threadName).isNotEqualTo(Thread.currentThread().getName());
     }
