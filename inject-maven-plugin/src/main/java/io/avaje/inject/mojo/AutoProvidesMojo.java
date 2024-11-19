@@ -1,6 +1,5 @@
 package io.avaje.inject.mojo;
 
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 import java.io.File;
@@ -12,11 +11,11 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
-import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
@@ -44,13 +43,12 @@ import io.avaje.inject.spi.InjectPlugin;
 @Mojo(
     name = "provides",
     defaultPhase = LifecyclePhase.PROCESS_SOURCES,
-    requiresDependencyResolution = ResolutionScope.COMPILE)
+    requiresDependencyResolution = ResolutionScope.COMPILE,
+    threadSafe = true)
 public class AutoProvidesMojo extends AbstractMojo {
 
   @Parameter(defaultValue = "${project}", readonly = true, required = true)
   private MavenProject project;
-
-  private final List<ModuleData> modules = new ArrayList<>();
 
   @Override
   public void execute() throws MojoExecutionException {
@@ -62,7 +60,7 @@ public class AutoProvidesMojo extends AbstractMojo {
     }
 
     try (var newClassLoader = createClassLoader(listUrl);
-        var pluginWriter = createFileWriter("avaje-plugin-provides.txt");
+        var pluginWriter = createFileWriter("avaje-plugins.csv");
         var moduleCSV = createFileWriter("avaje-module-dependencies.csv")) {
 
       writeProvidedPlugins(newClassLoader, pluginWriter);
@@ -76,9 +74,7 @@ public class AutoProvidesMojo extends AbstractMojo {
   private List<URL> compileDependencies() throws MojoExecutionException {
     final List<URL> listUrl = new ArrayList<>();
     project.setArtifactFilter(new ScopeArtifactFilter("compile"));
-    final var deps = project.getArtifacts();
-
-    for (final Artifact artifact : deps) {
+    for (final Artifact artifact : project.getArtifacts()) {
       try {
         listUrl.add(artifact.getFile().toURI().toURL());
       } catch (final MalformedURLException e) {
@@ -97,43 +93,51 @@ public class AutoProvidesMojo extends AbstractMojo {
   }
 
   private void writeProvidedPlugins(URLClassLoader newClassLoader, FileWriter pluginWriter) throws IOException {
-    final Set<String> providedTypes = new HashSet<>();
-
     final Log log = getLog();
 
     ServiceLoader.load(InjectExtension.class, newClassLoader).stream()
         .map(Provider::get)
         .filter(InjectPlugin.class::isInstance)
         .map(InjectPlugin.class::cast)
-        .forEach(
-            plugin -> {
-              log.info("Loaded Plugin: " + plugin.getClass().getTypeName());
-              for (final var provide : plugin.provides()) {
-                providedTypes.add(provide.getTypeName());
-              }
-              for (final var provide : plugin.providesAspects()) {
-                providedTypes.add(wrapAspect(provide.getCanonicalName()));
-              }
-            });
+        .forEach(plugins::add);
 
-    for (final var providedType : providedTypes) {
-      pluginWriter.write(providedType);
+    final Map<String, List<String>> pluginEntries = new HashMap<>();
+    for (final var plugin : plugins) {
+      final List<String> provides = new ArrayList<>();
+      final var typeName = plugin.getClass().getTypeName();
+      log.info("Loaded Plugin: " + typeName);
+      for (final var provide : plugin.provides()) {
+        provides.add(provide.getTypeName());
+      }
+      for (final var provide : plugin.providesAspects()) {
+        provides.add(wrapAspect(provide.getCanonicalName()));
+      }
+      pluginEntries.put(typeName, provides);
+    }
+
+    pluginWriter.write("External Plugin Type|Provides");
+    for (final var providedType : pluginEntries.entrySet()) {
       pluginWriter.write("\n");
+      pluginWriter.write(providedType.getKey());
+      pluginWriter.write("|");
+      var provides = String.join(",", providedType.getValue());
+      pluginWriter.write(provides.isEmpty() ? " " : provides);
     }
   }
 
   private void writeModuleCSV(ClassLoader newClassLoader, FileWriter moduleWriter) throws IOException {
-
     final Log log = getLog();
 
     ServiceLoader.load(InjectExtension.class, newClassLoader).stream()
         .map(Provider::get)
         .filter(AvajeModule.class::isInstance)
         .map(AvajeModule.class::cast)
-        .forEach(
-            module -> {
-              final var name = module.getClass().getTypeName();
-              log.info("Detected External Module: " + name);
+        .forEach(avajeModules::add);
+
+    List<ModuleData> modules = new ArrayList<>();
+    for (final var module : avajeModules) {
+      final var name = module.getClass().getTypeName();
+      log.info("Detected External Module: " + name);
 
               final var provides = new ArrayList<String>();
               for (final var provide : module.provides()) {
@@ -172,10 +176,10 @@ public class AutoProvidesMojo extends AbstractMojo {
       moduleWriter.write("\n");
       moduleWriter.write(avajeModule.name());
       moduleWriter.write("|");
-      var provides = avajeModule.provides().stream().collect(joining(","));
+      var provides = String.join(",", avajeModule.provides());
       moduleWriter.write(provides.isEmpty() ? " " : provides);
       moduleWriter.write("|");
-      var requires = avajeModule.requires().stream().collect(joining(","));
+      var requires = String.join(",", avajeModule.requires());
       moduleWriter.write(requires.isEmpty() ? " " : requires);
     }
   }

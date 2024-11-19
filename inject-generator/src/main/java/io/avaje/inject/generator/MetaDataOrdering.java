@@ -148,7 +148,7 @@ final class MetaDataOrdering {
     for (Dependency dependency : metaData.dependsOn()) {
       if (providers.get(dependency.name()) == null && !scopeInfo.providedByOtherScope(dependency.name())) {
         TypeElement element = elementMaybe(metaData.type());
-        logError(element, "No dependency provided for " + dependency + " on " + metaData.type());
+        logError(element, "No dependency provided for %s on %s", dependency, metaData.type());
         missingDependencyTypes.add(dependency.name());
       }
     }
@@ -164,7 +164,7 @@ final class MetaDataOrdering {
         .collect(toList());
       logError("Dependencies %s are not provided - there are no @Singleton, @Component, @Factory/@Bean that currently provide this type. If this is an external dependency consider specifying via @External", missingMessage);
     } else if (!queue.isEmpty()) {
-      logWarn("There are " + queue.size() + " beans with unsatisfied dependencies (assuming external dependencies)");
+      logWarn("There are %s beans with unsatisfied dependencies (assuming external dependencies)", queue.size());
       for (MetaData m : queue) {
         logWarn("Unsatisfied dependencies on %s dependsOn %s", m, m.dependsOn());
       }

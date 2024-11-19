@@ -9,4 +9,6 @@ import jakarta.inject.Singleton;
 @Singleton
 public class LazyBean {
   @Inject Provider<Integer> intProvider;
+
+  public LazyBean() throws Exception {}
 }

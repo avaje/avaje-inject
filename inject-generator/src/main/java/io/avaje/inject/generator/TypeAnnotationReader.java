@@ -39,7 +39,7 @@ final class TypeAnnotationReader {
           .replace("\"", "\\\"");
 
       } else if (annType.indexOf('.') == -1) {
-        logWarn("skip when no package on annotation " + annType);
+        logWarn("skip when no package on annotation %s", annType);
       }
     }
   }

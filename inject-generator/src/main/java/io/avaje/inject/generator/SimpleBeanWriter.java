@@ -25,11 +25,6 @@ import io.avaje.inject.generator.MethodReader.MethodParam;
  */
 final class SimpleBeanWriter {
 
-  private static final String CODE_COMMENT = "/**\n * Generated source - dependency injection builder for %s.\n */";
-  private static final String CODE_COMMENT_FACTORY = "/**\n * Generated source - dependency injection factory for request scoped %s.\n */";
-  private static final String CODE_COMMENT_BUILD = "  /**\n   * Create and register %s.\n   */";
-  private static final String CODE_COMMENT_BUILD_PROVIDER = "  /**\n   * Register %s provider.\n   */";
-
   private final BeanReader beanReader;
   private final String originName;
   private final String shortName;
@@ -180,7 +175,15 @@ final class SimpleBeanWriter {
     beanReader.buildAddFor(writer);
     if (beanReader.registerProvider()) {
       indent += "  ";
-      writer.append("      builder.%s(() -> {", beanReader.lazy() ? "registerProvider" : "asPrototype().registerProvider").eol();
+
+      final String registerProvider;
+      if (beanReader.lazy()) {
+        registerProvider = "registerProvider";
+      } else {
+        registerProvider = "asPrototype().registerProvider";
+      }
+
+      writer.append("      builder.%s(() -> {", registerProvider).eol();
     }
     constructor.startTry(writer);
     writeCreateBean(constructor);
@@ -192,19 +195,23 @@ final class SimpleBeanWriter {
     if (beanReader.registerProvider()) {
       beanReader.prototypePostConstruct(writer, indent);
       writer.indent("        return bean;").eol();
-      writer.indent("      });").eol();
+      if (!constructor.methodThrows()) {
+        writer.indent("      });").eol();
+      }
     }
     writeObserveMethods();
     constructor.endTry(writer);
-    writer.append("    }").eol();
+
+    if (beanReader.registerProvider() && constructor.methodThrows()) {
+      writer.append("     }");
+      writer.append(");").eol();
+    }
+
+    writer.append("    }");
+    writer.eol();
   }
 
   private void writeBuildMethodStart() {
-    if (beanReader.registerProvider()) {
-      writer.append(CODE_COMMENT_BUILD_PROVIDER, shortName).eol();
-    } else {
-      writer.append(CODE_COMMENT_BUILD, shortName).eol();
-    }
     writer.append("  public static void build(%s builder) {", beanReader.builderType()).eol();
   }
 
@@ -218,13 +225,13 @@ final class SimpleBeanWriter {
 
   private void writeExtraInjection() {
     if (!beanReader.registerProvider()) {
-      writer.indent("      ").append("builder.addInjector(b -> {").eol();
-      writer.indent("      ").append("  // field and method injection").eol();
+      writer.indent(indent).append(" builder.addInjector(b -> {").eol();
+      writer.indent(indent).append("   // field and method injection").eol();
     }
     injectFields();
     injectMethods();
     if (!beanReader.registerProvider()) {
-      writer.indent("      });").eol();
+      writer.indent(indent).append(" });").eol();
     }
   }
 
@@ -334,11 +341,6 @@ final class SimpleBeanWriter {
 
   private void writeClassStart() {
     final var requestScopedController = beanReader.isRequestScopedController();
-    if (requestScopedController) {
-      writer.append(CODE_COMMENT_FACTORY, shortName).eol();
-    } else {
-      writer.append(CODE_COMMENT, shortName).eol();
-    }
     writer.append(beanReader.generatedType()).append(Constants.AT_GENERATED_COMMENT).eol();
     if (requestScopedController) {
       writer.append(Constants.AT_SINGLETON).eol();

@@ -91,7 +91,7 @@ final class SimpleModuleWriter {
         writer.close();
       }
     } catch (IOException e) {
-      logError("Failed to write services file " + e.getMessage());
+      logError("Failed to write services file %s", e.getMessage());
     }
   }
 

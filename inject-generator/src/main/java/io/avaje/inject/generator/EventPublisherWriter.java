@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.PackageElement;
 import javax.tools.JavaFileObject;
 
 /** Write the source code for the bean. */
@@ -46,13 +47,15 @@ final class EventPublisherWriter {
   private EventPublisherWriter(Element element) {
     final var asType = element.asType();
     this.utype = UType.parse(asType).param0();
-    this.packageName = APContext.elements()
-      .getPackageOf(APContext.typeElement(utype.mainType()))
-      .getQualifiedName()
-      .toString()
+    this.packageName = Optional.ofNullable(APContext.typeElement(utype.mainType()))
+      .map(APContext.elements()::getPackageOf)
+      .map(PackageElement::getQualifiedName)
+      .map(Object::toString)
+      .orElse("error.notype")
       .replaceFirst("java.", "")
       + ".events";
-    qualifier = Optional.ofNullable(Util.named(element)).orElse("");
+
+    this.qualifier = Optional.ofNullable(Util.named(element)).orElse("");
     var className =
       packageName
         + "."
@@ -60,8 +63,7 @@ final class EventPublisherWriter {
         + Util.shortName(utype).replace(".", "_")
         + "$Publisher";
 
-    originName = getUniqueClassName(className, 0);
-
+    this.originName = getUniqueClassName(className, 0);
     if (GENERATED_PUBLISHERS.containsKey(originName)) {
       //in super niche situations when compiling the same module, we need to tell avaje that these types already exist
       //got this when running both my eclipse compiler and then the terminal build
@@ -105,7 +107,7 @@ final class EventPublisherWriter {
       writer.append(MessageFormat.format(TEMPLATE, packageName, imports(), name, className, shortType, typeString, qualifier));
       writer.close();
     } catch (Exception e) {
-      logError("Failed to write EventPublisher class " + e);
+      logError("Failed to write EventPublisher class %s", e);
     }
   }
 

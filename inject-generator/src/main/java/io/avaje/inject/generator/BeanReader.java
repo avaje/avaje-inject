@@ -337,7 +337,7 @@ final class BeanReader {
   void prototypePostConstruct(Append writer, String indent) {
     if (postConstructMethod != null) {
       var postConstruct = (ExecutableElement) postConstructMethod;
-      writer.append("%s bean.%s(", indent, postConstructMethod.getSimpleName());
+      writer.indent(indent).append(" bean.%s(", postConstructMethod.getSimpleName());
       if (postConstruct.getParameters().isEmpty()) {
         writer.append(");").eol();
       } else {

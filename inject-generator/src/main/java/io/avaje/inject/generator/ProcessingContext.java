@@ -19,7 +19,8 @@ import static java.util.stream.Collectors.toSet;
 
 final class ProcessingContext {
 
-  private static final ThreadLocal<Ctx> CTX = new ThreadLocal<>();
+  private static final String EVENTS_SPI = "io.avaje.inject.events.spi.ObserverManagerPlugin";
+  private static final ThreadLocal<Ctx> CTX = ThreadLocal.withInitial(Ctx::new);
   private static boolean processingOver;
   private ProcessingContext() {}
 
@@ -32,6 +33,7 @@ final class ProcessingContext {
     private final List<TypeElement> delayQueue = new ArrayList<>();
     private final Set<String> spiServices = new TreeSet<>();
     private boolean strictWiring;
+    private final boolean mergeServices = APContext.getOption("mergeServices").map(Boolean::valueOf).orElse(true);
 
     void registerProvidedTypes(Set<String> moduleFileProvided) {
       ExternalProvider.registerModuleProvidedTypes(providedTypes);
@@ -39,9 +41,19 @@ final class ProcessingContext {
     }
   }
 
-  static void init(Set<String> moduleFileProvided, boolean performModuleValidation) {
-    CTX.set(new Ctx());
+  static void registerProvidedTypes(Set<String> moduleFileProvided) {
     CTX.get().registerProvidedTypes(moduleFileProvided);
+    addEventSPI();
+  }
+
+  private static void addEventSPI() {
+    try {
+      if (typeElement(EVENTS_SPI) != null || Class.forName(EVENTS_SPI) != null) {
+        addInjectSPI(EVENTS_SPI);
+      }
+    } catch (final ClassNotFoundException e) {
+      // nothing
+    }
   }
 
   static String loadMetaInfServices() {
@@ -84,13 +96,19 @@ final class ProcessingContext {
     } catch (final FilerException e) {
       logNote("FilerException reading services file");
     } catch (final Exception e) {
-      logWarn("Error reading services file: " + e.getMessage());
+      logWarn("Error reading services file: %s", e.getMessage());
     }
     return Collections.emptyList();
   }
 
   static void addInjectSPI(String type) {
     CTX.get().spiServices.add(type);
+  }
+
+  static void addExternalInjectSPI(String type) {
+    if (CTX.get().mergeServices) {
+      CTX.get().spiServices.add(type);
+    }
   }
 
   static FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
@@ -140,8 +158,10 @@ final class ProcessingContext {
   }
 
   static void validateModule() {
-    APContext.moduleInfoReader().ifPresent(reader ->
-      reader.validateServices("io.avaje.inject.spi.InjectExtension", CTX.get().spiServices));
+    APContext.moduleInfoReader().ifPresent(reader -> {
+      CTX.get().spiServices.remove(EVENTS_SPI);
+      reader.validateServices("io.avaje.inject.spi.InjectExtension", CTX.get().spiServices);
+    });
   }
 
   static Optional<AspectImportPrism> getImportedAspect(String type) {
@@ -192,6 +212,10 @@ final class ProcessingContext {
 
   static void writeSPIServicesFile() {
     readExistingMetaInfServices();
+    if (CTX.get().spiServices.isEmpty()) {
+      // no services to register
+      return;
+    }
     try {
       FileObject jfo = createMetaInfWriterFor(Constants.META_INF_SPI);
       if (jfo != null) {
@@ -202,7 +226,7 @@ final class ProcessingContext {
         writer.close();
       }
     } catch (IOException e) {
-      logError("Failed to write services file " + e.getMessage());
+      logError("Failed to write services file %s", e.getMessage());
     }
   }
 
@@ -225,5 +249,10 @@ final class ProcessingContext {
     } catch (Exception e) {
       // not a critical error
     }
+  }
+
+  static void registerExternalProvidedTypes(ScopeInfo scopeInfo) {
+    ExternalProvider.scanAllInjectPlugins(scopeInfo);
+    ExternalProvider.scanAllAvajeModules(CTX.get().providedTypes);
   }
 }

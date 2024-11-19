@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.avaje</groupId>
   <artifactId>avaje-inject-parent</artifactId>
-  <version>10.4-RC1</version>
+  <version>10.6-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>avaje inject parent</name>
   <description>parent pom for avaje inject library</description>
@@ -22,6 +22,7 @@
     <nexus.staging.autoReleaseAfterClose>true</nexus.staging.autoReleaseAfterClose>
     <surefire.useModulePath>false</surefire.useModulePath>
     <argLine>-Dnet.bytebuddy.experimental=true</argLine>
+    <project.build.outputTimestamp>2024-11-10T19:30:37Z</project.build.outputTimestamp>
     <!-- VALHALLA-START ___
     <maven.compiler.release>23</maven.compiler.release>
     <maven.compiler.enablePreview>true</maven.compiler.enablePreview>
@@ -58,19 +59,19 @@
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy</artifactId>
-      <version>1.15.1</version>
+      <version>1.15.10</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy-agent</artifactId>
-      <version>1.15.1</version>
+      <version>1.15.10</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>5.13.0</version>
+      <version>5.14.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

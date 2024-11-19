@@ -4,7 +4,7 @@
   <parent>
     <artifactId>avaje-inject-parent</artifactId>
     <groupId>io.avaje</groupId>
-    <version>10.4-RC1</version>
+    <version>10.6-SNAPSHOT</version>
   </parent>
 
   <artifactId>avaje-inject-maven-plugin</artifactId>
@@ -20,7 +20,7 @@
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
-      <version>3.15.0</version>
+      <version>3.15.1</version>
       <scope>provided</scope>
     </dependency>
 
@@ -36,7 +36,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
-        <version>3.15.0</version>
+        <version>3.15.1</version>
         <configuration>
           <goalPrefix>provides</goalPrefix>
         </configuration>

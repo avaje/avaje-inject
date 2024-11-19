@@ -7,6 +7,8 @@ import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.InjectPlugin;
 import io.avaje.inject.spi.InjectExtension;
 import io.avaje.inject.spi.Module;
+import io.avaje.inject.spi.Plugin;
+
 import org.gradle.api.*;
 
 import java.io.File;
@@ -30,9 +32,9 @@ public class AvajeInjectPlugin implements Plugin<Project> {
   public void apply(Project project) {
     project.afterEvaluate(
         prj -> {
-          // run it automatically after clean
-          Task cleanTask = prj.getTasks().getByName("clean");
-          cleanTask.doLast(it -> writeProvides(project));
+          // run it automatically before build
+          Task buildTask = prj.getTasks().getByName("compileJava");
+          buildTask.doFirst(it -> writeProvides(project));
         });
     // register a task to run it manually
     project.task("discoverModules").doLast(task -> writeProvides(project));
@@ -47,7 +49,7 @@ public class AvajeInjectPlugin implements Plugin<Project> {
     }
 
     try (var classLoader = classLoader(project);
-        var pluginWriter = createFileWriter(outputDir.getPath(), "avaje-plugin-provides.txt");
+        var pluginWriter = createFileWriter(outputDir.getPath(), "avaje-plugins.csv");
         var moduleCSV = createFileWriter(outputDir.getPath(), "avaje-module-dependencies.csv")) {
         writeProvidedPlugins(classLoader, pluginWriter);
         writeModuleCSV(classLoader, moduleCSV);
@@ -61,26 +63,35 @@ public class AvajeInjectPlugin implements Plugin<Project> {
   }
 
   private void writeProvidedPlugins(ClassLoader classLoader, FileWriter pluginWriter) throws IOException {
-    final Set<String> providedTypes = new HashSet<>();
-
+    final List<InjectPlugin> plugins = new ArrayList<>();
     ServiceLoader.load(InjectExtension.class, classLoader).stream()
-    .map(Provider::get)
-    .filter(InjectPlugin.class::isInstance)
-    .map(InjectPlugin.class::cast)
-    .forEach(
-        plugin -> {
-          log.info("Loaded Plugin: " + plugin.getClass().getTypeName());
-          for (final var provide : plugin.provides()) {
-            providedTypes.add(provide.getTypeName());
-          }
-          for (final var provide : plugin.providesAspects()) {
-            providedTypes.add(wrapAspect(provide.getCanonicalName()));
-          }
-        });
+        .map(Provider::get)
+        .filter(InjectPlugin.class::isInstance)
+        .map(InjectPlugin.class::cast)
+        .forEach(plugins::add);
 
-    for (final var providedType : providedTypes) {
-      pluginWriter.write(providedType);
+    final Map<String, List<String>> pluginEntries = new HashMap<>();
+    for (final var plugin : plugins) {
+
+      final List<String> provides = new ArrayList<>();
+      final var typeName = plugin.getClass().getTypeName();
+      System.out.println("Loaded Plugin: " + typeName);
+      for (final var provide : plugin.provides()) {
+        provides.add(provide.getTypeName());
+      }
+      for (final var provide : plugin.providesAspects()) {
+        provides.add(wrapAspect(provide.getCanonicalName()));
+      }
+      pluginEntries.put(typeName, provides);
+    }
+
+    pluginWriter.write("External Plugin Type|Provides");
+    for (final var providedType : pluginEntries.entrySet()) {
       pluginWriter.write("\n");
+      pluginWriter.write(providedType.getKey());
+      pluginWriter.write("|");
+      var provides = providedType.getValue().stream().collect(joining(","));
+      pluginWriter.write(provides.isEmpty() ? " " : provides);
     }
   }
 
@@ -108,6 +119,7 @@ public class AvajeInjectPlugin implements Plugin<Project> {
 
   private void writeModuleCSV(ClassLoader classLoader, FileWriter moduleWriter) throws IOException {
 
+    final List<AvajeModule> avajeModules = new ArrayList<>();
     ServiceLoader.load(InjectExtension.class, classLoader).stream()
         .map(Provider::get)
         .filter(AvajeModule.class::isInstance)

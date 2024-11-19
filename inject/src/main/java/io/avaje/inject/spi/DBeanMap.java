@@ -6,7 +6,6 @@ import jakarta.inject.Provider;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -63,8 +62,10 @@ final class DBeanMap {
     qualifiers.add(supplied.name());
     DContextEntryBean entryBean = DContextEntryBean.supplied(supplied.source(), supplied.name(), supplied.priority());
     beans.computeIfAbsent(suppliedType.getTypeName(), s -> new DContextEntry()).add(entryBean);
-    for (Class<?> anInterface : supplied.interfaces()) {
-      beans.computeIfAbsent(anInterface.getTypeName(), s -> new DContextEntry()).add(entryBean);
+    if (!suppliedType.getTypeName().startsWith("java.lang")) {
+      for (Class<?> anInterface : supplied.interfaces()) {
+        beans.computeIfAbsent(anInterface.getTypeName(), s -> new DContextEntry()).add(entryBean);
+      }
     }
   }
 
@@ -134,7 +135,7 @@ final class DBeanMap {
    */
   List<Object> all(Type type) {
     DContextEntry entry = beans.get(type.getTypeName());
-    return entry != null ? entry.all() : Collections.emptyList();
+    return entry != null ? entry.all() : List.of();
   }
 
   /**
@@ -158,7 +159,7 @@ final class DBeanMap {
 
   private Map<String, Object> map(Type type) {
     DContextEntry entry = beans.get(type.getTypeName());
-    return entry != null ? entry.map() : Collections.emptyMap();
+    return entry != null ? entry.map() : Map.of();
   }
 
   /**

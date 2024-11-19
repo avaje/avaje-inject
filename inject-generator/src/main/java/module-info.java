@@ -5,7 +5,9 @@ module io.avaje.inject.generator {
   requires io.avaje.inject.aop;
   requires io.avaje.inject.events;
 
+  requires static io.avaje.http.api;
   requires static io.avaje.prism;
+  requires static io.avaje.spi;
 
   uses io.avaje.inject.spi.InjectExtension;
 
