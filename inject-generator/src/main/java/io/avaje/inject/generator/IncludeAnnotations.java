@@ -15,7 +15,7 @@ final class IncludeAnnotations {
 
   static {
     EXCLUDED_ANNOTATIONS.add(Constants.KOTLIN_METADATA);
-    EXCLUDED_ANNOTATIONS.add(Constants.PATH);
+    EXCLUDED_ANNOTATIONS.add(PathPrism.PRISM_TYPE);
   }
 
   /**

@@ -17,6 +17,8 @@ public class LazyBean {
 
   @Inject @Nullable AtomicBoolean initialized;
 
+  public LazyBean() throws Exception {}
+
   @PostConstruct
   void init(BeanScope scope) {
     // note that nested test scopes will not be lazy

@@ -3,6 +3,7 @@ package io.avaje.inject.generator;
 import static io.avaje.inject.generator.APContext.logWarn;
 import static io.avaje.inject.generator.APContext.types;
 import static io.avaje.inject.generator.ProcessingContext.asElement;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -50,8 +51,19 @@ final class TypeExtendsReader {
     this.baseTypeIsInterface = baseType.getKind() == ElementKind.INTERFACE;
     this.publicAccess = baseType.getModifiers().contains(Modifier.PUBLIC);
     this.proxyBean = proxyBean;
-    this.controller = hasAnnotation(Constants.CONTROLLER);
+    this.controller = ControllerPrism.isPresent(baseType);
+    this.closeable = closeableClient(baseType);
     this.autoProvide = autoProvide();
+  }
+
+  /**
+   * generated Avaje Http Clients are autoCloseable on JDK 21+
+   */
+  private boolean closeableClient(TypeElement baseType) {
+    return ClientPrism.isPresent(baseType)
+      && APContext.typeElement("io.avaje.http.client.HttpClient").getInterfaces().stream()
+      .map(Object::toString)
+      .anyMatch(AutoCloseable.class.getCanonicalName()::equals);
   }
 
   private boolean autoProvide() {
@@ -59,16 +71,6 @@ final class TypeExtendsReader {
       && !controller
       && !FactoryPrism.isPresent(baseType)
       && !ProxyPrism.isPresent(baseType);
-  }
-
-  private boolean hasAnnotation(String annotationFQN) {
-    for (final var m : baseType.getAnnotationMirrors()) {
-      final CharSequence mfqn = ((TypeElement) m.getAnnotationType().asElement()).getQualifiedName();
-      if (annotationFQN.contentEquals(mfqn)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   UType baseType() {
@@ -124,7 +126,7 @@ final class TypeExtendsReader {
       // http controller, or request scoped controller via BeanFactory
       return List.of();
     }
-    if (hasAnnotation(Constants.HTTP_GENERATED)) {
+    if (HttpGeneratedPrism.isPresent(baseType)) {
       // http route
       return providesTypes.stream()
         .filter(ut -> ROUTE_TYPES.contains(ut.mainType()))

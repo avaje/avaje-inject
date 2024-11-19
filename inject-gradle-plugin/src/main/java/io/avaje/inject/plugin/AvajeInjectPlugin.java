@@ -7,6 +7,8 @@ import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.InjectPlugin;
 import io.avaje.inject.spi.InjectExtension;
 import io.avaje.inject.spi.Module;
+import io.avaje.inject.spi.Plugin;
+
 import org.gradle.api.*;
 
 import java.io.File;
@@ -47,7 +49,7 @@ public class AvajeInjectPlugin implements Plugin<Project> {
     }
 
     try (var classLoader = classLoader(project);
-        var pluginWriter = createFileWriter(outputDir.getPath(), "avaje-plugin-provides.txt");
+        var pluginWriter = createFileWriter(outputDir.getPath(), "avaje-plugins.csv");
         var moduleCSV = createFileWriter(outputDir.getPath(), "avaje-module-dependencies.csv")) {
         writeProvidedPlugins(classLoader, pluginWriter);
         writeModuleCSV(classLoader, moduleCSV);
@@ -61,29 +63,36 @@ public class AvajeInjectPlugin implements Plugin<Project> {
   }
 
   private void writeProvidedPlugins(ClassLoader classLoader, FileWriter pluginWriter) throws IOException {
-    final Set<String> providedTypes = new HashSet<>();
-
-    List<InjectPlugin> allPlugins = new ArrayList<>();
-    ServiceLoader.load(io.avaje.inject.spi.Plugin.class, classLoader).forEach(allPlugins::add);
+    final List<InjectPlugin> plugins = new ArrayList<>();
+    ServiceLoader.load(Plugin.class, classLoader).forEach(plugins::add);
     ServiceLoader.load(InjectExtension.class, classLoader).stream()
         .map(Provider::get)
         .filter(InjectPlugin.class::isInstance)
         .map(InjectPlugin.class::cast)
-        .forEach(allPlugins::add);
+        .forEach(plugins::add);
 
-    for (final var plugin : allPlugins) {
-      System.out.println("Loaded Plugin: " + plugin.getClass().getCanonicalName());
+    final Map<String, List<String>> pluginEntries = new HashMap<>();
+    for (final var plugin : plugins) {
+
+      final List<String> provides = new ArrayList<>();
+      final var typeName = plugin.getClass().getTypeName();
+      System.out.println("Loaded Plugin: " + typeName);
       for (final var provide : plugin.provides()) {
-        providedTypes.add(provide.getTypeName());
+        provides.add(provide.getTypeName());
       }
       for (final var provide : plugin.providesAspects()) {
-        providedTypes.add(wrapAspect(provide.getCanonicalName()));
+        provides.add(wrapAspect(provide.getCanonicalName()));
       }
+      pluginEntries.put(typeName, provides);
     }
 
-    for (final var providedType : providedTypes) {
-      pluginWriter.write(providedType);
+    pluginWriter.write("External Plugin Type|Provides");
+    for (final var providedType : pluginEntries.entrySet()) {
       pluginWriter.write("\n");
+      pluginWriter.write(providedType.getKey());
+      pluginWriter.write("|");
+      var provides = providedType.getValue().stream().collect(joining(","));
+      pluginWriter.write(provides.isEmpty() ? " " : provides);
     }
   }
 
