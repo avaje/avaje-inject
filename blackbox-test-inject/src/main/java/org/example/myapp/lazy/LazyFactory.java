@@ -14,7 +14,7 @@ public class LazyFactory {
 
   @Bean
   @Named("factory")
-  LazyBean lazyInt(@Nullable AtomicBoolean initialized) {
+  LazyBean lazyInt(@Nullable AtomicBoolean initialized) throws Exception {
 
     // note that nested test scopes will not be lazy
     if (initialized != null) initialized.set(true);

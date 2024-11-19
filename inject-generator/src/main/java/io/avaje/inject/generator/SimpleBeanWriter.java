@@ -208,7 +208,6 @@ final class SimpleBeanWriter {
     }
 
     writer.append("    }");
-
     writer.eol();
   }
 
@@ -226,13 +225,13 @@ final class SimpleBeanWriter {
 
   private void writeExtraInjection() {
     if (!beanReader.registerProvider()) {
-      writer.indent("      ").append("builder.addInjector(b -> {").eol();
-      writer.indent("      ").append("  // field and method injection").eol();
+      writer.indent(indent).append(" builder.addInjector(b -> {").eol();
+      writer.indent(indent).append("   // field and method injection").eol();
     }
     injectFields();
     injectMethods();
     if (!beanReader.registerProvider()) {
-      writer.indent("      });").eol();
+      writer.indent(indent).append(" });").eol();
     }
   }
 
