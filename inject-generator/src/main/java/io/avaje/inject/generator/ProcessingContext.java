@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toSet;
 final class ProcessingContext {
 
   private static final String EVENTS_SPI = "io.avaje.inject.events.spi.ObserverManagerPlugin";
-  private static final ThreadLocal<Ctx> CTX = new ThreadLocal<>();
+  private static final ThreadLocal<Ctx> CTX = ThreadLocal.withInitial(Ctx::new);
   private static boolean processingOver;
   private ProcessingContext() {}
 
@@ -33,6 +33,7 @@ final class ProcessingContext {
     private final List<TypeElement> delayQueue = new ArrayList<>();
     private final Set<String> spiServices = new TreeSet<>();
     private boolean strictWiring;
+    private final boolean mergeServices = APContext.getOption("mergeServices").map(Boolean::valueOf).orElse(true);
 
     void registerProvidedTypes(Set<String> moduleFileProvided) {
       ExternalProvider.registerModuleProvidedTypes(providedTypes);
@@ -40,8 +41,7 @@ final class ProcessingContext {
     }
   }
 
-  static void init(Set<String> moduleFileProvided) {
-    CTX.set(new Ctx());
+  static void registerProvidedTypes(Set<String> moduleFileProvided) {
     CTX.get().registerProvidedTypes(moduleFileProvided);
     addEventSPI();
   }
@@ -103,6 +103,12 @@ final class ProcessingContext {
 
   static void addInjectSPI(String type) {
     CTX.get().spiServices.add(type);
+  }
+
+  static void addExternalInjectSPI(String type) {
+    if (CTX.get().mergeServices) {
+      CTX.get().spiServices.add(type);
+    }
   }
 
   static FileObject createMetaInfWriterFor(String interfaceType) throws IOException {
@@ -205,10 +211,6 @@ final class ProcessingContext {
   }
 
   static void writeSPIServicesFile() {
-    Optional.ofNullable(APContext.getProjectModuleElement())
-        .filter(m -> "io.avaje.inject.test".equals(m.getQualifiedName().toString()))
-        .ifPresent(m -> CTX.get().spiServices.remove(EVENTS_SPI));
-
     readExistingMetaInfServices();
     if (CTX.get().spiServices.isEmpty()) {
       // no services to register

@@ -10,6 +10,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +82,6 @@ final class ExternalProvider {
     }
     for (final var module : modules) {
       final var name = module.getClass().getTypeName();
-      APContext.logNote("Detected Module: %s", name);
       final var provides = new TreeSet<String>();
       for (final var provide : module.provides()) {
         provides.add(provide.getTypeName());
@@ -120,6 +120,7 @@ final class ExternalProvider {
 
     List<InjectPlugin> plugins = LoadServices.loadPlugins(CLASS_LOADER);
     for (final var plugin : plugins) {
+      ProcessingContext.addExternalInjectSPI(plugin.getClass().getCanonicalName());
       var name = plugin.getClass().getTypeName();
       if (avajePlugins.containsKey(name)) {
         continue;
@@ -143,6 +144,7 @@ final class ExternalProvider {
   }
 
   static void registerExternalMetaData(String name) {
+    ProcessingContext.addExternalInjectSPI(name);
     Optional.ofNullable(APContext.typeElement(name))
       .map(TypeElement::getEnclosedElements)
       .map(ElementFilter::methodsIn)
@@ -164,10 +166,13 @@ final class ExternalProvider {
   }
 
   static void scanAllInjectPlugins(ScopeInfo defaultScope) {
+    Map<String, List<String>> plugins = new HashMap<>();
     final var hasPlugins = !defaultScope.pluginProvided().isEmpty();
     avajePlugins.forEach((k, v) -> {
       if (APContext.typeElement(k) != null) {
+        plugins.put(k, v);
         APContext.logNote("Loaded Plugin: %s", k);
+        ProcessingContext.addExternalInjectSPI(k);
         v.forEach(defaultScope::pluginProvided);
       }
     });
@@ -179,42 +184,50 @@ final class ExternalProvider {
     injectExtensions()
       .filter(PluginProvidesPrism::isPresent)
       .distinct()
-      .forEach(pluginType -> addPluginToScope(defaultScope, pluginType));
+      .forEach(pluginType -> addPluginToScope(defaultScope, pluginType, plugins));
 
     if (defaultScope.pluginProvided().isEmpty()) {
       APContext.logNote("No external plugins detected");
     }
-    writePluginProvides(defaultScope);
+    writePluginProvides(plugins);
   }
 
-  private static void writePluginProvides(ScopeInfo defaultScope) {
+  private static void writePluginProvides(Map<String, List<String>> plugins) {
     // write detected plugins to a text file for test compilation
-    try (final var pluginWriter = new FileWriter(APContext.getBuildResource("avaje-plugin-provides.txt").toFile())) {
-      for (var providedType : defaultScope.pluginProvided()) {
-        pluginWriter.write(providedType);
+    try (final var pluginWriter = new FileWriter(APContext.getBuildResource("avaje-plugins.csv").toFile())) {
+      pluginWriter.write("External Plugin Type|Provides");
+      for (final var plugin : plugins.entrySet()) {
         pluginWriter.write("\n");
+        pluginWriter.write(plugin.getKey());
+        pluginWriter.write("|");
+        var provides = String.join(",", plugin.getValue());
+        pluginWriter.write(provides.isEmpty() ? " " : provides);
       }
     } catch (IOException e) {
-      APContext.logWarn("Failed to write avaje-plugin-provides.txt due to %s", e.getMessage());
+      APContext.logWarn("Failed to write avaje-plugins.csv due to %s", e.getMessage());
     }
   }
 
-  private static void addPluginToScope(ScopeInfo defaultScope, TypeElement pluginType) {
+  private static void addPluginToScope(ScopeInfo defaultScope, TypeElement pluginType, Map<String, List<String>> plugins) {
     final var name = pluginType.getQualifiedName().toString();
-    if (avajePlugins.containsKey(name)) {
-      return;
-    }
+    ProcessingContext.addExternalInjectSPI(name);
     var prism = PluginProvidesPrism.getInstanceOn(pluginType);
+    List<String> provides = new ArrayList<>();
     for (final var provide : prism.value()) {
       defaultScope.pluginProvided(provide.toString());
+      provides.add(provide.toString());
     }
     for (final var provide : prism.providesStrings()) {
       defaultScope.pluginProvided(provide);
+      provides.add(provide);
     }
     for (final var provide : prism.providesAspects()) {
-      defaultScope.pluginProvided(Util.wrapAspect(provide.toString()));
+      final var wrapAspect = Util.wrapAspect(provide.toString());
+      defaultScope.pluginProvided(wrapAspect);
+      provides.add(wrapAspect);
     }
     APContext.logNote("Loaded Plugin: %s", name);
+    plugins.put(name, provides);
   }
 
   static void scanAllAvajeModules(Collection<String> providedTypes) {
