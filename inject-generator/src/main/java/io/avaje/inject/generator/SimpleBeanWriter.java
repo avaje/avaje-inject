@@ -175,7 +175,15 @@ final class SimpleBeanWriter {
     beanReader.buildAddFor(writer);
     if (beanReader.registerProvider()) {
       indent += "  ";
-      writer.append("      builder.%s(() -> {", beanReader.lazy() ? "registerProvider" : "asPrototype().registerProvider").eol();
+
+      final String registerProvider;
+      if (beanReader.lazy()) {
+        registerProvider = "registerProvider";
+      } else {
+        registerProvider = "asPrototype().registerProvider";
+      }
+
+      writer.append("      builder.%s(() -> {", registerProvider).eol();
     }
     constructor.startTry(writer);
     writeCreateBean(constructor);
@@ -187,11 +195,20 @@ final class SimpleBeanWriter {
     if (beanReader.registerProvider()) {
       beanReader.prototypePostConstruct(writer, indent);
       writer.indent("        return bean;").eol();
-      writer.indent("      });").eol();
+      if (!constructor.methodThrows()) {
+        writer.indent("      });").eol();
+      }
     }
     writeObserveMethods();
     constructor.endTry(writer);
-    writer.append("    }").eol();
+
+    if (beanReader.registerProvider() && constructor.methodThrows()) {
+      writer.append("     }");
+      writer.append(");").eol();
+    }
+
+    writer.append("    }");
+    writer.eol();
   }
 
   private void writeBuildMethodStart() {
@@ -208,13 +225,13 @@ final class SimpleBeanWriter {
 
   private void writeExtraInjection() {
     if (!beanReader.registerProvider()) {
-      writer.indent("      ").append("builder.addInjector(b -> {").eol();
-      writer.indent("      ").append("  // field and method injection").eol();
+      writer.indent(indent).append(" builder.addInjector(b -> {").eol();
+      writer.indent(indent).append("   // field and method injection").eol();
     }
     injectFields();
     injectMethods();
     if (!beanReader.registerProvider()) {
-      writer.indent("      });").eol();
+      writer.indent(indent).append(" });").eol();
     }
   }
 
