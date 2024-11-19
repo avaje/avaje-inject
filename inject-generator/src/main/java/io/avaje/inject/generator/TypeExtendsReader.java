@@ -56,13 +56,14 @@ final class TypeExtendsReader {
     this.autoProvide = autoProvide();
   }
 
-  //generated Avaje Http Clients are autoCloseable on JDK 21+
+  /**
+   * generated Avaje Http Clients are autoCloseable on JDK 21+
+   */
   private boolean closeableClient(TypeElement baseType) {
-
     return ClientPrism.isPresent(baseType)
-        && APContext.typeElement("io.avaje.http.client.HttpClient").getInterfaces().stream()
-            .map(Object::toString)
-            .anyMatch(AutoCloseable.class.getCanonicalName()::equals);
+      && APContext.typeElement("io.avaje.http.client.HttpClient").getInterfaces().stream()
+      .map(Object::toString)
+      .anyMatch(AutoCloseable.class.getCanonicalName()::equals);
   }
 
   private boolean autoProvide() {
