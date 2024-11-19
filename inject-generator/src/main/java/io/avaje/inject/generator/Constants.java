@@ -18,10 +18,6 @@ final class Constants {
   static final String QUALIFIER = "jakarta.inject.Qualifier";
   static final String NAMED = "jakarta.inject.Named";
 
-  static final String PATH = "io.avaje.http.api.Path";
-  static final String CONTROLLER = "io.avaje.http.api.Controller";
-  static final String HTTP_GENERATED = "io.avaje.http.api.Generated";
-
   static final String AT_SINGLETON = "@Singleton";
   static final String AT_PROXY = "@Proxy";
   static final String AT_GENERATED = "@Generated(\"io.avaje.inject.generator\")";
