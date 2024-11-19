@@ -20,8 +20,6 @@ class AsyncTest {
 
       // the async beans shouldn't slowdown initialization
       assertThat(Duration.between(start, Instant.now()).toMillis()).isLessThan(1000);
-      // the async beans shouldn't slowdown initialization
-      assertThat(Duration.between(start, Instant.now()).toMillis()).isLessThan(1000);
 
       // prove it's not just lazy
       var beforeGet = Instant.now();

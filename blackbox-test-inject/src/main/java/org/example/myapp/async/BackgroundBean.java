@@ -26,6 +26,6 @@ public class BackgroundBean {
       intyAtomic.incrementAndGet();
     }
 
-    Thread.sleep(2000);
+    Thread.sleep(1200);
   }
 }

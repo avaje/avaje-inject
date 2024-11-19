@@ -2,10 +2,7 @@ package io.avaje.inject.spi;
 
 import jakarta.inject.Provider;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Entry for a given key (bean class, interface class or annotation class).
@@ -14,7 +11,7 @@ import java.util.Map;
  */
 final class DContextEntry {
 
-  private final List<DContextEntryBean> entries = new ArrayList<>(5);
+  private final List<DContextEntryBean> entries = Collections.synchronizedList(new ArrayList<>(5));
 
   @Override
   public String toString() {

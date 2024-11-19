@@ -1,6 +1,5 @@
 package org.example.myapp.async;
 
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.avaje.inject.AsyncBean;
@@ -16,8 +15,7 @@ public class BackgroundBeanFactory {
   @Bean
   @Named("factory")
   BackgroundBean lazyInt(@Nullable AtomicInteger intyAtomic) throws InterruptedException {
-
-    System.out.println("StartedInit" + Thread.currentThread().getName());
+    System.out.println("StartedInit BackgroundBean() " + Thread.currentThread().getName());
     return new BackgroundBean(intyAtomic);
   }
 }
