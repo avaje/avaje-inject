@@ -34,7 +34,7 @@ public class IncludeAnnotationsTest {
     assertFalse(include(Constants.FACTORY));
     assertFalse(include(Constants.PRIMARY));
     assertFalse(include(Constants.SECONDARY));
-    assertFalse(include(Constants.PATH));
+    assertFalse(include(PathPrism.PRISM_TYPE));
   }
 
 }

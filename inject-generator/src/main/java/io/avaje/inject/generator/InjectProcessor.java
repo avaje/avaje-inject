@@ -34,7 +34,7 @@ import static io.avaje.inject.generator.ProcessingContext.*;
   AssistFactoryPrism.PRISM_TYPE,
   ComponentPrism.PRISM_TYPE,
   Constants.TESTSCOPE,
-  Constants.CONTROLLER,
+  ControllerPrism.PRISM_TYPE,
   ExternalPrism.PRISM_TYPE,
   FactoryPrism.PRISM_TYPE,
   ImportPrism.PRISM_TYPE,
@@ -150,7 +150,7 @@ public final class InjectProcessor extends AbstractProcessor {
 
     readImported(importedElements(roundEnv));
 
-    maybeElements(roundEnv, Constants.CONTROLLER).ifPresent(this::readBeans);
+    maybeElements(roundEnv, ControllerPrism.PRISM_TYPE).ifPresent(this::readBeans);
     maybeElements(roundEnv, ProxyPrism.PRISM_TYPE).ifPresent(this::readBeans);
     maybeElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
 
