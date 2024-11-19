@@ -6,8 +6,12 @@ import jakarta.inject.Provider;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Map of types (class types, interfaces and annotations) to a DContextEntry where the
@@ -15,8 +19,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 final class DBeanMap {
   private static final Optional<Object> EMPTY = Optional.empty();
-  private final Map<String, DContextEntry> beans = new ConcurrentHashMap<>();
-  private final Set<String> qualifiers = Collections.synchronizedSet(new HashSet<>());
+  private final Map<String, DContextEntry> beans = new LinkedHashMap<>();
+  private final Set<String> qualifiers = new HashSet<>();
 
   private NextBean nextBean;
   private Class<? extends AvajeModule> currentModule;
