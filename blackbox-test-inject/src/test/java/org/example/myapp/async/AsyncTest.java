@@ -19,7 +19,7 @@ class AsyncTest {
     try (var scope = BeanScope.builder().bean(AtomicInteger.class, inty).build()) {
 
       // the async beans shouldn't slowdown initialization
-      assertThat(Duration.between(start, Instant.now()).toMillis()).isLessThan(1000);
+      assertThat(Duration.between(start, Instant.now()).toMillis()).isLessThan(300);
 
       // prove it's not just lazy
       var beforeGet = Instant.now();
@@ -36,7 +36,7 @@ class AsyncTest {
     var inty = new AtomicInteger();
     try (var scope = BeanScope.builder().bean(AtomicInteger.class, inty).build()) {
       // the async beans shouldn't slowdown initialization
-      assertThat(Duration.between(start, Instant.now()).toMillis()).isLessThan(1000);
+      assertThat(Duration.between(start, Instant.now()).toMillis()).isLessThan(300);
 
       var bean = scope.get(BackgroundBean.class, "factory");
       // this works on my local but not on the CI for some unknown reason.

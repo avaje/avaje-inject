@@ -1,9 +1,10 @@
 package org.example.myapp.async;
 
+import io.avaje.inject.AsyncBean;
 import io.avaje.inject.Component;
 import jakarta.inject.Named;
 
-// @AsyncBean
+@AsyncBean
 @Component
 public class MyUseOfBackground {
 
