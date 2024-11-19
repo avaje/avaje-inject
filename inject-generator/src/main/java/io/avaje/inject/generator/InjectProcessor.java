@@ -10,7 +10,6 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
@@ -29,6 +28,7 @@ import static io.avaje.inject.generator.ProcessingContext.*;
 @GenerateUtils
 @GenerateAPContext
 @GenerateModuleInfoReader
+@SupportedOptions("mergeServices")
 @SupportedAnnotationTypes({
   AspectImportPrism.PRISM_TYPE,
   AssistFactoryPrism.PRISM_TYPE,
@@ -66,7 +66,7 @@ public final class InjectProcessor extends AbstractProcessor {
     super.init(processingEnv);
     APContext.init(processingEnv);
     loadProvidedFiles();
-    ProcessingContext.init(moduleFileProvided);
+    ProcessingContext.registerProvidedTypes(moduleFileProvided);
     moduleData.forEach(ProcessingContext::addModule);
     this.elementUtils = processingEnv.getElementUtils();
     this.allScopes = new AllScopes();
@@ -98,7 +98,6 @@ public final class InjectProcessor extends AbstractProcessor {
    */
   void loadProvidedFiles() {
     pluginFileProvided.addAll(lines("avaje-plugin-provides.txt"));
-
     lines("avaje-module-dependencies.csv").stream()
       .filter(s -> s.contains("|") && !s.startsWith("External Module Type"))
       .distinct()
@@ -110,6 +109,11 @@ public final class InjectProcessor extends AbstractProcessor {
         ExternalProvider.readMetaDataProvides(moduleFileProvided);
         this.moduleData.add(m);
       });
+    lines("avaje-plugins.csv").stream()
+      .filter(s -> s.contains("|") && !s.startsWith("External Plugin Type"))
+      .distinct()
+      .map(l -> l.split("\\|")[1])
+      .forEach(pluginFileProvided::add);
   }
 
   private List<String> lines(String relativeName) {
