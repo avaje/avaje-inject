@@ -9,8 +9,9 @@ import io.avaje.inject.spi.InjectExtension;
 import io.avaje.inject.spi.Module;
 import io.avaje.inject.spi.Plugin;
 
-import org.gradle.api.*;
-
+import org.gradle.api.Project;
+import org.gradle.api.Task;
+import org.gradle.api.GradleException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -24,7 +25,7 @@ import java.util.ServiceLoader.Provider;
 /**
  * Plugin that discovers external avaje inject modules and plugins.
  */
-public class AvajeInjectPlugin implements Plugin<Project> {
+public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
 
   private final List<ModuleData> modules = new ArrayList<>();
 
