@@ -57,22 +57,6 @@ public interface Builder {
   }
 
   /**
-   * @deprecated use {@link #isBeanAbsent(String, Type...)}
-   */
-  @Deprecated(forRemoval = true)
-  default boolean isAddBeanFor(String name, Type... types) {
-    return isBeanAbsent(name, types);
-  }
-
-  /**
-   * @deprecated use {@link #isBeanAbsent(Type...)} instead
-   */
-  @Deprecated(forRemoval = true)
-  default boolean isAddBeanFor(Type... types) {
-    return isBeanAbsent(types);
-  }
-
-  /**
    * Register the next bean as having Primary priority.
    * Highest priority, will be used over any other matching beans.
    */
