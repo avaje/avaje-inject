@@ -4,7 +4,7 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.*;
 
-import io.avaje.inject.aop.Aspect.Import.List;
+import io.avaje.inject.aop.Aspect.Import.Imports;
 
 /**
  * Meta annotation used to define an Aspect.
@@ -38,7 +38,7 @@ public @interface Aspect {
    * Marks an External Annotation as being used for aspects
    */
   @Retention(SOURCE)
-  @Repeatable(List.class)
+  @Repeatable(Imports.class)
   @Target({PACKAGE, TYPE, MODULE})
   @interface Import {
 
@@ -56,7 +56,7 @@ public @interface Aspect {
 
     @Retention(SOURCE)
     @Target({TYPE, PACKAGE, MODULE})
-    @interface List {
+    @interface Imports {
 
       Import[] value();
     }
