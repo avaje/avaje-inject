@@ -35,24 +35,42 @@ public interface Builder {
 
   /**
    * Return true if the bean should be created and registered with the context.
-   * <p/>
+   * <p>
    * Returning false means there has been a supplied bean already registered and
    * that we should skip the creation and registration for this bean.
    *
    * @param name  The qualifier name
    * @param types The types that the bean implements and provides
    */
-  boolean isAddBeanFor(String name, Type... types);
+  boolean isBeanAbsent(String name, Type... types);
 
   /**
    * Return true if the bean should be created and registered with the context.
-   * <p/>
+   * <p>
    * Returning false means there has been a supplied bean already registered and
    * that we should skip the creation and registration for this bean.
    *
    * @param types The types that the bean implements and provides
    */
-  boolean isAddBeanFor(Type... types);
+  default boolean isBeanAbsent(Type... types) {
+    return isBeanAbsent(null, types);
+  }
+
+  /**
+   * @deprecated use {@link #isBeanAbsent(String, Type...)}
+   */
+  @Deprecated(forRemoval = true)
+  default boolean isAddBeanFor(String name, Type... types) {
+    return isBeanAbsent(name, types);
+  }
+
+  /**
+   * @deprecated use {@link #isBeanAbsent(Type...)} instead
+   */
+  @Deprecated(forRemoval = true)
+  default boolean isAddBeanFor(Type... types) {
+    return isBeanAbsent(types);
+  }
 
   /**
    * Register the next bean as having Primary priority.

@@ -49,12 +49,7 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public final boolean isAddBeanFor(Type... types) {
-    return isAddBeanFor(null, types);
-  }
-
-  @Override
-  public boolean isAddBeanFor(String name, Type... types) {
+  public boolean isBeanAbsent(String name, Type... types) {
     parentMatch = null;
     next(name, types);
     if (parentOverride || parent == null) {

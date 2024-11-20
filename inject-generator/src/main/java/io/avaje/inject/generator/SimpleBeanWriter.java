@@ -172,7 +172,7 @@ final class SimpleBeanWriter {
 
   private void writeAddFor(MethodReader constructor) {
     beanReader.buildConditional(writer);
-    beanReader.buildAddFor(writer);
+    beanReader.buildBeanAbsent(writer);
     if (beanReader.registerProvider()) {
       indent += "  ";
 
