@@ -1,6 +1,5 @@
 package io.avaje.inject.plugin;
 
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 import io.avaje.inject.spi.AvajeModule;
@@ -89,7 +88,7 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
       pluginWriter.write("\n");
       pluginWriter.write(providedType.getKey());
       pluginWriter.write("|");
-      var provides = providedType.getValue().stream().collect(joining(","));
+      var provides = String.join(",", providedType.getValue());
       pluginWriter.write(provides.isEmpty() ? " " : provides);
     }
   }
@@ -159,10 +158,10 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
       moduleWriter.write("\n");
       moduleWriter.write(avajeModule.name());
       moduleWriter.write("|");
-      var provides = avajeModule.provides().stream().collect(joining(","));
+      var provides = String.join(",", avajeModule.provides());
       moduleWriter.write(provides.isEmpty() ? " " : provides);
       moduleWriter.write("|");
-      var requires = avajeModule.requires().stream().collect(joining(","));
+      var requires = String.join(",", avajeModule.requires());
       moduleWriter.write(requires.isEmpty() ? " " : requires);
     }
   }

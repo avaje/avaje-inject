@@ -3,7 +3,7 @@
   <parent>
     <groupId>io.avaje</groupId>
     <artifactId>avaje-inject-parent</artifactId>
-    <version>10.7-SNAPSHOT</version>
+    <version>11.0</version>
   </parent>
   <artifactId>avaje-inject-events</artifactId>
   <name>avaje inject events</name>
