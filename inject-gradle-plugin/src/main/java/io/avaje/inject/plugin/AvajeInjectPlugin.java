@@ -6,8 +6,6 @@ import static java.util.stream.Collectors.toList;
 import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.InjectPlugin;
 import io.avaje.inject.spi.InjectExtension;
-import io.avaje.inject.spi.Module;
-import io.avaje.inject.spi.Plugin;
 
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -65,7 +63,6 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
 
   private void writeProvidedPlugins(ClassLoader classLoader, FileWriter pluginWriter) throws IOException {
     final List<InjectPlugin> plugins = new ArrayList<>();
-    ServiceLoader.load(Plugin.class, classLoader).forEach(plugins::add);
     ServiceLoader.load(InjectExtension.class, classLoader).stream()
         .map(Provider::get)
         .filter(InjectPlugin.class::isInstance)
@@ -122,7 +119,6 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
   private void writeModuleCSV(ClassLoader classLoader, FileWriter moduleWriter) throws IOException {
 
     final List<AvajeModule> avajeModules = new ArrayList<>();
-    ServiceLoader.load(Module.class, classLoader).forEach(avajeModules::add);
     ServiceLoader.load(InjectExtension.class, classLoader).stream()
         .map(Provider::get)
         .filter(AvajeModule.class::isInstance)

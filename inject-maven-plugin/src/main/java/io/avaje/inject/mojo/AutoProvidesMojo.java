@@ -31,8 +31,6 @@ import org.apache.maven.project.MavenProject;
 import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.InjectExtension;
 import io.avaje.inject.spi.InjectPlugin;
-import io.avaje.inject.spi.Module;
-import io.avaje.inject.spi.Plugin;
 
 /**
  * Plugin that generates <code>target/avaje-module-provides.txt</code> and <code>
@@ -98,7 +96,6 @@ public class AutoProvidesMojo extends AbstractMojo {
     final Log log = getLog();
 
     final List<InjectPlugin> plugins = new ArrayList<>();
-    ServiceLoader.load(Plugin.class, newClassLoader).forEach(plugins::add);
     ServiceLoader.load(InjectExtension.class, newClassLoader).stream()
         .map(Provider::get)
         .filter(InjectPlugin.class::isInstance)
@@ -132,7 +129,6 @@ public class AutoProvidesMojo extends AbstractMojo {
   private void writeModuleCSV(ClassLoader newClassLoader, FileWriter moduleWriter) throws IOException {
     final Log log = getLog();
     final List<AvajeModule> avajeModules = new ArrayList<>();
-    ServiceLoader.load(Module.class, newClassLoader).forEach(avajeModules::add);
     ServiceLoader.load(InjectExtension.class, newClassLoader).stream()
         .map(Provider::get)
         .filter(AvajeModule.class::isInstance)
