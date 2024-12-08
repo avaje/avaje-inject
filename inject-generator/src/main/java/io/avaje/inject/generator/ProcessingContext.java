@@ -32,6 +32,7 @@ final class ProcessingContext {
     private final List<ModuleData> modules = new ArrayList<>();
     private final List<TypeElement> delayQueue = new ArrayList<>();
     private final Set<String> spiServices = new TreeSet<>();
+    private final Set<String> externalSpi = new TreeSet<>();
     private boolean strictWiring;
     private final boolean mergeServices = APContext.getOption("mergeServices").map(Boolean::valueOf).orElse(true);
 
@@ -49,7 +50,7 @@ final class ProcessingContext {
   private static void addEventSPI() {
     try {
       if (typeElement(EVENTS_SPI) != null || Class.forName(EVENTS_SPI) != null) {
-        addInjectSPI(EVENTS_SPI);
+        addExternalInjectSPI(EVENTS_SPI);
       }
     } catch (final ClassNotFoundException e) {
       // nothing
@@ -107,7 +108,7 @@ final class ProcessingContext {
 
   static void addExternalInjectSPI(String type) {
     if (CTX.get().mergeServices) {
-      CTX.get().spiServices.add(type);
+      CTX.get().externalSpi.add(type);
     }
   }
 
@@ -159,9 +160,11 @@ final class ProcessingContext {
 
   static void validateModule() {
     APContext.moduleInfoReader().ifPresent(reader -> {
-      CTX.get().spiServices.remove(EVENTS_SPI);
-      reader.validateServices("io.avaje.inject.spi.InjectExtension", CTX.get().spiServices);
-    });
+    APContext.moduleInfoReader()
+        .ifPresent(
+            reader ->
+                reader.validateServices(
+                    "io.avaje.inject.spi.InjectExtension", CTX.get().spiServices));
   }
 
   static Optional<AspectImportPrism> getImportedAspect(String type) {
@@ -220,7 +223,8 @@ final class ProcessingContext {
       FileObject jfo = createMetaInfWriterFor(Constants.META_INF_SPI);
       if (jfo != null) {
         var writer = new Append(jfo.openWriter());
-        for (var service : CTX.get().spiServices) {
+        CTX.get().externalSpi.addAll(CTX.get().spiServices);
+        for (var service : CTX.get().externalSpi) {
           writer.append(service).eol();
         }
         writer.close();
@@ -244,7 +248,7 @@ final class ProcessingContext {
         line.replaceAll("\\s", "")
           .replace(",", "\n")
           .lines()
-          .forEach(ProcessingContext::addInjectSPI);
+          .forEach(ProcessingContext::addExternalInjectSPI);
       }
     } catch (Exception e) {
       // not a critical error
