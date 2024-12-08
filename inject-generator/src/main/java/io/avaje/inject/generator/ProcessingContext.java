@@ -159,7 +159,6 @@ final class ProcessingContext {
   }
 
   static void validateModule() {
-    APContext.moduleInfoReader().ifPresent(reader -> {
     APContext.moduleInfoReader()
         .ifPresent(
             reader ->
