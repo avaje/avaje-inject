@@ -21,7 +21,7 @@
   <properties>
     <nexus.staging.autoReleaseAfterClose>true</nexus.staging.autoReleaseAfterClose>
     <surefire.useModulePath>false</surefire.useModulePath>
-    <argLine>--enable-preview -Dnet.bytebuddy.experimental=true</argLine>
+    <argLine>-Dnet.bytebuddy.experimental=true</argLine>
     <!-- default-build-start -->
     <project.build.outputTimestamp>2024-12-08T18:54:06Z</project.build.outputTimestamp>
     <!-- default-build-end -->
