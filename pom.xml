@@ -22,11 +22,13 @@
     <nexus.staging.autoReleaseAfterClose>true</nexus.staging.autoReleaseAfterClose>
     <surefire.useModulePath>false</surefire.useModulePath>
     <argLine>-Dnet.bytebuddy.experimental=true</argLine>
+    <!-- default-build-start -->
     <project.build.outputTimestamp>2024-12-08T18:54:06Z</project.build.outputTimestamp>
-    <!-- VALHALLA-START ___
+    <!-- default-build-end -->
+    <!-- valhalla-build-start ___
     <maven.compiler.release>23</maven.compiler.release>
     <maven.compiler.enablePreview>true</maven.compiler.enablePreview>
-    ____ VALHALLA-END -->
+    ____ valhalla-build-end -->
   </properties>
 
   <modules>
