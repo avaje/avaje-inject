@@ -15,7 +15,6 @@ find . -type f -name 'pom.xml' -exec sed -i '' -e 's|____ valhalla-build-end -->
 find . -type f -name 'pom.xml' -exec sed -i '' -e 's|<!-- Javadoc-No-Preview -->|<additionalOptions>--enable-preview</additionalOptions> <!-- Valhalla -->|g' {} +
 
 
-
-sed -i '' -e 's|//@Disabled|@org.junit.jupiter.api.Disabled // Valhalla|g' ./inject-generator/src/test/java/io/avaje/inject/generator/InjectProcessorTest.java
-
+find . -type f -name 'InjectProcessorTest.java' -exec sed -i '' -e 's|//@Disabled|@org.junit.jupiter.api.Disabled // Valhalla|g' {} +
+## sed -i'' -e 's|//@Disabled|@org.junit.jupiter.api.Disabled // Valhalla|g' ./inject-generator/src/test/java/io/avaje/inject/generator/InjectProcessorTest.java
 
