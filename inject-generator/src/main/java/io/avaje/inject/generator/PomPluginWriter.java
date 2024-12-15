@@ -44,9 +44,8 @@ public class PomPluginWriter {
     APContext.logNote("Adding avaje-inject-maven-plugin Plugin to pom");
     var pluginsIndex = pomContent.indexOf("</plugins>");
     var builder = new StringBuilder(pomContent);
-    if (pluginsIndex == -1) {
 
-    } else {
+    if (pluginsIndex != -1) {
       builder.insert(
           pluginsIndex,
           String.format(plugin, PomPluginWriter.class.getPackage().getImplementationVersion()));
