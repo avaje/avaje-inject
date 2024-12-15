@@ -28,7 +28,7 @@ import static io.avaje.inject.generator.ProcessingContext.*;
 @GenerateUtils
 @GenerateAPContext
 @GenerateModuleInfoReader
-@SupportedOptions("mergeServices")
+@SupportedOptions({"mergeServices", "buildPlugin"})
 @SupportedAnnotationTypes({
   AspectImportPrism.PRISM_TYPE,
   AssistFactoryPrism.PRISM_TYPE,
@@ -88,6 +88,8 @@ public final class InjectProcessor extends AbstractProcessor {
         addition.append("avaje-inject-generator");
       }
       Files.writeString(file, addition.toString(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+
+      PomPluginWriter.addPlugin2Pom();
     } catch (IOException e) {
       // not an issue worth failing over
     }
