@@ -11,7 +11,7 @@
   <description>testing support for avaje-inject dependency injection</description>
 
   <properties>
-    <jupiter.version>5.11.3</jupiter.version>
+    <jupiter.version>5.11.4</jupiter.version>
     <mockito.version>5.14.2</mockito.version>
   </properties>
 
