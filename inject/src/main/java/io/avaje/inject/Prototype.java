@@ -20,6 +20,6 @@ import java.lang.annotation.Target;
  * }</pre>
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Prototype {
 }
