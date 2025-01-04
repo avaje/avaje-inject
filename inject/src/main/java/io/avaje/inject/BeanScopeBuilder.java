@@ -8,6 +8,7 @@ import org.jspecify.annotations.Nullable;
 
 import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.ConfigPropertyPlugin;
+import io.avaje.inject.spi.PreDestroyHook;
 
 /**
  * Build a bean scope with options for shutdown hook and supplying external dependencies.
@@ -222,7 +223,10 @@ public interface BeanScopeBuilder {
   /**
    * Adds hooks that will execute after this scope is built.
    */
-  BeanScopeBuilder addPostConstruct(Runnable postConstructHook);
+  default BeanScopeBuilder addPostConstruct(Runnable postConstructHook) {
+    addPostConstruct(scope -> postConstructHook.run());
+    return this;
+  }
 
   /**
    * Adds hook that will execute after this scope is built.
@@ -230,9 +234,35 @@ public interface BeanScopeBuilder {
   BeanScopeBuilder addPostConstruct(Consumer<BeanScope> postConstructHook);
 
   /**
-   * Add hook that will execute before this scope is destroyed.
+   * Add hook that will execute before this scope is destroyed. All destroy methods
+   * without any explicit priority are given a value of 1000.
    */
-  BeanScopeBuilder addPreDestroy(AutoCloseable preDestroyHook);
+  default BeanScopeBuilder addPreDestroy(AutoCloseable preDestroyHook) {
+    return addPreDestroy(preDestroyHook, 1000);
+  }
+
+  /**
+   * Add hook with a priority that will execute before this scope is destroyed.
+   * <p>
+   * Specify the priority of the destroy method to control its execution
+   * order relative to other destroy methods.
+   * <p>
+   * Low values for priority execute earlier than high values.
+   *
+   * @param preDestroyHook AutoCloseable to run on beanscope closing
+   * @param priority the priority of this hook
+   */
+  default BeanScopeBuilder addPreDestroy(AutoCloseable preDestroyHook, int priority) {
+    return addPreDestroy(b -> preDestroyHook.close(), priority);
+  }
+
+  /**
+   * Add hook that will execute before this scope is destroyed. All destroy methods
+   * without any explicit priority are given a value of 1000.
+   */
+  default BeanScopeBuilder addPreDestroy(PreDestroyHook preDestroyHook) {
+    return addPreDestroy(preDestroyHook, 1000);
+  }
 
   /**
    * Add hook with a priority that will execute before this scope is destroyed.
@@ -242,8 +272,13 @@ public interface BeanScopeBuilder {
    * <p>
    * Low values for priority execute earlier than high values. All destroy methods
    * without any explicit priority are given a value of 1000.
+   *
+   * @param preDestroyHook pre-destroy hook that accepts the current beanscope
+   * @param priority the priority of this hook
+   *
    */
-  BeanScopeBuilder addPreDestroy(AutoCloseable preDestroyHook, int priority);
+  BeanScopeBuilder addPreDestroy(PreDestroyHook preDestroyHook, int priority);
+
 
   /**
    * Set the ClassLoader to use when loading modules.

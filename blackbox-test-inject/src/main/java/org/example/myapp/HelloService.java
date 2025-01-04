@@ -92,7 +92,7 @@ public class HelloService {
   }
 
   @PreDestroy(priority = 100)
-  void preDest() {
+  void preDest(BeanScope scope) {
     MyDestroyOrder.add("HelloService");
   }
 }

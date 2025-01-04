@@ -16,8 +16,6 @@ class DBuilder implements Builder {
   private final ConfigPropertyPlugin propertyPlugin;
   private final Set<String> profiles;
   /** List of Lifecycle methods. */
-  private final List<Runnable> postConstruct = new ArrayList<>();
-
   private final List<Consumer<BeanScope>> postConstructConsumers = new ArrayList<>();
   private final List<ClosePair> preDestroy = new ArrayList<>();
   /** List of field injection closures. */
@@ -190,29 +188,19 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public final void addPostConstruct(Runnable invoke) {
-    postConstruct.add(invoke);
-  }
-
-  @Override
   public void addPostConstruct(Consumer<BeanScope> consumer) {
     postConstructConsumers.add(consumer);
   }
 
   @Override
-  public final void addPreDestroy(AutoCloseable invoke) {
-    addPreDestroy(invoke, 1000);
-  }
-
-  @Override
-  public final void addPreDestroy(AutoCloseable invoke, int priority) {
+  public final void addPreDestroy(PreDestroyHook invoke, int priority) {
     preDestroy.add(new ClosePair(priority, invoke));
   }
 
   @Override
   public final void addAutoClosable(Object maybeAutoCloseable) {
     if (maybeAutoCloseable instanceof AutoCloseable) {
-      preDestroy.add(new ClosePair(1000, (AutoCloseable) maybeAutoCloseable));
+      addPreDestroy((AutoCloseable) maybeAutoCloseable);
     }
   }
 
@@ -424,7 +412,7 @@ class DBuilder implements Builder {
   @Override
   public final BeanScope build(boolean withShutdownHook, long start) {
     runInjectors();
-    final var scope = new DBeanScope(withShutdownHook, preDestroy(), postConstruct, postConstructConsumers, beanMap, parent);
+    final var scope = new DBeanScope(withShutdownHook, preDestroy(), postConstructConsumers, beanMap, parent);
     if (beanScopeProxy != null) {
       beanScopeProxy.inject(scope);
     }
@@ -434,10 +422,10 @@ class DBuilder implements Builder {
   /**
    * Return the PreDestroy methods in priority order.
    */
-  private List<AutoCloseable> preDestroy() {
+  private List<PreDestroyHook> preDestroy() {
     Collections.sort(preDestroy);
     return preDestroy.stream()
-      .map(ClosePair::closeable)
+      .map(ClosePair::hook)
       .collect(Collectors.toList());
   }
 }

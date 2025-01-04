@@ -3,9 +3,9 @@ package io.avaje.inject.spi;
 public final /*value*/ class ClosePair implements Comparable<ClosePair> {
 
   private final int priority;
-  private final AutoCloseable closeable;
+  private final PreDestroyHook closeable;
 
-  public ClosePair(int priority, AutoCloseable closeable) {
+  public ClosePair(int priority, PreDestroyHook closeable) {
     this.priority = priority;
     this.closeable = closeable;
   }
@@ -14,7 +14,7 @@ public final /*value*/ class ClosePair implements Comparable<ClosePair> {
     return priority;
   }
 
-  public AutoCloseable closeable() {
+  public PreDestroyHook hook() {
     return closeable;
   }
 

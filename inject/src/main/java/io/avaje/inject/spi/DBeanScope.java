@@ -31,9 +31,8 @@ final class DBeanScope implements BeanScope {
   private static final System.Logger log = AppLog.getLogger("io.avaje.inject");
 
   private final ReentrantLock lock = new ReentrantLock();
-  private final List<Runnable> postConstruct;
-  private final List<Consumer<BeanScope>> postConstructConsumers;
-  private final List<AutoCloseable> preDestroy;
+  private final List<Consumer<BeanScope>> postConstruct;
+  private final List<PreDestroyHook> preDestroy;
   private final DBeanMap beans;
   private final ShutdownHook shutdownHook;
   private final BeanScope parent;
@@ -42,14 +41,12 @@ final class DBeanScope implements BeanScope {
 
   DBeanScope(
       boolean withShutdownHook,
-      List<AutoCloseable> preDestroy,
-      List<Runnable> postConstruct,
-      List<Consumer<BeanScope>> postConstructConsumers,
+      List<PreDestroyHook> preDestroy,
+      List<Consumer<BeanScope>> postConstruct,
       DBeanMap beans,
       BeanScope parent) {
     this.preDestroy = preDestroy;
     this.postConstruct = postConstruct;
-    this.postConstructConsumers = postConstructConsumers;
     this.beans = beans;
     this.parent = parent;
     if (withShutdownHook) {
@@ -241,10 +238,7 @@ final class DBeanScope implements BeanScope {
     try {
       log.log(TRACE, "firing postConstruct");
       for (final var invoke : postConstruct) {
-        invoke.run();
-      }
-      for (final var consumer : postConstructConsumers) {
-        consumer.accept(this);
+        invoke.accept(this);
       }
     } finally {
       lock.unlock();
@@ -264,9 +258,9 @@ final class DBeanScope implements BeanScope {
         // we only allow one call to preDestroy
         closed = true;
         log.log(TRACE, "firing preDestroy");
-        for (final AutoCloseable closeable : preDestroy) {
+        for (final var closeable : preDestroy) {
           try {
-            closeable.close();
+            closeable.destroy(this);
           } catch (final Exception e) {
             log.log(Level.ERROR, "Error during PreDestroy lifecycle method", e);
           }

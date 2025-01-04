@@ -1,6 +1,7 @@
 package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanScope;
+import io.avaje.inject.BeanScopeBuilder;
 import jakarta.inject.Provider;
 
 import java.lang.reflect.Type;
@@ -94,10 +95,10 @@ public interface Builder {
    */
   <T> void withBean(Class<T> type, T bean);
 
-  /**
-   * Add lifecycle PostConstruct method.
-   */
-  void addPostConstruct(Runnable runnable);
+  /** Add lifecycle PostConstruct method. */
+  default void addPostConstruct(Runnable runnable) {
+    addPostConstruct(b -> runnable.run());
+  }
 
   /**
    * Add lifecycle PostConstruct method.
@@ -107,12 +108,27 @@ public interface Builder {
   /**
    * Add lifecycle PreDestroy method.
    */
-  void addPreDestroy(AutoCloseable closeable);
+  default void addPreDestroy(AutoCloseable closeable) {
+    addPreDestroy(closeable, 1000);
+  }
+
+  /** Add lifecycle PreDestroy method with a given priority. */
+  default void addPreDestroy(AutoCloseable closeable, int priority) {
+
+    addPreDestroy(b -> closeable.close(), priority);
+  }
+
+  /**
+   * Add lifecycle PreDestroy method.
+   */
+  default void addPreDestroy(PreDestroyHook preDestroyHook) {
+    addPreDestroy(preDestroyHook, 1000);
+  }
 
   /**
    * Add lifecycle PreDestroy method with a given priority.
    */
-  void addPreDestroy(AutoCloseable closeable, int priority);
+  void addPreDestroy(PreDestroyHook preDestroyHook, int priority);
 
   /**
    * Check if the instance is AutoCloseable and if so register it with PreDestroy.

@@ -25,6 +25,7 @@ import io.avaje.inject.spi.ClosePair;
 import io.avaje.inject.spi.ConfigPropertyPlugin;
 import io.avaje.inject.spi.EnrichBean;
 import io.avaje.inject.spi.ModuleOrdering;
+import io.avaje.inject.spi.PreDestroyHook;
 import io.avaje.inject.spi.SuppliedBean;
 import jakarta.inject.Provider;
 
@@ -37,8 +38,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   @SuppressWarnings("rawtypes")
   private final List<EnrichBean> enrichBeans = new ArrayList<>();
   private final Set<AvajeModule> includeModules = new LinkedHashSet<>();
-  private final List<Runnable> postConstructList = new ArrayList<>();
-  private final List<Consumer<BeanScope>> postConstructConsumerList = new ArrayList<>();
+  private final List<Consumer<BeanScope>> postConstructList = new ArrayList<>();
   private final List<ClosePair> preDestroyList = new ArrayList<>();
   private BeanScope parent;
   private boolean parentOverride = true;
@@ -124,24 +124,13 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  public BeanScopeBuilder addPostConstruct(Runnable postConstructHook) {
-    postConstructList.add(postConstructHook);
-    return this;
-  }
-
-  @Override
   public BeanScopeBuilder addPostConstruct(Consumer<BeanScope> postConstructConsumer) {
-    this.postConstructConsumerList.add(postConstructConsumer);
+    this.postConstructList.add(postConstructConsumer);
     return this;
   }
 
   @Override
-  public BeanScopeBuilder addPreDestroy(AutoCloseable preDestroyHook) {
-    return addPreDestroy(preDestroyHook, 1000);
-  }
-
-  @Override
-  public BeanScopeBuilder addPreDestroy(AutoCloseable preDestroyHook, int priority) {
+  public BeanScopeBuilder addPreDestroy(PreDestroyHook preDestroyHook, int priority) {
     preDestroyList.add(new ClosePair(priority, preDestroyHook));
     return this;
   }
@@ -285,9 +274,8 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
 
     postConstructList.forEach(builder::addPostConstruct);
-    postConstructConsumerList.forEach(builder::addPostConstruct);
     for (var closePair : preDestroyList) {
-      builder.addPreDestroy(closePair.closeable(), closePair.priority());
+      builder.addPreDestroy(closePair.hook(), closePair.priority());
     }
     return builder.build(shutdownHook, start);
   }
