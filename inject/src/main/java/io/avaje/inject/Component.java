@@ -67,9 +67,10 @@ public @interface Component {
   @Target({TYPE, PACKAGE, MODULE})
   @interface Import {
 
-    /**
-     * Types to generate DI classes for.
-     */
+    /** Types to generate DI classes for. */
     Class<?>[] value();
+
+    /** Whether the imported types should have the prototype scope. */
+    boolean prototype() default false;
   }
 }

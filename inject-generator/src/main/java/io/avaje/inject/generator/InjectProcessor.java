@@ -209,12 +209,23 @@ public final class InjectProcessor extends AbstractProcessor {
 
   private Set<TypeElement> importedElements(RoundEnvironment roundEnv) {
     return maybeElements(roundEnv, ImportPrism.PRISM_TYPE).stream()
-      .flatMap(Set::stream)
-      .map(ImportPrism::getInstanceOn)
-      .flatMap(p -> p.value().stream())
-      .map(ProcessingContext::asElement)
-      .filter(this::notAlreadyProvided)
-      .collect(Collectors.toSet());
+        .flatMap(Set::stream)
+        .map(ImportPrism::getInstanceOn)
+        .flatMap(
+            p -> {
+              var prototype = p.prototype();
+              return p.value().stream()
+                  .map(ProcessingContext::asElement)
+                  .filter(this::notAlreadyProvided)
+                  .map(
+                      e -> {
+                        if (prototype) {
+                          ProcessingContext.addImportedPrototype(e);
+                        }
+                        return e;
+                      });
+            })
+        .collect(Collectors.toSet());
   }
 
   private boolean notAlreadyProvided(TypeElement e) {
