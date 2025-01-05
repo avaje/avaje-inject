@@ -10,6 +10,7 @@ import java.io.Writer;
 final class Append {
 
   private final Writer writer;
+  private final StringBuilder stringBuilder = new StringBuilder();
   private int nameIndex;
   private boolean comma;
   private String extraIndent;
@@ -27,8 +28,10 @@ final class Append {
     try {
       if (extraIndent != null) {
         writer.append(extraIndent);
+        stringBuilder.append(extraIndent);
       }
       writer.append(content);
+      stringBuilder.append(content);
       return this;
     } catch (IOException e) {
       throw new UncheckedIOException(e);
@@ -38,6 +41,7 @@ final class Append {
   Append append(String content) {
     try {
       writer.append(content);
+      stringBuilder.append(content);
       return this;
     } catch (IOException e) {
       throw new UncheckedIOException(e);
@@ -56,6 +60,7 @@ final class Append {
   Append eol() {
     try {
       writer.append("\n");
+      stringBuilder.append("\n");
       return this;
     } catch (IOException e) {
       throw new UncheckedIOException(e);
@@ -85,5 +90,11 @@ final class Append {
       append(", ");
     }
     append(name);
+  }
+
+
+  @Override
+  public String toString() {
+    return stringBuilder.toString();
   }
 }
