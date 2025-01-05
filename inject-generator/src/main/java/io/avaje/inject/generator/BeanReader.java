@@ -29,7 +29,7 @@ final class BeanReader {
   private final List<MethodReader> injectMethods;
   private final List<MethodReader> factoryMethods;
   private final List<MethodReader> observerMethods;
-  private final Element postConstructMethod;
+  private final Optional<MethodReader> postConstructMethod;
   private final Element preDestroyMethod;
 
   private final ImportTypeMap importTypes = new ImportTypeMap();
@@ -159,6 +159,8 @@ final class BeanReader {
       factoryMethod.addImports(importTypes);
     }
 
+    postConstructMethod.ifPresent(m -> m.addImports(importTypes));
+
     conditions.addImports(importTypes);
     return this;
   }
@@ -236,6 +238,13 @@ final class BeanReader {
     for (MethodReader factoryMethod : factoryMethods()) {
       factoryMethod.addDependsOnGeneric(allUTypes);
     }
+
+    postConstructMethod.ifPresent(
+        m ->
+            m.params().stream()
+                .filter(MethodParam::isGenericParam)
+                .map(MethodParam::getFullUType)
+                .forEach(allUTypes::add));
     return allUTypes;
   }
 
@@ -260,7 +269,7 @@ final class BeanReader {
    * Return true if lifecycle via annotated methods is required.
    */
   boolean hasLifecycleMethods() {
-    return (postConstructMethod != null || preDestroyMethod != null || typeReader.isClosable());
+    return (postConstructMethod.isPresent() || preDestroyMethod != null || typeReader.isClosable());
   }
 
   List<MetaData> createFactoryMethodMeta() {
@@ -322,9 +331,10 @@ final class BeanReader {
 
   void addLifecycleCallbacks(Append writer, String indent) {
 
-    if (postConstructMethod != null && !registerProvider()) {
-      writer.indent(indent).append(" builder.addPostConstruct($bean::%s);", postConstructMethod.getSimpleName()).eol();
+    if (postConstructMethod.isPresent() && !registerProvider()) {
+      writePostConstruct(writer, indent, postConstructMethod.get());
     }
+
     if (preDestroyMethod != null) {
       lifeCycleNotSupported("@PreDestroy");
       var priority = preDestroyPriority == null || preDestroyPriority == 1000 ? "" : ", " + preDestroyPriority;
@@ -334,17 +344,54 @@ final class BeanReader {
     }
   }
 
-  void prototypePostConstruct(Append writer, String indent) {
-    if (postConstructMethod != null) {
-      var postConstruct = (ExecutableElement) postConstructMethod;
-      writer.indent(indent).append(" bean.%s(", postConstructMethod.getSimpleName());
-      if (postConstruct.getParameters().isEmpty()) {
-        writer.append(");").eol();
-      } else {
-        writer.append("builder.get(io.avaje.inject.BeanScope.class));").eol();
-      }
-      writer.eol();
+  private void writePostConstruct(Append writer, String indent, MethodReader postConstruct) {
+
+    writer.indent(indent).append(" builder.addPostConstruct(");
+    final var simplename = postConstruct.name();
+
+    final var params = postConstruct.params();
+    if (params.isEmpty() || Constants.BEANSCOPE.equals(params.get(0).getFullUType().shortType())) {
+      writer.append("$bean::%s);", simplename).eol();
+    } else {
+      writer.append("b -> $bean.%s(", simplename);
+
+      writeLifeCycleGet(writer, params, "b", "b");
+      writer.append(");").eol();
     }
+  }
+
+  void prototypePostConstruct(Append writer, String indent) {
+    postConstructMethod.ifPresent(
+        m -> {
+          writer.indent(indent).append(" bean.%s(", m.name());
+          if (m.params().isEmpty()) {
+            writer.append(");").eol();
+          } else {
+            writeLifeCycleGet(
+                writer, m.params(), "builder", "builder.get(io.avaje.inject.BeanScope.class)");
+            writer.append(";").eol();
+          }
+          writer.eol();
+        });
+  }
+
+  private void writeLifeCycleGet(
+      Append writer, final List<MethodParam> params, String builderName, String beanScopeString) {
+    final var size = params.size();
+    for (int i = 0; i < size; i++) {
+      final var param = params.get(i);
+
+      if (Constants.BEANSCOPE.equals(param.getFullUType().fullWithoutAnnotations())) {
+        writer.append(beanScopeString);
+      } else {
+        param.builderGetDependency(writer, builderName);
+      }
+
+      if (i + 1 != size) {
+        writer.append(", ");
+      }
+    }
+    writer.append(")");
   }
 
   private void lifeCycleNotSupported(String lifecycle) {
