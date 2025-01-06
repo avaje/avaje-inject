@@ -287,7 +287,7 @@ final class MethodReader {
       if (hasInitMethod) {
         var addPostConstruct =
           multiRegister
-            ? "    .peek(b -> builder.addPostConstruct(b::%s))"
+            ? "    .peek($bean -> builder.addPostConstruct($bean::%s))"
             : "builder.addPostConstruct($bean::%s);";
         writer.indent(indent).append(addPostConstruct, initMethod).eol();
       }
@@ -296,14 +296,14 @@ final class MethodReader {
       if (notEmpty(destroyMethod)) {
         var addPreDestroy =
           multiRegister
-            ? "    .forEach(b -> builder.addPreDestroy(b::%s%s));"
-            : "builder.addPreDestroy($bean::%s%s);";
-        writer.indent(indent).append(addPreDestroy, destroyMethod, priority).eol();
+            ? "    .forEach($bean -> builder.addPreDestroy(%s%s));"
+            : "builder.addPreDestroy(%s%s);";
+        writer.indent(indent).append(addPreDestroy, addPreDestroy(destroyMethod), priority).eol();
 
       } else if (typeReader != null && typeReader.isClosable()) {
         var addPreDestroy =
           multiRegister
-            ? "    .forEach(b -> builder.addPreDestroy(b::close%s));"
+            ? "    .forEach($bean -> builder.addPreDestroy($bean::close%s));"
             : "builder.addPreDestroy($bean::close%s);";
         writer.indent(indent).append(addPreDestroy, priority).eol();
 
@@ -322,6 +322,13 @@ final class MethodReader {
         writer.append("      }").eol();
       }
     }
+  }
+
+  static String addPreDestroy(String destroyMethod) {
+    if (!destroyMethod.contains(".")) {
+      return "$bean::" + destroyMethod;
+    }
+    return "() -> $bean." + destroyMethod;
   }
 
   private boolean hasLifecycleMethods() {
