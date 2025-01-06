@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.logError;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -55,14 +56,14 @@ final class BeanReader {
     this.type = beanType.getQualifiedName().toString();
     this.shortName = shortName(beanType);
     this.prototype =
-        PrototypePrism.isPresent(beanType)
-            || importedComponent && ProcessingContext.isImportedPrototype(beanType);
+      PrototypePrism.isPresent(beanType)
+        || importedComponent && ProcessingContext.isImportedPrototype(beanType);
     this.primary = PrimaryPrism.isPresent(beanType);
     this.secondary = !primary && SecondaryPrism.isPresent(beanType);
     this.lazy =
-        !FactoryPrism.isPresent(beanType)
-            && (LazyPrism.isPresent(beanType)
-                || importedComponent && ProcessingContext.isImportedLazy(beanType));
+      !FactoryPrism.isPresent(beanType)
+        && (LazyPrism.isPresent(beanType)
+          || importedComponent && ProcessingContext.isImportedLazy(beanType));
     final var beantypes = BeanTypesPrism.getOptionalOn(beanType);
     beantypes.ifPresent(p -> Util.validateBeanTypes(beanType, p.value()));
     this.typeReader =
@@ -376,7 +377,7 @@ final class BeanReader {
       }
     }
     checkImports();
-    if (!suppressGeneratedImport){
+    if (!suppressGeneratedImport) {
       importTypes.add(Constants.GENERATED);
     }
     if (!suppressBuilderImport && !isGenerateProxy()) {
