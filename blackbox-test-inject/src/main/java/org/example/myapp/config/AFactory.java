@@ -2,11 +2,17 @@ package org.example.myapp.config;
 
 import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
+import org.example.myapp.MyNestedDestroy;
 
 import java.io.IOException;
 
 @Factory
 class AFactory {
+
+  @Bean(initMethod = "start", destroyMethod = "reaper().stop()")
+  MyNestedDestroy lifecycle2() {
+    return new MyNestedDestroy();
+  }
 
   @Bean
   A0.Builder build0() {

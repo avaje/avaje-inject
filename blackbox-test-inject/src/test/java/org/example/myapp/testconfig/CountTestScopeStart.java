@@ -13,6 +13,5 @@ public class CountTestScopeStart {
 
   public void onStop() {
     stopped.incrementAndGet();
-    System.out.println("STOPPED !! ");
   }
 }

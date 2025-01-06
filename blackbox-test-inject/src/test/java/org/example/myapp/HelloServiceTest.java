@@ -14,6 +14,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HelloServiceTest {
 
+  @Test
+  void lifecycles() {
+    MyNestedDestroy.reset();
+    try (BeanScope beanScope = BeanScope.builder().build()) {
+      assertThat(beanScope.get(MyNestedDestroy.class)).isNotNull();
+      assertThat(MyNestedDestroy.started.get()).isEqualTo(1);
+      assertThat(MyNestedDestroy.stopped.get()).isEqualTo(0);
+    }
+    assertThat(MyNestedDestroy.stopped.get()).isEqualTo(1);
+  }
+
   /**
    * No mocking, no use of <code>@TestScope</code> so just like main.
    */

@@ -321,7 +321,6 @@ final class BeanReader {
   }
 
   void addLifecycleCallbacks(Append writer, String indent) {
-
     if (postConstructMethod != null && !registerProvider()) {
       writer.indent(indent).append(" builder.addPostConstruct($bean::%s);", postConstructMethod.getSimpleName()).eol();
     }
