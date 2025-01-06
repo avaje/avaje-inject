@@ -160,11 +160,15 @@ final class ProcessingContext {
   }
 
   static boolean isImportedPrototype(TypeElement element) {
-    return "prototype".equalsIgnoreCase(CTX.get().importedProtoTypes.get(element.getQualifiedName().toString()));
+    return "prototype".equalsIgnoreCase(importedTypeKind(element));
   }
 
   static boolean isImportedLazy(TypeElement element) {
-    return "lazy".equalsIgnoreCase(CTX.get().importedProtoTypes.get(element.getQualifiedName().toString()));
+    return "lazy".equalsIgnoreCase(importedTypeKind(element));
+  }
+
+  private static String importedTypeKind(TypeElement element) {
+    return CTX.get().importedProtoTypes.get(element.getQualifiedName().toString());
   }
 
   static void addImportedAspects(Map<String, AspectImportPrism> importedMap) {
