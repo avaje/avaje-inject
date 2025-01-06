@@ -1,5 +1,6 @@
 package io.avaje.inject.generator;
 
+import static io.avaje.inject.generator.APContext.logError;
 import static io.avaje.inject.generator.ProcessingContext.getImportedAspect;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -30,6 +31,7 @@ final class TypeExtendsInjection {
   private final TypeElement baseType;
   private final boolean factory;
   private final List<AspectPair> typeAspects;
+  private final DestroyMethods factoryPreDestroyMethods = new DestroyMethods();
   private Element postConstructMethod;
   private Element preDestroyMethod;
   private Integer preDestroyPriority;
@@ -129,9 +131,17 @@ final class TypeExtendsInjection {
       checkAspect = false;
     }
     if (AnnotationUtil.hasAnnotationWithName(element, "PreDestroy")) {
-      preDestroyMethod = element;
-      checkAspect = false;
-      PreDestroyPrism.getOptionalOn(element).ifPresent(preDestroy -> preDestroyPriority = preDestroy.priority());
+      int paramCount = methodElement.getParameters().size();
+      if (paramCount == 0) {
+        // normal component PreDestroy method
+        preDestroyMethod = element;
+        checkAspect = false;
+        PreDestroyPrism.getOptionalOn(element).ifPresent(preDestroy -> preDestroyPriority = preDestroy.priority());
+      } else if (paramCount == 1 && factory) {
+        // additional factory PreDestroy to match a @Bean method
+        checkAspect = false;
+        factoryPreDestroyMethods.add(methodElement);
+      }
     }
     if (checkAspect) {
       checkForAspect(methodElement);
@@ -163,10 +173,9 @@ final class TypeExtendsInjection {
     }
   }
 
-
   private void addFactoryMethod(ExecutableElement methodElement, BeanPrism bean) {
     String qualifierName = Util.named(methodElement);
-    factoryMethods.add(new MethodReader(methodElement, baseType, bean, qualifierName, importTypes).read());
+    factoryMethods.add(new MethodReader(this, methodElement, baseType, bean, qualifierName, importTypes).read());
   }
 
   BeanAspects hasAspects() {
@@ -237,5 +246,15 @@ final class TypeExtendsInjection {
       return allPublic.get(0);
     }
     return null;
+  }
+
+  DestroyMethods.DestroyMethod matchPreDestroy(String returnTypeRaw) {
+    return factoryPreDestroyMethods.match(returnTypeRaw);
+  }
+
+  void validate() {
+    for (DestroyMethods.DestroyMethod destroyMethod : factoryPreDestroyMethods.unmatched()) {
+      logError(destroyMethod.element(), "Unused @PreDestroy method, no matching @Bean method for type " + destroyMethod.matchType());
+    }
   }
 }

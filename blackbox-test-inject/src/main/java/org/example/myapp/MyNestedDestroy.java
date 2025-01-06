@@ -4,16 +4,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class MyNestedDestroy {
 
-  public static AtomicInteger started = new AtomicInteger();
-  public static AtomicInteger stopped = new AtomicInteger();
+  public static AtomicInteger STARTED = new AtomicInteger();
+  public static AtomicInteger STOPPED = new AtomicInteger();
 
   public static void reset() {
-    started.set(0);
-    stopped.set(0);
+    STARTED.set(0);
+    STOPPED.set(0);
   }
 
   public void start() {
-    started.incrementAndGet();
+    STARTED.incrementAndGet();
   }
 
   public Reaper reaper() {
@@ -23,7 +23,7 @@ public class MyNestedDestroy {
   public static class Reaper {
 
     public void stop() {
-      stopped.incrementAndGet();
+      STOPPED.incrementAndGet();
     }
   }
 }

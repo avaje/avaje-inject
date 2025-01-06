@@ -4,6 +4,7 @@ import io.avaje.inject.BeanScope;
 import io.avaje.inject.aop.InvocationException;
 import org.example.myapp.aspect.MyAroundAspect;
 import org.example.myapp.aspect.MyMultiInvokeAspect;
+import org.example.myapp.config.AFactory;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -17,12 +18,19 @@ class HelloServiceTest {
   @Test
   void lifecycles() {
     MyNestedDestroy.reset();
+    AFactory.reset();
     try (BeanScope beanScope = BeanScope.builder().build()) {
       assertThat(beanScope.get(MyNestedDestroy.class)).isNotNull();
-      assertThat(MyNestedDestroy.started.get()).isEqualTo(1);
-      assertThat(MyNestedDestroy.stopped.get()).isEqualTo(0);
+      assertThat(MyNestedDestroy.STARTED.get()).isEqualTo(1);
+      assertThat(MyNestedDestroy.STOPPED.get()).isEqualTo(0);
+      assertThat(AFactory.DESTROY_COUNT_BEAN.get()).isEqualTo(0);
+      assertThat(AFactory.DESTROY_COUNT_AFOO.get()).isEqualTo(0);
+      assertThat(AFactory.DESTROY_COUNT_COMPONENT.get()).isEqualTo(0);
     }
-    assertThat(MyNestedDestroy.stopped.get()).isEqualTo(1);
+    assertThat(MyNestedDestroy.STOPPED.get()).isEqualTo(1);
+    assertThat(AFactory.DESTROY_COUNT_BEAN.get()).isEqualTo(1);
+    assertThat(AFactory.DESTROY_COUNT_AFOO.get()).isEqualTo(1);
+    assertThat(AFactory.DESTROY_COUNT_COMPONENT.get()).isEqualTo(1);
   }
 
   /**

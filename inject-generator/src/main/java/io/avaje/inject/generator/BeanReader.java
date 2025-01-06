@@ -541,4 +541,8 @@ final class BeanReader {
   boolean isDelayed() {
     return delayed;
   }
+
+  void validate() {
+    typeReader.validate();
+  }
 }
