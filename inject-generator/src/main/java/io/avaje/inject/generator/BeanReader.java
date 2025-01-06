@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 
@@ -244,12 +243,11 @@ final class BeanReader {
       factoryMethod.addDependsOnGeneric(allUTypes);
     }
 
-    postConstructMethod.ifPresent(
-        m ->
-            m.params().stream()
-                .filter(MethodParam::isGenericParam)
-                .map(MethodParam::getFullUType)
-                .forEach(allUTypes::add));
+    postConstructMethod.ifPresent(m ->
+      m.params().stream()
+        .filter(MethodParam::isGenericParam)
+        .map(MethodParam::getFullUType)
+        .forEach(allUTypes::add));
     return allUTypes;
   }
 
@@ -335,7 +333,6 @@ final class BeanReader {
   }
 
   void addLifecycleCallbacks(Append writer, String indent) {
-
     if (postConstructMethod.isPresent() && !registerProvider()) {
       writePostConstruct(writer, indent, postConstructMethod.get());
     }
@@ -350,50 +347,42 @@ final class BeanReader {
   }
 
   private void writePostConstruct(Append writer, String indent, MethodReader postConstruct) {
-
     writer.indent(indent).append(" builder.addPostConstruct(");
-    final var simplename = postConstruct.name();
-
+    final var methodName = postConstruct.name();
     final var params = postConstruct.params();
     if (params.isEmpty() || Constants.BEANSCOPE.equals(params.get(0).getFullUType().shortType())) {
-      writer.append("$bean::%s);", simplename).eol();
+      writer.append("$bean::%s);", methodName).eol();
     } else {
-      writer.append("b -> $bean.%s(", simplename);
-
+      writer.append("b -> $bean.%s(", methodName);
       writeLifeCycleGet(writer, params, "b", "b");
       writer.append(");").eol();
     }
   }
 
   void prototypePostConstruct(Append writer, String indent) {
-    postConstructMethod.ifPresent(
-        m -> {
-          writer.indent(indent).append(" bean.%s(", m.name());
-          if (m.params().isEmpty()) {
-            writer.append(");").eol();
-          } else {
-            writeLifeCycleGet(
-                writer, m.params(), "builder", "builder.get(io.avaje.inject.BeanScope.class)");
-            writer.append(";").eol();
-          }
-          writer.eol();
-        });
+    postConstructMethod.ifPresent(m -> {
+      writer.indent(indent).append(" bean.%s(", m.name());
+      if (m.params().isEmpty()) {
+        writer.append(");").eol();
+      } else {
+        writeLifeCycleGet(writer, m.params(), "builder", "builder.get(io.avaje.inject.BeanScope.class)");
+        writer.append(";").eol();
+      }
+      writer.eol();
+    });
   }
 
-  private void writeLifeCycleGet(
-      Append writer, final List<MethodParam> params, String builderName, String beanScopeString) {
+  private void writeLifeCycleGet(Append writer, List<MethodParam> params, String builderName, String beanScopeString) {
     final var size = params.size();
     for (int i = 0; i < size; i++) {
+      if (i > 0) {
+        writer.append(", ");
+      }
       final var param = params.get(i);
-
       if (Constants.BEANSCOPE.equals(param.getFullUType().fullWithoutAnnotations())) {
         writer.append(beanScopeString);
       } else {
         param.builderGetDependency(writer, builderName);
-      }
-
-      if (i + 1 != size) {
-        writer.append(", ");
       }
     }
     writer.append(")");
@@ -424,7 +413,7 @@ final class BeanReader {
       }
     }
     checkImports();
-    if (!suppressGeneratedImport){
+    if (!suppressGeneratedImport) {
       importTypes.add(Constants.GENERATED);
     }
     if (!suppressBuilderImport && !isGenerateProxy()) {
