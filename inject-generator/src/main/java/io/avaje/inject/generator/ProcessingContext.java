@@ -27,6 +27,7 @@ final class ProcessingContext {
   static final class Ctx {
     private final Set<String> uniqueModuleNames = new HashSet<>();
     private final Set<String> providedTypes = new HashSet<>();
+    private final Map<String, String> importedProtoTypes = new HashMap<>();
     private final Set<String> optionalTypes = new LinkedHashSet<>();
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
     private final List<ModuleData> modules = new ArrayList<>();
@@ -152,6 +153,22 @@ final class ProcessingContext {
     if (!CTX.get().providedTypes.contains(paramType)) {
       CTX.get().optionalTypes.add(ProcessorUtils.trimAnnotations(Util.addQualifierSuffixTrim(name, paramType)));
     }
+  }
+
+  static void addImportedKind(TypeElement element, String kind) {
+    CTX.get().importedProtoTypes.put(element.getQualifiedName().toString(), kind);
+  }
+
+  static boolean isImportedPrototype(TypeElement element) {
+    return "prototype".equalsIgnoreCase(importedTypeKind(element));
+  }
+
+  static boolean isImportedLazy(TypeElement element) {
+    return "lazy".equalsIgnoreCase(importedTypeKind(element));
+  }
+
+  private static String importedTypeKind(TypeElement element) {
+    return CTX.get().importedProtoTypes.get(element.getQualifiedName().toString());
   }
 
   static void addImportedAspects(Map<String, AspectImportPrism> importedMap) {
