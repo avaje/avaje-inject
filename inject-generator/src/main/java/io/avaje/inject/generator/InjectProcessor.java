@@ -213,14 +213,14 @@ public final class InjectProcessor extends AbstractProcessor {
         .map(ImportPrism::getInstanceOn)
         .flatMap(
             p -> {
-              var prototype = p.prototype();
+              var kind = p.kind();
               return p.value().stream()
                   .map(ProcessingContext::asElement)
                   .filter(this::notAlreadyProvided)
                   .map(
                       e -> {
-                        if (prototype) {
-                          ProcessingContext.addImportedPrototype(e);
+                        if (!"SINGLETON".equals(kind)) {
+                          ProcessingContext.addImportedKind(e, kind);
                         }
                         return e;
                       });

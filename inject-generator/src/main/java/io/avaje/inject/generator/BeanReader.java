@@ -59,7 +59,10 @@ final class BeanReader {
             || importedComponent && ProcessingContext.isImportedPrototype(beanType);
     this.primary = PrimaryPrism.isPresent(beanType);
     this.secondary = !primary && SecondaryPrism.isPresent(beanType);
-    this.lazy = !FactoryPrism.isPresent(beanType) && LazyPrism.isPresent(beanType);
+    this.lazy =
+        !FactoryPrism.isPresent(beanType)
+            && (LazyPrism.isPresent(beanType)
+                || importedComponent && ProcessingContext.isImportedLazy(beanType));
     final var beantypes = BeanTypesPrism.getOptionalOn(beanType);
     beantypes.ifPresent(p -> Util.validateBeanTypes(beanType, p.value()));
     this.typeReader =
