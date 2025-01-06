@@ -353,8 +353,8 @@ final class BeanReader {
     if (params.isEmpty() || Constants.BEANSCOPE.equals(params.get(0).getFullUType().shortType())) {
       writer.append("$bean::%s);", methodName).eol();
     } else {
-      writer.append("b -> $bean.%s(", methodName);
-      writeLifeCycleGet(writer, params, "b", "b");
+      writer.append("beanScope -> $bean.%s(", methodName);
+      writeLifeCycleGet(writer, params, "beanScope", "beanScope");
       writer.append(");").eol();
     }
   }

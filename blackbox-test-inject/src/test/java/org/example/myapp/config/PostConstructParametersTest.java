@@ -14,11 +14,13 @@ class PostConstructParametersTest {
       var two = testScope.get(LifeTwo.class);
       var three = testScope.get(LifeThree.class);
       var four = testScope.get(LifeFour.class);
+      var protoTwo = testScope.get(LifeProtoTwo.class);
 
       assertThat(one._state).isEqualTo("post|scope");
       assertThat(two._state).isEqualTo("post|one|scope");
       assertThat(three._state).isEqualTo("post|one");
       assertThat(four._state).isEqualTo("post|one|two");
+      assertThat(protoTwo._state).isEqualTo("post|one|scope");
     }
   }
 
