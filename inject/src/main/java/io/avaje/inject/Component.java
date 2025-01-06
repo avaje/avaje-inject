@@ -1,5 +1,6 @@
 package io.avaje.inject;
 
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -65,6 +66,7 @@ public @interface Component {
    */
   @Retention(SOURCE)
   @Target({TYPE, PACKAGE, MODULE})
+  @Repeatable(Imports.class)
   @interface Import {
 
     /** Types to generate DI classes for. */
