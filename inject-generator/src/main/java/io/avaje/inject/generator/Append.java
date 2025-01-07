@@ -30,7 +30,9 @@ final class Append {
     try {
       if (extraIndent != null) {
         writer.append(extraIndent);
-        stringBuilder.append(extraIndent);
+        if (debug) {
+          stringBuilder.append(extraIndent);
+        }
       }
       writer.append(content);
       if (debug) {
