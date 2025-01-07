@@ -46,6 +46,9 @@ class InjectProcessorTest {
   //@Disabled
   @Test
   void testGeneration() throws Exception {
+
+    System.setProperty("append.debug", "true");
+
     final String source =
         Paths.get("src/test/java/io/avaje/inject/generator/models/valid")
             .toAbsolutePath()

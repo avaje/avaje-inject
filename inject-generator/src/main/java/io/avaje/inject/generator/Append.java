@@ -9,6 +9,8 @@ import java.io.Writer;
  */
 final class Append {
 
+  private static final boolean debug = Boolean.getBoolean("append.debug");
+
   private final Writer writer;
   private final StringBuilder stringBuilder = new StringBuilder();
   private int nameIndex;
@@ -31,7 +33,9 @@ final class Append {
         stringBuilder.append(extraIndent);
       }
       writer.append(content);
-      stringBuilder.append(content);
+      if (debug) {
+        stringBuilder.append(content);
+      }
       return this;
     } catch (IOException e) {
       throw new UncheckedIOException(e);
@@ -41,7 +45,9 @@ final class Append {
   Append append(String content) {
     try {
       writer.append(content);
-      stringBuilder.append(content);
+      if (debug) {
+        stringBuilder.append(content);
+      }
       return this;
     } catch (IOException e) {
       throw new UncheckedIOException(e);
@@ -60,7 +66,9 @@ final class Append {
   Append eol() {
     try {
       writer.append("\n");
-      stringBuilder.append("\n");
+      if (debug) {
+        stringBuilder.append("\n");
+      }
       return this;
     } catch (IOException e) {
       throw new UncheckedIOException(e);
