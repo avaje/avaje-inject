@@ -165,4 +165,8 @@ final class TypeReader {
       genericTypes.forEach(t -> importTypes.addAll(t.importTypes()));
     }
   }
+
+  void validate() {
+    extendsReader.validate();
+  }
 }

@@ -15,6 +15,7 @@ final class MethodReader {
 
   private static final String CODE_COMMENT_BUILD_FACTORYBEAN = "  /**\n   * Create and register %s via factory bean method %s#%s().\n   */";
 
+  private final TypeExtendsInjection factory;
   private final ExecutableElement element;
   private final String factoryType;
   private final String methodName;
@@ -40,10 +41,11 @@ final class MethodReader {
   private MethodParam observeParameter;
 
   MethodReader(ExecutableElement element, TypeElement beanType, ImportTypeMap importTypes) {
-    this(element, beanType, null, null, importTypes);
+    this(null, element, beanType, null, null, importTypes);
   }
 
-  MethodReader(ExecutableElement element, TypeElement beanType, BeanPrism bean, String qualifierName, ImportTypeMap importTypes) {
+  MethodReader(TypeExtendsInjection factory, ExecutableElement element, TypeElement beanType, BeanPrism bean, String qualifierName, ImportTypeMap importTypes) {
+    this.factory = factory;
     this.element = element;
     if (bean != null) {
       prototype = PrototypePrism.isPresent(element);
@@ -255,8 +257,8 @@ final class MethodReader {
       }
       String indent = optionalType ? "        " : "      ";
       writer.indent(indent);
-      var hasLifecycleMethods = hasLifecycleMethods();
-
+      var matchedPreDestroyMethod = factory.matchPreDestroy(returnTypeRaw);
+      var hasLifecycleMethods = matchedPreDestroyMethod != null || hasLifecycleMethods();
       if (hasLifecycleMethods && multiRegister) {
         writer.append("bean.stream()").eol().indent(indent).append("    .map(");
       } else if (hasLifecycleMethods) {
@@ -292,7 +294,7 @@ final class MethodReader {
         writer.indent(indent).append(addPostConstruct, initMethod).eol();
       }
 
-      var priority = destroyPriority == null || destroyPriority == 1000 ? "" : ", " + destroyPriority;
+      var priority = priority(destroyPriority);
       if (notEmpty(destroyMethod)) {
         var addPreDestroy =
           multiRegister
@@ -317,11 +319,25 @@ final class MethodReader {
       } else if (multiRegister && hasInitMethod) {
         writer.indent(indent).append("    .forEach(x -> {});").eol();
       }
+      if (matchedPreDestroyMethod != null) {
+        // PreDestroy method on the factory
+        var addPreDestroy =
+          multiRegister
+            ? "    .forEach($bean -> builder.addPreDestroy(%s%s));"
+            : "builder.addPreDestroy(%s%s);";
+        var methodPriority = priority(matchedPreDestroyMethod.priority());
+        var method = String.format("() -> factory.%s($bean)", matchedPreDestroyMethod.method());
+        writer.indent(indent).append(addPreDestroy, method, methodPriority).eol();
+      }
 
       if (optionalType) {
         writer.append("      }").eol();
       }
     }
+  }
+
+  static String priority(Integer priority) {
+    return priority == null || priority == 1000 ? "" : ", " + priority;
   }
 
   static String addPreDestroy(String destroyMethod) {

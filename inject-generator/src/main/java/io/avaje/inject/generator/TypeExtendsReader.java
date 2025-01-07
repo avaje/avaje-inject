@@ -263,4 +263,8 @@ final class TypeExtendsReader {
   private boolean isPublic(Element element) {
     return element != null && element.getModifiers().contains(Modifier.PUBLIC);
   }
+
+  void validate() {
+    extendsInjection.validate();
+  }
 }
