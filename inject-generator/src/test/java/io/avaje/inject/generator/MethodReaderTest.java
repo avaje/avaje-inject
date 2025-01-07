@@ -16,4 +16,11 @@ class MethodReaderTest {
   void addPreDestroyNested() {
     assertThat(MethodReader.addPreDestroy("foo().bar()")).isEqualTo("() -> $bean.foo().bar()");
   }
+
+  @Test
+  void priority() {
+    assertThat(MethodReader.priority(null)).isEqualTo("");
+    assertThat(MethodReader.priority(1000)).isEqualTo("");
+    assertThat(MethodReader.priority(52)).isEqualTo(", 52");
+  }
 }

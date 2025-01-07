@@ -1,14 +1,14 @@
 package io.avaje.inject.generator;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
+import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import static java.util.stream.Collectors.toList;
+
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
 
 final class TypeReader {
 
@@ -107,7 +107,7 @@ final class TypeReader {
     return extendsReader.observerMethods();
   }
 
-  Element postConstructMethod() {
+  Optional<MethodReader> postConstructMethod() {
     return extendsReader.postConstructMethod();
   }
 
@@ -164,5 +164,9 @@ final class TypeReader {
       importTypes.add(Constants.GENERICTYPE);
       genericTypes.forEach(t -> importTypes.addAll(t.importTypes()));
     }
+  }
+
+  void validate() {
+    extendsReader.validate();
   }
 }

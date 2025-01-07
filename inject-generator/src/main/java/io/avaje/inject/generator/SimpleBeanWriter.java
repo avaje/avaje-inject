@@ -135,6 +135,7 @@ final class SimpleBeanWriter {
     for (MethodReader factoryMethod : beanReader.factoryMethods()) {
       writeFactoryBeanMethod(factoryMethod);
     }
+    beanReader.validate();
   }
 
   private void writeFactoryBeanMethod(MethodReader method) {
