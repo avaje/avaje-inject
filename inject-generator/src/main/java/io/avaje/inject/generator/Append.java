@@ -9,7 +9,10 @@ import java.io.Writer;
  */
 final class Append {
 
+  private static final boolean debug = Boolean.getBoolean("append.debug");
+
   private final Writer writer;
+  private final StringBuilder stringBuilder = new StringBuilder();
   private int nameIndex;
   private boolean comma;
   private String extraIndent;
@@ -27,8 +30,14 @@ final class Append {
     try {
       if (extraIndent != null) {
         writer.append(extraIndent);
+        if (debug) {
+          stringBuilder.append(extraIndent);
+        }
       }
       writer.append(content);
+      if (debug) {
+        stringBuilder.append(content);
+      }
       return this;
     } catch (IOException e) {
       throw new UncheckedIOException(e);
@@ -38,6 +47,9 @@ final class Append {
   Append append(String content) {
     try {
       writer.append(content);
+      if (debug) {
+        stringBuilder.append(content);
+      }
       return this;
     } catch (IOException e) {
       throw new UncheckedIOException(e);
@@ -56,6 +68,9 @@ final class Append {
   Append eol() {
     try {
       writer.append("\n");
+      if (debug) {
+        stringBuilder.append("\n");
+      }
       return this;
     } catch (IOException e) {
       throw new UncheckedIOException(e);
@@ -85,5 +100,11 @@ final class Append {
       append(", ");
     }
     append(name);
+  }
+
+
+  @Override
+  public String toString() {
+    return stringBuilder.toString();
   }
 }
