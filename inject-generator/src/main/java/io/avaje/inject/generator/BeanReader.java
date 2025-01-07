@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 
@@ -29,7 +28,7 @@ final class BeanReader {
   private final List<MethodReader> injectMethods;
   private final List<MethodReader> factoryMethods;
   private final List<MethodReader> observerMethods;
-  private final Element postConstructMethod;
+  private final Optional<MethodReader> postConstructMethod;
   private final Element preDestroyMethod;
 
   private final ImportTypeMap importTypes = new ImportTypeMap();
@@ -54,10 +53,15 @@ final class BeanReader {
     this.beanType = beanType;
     this.type = beanType.getQualifiedName().toString();
     this.shortName = shortName(beanType);
-    this.prototype = PrototypePrism.isPresent(beanType);
+    this.prototype =
+      PrototypePrism.isPresent(beanType)
+        || importedComponent && ProcessingContext.isImportedPrototype(beanType);
     this.primary = PrimaryPrism.isPresent(beanType);
     this.secondary = !primary && SecondaryPrism.isPresent(beanType);
-    this.lazy = !FactoryPrism.isPresent(beanType) && LazyPrism.isPresent(beanType);
+    this.lazy =
+      !FactoryPrism.isPresent(beanType)
+        && (LazyPrism.isPresent(beanType)
+          || importedComponent && ProcessingContext.isImportedLazy(beanType));
     final var beantypes = BeanTypesPrism.getOptionalOn(beanType);
     beantypes.ifPresent(p -> Util.validateBeanTypes(beanType, p.value()));
     this.typeReader =
@@ -159,6 +163,8 @@ final class BeanReader {
       factoryMethod.addImports(importTypes);
     }
 
+    postConstructMethod.ifPresent(m -> m.addImports(importTypes));
+
     conditions.addImports(importTypes);
     return this;
   }
@@ -236,6 +242,12 @@ final class BeanReader {
     for (MethodReader factoryMethod : factoryMethods()) {
       factoryMethod.addDependsOnGeneric(allUTypes);
     }
+
+    postConstructMethod.ifPresent(m ->
+      m.params().stream()
+        .filter(MethodParam::isGenericParam)
+        .map(MethodParam::getFullUType)
+        .forEach(allUTypes::add));
     return allUTypes;
   }
 
@@ -260,7 +272,7 @@ final class BeanReader {
    * Return true if lifecycle via annotated methods is required.
    */
   boolean hasLifecycleMethods() {
-    return (postConstructMethod != null || preDestroyMethod != null || typeReader.isClosable());
+    return (postConstructMethod.isPresent() || preDestroyMethod != null || typeReader.isClosable());
   }
 
   List<MetaData> createFactoryMethodMeta() {
@@ -321,9 +333,10 @@ final class BeanReader {
   }
 
   void addLifecycleCallbacks(Append writer, String indent) {
-    if (postConstructMethod != null && !registerProvider()) {
-      writer.indent(indent).append(" builder.addPostConstruct($bean::%s);", postConstructMethod.getSimpleName()).eol();
+    if (postConstructMethod.isPresent() && !registerProvider()) {
+      writePostConstruct(writer, indent, postConstructMethod.get());
     }
+
     if (preDestroyMethod != null) {
       lifeCycleNotSupported("@PreDestroy");
       var priority = preDestroyPriority == null || preDestroyPriority == 1000 ? "" : ", " + preDestroyPriority;
@@ -333,17 +346,46 @@ final class BeanReader {
     }
   }
 
+  private void writePostConstruct(Append writer, String indent, MethodReader postConstruct) {
+    writer.indent(indent).append(" builder.addPostConstruct(");
+    final var methodName = postConstruct.name();
+    final var params = postConstruct.params();
+    if (params.isEmpty() || Constants.BEANSCOPE.equals(params.get(0).getFullUType().shortType())) {
+      writer.append("$bean::%s);", methodName).eol();
+    } else {
+      writer.append("beanScope -> $bean.%s(", methodName);
+      writeLifeCycleGet(writer, params, "beanScope", "beanScope");
+      writer.append(");").eol();
+    }
+  }
+
   void prototypePostConstruct(Append writer, String indent) {
-    if (postConstructMethod != null) {
-      var postConstruct = (ExecutableElement) postConstructMethod;
-      writer.indent(indent).append(" bean.%s(", postConstructMethod.getSimpleName());
-      if (postConstruct.getParameters().isEmpty()) {
+    postConstructMethod.ifPresent(m -> {
+      writer.indent(indent).append(" bean.%s(", m.name());
+      if (m.params().isEmpty()) {
         writer.append(");").eol();
       } else {
-        writer.append("builder.get(io.avaje.inject.BeanScope.class));").eol();
+        writeLifeCycleGet(writer, m.params(), "builder", "builder.get(io.avaje.inject.BeanScope.class)");
+        writer.append(";").eol();
       }
       writer.eol();
+    });
+  }
+
+  private void writeLifeCycleGet(Append writer, List<MethodParam> params, String builderName, String beanScopeString) {
+    final var size = params.size();
+    for (int i = 0; i < size; i++) {
+      if (i > 0) {
+        writer.append(", ");
+      }
+      final var param = params.get(i);
+      if (Constants.BEANSCOPE.equals(param.getFullUType().fullWithoutAnnotations())) {
+        writer.append(beanScopeString);
+      } else {
+        param.builderGetDependency(writer, builderName);
+      }
     }
+    writer.append(")");
   }
 
   private void lifeCycleNotSupported(String lifecycle) {
@@ -371,7 +413,7 @@ final class BeanReader {
       }
     }
     checkImports();
-    if (!suppressGeneratedImport){
+    if (!suppressGeneratedImport) {
       importTypes.add(Constants.GENERATED);
     }
     if (!suppressBuilderImport && !isGenerateProxy()) {

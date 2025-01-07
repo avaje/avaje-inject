@@ -32,7 +32,7 @@ final class TypeExtendsInjection {
   private final boolean factory;
   private final List<AspectPair> typeAspects;
   private final DestroyMethods factoryPreDestroyMethods = new DestroyMethods();
-  private Element postConstructMethod;
+  private Optional<MethodReader> postConstructMethod = Optional.empty();
   private Element preDestroyMethod;
   private Integer preDestroyPriority;
 
@@ -127,7 +127,7 @@ final class TypeExtendsInjection {
       notInjectMethods.add(methodKey);
     }
     if (AnnotationUtil.hasAnnotationWithName(element, "PostConstruct")) {
-      postConstructMethod = element;
+      postConstructMethod = Optional.of(new MethodReader(methodElement, type, importTypes).read());
       checkAspect = false;
     }
     if (AnnotationUtil.hasAnnotationWithName(element, "PreDestroy")) {
@@ -215,7 +215,7 @@ final class TypeExtendsInjection {
     return observerMethods;
   }
 
-  Element postConstructMethod() {
+  Optional<MethodReader> postConstructMethod() {
     return postConstructMethod;
   }
 
