@@ -382,7 +382,7 @@ final class BeanReader {
       if (Constants.BEANSCOPE.equals(param.getFullUType().fullWithoutAnnotations())) {
         writer.append(beanScopeString);
       } else {
-        param.builderGetDependency(writer, builderName);
+        param.builderGetDependency(writer, builderName, !prototype);
       }
     }
     writer.append(")");

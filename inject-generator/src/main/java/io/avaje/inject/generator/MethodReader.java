@@ -548,6 +548,10 @@ final class MethodReader {
     }
 
     void builderGetDependency(Append writer, String builderName) {
+      builderGetDependency(writer, builderName, false);
+    }
+
+    void builderGetDependency(Append writer, String builderName, boolean isPostConstruct) {
       writer.append(builderName).append(".").append(utilType.getMethod(nullable, isBeanMap));
       if (!genericType.isGeneric() || genericType.param0().kind() == TypeKind.WILDCARD) {
         writer.append(Util.shortName(genericType.mainType())).append(".class");
@@ -556,7 +560,7 @@ final class MethodReader {
       }
       if (named != null && !named.isEmpty()) {
         writer.append(",\"").append(named).append("\"");
-      } else if (!isGenericParam() && utilType.allowsNamedQualifier()) {
+      } else if (!isGenericParam() && utilType.allowsNamedQualifier() && !isPostConstruct) {
         // implied qualifier name, leading '!' means implied
         writer.append(",\"!");
         final String shortName = Util.shortName(paramType);
