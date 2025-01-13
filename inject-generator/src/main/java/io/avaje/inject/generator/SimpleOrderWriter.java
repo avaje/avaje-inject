@@ -76,7 +76,17 @@ final class SimpleOrderWriter {
 
   private void writeBuildMethods() {
     writer.append(
-      "\n"
+        "\n"
+        + "  @Override\n"
+        + "  public boolean supportsExpected(List<AvajeModule> modules) {\n"
+        + "    if (modules.size() != sortedModules.length) {\n"
+        + "      return false;\n"
+        + "    }\n"
+        + "    return modules.stream()\n"
+        + "            .map(m -> m.getClass().getTypeName())\n"
+        + "            .allMatch(k -> INDEXES.containsKey(k));\n"
+        + "  }\n"
+        + "\n"
         + "  @Override\n"
         + "  public List<AvajeModule> factories() {\n"
         + "    return List.of(sortedModules);\n"
