@@ -259,7 +259,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     ModuleOrdering factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
     if (factoryOrder.isEmpty()) {
       // prefer generated ModuleOrdering if provided
-      factoryOrder = serviceLoader.moduleOrdering().orElse(factoryOrder);
+      factoryOrder = serviceLoader.moduleOrdering().orElse(factoryOrder); // for Tests skip this perhaps?
       serviceLoader.modules().forEach(factoryOrder::add);
     }
 
