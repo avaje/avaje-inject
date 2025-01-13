@@ -362,8 +362,13 @@ final class MetaReader {
         final var rawType = parameterizedType.getRawType();
         final var typeArguments = parameterizedType.getActualTypeArguments();
 
-        if (rawType.equals(List.class) || rawType.equals(Optional.class)) {
+        if (rawType.equals(List.class)) {
           set(field, beanScope.list(typeArguments[0]), testInstance);
+          return;
+        }
+
+        if (rawType.equals(Optional.class)) {
+          set(field, beanScope.getOptional(typeArguments[0], name), testInstance);
           return;
         }
       }
