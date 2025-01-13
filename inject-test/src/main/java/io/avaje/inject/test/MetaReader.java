@@ -1,10 +1,15 @@
 package io.avaje.inject.test;
 
-import io.avaje.inject.BeanScope;
-import io.avaje.inject.BeanScopeBuilder;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import jakarta.inject.Qualifier;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -12,13 +17,11 @@ import org.mockito.Spy;
 import org.mockito.internal.configuration.plugins.Plugins;
 import org.mockito.internal.util.reflection.GenericMaster;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import io.avaje.inject.BeanScope;
+import io.avaje.inject.BeanScopeBuilder;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Qualifier;
 
 final class MetaReader {
 
@@ -349,9 +352,28 @@ final class MetaReader {
     }
 
     void setFromScope(BeanScope beanScope, Object testInstance) throws IllegalAccessException {
-      if (!valueAlreadyProvided) {
-        set(field, beanScope.get(type(), name), testInstance);
+      if (valueAlreadyProvided) {
+        return;
       }
+      final var type = type();
+
+      if (type instanceof ParameterizedType) {
+        final var parameterizedType = (ParameterizedType) type;
+        final var rawType = parameterizedType.getRawType();
+        final var typeArguments = parameterizedType.getActualTypeArguments();
+
+        if (rawType.equals(List.class)) {
+          set(field, beanScope.list(typeArguments[0]), testInstance);
+          return;
+        }
+
+        if (rawType.equals(Optional.class)) {
+          set(field, beanScope.getOptional(typeArguments[0], name), testInstance);
+          return;
+        }
+      }
+
+      set(field, beanScope.get(type, name), testInstance);
     }
 
     void setFromPlugin(Object value, Object testInstance) throws IllegalAccessException {
