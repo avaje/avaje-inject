@@ -373,9 +373,7 @@ final class MetaReader {
         }
       }
 
-      if (!valueAlreadyProvided) {
-        set(field, beanScope.get(type, name), testInstance);
-      }
+      set(field, beanScope.get(type, name), testInstance);
     }
 
     void setFromPlugin(Object value, Object testInstance) throws IllegalAccessException {
