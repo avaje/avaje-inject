@@ -9,6 +9,18 @@ import java.util.Set;
 public interface ModuleOrdering extends InjectExtension {
 
   /**
+   * Return true if ordering supports the modules passed in.
+   */
+  default boolean supportsExpected(List<AvajeModule> modules) {
+    return true;
+  }
+
+  /**
+   * Accept a module for ordering
+   */
+  void add(AvajeModule module);
+
+  /**
    * Order the factories, returning the ordered list of module names.
    */
   Set<String> orderModules();
@@ -23,8 +35,4 @@ public interface ModuleOrdering extends InjectExtension {
    */
   boolean isEmpty();
 
-  /**
-   * Accept a module for ordering
-   */
-  void add(AvajeModule module);
 }

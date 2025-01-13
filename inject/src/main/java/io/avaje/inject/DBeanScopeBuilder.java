@@ -6,13 +6,7 @@ import static java.util.Collections.emptySet;
 
 import java.lang.System.Logger.Level;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -257,10 +251,13 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
     // sort factories by dependsOn
     ModuleOrdering factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
+    var modules = serviceLoader.modules();
     if (factoryOrder.isEmpty()) {
       // prefer generated ModuleOrdering if provided
-      factoryOrder = serviceLoader.moduleOrdering().orElse(factoryOrder); // for Tests skip this perhaps?
-      serviceLoader.modules().forEach(factoryOrder::add);
+      var ordering = serviceLoader.moduleOrdering()
+        .filter(o -> o.supportsExpected(modules))
+        .orElse(factoryOrder);
+      modules.forEach(ordering::add);
     }
 
     final var moduleNames = factoryOrder.orderModules();
