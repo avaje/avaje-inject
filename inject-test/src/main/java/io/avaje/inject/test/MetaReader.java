@@ -8,6 +8,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -356,12 +357,12 @@ final class MetaReader {
       }
       final var type = type();
 
-      if(type instanceof ParameterizedType) {
+      if (type instanceof ParameterizedType) {
         final var parameterizedType = (ParameterizedType) type;
         final var rawType = parameterizedType.getRawType();
         final var typeArguments = parameterizedType.getActualTypeArguments();
 
-        if (rawType.equals(List.class)) {
+        if (rawType.equals(List.class) || rawType.equals(Optional.class)) {
           set(field, beanScope.list(typeArguments[0]), testInstance);
           return;
         }
