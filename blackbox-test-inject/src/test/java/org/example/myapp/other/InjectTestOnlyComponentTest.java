@@ -11,6 +11,7 @@ public class InjectTestOnlyComponentTest {
 
   @Inject WireOther myTestOnlyComponent;
   @Inject WireOther2 myTestOnlyComponent2;
+  @Inject WireOther3 withBeanScope;
 
   @Test
   void test() {
@@ -21,5 +22,8 @@ public class InjectTestOnlyComponentTest {
     assertThat(myTestOnlyComponent2).isNotNull();
     assertThat(myTestOnlyComponent2.component).isNotNull();
     assertThat(myTestOnlyComponent2.plugin).isNotNull();
+
+    assertThat(withBeanScope).isNotNull();
+    assertThat(withBeanScope.beanScope).isNotNull();
   }
 }
