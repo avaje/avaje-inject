@@ -62,9 +62,12 @@ final class TypeExtendsReader {
    */
   private boolean closeableClient(TypeElement baseType) {
     return ClientPrism.isPresent(baseType)
-      && APContext.typeElement("io.avaje.http.client.HttpClient").getInterfaces().stream()
-      .map(Object::toString)
-      .anyMatch(AutoCloseable.class.getCanonicalName()::equals);
+        && Optional.ofNullable(APContext.typeElement("io.avaje.http.client.HttpClient"))
+            .map(TypeElement::getInterfaces)
+            .stream()
+            .flatMap(List::stream)
+            .map(Object::toString)
+            .anyMatch(AutoCloseable.class.getCanonicalName()::equals);
   }
 
   private boolean autoProvide() {

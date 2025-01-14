@@ -342,7 +342,7 @@ final class BeanReader {
       var priority = preDestroyPriority == null || preDestroyPriority == 1000 ? "" : ", " + preDestroyPriority;
       writer.indent(indent).append(" builder.addPreDestroy($bean::%s%s);", preDestroyMethod.getSimpleName(), priority).eol();
     } else if (typeReader.isClosable() && !prototype) {
-      writer.indent(indent).append(" builder.addPreDestroy($bean);").eol();
+      writer.indent(indent).append(" builder.addAutoClosable($bean);").eol();
     }
   }
 
