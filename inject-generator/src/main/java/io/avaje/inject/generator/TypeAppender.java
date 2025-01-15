@@ -21,20 +21,24 @@ final class TypeAppender {
 
   void add(UType utype) {
     var type = Util.unwrapProvider(utype);
-    var components = type.componentTypes();
-    if (isAddGenericType(type, components)) {
+    if (isAddGenericType(type)) {
       addUType(type);
     } else {
       addSimpleType(type.mainType());
     }
   }
 
-  private static boolean isAddGenericType(UType type, List<UType> components) {
+  private static boolean isAddGenericType(UType type) {
+    var components = type.componentTypes();
     return type.isGeneric()
-      && type.kind() != TypeKind.TYPEVAR
-      && (components.size() != 1 || components.get(0).kind() != TypeKind.WILDCARD)
-      && components.stream()
-      .noneMatch(u -> u.kind() == TypeKind.TYPEVAR || u.kind() == TypeKind.WILDCARD);
+        && type.kind() != TypeKind.TYPEVAR
+        && (components.size() != 1 || components.get(0).kind() != TypeKind.WILDCARD)
+        && components.stream()
+            .noneMatch(
+                u ->
+                    u.kind() == TypeKind.TYPEVAR
+                        || u.kind() == TypeKind.WILDCARD
+                        || !isAddGenericType(u));
   }
 
   void add(List<UType> sourceTypes) {

@@ -20,4 +20,10 @@ public class MyConsumerFactory {
       BiConsumer<A0, io.avaje.inject.generator.models.valid.nested.A0> consumer) {
     return null;
   }
+
+  @Bean
+  Aldrich<String, String> bean() {
+
+    return null;
+  }
 }
