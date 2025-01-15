@@ -293,6 +293,7 @@ final class MethodReader {
             : "builder.addPostConstruct($bean::%s);";
         writer.indent(indent).append(addPostConstruct, initMethod).eol();
       }
+      final var isCloseable = typeReader != null && typeReader.isClosable();
 
       var priority = priority(destroyPriority);
       if (notEmpty(destroyMethod)) {
@@ -302,14 +303,14 @@ final class MethodReader {
             : "builder.addPreDestroy(%s%s);";
         writer.indent(indent).append(addPreDestroy, addPreDestroy(destroyMethod), priority).eol();
 
-      } else if (typeReader != null && typeReader.isClosable()) {
+      } else if (isCloseable && !priority.isBlank()) {
         var addPreDestroy =
           multiRegister
             ? "    .forEach($bean -> builder.addPreDestroy($bean::close%s));"
             : "builder.addPreDestroy($bean::close%s);";
         writer.indent(indent).append(addPreDestroy, priority).eol();
 
-      } else if (beanCloseable) {
+      } else if (isCloseable || beanCloseable) {
         var addAutoClosable =
           multiRegister
             ? "    .forEach(builder::addAutoClosable);"

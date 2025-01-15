@@ -7,6 +7,7 @@ import org.example.coffee.factory.other.Something;
 
 import jakarta.inject.Named;
 import org.example.coffee.parent.DesEngi;
+import org.example.request.MyHttpClient;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -15,6 +16,19 @@ import java.io.IOException;
 public class MyFactory {
 
   String methods = "";
+
+  @Bean // (autoCloseable = true)
+  MyHttpClient httpClient() {
+    return new MyHttpClientGenerated();
+  }
+
+  public static class MyHttpClientGenerated implements MyHttpClient, AutoCloseable {
+    public boolean closed;
+    @Override
+    public void close() throws Exception {
+      closed = true;
+    }
+  }
 
   @Bean
   DFact buildDFact() {

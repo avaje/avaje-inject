@@ -3,6 +3,7 @@ package org.example.coffee.factory;
 import io.avaje.inject.xtra.ApplicationScope;
 import io.avaje.inject.BeanScope;
 import org.example.coffee.parent.DesEngi;
+import org.example.request.MyHttpClient;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,12 +23,15 @@ public class MyFactoryTest {
 
     final MyFactory.MyClose myClose;
     final MyFactory.MyAutoClose myAutoClose;
+    final MyFactory.MyHttpClientGenerated myHttpClientGenerated;
     try (BeanScope context = BeanScope.builder().build()) {
       myClose = context.get(MyFactory.MyClose.class);
       myAutoClose = context.get(MyFactory.MyAutoClose.class);
+      myHttpClientGenerated = (MyFactory.MyHttpClientGenerated) context.get(MyHttpClient.class);
     }
     assertThat(myClose.isClosed()).isTrue();
     assertThat(myAutoClose.isClosed()).isTrue();
+    assertThat(myHttpClientGenerated.closed).isTrue();
   }
 
   @Test
