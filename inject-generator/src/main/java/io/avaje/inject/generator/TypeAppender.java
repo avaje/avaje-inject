@@ -3,6 +3,7 @@ package io.avaje.inject.generator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.lang.model.type.TypeKind;
 
@@ -21,20 +22,29 @@ final class TypeAppender {
 
   void add(UType utype) {
     var type = Util.unwrapProvider(utype);
-    var components = type.componentTypes();
-    if (isAddGenericType(type, components)) {
+    if (isAddGenericType(type)) {
       addUType(type);
     } else {
       addSimpleType(type.mainType());
     }
   }
 
-  private static boolean isAddGenericType(UType type, List<UType> components) {
+  private static boolean isAddGenericType(UType type) {
+    var components = type.componentTypes();
     return type.isGeneric()
       && type.kind() != TypeKind.TYPEVAR
       && (components.size() != 1 || components.get(0).kind() != TypeKind.WILDCARD)
       && components.stream()
+      .flatMap(TypeAppender::allComponentTypes)
       .noneMatch(u -> u.kind() == TypeKind.TYPEVAR || u.kind() == TypeKind.WILDCARD);
+  }
+
+  private static Stream<UType> allComponentTypes(UType u) {
+    final var componentTypes = u.componentTypes();
+    return componentTypes.isEmpty()
+      ? Stream.of(u)
+      : Stream.concat(
+        Stream.of(u), componentTypes.stream().flatMap(TypeAppender::allComponentTypes));
   }
 
   void add(List<UType> sourceTypes) {

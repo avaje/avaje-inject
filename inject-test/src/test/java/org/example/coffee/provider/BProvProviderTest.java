@@ -17,6 +17,11 @@ class BProvProviderTest {
       BProv<String> bProv2 = beanScope.get(BProvProvider$DI.TYPE_BProvString);
       assertThat(bProv).isNotSameAs(bProv2);
       assertThat(bProv2.get()).isEqualTo("Hello BProv2");
+
+      BProvUser bProvUser = beanScope.get(BProvUser.class);
+      BProv<String> bProv3 = bProvUser.getProvider().get();
+      assertThat(bProv3.get()).isEqualTo("Hello BProv3");
+      assertThat(bProv).isNotSameAs(bProv3);
     }
   }
 
