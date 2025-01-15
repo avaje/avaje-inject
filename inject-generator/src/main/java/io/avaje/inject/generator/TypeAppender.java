@@ -35,8 +35,18 @@ final class TypeAppender {
         && type.kind() != TypeKind.TYPEVAR
         && (components.size() != 1 || components.get(0).kind() != TypeKind.WILDCARD)
         && components.stream()
-            .flatMap(u -> Stream.concat(Stream.of(u), u.componentTypes().stream()))
+            .flatMap(TypeAppender::allcomponentTypes)
             .noneMatch(u -> u.kind() == TypeKind.TYPEVAR || u.kind() == TypeKind.WILDCARD);
+  }
+
+  private static Stream<UType> allcomponentTypes(UType u) {
+
+    final var componentTypes = u.componentTypes();
+
+    return componentTypes.isEmpty()
+        ? Stream.of(u)
+        : Stream.concat(
+            Stream.of(u), componentTypes.stream().flatMap(TypeAppender::allcomponentTypes));
   }
 
   void add(List<UType> sourceTypes) {
