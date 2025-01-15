@@ -12,10 +12,14 @@ class GenericFactoryTest {
 
   @Inject Generic<Integer> intymcintface;
   @Inject Generic<String> stringy;
+  @Inject MyUseGenericDependencies others;
 
   @Test
   void test() {
     assertThat(intymcintface).isNotNull();
     assertThat(stringy).isNotNull();
+    assertThat(others.getAldrich()).isNotNull();
+    assertThat(others.getGenericMap()).isNotNull();
+    assertThat(others.getBiConsumer()).isNotNull();
   }
 }

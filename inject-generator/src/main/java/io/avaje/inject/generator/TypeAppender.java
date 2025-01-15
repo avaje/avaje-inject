@@ -32,21 +32,19 @@ final class TypeAppender {
   private static boolean isAddGenericType(UType type) {
     var components = type.componentTypes();
     return type.isGeneric()
-        && type.kind() != TypeKind.TYPEVAR
-        && (components.size() != 1 || components.get(0).kind() != TypeKind.WILDCARD)
-        && components.stream()
-            .flatMap(TypeAppender::allcomponentTypes)
-            .noneMatch(u -> u.kind() == TypeKind.TYPEVAR || u.kind() == TypeKind.WILDCARD);
+      && type.kind() != TypeKind.TYPEVAR
+      && (components.size() != 1 || components.get(0).kind() != TypeKind.WILDCARD)
+      && components.stream()
+      .flatMap(TypeAppender::allComponentTypes)
+      .noneMatch(u -> u.kind() == TypeKind.TYPEVAR || u.kind() == TypeKind.WILDCARD);
   }
 
-  private static Stream<UType> allcomponentTypes(UType u) {
-
+  private static Stream<UType> allComponentTypes(UType u) {
     final var componentTypes = u.componentTypes();
-
     return componentTypes.isEmpty()
-        ? Stream.of(u)
-        : Stream.concat(
-            Stream.of(u), componentTypes.stream().flatMap(TypeAppender::allcomponentTypes));
+      ? Stream.of(u)
+      : Stream.concat(
+        Stream.of(u), componentTypes.stream().flatMap(TypeAppender::allComponentTypes));
   }
 
   void add(List<UType> sourceTypes) {

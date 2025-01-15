@@ -1,4 +1,4 @@
-package io.avaje.inject.generator.models.valid.generic;
+package org.example.myapp.generic;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
