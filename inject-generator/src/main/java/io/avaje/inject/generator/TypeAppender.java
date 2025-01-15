@@ -3,6 +3,7 @@ package io.avaje.inject.generator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.lang.model.type.TypeKind;
 
@@ -34,11 +35,8 @@ final class TypeAppender {
         && type.kind() != TypeKind.TYPEVAR
         && (components.size() != 1 || components.get(0).kind() != TypeKind.WILDCARD)
         && components.stream()
-            .noneMatch(
-                u ->
-                    u.kind() == TypeKind.TYPEVAR
-                        || u.kind() == TypeKind.WILDCARD
-                        || !isAddGenericType(u));
+            .flatMap(u -> Stream.concat(Stream.of(u), u.componentTypes().stream()))
+            .noneMatch(u -> u.kind() == TypeKind.TYPEVAR || u.kind() == TypeKind.WILDCARD);
   }
 
   void add(List<UType> sourceTypes) {
