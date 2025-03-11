@@ -14,14 +14,13 @@ import java.util.ServiceLoader;
 /** Provides Lookup instances using potentially module specific Lookups. */
 final class Lookups {
 
-  // For public tests
   private static final Map<String, Lookup> MODULE_LOOKUP_MAP =
       ServiceLoader.load(LookupProvider.class).stream()
           .collect(toMap(p -> p.type().getModule().getName(), p -> p.get().provideLookup()));
 
   private static final Lookup DEFAULT_LOOKUP = MethodHandles.publicLookup();
 
-  /** Return a Lookup ideally for the package associated with the given type. */
+  /** Return a Lookup ideally for the module associated with the given type. */
   static Lookup getLookup(Class<?> type) {
     return MODULE_LOOKUP_MAP.getOrDefault(type.getModule().getName(), DEFAULT_LOOKUP);
   }
@@ -42,7 +41,7 @@ final class Lookups {
     }
   }
 
-  public static Class<?> getClassFromType(Type generic) {
+  static Class<?> getClassFromType(Type generic) {
     if (generic instanceof Class) {
       return (Class<?>) generic;
     }
