@@ -16,7 +16,7 @@ import javax.lang.model.element.TypeElement;
 @SupportedAnnotationTypes({"io.avaje.inject.test.InjectTest"})
 public final class InjectTestProcessor extends AbstractProcessor {
 
-  boolean wroteLookup;
+  private boolean wroteLookup;
 
   @Override
   public SourceVersion getSupportedSourceVersion() {
@@ -30,7 +30,6 @@ public final class InjectTestProcessor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-
     if (!wroteLookup
         && !Optional.ofNullable(typeElement("io.avaje.inject.test.InjectTest"))
             .map(roundEnv::getElementsAnnotatedWith)
@@ -39,12 +38,10 @@ public final class InjectTestProcessor extends AbstractProcessor {
       wroteLookup = true;
       writeLookup();
     }
-
     return false;
   }
 
   private void writeLookup() {
-
     var template =
         "package io.avaje.inject.test.lookup;\n"
             + "\n"

@@ -56,7 +56,7 @@ final class MetaReader {
     if (testInstance == null) {
       return hasStaticMocksOrSpies() || methodFinder.hasStaticMethods();
     }
-  return hasInstanceMocksOrSpies(testInstance) || methodFinder.hasInstanceMethods();
+    return hasInstanceMocksOrSpies(testInstance) || methodFinder.hasInstanceMethods();
   }
 
   private boolean hasInstanceMocksOrSpies(Object testInstance) {
@@ -179,7 +179,7 @@ final class MetaReader {
     if (testInstance != null) {
       return setForInstance(metaScope, testInstance);
     }
-  return setForStatics(metaScope);
+    return setForStatics(metaScope);
   }
 
   private TestBeans setForInstance(TestBeans metaScope, Object testInstance) {
@@ -356,7 +356,6 @@ final class MetaReader {
     }
 
     Object get(Object instance) {
-
       return isStatic ? fieldHandle.get() : fieldHandle.get(instance);
     }
 
@@ -365,7 +364,6 @@ final class MetaReader {
         return;
       }
       final var type = type();
-
       if (type instanceof ParameterizedType) {
         final var parameterizedType = (ParameterizedType) type;
         final var rawType = parameterizedType.getRawType();

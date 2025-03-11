@@ -26,10 +26,8 @@ final class Lookups {
   }
 
   static VarHandle getVarhandle(Class<?> testClass, Field field) {
-
     try {
       var lookup = getLookup(testClass);
-
       lookup =
           lookup.hasPrivateAccess()
               ? MethodHandles.privateLookupIn(testClass, getLookup(testClass))
@@ -54,7 +52,6 @@ final class Lookups {
         return (Class<?>) ((ParameterizedType) actual).getRawType();
       }
     }
-
     return Object.class;
   }
 }
