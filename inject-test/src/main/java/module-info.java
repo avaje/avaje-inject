@@ -16,4 +16,5 @@ module io.avaje.inject.test {
 
   uses io.avaje.inject.test.TestModule;
   uses io.avaje.inject.test.Plugin;
+  uses io.avaje.inject.test.LookupProvider;
 }

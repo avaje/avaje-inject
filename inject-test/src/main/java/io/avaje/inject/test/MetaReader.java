@@ -1,6 +1,7 @@
 package io.avaje.inject.test;
 
 import java.lang.annotation.Annotation;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -14,8 +15,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.internal.configuration.plugins.Plugins;
-import org.mockito.internal.util.reflection.GenericMaster;
 
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.BeanScopeBuilder;
@@ -26,6 +25,7 @@ import jakarta.inject.Qualifier;
 final class MetaReader {
 
   private final SetupMethods methodFinder;
+  final Class<?> testClass;
   final List<Field> captors = new ArrayList<>();
   final List<FieldTarget> mocks = new ArrayList<>();
   final List<FieldTarget> spies = new ArrayList<>();
@@ -41,6 +41,7 @@ final class MetaReader {
   boolean instancePlugin;
 
   MetaReader(Class<?> testClass, Plugin plugin) {
+    this.testClass = testClass;
     this.plugin = plugin;
     final var hierarchy = typeHierarchy(testClass);
     this.methodFinder = new SetupMethods(hierarchy);
@@ -54,9 +55,8 @@ final class MetaReader {
   boolean hasMocksOrSpies(Object testInstance) {
     if (testInstance == null) {
       return hasStaticMocksOrSpies() || methodFinder.hasStaticMethods();
-    } else {
-      return hasInstanceMocksOrSpies(testInstance) || methodFinder.hasInstanceMethods();
     }
+    return hasInstanceMocksOrSpies(testInstance) || methodFinder.hasInstanceMethods();
   }
 
   private boolean hasInstanceMocksOrSpies(Object testInstance) {
@@ -154,7 +154,7 @@ final class MetaReader {
   }
 
   private FieldTarget newTarget(Field field) {
-    return new FieldTarget(field, name(field));
+    return new FieldTarget(field, name(field), Lookups.getVarhandle(testClass, field));
   }
 
   private String name(Field field) {
@@ -178,9 +178,8 @@ final class MetaReader {
   TestBeans setFromScope(TestBeans metaScope, Object testInstance) {
     if (testInstance != null) {
       return setForInstance(metaScope, testInstance);
-    } else {
-      return setForStatics(metaScope);
     }
+    return setForStatics(metaScope);
   }
 
   private TestBeans setForInstance(TestBeans metaScope, Object testInstance) {
@@ -189,7 +188,11 @@ final class MetaReader {
       BeanScope beanScope = metaScope.beanScope();
 
       for (Field field : captors) {
-        set(field, captorFor(field), testInstance);
+        set(
+            Modifier.isStatic(field.getModifiers()),
+            Lookups.getVarhandle(testClass, field),
+            captorFor(field),
+            testInstance);
       }
       for (FieldTarget target : mocks) {
         target.setFromScope(beanScope, testInstance);
@@ -239,9 +242,12 @@ final class MetaReader {
   private Object captorFor(Field field) {
     Class<?> type = field.getType();
     if (!ArgumentCaptor.class.isAssignableFrom(type)) {
-      throw new IllegalStateException("@Captor field must be of the type ArgumentCaptor.\n Field: '" + field.getName() + "' has wrong type");
+      throw new IllegalStateException(
+          "@Captor field must be of the type ArgumentCaptor.\n Field: '"
+              + field.getName()
+              + "' has wrong type");
     }
-    Class<?> cls = new GenericMaster().getGenericType(field);
+    Class<?> cls = Lookups.getClassFromType(field.getGenericType());
     return ArgumentCaptor.forClass(cls);
   }
 
@@ -308,8 +314,12 @@ final class MetaReader {
     builder.bean(target.name(), target.type(), value);
   }
 
-  void set(Field field, Object val, Object testInstance) throws IllegalAccessException {
-    Plugins.getMemberAccessor().set(field, testInstance, val);
+  void set(boolean isStatic, VarHandle fieldHandle, Object val, Object testInstance) {
+    if (isStatic) {
+      fieldHandle.set(val);
+    } else {
+      fieldHandle.set(testInstance, val);
+    }
   }
 
   class FieldTarget {
@@ -319,11 +329,13 @@ final class MetaReader {
     private final boolean isStatic;
     private boolean pluginInjection;
     private boolean valueAlreadyProvided;
+    private final VarHandle fieldHandle;
 
-    FieldTarget(Field field, String name) {
+    FieldTarget(Field field, String name, VarHandle fieldHandle) {
       this.field = field;
       this.isStatic = Modifier.isStatic(field.getModifiers());
       this.name = name;
+      this.fieldHandle = fieldHandle;
     }
 
     @Override
@@ -344,11 +356,7 @@ final class MetaReader {
     }
 
     Object get(Object instance) {
-      try {
-        return Plugins.getMemberAccessor().get(field, instance);
-      } catch (IllegalAccessException e) {
-        throw new RuntimeException(e);
-      }
+      return isStatic ? fieldHandle.get() : fieldHandle.get(instance);
     }
 
     void setFromScope(BeanScope beanScope, Object testInstance) throws IllegalAccessException {
@@ -356,28 +364,27 @@ final class MetaReader {
         return;
       }
       final var type = type();
-
       if (type instanceof ParameterizedType) {
         final var parameterizedType = (ParameterizedType) type;
         final var rawType = parameterizedType.getRawType();
         final var typeArguments = parameterizedType.getActualTypeArguments();
 
         if (rawType.equals(List.class)) {
-          set(field, beanScope.list(typeArguments[0]), testInstance);
+          set(isStatic, fieldHandle, beanScope.list(typeArguments[0]), testInstance);
           return;
         }
 
         if (rawType.equals(Optional.class)) {
-          set(field, beanScope.getOptional(typeArguments[0], name), testInstance);
+          set(isStatic, fieldHandle, beanScope.getOptional(typeArguments[0], name), testInstance);
           return;
         }
       }
 
-      set(field, beanScope.get(type, name), testInstance);
+      set(isStatic, fieldHandle, beanScope.get(type, name), testInstance);
     }
 
     void setFromPlugin(Object value, Object testInstance) throws IllegalAccessException {
-      set(field, value, testInstance);
+      set(isStatic, fieldHandle, value, testInstance);
     }
 
     void markForPluginInjection() {
