@@ -247,7 +247,7 @@ final class MetaReader {
               + field.getName()
               + "' has wrong type");
     }
-    Class<?> cls = Lookups.getaClass(field.getGenericType());
+    Class<?> cls = Lookups.getClassFromType(field.getGenericType());
     return ArgumentCaptor.forClass(cls);
   }
 

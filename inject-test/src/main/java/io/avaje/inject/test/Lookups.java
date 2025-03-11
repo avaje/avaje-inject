@@ -42,7 +42,7 @@ final class Lookups {
     }
   }
 
-  public static Class<?> getaClass(Type generic) {
+  public static Class<?> getClassFromType(Type generic) {
     if (generic instanceof Class) {
       return (Class<?>) generic;
     }
