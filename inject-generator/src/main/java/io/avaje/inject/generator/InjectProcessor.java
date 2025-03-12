@@ -325,19 +325,16 @@ public final class InjectProcessor extends AbstractProcessor {
    * Read the existing meta-data from InjectModule (if found) and the factory bean (if exists).
    */
   private void readModule(RoundEnvironment roundEnv) {
-
     var moduleList =
-        maybeElements(roundEnv, InjectModulePrism.PRISM_TYPE).stream()
-            .flatMap(Set::stream)
-            .filter(e -> !ScopePrism.isPresent(e))
-            .filter(e -> !GeneratedPrism.isPresent(e))
-            .collect(toList());
+      maybeElements(roundEnv, InjectModulePrism.PRISM_TYPE).stream()
+        .flatMap(Set::stream)
+        .filter(e -> !ScopePrism.isPresent(e))
+        .filter(e -> !GeneratedPrism.isPresent(e))
+        .collect(toList());
 
     if (moduleList.size() > 1) {
-
       for (var element : moduleList) {
-        logError(
-            element, "There should only be one default scope @InjectModule annotation in a module");
+        logError(element, "There should only be one default scope @InjectModule annotation in a module");
       }
     }
 
