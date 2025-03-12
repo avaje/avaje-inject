@@ -15,6 +15,8 @@ import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -243,7 +245,7 @@ public final class InjectProcessor extends AbstractProcessor {
 
   private void readScopes(Set<? extends Element> scopes) {
     for (final Element element : scopes) {
-      if ((element.getKind() == ElementKind.ANNOTATION_TYPE) && (element instanceof TypeElement)) {
+      if (element.getKind() == ElementKind.ANNOTATION_TYPE && element instanceof TypeElement) {
         final var type = (TypeElement) element;
         allScopes.addScopeAnnotation(type);
       }
@@ -323,6 +325,19 @@ public final class InjectProcessor extends AbstractProcessor {
    * Read the existing meta-data from InjectModule (if found) and the factory bean (if exists).
    */
   private void readModule(RoundEnvironment roundEnv) {
+    var moduleList =
+      maybeElements(roundEnv, InjectModulePrism.PRISM_TYPE).stream()
+        .flatMap(Set::stream)
+        .filter(e -> !ScopePrism.isPresent(e))
+        .filter(e -> !GeneratedPrism.isPresent(e))
+        .collect(toList());
+
+    if (moduleList.size() > 1) {
+      for (var element : moduleList) {
+        logError(element, "There should only be one default scope @InjectModule annotation in a module");
+      }
+    }
+
     if (readModuleInfo) {
       // only read the module meta data once
       return;
