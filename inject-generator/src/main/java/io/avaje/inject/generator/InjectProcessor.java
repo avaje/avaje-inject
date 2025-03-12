@@ -129,6 +129,10 @@ public final class InjectProcessor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+    if (roundEnv.errorRaised()) {
+      return false;
+    }
+
     APContext.setProjectModuleElement(annotations, roundEnv);
     readModule(roundEnv);
 
