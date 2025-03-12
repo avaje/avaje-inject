@@ -329,6 +329,7 @@ public final class InjectProcessor extends AbstractProcessor {
     var moduleList =
         maybeElements(roundEnv, InjectModulePrism.PRISM_TYPE).stream()
             .flatMap(Set::stream)
+            .filter(e -> !ScopePrism.isPresent(e))
             .filter(
                 e ->
                     (!(e instanceof TypeElement)
@@ -340,7 +341,7 @@ public final class InjectProcessor extends AbstractProcessor {
 
       for (var element : moduleList) {
         logError(
-            element, "There should only be one user provided @InjectModule annotation in a module");
+            element, "There should only be one default scope @InjectModule annotation in a module");
       }
     }
 
