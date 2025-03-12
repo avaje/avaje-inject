@@ -330,11 +330,7 @@ public final class InjectProcessor extends AbstractProcessor {
         maybeElements(roundEnv, InjectModulePrism.PRISM_TYPE).stream()
             .flatMap(Set::stream)
             .filter(e -> !ScopePrism.isPresent(e))
-            .filter(
-                e ->
-                    (!(e instanceof TypeElement)
-                        || !APContext.isAssignable(
-                            (TypeElement) e, "io.avaje.inject.spi.AvajeModule")))
+            .filter(e -> !GeneratedPrism.isPresent(getProjectModuleElement()))
             .collect(toList());
 
     if (moduleList.size() > 1) {
