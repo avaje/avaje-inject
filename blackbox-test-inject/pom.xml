@@ -29,7 +29,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-jsonb</artifactId>
-      <version>3.0</version>
+      <version>3.1</version>
     </dependency>
 
     <dependency>
