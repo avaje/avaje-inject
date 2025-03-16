@@ -318,10 +318,10 @@ final class ExternalProvider {
         .filter(t -> types.isAssignable(t.asType(), extensionType));
 
     final var checkDirectives =
-      allModules.stream()
-        .flatMap(m -> ElementFilter.providesIn(m.getDirectives()).stream())
-        .filter(ExternalProvider::isInjectExtension)
-        .flatMap(p -> p.getImplementations().stream());
+        allModules.stream()
+            .flatMap(ExternalProvider::providesDirectives)
+            .filter(ExternalProvider::isInjectExtension)
+            .flatMap(p -> p.getImplementations().stream());
 
     return Stream.concat(checkEnclosing, checkDirectives);
   }
