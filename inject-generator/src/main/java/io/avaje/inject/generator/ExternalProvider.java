@@ -318,17 +318,16 @@ final class ExternalProvider {
         .filter(t -> types.isAssignable(t.asType(), extensionType));
 
     final var checkDirectives =
-        allModules.stream()
-            .flatMap(ExternalProvider::providesDirectives)
-            .filter(ExternalProvider::isInjectExtension)
-            .flatMap(p -> p.getImplementations().stream());
+      allModules.stream()
+        .flatMap(ExternalProvider::providesDirectives)
+        .filter(ExternalProvider::isInjectExtension)
+        .flatMap(p -> p.getImplementations().stream());
 
     return Stream.concat(checkEnclosing, checkDirectives);
   }
 
   // Automatic modules throw an NPE for getDirectives on JDT
   private static Stream<ProvidesDirective> providesDirectives(ModuleElement m) {
-
     try {
       return ElementFilter.providesIn(m.getDirectives()).stream();
     } catch (NullPointerException npe) {
