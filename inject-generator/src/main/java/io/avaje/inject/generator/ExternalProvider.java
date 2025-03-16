@@ -24,6 +24,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.ModuleElement;
+import javax.lang.model.element.ModuleElement.ProvidesDirective;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 
@@ -323,6 +324,16 @@ final class ExternalProvider {
         .flatMap(p -> p.getImplementations().stream());
 
     return Stream.concat(checkEnclosing, checkDirectives);
+  }
+
+  // Automatic modules throw an NPE for getDirectives on JDT
+  private static Stream<ProvidesDirective> providesDirectives(ModuleElement m) {
+
+    try {
+      return ElementFilter.providesIn(m.getDirectives()).stream();
+    } catch (NullPointerException npe) {
+      return Stream.of();
+    }
   }
 
   // when a project's module-info is misconfigured a certain way, getEnclosedElements throws an error
