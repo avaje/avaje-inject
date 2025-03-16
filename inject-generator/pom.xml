@@ -55,7 +55,7 @@
       <version>1.5</version>
       <scope>test</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-http-client</artifactId>
