@@ -294,7 +294,12 @@ final class Util {
   static String named(Element p) {
     final NamedPrism named = NamedPrism.getInstanceOn(p);
     if (named != null) {
-      return named.value().replace("\"", "\\\"");
+      String raw = named.value();
+      if (raw.isEmpty()) {
+        // default to the method name
+        raw = p.getSimpleName().toString();
+      }
+      return raw.replace("\"", "\\\"");
     }
     for (final AnnotationMirror annotationMirror : p.getAnnotationMirrors()) {
       final DeclaredType annotationType = annotationMirror.getAnnotationType();
