@@ -253,8 +253,24 @@ final class TypeExtendsInjection {
   }
 
   void validate() {
+    validateFactoryMethodDuplicates();
     for (DestroyMethods.DestroyMethod destroyMethod : factoryPreDestroyMethods.unmatched()) {
       logError(destroyMethod.element(), "Unused @PreDestroy method, no matching @Bean method for type " + destroyMethod.matchType());
+    }
+  }
+
+  void validateFactoryMethodDuplicates() {
+    var map = new HashMap<String, MethodReader>();
+    for (MethodReader method : factoryMethods) {
+      if (!method.isVoid()) {
+        var clashMethod = map.put(method.qualifiedKey(), method);
+        if (clashMethod != null) {
+          var msg = String.format("@Bean method %s() returns the same type as with method %s() without a unique name qualifier." +
+              " Add @Named or a qualifier annotation to allow both @Bean methods.",
+            method.name(), clashMethod.name());
+          logError(method.element(), msg);
+        }
+      }
     }
   }
 }
