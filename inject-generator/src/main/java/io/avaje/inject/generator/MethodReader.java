@@ -502,6 +502,14 @@ final class MethodReader {
     return observeParameter;
   }
 
+  String qualifiedKey() {
+    return name + ':' + genericType.full();
+  }
+
+  boolean isVoid() {
+    return isVoid;
+  }
+
   static class MethodParam {
 
     private final VariableElement element;
