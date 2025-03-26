@@ -91,7 +91,10 @@ final class MethodReader {
     // for multiRegister we desire a qualifier name such that builder.isBeanAbsent() uses it and allows
     // other beans of the same type to also register, otherwise it defaults to slightly confusing behaviour
     this.name = multiRegister && qualifierName == null ? "multi" : qualifierName;
-    TypeElement returnElement = multiRegister ? APContext.typeElement(uType.mainType()) : asElement(returnMirror);
+    TypeElement returnElement =
+      multiRegister
+        ? APContext.typeElement(returnTypeRaw)
+        : optionalType ? APContext.typeElement(returnTypeRaw) : asElement(returnMirror);
     if (returnElement == null) {
       this.typeReader = null;
       this.initMethod = initMethod;
