@@ -61,7 +61,7 @@ final class EventPublisherWriter {
         + "."
         + (qualifier.isEmpty() ? "" : "Qualified")
         + Util.shortName(utype).replace(".", "_")
-        + "$Publisher";
+        + "_Publisher";
 
     this.originName = getUniqueClassName(className, 0);
     if (GENERATED_PUBLISHERS.containsKey(originName)) {
@@ -84,8 +84,8 @@ final class EventPublisherWriter {
     if (Optional.ofNullable(GENERATED_PUBLISHERS.get(className))
         .filter(not(qualifier::equals))
         .isPresent()) {
-      var index = className.indexOf("$Publisher");
-      className = className.substring(0, index) + "$Publisher" + ++recursiveIndex;
+      var index = className.indexOf("_Publisher");
+      className = className.substring(0, index) + "_Publisher" + ++recursiveIndex;
       return getUniqueClassName(className, recursiveIndex);
     }
     return className;

@@ -1,7 +1,12 @@
 package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.typeElement;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -67,7 +72,7 @@ final class MetaData implements Comparable<MetaData> {
 
   @Override
   public String toString() {
-    return (name == null) ? type : type + ":" + name;
+    return name == null ? type : type + ":" + name;
   }
 
   boolean importedComponent() {
@@ -93,7 +98,7 @@ final class MetaData implements Comparable<MetaData> {
     if (Util.isVoid(type)) {
       return "void_" + Util.trimMethod(method);
     } else {
-      final String trimType = Util.trimMethod(Util.unwrapProvider(type));
+      final String trimType = Util.trimMethod(Util.unwrapProvider(type)).replace("$", "_");
       if (name != null) {
         return trimType + "_" + name.replaceAll("[^a-zA-Z0-9_$]+", "_");
       } else {
@@ -188,9 +193,9 @@ final class MetaData implements Comparable<MetaData> {
         } else {
           packageName = ProcessorUtils.packageOf(type);
         }
-        importTypes.add(packageName + ".di." + shortType + Constants.DI);
+        importTypes.add(packageName + ".di." + shortType.replace("$", "_") + Constants.DI);
       } else {
-        importTypes.add(type + Constants.DI);
+        importTypes.add(type.replace("$", "_") + Constants.DI);
       }
     }
   }
@@ -246,7 +251,7 @@ final class MetaData implements Comparable<MetaData> {
     if (hasMethod()) {
       append.append("    ").append(Util.shortMethod(method)).append("(builder");
     } else {
-      append.append("    ").append(shortType).append(Constants.DI).append(".build(builder");
+      append.append("    ").append(shortType.replace("$", "_")).append(Constants.DI).append(".build(builder");
     }
     append.append(");").append(NEWLINE);
     append.append("  }").append(NEWLINE);

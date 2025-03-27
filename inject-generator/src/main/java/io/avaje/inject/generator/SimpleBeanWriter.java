@@ -45,7 +45,7 @@ final class SimpleBeanWriter {
   private Writer createFileWriter() throws IOException {
     String originName = this.originName;
     if (beanReader.beanType().getNestingKind().isNested()) {
-      originName = originName.replace(shortName, shortName.replace(".", "$"));
+      originName = originName.replace(shortName, shortName.replace(".", "_"));
     }
     final JavaFileObject jfo = createSourceFile(originName + suffix);
     return jfo.openWriter();
@@ -164,7 +164,7 @@ final class SimpleBeanWriter {
     }
     writeBuildMethodStart();
     if (proxied) {
-      writer.append("    // this bean is proxied, see %s$Proxy$DI instead", shortName).eol();
+      writer.append("    // this bean is proxied, see %s_Proxy_DI instead", shortName).eol();
     } else {
       writeAddFor(constructor);
     }
@@ -348,7 +348,7 @@ final class SimpleBeanWriter {
     }
     String shortName = this.shortName;
     if (beanReader.beanType().getNestingKind().isNested()) {
-      shortName = shortName.replace(".", "$");
+      shortName = shortName.replace(".", "_");
     }
     writer
       .append("public final %sclass ", requestScopedController ? "" : Util.valhalla())

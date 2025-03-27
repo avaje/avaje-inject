@@ -11,11 +11,11 @@ import io.avaje.inject.spi.Generated;
 
 @Component
 @Generated("avaje-inject-generator")
-public class SomeOptionalDep$Publisher extends Event<SomeOptionalDep> {
+public class SomeOptionalDep_Publisher extends Event<SomeOptionalDep> {
 
   private static final Type TYPE = SomeOptionalDep.class;
 
-  public SomeOptionalDep$Publisher(ObserverManager manager) {
+  public SomeOptionalDep_Publisher(ObserverManager manager) {
     super(manager, TYPE, "");
   }
 }
