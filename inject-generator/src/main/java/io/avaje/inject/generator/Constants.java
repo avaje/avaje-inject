@@ -4,8 +4,8 @@ final class Constants {
 
   static final int ORDERING_DEFAULT = 1000;
 
-  static final String DOLLAR_FACTORY = "$Factory";
-  static final String DI = "$DI";
+  static final String DOLLAR_FACTORY = "_Factory";
+  static final String DI = "_DI";
   static final String IO_CLOSEABLE = "java.io.Closeable";
   static final String AUTO_CLOSEABLE = "java.lang.AutoCloseable";
   static final String OPTIONAL = "java.util.Optional";

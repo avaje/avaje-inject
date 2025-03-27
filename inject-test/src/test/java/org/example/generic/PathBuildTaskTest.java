@@ -18,7 +18,7 @@ class PathBuildTaskTest {
       // PathBuildTask is registered as providing PathBuildTask.class, BuildTask.class and generic TYPE_BuildTaskWithPath
       assertThat(pathBuildTask).isSameAs(buildTask);
 
-      Object viaType = beanScope.get(PathBuildTask$DI.TYPE_BuildTaskWithPath);
+      Object viaType = beanScope.get(PathBuildTask_DI.TYPE_BuildTaskWithPath);
       assertThat(viaType).isSameAs(buildTask);
     }
   }

@@ -53,7 +53,7 @@ class HazManagerTest {
     TDFoo testDouble = new TDFoo();
 
     try (BeanScope context = BeanScope.builder()
-      .bean(HazRepo$DI.TYPE_RepositoryHazLong, testDouble)
+      .bean(HazRepo_DI.TYPE_RepositoryHazLong, testDouble)
       .build()) {
 
       HazManager hazManager = context.get(HazManager.class);

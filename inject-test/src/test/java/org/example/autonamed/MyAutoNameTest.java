@@ -40,8 +40,8 @@ class MyAutoNameTest {
       assertThat(myAutoName2.who()).isEqualTo("one");
 
       final MyGeneric<?> genericWild = beanScope.get(MyGeneric.class, "wild");
-      final MyGeneric<?> generic2 = beanScope.get(MyAutoNameFactory$DI.TYPE_MyGenericString, "genericString");
-      final MyGeneric<?> generic3 = beanScope.get(MyAutoNameFactory$DI.TYPE_MyGenericSome, "genericOther");
+      final MyGeneric<?> generic2 = beanScope.get(MyAutoNameFactory_DI.TYPE_MyGenericString, "genericString");
+      final MyGeneric<?> generic3 = beanScope.get(MyAutoNameFactory_DI.TYPE_MyGenericSome, "genericOther");
       assertThat(genericWild).isNotNull();
       assertThat(generic2).isNotNull();
       assertThat(generic3).isNotNull();

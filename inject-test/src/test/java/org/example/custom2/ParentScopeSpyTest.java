@@ -100,7 +100,7 @@ class ParentScopeSpyTest {
     }
 
     protected void build_custom2_OcsOne() {
-      OcsOne$DI.build(builder);
+      OcsOne_DI.build(builder);
     }
 
   }

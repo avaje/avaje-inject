@@ -25,7 +25,7 @@ final class SimpleBeanProxyWriter {
     this.originName = origin.getQualifiedName().toString();
     this.shortName = origin.getSimpleName().toString();
     this.packageName = ProcessorUtils.packageOf(originName);
-    this.suffix = "$Proxy";
+    this.suffix = "_Proxy";
     this.aspects = beanReader.aspects();
   }
 

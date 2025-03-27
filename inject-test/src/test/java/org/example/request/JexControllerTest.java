@@ -16,7 +16,7 @@ class JexControllerTest {
 
     assertThrows(NoSuchElementException.class, () -> ApplicationScope.get(JexController.class));
 
-    final JexController$Factory factory = ApplicationScope.get(JexController$Factory.class);
+    final JexController_Factory factory = ApplicationScope.get(JexController_Factory.class);
     final Context context = Mockito.mock(Context.class);
     final JexController jexController = factory.create(context);
 

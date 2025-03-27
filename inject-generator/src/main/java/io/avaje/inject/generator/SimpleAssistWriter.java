@@ -1,16 +1,21 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.generator.MethodReader.MethodParam;
+import static io.avaje.inject.generator.APContext.createSourceFile;
+import static java.util.function.Predicate.not;
 
-import javax.lang.model.element.*;
-import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.avaje.inject.generator.APContext.createSourceFile;
-import static java.util.function.Predicate.not;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.tools.JavaFileObject;
+
+import io.avaje.inject.generator.MethodReader.MethodParam;
 
 /**
  * Write the source code for the bean.
@@ -32,7 +37,7 @@ final class SimpleAssistWriter {
     this.beanReader = beanReader;
     this.packageName = beanReader.packageName();
     this.shortName = beanReader.shortName();
-    this.suffix = "$AssistFactory";
+    this.suffix = "_AssistFactory";
     this.assistedElements = beanReader.assistElements();
     this.originName = packageName + "." + shortName;
     this.hasNoConstructorParams =
