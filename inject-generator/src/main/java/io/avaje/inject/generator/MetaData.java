@@ -112,7 +112,7 @@ final class MetaData implements Comparable<MetaData> {
     return buildName;
   }
 
-  String createBuildName() {
+  private String createBuildName() {
     if (Util.isVoid(type)) {
       return "void_" + Util.trimMethod(method);
     } else {
@@ -136,12 +136,13 @@ final class MetaData implements Comparable<MetaData> {
     return key;
   }
 
-  String createKey() {
+  private String createKey() {
     if (Util.isVoid(type)) {
       return "method:" + method;
     }
     String keyString = name != null ? type + ":" + name : type;
     if (hasMethod() && FACTORY_FREQUENCY.compute(type, (k, v) -> v == null ? 0 : ++v) > 0) {
+      // allow multiple factory methods that produce the same types, typically conditional
       keyString += FACTORY_FREQUENCY.get(type);
     }
     return keyString;
