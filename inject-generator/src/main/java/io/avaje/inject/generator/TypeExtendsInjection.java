@@ -262,7 +262,7 @@ final class TypeExtendsInjection {
   void validateFactoryMethodDuplicates() {
     var map = new HashMap<String, MethodReader>();
     for (MethodReader method : factoryMethods) {
-      if (!method.isVoid()) {
+      if (!method.isVoid() && !method.hasConditions()) {
         var clashMethod = map.put(method.qualifiedKey(), method);
         if (clashMethod != null) {
           var msg = String.format("@Bean method %s() returns the same type as with method %s() without a unique name qualifier." +

@@ -15,13 +15,17 @@ final class MetaData implements Comparable<MetaData> {
       .thenComparing(MetaData::name, Comparator.nullsFirst(Comparator.naturalOrder()))
       .thenComparing(MetaData::compareProvides);
 
+  private static final Map<String, Integer> FACTORY_FREQUENCY = new HashMap<>();
+
   private static final String INDENT = "      ";
   private static final String NEWLINE = "\n";
 
   private final String type;
   private final String shortType;
   private final String name;
-  private String method;
+  private final String buildName;
+  private final String method;
+  private final String key;
   private boolean wired;
   private String providesAspect;
 
@@ -45,6 +49,7 @@ final class MetaData implements Comparable<MetaData> {
   private final Set<String> externalDependencies = new HashSet<>();
   private boolean importedComponent;
 
+
   MetaData(DependencyMetaPrism meta) {
     this.type = meta.type();
     this.name = trimName(meta.name());
@@ -55,19 +60,28 @@ final class MetaData implements Comparable<MetaData> {
     this.provides = Util.addQualifierSuffix(meta.provides(), name);
     this.autoProvides = Util.addQualifierSuffix(meta.autoProvides(), name);
     this.importedComponent = meta.importedComponent();
+    this.buildName = createBuildName();
+    this.key = createKey();
   }
 
   MetaData(String type, String name) {
+    this(type, name, null);
+  }
+
+  MetaData(String type, String name, String method) {
     this.type = type;
     this.name = trimName(name);
     this.shortType = Util.shortName(type);
     this.provides = new ArrayList<>();
     this.dependsOn = new ArrayList<>();
+    this.method = method;
+    this.buildName = createBuildName();
+    this.key = createKey();
   }
 
   @Override
   public String toString() {
-    return (name == null) ? type : type + ":" + name;
+    return name == null ? type : type + ":" + name;
   }
 
   boolean importedComponent() {
@@ -90,18 +104,23 @@ final class MetaData implements Comparable<MetaData> {
   }
 
   String buildName() {
+
+    return buildName;
+  }
+
+  String createBuildName() {
     if (Util.isVoid(type)) {
       return "void_" + Util.trimMethod(method);
     } else {
       final String trimType = Util.trimMethod(Util.unwrapProvider(type));
+
       if (name != null) {
         return trimType + "_" + name.replaceAll("[^a-zA-Z0-9_$]+", "_");
-      } else {
-        if (buildNameIncludeMethod()) {
-          return trimType + "__" + Util.trimMethod(method);
-        }
-        return trimType;
+      } else if (buildNameIncludeMethod()
+          || hasMethod() && FACTORY_FREQUENCY.compute(type, (k, v) -> v == null ? 0 : ++v) > 0) {
+        return trimType + "__" + Util.trimMethod(method);
       }
+      return trimType;
     }
   }
 
@@ -111,14 +130,18 @@ final class MetaData implements Comparable<MetaData> {
   }
 
   public String key() {
+    return key;
+  }
+
+  String createKey() {
     if (Util.isVoid(type)) {
       return "method:" + method;
     }
-    if (name != null) {
-      return type + ":" + name;
-    } else {
-      return type;
+    String keyString = name != null ? type + ":" + name : type;
+    if (hasMethod() && FACTORY_FREQUENCY.get(type) > 0) {
+      keyString += FACTORY_FREQUENCY.get(type);
     }
+    return keyString;
   }
 
   boolean noDepends() {
@@ -292,10 +315,6 @@ final class MetaData implements Comparable<MetaData> {
 
   void setDependsOn(List<String> dependsOn) {
     this.dependsOn = dependsOn.stream().map(Dependency::new).collect(Collectors.toList());
-  }
-
-  void setMethod(String method) {
-    this.method = method;
   }
 
   void setAutoProvides(List<String> autoProvides) {
