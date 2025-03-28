@@ -68,8 +68,8 @@ final class MetaData implements Comparable<MetaData> {
     this.provides = Util.addQualifierSuffix(meta.provides(), name);
     this.autoProvides = Util.addQualifierSuffix(meta.autoProvides(), name);
     this.importedComponent = meta.importedComponent();
-    this.buildName = createBuildName();
     this.key = createKey();
+    this.buildName = createBuildName();
   }
 
   MetaData(String type, String name) {
@@ -83,8 +83,8 @@ final class MetaData implements Comparable<MetaData> {
     this.provides = new ArrayList<>();
     this.dependsOn = new ArrayList<>();
     this.method = method;
-    this.buildName = createBuildName();
     this.key = createKey();
+    this.buildName = createBuildName();
   }
 
   @Override
@@ -124,8 +124,7 @@ final class MetaData implements Comparable<MetaData> {
 
       if (name != null) {
         return trimType + "_" + name.replaceAll("[^a-zA-Z0-9_$]+", "_");
-      } else if (buildNameIncludeMethod()
-          || hasMethod() && FACTORY_FREQUENCY.compute(type, (k, v) -> v == null ? 0 : ++v) > 0) {
+      } else if (buildNameIncludeMethod() || hasMethod() && FACTORY_FREQUENCY.get(type) > 0) {
         return trimType + "__" + Util.trimMethod(method);
       }
       return trimType;
@@ -146,7 +145,7 @@ final class MetaData implements Comparable<MetaData> {
       return "method:" + method;
     }
     String keyString = name != null ? type + ":" + name : type;
-    if (hasMethod() && FACTORY_FREQUENCY.computeIfAbsent(type, k -> 0) > 0) {
+    if (hasMethod() && FACTORY_FREQUENCY.compute(type, (k, v) -> v == null ? 0 : ++v) > 0) {
       keyString += FACTORY_FREQUENCY.get(type);
     }
     return keyString;
