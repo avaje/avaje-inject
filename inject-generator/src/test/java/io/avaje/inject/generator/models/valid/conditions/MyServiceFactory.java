@@ -1,4 +1,4 @@
-package io.avaje.inject.generator.models.valid.requires;
+package io.avaje.inject.generator.models.valid.conditions;
 
 import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
