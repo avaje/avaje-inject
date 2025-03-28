@@ -1,8 +1,17 @@
 package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.typeElement;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import io.avaje.spi.internal.ProcessorUtils;
 
 
 /**
@@ -138,7 +147,7 @@ final class MetaData implements Comparable<MetaData> {
       return "method:" + method;
     }
     String keyString = name != null ? type + ":" + name : type;
-    if (hasMethod() && FACTORY_FREQUENCY.get(type) > 0) {
+    if (hasMethod() && FACTORY_FREQUENCY.computeIfAbsent(type, k -> 0) > 0) {
       keyString += FACTORY_FREQUENCY.get(type);
     }
     return keyString;
