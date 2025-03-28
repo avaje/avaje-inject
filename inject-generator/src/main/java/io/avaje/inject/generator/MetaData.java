@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
-
 /**
  * Holds the data as per <code>@DependencyMeta</code>
  */
@@ -56,7 +54,6 @@ final class MetaData implements Comparable<MetaData> {
   private boolean usesExternalDependency;
   private final Set<String> externalDependencies = new HashSet<>();
   private boolean importedComponent;
-
 
   MetaData(DependencyMetaPrism meta) {
     this.type = meta.type();
@@ -112,7 +109,6 @@ final class MetaData implements Comparable<MetaData> {
   }
 
   String buildName() {
-
     return buildName;
   }
 
@@ -136,7 +132,7 @@ final class MetaData implements Comparable<MetaData> {
     return type.contains("<") && hasMethod();
   }
 
-  public String key() {
+  String key() {
     return key;
   }
 
