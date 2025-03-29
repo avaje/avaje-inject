@@ -1,16 +1,11 @@
 package org.example.myapp.conditional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
-
-import org.example.myapp.conditional.Bird;
 import org.example.myapp.conditional.Bird.BlueJay;
 import org.example.myapp.conditional.Bird.StrawberryFinch;
-import org.example.myapp.conditional.BirdFactory;
-import org.example.myapp.conditional.BirdWatcher;
-import org.example.myapp.conditional.QualifiedBirdWatcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +39,7 @@ class ConditionalTests {
     final BeanScope beanScope = BeanScope.builder().build();
 
     assertTrue(beanScope.getOptional(BirdFactory.class).isPresent());
-    assertTrue(beanScope.getOptional(BlueJay.class).isPresent());
+    assertThat(beanScope.get(Bird.class)).isInstanceOf(BlueJay.class);
     assertTrue(beanScope.getOptional(BirdWatcher.class).isEmpty());
   }
 
