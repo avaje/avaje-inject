@@ -84,10 +84,10 @@ final class MethodReader {
     this.factoryType = beanType.getQualifiedName().toString();
     this.factoryShortName = Util.shortName(factoryType);
     this.isVoid = Util.isVoid(mainType);
-    String initMethod = (bean == null) ? null : bean.initMethod();
-    String destroyMethod = (bean == null) ? null : bean.destroyMethod();
-    this.destroyPriority = (bean == null) ? null : bean.destroyPriority();
-    this.beanCloseable = (bean != null) && bean.autoCloseable();
+    String initMethod = bean == null ? null : bean.initMethod();
+    String destroyMethod = bean == null ? null : bean.destroyMethod();
+    this.destroyPriority = bean == null ? null : bean.destroyPriority();
+    this.beanCloseable = bean != null && bean.autoCloseable();
     // for multiRegister we desire a qualifier name such that builder.isBeanAbsent() uses it and allows
     // other beans of the same type to also register, otherwise it defaults to slightly confusing behaviour
     this.name = multiRegister && qualifierName == null ? "multi" : qualifierName;
@@ -151,8 +151,7 @@ final class MethodReader {
   }
 
   MetaData createMeta() {
-    MetaData metaData = new MetaData(returnTypeRaw, name);
-    metaData.setMethod(fullBuildMethod());
+    MetaData metaData = new MetaData(returnTypeRaw, name, fullBuildMethod());
 
     List<String> dependsOn = new ArrayList<>(params.size() + 1);
     dependsOn.add(factoryType);
@@ -372,6 +371,10 @@ final class MethodReader {
 
   Set<UType> genericTypes() {
     return typeReader == null ? Collections.emptySet() : typeReader.genericTypes();
+  }
+
+  boolean hasConditions() {
+    return !conditions.isEmpty();
   }
 
   void buildConditional(Append writer) {
