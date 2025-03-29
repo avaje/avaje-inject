@@ -13,7 +13,7 @@
   <name>avaje inject generator</name>
   <description>annotation processor generating source code for avaje-inject dependency injection</description>
   <properties>
-    <avaje.prisms.version>1.40</avaje.prisms.version>
+    <avaje.prisms.version>1.42</avaje.prisms.version>
     <!-- valhalla-build-start ___
     <maven.compiler.enablePreview>false</maven.compiler.enablePreview>
     ____ valhalla-build-end -->
@@ -37,7 +37,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-spi-service</artifactId>
-      <version>2.10</version>
+      <version>2.11</version>
     </dependency>
 
     <dependency>
