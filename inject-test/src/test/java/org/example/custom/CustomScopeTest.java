@@ -1,18 +1,19 @@
 package org.example.custom;
 
-import io.avaje.inject.BeanEntry;
-import io.avaje.inject.BeanScope;
+import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+import java.util.Optional;
+
 import org.example.MyCustomScope;
 import org.example.coffee.CoffeeMaker;
 import org.example.custom.loc.LocalExternal;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.List;
-import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
-import static org.assertj.core.api.Assertions.assertThat;
+import io.avaje.inject.BeanEntry;
+import io.avaje.inject.BeanScope;
 
 class CustomScopeTest {
 
@@ -80,7 +81,7 @@ class CustomScopeTest {
 
       // includes the 2 supplied beans
       final List<BeanEntry> all = beanScope.all();
-      assertThat(all).hasSize(7);
+      assertThat(all).hasSize(8);
 
       final CustomBean customBean = beanScope.get(CustomBean.class);
 
