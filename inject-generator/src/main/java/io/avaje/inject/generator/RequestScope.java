@@ -8,7 +8,7 @@ import java.util.Map;
  */
 final class RequestScope {
 
-  private static final String JEX_CONTEXT = "io.avaje.jex.Context";
+  private static final String JEX_CONTEXT = "io.avaje.jex.http.Context";
   private static final String JAVALIN_CONTEXT = "io.javalin.http.Context";
   private static final String HELIDON_REQ = "io.helidon.webserver.ServerRequest";
   private static final String HELIDON_RES = "io.helidon.webserver.ServerResponse";

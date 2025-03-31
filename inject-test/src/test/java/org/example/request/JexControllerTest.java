@@ -1,7 +1,7 @@
 package org.example.request;
 
 import io.avaje.inject.xtra.ApplicationScope;
-import io.avaje.jex.Context;
+import io.avaje.jex.http.Context;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
