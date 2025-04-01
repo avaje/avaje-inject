@@ -2,8 +2,7 @@ package org.example.request;
 
 
 import io.avaje.http.api.Controller;
-import io.avaje.jex.Context;
-
+import io.avaje.jex.http.Context;
 import jakarta.inject.Inject;
 
 @Controller

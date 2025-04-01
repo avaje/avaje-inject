@@ -43,7 +43,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-http-api</artifactId>
-      <version>3.1</version>
+      <version>3.2</version>
       <optional>true</optional>
       <scope>provided</scope>
     </dependency>
@@ -59,7 +59,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-http-client</artifactId>
-      <version>3.1</version>
+      <version>3.2</version>
       <scope>test</scope>
     </dependency>
 
