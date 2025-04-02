@@ -24,6 +24,30 @@
       <groupId>io.avaje</groupId>
       <artifactId>avaje-inject</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>io.avaje</groupId>
+          <artifactId>avaje-inject-events</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>io.avaje</groupId>
+          <artifactId>avaje-inject-aop</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-inject-events</artifactId>
+      <version>${project.version}</version>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>io.avaje</groupId>
+      <artifactId>avaje-inject-aop</artifactId>
+      <version>${project.version}</version>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
