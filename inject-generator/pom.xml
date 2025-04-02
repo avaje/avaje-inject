@@ -55,7 +55,6 @@
       <artifactId>avaje-prisms</artifactId>
       <version>${avaje.prisms.version}</version>
       <optional>true</optional>
-      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -69,7 +68,6 @@
       <artifactId>avaje-http-api</artifactId>
       <version>3.2</version>
       <optional>true</optional>
-      <scope>provided</scope>
     </dependency>
 
     <!-- test dependencies -->
