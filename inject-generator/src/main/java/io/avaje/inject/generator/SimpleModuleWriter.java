@@ -13,6 +13,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -69,6 +70,7 @@ final class SimpleModuleWriter {
         ordering.ordered().stream()
             .map(MetaData::type)
             .filter(t -> !seen.add(ProcessorUtils.shortType(t)))
+            .flatMap(t -> Stream.of(t, t + "$DI"))
             .collect(toSet());
   }
 
