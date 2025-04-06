@@ -222,7 +222,7 @@ final class MetaData implements Comparable<MetaData> {
     }
   }
 
-  void buildMethod(Append append) {
+  void buildMethod(Append append, boolean fullyQualify) {
     if (generateProxy) {
       return;
     }
@@ -273,7 +273,7 @@ final class MetaData implements Comparable<MetaData> {
     if (hasMethod()) {
       append.append("    ").append(Util.shortMethod(method)).append("(builder");
     } else {
-      append.append("    ").append(shortType).append(Constants.DI).append(".build(builder");
+      append.append("    ").append(fullyQualify ? type : shortType).append(Constants.DI).append(".build(builder");
     }
     append.append(");").append(NEWLINE);
     append.append("  }").append(NEWLINE);
