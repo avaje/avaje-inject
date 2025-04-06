@@ -5,5 +5,5 @@ import jakarta.inject.Singleton;
 @Singleton
 public class SameType {
   @Singleton
-  static class Inner {}
+  public static class Inner {}
 }
