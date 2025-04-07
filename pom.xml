@@ -53,6 +53,7 @@
         <module>blackbox-other</module>
         <module>blackbox-aspect</module>
         <module>blackbox-test-inject</module>
+        <module>blackbox-multi-scope</module>
       </modules>
     </profile>
   </profiles>
