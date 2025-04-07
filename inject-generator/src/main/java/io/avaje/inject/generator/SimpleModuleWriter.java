@@ -3,14 +3,17 @@ package io.avaje.inject.generator;
 import static io.avaje.inject.generator.APContext.logError;
 import static io.avaje.inject.generator.APContext.typeElement;
 import static io.avaje.inject.generator.ProcessingContext.createMetaInfWriterFor;
+import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -52,6 +55,7 @@ final class SimpleModuleWriter {
   private final String fullName;
   private final ScopeInfo scopeInfo;
   private final MetaDataOrdering ordering;
+  private final Set<String> duplicateTypes;
 
   private Append writer;
 
@@ -61,6 +65,13 @@ final class SimpleModuleWriter {
     this.modulePackage = scopeInfo.modulePackage();
     this.shortName = scopeInfo.moduleShortName();
     this.fullName = scopeInfo.moduleFullName();
+    final Set<String> seen = new HashSet<>();
+    this.duplicateTypes =
+      ordering.ordered().stream()
+        .map(MetaData::type)
+        .filter(t -> !seen.add(ProcessorUtils.shortType(t)))
+        .flatMap(t -> Stream.of(t, t + "$DI"))
+        .collect(toSet());
   }
 
   void write(ScopeInfo.Type scopeType) throws IOException {
@@ -183,7 +194,7 @@ final class SimpleModuleWriter {
 
   private void writeBuildMethods() {
     for (MetaData metaData : ordering.ordered()) {
-      metaData.buildMethod(writer);
+      metaData.buildMethod(writer, duplicateTypes.contains(metaData.type()));
     }
   }
 
@@ -192,8 +203,9 @@ final class SimpleModuleWriter {
     for (String type : factoryImportTypes()) {
       writer.append("import %s;", type).eol();
     }
+
     for (String type : scopeInfo.initModuleDependencies(ordering.importTypes())) {
-      if (Util.validImportType(type, modulePackage)) {
+      if (!duplicateTypes.contains(type) && Util.validImportType(type, modulePackage)) {
         writer.append("import %s;", type).eol();
       }
     }
