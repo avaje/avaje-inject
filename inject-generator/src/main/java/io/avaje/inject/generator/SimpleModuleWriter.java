@@ -65,13 +65,13 @@ final class SimpleModuleWriter {
     this.modulePackage = scopeInfo.modulePackage();
     this.shortName = scopeInfo.moduleShortName();
     this.fullName = scopeInfo.moduleFullName();
-    Set<String> seen = new HashSet<>();
-    duplicateTypes =
-        ordering.ordered().stream()
-            .map(MetaData::type)
-            .filter(t -> !seen.add(ProcessorUtils.shortType(t)))
-            .flatMap(t -> Stream.of(t, t + "$DI"))
-            .collect(toSet());
+    final Set<String> seen = new HashSet<>();
+    this.duplicateTypes =
+      ordering.ordered().stream()
+        .map(MetaData::type)
+        .filter(t -> !seen.add(ProcessorUtils.shortType(t)))
+        .flatMap(t -> Stream.of(t, t + "$DI"))
+        .collect(toSet());
   }
 
   void write(ScopeInfo.Type scopeType) throws IOException {
