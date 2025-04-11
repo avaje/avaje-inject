@@ -6,9 +6,9 @@ import org.multi.scope.ModDScope;
 @ModDScope
 public class BeanInModD {
 
-    private final BeanInModA beanA;
+  private final BeanInModA beanA;
 
-    public BeanInModD(final BeanInModA beanInModA){
-        this.beanA = beanInModA;
-    }
+  public BeanInModD(final BeanInModA beanInModA) {
+    this.beanA = beanInModA;
+  }
 }

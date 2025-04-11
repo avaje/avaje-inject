@@ -4,7 +4,5 @@ import io.avaje.inject.InjectModule;
 import jakarta.inject.Scope;
 
 @Scope
-@InjectModule(
-    requires = {ModAScope.class},
-    provides = ModDScope.class)
+@InjectModule(requires = {ModAScope.class})
 public @interface ModDScope {}

@@ -5,7 +5,5 @@ import org.multi.scope.CrossCutScope;
 
 @CrossCutScope
 public class BeanCross3 {
-  public BeanCross3(final COther other) {
-
-  }
+  public BeanCross3(final COther other) {}
 }

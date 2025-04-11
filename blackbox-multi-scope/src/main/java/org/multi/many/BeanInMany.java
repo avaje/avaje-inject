@@ -8,13 +8,13 @@ import org.multi.scope.ManyScope;
 @ManyScope
 public class BeanInMany {
 
-    private final BeanInModE beanInModE;
-    private final COther cOther;
-    private final BeanInModA modA;
+  private final BeanInModE beanInModE;
+  private final COther cOther;
+  private final BeanInModA modA;
 
-    public BeanInMany(final BeanInModE beanInModE, final COther cOther, final BeanInModA modA) {
-        this.beanInModE = beanInModE;
-        this.cOther = cOther;
-        this.modA = modA;
-    }
+  public BeanInMany(final BeanInModE beanInModE, final COther cOther, final BeanInModA modA) {
+    this.beanInModE = beanInModE;
+    this.cOther = cOther;
+    this.modA = modA;
+  }
 }

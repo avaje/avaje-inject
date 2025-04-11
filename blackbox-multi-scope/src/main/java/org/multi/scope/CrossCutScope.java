@@ -4,7 +4,5 @@ import io.avaje.inject.InjectModule;
 import jakarta.inject.Scope;
 
 @Scope
-@InjectModule(
-    requires = {ModAScope.class, ModBScope.class},
-    provides = CrossCutScope.class)
+@InjectModule(requires = {ModAScope.class, ModBScope.class})
 public @interface CrossCutScope {}

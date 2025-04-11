@@ -26,7 +26,7 @@ public class CrossCutMain {
 
   public static BeanScope buildScope() {
     return BeanScope.builder()
-      .modules(new ModAModule(), new ModCModule(), new ModBModule(),  new CrossCutModule())
-      .build();
+        .modules(new ModAModule(), new ModCModule(), new ModBModule(), new CrossCutModule())
+        .build();
   }
 }

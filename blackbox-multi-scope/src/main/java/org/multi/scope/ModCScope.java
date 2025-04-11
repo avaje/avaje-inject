@@ -4,5 +4,5 @@ import io.avaje.inject.InjectModule;
 import jakarta.inject.Scope;
 
 @Scope
-@InjectModule(provides = ModCScope.class)
+@InjectModule
 public @interface ModCScope {}
