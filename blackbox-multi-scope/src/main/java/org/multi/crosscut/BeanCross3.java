@@ -1,6 +1,6 @@
 package org.multi.crosscut;
 
-import org.multi.modc.modb.COther;
+import org.multi.modc.COther;
 import org.multi.scope.CrossCutScope;
 
 @CrossCutScope

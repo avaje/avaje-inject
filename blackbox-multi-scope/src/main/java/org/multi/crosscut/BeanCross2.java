@@ -1,8 +1,7 @@
 package org.multi.crosscut;
 
 import org.multi.moda.BeanInModA;
-import org.multi.modb.BeanInModB;
-import org.multi.modc.modb.BeanInModC;
+import org.multi.modc.BeanInModC;
 import org.multi.scope.CrossCutScope;
 
 @CrossCutScope
