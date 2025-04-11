@@ -239,7 +239,7 @@ final class ScopeInfo {
     }
     try {
       SimpleModuleWriter factoryWriter = new SimpleModuleWriter(ordering, this);
-      factoryWriter.write(type());
+      factoryWriter.write();
       moduleWritten = true;
     } catch (FilerException e) {
       logWarn("FilerException trying to write factory %s", e.getMessage());
@@ -253,6 +253,10 @@ final class ScopeInfo {
    */
   Type type() {
     return annotationType == null ? Type.DEFAULT : Constants.TESTSCOPE.equals(annotationType.getQualifiedName().toString()) ? Type.TEST : Type.CUSTOM;
+  }
+
+  UType scopeAnnotation() {
+    return UType.parse(annotationType.asType());
   }
 
   /**
@@ -492,7 +496,7 @@ final class ScopeInfo {
     for (String require : requires) {
       final ScopeInfo requiredScope = scopes.get(require);
       // recursively search parent scope
-      if ((requiredScope != null) && requiredScope.providesDependencyRecursive(dependency)) {
+      if (requiredScope != null && requiredScope.providesDependencyRecursive(dependency)) {
         // logWarn("dependency " + dependency + " provided by other scope " + requiredScope.name);
         return true;
       }

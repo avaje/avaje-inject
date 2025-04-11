@@ -19,6 +19,8 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
 
+import io.avaje.inject.generator.ScopeInfo.Type;
+
 /**
  * Write the source code for the factory.
  */
@@ -55,6 +57,7 @@ final class SimpleModuleWriter {
   private final String fullName;
   private final ScopeInfo scopeInfo;
   private final MetaDataOrdering ordering;
+  private final Type scopeType;
   private final Set<String> duplicateTypes;
 
   private Append writer;
@@ -65,6 +68,8 @@ final class SimpleModuleWriter {
     this.modulePackage = scopeInfo.modulePackage();
     this.shortName = scopeInfo.moduleShortName();
     this.fullName = scopeInfo.moduleFullName();
+    this.scopeType = scopeInfo.type();
+
     final Set<String> seen = new HashSet<>();
     this.duplicateTypes =
       ordering.ordered().stream()
@@ -74,7 +79,7 @@ final class SimpleModuleWriter {
         .collect(toSet());
   }
 
-  void write(ScopeInfo.Type scopeType) throws IOException {
+  void write() throws IOException {
     writer = new Append(createFileWriter());
     writePackage();
     writeStartClass();
@@ -109,6 +114,10 @@ final class SimpleModuleWriter {
   private void writeProvides() {
     final Set<String> autoProvidesAspects = new TreeSet<>();
     final Set<String> autoProvides = new TreeSet<>();
+
+    if (scopeType == ScopeInfo.Type.CUSTOM) {
+      autoProvides.add(scopeInfo.scopeAnnotation().full());
+    }
 
     for (MetaData metaData : ordering.ordered()) {
       final String aspect = metaData.providesAspect();

@@ -1,6 +1,6 @@
 package org.multi.modb;
 
-import org.multi.modc.modb.COther;
+import org.multi.modc.COther;
 import org.multi.scope.ModBScope;
 
 @ModBScope
