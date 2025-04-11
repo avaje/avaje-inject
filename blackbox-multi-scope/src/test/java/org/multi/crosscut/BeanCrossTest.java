@@ -66,6 +66,9 @@ class BeanCrossTest {
         new ModCModule(),
         new ModAModule(),
         new CrossCutModule(),
+      })),
+      Arguments.of(Named.of("Only the end module is required", new AvajeModule[]{
+        new ManyModule()
       }))
     );
   }

@@ -106,6 +106,22 @@ public @interface InjectModule {
   Class<?>[] requiresPackages() default {};
 
   /**
+   * Modules and scopes that are expected to be automatically imported when this module is requested manually
+   * <p>
+   * Like {@code requires}, references to beans created in the imported module/scope are not treated as missing.
+   * Unlike {@code requires} though, referenced items will be provided automatically.
+   * <p>
+   * Any item that a referenced module/scope {@code requires} must either:
+   * <ul>
+   *  <li>Be provided by another {@code automaticallyImport}ed item</li>
+   *  <li>Be required by this module as well</li>
+   * </ul>
+   * <p>
+   * Circular dependencies are not permitted
+   */
+  Class<?>[] automaticallyImport() default {};
+
+  /**
    * Internal use only - identifies the custom scope annotation associated to this module.
    * <p>
    * When a module is generated for a custom scope this is set to link the module back to the
