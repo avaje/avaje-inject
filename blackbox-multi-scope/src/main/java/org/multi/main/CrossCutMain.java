@@ -1,6 +1,5 @@
 package org.multi.main;
 
-import io.avaje.inject.BeanScope;
 import org.multi.crosscut.BeanCross;
 import org.multi.crosscut.BeanCross2;
 import org.multi.crosscut.BeanCross3;
@@ -9,7 +8,9 @@ import org.multi.moda.BeanInModA;
 import org.multi.moda.ModAModule;
 import org.multi.modb.BeanInModB;
 import org.multi.modb.ModBModule;
-import org.multi.modc.modb.ModCModule;
+import org.multi.modc.ModCModule;
+
+import io.avaje.inject.BeanScope;
 
 public class CrossCutMain {
 

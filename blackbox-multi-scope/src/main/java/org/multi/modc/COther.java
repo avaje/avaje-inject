@@ -1,4 +1,4 @@
-package org.multi.modc.modb;
+package org.multi.modc;
 
 import org.multi.scope.ModCScope;
 
