@@ -5,10 +5,7 @@ import org.multi.crosscut.BeanCross2;
 import org.multi.crosscut.BeanCross3;
 import org.multi.crosscut.CrossCutModule;
 import org.multi.moda.BeanInModA;
-import org.multi.moda.ModAModule;
 import org.multi.modb.BeanInModB;
-import org.multi.modb.ModBModule;
-import org.multi.modc.ModCModule;
 
 import io.avaje.inject.BeanScope;
 
@@ -25,8 +22,6 @@ public class CrossCutMain {
   }
 
   public static BeanScope buildScope() {
-    return BeanScope.builder()
-        .modules(new ModAModule(), new ModCModule(), new ModBModule(), new CrossCutModule())
-        .build();
+    return BeanScope.builder().modules(CrossCutModule.allRequiredModules()).build();
   }
 }
