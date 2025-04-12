@@ -108,7 +108,7 @@ final class SimpleModuleWriter {
     ProcessingContext.modules();
     Set<String> requiredModules = new HashSet<>();
 
-    var dependentScopes =
+    var directScopes =
         scopeInfo.requires().stream()
             .map(APContext::typeElement)
             .filter(ScopePrism::isPresent)
@@ -116,11 +116,16 @@ final class SimpleModuleWriter {
             .map(TypeElement::getQualifiedName)
             .map(Object::toString)
             .map(allScopes()::get)
+            .collect(toList());
+    var dependentScopes =
+        directScopes.stream()
             .filter(Objects::nonNull)
             .flatMap(scope -> scope.dependentScopes().stream())
             .collect(toList());
 
-    // don't write if dependent scopes have constructor params
+    // don't write if dependent scopes have constructor params or external module
+    if (directScopes.contains(null)) return;
+
     for (var scope : dependentScopes) {
       if (scope.requires().stream().map(allScopes()::get).anyMatch(Objects::isNull)) {
         return;

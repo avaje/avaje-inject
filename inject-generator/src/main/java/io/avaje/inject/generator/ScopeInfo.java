@@ -205,7 +205,7 @@ final class ScopeInfo {
       .filter(Objects::nonNull)
       .flatMap(scope -> scope.dependentScopes().stream())
       .forEach(depScopes::add);
-    
+
     depScopes.add(this);
     return List.copyOf(depScopes);
   }
@@ -596,8 +596,7 @@ final class ScopeInfo {
       return importTypes;
     }
     for (String require : requires) {
-      final ScopeInfo otherScope = scopes.get(require);
-      if (otherScope == null) {
+      if (!ScopePrism.isPresent(APContext.typeElement(require))) {
         importTypes.add(require);
         final String type = Util.shortName(require);
         final String var = Util.initLower(type);

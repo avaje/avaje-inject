@@ -32,10 +32,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-params</artifactId>
-      <version>5.12.1</version>
-      <scope>test</scope>
+      <groupId>io.avaje</groupId>
+      <artifactId>blackbox-other</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 
