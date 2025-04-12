@@ -70,7 +70,7 @@ class BeanCrossTest {
     );
   }
 
-  private static final Class<?>[] CHECKABLE = {
+  private static final Class[] CHECKABLE = {
     BeanCross.class,
     BeanCross2.class,
     BeanCross3.class,
