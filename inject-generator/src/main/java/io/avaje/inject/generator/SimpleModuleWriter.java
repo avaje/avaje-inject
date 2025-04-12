@@ -2,19 +2,25 @@ package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.logError;
 import static io.avaje.inject.generator.APContext.typeElement;
+import static io.avaje.inject.generator.ProcessingContext.allScopes;
 import static io.avaje.inject.generator.ProcessingContext.createMetaInfWriterFor;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
@@ -83,15 +89,82 @@ final class SimpleModuleWriter {
     writer = new Append(createFileWriter());
     writePackage();
     writeStartClass();
+
+    if (scopeType != ScopeInfo.Type.CUSTOM) {
+      writeServicesFile(scopeType);
+    } else {
+      writeRequiredModules();
+    }
     writeProvides();
     writeClassesMethod();
     writeBuildMethod();
     writeBuildMethods();
     writeEndClass();
     writer.close();
-    if (scopeType != ScopeInfo.Type.CUSTOM) {
-      writeServicesFile(scopeType);
+  }
+
+  private void writeRequiredModules() {
+
+    ProcessingContext.modules();
+    Set<String> requiredModules = new HashSet<>();
+
+    var directScopes =
+        scopeInfo.requires().stream()
+            .map(APContext::typeElement)
+            .filter(ScopePrism::isPresent)
+            .filter(e -> e.getKind() == ElementKind.ANNOTATION_TYPE)
+            .map(TypeElement::getQualifiedName)
+            .map(Object::toString)
+            .map(allScopes()::get)
+            .collect(toList());
+    var dependentScopes =
+        directScopes.stream()
+            .filter(Objects::nonNull)
+            .flatMap(scope -> scope.dependentScopes().stream())
+            .collect(toList());
+
+    // don't write if dependent scopes have constructor params or external module
+    if (directScopes.contains(null)) return;
+
+    for (var scope : dependentScopes) {
+      if (scope.requires().stream().map(allScopes()::get).anyMatch(Objects::isNull)) {
+        return;
+      }
     }
+
+    dependentScopes.stream()
+        .map(ScopeInfo::moduleFullName)
+        .filter(Objects::nonNull)
+        .filter(Predicate.not(String::isBlank))
+        .forEach(requiredModules::add);
+
+    final Map<String, String> dependencies =
+        new LinkedHashMap<>(scopeInfo.constructorDependencies());
+
+    writer.append("  public static AvajeModule[] allRequiredModules(");
+
+    boolean comma = false;
+    for (Map.Entry<String, String> entry : dependencies.entrySet()) {
+
+      if (!comma) {
+        comma = true;
+      } else {
+        writer.append(", ");
+      }
+      writer.append(entry.getKey()).append(" ").append(entry.getValue());
+    }
+
+    writer.append(") {").eol();
+    writer.append("    return new AvajeModule[] {").eol();
+
+    for (String rawType : requiredModules) {
+      writer.append("      new %s(),", rawType).eol();
+    }
+    writer.append("      new %s(", shortName);
+    writer.append(String.join(", ", scopeInfo.constructorDependencies().values()));
+    writer.append(")").eol();
+    writer.append("    };").eol();
+    writer.append("  }").eol().eol();
   }
 
   private void writeServicesFile(ScopeInfo.Type scopeType) {
@@ -116,7 +189,8 @@ final class SimpleModuleWriter {
     final Set<String> autoProvides = new TreeSet<>();
 
     if (scopeType == ScopeInfo.Type.CUSTOM) {
-      autoProvides.add(scopeInfo.scopeAnnotation().full());
+      autoProvides.add(scopeInfo.scopeAnnotationFQN());
+      autoProvides.add(shortName);
     }
 
     for (MetaData metaData : ordering.ordered()) {

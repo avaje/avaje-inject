@@ -1,9 +1,23 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.ProcessingContext.*;
-import static io.avaje.inject.generator.APContext.*;
+import static io.avaje.inject.generator.APContext.createSourceFile;
+import static io.avaje.inject.generator.APContext.logError;
+import static io.avaje.inject.generator.APContext.logNote;
+import static io.avaje.inject.generator.APContext.logWarn;
+import static io.avaje.inject.generator.ProcessingContext.addModule;
+import static io.avaje.inject.generator.ProcessingContext.isDuplicateModule;
+
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.processing.FilerException;
@@ -163,6 +177,10 @@ final class ScopeInfo {
     return name;
   }
 
+  String scopeAnnotationFQN(){
+    return annotationType.getQualifiedName().toString();
+  }
+
   Set<String> requires() {
     return requires;
   }
@@ -173,6 +191,23 @@ final class ScopeInfo {
 
   Set<String> pluginProvided() {
     return pluginProvided;
+  }
+
+  List<ScopeInfo> dependentScopes() {
+    final List<ScopeInfo> depScopes = new ArrayList<>();
+    requires().stream()
+      .map(APContext::typeElement)
+      .filter(e -> e.getKind() == ElementKind.ANNOTATION_TYPE)
+      .filter(ScopePrism::isPresent)
+      .map(TypeElement::getQualifiedName)
+      .map(Object::toString)
+      .map(scopes::get)
+      .filter(Objects::nonNull)
+      .flatMap(scope -> scope.dependentScopes().stream())
+      .forEach(depScopes::add);
+
+    depScopes.add(this);
+    return List.copyOf(depScopes);
   }
 
   void writeBeanHelpers() {
@@ -561,8 +596,7 @@ final class ScopeInfo {
       return importTypes;
     }
     for (String require : requires) {
-      final ScopeInfo otherScope = scopes.get(require);
-      if (otherScope == null) {
+      if (!ScopePrism.isPresent(APContext.typeElement(require))) {
         importTypes.add(require);
         final String type = Util.shortName(require);
         final String var = Util.initLower(type);

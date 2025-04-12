@@ -6,9 +6,14 @@ import org.multi.mode.BeanInModE;
 import org.multi.scope.ManyScope;
 import org.other.one.custom.OtherCustomComponent;
 
+import io.avaje.inject.External;
+
 @ManyScope
 public class BeanInMany {
 
   public BeanInMany(
-      BeanInModE beanInModE, COther cOther, BeanInModA modA, OtherCustomComponent external) {}
+      BeanInModE beanInModE,
+      COther cOther,
+      BeanInModA modA,
+      @External OtherCustomComponent external) {}
 }
