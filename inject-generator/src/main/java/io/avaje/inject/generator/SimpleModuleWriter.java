@@ -2,6 +2,7 @@ package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.logError;
 import static io.avaje.inject.generator.APContext.typeElement;
+import static io.avaje.inject.generator.ProcessingContext.allScopes;
 import static io.avaje.inject.generator.ProcessingContext.createMetaInfWriterFor;
 import static java.util.stream.Collectors.toSet;
 
@@ -11,9 +12,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.ElementKind;
@@ -102,7 +106,7 @@ final class SimpleModuleWriter {
   private void writeRequiredModules() {
 
     ProcessingContext.modules();
-    Set<String> requiredModules = new TreeSet<>();
+    List<String> requiredModules = new ArrayList<>();
 
     scopeInfo.requires().stream()
         .map(APContext::typeElement)
@@ -111,14 +115,32 @@ final class SimpleModuleWriter {
         .map(TypeElement::getQualifiedName)
         .map(Object::toString)
         .forEach(requiredModules::add);
-
-    writer.append("  public static AvajeModule[] allRequiredModules(");
+      
+    scopeInfo.requires().stream()
+        .map(APContext::typeElement)
+        .filter(ScopePrism::isPresent)
+        .filter(e -> e.getKind() == ElementKind.ANNOTATION_TYPE)
+        .map(TypeElement::getQualifiedName)
+        .map(Object::toString)
+        .map(allScopes()::get)
+        .filter(Objects::nonNull)
+        .flatMap(scope -> scope.dependentScopes().stream())
+        .map(ScopeInfo::moduleFullName)
+        .filter(Objects::nonNull)
+        .filter(Predicate.not(String::isBlank))
+        .forEach(requiredModules::add);
 
     final Map<String, String> dependencies =
         new LinkedHashMap<>(scopeInfo.constructorDependencies());
 
     var scopes = ProcessingContext.allScopes();
-    requiredModules.forEach(e -> dependencies.putAll(scopes.get(e).constructorDependencies()));
+    
+    requiredModules.stream()
+      .forEach(module -> {
+        // Look up module dependencies (how?)
+      });
+
+    writer.append("  public static AvajeModule[] allRequiredModules(");
 
     boolean comma = false;
     for (Map.Entry<String, String> entry : dependencies.entrySet()) {
@@ -134,18 +156,21 @@ final class SimpleModuleWriter {
     writer.append(") {").eol();
     writer.append("    return new AvajeModule[] {").eol();
 
-    writer.append("      new %s(", shortName);
-    writer.append(String.join(", ", scopeInfo.constructorDependencies().values()));
-    writer.append("),").eol();
     for (String rawType : requiredModules) {
       writer.append("      new %s(", rawType).eol();
 
       var scope = scopes.get(rawType);
-
-      writer.append(String.join(", ", scope.constructorDependencies().values()));
+      if(Objects.nonNull(scope)) {
+        writer.append(String.join(", ", scope.constructorDependencies().values()));
+      } else {
+        // Look up module dependencies (how?)
+      }
 
       writer.append("),", rawType).eol();
     }
+    writer.append("      new %s(", shortName);
+    writer.append(String.join(", ", scopeInfo.constructorDependencies().values()));
+    writer.append("),").eol();
     writer.append("    };").eol();
     writer.append("  }").eol().eol();
   }
@@ -172,6 +197,7 @@ final class SimpleModuleWriter {
     final Set<String> autoProvides = new TreeSet<>();
 
     if (scopeType == ScopeInfo.Type.CUSTOM) {
+      autoProvides.add(scopeInfo.scopeAnnotationFQN());
       autoProvides.add(shortName);
     }
 
