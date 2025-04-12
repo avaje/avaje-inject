@@ -83,15 +83,41 @@ final class SimpleModuleWriter {
     writer = new Append(createFileWriter());
     writePackage();
     writeStartClass();
+
+    if (scopeType != ScopeInfo.Type.CUSTOM) {
+      writeServicesFile(scopeType);
+    } else {
+      writeRequiredModules();
+    }
     writeProvides();
     writeClassesMethod();
     writeBuildMethod();
     writeBuildMethods();
     writeEndClass();
     writer.close();
-    if (scopeType != ScopeInfo.Type.CUSTOM) {
-      writeServicesFile(scopeType);
+  }
+
+  private void writeRequiredModules() {
+    ProcessingContext.modules();
+    Set<String> requiredModules = new TreeSet<>();
+
+    requiredModules.add(fullName);
+    scopeInfo.requires().stream()
+        .map(APContext::typeElement)
+        .filter(InjectModulePrism::isPresent)
+        .filter(e -> APContext.isAssignable(e, Constants.MODULE))
+        .map(TypeElement::getQualifiedName)
+        .map(Object::toString)
+        .forEach(requiredModules::add);
+
+    writer.append("  public static AvajeModule[] allRequiredModules() {").eol();
+    writer.append("    return new AvajeModule[] {").eol();
+
+    for (String rawType : requiredModules) {
+      writer.append("      new %s(),", rawType).eol();
     }
+    writer.append("    };").eol();
+    writer.append("  }").eol().eol();
   }
 
   private void writeServicesFile(ScopeInfo.Type scopeType) {
@@ -116,7 +142,7 @@ final class SimpleModuleWriter {
     final Set<String> autoProvides = new TreeSet<>();
 
     if (scopeType == ScopeInfo.Type.CUSTOM) {
-      autoProvides.add(scopeInfo.scopeAnnotation().full());
+      autoProvides.add(shortName);
     }
 
     for (MetaData metaData : ordering.ordered()) {
