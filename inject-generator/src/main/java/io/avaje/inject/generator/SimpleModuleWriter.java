@@ -9,12 +9,14 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
@@ -98,23 +100,51 @@ final class SimpleModuleWriter {
   }
 
   private void writeRequiredModules() {
+
     ProcessingContext.modules();
     Set<String> requiredModules = new TreeSet<>();
 
-    requiredModules.add(fullName);
     scopeInfo.requires().stream()
         .map(APContext::typeElement)
         .filter(InjectModulePrism::isPresent)
-        .filter(e -> APContext.isAssignable(e, Constants.MODULE))
+        .filter(e -> e.getKind() == ElementKind.CLASS)
         .map(TypeElement::getQualifiedName)
         .map(Object::toString)
         .forEach(requiredModules::add);
 
-    writer.append("  public static AvajeModule[] allRequiredModules() {").eol();
+    writer.append("  public static AvajeModule[] allRequiredModules(");
+
+    final Map<String, String> dependencies =
+        new LinkedHashMap<>(scopeInfo.constructorDependencies());
+
+    var scopes = ProcessingContext.allScopes();
+    requiredModules.forEach(e -> dependencies.putAll(scopes.get(e).constructorDependencies()));
+
+    boolean comma = false;
+    for (Map.Entry<String, String> entry : dependencies.entrySet()) {
+
+      if (!comma) {
+        comma = true;
+      } else {
+        writer.append(", ");
+      }
+      writer.append(entry.getKey()).append(" ").append(entry.getValue());
+    }
+
+    writer.append(") {").eol();
     writer.append("    return new AvajeModule[] {").eol();
 
+    writer.append("      new %s(", shortName);
+    writer.append(String.join(", ", scopeInfo.constructorDependencies().values()));
+    writer.append("),").eol();
     for (String rawType : requiredModules) {
-      writer.append("      new %s(),", rawType).eol();
+      writer.append("      new %s(", rawType).eol();
+
+      var scope = scopes.get(rawType);
+
+      writer.append(String.join(", ", scope.constructorDependencies().values()));
+
+      writer.append("),", rawType).eol();
     }
     writer.append("    };").eol();
     writer.append("  }").eol().eol();
