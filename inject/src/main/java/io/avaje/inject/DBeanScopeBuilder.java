@@ -309,7 +309,6 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     private final List<AvajeModule> factories = new ArrayList<>();
     private final List<FactoryState> queue = new ArrayList<>();
     private final List<FactoryState> queueNoDependencies = new ArrayList<>();
-
     private final Map<String, FactoryList> providesMap = new HashMap<>();
 
     FactoryOrder(BeanScope parent, Set<AvajeModule> includeModules, boolean suppliedBeans) {

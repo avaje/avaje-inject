@@ -1,22 +1,13 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.APContext.logError;
-import static io.avaje.inject.generator.APContext.typeElement;
-import static io.avaje.inject.generator.ProcessingContext.allScopes;
-import static io.avaje.inject.generator.ProcessingContext.createMetaInfWriterFor;
+import static io.avaje.inject.generator.APContext.*;
+import static io.avaje.inject.generator.ProcessingContext.*;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -104,48 +95,39 @@ final class SimpleModuleWriter {
   }
 
   private void writeRequiredModules() {
-
-    ProcessingContext.modules();
-    Set<String> requiredModules = new HashSet<>();
-
     var directScopes =
-        scopeInfo.requires().stream()
-            .map(APContext::typeElement)
-            .filter(ScopePrism::isPresent)
-            .filter(e -> e.getKind() == ElementKind.ANNOTATION_TYPE)
-            .map(TypeElement::getQualifiedName)
-            .map(Object::toString)
-            .map(allScopes()::get)
-            .collect(toList());
+      scopeInfo.requires().stream()
+        .map(APContext::typeElement)
+        .filter(ScopePrism::isPresent)
+        .filter(e -> e.getKind() == ElementKind.ANNOTATION_TYPE)
+        .map(TypeElement::getQualifiedName)
+        .map(Object::toString)
+        .map(allScopes()::get)
+        .collect(toList());
+
     var dependentScopes =
-        directScopes.stream()
-            .filter(Objects::nonNull)
-            .flatMap(scope -> scope.dependentScopes().stream())
-            .collect(toList());
+      directScopes.stream()
+        .filter(Objects::nonNull)
+        .flatMap(scope -> scope.dependentScopes().stream())
+        .collect(toList());
 
-    // don't write if dependent scopes have constructor params or external module
-    if (directScopes.contains(null)) return;
-
-    for (var scope : dependentScopes) {
-      if (scope.requires().stream().map(allScopes()::get).anyMatch(Objects::isNull)) {
-        return;
-      }
+    if (hasExternalDependency(directScopes, dependentScopes)) {
+      // don't write if dependent scopes have constructor params or external module
+      return;
     }
 
+    final Set<String> requiredModules = new LinkedHashSet<>();
     dependentScopes.stream()
-        .map(ScopeInfo::moduleFullName)
-        .filter(Objects::nonNull)
-        .filter(Predicate.not(String::isBlank))
-        .forEach(requiredModules::add);
+      .map(ScopeInfo::moduleFullName)
+      .filter(Objects::nonNull)
+      .filter(Predicate.not(String::isBlank))
+      .forEach(requiredModules::add);
 
-    final Map<String, String> dependencies =
-        new LinkedHashMap<>(scopeInfo.constructorDependencies());
+    final Map<String, String> dependencies = new LinkedHashMap<>(scopeInfo.constructorDependencies());
 
     writer.append("  public static AvajeModule[] allRequiredModules(");
-
     boolean comma = false;
     for (Map.Entry<String, String> entry : dependencies.entrySet()) {
-
       if (!comma) {
         comma = true;
       } else {
@@ -156,7 +138,6 @@ final class SimpleModuleWriter {
 
     writer.append(") {").eol();
     writer.append("    return new AvajeModule[] {").eol();
-
     for (String rawType : requiredModules) {
       writer.append("      new %s(),", rawType).eol();
     }
@@ -165,6 +146,18 @@ final class SimpleModuleWriter {
     writer.append(")").eol();
     writer.append("    };").eol();
     writer.append("  }").eol().eol();
+  }
+
+  private boolean hasExternalDependency(List<ScopeInfo> directScopes, List<ScopeInfo> dependentScopes) {
+    if (directScopes.contains(null)) {
+      return true;
+    }
+    for (var scope : dependentScopes) {
+      if (scope.requires().stream().map(allScopes()::get).anyMatch(Objects::isNull)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private void writeServicesFile(ScopeInfo.Type scopeType) {
