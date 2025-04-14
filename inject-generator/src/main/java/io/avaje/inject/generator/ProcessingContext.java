@@ -1,21 +1,37 @@
 package io.avaje.inject.generator;
 
+import static io.avaje.inject.generator.APContext.asTypeElement;
+import static io.avaje.inject.generator.APContext.elements;
+import static io.avaje.inject.generator.APContext.filer;
+import static io.avaje.inject.generator.APContext.logError;
+import static io.avaje.inject.generator.APContext.logNote;
+import static io.avaje.inject.generator.APContext.logWarn;
+import static io.avaje.inject.generator.APContext.typeElement;
+import static io.avaje.inject.generator.APContext.types;
+import static java.util.stream.Collectors.toSet;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.nio.file.NoSuchFileException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.annotation.processing.FilerException;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
-import java.util.*;
-
-import static io.avaje.inject.generator.APContext.*;
-import static java.util.stream.Collectors.toSet;
 
 final class ProcessingContext {
 
@@ -34,6 +50,7 @@ final class ProcessingContext {
     private final List<TypeElement> delayQueue = new ArrayList<>();
     private final Set<String> spiServices = new TreeSet<>();
     private final Set<String> externalSpi = new TreeSet<>();
+    private final AllScopes scopes = new AllScopes();
     private boolean strictWiring;
     private final boolean mergeServices = APContext.getOption("mergeServices").map(Boolean::valueOf).orElse(true);
 
@@ -101,6 +118,10 @@ final class ProcessingContext {
       logWarn("Error reading services file: %s", e.getMessage());
     }
     return Collections.emptyList();
+  }
+
+  static AllScopes allScopes() {
+    return CTX.get().scopes;
   }
 
   static void addInjectSPI(String type) {

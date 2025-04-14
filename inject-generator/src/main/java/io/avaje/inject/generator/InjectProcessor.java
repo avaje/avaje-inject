@@ -71,7 +71,7 @@ public final class InjectProcessor extends AbstractProcessor {
     ProcessingContext.registerProvidedTypes(moduleFileProvided);
     moduleData.forEach(ProcessingContext::addModule);
     this.elementUtils = processingEnv.getElementUtils();
-    this.allScopes = new AllScopes();
+    this.allScopes = ProcessingContext.allScopes();
     this.defaultScope = allScopes.defaultScope();
     ExternalProvider.registerPluginProvidedTypes(defaultScope);
     pluginFileProvided.forEach(defaultScope::pluginProvided);

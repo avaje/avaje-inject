@@ -251,8 +251,9 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
     // sort factories by dependsOn
     ModuleOrdering factoryOrder = new FactoryOrder(parent, includeModules, !suppliedBeans.isEmpty());
-    var modules = serviceLoader.modules();
-    if (factoryOrder.isEmpty()) {
+
+    if (includeModules.isEmpty()) {
+      var modules = serviceLoader.modules();
       // prefer generated ModuleOrdering if provided
       factoryOrder = serviceLoader.moduleOrdering()
         .filter(o -> o.supportsExpected(modules))
@@ -308,15 +309,13 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     private final List<AvajeModule> factories = new ArrayList<>();
     private final List<FactoryState> queue = new ArrayList<>();
     private final List<FactoryState> queueNoDependencies = new ArrayList<>();
-
     private final Map<String, FactoryList> providesMap = new HashMap<>();
 
     FactoryOrder(BeanScope parent, Set<AvajeModule> includeModules, boolean suppliedBeans) {
       this.parent = parent;
-      this.factories.addAll(includeModules);
       this.suppliedBeans = suppliedBeans;
       for (final AvajeModule includeModule : includeModules) {
-        moduleNames.add(includeModule.getClass().getName());
+        add(includeModule);
       }
     }
 
@@ -417,7 +416,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         return false;
       }
       final var factoryList = providesMap.get(dependency);
-      return (factoryList == null || !factoryList.allPushed());
+      return factoryList == null || !factoryList.allPushed();
     }
 
     /**

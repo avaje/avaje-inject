@@ -5,8 +5,6 @@ import org.multi.modb.BeanInModB;
 import org.multi.scope.CrossCutScope;
 
 @CrossCutScope
-public class BeanCross{
-  public BeanCross(final BeanInModA beanInModA, final BeanInModB beanInModB) {
-
-  }
+public class BeanCross {
+  public BeanCross(final BeanInModA beanInModA, final BeanInModB beanInModB) {}
 }

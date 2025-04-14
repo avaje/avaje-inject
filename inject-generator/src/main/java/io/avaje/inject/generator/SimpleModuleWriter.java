@@ -1,23 +1,22 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.APContext.logError;
-import static io.avaje.inject.generator.APContext.typeElement;
-import static io.avaje.inject.generator.ProcessingContext.createMetaInfWriterFor;
+import static io.avaje.inject.generator.APContext.*;
+import static io.avaje.inject.generator.ProcessingContext.*;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
+
+import io.avaje.inject.generator.ScopeInfo.Type;
 
 /**
  * Write the source code for the factory.
@@ -55,6 +54,7 @@ final class SimpleModuleWriter {
   private final String fullName;
   private final ScopeInfo scopeInfo;
   private final MetaDataOrdering ordering;
+  private final Type scopeType;
   private final Set<String> duplicateTypes;
 
   private Append writer;
@@ -65,6 +65,8 @@ final class SimpleModuleWriter {
     this.modulePackage = scopeInfo.modulePackage();
     this.shortName = scopeInfo.moduleShortName();
     this.fullName = scopeInfo.moduleFullName();
+    this.scopeType = scopeInfo.type();
+
     final Set<String> seen = new HashSet<>();
     this.duplicateTypes =
       ordering.ordered().stream()
@@ -74,19 +76,88 @@ final class SimpleModuleWriter {
         .collect(toSet());
   }
 
-  void write(ScopeInfo.Type scopeType) throws IOException {
+  void write() throws IOException {
     writer = new Append(createFileWriter());
     writePackage();
     writeStartClass();
+
+    if (scopeType != ScopeInfo.Type.CUSTOM) {
+      writeServicesFile(scopeType);
+    } else {
+      writeRequiredModules();
+    }
     writeProvides();
     writeClassesMethod();
     writeBuildMethod();
     writeBuildMethods();
     writeEndClass();
     writer.close();
-    if (scopeType != ScopeInfo.Type.CUSTOM) {
-      writeServicesFile(scopeType);
+  }
+
+  private void writeRequiredModules() {
+    var directScopes =
+      scopeInfo.requires().stream()
+        .map(APContext::typeElement)
+        .filter(ScopePrism::isPresent)
+        .filter(e -> e.getKind() == ElementKind.ANNOTATION_TYPE)
+        .map(TypeElement::getQualifiedName)
+        .map(Object::toString)
+        .map(allScopes()::get)
+        .collect(toList());
+
+    var dependentScopes =
+      directScopes.stream()
+        .filter(Objects::nonNull)
+        .flatMap(scope -> scope.dependentScopes().stream())
+        .collect(toList());
+
+    if (hasExternalDependency(directScopes, dependentScopes)) {
+      // don't write if dependent scopes have constructor params or external module
+      return;
     }
+
+    final Set<String> requiredModules = new LinkedHashSet<>();
+    dependentScopes.stream()
+      .map(ScopeInfo::moduleFullName)
+      .filter(Objects::nonNull)
+      .filter(Predicate.not(String::isBlank))
+      .forEach(requiredModules::add);
+
+    final Map<String, String> dependencies = new LinkedHashMap<>(scopeInfo.constructorDependencies());
+
+    writer.append("  public static AvajeModule[] allRequiredModules(");
+    boolean comma = false;
+    for (Map.Entry<String, String> entry : dependencies.entrySet()) {
+      if (!comma) {
+        comma = true;
+      } else {
+        writer.append(", ");
+      }
+      writer.append(entry.getKey()).append(" ").append(entry.getValue());
+    }
+
+    writer.append(") {").eol();
+    writer.append("    return new AvajeModule[] {").eol();
+    for (String rawType : requiredModules) {
+      writer.append("      new %s(),", rawType).eol();
+    }
+    writer.append("      new %s(", shortName);
+    writer.append(String.join(", ", scopeInfo.constructorDependencies().values()));
+    writer.append(")").eol();
+    writer.append("    };").eol();
+    writer.append("  }").eol().eol();
+  }
+
+  private boolean hasExternalDependency(List<ScopeInfo> directScopes, List<ScopeInfo> dependentScopes) {
+    if (directScopes.contains(null)) {
+      return true;
+    }
+    for (var scope : dependentScopes) {
+      if (scope.requires().stream().map(allScopes()::get).anyMatch(Objects::isNull)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private void writeServicesFile(ScopeInfo.Type scopeType) {
@@ -109,6 +180,11 @@ final class SimpleModuleWriter {
   private void writeProvides() {
     final Set<String> autoProvidesAspects = new TreeSet<>();
     final Set<String> autoProvides = new TreeSet<>();
+
+    if (scopeType == ScopeInfo.Type.CUSTOM) {
+      autoProvides.add(scopeInfo.scopeAnnotationFQN());
+      autoProvides.add(shortName);
+    }
 
     for (MetaData metaData : ordering.ordered()) {
       final String aspect = metaData.providesAspect();
