@@ -255,11 +255,9 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     if (includeModules.isEmpty()) {
       var modules = serviceLoader.modules();
       // prefer generated ModuleOrdering if provided
-      factoryOrder =
-          serviceLoader
-              .moduleOrdering()
-              .filter(o -> o.supportsExpected(modules))
-              .orElse(factoryOrder);
+      factoryOrder = serviceLoader.moduleOrdering()
+        .filter(o -> o.supportsExpected(modules))
+        .orElse(factoryOrder);
       modules.forEach(factoryOrder::add);
     }
 
