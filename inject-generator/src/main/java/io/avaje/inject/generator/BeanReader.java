@@ -102,40 +102,42 @@ final class BeanReader {
    * delay until next round if types cannot be resolved
    */
   private boolean shouldDelay() {
-    var construct = Optional.ofNullable(constructor)
+    var constructors = Optional.ofNullable(constructor)
       .map(MethodReader::params).stream()
       .flatMap(List::stream)
       .map(MethodParam::element)
-      .map(Element::getKind);
+      .map(Element::asType)
+      .map(TypeMirror::getKind);
 
     var fields = injectFields.stream()
       .map(FieldReader::element)
-      .map(Element::getKind);
+      .map(Element::asType)
+      .map(TypeMirror::getKind);
+
     var methods = injectMethods.stream()
       .map(MethodReader::params)
       .flatMap(List::stream)
       .map(MethodParam::element)
-      .map(Element::getKind);
+      .map(Element::asType)
+      .map(TypeMirror::getKind);
 
     var interfaces = Optional.ofNullable(beanType.getInterfaces())
       .orElse(List.of())
       .stream()
       .map(TypeMirror::getKind);
-      
+
     var superClass = Optional.ofNullable(beanType.getSuperclass())
       .stream()
       .map(TypeMirror::getKind);
-      
+
     var beanTypes = BeanTypesPrism.getOptionalOn(beanType)
       .map(BeanTypesPrism::value)
       .stream()
       .flatMap(List::stream)
       .map(TypeMirror::getKind);
 
-    var constructorField = Stream.concat(construct, fields);
-    var methodInterfaces = Stream.concat(methods, interfaces);
-    var superclassBeanTypes = Stream.concat(superClass, beanTypes);
-    return Stream.concat(constructorField, Stream.concat(methodInterfaces, superclassBeanTypes))
+    return Stream.of(constructors, fields, methods, interfaces, superClass, beanTypes)
+      .flatMap(s -> s)
       .anyMatch(TypeKind.ERROR::equals);
   }
 
