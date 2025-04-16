@@ -1,17 +1,14 @@
 package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.logError;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 
 import io.avaje.inject.generator.MethodReader.MethodParam;
 
@@ -101,21 +98,36 @@ final class BeanReader {
    * delay until next round if types cannot be resolved
    */
   private boolean shouldDelay() {
-    var construct = Optional.ofNullable(constructor)
+    var constructors = Optional.ofNullable(constructor)
       .map(MethodReader::params).stream()
       .flatMap(List::stream)
-      .map(MethodParam::element);
+      .map(MethodParam::element)
+      .map(Element::asType);
 
-    var fields = injectFields.stream().map(FieldReader::element);
-    var constructFields = Stream.concat(construct, fields);
+    var fields = injectFields.stream()
+      .map(FieldReader::element)
+      .map(Element::asType);
+
     var methods = injectMethods.stream()
       .map(MethodReader::params)
       .flatMap(List::stream)
-      .map(MethodParam::element);
+      .map(MethodParam::element)
+      .map(Element::asType);
 
-    return Stream.concat(constructFields, methods)
-      .map(Element::asType)
-      .anyMatch(t -> t.getKind() == TypeKind.ERROR);
+    var interfaces = beanType.getInterfaces()
+      .stream();
+
+    var superClass = Stream.of(beanType.getSuperclass());
+
+    var beanTypes = BeanTypesPrism.getOptionalOn(beanType)
+      .map(BeanTypesPrism::value)
+      .stream()
+      .flatMap(List::stream);
+
+    return Stream.of(constructors, fields, methods, interfaces, superClass, beanTypes)
+      .flatMap(s -> s)
+      .map(TypeMirror::getKind)
+      .anyMatch(TypeKind.ERROR::equals);
   }
 
   @Override
