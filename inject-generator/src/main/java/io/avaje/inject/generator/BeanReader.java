@@ -102,38 +102,31 @@ final class BeanReader {
       .map(MethodReader::params).stream()
       .flatMap(List::stream)
       .map(MethodParam::element)
-      .map(Element::asType)
-      .map(TypeMirror::getKind);
+      .map(Element::asType);
 
     var fields = injectFields.stream()
       .map(FieldReader::element)
-      .map(Element::asType)
-      .map(TypeMirror::getKind);
+      .map(Element::asType);
 
     var methods = injectMethods.stream()
       .map(MethodReader::params)
       .flatMap(List::stream)
       .map(MethodParam::element)
-      .map(Element::asType)
-      .map(TypeMirror::getKind);
+      .map(Element::asType);
 
-    var interfaces = Optional.ofNullable(beanType.getInterfaces())
-      .stream()
-      .flatMap(List::stream)
-      .map(TypeMirror::getKind);
+    var interfaces = beanType.getInterfaces()
+      .stream();
 
-    var superClass = Optional.ofNullable(beanType.getSuperclass())
-      .stream()
-      .map(TypeMirror::getKind);
+    var superClass = Stream.of(beanType.getSuperclass());
 
     var beanTypes = BeanTypesPrism.getOptionalOn(beanType)
       .map(BeanTypesPrism::value)
       .stream()
-      .flatMap(List::stream)
-      .map(TypeMirror::getKind);
+      .flatMap(List::stream);
 
     return Stream.of(constructors, fields, methods, interfaces, superClass, beanTypes)
       .flatMap(s -> s)
+      .map(TypeMirror::getKind)
       .anyMatch(TypeKind.ERROR::equals);
   }
 
