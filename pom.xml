@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.avaje</groupId>
     <artifactId>java11-oss</artifactId>
-    <version>5.0</version>
+    <version>5.1</version>
   </parent>
   <scm>
     <developerConnection>scm:git:git@github.com:avaje/avaje-inject.git</developerConnection>
