@@ -25,12 +25,13 @@ final class Lookups {
     return MODULE_LOOKUP_MAP.getOrDefault(type.getModule().getName(), DEFAULT_LOOKUP);
   }
 
-  static VarHandle getVarhandle(Class<?> testClass, Field field) {
+  static VarHandle getVarhandle(Field field) {
     try {
-      var lookup = getLookup(testClass);
+      Class<?> declaringClass = field.getDeclaringClass();
+      var lookup = getLookup(declaringClass);
       lookup =
           lookup.hasPrivateAccess()
-              ? MethodHandles.privateLookupIn(testClass, getLookup(testClass))
+              ? MethodHandles.privateLookupIn(declaringClass, getLookup(declaringClass))
               : lookup;
 
       return lookup.unreflectVarHandle(field);
