@@ -18,5 +18,6 @@ public class MyOneTest extends MyOneAbstract {
   void test_expect_inheritedFieldIsInjected() {
     assertThat(something).isNotNull();
     assertThat(steamer).isNotNull();
+    assertThat(someNested()).isNotNull();
   }
 }
