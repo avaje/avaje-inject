@@ -154,7 +154,7 @@ final class MetaReader {
   }
 
   private FieldTarget newTarget(Field field) {
-    return new FieldTarget(field, name(field), Lookups.getVarhandle(testClass, field));
+    return new FieldTarget(field, name(field), Lookups.getVarhandle(field));
   }
 
   private String name(Field field) {
@@ -190,7 +190,7 @@ final class MetaReader {
       for (Field field : captors) {
         set(
             Modifier.isStatic(field.getModifiers()),
-            Lookups.getVarhandle(testClass, field),
+            Lookups.getVarhandle(field),
             captorFor(field),
             testInstance);
       }
