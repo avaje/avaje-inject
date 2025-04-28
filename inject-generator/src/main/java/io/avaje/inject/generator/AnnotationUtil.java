@@ -34,20 +34,22 @@ final class AnnotationUtil {
     var methodName = element.getSimpleName();
     final Types types = APContext.types();
     return types.directSupertypes(element.getEnclosingElement().asType()).stream()
-        .filter(type -> !type.toString().contains("java.lang.Object"))
-        .map(
-            superType -> {
-              final var superClass = (TypeElement) types.asElement(superType);
-              for (final var method : ElementFilter.methodsIn(superClass.getEnclosedElements())) {
-                if (method.getSimpleName().contentEquals(methodName)
-                    && method.getParameters().size() == element.getParameters().size()) {
-                  return method;
-                }
-              }
-              return null;
-            })
-        .filter(Objects::nonNull)
-        .flatMap(m -> APContext.elements().getAllAnnotationMirrors(m).stream())
-        .anyMatch(m -> matchShortName.equals(shortName(m.getAnnotationType().asElement())));
+      .filter(type -> !type.toString().contains("java.lang.Object"))
+      .map(superType -> {
+        final var superClass = (TypeElement) types.asElement(superType);
+        for (final var method : ElementFilter.methodsIn(superClass.getEnclosedElements())) {
+          if (matchNameAndParams(element, method, methodName)) {
+            return method;
+          }
+        }
+        return null;
+      })
+      .filter(Objects::nonNull)
+      .flatMap(m -> APContext.elements().getAllAnnotationMirrors(m).stream())
+      .anyMatch(m -> matchShortName.equals(shortName(m.getAnnotationType().asElement())));
+  }
+
+  private static boolean matchNameAndParams(ExecutableElement element, ExecutableElement method, javax.lang.model.element.Name methodName) {
+    return method.getSimpleName().contentEquals(methodName) && method.getParameters().size() == element.getParameters().size();
   }
 }
