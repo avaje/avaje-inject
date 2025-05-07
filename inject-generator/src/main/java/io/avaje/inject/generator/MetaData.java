@@ -66,7 +66,7 @@ final class MetaData implements Comparable<MetaData> {
     this.autoProvides = Util.addQualifierSuffix(meta.autoProvides(), name);
     this.importedComponent = meta.importedComponent();
     this.key = createKey();
-    this.buildName = createBuildName();
+    this.buildName = createBuildName().replace("[]", "_array");
   }
 
   MetaData(String type, String name) {
@@ -81,7 +81,7 @@ final class MetaData implements Comparable<MetaData> {
     this.dependsOn = new ArrayList<>();
     this.method = method;
     this.key = createKey();
-    this.buildName = createBuildName();
+    this.buildName = createBuildName().replace("[]", "_array");
   }
 
   @Override

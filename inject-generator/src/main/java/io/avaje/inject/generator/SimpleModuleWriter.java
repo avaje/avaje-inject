@@ -241,8 +241,9 @@ final class SimpleModuleWriter {
       if (!"void".equals(rawType) && !ProcessorUtils.isPrimitive(rawType)) {
 
         String type = Util.trimGenerics(rawType);
-        TypeElement element = typeElement(type);
-        if (element != null && element.getModifiers().contains(Modifier.PUBLIC)) {
+        TypeElement element = typeElement(type.replace("[]", ""));
+        if (element != null && element.getModifiers().contains(Modifier.PUBLIC)
+            || type.endsWith("[]") && ProcessorUtils.isPrimitive(type.replace("[]", ""))) {
           publicClasses.add(type);
         }
       }

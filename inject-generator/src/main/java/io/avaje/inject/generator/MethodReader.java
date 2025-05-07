@@ -168,15 +168,22 @@ final class MethodReader {
       var dep = Util.addQualifierSuffix(param.named, Util.trimWildcard(param.paramType));
       dependsOn.add(dep);
     }
-    metaData.setDependsOn(dependsOn);
+
     metaData.setProvides(
-      typeReader == null
-        ? Collections.emptyList()
-        : Util.addQualifierSuffix(typeReader.provides(), name));
-    metaData.setAutoProvides(
-      typeReader == null
-        ? List.of()
-        : Util.addQualifierSuffix(typeReader.autoProvides(), name));
+        typeReader == null
+            ? Collections.emptyList()
+            : Util.addQualifierSuffix(typeReader.provides(), name));
+
+    metaData.setDependsOn(dependsOn);
+    if (genericType.kind() == TypeKind.ARRAY) {
+      metaData.setAutoProvides(
+          Util.addQualifierSuffix(List.of(genericType.fullWithoutAnnotations()), name));
+    } else {
+      metaData.setAutoProvides(
+          typeReader == null
+              ? List.of()
+              : Util.addQualifierSuffix(typeReader.autoProvides(), name));
+    }
     metaData.setProvidesAspect(typeReader == null ? "" : typeReader.providesAspect());
     return metaData;
   }
@@ -351,7 +358,7 @@ final class MethodReader {
   }
 
   private boolean hasLifecycleMethods() {
-    return notEmpty(initMethod) || notEmpty(destroyMethod) || (typeReader != null && typeReader.isClosable() || beanCloseable);
+    return notEmpty(initMethod) || notEmpty(destroyMethod) || typeReader != null && typeReader.isClosable() || beanCloseable;
   }
 
   private boolean notEmpty(String value) {
@@ -391,6 +398,8 @@ final class MethodReader {
       }
       if (typeReader != null) {
         writer.append(typeReader.typesRegister());
+      } else if (genericType.kind() == TypeKind.ARRAY) {
+        writer.append(genericType.fullWithoutAnnotations()).append(".class");
       }
     }
     writer.append(")) {").eol();
