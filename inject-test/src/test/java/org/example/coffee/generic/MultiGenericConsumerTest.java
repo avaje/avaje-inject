@@ -1,9 +1,10 @@
 package org.example.coffee.generic;
 
-import io.avaje.inject.xtra.ApplicationScope;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import io.avaje.inject.xtra.ApplicationScope;
 
 public class MultiGenericConsumerTest {
 
@@ -14,6 +15,6 @@ public class MultiGenericConsumerTest {
 
     assertThat(bean.findAndDo(34L)).isEqualTo("found 34 stuff");
     assertThat(bean.mushString()).isNotNull();
+    assertThat(bean.list()).isNotEmpty();
   }
-
 }

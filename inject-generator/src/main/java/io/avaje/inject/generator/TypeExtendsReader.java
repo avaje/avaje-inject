@@ -210,13 +210,20 @@ final class TypeExtendsReader {
       final String type = Util.unwrapProvider(fullName);
 
       if (proxyBean || isPublic(element)) {
-        final var genericType = !Objects.equals(fullName, type) ? UType.parse(mirror).param0() : UType.parse(mirror);
+        UType uType = UType.parse(mirror);
+        final var genericType = !Objects.equals(fullName, type) ? uType.param0() : uType;
         // check if any unknown generic types are in the parameters (T,T2, etc.)
-        final var knownType = genericType.componentTypes().stream()
-          .flatMap(g -> Stream.concat(Stream.of(g), g.componentTypes().stream()))
-          .noneMatch(g -> g.kind() == TypeKind.TYPEVAR);
+        final var knownType =
+            genericType.componentTypes().stream()
+                .flatMap(g -> Stream.concat(Stream.of(g), g.componentTypes().stream()))
+                .noneMatch(g -> g.kind() == TypeKind.TYPEVAR);
 
         extendsTypes.add(knownType ? Util.unwrapProvider(mirror) : genericType);
+
+        if (uType.isGeneric()) {
+          extendsTypes.add(UType.parse(types().erasure(Util.stripProvider(mirror))));
+        }
+
         extendsInjection.read(element);
       }
 
@@ -257,6 +264,9 @@ final class TypeExtendsReader {
         }
       }
       interfaceTypes.add(rawUType);
+      if (rawUType.isGeneric()) {
+        interfaceTypes.add(UType.parse(types().erasure(Util.stripProvider(anInterface))));
+      }
       for (final TypeMirror supertype : types().directSupertypes(anInterface)) {
         readInterfacesOf(supertype);
       }

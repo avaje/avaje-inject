@@ -74,9 +74,13 @@ final class TypeReader {
       return injectsTypes.stream().map(UType::full).collect(toList());
     }
     return extendsReader.autoProvides().stream()
-      .filter(u -> u.componentTypes().stream().noneMatch(p -> p.kind() == TypeKind.TYPEVAR))
-      .map(UType::full)
-      .collect(toList());
+        .map(
+            u ->
+                u.componentTypes().stream().noneMatch(p -> p.kind() == TypeKind.TYPEVAR)
+                    ? u.full()
+                    : u.mainType())
+        .distinct()
+        .collect(toList());
   }
 
   String providesAspect() {

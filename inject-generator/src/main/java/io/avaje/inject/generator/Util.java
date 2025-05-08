@@ -50,7 +50,7 @@ final class Util {
 
   static String classOfMethod(String method) {
     final int pos = method.lastIndexOf('.');
-    return (pos == -1) ? "" : method.substring(0, pos);
+    return pos == -1 ? "" : method.substring(0, pos);
   }
 
   static String shortMethod(String method) {
@@ -92,7 +92,7 @@ final class Util {
       return "";
     }
     pos = cls.lastIndexOf('.', pos - 1);
-    return (pos == -1) ? "" : cls.substring(0, pos);
+    return pos == -1 ? "" : cls.substring(0, pos);
   }
 
   static String unwrapProvider(String maybeProvider) {
@@ -104,16 +104,20 @@ final class Util {
   }
 
   static UType unwrapProvider(TypeMirror maybeProvider) {
-    if (isProvider(maybeProvider.toString())) {
-      return UType.parse(maybeProvider).param0();
-    } else {
-      return UType.parse(maybeProvider);
-    }
+    return UType.parse(stripProvider(maybeProvider));
   }
 
   static UType unwrapProvider(UType maybeProvider) {
     if (isProvider(maybeProvider.mainType())) {
       return maybeProvider.param0();
+    } else {
+      return maybeProvider;
+    }
+  }
+
+  static TypeMirror stripProvider(TypeMirror maybeProvider) {
+    if (isProvider(maybeProvider.toString())) {
+      return ((DeclaredType) maybeProvider).getTypeArguments().get(0);
     } else {
       return maybeProvider;
     }
