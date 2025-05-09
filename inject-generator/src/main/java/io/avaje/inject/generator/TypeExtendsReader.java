@@ -221,7 +221,6 @@ final class TypeExtendsReader {
         if (uType.isGeneric()) {
           extendsTypes.add(UType.parse(types().erasure(Util.stripProvider(mirror))));
         }
-
         extendsInjection.read(element);
       }
 

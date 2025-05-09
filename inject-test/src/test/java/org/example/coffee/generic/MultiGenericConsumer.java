@@ -40,7 +40,7 @@ class MultiGenericConsumer {
     return aMusher.toString();
   }
 
-  public List<SomeGeneric<?>> list() {
+  List<SomeGeneric<?>> list() {
     return list;
   }
 }
