@@ -213,13 +213,11 @@ final class TypeExtendsReader {
         UType uType = UType.parse(mirror);
         final var genericType = !Objects.equals(fullName, type) ? uType.param0() : uType;
         // check if any unknown generic types are in the parameters (T,T2, etc.)
-        final var knownType =
-            genericType.componentTypes().stream()
-                .flatMap(g -> Stream.concat(Stream.of(g), g.componentTypes().stream()))
-                .noneMatch(g -> g.kind() == TypeKind.TYPEVAR);
+        final var knownType = genericType.componentTypes().stream()
+          .flatMap(g -> Stream.concat(Stream.of(g), g.componentTypes().stream()))
+          .noneMatch(g -> g.kind() == TypeKind.TYPEVAR);
 
         extendsTypes.add(knownType ? Util.unwrapProvider(mirror) : genericType);
-
         if (uType.isGeneric()) {
           extendsTypes.add(UType.parse(types().erasure(Util.stripProvider(mirror))));
         }
