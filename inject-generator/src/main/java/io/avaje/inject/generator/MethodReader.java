@@ -572,8 +572,14 @@ final class MethodReader {
     }
 
     void builderGetDependency(Append writer, String builderName) {
-      writer.append(builderName).append(".").append(utilType.getMethod(nullable, isBeanMap));
-      if (!genericType.isGeneric() || genericType.param0().kind() == TypeKind.WILDCARD) {
+      final boolean wildcard = isWildcard();
+      final var wildParam = wildcard ? String.format("<%s>", genericType.shortWithoutAnnotations()) : "";
+      writer
+        .append(builderName)
+        .append(".")
+        .append(wildParam)
+        .append(utilType.getMethod(nullable, isBeanMap));
+      if (!genericType.isGeneric() || wildcard) {
         writer.append(Util.shortName(genericType.mainType())).append(".class");
       } else {
         writer.append("TYPE_").append(Util.shortName(genericType).replace(".", "_"));
@@ -594,6 +600,11 @@ final class MethodReader {
       writer.append(")");
     }
 
+    private boolean isWildcard() {
+      return genericType.isGeneric()
+        && genericType.componentTypes().stream().allMatch(g -> g.kind() == TypeKind.WILDCARD);
+    }
+
     String simpleName() {
       return simpleName;
     }
@@ -611,7 +622,7 @@ final class MethodReader {
     }
 
     Dependency dependsOn() {
-      return new Dependency(paramType, named, utilType.isCollection());
+      return new Dependency(isWildcard() ? genericType.mainType() : paramType, named, utilType.isCollection());
     }
 
     void addImports(ImportTypeMap importTypes) {
