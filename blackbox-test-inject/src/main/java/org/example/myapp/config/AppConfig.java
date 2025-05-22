@@ -1,6 +1,8 @@
 package org.example.myapp.config;
 
 import io.avaje.inject.*;
+import io.ebean.Database;
+import io.ebean.MyDatabase;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import org.example.myapp.HelloData;
@@ -13,6 +15,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AppConfig {
 
   public static AtomicBoolean BEAN_AUTO_CLOSED = new AtomicBoolean();
+
+  /** Because this is a io.ebean.Database, we know it should be shutdown() last */
+  @Bean // Effectively default to  @Bean(destroyMethod = "shutdown", destroyPriority = Integer.MAX_VALUE)
+  Database database() {
+    return new MyDatabase();
+  }
 
   @PreDestroy(priority = 999)
   void close() {
