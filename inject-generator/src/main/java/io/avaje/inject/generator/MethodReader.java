@@ -3,10 +3,7 @@ package io.avaje.inject.generator;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static io.avaje.inject.generator.Constants.CONDITIONAL_DEPENDENCY;
 import static io.avaje.inject.generator.ProcessingContext.asElement;
@@ -14,6 +11,13 @@ import static io.avaje.inject.generator.ProcessingContext.asElement;
 final class MethodReader {
 
   private static final String CODE_COMMENT_BUILD_FACTORYBEAN = "  /**\n   * Create and register %s via factory bean method %s#%s().\n   */";
+
+  private static final Map<String,String> DEFAULT_DESTROY_METHODS = Map.of(
+    "io.ebean.Database", "shutdown"
+  );
+  private static final Map<String,Integer> DEFAULT_DESTROY_PRIORITY = Map.of(
+    "io.ebean.Database", Integer.MAX_VALUE
+  );
 
   private final TypeExtendsInjection factory;
   private final ExecutableElement element;
@@ -85,8 +89,8 @@ final class MethodReader {
     this.factoryShortName = Util.shortName(factoryType);
     this.isVoid = Util.isVoid(mainType);
     String initMethod = bean == null ? null : bean.initMethod();
-    String destroyMethod = bean == null ? null : bean.destroyMethod();
-    this.destroyPriority = bean == null ? null : bean.destroyPriority();
+    String destroyMethod = bean == null ? null : defaultDestroyMethod(bean.destroyMethod());
+    this.destroyPriority = bean == null ? null : defaultDestroyPriority(bean.destroyPriority());
     this.beanCloseable = bean != null && bean.autoCloseable();
     // for multiRegister we desire a qualifier name such that builder.isBeanAbsent() uses it and allows
     // other beans of the same type to also register, otherwise it defaults to slightly confusing behaviour
@@ -111,6 +115,20 @@ final class MethodReader {
     if (lazy && prototype) {
       APContext.logError("Cannot use both @Lazy and @Prototype");
     }
+  }
+
+  private String defaultDestroyMethod(String destroyMethod) {
+    if (!destroyMethod.isEmpty()) {
+      return destroyMethod;
+    }
+    return DEFAULT_DESTROY_METHODS.get(returnTypeRaw);
+  }
+
+  private Integer defaultDestroyPriority(Integer destroyPriority) {
+    if (destroyPriority != null && destroyPriority != 1000) {
+      return destroyPriority;
+    }
+    return DEFAULT_DESTROY_PRIORITY.get(returnTypeRaw);
   }
 
   @Override
