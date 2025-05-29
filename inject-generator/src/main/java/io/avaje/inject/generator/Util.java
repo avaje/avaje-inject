@@ -1,5 +1,13 @@
 package io.avaje.inject.generator;
 
+import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.toList;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -8,14 +16,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-
-import static java.util.function.Predicate.not;
-import static java.util.stream.Collectors.toList;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 final class Util {
   static final String ASPECT_PROVIDER_PREFIX = "io.avaje.inject.aop.AspectProvider<";
@@ -150,7 +150,7 @@ final class Util {
         char firstChar = part.charAt(0);
         if (foundClass
           || Character.isUpperCase(firstChar)
-          || (!Character.isAlphabetic(firstChar) && Character.isJavaIdentifierStart(firstChar))) {
+          || !Character.isAlphabetic(firstChar) && Character.isJavaIdentifierStart(firstChar)) {
           foundClass = true;
           result += (result.isEmpty() ? "" : ".") + part;
         }
@@ -223,7 +223,7 @@ final class Util {
   }
 
   static UtilType determineType(TypeMirror rawType, boolean beanMap) {
-    return UtilType.of(rawType.toString(), beanMap, rawType);
+    return UtilType.of(beanMap, rawType);
   }
 
   /**

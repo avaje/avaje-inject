@@ -1,11 +1,10 @@
 package org.example.myapp.config;
 
-import io.avaje.inject.Component;
-import io.avaje.lang.Nullable;
-
 import java.util.Optional;
 
 import org.other.one.SomeOptionalDep;
+
+import io.avaje.inject.Component;
 
 @Component
 public class SomeOptionalUser2 {

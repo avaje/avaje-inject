@@ -2,10 +2,11 @@ package org.example.myapp.lazy;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.jspecify.annotations.Nullable;
+
 import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
 import io.avaje.inject.Lazy;
-import io.avaje.lang.Nullable;
 import jakarta.inject.Named;
 
 @Lazy

@@ -2,10 +2,11 @@ package org.example.myapp.lazy;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.jspecify.annotations.Nullable;
+
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.Lazy;
 import io.avaje.inject.PostConstruct;
-import io.avaje.lang.Nullable;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
