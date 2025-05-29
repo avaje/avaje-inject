@@ -25,7 +25,7 @@ final class UtilType {
 
   static UtilType of(boolean beanMap, TypeMirror mirror) {
     var uType = UType.parse(mirror);
-    var rawType = uType.fullWithoutAnnotations();
+    var rawType = uType.fullWithoutAnnotations().replace(" ", "");
     if (rawType.startsWith("java.util.List<")) {
       return new UtilType(Type.LIST, rawType, uType.param0());
     } else if (rawType.startsWith("java.util.Set<")) {
