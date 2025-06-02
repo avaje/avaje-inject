@@ -11,7 +11,7 @@
   <description>testing support for avaje-inject dependency injection</description>
 
   <properties>
-    <jupiter.version>5.12.2</jupiter.version>
+    <jupiter.version>5.13.0</jupiter.version>
     <mockito.version>5.18.0</mockito.version>
   </properties>
 
@@ -111,7 +111,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-jsonb</artifactId>
-      <version>3.4</version>
+      <version>3.5</version>
       <scope>test</scope>
     </dependency>
 
