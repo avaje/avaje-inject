@@ -1,9 +1,9 @@
 package org.example.myapp.config;
 
+import org.jspecify.annotations.Nullable;
 import org.other.one.SomeOptionalDep;
 
 import io.avaje.inject.Component;
-import io.avaje.lang.Nullable;
 
 @Component
 public class SomeOptionalUser {
