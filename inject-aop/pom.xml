@@ -8,6 +8,7 @@
     <version>11.6-RC1</version>
   </parent>
   <artifactId>avaje-inject-aop</artifactId>
+  <name>avaje inject aspect orient programming</name>
   <dependencies>
     <!-- test dependencies -->
     <dependency>

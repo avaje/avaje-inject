@@ -9,6 +9,7 @@
 
   <artifactId>avaje-inject-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
+  <name>avaje inject maven plugin</name>
 
   <dependencies>
     <dependency>
