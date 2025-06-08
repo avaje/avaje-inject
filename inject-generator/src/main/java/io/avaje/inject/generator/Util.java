@@ -141,26 +141,26 @@ final class Util {
     final int p = fullType.lastIndexOf('.');
     if (p == -1) {
       return fullType;
-    } else if (fullType.startsWith("java")) {
-      return fullType.substring(p + 1);
-    } else {
-      var result = "";
-      var foundClass = false;
-      for (final String part : fullType.split("\\.")) {
-        char firstChar = part.charAt(0);
-        if (foundClass
-          || Character.isUpperCase(firstChar)
-          || !Character.isAlphabetic(firstChar) && Character.isJavaIdentifierStart(firstChar)) {
-          foundClass = true;
-          result += (result.isEmpty() ? "" : ".") + part;
-        }
-      }
-      // when in doubt, do the basic thing
-      if (result.isBlank()) {
-        return fullType.substring(p + 1);
-      }
-      return result;
     }
+
+    String[] parts = fullType.split("\\.");
+    StringBuilder result = new StringBuilder();
+    boolean foundClass = false;
+
+    for (String part : parts) {
+      char firstChar = part.charAt(0);
+      if (!foundClass && Character.isUpperCase(firstChar)) {
+        foundClass = true;
+      }
+      if (foundClass) {
+        if (result.length() > 0) {
+          result.append(".");
+        }
+        result.append(part);
+      }
+    }
+
+    return result.length() > 0 ? result.toString() : fullType.substring(p + 1);
   }
 
   static String shortName(UType uType) {
