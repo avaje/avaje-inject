@@ -144,4 +144,12 @@ class UtilTest {
     assertEquals("my.Foo", Util.sanitizeImports("@org.bar.annotationMcgee my.Foo"));
     assertEquals("java.util.String", Util.sanitizeImports("java.util.String>"));
   }
+
+  @Test
+  void testShortName_nestedTypes() {
+    assertEquals("Flow.Publisher", Util.shortName("java.util.concurrent.Flow.Publisher"));
+    assertEquals("Outer.Inner", Util.shortName("com.foo.Outer.Inner"));
+    assertEquals("Only", Util.shortName("a.b.c.Only"));
+    assertEquals("simple", Util.shortName("simple"));
+  }
 }
