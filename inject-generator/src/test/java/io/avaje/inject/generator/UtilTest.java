@@ -21,11 +21,6 @@ class UtilTest {
   }
 
   @Test
-  void nestedShortName() {
-    assertEquals(Util.shortName("com.example.Foo.Bar"), "Foo.Bar");
-  }
-
-  @Test
   void nestedPackageOf() {
     assertEquals(Util.nestedPackageOf("com.example.Foo.Bar"), "com.example");
     assertEquals(Util.nestedPackageOf("com.example.other.foo.Bar"), "com.example.other");
@@ -146,10 +141,13 @@ class UtilTest {
   }
 
   @Test
-  void testShortName_nestedTypes() {
+  void nestedShortName() {
+    assertEquals("Foo.Bar", Util.shortName("com.example.Foo.Bar") );
     assertEquals("Flow.Publisher", Util.shortName("java.util.concurrent.Flow.Publisher"));
     assertEquals("Outer.Inner", Util.shortName("com.foo.Outer.Inner"));
     assertEquals("Only", Util.shortName("a.b.c.Only"));
     assertEquals("simple", Util.shortName("simple"));
+    assertEquals("Math", Util.shortName("java.lang.Math"));
+    assertEquals("BigDecimal", Util.shortName("java.math.BigDecimal"));
   }
 }
