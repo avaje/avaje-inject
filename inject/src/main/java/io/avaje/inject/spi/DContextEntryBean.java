@@ -136,10 +136,8 @@ class DContextEntryBean {
     }
   }
 
-  /**
-   * Single instance scoped Provider based entry.
-   */
-  static final class OnceProvider extends DContextEntryBean {
+  /** Single instance scoped Provider based entry. */
+  static final class OnceBeanProvider extends DContextEntryBean {
 
     private final Provider<?> provider;
 

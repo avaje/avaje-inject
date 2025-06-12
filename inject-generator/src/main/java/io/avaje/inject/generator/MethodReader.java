@@ -59,7 +59,7 @@ final class MethodReader {
       secondary = SecondaryPrism.isPresent(element);
       lazy = LazyPrism.isPresent(element) || LazyPrism.isPresent(element.getEnclosingElement());
       conditions.readAll(element);
-      this.lazyProxyType = Util.lazyProxy(element);
+      this.lazyProxyType = lazy ? Util.lazyProxy(element) : null;
       this.proxyLazy = lazy && lazyProxyType != null;
     } else {
       prototype = false;

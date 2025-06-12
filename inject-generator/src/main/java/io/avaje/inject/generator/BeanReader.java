@@ -58,29 +58,28 @@ final class BeanReader {
     this.beanType = beanType;
     this.type = beanType.getQualifiedName().toString();
     this.shortName = shortName(beanType);
+    this.proxy = ProxyPrism.isPresent(beanType);
+
+    // if proxy read annotations from actual type
+    TypeElement actualType = proxy ? APContext.asTypeElement(beanType.getSuperclass()) : beanType;
+
     this.prototype =
-      PrototypePrism.isPresent(beanType)
-        || importedComponent && ProcessingContext.isImportedPrototype(beanType);
-    this.primary = PrimaryPrism.isPresent(beanType);
-    this.secondary = !primary && SecondaryPrism.isPresent(beanType);
-    this.lazy =
-      !FactoryPrism.isPresent(beanType)
-        && (LazyPrism.isPresent(beanType)
-          || importedComponent && ProcessingContext.isImportedLazy(beanType));
-    final var beantypes = BeanTypesPrism.getOptionalOn(beanType);
-    beantypes.ifPresent(p -> Util.validateBeanTypes(beanType, p.value()));
+        PrototypePrism.isPresent(actualType)
+            || importedComponent && ProcessingContext.isImportedPrototype(actualType);
+    this.primary = PrimaryPrism.isPresent(actualType);
+    this.secondary = !primary && SecondaryPrism.isPresent(actualType);
+    final var beantypes = BeanTypesPrism.getOptionalOn(actualType);
+    beantypes.ifPresent(p -> Util.validateBeanTypes(actualType, p.value()));
     this.typeReader =
-      new TypeReader(
-        beantypes,
-        UType.parse(beanType.asType()),
-        beanType,
-        importTypes,
-        factory);
+        new TypeReader(beantypes, UType.parse(beanType.asType()), beanType, importTypes, factory);
 
     typeReader.process();
 
-    this.lazyProxyType = Util.lazyProxy(beanType);
-    this.proxyLazy = lazy && lazyProxyType != null;
+    this.lazy =
+        !FactoryPrism.isPresent(actualType)
+            && (LazyPrism.isPresent(actualType)
+                || importedComponent && ProcessingContext.isImportedLazy(actualType));
+
     this.requestParams = new BeanRequestParams(type);
     this.name = typeReader.name();
     this.aspects = typeReader.hasAspects();
@@ -93,15 +92,10 @@ final class BeanReader {
     this.constructor = typeReader.constructor();
     this.observerMethods = typeReader.observerMethods();
     this.importedComponent = importedComponent && constructor != null && constructor.isPublic();
-
-    if (ProxyPrism.isPresent(beanType)) {
-      this.proxy = true;
-      conditions.readAll(APContext.asTypeElement(beanType.getSuperclass()));
-    } else {
-      conditions.readAll(beanType);
-      this.proxy = false;
-    }
     this.delayed = shouldDelay();
+    this.lazyProxyType = !lazy || delayed ? null : Util.lazyProxy(actualType);
+    this.proxyLazy = lazy && lazyProxyType != null;
+    conditions.readAll(actualType);
   }
 
   /**
