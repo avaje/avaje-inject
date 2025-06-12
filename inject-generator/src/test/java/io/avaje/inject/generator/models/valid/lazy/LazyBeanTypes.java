@@ -1,5 +1,6 @@
 package io.avaje.inject.generator.models.valid.lazy;
 
+import io.avaje.inject.BeanTypes;
 import io.avaje.inject.Lazy;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
@@ -7,16 +8,16 @@ import jakarta.inject.Singleton;
 
 @Lazy
 @Singleton
-public class LazyBean {
+@BeanTypes(LazyInterface.class)
+public class LazyBeanTypes implements LazyInterface {
 
   Provider<Integer> intProvider;
 
   @Inject
-  public LazyBean(Provider<Integer> intProvider) {
+  public LazyBeanTypes(Provider<Integer> intProvider) {
     this.intProvider = intProvider;
   }
 
-  public LazyBean() {}
-
-  void something() {}
+  @Override
+  public void something() {}
 }

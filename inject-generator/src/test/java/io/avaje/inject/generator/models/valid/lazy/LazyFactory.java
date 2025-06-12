@@ -12,4 +12,9 @@ public class LazyFactory {
   Integer lazyInt() {
     return 0;
   }
+
+  @Bean
+  LazyInterface lazyInterface() {
+    return null;
+  }
 }

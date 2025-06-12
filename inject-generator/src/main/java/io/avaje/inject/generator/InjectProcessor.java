@@ -1,10 +1,32 @@
 package io.avaje.inject.generator;
 
-import io.avaje.prism.GenerateAPContext;
-import io.avaje.prism.GenerateModuleInfoReader;
-import io.avaje.prism.GenerateUtils;
+import static io.avaje.inject.generator.APContext.logError;
+import static io.avaje.inject.generator.APContext.typeElement;
+import static io.avaje.inject.generator.ProcessingContext.addImportedAspects;
+import static io.avaje.inject.generator.ProcessingContext.delayedElements;
+import static io.avaje.inject.generator.ProcessingContext.loadMetaInfCustom;
+import static io.avaje.inject.generator.ProcessingContext.loadMetaInfServices;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
-import javax.annotation.processing.*;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -14,18 +36,9 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static io.avaje.inject.generator.APContext.*;
-import static io.avaje.inject.generator.ProcessingContext.*;
+import io.avaje.prism.GenerateAPContext;
+import io.avaje.prism.GenerateModuleInfoReader;
+import io.avaje.prism.GenerateUtils;
 
 @GenerateUtils
 @GenerateAPContext
@@ -158,7 +171,6 @@ public final class InjectProcessor extends AbstractProcessor {
     readImported(importedElements(roundEnv));
 
     maybeElements(roundEnv, ControllerPrism.PRISM_TYPE).ifPresent(this::readBeans);
-    maybeElements(roundEnv, ProxyPrism.PRISM_TYPE).ifPresent(this::readBeans);
     maybeElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
 
     maybeElements(roundEnv, ExternalPrism.PRISM_TYPE).stream()

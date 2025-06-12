@@ -16,6 +16,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 
 final class Util {
   static final String ASPECT_PROVIDER_PREFIX = "io.avaje.inject.aop.AspectProvider<";
@@ -391,13 +392,35 @@ final class Util {
 
   static void validateBeanTypes(Element origin, List<TypeMirror> beanType) {
     TypeMirror targetType =
-      origin instanceof TypeElement
-        ? origin.asType()
-        : ((ExecutableElement) origin).getReturnType();
-    beanType.forEach(type -> {
-      if (!APContext.types().isAssignable(targetType, type)) {
-        APContext.logError(origin, "%s does not extend type %s", targetType, beanType);
-      }
-    });
+        origin instanceof TypeElement
+            ? origin.asType()
+            : ((ExecutableElement) origin).getReturnType();
+    beanType.forEach(
+        type -> {
+          if (!APContext.types().isAssignable(targetType, type)) {
+            APContext.logError(origin, "%s does not extend type %s", targetType, beanType);
+          }
+        });
+  }
+
+  static TypeElement lazyProxy(TypeElement beanType) {
+
+    if (beanType.getModifiers().contains(Modifier.FINAL)
+        || !beanType.getKind().isInterface() && !Util.hasNoArgConstructor(beanType)) {
+
+      return BeanTypesPrism.getOptionalOn(beanType)
+          .map(BeanTypesPrism::value)
+          .filter(v -> v.size() == 1)
+          .map(v -> APContext.asTypeElement(v.get(0)))
+          .filter(v -> v.getKind().isInterface() || hasNoArgConstructor(v))
+          .orElse(null);
+    }
+
+    return beanType;
+  }
+
+  static boolean hasNoArgConstructor(TypeElement beanType) {
+    return ElementFilter.constructorsIn(beanType.getEnclosedElements()).stream()
+        .anyMatch(e -> e.getParameters().isEmpty() && !e.getModifiers().contains(Modifier.PRIVATE));
   }
 }
