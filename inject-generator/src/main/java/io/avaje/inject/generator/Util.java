@@ -403,12 +403,16 @@ final class Util {
         });
   }
 
-  static TypeElement lazyProxy(TypeElement beanType) {
+  static TypeElement lazyProxy(Element element) {
+    TypeElement type =
+        element instanceof TypeElement
+            ? (TypeElement) element
+            : APContext.asTypeElement(((ExecutableElement) element).getReturnType());
 
-    if (beanType.getModifiers().contains(Modifier.FINAL)
-        || !beanType.getKind().isInterface() && !Util.hasNoArgConstructor(beanType)) {
+    if (type.getModifiers().contains(Modifier.FINAL)
+        || !type.getKind().isInterface() && !Util.hasNoArgConstructor(type)) {
 
-      return BeanTypesPrism.getOptionalOn(beanType)
+      return BeanTypesPrism.getOptionalOn(element)
           .map(BeanTypesPrism::value)
           .filter(v -> v.size() == 1)
           .map(v -> APContext.asTypeElement(v.get(0)))
@@ -416,7 +420,7 @@ final class Util {
           .orElse(null);
     }
 
-    return beanType;
+    return type;
   }
 
   static boolean hasNoArgConstructor(TypeElement beanType) {

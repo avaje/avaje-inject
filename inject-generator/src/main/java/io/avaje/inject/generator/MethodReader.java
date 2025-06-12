@@ -27,6 +27,8 @@ final class MethodReader {
   private final boolean primary;
   private final boolean secondary;
   private final boolean lazy;
+  private final boolean proxyLazy;
+  private final TypeElement lazyProxyType;
   private final String returnTypeRaw;
   private final UType genericType;
   private final String shortName;
@@ -57,11 +59,15 @@ final class MethodReader {
       secondary = SecondaryPrism.isPresent(element);
       lazy = LazyPrism.isPresent(element) || LazyPrism.isPresent(element.getEnclosingElement());
       conditions.readAll(element);
+      this.lazyProxyType = Util.lazyProxy(element);
+      this.proxyLazy = lazy && lazyProxyType != null;
     } else {
       prototype = false;
       primary = false;
       secondary = false;
       lazy = false;
+      this.proxyLazy = false;
+      this.lazyProxyType = null;
     }
     this.methodName = element.getSimpleName().toString();
     TypeMirror returnMirror = element.getReturnType();
@@ -252,7 +258,11 @@ final class MethodReader {
       writer.append(".asSecondary()");
     }
 
-    writer.indent(".registerProvider(() -> {").eol();
+    if (proxyLazy) {
+      writer.indent(".registerLazy(() -> {").eol();
+    } else {
+      writer.indent(".registerProvider(() -> {").eol();
+    }
 
     startTry(writer, "  ");
     writer.indent(indent).append("  return ");
@@ -265,7 +275,16 @@ final class MethodReader {
     }
     writer.append(");").eol();
     endTry(writer, "  ");
-    writer.indent(indent).append("  });").eol();
+    writer.indent(indent);
+    if (proxyLazy) {
+      writer
+          .append(
+              "  }, %s$Lazy::new);",
+              Util.shortName(lazyProxyType.getQualifiedName().toString()).replace(".", "_"))
+          .eol();
+    } else {
+      writer.indent(indent).append("  });").eol();
+    }
     writer.indent(indent).append("}").eol();
   }
 
