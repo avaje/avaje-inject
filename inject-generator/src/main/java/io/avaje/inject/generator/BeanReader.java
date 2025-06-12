@@ -68,10 +68,18 @@ final class BeanReader {
             || importedComponent && ProcessingContext.isImportedPrototype(actualType);
     this.primary = PrimaryPrism.isPresent(actualType);
     this.secondary = !primary && SecondaryPrism.isPresent(actualType);
-    final var beantypes = BeanTypesPrism.getOptionalOn(actualType);
-    beantypes.ifPresent(p -> Util.validateBeanTypes(actualType, p.value()));
+    var beantypes =
+        BeanTypesPrism.getOptionalOn(actualType)
+            .map(BeanTypesPrism::value)
+            .or(() -> proxy ? Optional.of(List.of(actualType.asType())) : Optional.empty());
+    beantypes.ifPresent(t -> Util.validateBeanTypes(actualType, t));
     this.typeReader =
-        new TypeReader(beantypes, UType.parse(beanType.asType()), beanType, importTypes, factory);
+        new TypeReader(
+            beantypes.orElse(List.of()),
+            UType.parse(beanType.asType()),
+            beanType,
+            importTypes,
+            factory);
 
     typeReader.process();
 

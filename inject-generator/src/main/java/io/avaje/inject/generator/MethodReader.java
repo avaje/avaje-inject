@@ -1,12 +1,21 @@
 package io.avaje.inject.generator;
 
-import javax.lang.model.element.*;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
-import java.util.*;
-
 import static io.avaje.inject.generator.Constants.CONDITIONAL_DEPENDENCY;
 import static io.avaje.inject.generator.ProcessingContext.asElement;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 
 final class MethodReader {
 
@@ -110,9 +119,10 @@ final class MethodReader {
       this.initMethod = initMethod;
       this.destroyMethod = destroyMethod;
     } else {
-      final var beantypes = BeanTypesPrism.getOptionalOn(element);
-      beantypes.ifPresent(p -> Util.validateBeanTypes(element, p.value()));
-      this.typeReader = new TypeReader(beantypes, genericType, returnElement, importTypes);
+      var beantypes = BeanTypesPrism.getOptionalOn(element).map(BeanTypesPrism::value);
+      beantypes.ifPresent(t -> Util.validateBeanTypes(element, t));
+      this.typeReader =
+          new TypeReader(beantypes.orElse(List.of()), genericType, returnElement, importTypes);
       typeReader.process();
       MethodLifecycleReader lifecycleReader = new MethodLifecycleReader(returnElement, initMethod, destroyMethod);
       this.initMethod = lifecycleReader.initMethod();
@@ -388,7 +398,7 @@ final class MethodReader {
   }
 
   private boolean hasLifecycleMethods() {
-    return notEmpty(initMethod) || notEmpty(destroyMethod) || (typeReader != null && typeReader.isClosable() || beanCloseable);
+    return notEmpty(initMethod) || notEmpty(destroyMethod) || typeReader != null && typeReader.isClosable() || beanCloseable;
   }
 
   private boolean notEmpty(String value) {
