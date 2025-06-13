@@ -4,10 +4,18 @@ import java.util.Map;
 
 import io.avaje.inject.Component;
 import io.avaje.inject.aop.AOPFallback;
+import io.avaje.inject.generator.models.valid.TestClass;
 import io.avaje.inject.generator.models.valid.Timed;
+import jakarta.inject.Provider;
 
 @Component
 public class MethodTest {
+
+  Provider<TestClass> provider;
+
+  public MethodTest(Provider<TestClass> provider) {
+    this.provider = provider;
+  }
 
   @Timed
   void test(@Param Map<@TypeUse String, String> str, @Param int inty, String regular) {}
