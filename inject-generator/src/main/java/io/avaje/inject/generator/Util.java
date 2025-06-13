@@ -416,7 +416,11 @@ final class Util {
           .map(BeanTypesPrism::value)
           .filter(v -> v.size() == 1)
           .map(v -> APContext.asTypeElement(v.get(0)))
-          .filter(v -> v.getKind().isInterface() || hasNoArgConstructor(v))
+          // figure out generics later
+          .filter(
+              v ->
+                  v.getTypeParameters().isEmpty()
+                      && (v.getKind().isInterface() || hasNoArgConstructor(v)))
           .orElse(null);
     }
 
