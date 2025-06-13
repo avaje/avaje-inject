@@ -20,4 +20,9 @@ public class LazyBeanTypes implements LazyInterface {
 
   @Override
   public void something() {}
+
+  @Override
+  public String somethingElse() { // TODO Auto-generated method stub
+    return null;
+  }
 }

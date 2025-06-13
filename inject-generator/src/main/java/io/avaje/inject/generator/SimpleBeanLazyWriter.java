@@ -154,8 +154,12 @@ final class SimpleBeanLazyWriter {
                 .collect(Collectors.joining(", ")));
       }
 
-      sb.append(" {\n");
-      sb.append("    onceProvider.get().").append(methodName);
+      sb.append(" {\n    ");
+      if (!"void".equals(returnType.full())) {
+        sb.append("return ");
+      }
+
+      sb.append("onceProvider.get().").append(methodName);
       sb.append("(");
       for (int i = 0; i < parameters.size(); i++) {
         sb.append(parameters.get(i).getSimpleName().toString());

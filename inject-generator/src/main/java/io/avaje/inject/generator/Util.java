@@ -409,7 +409,8 @@ final class Util {
             ? (TypeElement) element
             : APContext.asTypeElement(((ExecutableElement) element).getReturnType());
 
-    if (type.getModifiers().contains(Modifier.FINAL)
+    if (!type.getTypeParameters().isEmpty()
+        || type.getModifiers().contains(Modifier.FINAL)
         || !type.getKind().isInterface() && !Util.hasNoArgConstructor(type)) {
 
       return BeanTypesPrism.getOptionalOn(element)
