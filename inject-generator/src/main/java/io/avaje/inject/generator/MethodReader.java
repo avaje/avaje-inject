@@ -669,10 +669,10 @@ final class MethodReader {
       if (nullable) {
         writer.append("@Nullable ");
       }
-      if (genericType.isGeneric()) {
-        writer.append(genericType.shortWithoutAnnotations());
+      if (fullUType.isGeneric()) {
+        writer.append(fullUType.shortWithoutAnnotations());
       } else {
-        writer.append(Util.shortName(genericType.mainType()));
+        writer.append(Util.shortName(fullUType.mainType()));
       }
       writer.append(" ").append(simpleName);
     }
