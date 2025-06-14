@@ -1,17 +1,22 @@
 package io.avaje.inject.generator;
 
-import io.avaje.inject.generator.MethodReader.MethodParam;
+import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toSet;
 
-import javax.lang.model.element.*;
-import javax.lang.model.util.ElementFilter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.util.function.Predicate.not;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toSet;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.util.ElementFilter;
+
+import io.avaje.inject.generator.MethodReader.MethodParam;
 
 final class AssistBeanReader {
 
@@ -34,12 +39,7 @@ final class AssistBeanReader {
     this.beanType = beanType;
     this.type = beanType.getQualifiedName().toString();
     this.typeReader =
-      new TypeReader(
-        Optional.empty(),
-        UType.parse(beanType.asType()),
-        beanType,
-        importTypes,
-        false);
+        new TypeReader(List.of(), UType.parse(beanType.asType()), beanType, importTypes, false);
 
     typeReader.process();
     qualifierName = typeReader.name();

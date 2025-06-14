@@ -168,11 +168,12 @@ final class AspectMethod {
     writer.append(")");
   }
 
-  void writeSetupFields(Append writer) {
-    writer.append("  private final Method %s;", localName).eol();
+  void writeSetupFields(Append writer, boolean lazy) {
+    var isFinal = lazy ? "" : "final ";
+    writer.append("  private %sMethod %s;", isFinal, localName).eol();
     for (AspectPair aspectPair : aspectPairs) {
       String sn = aspectPair.annotationShortName();
-      writer.append("  private final MethodInterceptor %s%s;", localName, sn).eol();
+      writer.append("  private %sMethodInterceptor %s%s;", isFinal, localName, sn).eol();
     }
   }
 

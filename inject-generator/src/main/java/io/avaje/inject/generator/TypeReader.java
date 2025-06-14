@@ -9,6 +9,7 @@ import java.util.Set;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 
 final class TypeReader {
 
@@ -22,7 +23,7 @@ final class TypeReader {
   private final List<UType> injectsTypes;
 
   TypeReader(
-      Optional<BeanTypesPrism> injectsTypes,
+      List<TypeMirror> injectsTypes,
       UType genericType,
       TypeElement beanType,
       ImportTypeMap importTypes,
@@ -31,7 +32,7 @@ final class TypeReader {
   }
 
   TypeReader(
-      Optional<BeanTypesPrism> injectsTypes,
+      List<TypeMirror> injectsTypes,
       UType genericType,
       TypeElement returnElement,
       ImportTypeMap importTypes) {
@@ -39,17 +40,13 @@ final class TypeReader {
   }
 
   private TypeReader(
-      Optional<BeanTypesPrism> injectsTypes,
+      List<TypeMirror> injectsTypes,
       UType genericType,
       boolean forBean,
       TypeElement beanType,
       ImportTypeMap importTypes,
       boolean factory) {
-    this.injectsTypes =
-      injectsTypes.map(BeanTypesPrism::value).stream()
-        .flatMap(List::stream)
-        .map(UType::parse)
-        .collect(toList());
+    this.injectsTypes = injectsTypes.stream().map(UType::parse).collect(toList());
     this.forBean = forBean;
     this.beanType = beanType;
     this.importTypes = importTypes;

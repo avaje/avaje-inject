@@ -15,11 +15,13 @@ class LazyTest {
     var initialized = new AtomicBoolean();
     try (var scope = BeanScope.builder().beans(initialized).build()) {
       assertThat(initialized).isFalse();
-      LazyBean lazy = scope.get(LazyBean.class, "single");
-      assertThat(initialized).isTrue();
+      var lazy = scope.get(LazyBean.class, "single");
       assertThat(lazy).isNotNull();
+      assertThat(initialized).isFalse();
+      lazy.something();
+      assertThat(initialized).isTrue();
 
-      LazyBean lazyAgain = scope.get(LazyBean.class, "single");
+      var lazyAgain = scope.get(LazyBean.class, "single");
       assertThat(lazyAgain).isSameAs(lazy);
     }
   }
@@ -29,9 +31,84 @@ class LazyTest {
     var initialized = new AtomicBoolean();
     try (var scope = BeanScope.builder().beans(initialized).build()) {
       assertThat(initialized).isFalse();
-      LazyBean prov = scope.get(LazyBean.class, "factory");
+      var prov = scope.get(LazyBean.class, "factory");
+      assertThat(initialized).isFalse();
+      prov.something();
       assertThat(initialized).isTrue();
       assertThat(prov).isNotNull();
+    }
+  }
+
+  @Test
+  void testInterface() {
+    var initialized = new AtomicBoolean();
+    try (var scope = BeanScope.builder().beans(initialized).build()) {
+      assertThat(initialized).isFalse();
+      var lazy = scope.get(LazyInterface.class, "single");
+      assertThat(lazy).isNotNull();
+      assertThat(initialized).isFalse();
+      lazy.something();
+      assertThat(initialized).isTrue();
+
+      var lazyAgain = scope.get(LazyInterface.class, "single");
+      assertThat(lazyAgain).isSameAs(lazy);
+    }
+  }
+
+  @Test
+  void testFactoryInterface() {
+    var initialized = new AtomicBoolean();
+    try (var scope = BeanScope.builder().beans(initialized).build()) {
+      assertThat(initialized).isFalse();
+      var prov = scope.get(LazyInterface.class, "factory");
+      assertThat(initialized).isFalse();
+      prov.something();
+      assertThat(initialized).isTrue();
+      assertThat(prov).isNotNull();
+    }
+  }
+
+  @Test
+  void factoryBeanType() {
+    var initialized = new AtomicBoolean();
+    try (var scope = BeanScope.builder().beans(initialized).build()) {
+      assertThat(initialized).isFalse();
+      var prov = scope.get(LazyInterface.class, "factoryBeanType");
+      assertThat(initialized).isFalse();
+      prov.something();
+      assertThat(initialized).isTrue();
+      assertThat(prov).isNotNull();
+    }
+  }
+
+  @Test
+  void testAOP() {
+    var initialized = new AtomicBoolean();
+    try (var scope = BeanScope.builder().beans(initialized).build()) {
+      assertThat(initialized).isFalse();
+      var lazy = scope.get(LazyBeanAOP.class, "single");
+      assertThat(lazy).isNotNull();
+      assertThat(initialized).isFalse();
+      lazy.something();
+      assertThat(initialized).isTrue();
+
+      var lazyAgain = scope.get(LazyBeanAOP.class, "single");
+      assertThat(lazyAgain).isSameAs(lazy);
+    }
+  }
+
+  @Test
+  void testOldLazyBehavior() {
+    var initialized = new AtomicBoolean();
+    try (var scope = BeanScope.builder().beans(initialized).build()) {
+      assertThat(initialized).isFalse();
+      var lazy = scope.get(OldLazy.class, "single");
+      assertThat(lazy).isNotNull();
+      assertThat(initialized).isTrue();
+      lazy.something();
+
+      var lazyAgain = scope.get(OldLazy.class, "single");
+      assertThat(lazyAgain).isSameAs(lazy);
     }
   }
 }
