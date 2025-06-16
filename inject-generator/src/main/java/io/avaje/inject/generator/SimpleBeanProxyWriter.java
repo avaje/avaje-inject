@@ -55,9 +55,6 @@ final class SimpleBeanProxyWriter {
   }
 
   private void writeConstructor() {
-    if (beanReader.proxyLazy()) {
-      writer.append("  public %s%s(){}", shortName, suffix).eol().eol();
-    }
     writer.append("  @Inject\n");
     writer.append("  public %s%s(", shortName, suffix);
     int count = 0;
