@@ -4,11 +4,9 @@ final class ScopeUtil {
 
   static String initName(String name) {
     name = name(name);
-
     if (name == null) {
       return null;
     }
-
     switch (name) {
       case "Inject":
         return "DInject";

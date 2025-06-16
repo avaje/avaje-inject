@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
@@ -12,6 +13,9 @@ class ScopeUtilTest {
     assertEquals("Example", ScopeUtil.name("org.Example"));
     assertEquals("Example", ScopeUtil.name("example"));
     assertEquals("Example", ScopeUtil.name("Example"));
+    assertEquals("Example", ScopeUtil.name("ExampleScope"));
+    assertEquals("Example", ScopeUtil.name("ExampleModule"));
+    assertNull(ScopeUtil.name(null));
   }
 
   @Test
@@ -19,6 +23,7 @@ class ScopeUtilTest {
     // resulting module can't be InjectModule as that clashes with @InjectModule
     assertEquals("DInject", ScopeUtil.initName("org.example.inject"));
     assertEquals("Foo", ScopeUtil.initName("org.example.foo"));
+    assertNull(ScopeUtil.initName(null));
   }
 
   @Test
