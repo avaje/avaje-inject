@@ -11,12 +11,6 @@ import jakarta.inject.Provider;
 @Component
 public class MethodTest {
 
-  Provider<TestClass> provider;
-
-  public MethodTest(Provider<TestClass> provider) {
-    this.provider = provider;
-  }
-
   @Timed
   void test(@Param Map<@TypeUse String, String> str, @Param int inty, String regular) {}
 
