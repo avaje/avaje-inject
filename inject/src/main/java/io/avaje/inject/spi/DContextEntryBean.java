@@ -141,8 +141,7 @@ class DContextEntryBean {
 
     private final Provider<?> provider;
 
-    private OnceBeanProvider(
-        Provider<?> provider, String name, int flag, Class<? extends AvajeModule> currentModule) {
+    private OnceBeanProvider(Provider<?> provider, String name, int flag, Class<? extends AvajeModule> currentModule) {
       super(provider, name, flag, currentModule);
       this.provider = new OnceProvider<>(provider);
     }

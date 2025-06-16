@@ -392,37 +392,35 @@ final class Util {
 
   static void validateBeanTypes(Element origin, List<TypeMirror> beanType) {
     TypeMirror targetType =
-        origin instanceof TypeElement
-            ? origin.asType()
-            : ((ExecutableElement) origin).getReturnType();
-    beanType.forEach(
-        type -> {
-          if (!APContext.types().isAssignable(targetType, type)) {
-            APContext.logError(origin, "%s does not extend type %s", targetType, beanType);
-          }
-        });
+      origin instanceof TypeElement
+        ? origin.asType()
+        : ((ExecutableElement) origin).getReturnType();
+    beanType.forEach(type -> {
+      if (!APContext.types().isAssignable(targetType, type)) {
+        APContext.logError(origin, "%s does not extend type %s", targetType, beanType);
+      }
+    });
   }
 
   static TypeElement lazyProxy(Element element) {
     TypeElement type =
-        element instanceof TypeElement
-            ? (TypeElement) element
-            : APContext.asTypeElement(((ExecutableElement) element).getReturnType());
+      element instanceof TypeElement
+        ? (TypeElement) element
+        : APContext.asTypeElement(((ExecutableElement) element).getReturnType());
 
     if (!type.getTypeParameters().isEmpty()
-        || type.getModifiers().contains(Modifier.FINAL)
-        || !type.getKind().isInterface() && !Util.hasNoArgConstructor(type)) {
+      || type.getModifiers().contains(Modifier.FINAL)
+      || !type.getKind().isInterface() && !Util.hasNoArgConstructor(type)) {
 
       return BeanTypesPrism.getOptionalOn(element)
-          .map(BeanTypesPrism::value)
-          .filter(v -> v.size() == 1)
-          .map(v -> APContext.asTypeElement(v.get(0)))
-          // figure out generics later
-          .filter(
-              v ->
-                  v.getTypeParameters().isEmpty()
-                      && (v.getKind().isInterface() || hasNoArgConstructor(v)))
-          .orElse(null);
+        .map(BeanTypesPrism::value)
+        .filter(v -> v.size() == 1)
+        .map(v -> APContext.asTypeElement(v.get(0)))
+        // figure out generics later
+        .filter(v ->
+          v.getTypeParameters().isEmpty()
+            && (v.getKind().isInterface() || hasNoArgConstructor(v)))
+        .orElse(null);
     }
 
     return type;
@@ -430,7 +428,7 @@ final class Util {
 
   static boolean hasNoArgConstructor(TypeElement beanType) {
     return ElementFilter.constructorsIn(beanType.getEnclosedElements()).stream()
-        .anyMatch(e -> e.getParameters().isEmpty() && !e.getModifiers().contains(Modifier.PRIVATE));
+      .anyMatch(e -> e.getParameters().isEmpty() && !e.getModifiers().contains(Modifier.PRIVATE));
   }
 
   public static String shortNameLazyProxy(TypeElement lazyProxyType) {

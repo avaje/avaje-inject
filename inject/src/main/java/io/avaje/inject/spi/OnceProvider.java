@@ -12,7 +12,7 @@ final class OnceProvider<T> implements Provider<T> {
   private final Provider<T> provider;
   private T bean;
 
-  public OnceProvider(Provider<T> provider) {
+  OnceProvider(Provider<T> provider) {
     this.provider = Objects.requireNonNull(provider);
   }
 

@@ -79,9 +79,10 @@ public interface Builder {
    */
   <T> void registerProvider(Provider<T> provider);
 
-  /** Register the lazy provider into the context. */
-  default <T> void registerLazy(
-      Provider<T> provider, Function<Provider<T>, T> proxyClassConstructor) {
+  /**
+   * Register the lazy provider into the context.
+   */
+  default <T> void registerLazy(Provider<T> provider, Function<Provider<T>, T> proxyClassConstructor) {
     register(proxyClassConstructor.apply(new OnceProvider<>(provider)));
   }
 
