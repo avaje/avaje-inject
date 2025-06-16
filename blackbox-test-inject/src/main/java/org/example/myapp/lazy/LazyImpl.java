@@ -30,4 +30,7 @@ public class LazyImpl implements LazyInterface {
 
   @Override
   public void something() {}
+
+  @Override
+  public void otherThing() {}
 }

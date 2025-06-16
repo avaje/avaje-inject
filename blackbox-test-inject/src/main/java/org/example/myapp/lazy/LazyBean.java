@@ -25,4 +25,6 @@ public class LazyBean {
   }
 
   void something() {}
+
+  public void other() {}
 }

@@ -29,7 +29,7 @@ final class SimpleBeanLazyWriter {
           + "  public {2}$Lazy(Provider<{2}> onceProvider) '{'\n"
           + "    this.onceProvider = onceProvider;\n"
           + "  '}'\n\n"
-          + "  {4}"
+          + "{4}"
           + "'}'\n";
 
   private final String originName;
@@ -96,12 +96,13 @@ final class SimpleBeanLazyWriter {
           || modifiers.contains(Modifier.STATIC)
           || methodElement.getEnclosingElement().getSimpleName().contentEquals("Object")) continue;
       // Access modifiers
+      sb.append("  @Override\n");
       if (modifiers.contains(Modifier.PUBLIC)) {
         sb.append("  public ");
       } else if (modifiers.contains(Modifier.PROTECTED)) {
         sb.append("  protected ");
       } else {
-        sb.append(" ");
+        sb.append("  ");
       }
       // Generic type parameters
       List<? extends TypeParameterElement> typeParameters = methodElement.getTypeParameters();
