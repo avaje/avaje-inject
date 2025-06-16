@@ -432,4 +432,8 @@ final class Util {
     return ElementFilter.constructorsIn(beanType.getEnclosedElements()).stream()
         .anyMatch(e -> e.getParameters().isEmpty() && !e.getModifiers().contains(Modifier.PRIVATE));
   }
+
+  public static String shortNameLazyProxy(TypeElement lazyProxyType) {
+    return shortName(lazyProxyType.getQualifiedName().toString())
+      .replace(".", "_");  }
 }

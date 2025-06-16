@@ -287,15 +287,11 @@ final class MethodReader {
     endTry(writer, "  ");
     writer.indent(indent);
     if (proxyLazy) {
-      writer.append("  }, %s$Lazy::new);", lazyProxyShortName()).eol();
+      writer.append("  }, %s$Lazy::new);", Util.shortNameLazyProxy(lazyProxyType)).eol();
     } else {
       writer.indent(indent).append("  });").eol();
     }
     writer.indent(indent).append("}").eol();
-  }
-
-  private String lazyProxyShortName() {
-    return Util.shortName(lazyProxyType.getQualifiedName().toString()).replace(".", "_");
   }
 
   void builderBuildAddBean(Append writer) {

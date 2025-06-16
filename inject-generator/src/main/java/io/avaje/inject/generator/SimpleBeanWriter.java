@@ -201,12 +201,7 @@ final class SimpleBeanWriter {
       if (!constructor.methodThrows()) {
         writer.append("     }");
         if (beanReader.proxyLazy()) {
-          writer
-              .append(", ")
-              .append(
-                  "%s$Lazy::new",
-                  Util.shortName(beanReader.lazyProxyType().getQualifiedName().toString())
-                      .replace(".", "_"));
+          writer.append(", %s$Lazy::new", Util.shortNameLazyProxy(beanReader.lazyProxyType()));
         }
         writer.append(");").eol();
       }
@@ -217,12 +212,7 @@ final class SimpleBeanWriter {
     if (beanReader.registerProvider() && constructor.methodThrows()) {
       writer.append("     }");
       if (beanReader.proxyLazy()) {
-        writer
-            .append(", ")
-            .append(
-                " %s$Lazy::new",
-                Util.shortName(beanReader.lazyProxyType().getQualifiedName().toString())
-                    .replace(".", "_"));
+        writer.append(", %s$Lazy::new", Util.shortNameLazyProxy(beanReader.lazyProxyType()));
       }
       writer.append(");").eol();
     }
