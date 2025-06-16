@@ -41,8 +41,8 @@ final class SimpleBeanLazyWriter {
   }
 
   private final String shortName;
-  private boolean isInterface;
-  private TypeElement element;
+  private final boolean isInterface;
+  private final TypeElement element;
 
   SimpleBeanLazyWriter(PackageElement pkg, TypeElement element) {
     this.element = element;
@@ -62,14 +62,11 @@ final class SimpleBeanLazyWriter {
 
   void write() {
     try {
-      var writer = new Append(APContext.createSourceFile(originName, element).openWriter());
+      final var writer = new Append(APContext.createSourceFile(originName, element).openWriter());
 
       var typeString = isInterface ? "implements" : "extends";
-
       String methodString = methods();
-      writer.append(
-          MessageFormat.format(
-              TEMPLATE, packageName, imports(), shortName, typeString, methodString));
+      writer.append(MessageFormat.format(TEMPLATE, packageName, imports(), shortName, typeString, methodString));
       writer.close();
     } catch (Exception e) {
       logError("Failed to write Proxy class %s", e);
@@ -91,16 +88,13 @@ final class SimpleBeanLazyWriter {
   }
 
   private String methods() {
-
     var sb = new StringBuilder();
-
     for (var methodElement : ElementFilter.methodsIn(APContext.elements().getAllMembers(element))) {
 
       Set<Modifier> modifiers = methodElement.getModifiers();
       if (modifiers.contains(Modifier.PRIVATE)
           || modifiers.contains(Modifier.STATIC)
           || methodElement.getEnclosingElement().getSimpleName().contentEquals("Object")) continue;
-      sb.append("");
       // Access modifiers
       if (modifiers.contains(Modifier.PUBLIC)) {
         sb.append("  public ");
@@ -114,9 +108,9 @@ final class SimpleBeanLazyWriter {
       if (!typeParameters.isEmpty()) {
         sb.append("<");
         sb.append(
-            typeParameters.stream()
-                .map(tp -> tp.getSimpleName().toString())
-                .collect(Collectors.joining(", ")));
+          typeParameters.stream()
+            .map(tp -> tp.getSimpleName().toString())
+            .collect(Collectors.joining(", ")));
         sb.append("> ");
       }
       var returnType = UType.parse(methodElement.getReturnType());
@@ -149,9 +143,9 @@ final class SimpleBeanLazyWriter {
       if (!thrownTypes.isEmpty()) {
         sb.append(" throws ");
         sb.append(
-            thrownTypes.stream()
-                .map(t -> UType.parse(t).shortType())
-                .collect(Collectors.joining(", ")));
+          thrownTypes.stream()
+            .map(t -> UType.parse(t).shortType())
+            .collect(Collectors.joining(", ")));
       }
 
       sb.append(" {\n    ");

@@ -39,7 +39,7 @@ final class AssistBeanReader {
     this.beanType = beanType;
     this.type = beanType.getQualifiedName().toString();
     this.typeReader =
-        new TypeReader(List.of(), UType.parse(beanType.asType()), beanType, importTypes, false);
+      new TypeReader(List.of(), UType.parse(beanType.asType()), beanType, importTypes, false);
 
     typeReader.process();
     qualifierName = typeReader.name();

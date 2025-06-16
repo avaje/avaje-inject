@@ -64,29 +64,28 @@ final class BeanReader {
     TypeElement actualType = proxy ? APContext.asTypeElement(beanType.getSuperclass()) : beanType;
 
     this.prototype =
-        PrototypePrism.isPresent(actualType)
-            || importedComponent && ProcessingContext.isImportedPrototype(actualType);
+      PrototypePrism.isPresent(actualType)
+        || importedComponent && ProcessingContext.isImportedPrototype(actualType);
     this.primary = PrimaryPrism.isPresent(actualType);
     this.secondary = !primary && SecondaryPrism.isPresent(actualType);
-    var beantypes =
-        BeanTypesPrism.getOptionalOn(actualType)
-            .map(BeanTypesPrism::value)
-            .or(() -> proxy ? Optional.of(List.of(actualType.asType())) : Optional.empty());
-    beantypes.ifPresent(t -> Util.validateBeanTypes(actualType, t));
+    var beanTypes =
+      BeanTypesPrism.getOptionalOn(actualType)
+        .map(BeanTypesPrism::value)
+        .or(() -> proxy ? Optional.of(List.of(actualType.asType())) : Optional.empty());
+    beanTypes.ifPresent(t -> Util.validateBeanTypes(actualType, t));
     this.typeReader =
-        new TypeReader(
-            beantypes.orElse(List.of()),
-            UType.parse(beanType.asType()),
-            beanType,
-            importTypes,
-            factory);
+      new TypeReader(
+        beanTypes.orElse(List.of()),
+        UType.parse(beanType.asType()),
+        beanType,
+        importTypes,
+        factory);
 
     typeReader.process();
-
     this.lazy =
-        !FactoryPrism.isPresent(actualType)
-            && (LazyPrism.isPresent(actualType)
-                || importedComponent && ProcessingContext.isImportedLazy(actualType));
+      !FactoryPrism.isPresent(actualType)
+        && (LazyPrism.isPresent(actualType)
+        || importedComponent && ProcessingContext.isImportedLazy(actualType));
 
     this.requestParams = new BeanRequestParams(type);
     this.name = typeReader.name();
@@ -192,7 +191,6 @@ final class BeanReader {
     }
 
     postConstructMethod.ifPresent(m -> m.addImports(importTypes));
-
     conditions.addImports(importTypes);
     if (proxyLazy) {
       SimpleBeanLazyWriter.write(APContext.elements().getPackageOf(beanType), lazyProxyType);
@@ -619,7 +617,7 @@ final class BeanReader {
     typeReader.validate();
   }
 
-  public TypeElement getLazyProxyType() {
+  TypeElement lazyProxyType() {
     return lazyProxyType;
   }
 }

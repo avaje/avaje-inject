@@ -205,7 +205,7 @@ final class SimpleBeanWriter {
               .append(", ")
               .append(
                   "%s$Lazy::new",
-                  Util.shortName(beanReader.getLazyProxyType().getQualifiedName().toString())
+                  Util.shortName(beanReader.lazyProxyType().getQualifiedName().toString())
                       .replace(".", "_"));
         }
         writer.append(");").eol();
@@ -221,7 +221,7 @@ final class SimpleBeanWriter {
             .append(", ")
             .append(
                 " %s$Lazy::new",
-                Util.shortName(beanReader.getLazyProxyType().getQualifiedName().toString())
+                Util.shortName(beanReader.lazyProxyType().getQualifiedName().toString())
                     .replace(".", "_"));
       }
       writer.append(");").eol();

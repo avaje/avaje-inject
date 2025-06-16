@@ -119,10 +119,10 @@ final class MethodReader {
       this.initMethod = initMethod;
       this.destroyMethod = destroyMethod;
     } else {
-      var beantypes = BeanTypesPrism.getOptionalOn(element).map(BeanTypesPrism::value);
-      beantypes.ifPresent(t -> Util.validateBeanTypes(element, t));
+      var beanTypes = BeanTypesPrism.getOptionalOn(element).map(BeanTypesPrism::value);
+      beanTypes.ifPresent(t -> Util.validateBeanTypes(element, t));
       this.typeReader =
-          new TypeReader(beantypes.orElse(List.of()), genericType, returnElement, importTypes);
+        new TypeReader(beanTypes.orElse(List.of()), genericType, returnElement, importTypes);
       typeReader.process();
       MethodLifecycleReader lifecycleReader = new MethodLifecycleReader(returnElement, initMethod, destroyMethod);
       this.initMethod = lifecycleReader.initMethod();
@@ -287,15 +287,15 @@ final class MethodReader {
     endTry(writer, "  ");
     writer.indent(indent);
     if (proxyLazy) {
-      writer
-          .append(
-              "  }, %s$Lazy::new);",
-              Util.shortName(lazyProxyType.getQualifiedName().toString()).replace(".", "_"))
-          .eol();
+      writer.append("  }, %s$Lazy::new);", lazyProxyShortName()).eol();
     } else {
       writer.indent(indent).append("  });").eol();
     }
     writer.indent(indent).append("}").eol();
+  }
+
+  private String lazyProxyShortName() {
+    return Util.shortName(lazyProxyType.getQualifiedName().toString()).replace(".", "_");
   }
 
   void builderBuildAddBean(Append writer) {
