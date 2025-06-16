@@ -2,6 +2,7 @@ package org.example.myapp.lazy;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.example.myapp.aspect.MyTimed;
 import org.jspecify.annotations.Nullable;
 
 import io.avaje.inject.BeanScope;
@@ -14,7 +15,8 @@ import jakarta.inject.Singleton;
 @Lazy
 @Singleton
 @Named("single")
-public class LazyBean {
+@MyTimed(name = "AOP")
+public class LazyBeanAOP {
 
   @Inject @Nullable AtomicBoolean initialized;
 
@@ -25,6 +27,4 @@ public class LazyBean {
   }
 
   void something() {}
-
-  public void other() {}
 }

@@ -2,7 +2,12 @@ package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.logError;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
@@ -36,6 +41,9 @@ final class BeanReader {
   private final boolean secondary;
   private final boolean lazy;
   private final boolean proxy;
+  private final boolean proxyLazy;
+  private final TypeElement lazyProxyType;
+
   private final BeanAspects aspects;
   private final BeanConditions conditions = new BeanConditions();
   private final boolean importedComponent;
@@ -50,26 +58,34 @@ final class BeanReader {
     this.beanType = beanType;
     this.type = beanType.getQualifiedName().toString();
     this.shortName = shortName(beanType);
+    this.proxy = ProxyPrism.isPresent(beanType);
+
+    // if proxy read annotations from actual type
+    TypeElement actualType = proxy ? APContext.asTypeElement(beanType.getSuperclass()) : beanType;
+
     this.prototype =
-      PrototypePrism.isPresent(beanType)
-        || importedComponent && ProcessingContext.isImportedPrototype(beanType);
-    this.primary = PrimaryPrism.isPresent(beanType);
-    this.secondary = !primary && SecondaryPrism.isPresent(beanType);
-    this.lazy =
-      !FactoryPrism.isPresent(beanType)
-        && (LazyPrism.isPresent(beanType)
-          || importedComponent && ProcessingContext.isImportedLazy(beanType));
-    final var beantypes = BeanTypesPrism.getOptionalOn(beanType);
-    beantypes.ifPresent(p -> Util.validateBeanTypes(beanType, p.value()));
+      PrototypePrism.isPresent(actualType)
+        || importedComponent && ProcessingContext.isImportedPrototype(actualType);
+    this.primary = PrimaryPrism.isPresent(actualType);
+    this.secondary = !primary && SecondaryPrism.isPresent(actualType);
+    var beanTypes =
+      BeanTypesPrism.getOptionalOn(actualType)
+        .map(BeanTypesPrism::value)
+        .or(() -> proxy ? Optional.of(List.of(actualType.asType())) : Optional.empty());
+    beanTypes.ifPresent(t -> Util.validateBeanTypes(actualType, t));
     this.typeReader =
       new TypeReader(
-        beantypes,
+        beanTypes.orElse(List.of()),
         UType.parse(beanType.asType()),
         beanType,
         importTypes,
         factory);
 
     typeReader.process();
+    this.lazy =
+      !FactoryPrism.isPresent(actualType)
+        && (LazyPrism.isPresent(actualType)
+        || importedComponent && ProcessingContext.isImportedLazy(actualType));
 
     this.requestParams = new BeanRequestParams(type);
     this.name = typeReader.name();
@@ -82,16 +98,11 @@ final class BeanReader {
     this.preDestroyPriority = typeReader.preDestroyPriority();
     this.constructor = typeReader.constructor();
     this.observerMethods = typeReader.observerMethods();
-    this.importedComponent = importedComponent && (constructor != null && constructor.isPublic());
-
-    if (ProxyPrism.isPresent(beanType)) {
-      this.proxy = true;
-      conditions.readAll(APContext.asTypeElement(beanType.getSuperclass()));
-    } else {
-      conditions.readAll(beanType);
-      this.proxy = false;
-    }
+    this.importedComponent = importedComponent && constructor != null && constructor.isPublic();
     this.delayed = shouldDelay();
+    this.lazyProxyType = !lazy || delayed ? null : Util.lazyProxy(actualType);
+    this.proxyLazy = lazy && lazyProxyType != null;
+    conditions.readAll(actualType);
   }
 
   /**
@@ -151,6 +162,10 @@ final class BeanReader {
     return lazy;
   }
 
+  boolean proxyLazy() {
+    return proxyLazy;
+  }
+
   boolean importedComponent() {
     return importedComponent;
   }
@@ -176,8 +191,10 @@ final class BeanReader {
     }
 
     postConstructMethod.ifPresent(m -> m.addImports(importTypes));
-
     conditions.addImports(importTypes);
+    if (proxyLazy) {
+      SimpleBeanLazyWriter.write(APContext.elements().getPackageOf(beanType), lazyProxyType);
+    }
     return this;
   }
 
@@ -284,7 +301,7 @@ final class BeanReader {
    * Return true if lifecycle via annotated methods is required.
    */
   boolean hasLifecycleMethods() {
-    return (postConstructMethod.isPresent() || preDestroyMethod != null || typeReader.isClosable());
+    return postConstructMethod.isPresent() || preDestroyMethod != null || typeReader.isClosable();
   }
 
   List<MetaData> createFactoryMethodMeta() {
@@ -598,5 +615,9 @@ final class BeanReader {
 
   void validate() {
     typeReader.validate();
+  }
+
+  TypeElement lazyProxyType() {
+    return lazyProxyType;
   }
 }

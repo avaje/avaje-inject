@@ -16,6 +16,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 
 final class Util {
   static final String ASPECT_PROVIDER_PREFIX = "io.avaje.inject.aop.AspectProvider<";
@@ -400,4 +401,37 @@ final class Util {
       }
     });
   }
+
+  static TypeElement lazyProxy(Element element) {
+    TypeElement type =
+      element instanceof TypeElement
+        ? (TypeElement) element
+        : APContext.asTypeElement(((ExecutableElement) element).getReturnType());
+
+    if (!type.getTypeParameters().isEmpty()
+      || type.getModifiers().contains(Modifier.FINAL)
+      || !type.getKind().isInterface() && !Util.hasNoArgConstructor(type)) {
+
+      return BeanTypesPrism.getOptionalOn(element)
+        .map(BeanTypesPrism::value)
+        .filter(v -> v.size() == 1)
+        .map(v -> APContext.asTypeElement(v.get(0)))
+        // figure out generics later
+        .filter(v ->
+          v.getTypeParameters().isEmpty()
+            && (v.getKind().isInterface() || hasNoArgConstructor(v)))
+        .orElse(null);
+    }
+
+    return type;
+  }
+
+  static boolean hasNoArgConstructor(TypeElement beanType) {
+    return ElementFilter.constructorsIn(beanType.getEnclosedElements()).stream()
+      .anyMatch(e -> e.getParameters().isEmpty() && !e.getModifiers().contains(Modifier.PRIVATE));
+  }
+
+  public static String shortNameLazyProxy(TypeElement lazyProxyType) {
+    return shortName(lazyProxyType.getQualifiedName().toString())
+      .replace(".", "_");  }
 }

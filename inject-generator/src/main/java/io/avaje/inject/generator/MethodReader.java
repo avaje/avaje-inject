@@ -1,12 +1,21 @@
 package io.avaje.inject.generator;
 
-import javax.lang.model.element.*;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
-import java.util.*;
-
 import static io.avaje.inject.generator.Constants.CONDITIONAL_DEPENDENCY;
 import static io.avaje.inject.generator.ProcessingContext.asElement;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 
 final class MethodReader {
 
@@ -27,6 +36,8 @@ final class MethodReader {
   private final boolean primary;
   private final boolean secondary;
   private final boolean lazy;
+  private final boolean proxyLazy;
+  private final TypeElement lazyProxyType;
   private final String returnTypeRaw;
   private final UType genericType;
   private final String shortName;
@@ -57,11 +68,15 @@ final class MethodReader {
       secondary = SecondaryPrism.isPresent(element);
       lazy = LazyPrism.isPresent(element) || LazyPrism.isPresent(element.getEnclosingElement());
       conditions.readAll(element);
+      this.lazyProxyType = lazy ? Util.lazyProxy(element) : null;
+      this.proxyLazy = lazy && lazyProxyType != null;
     } else {
       prototype = false;
       primary = false;
       secondary = false;
       lazy = false;
+      this.proxyLazy = false;
+      this.lazyProxyType = null;
     }
     this.methodName = element.getSimpleName().toString();
     TypeMirror returnMirror = element.getReturnType();
@@ -104,9 +119,10 @@ final class MethodReader {
       this.initMethod = initMethod;
       this.destroyMethod = destroyMethod;
     } else {
-      final var beantypes = BeanTypesPrism.getOptionalOn(element);
-      beantypes.ifPresent(p -> Util.validateBeanTypes(element, p.value()));
-      this.typeReader = new TypeReader(beantypes, genericType, returnElement, importTypes);
+      var beanTypes = BeanTypesPrism.getOptionalOn(element).map(BeanTypesPrism::value);
+      beanTypes.ifPresent(t -> Util.validateBeanTypes(element, t));
+      this.typeReader =
+        new TypeReader(beanTypes.orElse(List.of()), genericType, returnElement, importTypes);
       typeReader.process();
       MethodLifecycleReader lifecycleReader = new MethodLifecycleReader(returnElement, initMethod, destroyMethod);
       this.initMethod = lifecycleReader.initMethod();
@@ -252,7 +268,11 @@ final class MethodReader {
       writer.append(".asSecondary()");
     }
 
-    writer.indent(".registerProvider(() -> {").eol();
+    if (proxyLazy) {
+      writer.indent(".registerLazy(() -> {").eol();
+    } else {
+      writer.indent(".registerProvider(() -> {").eol();
+    }
 
     startTry(writer, "  ");
     writer.indent(indent).append("  return ");
@@ -265,7 +285,12 @@ final class MethodReader {
     }
     writer.append(");").eol();
     endTry(writer, "  ");
-    writer.indent(indent).append("  });").eol();
+    writer.indent(indent);
+    if (proxyLazy) {
+      writer.append("  }, %s$Lazy::new);", Util.shortNameLazyProxy(lazyProxyType)).eol();
+    } else {
+      writer.indent(indent).append("  });").eol();
+    }
     writer.indent(indent).append("}").eol();
   }
 
@@ -369,7 +394,7 @@ final class MethodReader {
   }
 
   private boolean hasLifecycleMethods() {
-    return notEmpty(initMethod) || notEmpty(destroyMethod) || (typeReader != null && typeReader.isClosable() || beanCloseable);
+    return notEmpty(initMethod) || notEmpty(destroyMethod) || typeReader != null && typeReader.isClosable() || beanCloseable;
   }
 
   private boolean notEmpty(String value) {

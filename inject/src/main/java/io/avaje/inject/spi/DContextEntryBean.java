@@ -1,9 +1,7 @@
 package io.avaje.inject.spi;
 
 import io.avaje.inject.BeanEntry;
-
 import jakarta.inject.Provider;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Holds either the bean itself or a provider of the bean.
@@ -26,14 +24,14 @@ class DContextEntryBean {
    */
   static DContextEntryBean supplied(Object source, String name, int flag) {
     if (source instanceof Provider) {
-      return new OnceProvider((Provider<?>)source, name, flag, null);
+      return new OnceBeanProvider((Provider<?>)source, name, flag, null);
     } else {
       return new DContextEntryBean(source, name, flag, null);
     }
   }
 
   static DContextEntryBean provider(boolean prototype, Provider<?> provider, String name, int flag, Class<? extends AvajeModule> currentModule) {
-    return prototype ? new ProtoProvider(provider, name, flag, currentModule) : new OnceProvider(provider, name, flag, currentModule);
+    return prototype ? new ProtoProvider(provider, name, flag, currentModule) : new OnceBeanProvider(provider, name, flag, currentModule);
   }
 
   protected final Object source;
@@ -138,31 +136,19 @@ class DContextEntryBean {
     }
   }
 
-  /**
-   * Single instance scoped Provider based entry.
-   */
-  static final class OnceProvider extends DContextEntryBean {
+  /** Single instance scoped Provider based entry. */
+  static final class OnceBeanProvider extends DContextEntryBean {
 
-    private final ReentrantLock lock = new ReentrantLock();
     private final Provider<?> provider;
-    private Object bean;
 
-    private OnceProvider(Provider<?> provider, String name, int flag, Class<? extends AvajeModule> currentModule) {
+    private OnceBeanProvider(Provider<?> provider, String name, int flag, Class<? extends AvajeModule> currentModule) {
       super(provider, name, flag, currentModule);
-      this.provider = provider;
+      this.provider = new OnceProvider<>(provider);
     }
 
     @Override
     Object bean() {
-      lock.lock();
-      try {
-        if (bean == null) {
-          bean = provider.get();
-        }
-        return bean;
-      } finally {
-        lock.unlock();
-      }
+      return provider.get();
     }
   }
 }

@@ -178,7 +178,9 @@ final class SimpleBeanWriter {
       indent += "  ";
 
       final String registerProvider;
-      if (beanReader.lazy()) {
+      if (beanReader.proxyLazy()) {
+        registerProvider = "registerLazy";
+      } else if (beanReader.lazy()) {
         registerProvider = "registerProvider";
       } else {
         registerProvider = "asPrototype().registerProvider";
@@ -197,7 +199,11 @@ final class SimpleBeanWriter {
       beanReader.prototypePostConstruct(writer, indent);
       writer.indent("        return bean;").eol();
       if (!constructor.methodThrows()) {
-        writer.indent("      });").eol();
+        writer.append("     }");
+        if (beanReader.proxyLazy()) {
+          writer.append(", %s$Lazy::new", Util.shortNameLazyProxy(beanReader.lazyProxyType()));
+        }
+        writer.append(");").eol();
       }
     }
     writeObserveMethods();
@@ -205,6 +211,9 @@ final class SimpleBeanWriter {
 
     if (beanReader.registerProvider() && constructor.methodThrows()) {
       writer.append("     }");
+      if (beanReader.proxyLazy()) {
+        writer.append(", %s$Lazy::new", Util.shortNameLazyProxy(beanReader.lazyProxyType()));
+      }
       writer.append(");").eol();
     }
 

@@ -49,12 +49,13 @@ final class SimpleBeanProxyWriter {
 
   private void writeFields() {
     for (AspectMethod method : aspects.methods()) {
-      method.writeSetupFields(writer);
+      method.writeSetupFields(writer, beanReader.proxyLazy());
     }
     writer.eol();
   }
 
   private void writeConstructor() {
+    writer.append("  @Inject\n");
     writer.append("  public %s%s(", shortName, suffix);
     int count = 0;
     for (final String aspectName : aspects.aspectNames()) {
@@ -94,6 +95,8 @@ final class SimpleBeanProxyWriter {
     writer.append("import %s;", Constants.INVOCATION).eol();
     writer.append("import %s;", Constants.INVOCATION_EXCEPTION).eol();
     writer.append("import %s;", Constants.METHOD_INTERCEPTOR).eol();
+    writer.append("import %s;", Constants.COMPONENT).eol();
+    writer.append("import %s;", Constants.INJECT).eol();
     writer.append("import %s;", Constants.PROXY).eol();
     beanReader.writeImports(writer, packageName);
   }
@@ -104,6 +107,7 @@ final class SimpleBeanProxyWriter {
 
   private void writeClassStart() {
     writer.append(Constants.AT_PROXY).eol();
+    writer.append("@Component").eol();
     writer.append(Constants.AT_GENERATED).eol();
     writer.append("public final class %s%s extends %s {", shortName, suffix, shortName).eol().eol();
   }
