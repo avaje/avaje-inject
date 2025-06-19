@@ -109,7 +109,7 @@ public class AutoProvidesMojo extends AbstractMojo {
       final List<String> provides = new ArrayList<>();
       final var typeName = plugin.getClass();
       log.info("Loaded Plugin: " + typeName);
-      Collections.addAll(provides,plugin.providesBeans());
+      Collections.addAll(provides, plugin.providesBeans());
       for (final var provide : plugin.providesAspects()) {
         provides.add(wrapAspect(provide.getCanonicalName()));
       }
@@ -159,8 +159,8 @@ public class AutoProvidesMojo extends AbstractMojo {
 
       final var requires = Arrays.stream(module.requiresBeans()).collect(toList());
 
-      Arrays.stream(module.autoRequiresBeans()).forEach(requires::add);
-      Arrays.stream(module.requiresPackagesFromType()).forEach(requires::add);
+      Collections.addAll(requires, module.autoRequiresBeans());
+      Collections.addAll(requires, module.requiresPackagesFromType());
       Arrays.stream(module.autoRequiresAspectBeans())
           .map(AutoProvidesMojo::wrapAspect)
           .forEach(requires::add);

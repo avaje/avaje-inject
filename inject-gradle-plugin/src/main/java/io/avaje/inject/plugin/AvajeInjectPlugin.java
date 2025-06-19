@@ -74,10 +74,10 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
       final List<String> provides = new ArrayList<>();
       final var typeName = plugin.getClass().getTypeName();
       System.out.println("Loaded Plugin: " + typeName);
-      for (final var provide : plugin.provides()) {
-        provides.add(provide.getTypeName());
+      for (final var provide : plugin.providesBeans()) {
+        provides.add(provide);
       }
-      for (final var provide : plugin.providesAspects()) {
+      for (final var provide : plugin.providesAspectBeans()) {
         provides.add(wrapAspect(provide.getCanonicalName()));
       }
       pluginEntries.put(typeName, provides);
@@ -129,25 +129,24 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
       System.out.println("Detected External Module: " + name);
 
       final var provides = new ArrayList<String>();
-      for (final var provide : module.provides()) {
-        var type = provide.getTypeName();
+      for (final var provide : module.providesBeans()) {
+        var type = provide;
         provides.add(type);
       }
-      for (final var provide : module.autoProvides()) {
-        var type = provide.getTypeName();
+      for (final var provide : module.autoProvidesBeans()) {
+        var type = provide;
         provides.add(type);
       }
-      for (final var provide : module.autoProvidesAspects()) {
-        var type = wrapAspect(provide.getTypeName());
+      for (final var provide : module.autoprovidesAspectBeans()) {
+        var type = wrapAspect(provide);
         provides.add(type);
       }
 
-      final var requires = Arrays.<Type>stream(module.requires()).map(Type::getTypeName).collect(toList());
+      final var requires = Arrays.stream(module.requiresBeans()).collect(toList());
 
-      Arrays.<Type>stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
-      Arrays.<Type>stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
-      Arrays.<Type>stream(module.autoRequiresAspects())
-          .map(Type::getTypeName)
+      Arrays.stream(module.autoRequires()).forEach(requires::add);
+      Arrays.stream(module.requiresPackages()).forEach(requires::add);
+      Arrays.stream(module.autoRequiresAspects())
           .map(AvajeInjectPlugin::wrapAspect)
           .forEach(requires::add);
       modules.add(new ModuleData(name, provides, requires));
