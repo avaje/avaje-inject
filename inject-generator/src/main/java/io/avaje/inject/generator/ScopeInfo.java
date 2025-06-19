@@ -429,32 +429,26 @@ final class ScopeInfo {
 
   void buildProvides(Append writer) {
     if (!provides.isEmpty()) {
-      buildProvidesMethod(writer, "provides", provides);
+      buildProvidesMethod(writer, "providesBeans", provides);
     }
     if (!requires.isEmpty()) {
-      buildProvidesMethod(writer, "requires", requires);
+      buildProvidesMethod(writer, "requiresBeans", requires);
     }
     if (!requiresPackages.isEmpty()) {
-      buildProvidesMethod(writer, "requiresPackages", requiresPackages);
+      buildProvidesMethod(writer, "requiresPackagesFromType", requiresPackages);
     }
   }
 
   private void buildProvidesMethod(Append writer, String fieldName, Set<String> types) {
     writer.append("  @Override").eol();
-    final var arrayType = fieldName.contains("Aspects") ? "Class<?>" : "Type";
-    writer.append("  public %s[] %s() {", arrayType, fieldName).eol();
-    writer.append("    return new %s[] {", arrayType).eol();
+    writer.append("  public String[] %s() {", fieldName).eol();
+    writer.append("    return new String[] {").eol();
     for (final String rawType : types) {
 
       if (rawType.contains(":")) {
         continue;
       }
-
-      if (rawType.contains("<")) {
-        writer.append("      new GenericType<%s>(){},", rawType).eol();
-      } else {
-        writer.append("      %s.class,", rawType).eol();
-      }
+      writer.append("      \"%s\",", rawType).eol();
     }
     writer.append("    };").eol();
     writer.append("  }").eol().eol();
@@ -463,28 +457,28 @@ final class ScopeInfo {
   void buildAutoProvides(Append writer, Set<String> autoProvides) {
     autoProvides.removeAll(provides);
     if (!autoProvides.isEmpty()) {
-      buildProvidesMethod(writer, "autoProvides", autoProvides);
+      buildProvidesMethod(writer, "autoProvidesBeans", autoProvides);
     }
   }
 
   void buildAutoProvidesAspects(Append writer, Set<String> autoProvidesAspects) {
     autoProvidesAspects.removeAll(provides);
     if (!autoProvidesAspects.isEmpty()) {
-      buildProvidesMethod(writer, "autoProvidesAspects", autoProvidesAspects);
+      buildProvidesMethod(writer, "autoProvidesAspectBeans", autoProvidesAspects);
     }
   }
 
   void buildAutoRequires(Append writer, Set<String> autoRequires) {
     autoRequires.removeAll(requires);
     if (!autoRequires.isEmpty()) {
-      buildProvidesMethod(writer, "autoRequires", autoRequires);
+      buildProvidesMethod(writer, "autoRequiresBeans", autoRequires);
     }
   }
 
   void buildAutoRequiresAspects(Append writer, Set<String> autoRequires) {
     autoRequires.removeAll(requires);
     if (!autoRequires.isEmpty()) {
-      buildProvidesMethod(writer, "autoRequiresAspects", autoRequires);
+      buildProvidesMethod(writer, "autoRequiresAspectBeans", autoRequires);
     }
   }
 
