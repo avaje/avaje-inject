@@ -1,13 +1,23 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.APContext.*;
-import static io.avaje.inject.generator.ProcessingContext.*;
+import static io.avaje.inject.generator.APContext.logError;
+import static io.avaje.inject.generator.APContext.typeElement;
+import static io.avaje.inject.generator.ProcessingContext.allScopes;
+import static io.avaje.inject.generator.ProcessingContext.createMetaInfWriterFor;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
