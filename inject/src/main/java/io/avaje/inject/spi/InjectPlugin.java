@@ -1,8 +1,9 @@
 package io.avaje.inject.spi;
 
-import io.avaje.inject.BeanScopeBuilder;
-
 import java.lang.reflect.Type;
+import java.util.Arrays;
+
+import io.avaje.inject.BeanScopeBuilder;
 
 /**
  * A Plugin that can be applied when creating a bean scope.
@@ -12,27 +13,32 @@ import java.lang.reflect.Type;
  */
 public interface InjectPlugin extends InjectExtension {
 
-  /**
-   * Empty array of classes.
-   */
+  /** Empty array of classes. */
   Class<?>[] EMPTY_CLASSES = {};
 
-  /**
-   * Apply the plugin to the scope builder.
-   */
+  /** Empty array of classes. */
+  String[] EMPTY_STRINGS = {};
+
+  /** Apply the plugin to the scope builder. */
   void apply(BeanScopeBuilder builder);
 
-  /**
-   * Return the classes that the plugin provides.
-   */
+  /** Return the classes that the plugin provides. */
   default Type[] provides() {
     return EMPTY_CLASSES;
   }
 
-  /**
-   * Return the aspect classes that the plugin provides.
-   */
+  /** Return the type names of types this module explicitly provides to other modules. */
+  default String[] providesBeans() {
+    return Arrays.stream(provides()).map(Type::getTypeName).toArray(String[]::new);
+  }
+
+  /** Return the aspect classes that the plugin provides. */
   default Class<?>[] providesAspects() {
     return EMPTY_CLASSES;
+  }
+
+  /** Return the type names of types this module explicitly provides to other modules. */
+  default String[] providesAspectBeans() {
+    return Arrays.stream(providesAspects()).map(Type::getTypeName).toArray(String[]::new);
   }
 }

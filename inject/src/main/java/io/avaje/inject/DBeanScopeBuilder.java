@@ -326,9 +326,9 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         .computeIfAbsent(module.getClass().getTypeName(), s -> new FactoryList())
         .add(factoryState);
 
-      addFactoryProvides(factoryState, module.provides());
-      addFactoryProvides(factoryState, module.autoProvides());
-      addFactoryProvides(factoryState, module.autoProvidesAspects());
+      addFactoryProvides(factoryState, module.providesBeans());
+      addFactoryProvides(factoryState, module.autoProvidesBeans());
+      addFactoryProvides(factoryState, module.autoProvidesAspectBeans());
 
       if (factoryState.isRequiresEmpty()) {
         if (factoryState.explicitlyProvides()) {
@@ -344,9 +344,9 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       }
     }
 
-    private void addFactoryProvides(FactoryState factoryState, Type[] provides) {
+    private void addFactoryProvides(FactoryState factoryState, String[] provides) {
       for (final var feature : provides) {
-        providesMap.computeIfAbsent(feature.getTypeName(), s -> new FactoryList()).add(factoryState);
+        providesMap.computeIfAbsent(feature, s -> new FactoryList()).add(factoryState);
       }
     }
 
@@ -403,10 +403,10 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       }
     }
 
-    private void unsatisfiedRequires(StringBuilder sb, Type[] requiredType, String requires) {
+    private void unsatisfiedRequires(StringBuilder sb, String[] requiredType, String requires) {
       for (final var depModuleName : requiredType) {
-        if (notProvided(depModuleName.getTypeName())) {
-          sb.append(String.format(" %s [%s]", requires, depModuleName.getTypeName()));
+        if (notProvided(depModuleName)) {
+          sb.append(String.format(" %s [%s]", requires, depModuleName));
         }
       }
     }
@@ -447,9 +447,9 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         && satisfiedDependencies(factory.autoRequires());
     }
 
-    private boolean satisfiedDependencies(Type[] requires) {
+    private boolean satisfiedDependencies(String[] requires) {
       for (final var dependency : requires) {
-        if (notProvided(dependency.getTypeName())) {
+        if (notProvided(dependency)) {
           return false;
         }
       }
@@ -485,20 +485,20 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       return factory;
     }
 
-    Type[] requires() {
-      return factory.requires();
+    String[] requires() {
+      return factory.requiresBeans();
     }
 
-    Type[] requiresPackages() {
-      return factory.requiresPackages();
+    String[] requiresPackages() {
+      return factory.requiresPackagesFromType();
     }
 
-    Type[] autoRequires() {
-      return factory.autoRequires();
+    String[] autoRequires() {
+      return factory.autoRequiresBeans();
     }
 
-    Type[] autoRequiresAspects() {
-      return factory.autoRequiresAspects();
+    String[] autoRequiresAspects() {
+      return factory.autoRequiresAspectBeans();
     }
 
     @Override
@@ -507,15 +507,17 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
 
     boolean isRequiresEmpty() {
-      return isEmpty(factory.requires()) && isEmpty(factory.requiresPackages())
-        && isEmpty(factory.autoRequires()) && isEmpty(factory.autoRequiresAspects());
+      return isEmpty(factory.requiresBeans())
+          && isEmpty(factory.requiresPackagesFromType())
+          && isEmpty(factory.autoRequiresBeans())
+          && isEmpty(factory.autoRequiresAspectBeans());
     }
 
     boolean explicitlyProvides() {
-      return !isEmpty(factory.provides());
+      return !isEmpty(factory.providesBeans());
     }
 
-    private boolean isEmpty(@Nullable Type[] values) {
+    private boolean isEmpty(@Nullable String[] values) {
       return values == null || values.length == 0;
     }
   }

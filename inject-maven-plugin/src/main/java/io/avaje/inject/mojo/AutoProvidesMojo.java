@@ -5,12 +5,12 @@ import static java.util.stream.Collectors.toList;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,14 +85,16 @@ public class AutoProvidesMojo extends AbstractMojo {
   }
 
   private URLClassLoader createClassLoader(List<URL> listUrl) {
-    return new URLClassLoader(listUrl.toArray(new URL[listUrl.size()]), Thread.currentThread().getContextClassLoader());
+    return new URLClassLoader(
+        listUrl.toArray(new URL[listUrl.size()]), Thread.currentThread().getContextClassLoader());
   }
 
   private FileWriter createFileWriter(String string) throws IOException {
     return new FileWriter(new File(project.getBuild().getDirectory(), string));
   }
 
-  private void writeProvidedPlugins(URLClassLoader newClassLoader, FileWriter pluginWriter) throws IOException {
+  private void writeProvidedPlugins(URLClassLoader newClassLoader, FileWriter pluginWriter)
+      throws IOException {
     final Log log = getLog();
 
     final List<InjectPlugin> plugins = new ArrayList<>();
@@ -105,15 +107,13 @@ public class AutoProvidesMojo extends AbstractMojo {
     final Map<String, List<String>> pluginEntries = new HashMap<>();
     for (final var plugin : plugins) {
       final List<String> provides = new ArrayList<>();
-      final var typeName = plugin.getClass().getTypeName();
+      final var typeName = plugin.getClass();
       log.info("Loaded Plugin: " + typeName);
-      for (final var provide : plugin.provides()) {
-        provides.add(provide.getTypeName());
-      }
+      Collections.addAll(provides,plugin.providesBeans());
       for (final var provide : plugin.providesAspects()) {
         provides.add(wrapAspect(provide.getCanonicalName()));
       }
-      pluginEntries.put(typeName, provides);
+      pluginEntries.put(typeName.getTypeName(), provides);
     }
 
     pluginWriter.write("External Plugin Type|Provides");
@@ -126,7 +126,8 @@ public class AutoProvidesMojo extends AbstractMojo {
     }
   }
 
-  private void writeModuleCSV(ClassLoader newClassLoader, FileWriter moduleWriter) throws IOException {
+  private void writeModuleCSV(ClassLoader newClassLoader, FileWriter moduleWriter)
+      throws IOException {
     final Log log = getLog();
     final List<AvajeModule> avajeModules = new ArrayList<>();
     ServiceLoader.load(InjectExtension.class, newClassLoader).stream()
@@ -137,35 +138,33 @@ public class AutoProvidesMojo extends AbstractMojo {
 
     List<ModuleData> modules = new ArrayList<>();
     for (final var module : avajeModules) {
-      final var name = module.getClass().getTypeName();
+      final var name = module.getClass();
       log.info("Detected External Module: " + name);
 
       final var provides = new ArrayList<String>();
-      for (final var provide : module.provides()) {
-        var type = provide.getTypeName();
+      for (final var provide : module.providesBeans()) {
+        var type = provide;
         provides.add(type);
       }
 
-      for (final var provide : module.autoProvides()) {
-        var type = provide.getTypeName();
+      for (final var provide : module.autoProvidesBeans()) {
+        var type = provide;
         provides.add(type);
       }
 
-      for (final var provide : module.autoProvidesAspects()) {
-        var type = wrapAspect(provide.getTypeName());
+      for (final var provide : module.autoProvidesAspectBeans()) {
+        var type = wrapAspect(provide);
         provides.add(type);
       }
 
-      final var requires =
-          Arrays.<Type>stream(module.requires()).map(Type::getTypeName).collect(toList());
+      final var requires = Arrays.stream(module.requiresBeans()).collect(toList());
 
-      Arrays.<Type>stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
-      Arrays.<Type>stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
-      Arrays.<Type>stream(module.autoRequiresAspects())
-        .map(Type::getTypeName)
-        .map(AutoProvidesMojo::wrapAspect)
-        .forEach(requires::add);
-      modules.add(new ModuleData(name, provides, requires));
+      Arrays.stream(module.autoRequiresBeans()).forEach(requires::add);
+      Arrays.stream(module.requiresPackagesFromType()).forEach(requires::add);
+      Arrays.stream(module.autoRequiresAspectBeans())
+          .map(AutoProvidesMojo::wrapAspect)
+          .forEach(requires::add);
+      modules.add(new ModuleData(name.getTypeName(), provides, requires));
     }
 
     moduleWriter.write("External Module Type|Provides|Requires");
