@@ -130,6 +130,8 @@ final class ScopeInfo {
     ignoreSingleton = injectModule.ignoreSingleton();
     injectModule.requires().stream().map(Object::toString).forEach(requires::add);
     injectModule.provides().stream().map(Object::toString).forEach(provides::add);
+    requires.addAll(injectModule.requiresString());
+    provides.addAll(injectModule.providesString());
     injectModule.requiresPackages().stream()
         .map(Object::toString)
         .forEach(
@@ -392,11 +394,11 @@ final class ScopeInfo {
     writer.append("@InjectModule(");
     boolean leadingComma = false;
     if (!provides.isEmpty()) {
-      attributeClasses(false, writer, "provides", provides);
+      attributeString(false, writer, "providesString", provides);
       leadingComma = true;
     }
     if (!requires.isEmpty()) {
-      attributeClasses(leadingComma, writer, "requires", requires);
+      attributeString(leadingComma, writer, "requiresString", requires);
       leadingComma = true;
     }
     if (!requiresPackages.isEmpty()) {
@@ -410,6 +412,22 @@ final class ScopeInfo {
       writer.append("customScopeType = \"%s\"", annotationType.getQualifiedName().toString());
     }
     writer.append(")").eol();
+  }
+
+  private void attributeString(
+      boolean leadingComma, Append writer, String prefix, Set<String> classNames) {
+    if (leadingComma) {
+      writer.append(", ");
+    }
+    writer.append("%s = {", prefix);
+    int c = 0;
+    for (final String value : classNames) {
+      if (c++ > 0) {
+        writer.append(",");
+      }
+      writer.append("\"%s\"", value);
+    }
+    writer.append("}");
   }
 
   private void attributeClasses(boolean leadingComma, Append writer, String prefix, Set<String> classNames) {
