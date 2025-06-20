@@ -393,11 +393,41 @@ final class ScopeInfo {
     writer.append(Constants.AT_GENERATED).eol();
     writer.append("@InjectModule(");
     boolean leadingComma = false;
-    if (!provides.isEmpty()) {
+    List<String> regularProvides = new ArrayList<>();
+    List<String> genericProvides = new ArrayList<>();
+
+    for (var type : provides) {
+      if (type.contains("<")) {
+        genericProvides.add(type);
+      } else {
+        regularProvides.add(type);
+      }
+    }
+
+    if (!regularProvides.isEmpty()) {
+      attributeClasses(false, writer, "provides", provides);
+      leadingComma = true;
+    }
+    if (!genericProvides.isEmpty()) {
       attributeString(false, writer, "providesString", provides);
       leadingComma = true;
     }
-    if (!requires.isEmpty()) {
+
+    List<String> regularRequires = new ArrayList<>();
+    List<String> genericRequires = new ArrayList<>();
+
+    for (var type : requires) {
+      if (type.contains("<")) {
+        genericRequires.add(type);
+      } else {
+        regularRequires.add(type);
+      }
+    }
+    if (!regularRequires.isEmpty()) {
+      attributeClasses(leadingComma, writer, "requires", regularRequires);
+      leadingComma = true;
+    }
+    if (!genericRequires.isEmpty()) {
       attributeString(leadingComma, writer, "requiresString", requires);
       leadingComma = true;
     }
@@ -430,7 +460,7 @@ final class ScopeInfo {
     writer.append("}");
   }
 
-  private void attributeClasses(boolean leadingComma, Append writer, String prefix, Set<String> classNames) {
+  private void attributeClasses(boolean leadingComma, Append writer, String prefix, Collection<String> classNames) {
     if (leadingComma) {
       writer.append(", ");
     }
