@@ -21,5 +21,6 @@ class GenericFactoryTest {
     assertThat(others.getAldrich()).isNotNull();
     assertThat(others.getGenericMap()).isNotNull();
     assertThat(others.getBiConsumer()).isNotNull();
+    assertThat(others.getGenList()).hasSize(2);
   }
 }
