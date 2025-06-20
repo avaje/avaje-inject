@@ -24,9 +24,8 @@ final class TypeAppender {
     var type = Util.unwrapProvider(utype);
     if (isAddGenericType(type)) {
       addUType(type);
-    } else {
-      addSimpleType(type.mainType());
     }
+    addSimpleType(type.mainType());
   }
 
   private static boolean isAddGenericType(UType type) {
