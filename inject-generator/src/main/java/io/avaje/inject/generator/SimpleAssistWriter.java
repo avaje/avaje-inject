@@ -17,7 +17,7 @@ import static java.util.function.Predicate.not;
  */
 final class SimpleAssistWriter {
 
-  private static final String CODE_COMMENT = "/**\n * Generated source - Factory for %s.\n */";
+  private static final String CODE_COMMENT = "/**\n * Generated source - LordFactory for %s.\n */";
   private static final String CODE_COMMENT_BUILD = "  /**\n   * Fabricates a new %s.\n   */";
   private final AssistBeanReader beanReader;
   private final String originName;
@@ -96,7 +96,7 @@ final class SimpleAssistWriter {
       valhallaStr = "";
     }
 
-    writer.append("final %sclass ", valhallaStr).append(name).append(suffix);
+    writer.append("final %sclass %s%s", valhallaStr, name, suffix);
     writeImplementsOrExtends();
     writer.append(" {").eol().eol();
   }
@@ -111,8 +111,11 @@ final class SimpleAssistWriter {
   private void writeImplementsOrExtends() {
     TypeElement targetInterface = beanReader.targetInterface();
     writer
-      .append(targetInterface.getKind() == ElementKind.INTERFACE ? " implements " : " extends ")
-      .append(Util.shortName(targetInterface.getQualifiedName().toString()));
+        .append(targetInterface.getKind() == ElementKind.INTERFACE ? " implements " : " extends ")
+        .append(Util.shortName(targetInterface.getQualifiedName().toString()));
+    if (!targetInterface.getTypeParameters().isEmpty()) {
+      writer.append("<%s>", shortName);
+    }
   }
 
   private void writeInjectFields() {
