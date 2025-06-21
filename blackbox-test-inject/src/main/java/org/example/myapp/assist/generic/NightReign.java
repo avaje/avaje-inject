@@ -8,19 +8,19 @@ import jakarta.inject.Singleton;
 @Singleton
 public class NightReign {
 
-  private LordFactory<Caligo> caligo;
-  private LordFactory<Libra> creature;
+  private LordFactory<Caligo> caligoFactory;
+  private LordFactory<Libra> libraFactory;
 
-  public NightReign(LordFactory<Caligo> caligo, LordFactory<Libra> creature) {
-    this.caligo = caligo;
-    this.creature = creature;
+  public NightReign(LordFactory<Caligo> caligoFactory, LordFactory<Libra> libraFactory) {
+    this.caligoFactory = caligoFactory;
+    this.libraFactory = libraFactory;
   }
 
   public Caligo caligo() {
-    return caligo.create("Miasma of Night");
+    return caligoFactory.create("Miasma of Night");
   }
 
   public Libra libra() {
-    return creature.create("Creature of Night");
+    return libraFactory.create("Creature of Night");
   }
 }
