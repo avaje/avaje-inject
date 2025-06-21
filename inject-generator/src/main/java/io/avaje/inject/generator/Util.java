@@ -408,19 +408,17 @@ final class Util {
         ? (TypeElement) element
         : APContext.asTypeElement(((ExecutableElement) element).getReturnType());
 
-    if (!type.getTypeParameters().isEmpty()
-      || type.getModifiers().contains(Modifier.FINAL)
-      || !type.getKind().isInterface() && !Util.hasNoArgConstructor(type)) {
+    if (type.getModifiers().contains(Modifier.FINAL)
+        || !type.getKind().isInterface() && !Util.hasNoArgConstructor(type)) {
 
       return BeanTypesPrism.getOptionalOn(element)
-        .map(BeanTypesPrism::value)
-        .filter(v -> v.size() == 1)
-        .map(v -> APContext.asTypeElement(v.get(0)))
-        // figure out generics later
-        .filter(v ->
-          v.getTypeParameters().isEmpty()
-            && (v.getKind().isInterface() || hasNoArgConstructor(v)))
-        .orElse(null);
+          .map(BeanTypesPrism::value)
+          .filter(v -> v.size() == 1)
+          .map(v -> APContext.asTypeElement(v.get(0)))
+          // generics and beantypes don't mix
+          .filter(t -> t.getTypeParameters().isEmpty() || t.equals(element))
+          .filter(v -> (v.getKind().isInterface() || hasNoArgConstructor(v)))
+          .orElse(null);
     }
 
     return type;

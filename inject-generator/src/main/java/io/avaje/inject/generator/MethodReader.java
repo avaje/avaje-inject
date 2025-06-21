@@ -173,6 +173,9 @@ final class MethodReader {
       params.add(new MethodParam(p));
     }
     observeParameter = params.stream().filter(MethodParam::observeEvent).findFirst().orElse(null);
+    if (proxyLazy) {
+      SimpleBeanLazyWriter.write(APContext.elements().getPackageOf(element), lazyProxyType);
+    }
     return this;
   }
 
@@ -287,7 +290,14 @@ final class MethodReader {
     endTry(writer, "  ");
     writer.indent(indent);
     if (proxyLazy) {
-      writer.append("  }, %s$Lazy::new);", Util.shortNameLazyProxy(lazyProxyType)).eol();
+      String shortNameLazyProxy = Util.shortNameLazyProxy(lazyProxyType) + "$Lazy";
+      writer.append("  }, ");
+      if (lazyProxyType.getTypeParameters().isEmpty()) {
+        writer.append("%s::new", shortNameLazyProxy);
+      } else {
+        writer.append("p -> new %s<>(p)", shortNameLazyProxy);
+      }
+      writer.append(");");
     } else {
       writer.indent(indent).append("  });").eol();
     }
