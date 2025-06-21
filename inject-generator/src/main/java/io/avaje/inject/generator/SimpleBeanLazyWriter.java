@@ -72,7 +72,6 @@ final class SimpleBeanLazyWriter {
       // Get type parameters
       List<? extends TypeParameterElement> typeParameters = element.getTypeParameters();
       String typeParametersDecl = buildTypeParametersDeclaration(typeParameters);
-      String typeParametersUsage = buildTypeParametersUsage(typeParameters);
       writer.append(
           MessageFormat.format(
               TEMPLATE,
@@ -204,20 +203,6 @@ final class SimpleBeanLazyWriter {
           sb.append(bounds.get(j).toString());
         }
       }
-    }
-    sb.append(">");
-    return sb.toString();
-  }
-
-  private String buildTypeParametersUsage(List<? extends TypeParameterElement> typeParameters) {
-    if (typeParameters.isEmpty()) {
-      return "";
-    }
-
-    StringBuilder sb = new StringBuilder("<");
-    for (int i = 0; i < typeParameters.size(); i++) {
-      if (i > 0) sb.append(", ");
-      sb.append(typeParameters.get(i).getSimpleName());
     }
     sb.append(">");
     return sb.toString();
