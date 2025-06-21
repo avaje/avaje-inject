@@ -85,6 +85,11 @@ final class AssistBeanReader {
         APContext.logError(type, "@AssistFactory targets must have only one abstract method");
       }
     }
+
+    if (t.getTypeParameters().size() > 1) {
+      APContext.logError(type, "@AssistFactory targets can't have more than one type parameter");
+    }
+
     var sb = new StringBuilder(String.format("@AssistFactory targets for type %s must have an abstract method with form '%s <methodName>(", shortName(), shortName()));
     var assistNames = new ArrayList<String>();
     for (var iterator = assistedElements.iterator(); iterator.hasNext(); ) {
