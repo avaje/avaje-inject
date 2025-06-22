@@ -96,7 +96,7 @@ final class SimpleAssistWriter {
       valhallaStr = "";
     }
 
-    writer.append("final %sclass ", valhallaStr).append(name).append(suffix);
+    writer.append("final %sclass %s%s", valhallaStr, name, suffix);
     writeImplementsOrExtends();
     writer.append(" {").eol().eol();
   }
@@ -113,6 +113,9 @@ final class SimpleAssistWriter {
     writer
       .append(targetInterface.getKind() == ElementKind.INTERFACE ? " implements " : " extends ")
       .append(Util.shortName(targetInterface.getQualifiedName().toString()));
+    if (!targetInterface.getTypeParameters().isEmpty()) {
+      writer.append("<%s>", shortName);
+    }
   }
 
   private void writeInjectFields() {
