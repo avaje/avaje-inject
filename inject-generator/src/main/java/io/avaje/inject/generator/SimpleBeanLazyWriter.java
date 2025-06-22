@@ -66,21 +66,20 @@ final class SimpleBeanLazyWriter {
       final var writer = new Append(APContext.createSourceFile(originName, element).openWriter());
 
       var inheritance = isInterface ? "implements" : "extends";
-
       String methodString = methods();
 
       // Get type parameters
       List<? extends TypeParameterElement> typeParameters = element.getTypeParameters();
       String typeParametersDecl = buildTypeParametersDeclaration(typeParameters);
       writer.append(
-          MessageFormat.format(
-              TEMPLATE,
-              packageName,
-              imports(),
-              shortName,
-              typeParametersDecl,
-              inheritance,
-              methodString));
+        MessageFormat.format(
+          TEMPLATE,
+          packageName,
+          imports(),
+          shortName,
+          typeParametersDecl,
+          inheritance,
+          methodString));
       writer.close();
     } catch (Exception e) {
       logError("Failed to write Proxy class %s", e);
@@ -179,19 +178,19 @@ final class SimpleBeanLazyWriter {
       sb.append(");\n");
       sb.append("  }\n\n");
     }
-
     return sb.toString();
   }
 
-  private String buildTypeParametersDeclaration(
-      List<? extends TypeParameterElement> typeParameters) {
+  private String buildTypeParametersDeclaration(List<? extends TypeParameterElement> typeParameters) {
     if (typeParameters.isEmpty()) {
       return "";
     }
 
     StringBuilder sb = new StringBuilder("<");
     for (int i = 0; i < typeParameters.size(); i++) {
-      if (i > 0) sb.append(", ");
+      if (i > 0) {
+        sb.append(", ");
+      }
       TypeParameterElement param = typeParameters.get(i);
       sb.append(param.getSimpleName());
 
@@ -199,7 +198,9 @@ final class SimpleBeanLazyWriter {
       if (!bounds.isEmpty() && !"java.lang.Object".equals(bounds.get(0).toString())) {
         sb.append(" extends ");
         for (int j = 0; j < bounds.size(); j++) {
-          if (j > 0) sb.append(" & ");
+          if (j > 0) {
+            sb.append(" & ");
+          }
           sb.append(bounds.get(j).toString());
         }
       }
