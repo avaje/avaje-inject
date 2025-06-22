@@ -22,5 +22,6 @@ class GenericFactoryTest {
     assertThat(others.getGenericMap()).isNotNull();
     assertThat(others.getBiConsumer()).isNotNull();
     assertThat(others.getGenList()).hasSize(2);
+    assertThat(others.getGenList()).contains(stringy, intymcintface);
   }
 }
