@@ -22,7 +22,7 @@ public class LazyBeanTypes implements LazyInterface {
   public void something() {}
 
   @Override
-  public String somethingElse() { // TODO Auto-generated method stub
+  public String somethingElse() {
     return null;
   }
 }

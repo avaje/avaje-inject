@@ -22,12 +22,12 @@ public class LazyGenericBeanTypes implements LazyGenericInterface {
   public void something() {}
 
   @Override
-  public String somethingElse() { // TODO Auto-generated method stub
+  public String somethingElse() {
     return null;
   }
 
   @Override
-  public Object gen() { // TODO Auto-generated method stub
+  public Object gen() {
     return null;
   }
 }
