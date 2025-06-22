@@ -164,6 +164,7 @@ public final class ExampleModule implements AvajeModule {
 | [@PreDestroy](https://avaje.io/inject/#pre-destroy) | - | @PreDestroy
 | [@Factory and @Bean](https://avaje.io/inject/#factory) | - | @Configuration and @Bean
 | [@RequiresBean and @RequiresProperty](https://avaje.io/inject/#conditional) | - | @Conditional
+| [@Lazy](https://avaje.io/inject/#lazy) | - | @Lazy
 | [@Primary](https://avaje.io/inject/#primary) | - | @Primary
 | [@Secondary](https://avaje.io/inject/#secondary) | - | @Fallback
 | [@InjectTest](https://avaje.io/inject/#component-testing) | - | @SpringBootTest
