@@ -5,7 +5,7 @@
   <parent>
     <artifactId>avaje-inject-parent</artifactId>
     <groupId>io.avaje</groupId>
-    <version>11.6-RC3</version>
+    <version>11.6-RC4</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
