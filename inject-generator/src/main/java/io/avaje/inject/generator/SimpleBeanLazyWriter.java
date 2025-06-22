@@ -13,6 +13,7 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
 final class SimpleBeanLazyWriter {
@@ -22,14 +23,14 @@ final class SimpleBeanLazyWriter {
           + "{1}"
           + "@Proxy\n"
           + "@Generated(\"avaje-inject-generator\")\n"
-          + "public final class {2}$Lazy {3} {2} '{'\n"
+          + "public final class {2}$Lazy{3} {4} {2}{3} '{'\n"
           + "\n"
-          + "  private final Provider<{2}> onceProvider;\n"
+          + "  private final Provider<{2}{3}> onceProvider;\n"
           + "\n"
-          + "  public {2}$Lazy(Provider<{2}> onceProvider) '{'\n"
+          + "  public {2}$Lazy(Provider<{2}{3}> onceProvider) '{'\n"
           + "    this.onceProvider = onceProvider;\n"
           + "  '}'\n\n"
-          + "{4}"
+          + "{5}"
           + "'}'\n";
 
   private final String originName;
@@ -64,9 +65,21 @@ final class SimpleBeanLazyWriter {
     try {
       final var writer = new Append(APContext.createSourceFile(originName, element).openWriter());
 
-      var typeString = isInterface ? "implements" : "extends";
+      var inheritance = isInterface ? "implements" : "extends";
       String methodString = methods();
-      writer.append(MessageFormat.format(TEMPLATE, packageName, imports(), shortName, typeString, methodString));
+
+      // Get type parameters
+      List<? extends TypeParameterElement> typeParameters = element.getTypeParameters();
+      String typeParametersDecl = buildTypeParametersDeclaration(typeParameters);
+      writer.append(
+        MessageFormat.format(
+          TEMPLATE,
+          packageName,
+          imports(),
+          shortName,
+          typeParametersDecl,
+          inheritance,
+          methodString));
       writer.close();
     } catch (Exception e) {
       logError("Failed to write Proxy class %s", e);
@@ -165,7 +178,34 @@ final class SimpleBeanLazyWriter {
       sb.append(");\n");
       sb.append("  }\n\n");
     }
+    return sb.toString();
+  }
 
+  private String buildTypeParametersDeclaration(List<? extends TypeParameterElement> typeParameters) {
+    if (typeParameters.isEmpty()) {
+      return "";
+    }
+
+    StringBuilder sb = new StringBuilder("<");
+    for (int i = 0; i < typeParameters.size(); i++) {
+      if (i > 0) {
+        sb.append(", ");
+      }
+      TypeParameterElement param = typeParameters.get(i);
+      sb.append(param.getSimpleName());
+
+      List<? extends TypeMirror> bounds = param.getBounds();
+      if (!bounds.isEmpty() && !"java.lang.Object".equals(bounds.get(0).toString())) {
+        sb.append(" extends ");
+        for (int j = 0; j < bounds.size(); j++) {
+          if (j > 0) {
+            sb.append(" & ");
+          }
+          sb.append(bounds.get(j).toString());
+        }
+      }
+    }
+    sb.append(">");
     return sb.toString();
   }
 }

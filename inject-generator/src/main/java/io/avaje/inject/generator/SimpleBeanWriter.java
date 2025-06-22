@@ -200,9 +200,7 @@ final class SimpleBeanWriter {
       writer.indent("        return bean;").eol();
       if (!constructor.methodThrows()) {
         writer.append("     }");
-        if (beanReader.proxyLazy()) {
-          writer.append(", %s$Lazy::new", Util.shortNameLazyProxy(beanReader.lazyProxyType()));
-        }
+        writeLazyRegister();
         writer.append(");").eol();
       }
     }
@@ -211,14 +209,24 @@ final class SimpleBeanWriter {
 
     if (beanReader.registerProvider() && constructor.methodThrows()) {
       writer.append("     }");
-      if (beanReader.proxyLazy()) {
-        writer.append(", %s$Lazy::new", Util.shortNameLazyProxy(beanReader.lazyProxyType()));
-      }
+      writeLazyRegister();
       writer.append(");").eol();
     }
 
     writer.append("    }");
     writer.eol();
+  }
+
+  private void writeLazyRegister() {
+    if (beanReader.proxyLazy()) {
+      String shortNameLazyProxy = Util.shortNameLazyProxy(beanReader.lazyProxyType()) + "$Lazy";
+      writer.append(", ");
+      if (beanReader.lazyProxyType().getTypeParameters().isEmpty()) {
+        writer.append("%s::new", shortNameLazyProxy);
+      } else {
+        writer.append("p -> new %s<>(p)", shortNameLazyProxy);
+      }
+    }
   }
 
   private void writeBuildMethodStart() {
