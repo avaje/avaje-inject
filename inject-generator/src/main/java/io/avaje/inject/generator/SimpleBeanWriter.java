@@ -256,6 +256,7 @@ final class SimpleBeanWriter {
   private void writeObserveMethods() {
     final var bean = "bean";
     final var builder = "builder";
+    final var scope = "events$$beanScope";
 
     final var indent = "      ";
     for (MethodReader methodReader : beanReader.observerMethods()) {
@@ -264,9 +265,17 @@ final class SimpleBeanWriter {
       final var shortWithoutAnnotations = observeUtype.shortWithoutAnnotations();
       var injectParams = methodReader.params().stream().skip(1).collect(toList());
 
+      if (!injectParams.isEmpty()) {
+        writer.indent(indent).append("var %s = %s.get(BeanScope.class);", scope, builder).eol();
+      }
+
       for (MethodParam param : injectParams) {
-        writer.indent(indent).append("var %s = ", methodReader.name() + "$" + param.simpleName());
-        param.builderGetDependency(writer, builder);
+        writer
+            .indent(indent)
+            .append(
+                "Supplier<%s> %s = () -> ",
+                param.getFullUType().shortType(), methodReader.name() + "$" + param.simpleName());
+        param.builderGetDependency(writer, scope);
         writer.append(";").eol();
       }
 
@@ -280,9 +289,10 @@ final class SimpleBeanWriter {
       if (methodReader.params().size() == 1) {
         writer.append("%s::%s;", bean, methodReader.name());
       } else {
-        var injectParamNames = injectParams.stream()
-          .map(p -> methodReader.name() + "$" + p.simpleName())
-          .collect(joining(", "));
+        var injectParamNames =
+            injectParams.stream()
+                .map(p -> methodReader.name() + "$" + p.simpleName() + ".get()")
+                .collect(joining(", "));
         writer.append("e -> bean.%s(e, %s);", methodReader.name(), injectParamNames);
       }
       final var observesPrism = ObservesPrism.getInstanceOn(observeEvent.element());
