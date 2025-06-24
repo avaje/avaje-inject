@@ -273,11 +273,9 @@ final class SimpleBeanWriter {
         if (Constants.BEANSCOPE.equals(param.getFullUType().fullWithoutAnnotations())) {
           continue;
         }
-        writer
-            .indent(indent)
-            .append(
-                "Supplier<%s> %s = () -> ",
-                param.getFullUType().shortType(), methodReader.name() + "$" + param.simpleName());
+        writer.indent(indent).append("Supplier<%s> %s = () -> ",
+          param.getFullUType().shortType(),
+          methodReader.name() + "$" + param.simpleName());
         param.builderGetDependency(writer, scope);
         writer.append(";").eol();
       }
@@ -292,14 +290,12 @@ final class SimpleBeanWriter {
       if (methodReader.params().size() == 1) {
         writer.append("%s::%s;", bean, methodReader.name());
       } else {
-        var injectParamNames =
-            injectParams.stream()
-                .map(
-                    p ->
-                        Constants.BEANSCOPE.equals(p.getFullUType().fullWithoutAnnotations())
-                            ? scope
-                            : methodReader.name() + "$" + p.simpleName() + ".get()")
-                .collect(joining(", "));
+        var injectParamNames = injectParams.stream()
+          .map(p ->
+            Constants.BEANSCOPE.equals(p.getFullUType().fullWithoutAnnotations())
+              ? scope
+              : methodReader.name() + "$" + p.simpleName() + ".get()")
+          .collect(joining(", "));
         writer.append("e -> bean.%s(e, %s);", methodReader.name(), injectParamNames);
       }
       final var observesPrism = ObservesPrism.getInstanceOn(observeEvent.element());

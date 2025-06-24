@@ -264,14 +264,13 @@ final class BeanReader {
         allUTypes.add(utype);
       }
       method.params().stream()
-          .filter(p -> !p.observeEvent())
-          .map(MethodParam::getFullUType)
-          .forEach(
-              u -> {
-                if (u.isGeneric()) {
-                  allUTypes.add(u);
-                }
-              });
+        .filter(p -> !p.observeEvent())
+        .map(MethodParam::getFullUType)
+        .forEach(u -> {
+          if (u.isGeneric()) {
+            allUTypes.add(u);
+          }
+        });
     }
 
     if (constructor != null) {
