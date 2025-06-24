@@ -270,6 +270,9 @@ final class SimpleBeanWriter {
       }
 
       for (MethodParam param : injectParams) {
+        if (Constants.BEANSCOPE.equals(param.getFullUType().fullWithoutAnnotations())) {
+          continue;
+        }
         writer
             .indent(indent)
             .append(
@@ -291,7 +294,11 @@ final class SimpleBeanWriter {
       } else {
         var injectParamNames =
             injectParams.stream()
-                .map(p -> methodReader.name() + "$" + p.simpleName() + ".get()")
+                .map(
+                    p ->
+                        Constants.BEANSCOPE.equals(p.getFullUType().fullWithoutAnnotations())
+                            ? scope
+                            : methodReader.name() + "$" + p.simpleName() + ".get()")
                 .collect(joining(", "));
         writer.append("e -> bean.%s(e, %s);", methodReader.name(), injectParamNames);
       }
