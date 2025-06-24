@@ -16,6 +16,7 @@ class TestEventMessaging {
   @Inject MyObserver observer;
   @Inject MyQualifiedObserver qualifiedObserver;
   @Inject MyObserverInjected observerInjected;
+  @Inject MyObserverInjectPrototype observerPrototype;
   @Inject MyStrQualifiedObserver strQualifiedObserver;
   @Inject Event<CustomEvent> event;
   @Inject EventSender2 sender2;
@@ -30,6 +31,9 @@ class TestEventMessaging {
     qualifiedObserver.event = null;
     observerInjected.invoked= false;
     observerInjected.event = null;
+    observerPrototype.invoked = false;
+    observerPrototype.event = null;
+    observerPrototype.beansList.clear();
   }
 
   @Test
@@ -43,6 +47,21 @@ class TestEventMessaging {
     assertThat(qualifiedObserver.invoked).isFalse();
     assertThat(observerInjected.invoked).isTrue();
     assertThat(observerInjected.event).isSameAs(message);
+  }
+
+  @Test
+  void testProtoType() {
+    var message = new CustomEvent("hi");
+
+    event.fire(message);
+
+    assertThat(observerPrototype.invoked).isTrue();
+    assertThat(observerPrototype.event).isSameAs(message);
+    event.fire(message);
+
+    assertThat(observerPrototype.invoked).isTrue();
+    assertThat(observerPrototype.event).isSameAs(message);
+    assertThat(observerPrototype.beansList.poll()).isNotSameAs(observerPrototype.beansList.poll());
   }
 
   @Test
