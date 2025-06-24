@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -418,6 +419,11 @@ final class MethodReader {
     // TYPE_ generic types are fully qualified
     if (optionalType) {
       importTypes.add(Constants.OPTIONAL);
+    }
+
+    if (observeParameter != null && params.size() > 1) {
+      importTypes.add(Supplier.class.getCanonicalName());
+      importTypes.add(Constants.BEANSCOPE);
     }
     conditions.addImports(importTypes);
   }
