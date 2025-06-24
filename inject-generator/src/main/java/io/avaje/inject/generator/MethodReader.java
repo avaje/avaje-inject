@@ -421,7 +421,7 @@ final class MethodReader {
       importTypes.add(Constants.OPTIONAL);
     }
 
-    if (observeParameter != null) {
+    if (observeParameter != null && params.size() > 1) {
       importTypes.add(Supplier.class.getCanonicalName());
       importTypes.add(Constants.BEANSCOPE);
     }
