@@ -256,7 +256,7 @@ final class SimpleBeanWriter {
   private void writeObserveMethods() {
     final var bean = "bean";
     final var builder = "builder";
-    final var scope = "events$$beanScope";
+    final var scope = "beanScope";
 
     final var indent = "      ";
     for (MethodReader methodReader : beanReader.observerMethods()) {
