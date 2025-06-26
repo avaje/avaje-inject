@@ -146,7 +146,7 @@ final class MetaDataOrdering {
 
   private void checkMissingDependencies(MetaData metaData) {
     for (Dependency dependency : metaData.dependsOn()) {
-      if (providers.get(dependency.name()) == null && !scopeInfo.providedByOtherScope(dependency.name())) {
+      if (!dependencySatisfied(dependency, true, metaData)) {
         TypeElement element = elementMaybe(metaData.type());
         logError(element, "No dependency provided for %s on %s", dependency, metaData.type());
         missingDependencyTypes.add(dependency.name());
