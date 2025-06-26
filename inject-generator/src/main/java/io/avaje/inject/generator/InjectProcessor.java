@@ -174,13 +174,23 @@ public final class InjectProcessor extends AbstractProcessor {
     maybeElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
 
     maybeElements(roundEnv, ExternalPrism.PRISM_TYPE).stream()
-      .flatMap(Set::stream)
-      .forEach(e -> {
-        var type = UType.parse(e.asType());
-        type = "java.util.List".equals(type.mainType()) ? type.param0() : type;
-        ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), Util.named(e));
-        ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), null);
-      });
+        .flatMap(Set::stream)
+        .forEach(
+            e -> {
+              if (e instanceof ExecutableElement) {
+                ExecutableElement method = (ExecutableElement) e;
+                method
+                    .getParameters()
+                    .forEach(
+                        p -> {
+                          var type = UType.parse(p.asType());
+                          addExteralType(p, type);
+                        });
+              } else {
+                var type = UType.parse(e.asType());
+                addExteralType(e, type);
+              }
+            });
 
     maybeElements(roundEnv, ServiceProviderPrism.PRISM_TYPE).ifPresent(this::registerSPI);
     maybeElements(roundEnv, PluginProvidesPrism.PRISM_TYPE).ifPresent(this::registerSPI);
@@ -205,6 +215,12 @@ public final class InjectProcessor extends AbstractProcessor {
       ProcessingContext.clear();
     }
     return false;
+  }
+
+  private void addExteralType(Element e, UType type) {
+    type = "java.util.List".equals(type.mainType()) ? type.param0() : type;
+    ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), Util.named(e));
+    ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), null);
   }
 
   private void validateQualifier(ExecutableElement method) {
