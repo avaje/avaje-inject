@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.logError;
+import static io.avaje.inject.generator.APContext.logWarn;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -194,6 +195,8 @@ final class BeanReader {
     conditions.addImports(importTypes);
     if (proxyLazy) {
       SimpleBeanLazyWriter.write(APContext.elements().getPackageOf(beanType), lazyProxyType);
+    } else if (lazy) {
+      logWarn(beanType, "Lazy beans should have a no-arg constructor");
     }
     return this;
   }

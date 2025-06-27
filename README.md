@@ -145,7 +145,7 @@ public final class ExampleModule implements AvajeModule {
 
 - Specifically aimed for server-side development (rather than Android)
 - Supports "component testing" via `avaje-inject-test` and `@InjectTest`
-- Provides API to obtain all bean instances that implement an interface
+- Provides an API to obtain all bean instances that implement an interface
 - Lifecycle methods with `@PostConstruct` and `@PreDestroy`
 - Spring-like factory classes with `@Factory` and `@Bean`
 - Conditional Wiring based on active profiles or existing beans/properties
@@ -165,6 +165,7 @@ public final class ExampleModule implements AvajeModule {
 | [@Factory and @Bean](https://avaje.io/inject/#factory) | - | @Configuration and @Bean
 | [@RequiresBean and @RequiresProperty](https://avaje.io/inject/#conditional) | - | @Conditional
 | [@Lazy](https://avaje.io/inject/#lazy) | - | @Lazy
+| [@Prototype](https://avaje.io/inject/#prototype) | - | @Scope("prototype")
 | [@Primary](https://avaje.io/inject/#primary) | - | @Primary
 | [@Secondary](https://avaje.io/inject/#secondary) | - | @Fallback
 | [@InjectTest](https://avaje.io/inject/#component-testing) | - | @SpringBootTest
