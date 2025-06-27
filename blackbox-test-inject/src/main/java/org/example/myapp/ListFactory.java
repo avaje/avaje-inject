@@ -12,7 +12,7 @@ import jakarta.inject.Named;
 public class ListFactory {
 
   @Bean
-  List<String> test() {
+  List<String> test(List<Cloneable> emptyList) {
     return List.of("test1", "test2");
   }
 
