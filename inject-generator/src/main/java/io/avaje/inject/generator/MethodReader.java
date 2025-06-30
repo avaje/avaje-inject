@@ -1,5 +1,6 @@
 package io.avaje.inject.generator;
 
+import static io.avaje.inject.generator.APContext.logWarn;
 import static io.avaje.inject.generator.Constants.CONDITIONAL_DEPENDENCY;
 import static io.avaje.inject.generator.ProcessingContext.asElement;
 
@@ -169,13 +170,15 @@ final class MethodReader {
   }
 
   MethodReader read() {
-    List<? extends VariableElement> ps = element.getParameters();
-    for (VariableElement p : ps) {
+    var ps = element.getParameters();
+    for (var p : ps) {
       params.add(new MethodParam(p));
     }
     observeParameter = params.stream().filter(MethodParam::observeEvent).findFirst().orElse(null);
     if (proxyLazy) {
       SimpleBeanLazyWriter.write(APContext.elements().getPackageOf(element), lazyProxyType);
+    } else if (lazy) {
+      logWarn(element, "Lazy return types should be abstract or have a no-arg constructor");
     }
     return this;
   }
