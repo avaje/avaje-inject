@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.avaje</groupId>
   <artifactId>avaje-inject-parent</artifactId>
-  <version>11.6-RC4</version>
+  <version>11.6-RC5</version>
   <packaging>pom</packaging>
   <name>avaje inject parent</name>
   <description>parent pom for avaje inject library</description>
@@ -23,7 +23,7 @@
     <surefire.useModulePath>false</surefire.useModulePath>
     <argLine>-Dnet.bytebuddy.experimental=true</argLine>
     <!-- default-build-start -->
-    <project.build.outputTimestamp>2025-06-22T00:51:02Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2025-06-30T22:14:44Z</project.build.outputTimestamp>
     <!-- default-build-end -->
     <!-- valhalla-build-start ___
     <maven.compiler.release>23</maven.compiler.release>
