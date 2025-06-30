@@ -9,7 +9,7 @@ import io.avaje.inject.Factory;
 public class ListFactory {
 
   @Bean(initMethod = "postConstruct")
-  List<Something> userId() {
+  List<Something> userId(List<Short> shortyList) {
     return List.of(new Something());
   }
 
