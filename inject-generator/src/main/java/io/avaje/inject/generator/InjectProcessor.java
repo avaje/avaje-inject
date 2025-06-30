@@ -174,23 +174,19 @@ public final class InjectProcessor extends AbstractProcessor {
     maybeElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
 
     maybeElements(roundEnv, ExternalPrism.PRISM_TYPE).stream()
-        .flatMap(Set::stream)
-        .forEach(
-            e -> {
-              if (e instanceof ExecutableElement) {
-                ExecutableElement method = (ExecutableElement) e;
-                method
-                    .getParameters()
-                    .forEach(
-                        p -> {
-                          var type = UType.parse(p.asType());
-                          addExteralType(p, type);
-                        });
-              } else {
-                var type = UType.parse(e.asType());
-                addExteralType(e, type);
-              }
-            });
+      .flatMap(Set::stream)
+      .forEach(e -> {
+        if (e instanceof ExecutableElement) {
+          ExecutableElement method = (ExecutableElement) e;
+          method.getParameters().forEach(p -> {
+            var type = UType.parse(p.asType());
+            addExternalType(p, type);
+          });
+        } else {
+          var type = UType.parse(e.asType());
+          addExternalType(e, type);
+        }
+      });
 
     maybeElements(roundEnv, ServiceProviderPrism.PRISM_TYPE).ifPresent(this::registerSPI);
     maybeElements(roundEnv, PluginProvidesPrism.PRISM_TYPE).ifPresent(this::registerSPI);
@@ -217,7 +213,7 @@ public final class InjectProcessor extends AbstractProcessor {
     return false;
   }
 
-  private void addExteralType(Element e, UType type) {
+  private void addExternalType(Element e, UType type) {
     type = "java.util.List".equals(type.mainType()) ? type.param0() : type;
     ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), Util.named(e));
     ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), null);
