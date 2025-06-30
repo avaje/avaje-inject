@@ -207,7 +207,7 @@ final class MethodReader {
 
     for (final MethodParam param : params) {
       var dep = Util.addQualifierSuffix(param.named, Util.trimWildcard(param.paramType));
-      dependsOn.add(dep);
+      dependsOn.add(param.utilType.isCollection() ? Constants.SOFT_DEPENDENCY + dep : dep);
     }
     metaData.setDependsOn(dependsOn);
     metaData.setProvides(
