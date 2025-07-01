@@ -15,6 +15,17 @@ public interface AvajeModule extends InjectExtension {
   String[] EMPTY_STRINGS = {};
 
   /**
+   * Return public classes of the beans that would be registered by this module.
+   *
+   * <p>This method allows code to use reflection to inspect the modules classes before the module
+   * is wired. This method is not required for DI wiring.
+   */
+  Class<?>[] classes();
+
+  /** Build all the beans. */
+  void build(Builder builder);
+
+  /**
    * Return the set of types this module explicitly provides to other modules.
    *
    * @deprecated use {@link #providesBeans()}
@@ -149,17 +160,6 @@ public interface AvajeModule extends InjectExtension {
         .map(Class::getTypeName)
         .toArray(String[]::new);
   }
-
-  /**
-   * Return public classes of the beans that would be registered by this module.
-   *
-   * <p>This method allows code to use reflection to inspect the modules classes before the module
-   * is wired. This method is not required for DI wiring.
-   */
-  Class<?>[] classes();
-
-  /** Build all the beans. */
-  void build(Builder builder);
 
   /** Marker for custom scoped modules. */
   interface Custom extends AvajeModule {}
