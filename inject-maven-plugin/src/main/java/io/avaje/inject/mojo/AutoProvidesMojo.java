@@ -109,7 +109,9 @@ public class AutoProvidesMojo extends AbstractMojo {
       final List<String> provides = new ArrayList<>();
       final var typeName = plugin.getClass();
       log.info("Loaded Plugin: " + typeName);
-      Collections.addAll(provides, plugin.providesBeans());
+      for (final var provide : plugin.provides()) {
+        provides.add(provide.getTypeName());
+      }
       for (final var provide : plugin.providesAspects()) {
         provides.add(wrapAspect(provide.getCanonicalName()));
       }

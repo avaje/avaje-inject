@@ -49,8 +49,8 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
     try (var classLoader = classLoader(project);
         var pluginWriter = createFileWriter(outputDir.getPath(), "avaje-plugins.csv");
         var moduleCSV = createFileWriter(outputDir.getPath(), "avaje-module-dependencies.csv")) {
-        writeProvidedPlugins(classLoader, pluginWriter);
-        writeModuleCSV(classLoader, moduleCSV);
+      writeProvidedPlugins(classLoader, pluginWriter);
+      writeModuleCSV(classLoader, moduleCSV);
     } catch (IOException e) {
       throw new GradleException("Failed to write avaje-module-provides", e);
     }
@@ -74,11 +74,11 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
       final List<String> provides = new ArrayList<>();
       final var typeName = plugin.getClass().getTypeName();
       System.out.println("Loaded Plugin: " + typeName);
-      for (final var provide : plugin.providesBeans()) {
-        provides.add(provide);
+      for (final var provide : plugin.provides()) {
+        provides.add(provide.getTypeName());
       }
-      for (final var provide : plugin.providesAspectBeans()) {
-        provides.add(wrapAspect(provide));
+      for (final var provide : plugin.providesAspects()) {
+        provides.add(wrapAspect(provide.getCanonicalName()));
       }
       pluginEntries.put(typeName, provides);
     }
@@ -104,7 +104,8 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
 
   private static URL[] createClassPath(Project project) {
     try {
-      Set<File> compileClasspath = project.getConfigurations().getByName("compileClasspath").resolve();
+      Set<File> compileClasspath =
+          project.getConfigurations().getByName("compileClasspath").resolve();
       final List<URL> urls = new ArrayList<>(compileClasspath.size());
       for (File file : compileClasspath) {
         urls.add(file.toURI().toURL());
