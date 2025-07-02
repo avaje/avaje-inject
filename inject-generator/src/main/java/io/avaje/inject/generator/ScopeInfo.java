@@ -475,7 +475,7 @@ final class ScopeInfo {
     writer.append("}");
   }
 
-  void buildProvides(Append writer, Set<String> provides, Set<String> requires) {
+  void buildProvides(Append writer) {
     if (!provides.isEmpty()) {
       buildProvidesMethod(writer, "providesBeans", provides);
     }
@@ -500,6 +500,34 @@ final class ScopeInfo {
     }
     writer.append("    };").eol();
     writer.append("  }").eol().eol();
+  }
+
+  void buildAutoProvides(Append writer, Set<String> autoProvides) {
+    autoProvides.removeAll(provides);
+    if (!autoProvides.isEmpty()) {
+      buildProvidesMethod(writer, "autoProvidesBeans", autoProvides);
+    }
+  }
+
+  void buildAutoProvidesAspects(Append writer, Set<String> autoProvidesAspects) {
+    autoProvidesAspects.removeAll(provides);
+    if (!autoProvidesAspects.isEmpty()) {
+      buildProvidesMethod(writer, "autoProvidesAspectBeans", autoProvidesAspects);
+    }
+  }
+
+  void buildAutoRequires(Append writer, Set<String> autoRequires) {
+    autoRequires.removeAll(requires);
+    if (!autoRequires.isEmpty()) {
+      buildProvidesMethod(writer, "autoRequiresBeans", autoRequires);
+    }
+  }
+
+  void buildAutoRequiresAspects(Append writer, Set<String> autoRequires) {
+    autoRequires.removeAll(requires);
+    if (!autoRequires.isEmpty()) {
+      buildProvidesMethod(writer, "autoRequiresAspectBeans", autoRequires);
+    }
   }
 
   void readModuleMetaData(TypeElement moduleType) {

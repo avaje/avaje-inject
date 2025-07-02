@@ -25,6 +25,7 @@ final class MetaDataOrdering {
   private final List<DependencyLink> circularDependencies = new ArrayList<>();
   private final Set<String> missingDependencyTypes = new LinkedHashSet<>();
   private final Set<String> autoRequires = new TreeSet<>();
+  private final Set<String> autoRequiresAspects = new TreeSet<>();
 
   MetaDataOrdering(Collection<MetaData> values, ScopeInfo scopeInfo) {
     this.scopeInfo = scopeInfo;
@@ -223,7 +224,11 @@ final class MetaDataOrdering {
 
   private boolean isExternal(String dependencyName, boolean includeExternal, MetaData queuedMeta) {
     if (includeExternal && externallyProvided(dependencyName)) {
-      autoRequires.add(dependencyName);
+      if (Util.isAspectProvider(dependencyName)) {
+        autoRequiresAspects.add(Util.extractAspectType(dependencyName));
+      } else {
+        autoRequires.add(dependencyName);
+      }
       queuedMeta.markWithExternalDependency(dependencyName);
       return true;
     }
@@ -232,6 +237,10 @@ final class MetaDataOrdering {
 
   Set<String> autoRequires() {
     return autoRequires;
+  }
+
+  Set<String> autoRequiresAspects() {
+    return autoRequiresAspects;
   }
 
   List<MetaData> ordered() {
