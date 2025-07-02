@@ -78,7 +78,7 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
         provides.add(provide);
       }
       for (final var provide : plugin.providesAspectBeans()) {
-        provides.add(wrapAspect(provide.getCanonicalName()));
+        provides.add(wrapAspect(provide));
       }
       pluginEntries.put(typeName, provides);
     }
@@ -133,20 +133,11 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
         var type = provide;
         provides.add(type);
       }
-      for (final var provide : module.autoProvidesBeans()) {
-        var type = provide;
-        provides.add(type);
-      }
-      for (final var provide : module.autoprovidesAspectBeans()) {
-        var type = wrapAspect(provide);
-        provides.add(type);
-      }
 
       final var requires = Arrays.stream(module.requiresBeans()).collect(toList());
-
-      Arrays.stream(module.autoRequires()).forEach(requires::add);
-      Arrays.stream(module.requiresPackages()).forEach(requires::add);
+      Collections.addAll(requires, module.requiresPackagesFromType());
       Arrays.stream(module.autoRequiresAspects())
+          .map(Class::getTypeName)
           .map(AvajeInjectPlugin::wrapAspect)
           .forEach(requires::add);
       modules.add(new ModuleData(name, provides, requires));
