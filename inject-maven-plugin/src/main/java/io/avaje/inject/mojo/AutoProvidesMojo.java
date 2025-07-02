@@ -147,21 +147,15 @@ public class AutoProvidesMojo extends AbstractMojo {
         provides.add(type);
       }
 
-      for (final var provide : module.autoProvidesBeans()) {
-        var type = provide;
-        provides.add(type);
-      }
-
-      for (final var provide : module.autoProvidesAspectBeans()) {
-        var type = wrapAspect(provide);
+      for (final var provide : module.autoProvidesAspects()) {
+        var type = wrapAspect(provide.getTypeName());
         provides.add(type);
       }
 
       final var requires = Arrays.stream(module.requiresBeans()).collect(toList());
-
-      Collections.addAll(requires, module.autoRequiresBeans());
       Collections.addAll(requires, module.requiresPackagesFromType());
-      Arrays.stream(module.autoRequiresAspectBeans())
+      Arrays.stream(module.autoRequiresAspects())
+          .map(Class::getTypeName)
           .map(AutoProvidesMojo::wrapAspect)
           .forEach(requires::add);
       modules.add(new ModuleData(name.getTypeName(), provides, requires));

@@ -327,8 +327,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         .add(factoryState);
 
       addFactoryProvides(factoryState, module.providesBeans());
-      addFactoryProvides(factoryState, module.autoProvidesBeans());
-      addFactoryProvides(factoryState, module.autoProvidesAspectBeans());
+      addAspectProvides(factoryState, module.autoProvidesAspects());
 
       if (factoryState.isRequiresEmpty()) {
         if (factoryState.explicitlyProvides()) {
@@ -341,6 +340,16 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       } else {
         // queue it to process by dependency ordering
         queue.add(factoryState);
+      }
+    }
+
+    private void addAspectProvides(FactoryState factoryState, Class<?>[] aspects) {
+      for (final var feature : aspects) {
+        providesMap
+            .computeIfAbsent(
+                "io.avaje.inject.aop.AspectProvider<" + feature.getTypeName() + ">",
+                s -> new FactoryList())
+            .add(factoryState);
       }
     }
 
@@ -392,7 +401,6 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
           sb.append("Module [").append(factory).append("] has unsatisfied");
           unsatisfiedRequires(sb, factory.requires(), "requires");
           unsatisfiedRequires(sb, factory.requiresPackages(), "requiresPackages");
-          unsatisfiedRequires(sb, factory.autoRequires(), "autoRequires");
         }
         sb.append(" - none of the loaded modules ").append(moduleNames).append(" have this in their @InjectModule( provides = ... ). ");
         if (parent != null) {
@@ -442,9 +450,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     /** Return true if the (module) requires dependencies are satisfied for this factory. */
     private boolean satisfiedDependencies(FactoryState factory) {
       return satisfiedDependencies(factory.requires())
-        && satisfiedDependencies(factory.requiresPackages())
-        && satisfiedDependencies(factory.autoRequiresAspects())
-        && satisfiedDependencies(factory.autoRequires());
+          && satisfiedDependencies(factory.requiresPackages());
     }
 
     private boolean satisfiedDependencies(String[] requires) {
@@ -493,24 +499,13 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       return factory.requiresPackagesFromType();
     }
 
-    String[] autoRequires() {
-      return factory.autoRequiresBeans();
-    }
-
-    String[] autoRequiresAspects() {
-      return factory.autoRequiresAspectBeans();
-    }
-
     @Override
     public String toString() {
       return factory.getClass().getTypeName();
     }
 
     boolean isRequiresEmpty() {
-      return isEmpty(factory.requiresBeans())
-          && isEmpty(factory.requiresPackagesFromType())
-          && isEmpty(factory.autoRequiresBeans())
-          && isEmpty(factory.autoRequiresAspectBeans());
+      return isEmpty(factory.requiresBeans()) && isEmpty(factory.requiresPackagesFromType());
     }
 
     boolean explicitlyProvides() {

@@ -85,9 +85,8 @@ final class ExternalProvider {
       final var name = module.getClass().getTypeName();
       final var provides = new TreeSet<String>();
       Collections.addAll(provides, module.providesBeans());
-      Collections.addAll(provides, module.autoProvidesBeans());
-      for (final var provide : module.autoProvidesAspectBeans()) {
-        final var aspectType = Util.wrapAspect(provide);
+      for (final var provide : module.autoProvidesAspects()) {
+        final var aspectType = Util.wrapAspect(provide.getTypeName());
         provides.add(aspectType);
       }
       registerExternalMetaData(name);
@@ -95,9 +94,9 @@ final class ExternalProvider {
       providedTypes.addAll(provides);
       final List<String> requires = new ArrayList<>();
       Collections.addAll(requires, module.requiresBeans());
-      Collections.addAll(requires, module.autoRequiresBeans());
       Collections.addAll(requires, module.requiresPackagesFromType());
-      Arrays.stream(module.autoRequiresAspectBeans())
+      Arrays.stream(module.autoRequiresAspects())
+          .map(Class::getTypeName)
           .map(Util::wrapAspect)
           .forEach(requires::add);
 
