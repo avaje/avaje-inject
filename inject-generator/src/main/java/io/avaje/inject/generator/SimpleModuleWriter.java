@@ -1,13 +1,23 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.APContext.*;
-import static io.avaje.inject.generator.ProcessingContext.*;
+import static io.avaje.inject.generator.APContext.logError;
+import static io.avaje.inject.generator.APContext.typeElement;
+import static io.avaje.inject.generator.ProcessingContext.allScopes;
+import static io.avaje.inject.generator.ProcessingContext.createMetaInfWriterFor;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -86,9 +96,9 @@ final class SimpleModuleWriter {
     } else {
       writeRequiredModules();
     }
+    writeBuildMethod();
     writeProvides();
     writeClassesMethod();
-    writeBuildMethod();
     writeBuildMethods();
     writeEndClass();
     writer.close();
@@ -178,45 +188,28 @@ final class SimpleModuleWriter {
   }
 
   private void writeProvides() {
-    final Set<String> autoProvidesAspects = new TreeSet<>();
-    final Set<String> autoProvides = new TreeSet<>();
+    final Set<String> scopeProvides = new TreeSet<>(scopeInfo.provides());
 
     if (scopeType == ScopeInfo.Type.CUSTOM) {
-      autoProvides.add(scopeInfo.scopeAnnotationFQN());
-      autoProvides.add(shortName);
+      scopeProvides.add(scopeInfo.scopeAnnotationFQN());
+      scopeProvides.add(shortName);
     }
-
     for (MetaData metaData : ordering.ordered()) {
       final String aspect = metaData.providesAspect();
       if (aspect != null && !aspect.isEmpty()) {
-        autoProvidesAspects.add(aspect);
+        scopeProvides.add(Util.wrapAspect(aspect));
       }
       final var forExternal = metaData.autoProvides();
       if (forExternal != null && !forExternal.isEmpty()) {
-        autoProvides.addAll(forExternal);
+        scopeProvides.addAll(forExternal);
       }
     }
-    if (!autoProvides.isEmpty()) {
-      scopeInfo.buildAutoProvides(writer, autoProvides);
-    }
-    if (!autoProvidesAspects.isEmpty()) {
-      scopeInfo.buildAutoProvidesAspects(writer, autoProvidesAspects);
-    }
-    Set<String> autoRequires = ordering.autoRequires();
-    if (!autoRequires.isEmpty()) {
-      scopeInfo.buildAutoRequires(writer, autoRequires);
-    }
-    Set<String> autoRequiresAspects = ordering.autoRequiresAspects();
-    if (!autoRequiresAspects.isEmpty()) {
-      scopeInfo.buildAutoRequiresAspects(writer, autoRequiresAspects);
-    }
+    Set<String> scopeRequires = new TreeSet<>(scopeInfo.requires());
+    scopeRequires.addAll(ordering.autoRequires());
+    scopeInfo.buildProvides(writer, scopeProvides, scopeRequires);
 
-    var requires = new ArrayList<>(scopeInfo.requires());
-    var provides = new ArrayList<>(scopeInfo.provides());
-    requires.addAll(autoRequires);
-    autoRequiresAspects.stream().map(Util::wrapAspect).forEach(requires::add);
-    provides.addAll(autoProvides);
-    autoProvidesAspects.stream().map(Util::wrapAspect).forEach(provides::add);
+    var requires = new ArrayList<>(scopeRequires);
+    var provides = new ArrayList<>(scopeProvides);
 
     ProcessingContext.addModule(new ModuleData(fullName, provides, requires));
   }
@@ -310,7 +303,6 @@ final class SimpleModuleWriter {
     if (scopeInfo.addModuleConstructor()) {
       writeConstructor();
     }
-    scopeInfo.buildProvides(writer);
   }
 
   private void writeWithBeans() {

@@ -39,6 +39,7 @@ public interface AvajeModule extends InjectExtension {
    * <p>This is a convenience when using multiple modules that is otherwise controlled manually by
    * explicitly using {@link AvajeModule#provides()}.
    */
+  @Deprecated(forRemoval = true)
   default Type[] autoProvides() {
     return EMPTY_CLASSES;
   }
@@ -49,6 +50,7 @@ public interface AvajeModule extends InjectExtension {
    * <p>This is a convenience when using multiple modules that we otherwise manually specify via
    * {@link AvajeModule#provides()}.
    */
+  @Deprecated(forRemoval = true)
   default Class<?>[] autoProvidesAspects() {
     return EMPTY_CLASSES;
   }
@@ -60,6 +62,7 @@ public interface AvajeModule extends InjectExtension {
    * <p>This is a convenience when using multiple modules that is otherwise controlled manually by
    * explicitly using {@link AvajeModule#requires()} or {@link AvajeModule#requiresPackages()}.
    */
+  @Deprecated(forRemoval = true)
   default Type[] autoRequires() {
     return EMPTY_CLASSES;
   }
@@ -68,6 +71,7 @@ public interface AvajeModule extends InjectExtension {
    * These are the aspects that this module requires whose implementations are provided by other
    * external modules (that are in the classpath at compile time).
    */
+  @Deprecated(forRemoval = true)
   default Class<?>[] autoRequiresAspects() {
     return EMPTY_CLASSES;
   }
