@@ -150,10 +150,10 @@ final class DContextEntry {
         match = entry;
         return;
       }
-      if (match.priority() > entry.priority()) {
+      if (match.priority() < entry.priority()) {
         // existing supplied match always wins
         return;
-      } else if (match.priority() < entry.priority()) {
+      } else if (match.priority() > entry.priority()) {
         // new supplied wins
         match = entry;
         return;

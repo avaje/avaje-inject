@@ -172,7 +172,7 @@ class DBuilder implements Builder {
 
   @Override
   public Builder asPriority(int priority) {
-    beanMap.nextPriority(priority * -1);
+    beanMap.nextPriority(priority);
     return this;
   }
 

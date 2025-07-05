@@ -132,7 +132,7 @@ final class DBeanMap {
     }
 
     return entry.entries().stream()
-        .sorted(Comparator.comparingInt(DContextEntryBean::priority).reversed())
+        .sorted(Comparator.comparingInt(DContextEntryBean::priority))
         .map(e -> (T) e.bean())
         .collect(toList());
   }
