@@ -430,6 +430,20 @@ final class Util {
   }
 
   public static String shortNameLazyProxy(TypeElement lazyProxyType) {
-    return shortName(lazyProxyType.getQualifiedName().toString())
-      .replace(".", "_");  }
+    return shortName(lazyProxyType.getQualifiedName().toString()).replace(".", "_");
+  }
+
+  static Integer getPriority(Element element) {
+
+    for (final var mirror : element.getAnnotationMirrors()) {
+      if (mirror.getAnnotationType().asElement().getSimpleName().toString().contains("Priority")
+          && mirror.getElementValues().size() == 1) {
+        var value = mirror.getElementValues().values().iterator().next().getValue();
+        if (value instanceof Integer) {
+          return (Integer) value;
+        }
+      }
+    }
+    return null;
+  }
 }

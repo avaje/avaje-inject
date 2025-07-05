@@ -106,18 +106,9 @@ final class DBeanScopeProxy implements BeanScope {
   }
 
   @Override
-  public <T> List<T> listByPriority(Class<T> type) {
+  public <T> List<T> listByPriority(Type type) {
     if (delegate != null) {
       return delegate.listByPriority(type);
-    } else {
-      throw illegal("listByPriority");
-    }
-  }
-
-  @Override
-  public <T> List<T> listByPriority(Class<T> type, Class<? extends Annotation> priority) {
-    if (delegate != null) {
-      return delegate.listByPriority(type, priority);
     } else {
       throw illegal("listByPriority");
     }

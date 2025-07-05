@@ -70,6 +70,12 @@ public interface Builder {
   Builder asSecondary();
 
   /**
+   * Register the next bean as having Secondary priority. Lowest priority, only used if no other
+   * matching beans are available.
+   */
+  Builder asPriority(int priority);
+
+  /**
    * Register the next bean as having Prototype scope.
    */
   Builder asPrototype();

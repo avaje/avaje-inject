@@ -1,17 +1,20 @@
 package io.avaje.inject.spi;
 
-import io.avaje.inject.BeanEntry;
-import io.avaje.inject.BeanScope;
-import jakarta.inject.Provider;
+import static java.util.stream.Collectors.toList;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import io.avaje.inject.BeanEntry;
+import io.avaje.inject.BeanScope;
+import jakarta.inject.Provider;
 
 /**
  * Map of types (class types, interfaces and annotations) to a DContextEntry where the
@@ -119,6 +122,19 @@ final class DBeanMap {
       return null;
     }
     return (T) entry.get(name, currentModule);
+  }
+
+  public <T> List<T> listByPriority(Type type) {
+
+    DContextEntry entry = beans.get(type.getTypeName());
+    if (entry == null) {
+      return List.of();
+    }
+
+    return entry.entries().stream()
+        .sorted(Comparator.comparingInt(DContextEntryBean::priority).reversed())
+        .map(e -> (T) e.bean())
+        .collect(toList());
   }
 
   @SuppressWarnings("unchecked")
