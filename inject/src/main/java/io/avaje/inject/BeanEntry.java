@@ -45,7 +45,7 @@ public interface BeanEntry {
   Class<?> type();
 
   /**
-   * Return the priority indicating if the bean is Supplied Primary, Normal or Secondary.
+   * Return the wiring priority of the bean.
    */
   int priority();
 
