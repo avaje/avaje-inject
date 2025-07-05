@@ -11,22 +11,22 @@ class DContextEntryBean {
   /**
    * Create taking into account if it is a Provider or the bean itself.
    */
-  static DContextEntryBean of(Object source, String name, int flag, Class<? extends AvajeModule> currentModule) {
+  static DContextEntryBean of(Object source, String name, int priority, Class<? extends AvajeModule> currentModule) {
     if (source instanceof Provider) {
-      return new ProtoProvider((Provider<?>)source, name, flag, currentModule);
+      return new ProtoProvider((Provider<?>)source, name, priority, currentModule);
     } else {
-      return new DContextEntryBean(source, name, flag, currentModule);
+      return new DContextEntryBean(source, name, priority, currentModule);
     }
   }
 
   /**
    * Create an entry with supplied Providers using a 'Once' / 'one instance' provider.
    */
-  static DContextEntryBean supplied(Object source, String name, int flag) {
+  static DContextEntryBean supplied(Object source, String name, int priority) {
     if (source instanceof Provider) {
-      return new OnceBeanProvider((Provider<?>)source, name, flag, null);
+      return new OnceBeanProvider((Provider<?>)source, name, priority, null);
     } else {
-      return new DContextEntryBean(source, name, flag, null);
+      return new DContextEntryBean(source, name, priority, null);
     }
   }
 
@@ -37,12 +37,12 @@ class DContextEntryBean {
   protected final Object source;
   protected final String name;
   protected final Class<? extends AvajeModule> sourceModule;
-  private final int flag;
+  private final int priority;
 
-  private DContextEntryBean(Object source, String name, int flag, Class<? extends AvajeModule> currentModule) {
+  private DContextEntryBean(Object source, String name, int priority, Class<? extends AvajeModule> currentModule) {
     this.source = source;
     this.name = name;
-    this.flag = flag;
+    this.priority = priority;
     this.sourceModule = currentModule;
   }
 
@@ -51,13 +51,13 @@ class DContextEntryBean {
     return "Bean{" +
       "source=" + source +
       ", name='" + name + '\'' +
-      ", flag=" + flag +
+      ", priority=" + priority +
       ", sourceModule=" + sourceModule +
       '}';
   }
 
   final DEntry entry() {
-    return new DEntry(name, flag, bean());
+    return new DEntry(name, priority, bean());
   }
 
   /**
@@ -98,19 +98,15 @@ class DContextEntryBean {
   }
 
   final boolean isPrimary() {
-    return flag == BeanEntry.PRIMARY;
+    return priority == BeanEntry.PRIMARY;
   }
 
-  final boolean isSecondary() {
-    return flag == BeanEntry.SECONDARY;
-  }
-
-  final boolean isSupplied() {
-    return flag == BeanEntry.SUPPLIED;
+  final int priority() {
+    return priority;
   }
 
   final boolean isSupplied(String qualifierName) {
-    return flag == BeanEntry.SUPPLIED && (qualifierName == null || qualifierName.equals(name));
+    return priority == BeanEntry.SUPPLIED && (qualifierName == null || qualifierName.equals(name));
   }
 
   /**

@@ -10,6 +10,7 @@ import org.example.coffee.priority.base.ABasei;
 import org.example.coffee.priority.base.BBasei;
 import org.example.coffee.priority.base.BaseIface;
 import org.example.coffee.priority.base.CBasei;
+import org.example.coffee.priority.base.PriorityFactory.DBasei;
 import org.junit.jupiter.api.Test;
 
 import javax.annotation.Priority;
@@ -23,11 +24,12 @@ public class SystemContextTest {
   public void getBeansByPriority() {
     try (BeanScope context = BeanScope.builder().build()) {
       final List<BaseIface> beans = context.listByPriority(BaseIface.class);
-      assertThat(beans).hasSize(3);
+      assertThat(beans).hasSize(4);
 
       assertThat(beans.get(0)).isInstanceOf(CBasei.class);
       assertThat(beans.get(1)).isInstanceOf(BBasei.class);
       assertThat(beans.get(2)).isInstanceOf(ABasei.class);
+      assertThat(beans.get(3)).isInstanceOf(DBasei.class);
     }
   }
 
