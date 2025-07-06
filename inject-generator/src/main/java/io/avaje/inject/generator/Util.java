@@ -440,7 +440,8 @@ final class Util {
           && mirror.getElementValues().size() == 1) {
         var value = mirror.getElementValues().values().iterator().next().getValue();
         if (value instanceof Integer) {
-          return (Integer) value;
+          var val = (Integer) value;
+          return val <= Integer.MIN_VALUE + 1 ? Integer.MIN_VALUE + 2 : val;
         }
       }
     }
