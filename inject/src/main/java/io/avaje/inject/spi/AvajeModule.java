@@ -13,6 +13,19 @@ public interface AvajeModule extends InjectExtension {
   Class<?>[] EMPTY_CLASSES = {};
 
   /**
+   * Return public classes of the beans that would be registered by this module.
+   *
+   * <p>This method allows code to use reflection to inspect the modules classes before the module
+   * is wired. This method is not required for DI wiring.
+   */
+  Class<?>[] classes();
+
+  /**
+   * Build all the beans.
+   */
+  void build(Builder builder);
+  
+  /**
    * Return the set of types this module explicitly provides to other modules.
    */
   default Type[] provides() {
@@ -75,19 +88,6 @@ public interface AvajeModule extends InjectExtension {
   default Class<?>[] autoRequiresAspects() {
     return EMPTY_CLASSES;
   }
-
-  /**
-   * Return public classes of the beans that would be registered by this module.
-   *
-   * <p>This method allows code to use reflection to inspect the modules classes before the module
-   * is wired. This method is not required for DI wiring.
-   */
-  Class<?>[] classes();
-
-  /**
-   * Build all the beans.
-   */
-  void build(Builder builder);
 
   /**
    * Marker for custom scoped modules.
