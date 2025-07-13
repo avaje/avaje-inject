@@ -305,12 +305,7 @@ class BeanScopeBuilderTest {
     }
 
     @Override
-    public <T> List<T> listByPriority(Class<T> type) {
-      return null;
-    }
-
-    @Override
-    public <T> List<T> listByPriority(Class<T> type, Class<? extends Annotation> priority) {
+    public <T> List<T> listByPriority(Type type) {
       return null;
     }
 

@@ -198,21 +198,21 @@ public interface BeanScope extends AutoCloseable {
    */
   <T> List<T> list(Type type);
 
-  /**
-   * Return the list of beans that implement the interface sorting by priority.
-   */
-  <T> List<T> listByPriority(Class<T> type);
+  /** Return the list of beans that implement the class sorting by priority. */
+  default <T> List<T> listByPriority(Class<T> type) {
+    return listByPriority((Type) type);
+  }
+
+  /** Return the list of beans that implement the type sorting by priority. */
+  <T> List<T> listByPriority(Type type);
 
   /**
-   * Return the beans that implement the interface sorting by the priority annotation used.
-   * <p>
-   * The priority annotation will typically be either <code>javax.annotation.Priority</code>
-   * or <code>jakarta.annotation.Priority</code>.
-   *
-   * @param type     The interface type of the beans to return
-   * @param priority The priority annotation used to sort the beans
+   * @deprecated use {@link #listByPriority(Class)}
    */
-  <T> List<T> listByPriority(Class<T> type, Class<? extends Annotation> priority);
+  @Deprecated(forRemoval = true)
+  default <T> List<T> listByPriority(Class<T> type, Class<? extends Annotation> priority) {
+    return listByPriority(type);
+  }
 
   /**
    * Return the beans for this type mapped by their qualifier name.

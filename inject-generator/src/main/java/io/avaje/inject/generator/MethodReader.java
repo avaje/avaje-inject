@@ -4,6 +4,7 @@ import static io.avaje.inject.generator.APContext.logWarn;
 import static io.avaje.inject.generator.Constants.CONDITIONAL_DEPENDENCY;
 import static io.avaje.inject.generator.ProcessingContext.asElement;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,6 +38,7 @@ final class MethodReader {
   private final boolean prototype;
   private final boolean primary;
   private final boolean secondary;
+  private final Integer priority;
   private final boolean lazy;
   private final boolean proxyLazy;
   private final TypeElement lazyProxyType;
@@ -68,6 +70,7 @@ final class MethodReader {
       prototype = PrototypePrism.isPresent(element);
       primary = PrimaryPrism.isPresent(element);
       secondary = SecondaryPrism.isPresent(element);
+      priority = Util.priority(element);
       lazy = LazyPrism.isPresent(element) || LazyPrism.isPresent(element.getEnclosingElement());
       conditions.readAll(element);
       this.lazyProxyType = lazy ? Util.lazyProxy(element) : null;
@@ -76,6 +79,7 @@ final class MethodReader {
       prototype = false;
       primary = false;
       secondary = false;
+      priority = null;
       lazy = false;
       this.proxyLazy = false;
       this.lazyProxyType = null;
@@ -273,6 +277,8 @@ final class MethodReader {
       writer.append(".asPrototype()");
     } else if (secondary) {
       writer.append(".asSecondary()");
+    } else if (priority != null) {
+      writer.append(".asPriority(%s)", priority);
     }
 
     if (proxyLazy) {
@@ -331,6 +337,8 @@ final class MethodReader {
         writer.append(".asPrimary()");
       } else if (secondary) {
         writer.append(".asSecondary()");
+      } else if (priority != null) {
+        writer.append(".asPriority(%s)", priority);
       } else if (prototype) {
         writer.append(".asPrototype()");
       }
@@ -525,8 +533,15 @@ final class MethodReader {
     return lazy;
   }
 
+  /**
+   * Use a Provider with Secondary or Priority annotation.
+   *
+   * <p> As a Provider, the bean won't be instantiated unless it is needed
+   * by being wired as the highest priority, or wired in a List/Set/Map, or
+   * by being accessed via {@link io.avaje.inject.BeanScope#list(Type)} etc.
+   */
   boolean isUseProviderForSecondary() {
-    return secondary && !optionalType && !Util.isProvider(returnTypeRaw);
+    return (secondary || priority != null) && !optionalType && !Util.isProvider(returnTypeRaw);
   }
 
   boolean isPublic() {
