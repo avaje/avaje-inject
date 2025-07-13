@@ -81,17 +81,16 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
         provides.add(wrapAspect(provide.getCanonicalName()));
       }
       Optional.ofNullable(plugin.getClass().getAnnotation(PluginProvides.class))
-          .ifPresent(
-              p -> {
-                for (final var provide : p.value()) {
-                  provides.add(provide.getTypeName());
-                }
-                Collections.addAll(provides, p.providesStrings());
-                for (final var provide : p.providesAspects()) {
-                  provides.add(wrapAspect(provide.getCanonicalName()));
-                }
-                p.providesStrings();
-              });
+        .ifPresent(p -> {
+          for (final var provide : p.value()) {
+            provides.add(provide.getTypeName());
+          }
+          Collections.addAll(provides, p.providesStrings());
+          for (final var provide : p.providesAspects()) {
+            provides.add(wrapAspect(provide.getCanonicalName()));
+          }
+          p.providesStrings();
+        });
       pluginEntries.put(typeName, provides);
     }
 
