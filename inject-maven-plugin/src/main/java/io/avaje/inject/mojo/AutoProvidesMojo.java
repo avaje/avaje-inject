@@ -11,9 +11,11 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
 
@@ -31,6 +33,7 @@ import org.apache.maven.project.MavenProject;
 import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.InjectExtension;
 import io.avaje.inject.spi.InjectPlugin;
+import io.avaje.inject.spi.PluginProvides;
 
 /**
  * Plugin that generates <code>target/avaje-module-provides.txt</code> and <code>
@@ -113,6 +116,17 @@ public class AutoProvidesMojo extends AbstractMojo {
       for (final var provide : plugin.providesAspects()) {
         provides.add(wrapAspect(provide.getCanonicalName()));
       }
+      Optional.ofNullable(plugin.getClass().getAnnotation(PluginProvides.class))
+        .ifPresent(p -> {
+          for (final var provide : p.value()) {
+            provides.add(provide.getTypeName());
+          }
+          Collections.addAll(provides, p.providesStrings());
+          for (final var provide : p.providesAspects()) {
+            provides.add(wrapAspect(provide.getCanonicalName()));
+          }
+          p.providesStrings();
+        });
       pluginEntries.put(typeName, provides);
     }
 
