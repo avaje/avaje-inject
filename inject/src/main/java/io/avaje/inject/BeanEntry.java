@@ -12,12 +12,12 @@ public interface BeanEntry {
   /**
    * Priority of externally supplied bean.
    */
-  int SUPPLIED = 2;
+  int SUPPLIED = Integer.MIN_VALUE;
 
   /**
    * Priority of <code>@Primary</code> bean.
    */
-  int PRIMARY = 1;
+  int PRIMARY = Integer.MIN_VALUE + 1;
 
   /**
    * Priority of normal bean.
@@ -27,7 +27,7 @@ public interface BeanEntry {
   /**
    * Priority of <code>@Secondary</code> bean.
    */
-  int SECONDARY = -1;
+  int SECONDARY = Integer.MAX_VALUE;
 
   /**
    * Return the bean name.
@@ -45,7 +45,7 @@ public interface BeanEntry {
   Class<?> type();
 
   /**
-   * Return the priority indicating if the bean is Supplied Primary, Normal or Secondary.
+   * Return the wiring priority of the bean.
    */
   int priority();
 

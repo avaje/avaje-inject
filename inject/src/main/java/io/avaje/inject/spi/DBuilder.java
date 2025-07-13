@@ -171,6 +171,12 @@ class DBuilder implements Builder {
   }
 
   @Override
+  public Builder asPriority(int priority) {
+    beanMap.nextPriority(priority);
+    return this;
+  }
+
+  @Override
   public Builder asPrototype() {
     beanMap.nextPrototype();
     return this;
