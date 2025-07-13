@@ -54,6 +54,7 @@ final class BeanReader {
   private boolean suppressGeneratedImport;
   private Set<UType> allUTypes;
   private final boolean delayed;
+  private final Integer priority;
 
   BeanReader(TypeElement beanType, boolean factory, boolean importedComponent) {
     this.beanType = beanType;
@@ -69,6 +70,7 @@ final class BeanReader {
         || importedComponent && ProcessingContext.isImportedPrototype(actualType);
     this.primary = PrimaryPrism.isPresent(actualType);
     this.secondary = !primary && SecondaryPrism.isPresent(actualType);
+    this.priority = Util.priority(actualType);
     var beanTypes =
       BeanTypesPrism.getOptionalOn(actualType)
         .map(BeanTypesPrism::value)
@@ -368,6 +370,8 @@ final class BeanReader {
       writer.append("asPrimary().");
     } else if (secondary) {
       writer.append("asSecondary().");
+    } else if (priority != null) {
+      writer.append("asPriority(%s).", priority);
     }
     writer.append("register(bean);").eol();
   }

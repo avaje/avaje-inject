@@ -68,7 +68,7 @@ class CoffeeMakerTest {
       assertThat(entry.qualifierName()).isEqualTo("B");
       assertThat(entry.keys()).containsExactlyInAnyOrder(name(BSomei.class), name(Somei.class));
       assertThat(entry.type()).isEqualTo(BSomei.class);
-      assertThat(entry.priority()).isEqualTo(0);
+      assertThat(entry.priority()).isEqualTo(1);
       assertThat(entry.bean()).isEqualTo(context.get(Somei.class, "B"));
       assertThat(entry.bean()).isEqualTo(context.get(BSomei.class));
     }

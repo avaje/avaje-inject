@@ -59,15 +59,21 @@ public interface Builder {
 
   /**
    * Register the next bean as having Primary priority.
-   * Highest priority, will be used over any other matching beans.
+   * Highest priority, wired over any other matching beans.
    */
   Builder asPrimary();
 
   /**
    * Register the next bean as having Secondary priority.
-   * Lowest priority, only used if no other matching beans are available.
+   * Lowest priority, wired when no other matching beans are available.
    */
   Builder asSecondary();
+
+  /**
+   * Register the next bean as having the given priority. Wired only if no other higher priority
+   * matching beans are available.
+   */
+  Builder asPriority(int priority);
 
   /**
    * Register the next bean as having Prototype scope.

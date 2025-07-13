@@ -1,11 +1,12 @@
 package io.avaje.inject.spi;
 
-import jakarta.inject.Provider;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.avaje.inject.BeanEntry;
+import jakarta.inject.Provider;
 
 /**
  * Entry for a given key (bean class, interface class or annotation class).
@@ -149,37 +150,29 @@ final class DContextEntry {
         match = entry;
         return;
       }
-      if (match.isSupplied()) {
+      if (match.priority() < entry.priority()) {
         // existing supplied match always wins
         return;
-      } else if (entry.isSupplied()) {
+      } else if (match.priority() > entry.priority()) {
         // new supplied wins
-        match = entry;
-        return;
-      }
-      if (match.isSecondary() && !entry.isSecondary()) {
-        // secondary loses
         match = entry;
         return;
       }
       if (match.isPrimary()) {
         if (entry.isPrimary()) {
-          throw new IllegalStateException("Expecting only 1 bean match but have multiple primary beans " + match.bean() + " and " + entry.bean());
+          throw new IllegalStateException(
+              "Expecting only 1 bean match but have multiple primary beans "
+                  + match.bean()
+                  + " and "
+                  + entry.bean());
         }
         // leave as is, current primary wins
         return;
-      }
-      if (entry.isSecondary()) {
-        if (match.isSecondary()) {
-          ignoredSecondaryMatch = entry;
-        }
+      } else if (impliedName) {
+        ignoredSecondaryMatch = entry;
         return;
       }
-      if (entry.isPrimary()) {
-        // new primary wins
-        match = entry;
-        return;
-      }
+
       // try to resolve match using qualifier name (including null)
       if (match.isNameEqual(name) && !entry.isNameEqual(name)) {
         ignoredSecondaryMatch = entry;
@@ -197,8 +190,12 @@ final class DContextEntry {
         match = entry;
         return;
       }
-      throw new IllegalStateException("Expecting only 1 bean match but have multiple matching beans " + match.bean()
-        + " and " + entry.bean() + ". Maybe need a rebuild is required after adding a @Named qualifier?");
+      throw new IllegalStateException(
+          "Expecting only 1 bean match but have multiple matching beans "
+              + match.bean()
+              + " and "
+              + entry.bean()
+              + ". Maybe need a rebuild is required after adding a @Named qualifier or @Priority annotation?");
     }
 
     private DContextEntryBean candidate() {
@@ -210,10 +207,17 @@ final class DContextEntry {
     }
 
     private void checkSecondary() {
-      if (match.isSecondary() && ignoredSecondaryMatch != null) {
-        throw new IllegalStateException("Expecting only 1 bean match but have multiple secondary beans " + match.bean() + " and " + ignoredSecondaryMatch.bean());
+      if (match.priority() != BeanEntry.SUPPLIED
+          && match.priority() != BeanEntry.NORMAL
+          && ignoredSecondaryMatch != null
+          && ignoredSecondaryMatch.priority() == match.priority()) {
+        throw new IllegalStateException(
+            "Expecting only 1 bean match but have multiple beans with the same priority"
+                + match.bean()
+                + " and "
+                + ignoredSecondaryMatch.bean()
+                + ". Maybe need a rebuild is required after adding a @Named qualifier or @Priority annotation?");
       }
     }
-
   }
 }
