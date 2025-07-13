@@ -70,7 +70,7 @@ final class BeanReader {
         || importedComponent && ProcessingContext.isImportedPrototype(actualType);
     this.primary = PrimaryPrism.isPresent(actualType);
     this.secondary = !primary && SecondaryPrism.isPresent(actualType);
-    this.priority = Util.getPriority(actualType);
+    this.priority = Util.priority(actualType);
     var beanTypes =
       BeanTypesPrism.getOptionalOn(actualType)
         .map(BeanTypesPrism::value)

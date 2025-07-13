@@ -4,6 +4,7 @@ import static io.avaje.inject.generator.APContext.logWarn;
 import static io.avaje.inject.generator.Constants.CONDITIONAL_DEPENDENCY;
 import static io.avaje.inject.generator.ProcessingContext.asElement;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -69,7 +70,7 @@ final class MethodReader {
       prototype = PrototypePrism.isPresent(element);
       primary = PrimaryPrism.isPresent(element);
       secondary = SecondaryPrism.isPresent(element);
-      priority = Util.getPriority(element);
+      priority = Util.priority(element);
       lazy = LazyPrism.isPresent(element) || LazyPrism.isPresent(element.getEnclosingElement());
       conditions.readAll(element);
       this.lazyProxyType = lazy ? Util.lazyProxy(element) : null;
@@ -532,6 +533,13 @@ final class MethodReader {
     return lazy;
   }
 
+  /**
+   * Use a Provider with Secondary or Priority annotation.
+   *
+   * <p> As a Provider, the bean won't be instantiated unless it is needed
+   * by being wired as the highest priority, or wired in a List/Set/Map, or
+   * by being accessed via {@link io.avaje.inject.BeanScope#list(Type)} etc.
+   */
   boolean isUseProviderForSecondary() {
     return (secondary || priority != null) && !optionalType && !Util.isProvider(returnTypeRaw);
   }

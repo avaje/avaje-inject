@@ -433,11 +433,9 @@ final class Util {
     return shortName(lazyProxyType.getQualifiedName().toString()).replace(".", "_");
   }
 
-  static Integer getPriority(Element element) {
-
+  static Integer priority(Element element) {
     for (final var mirror : element.getAnnotationMirrors()) {
-      if (mirror.getAnnotationType().asElement().getSimpleName().toString().contains("Priority")
-          && mirror.getElementValues().size() == 1) {
+      if (isPriorityAnnotation(mirror) && mirror.getElementValues().size() == 1) {
         var value = mirror.getElementValues().values().iterator().next().getValue();
         if (value instanceof Integer) {
           var val = (Integer) value;
@@ -446,5 +444,9 @@ final class Util {
       }
     }
     return null;
+  }
+
+  private static boolean isPriorityAnnotation(AnnotationMirror mirror) {
+    return mirror.getAnnotationType().asElement().getSimpleName().toString().contains("Priority");
   }
 }
