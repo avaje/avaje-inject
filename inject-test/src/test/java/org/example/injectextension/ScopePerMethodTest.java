@@ -10,7 +10,7 @@ import jakarta.inject.Inject;
 @InjectTest(scopePerMethod = true)
 class ScopePerMethodTest {
   @Inject ƎNA ena;
-  ƎNA ayna;
+  static ƎNA ayna;
 
   @Test
   void one() {
