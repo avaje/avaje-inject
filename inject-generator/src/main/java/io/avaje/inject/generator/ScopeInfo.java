@@ -444,8 +444,7 @@ final class ScopeInfo {
     writer.append(")").eol();
   }
 
-  private void attributeString(
-      boolean leadingComma, Append writer, String prefix, Set<String> classNames) {
+  private void attributeString(boolean leadingComma, Append writer, String prefix, Set<String> classNames) {
     if (leadingComma) {
       writer.append(", ");
     }

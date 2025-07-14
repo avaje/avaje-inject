@@ -87,16 +87,14 @@ public class AutoProvidesMojo extends AbstractMojo {
   }
 
   private URLClassLoader createClassLoader(List<URL> listUrl) {
-    return new URLClassLoader(
-        listUrl.toArray(new URL[listUrl.size()]), Thread.currentThread().getContextClassLoader());
+    return new URLClassLoader(listUrl.toArray(new URL[listUrl.size()]), Thread.currentThread().getContextClassLoader());
   }
 
   private FileWriter createFileWriter(String string) throws IOException {
     return new FileWriter(new File(project.getBuild().getDirectory(), string));
   }
 
-  private void writeProvidedPlugins(URLClassLoader newClassLoader, FileWriter pluginWriter)
-      throws IOException {
+  private void writeProvidedPlugins(URLClassLoader newClassLoader, FileWriter pluginWriter) throws IOException {
     final Log log = getLog();
 
     final List<InjectPlugin> plugins = new ArrayList<>();
@@ -141,8 +139,7 @@ public class AutoProvidesMojo extends AbstractMojo {
     }
   }
 
-  private void writeModuleCSV(ClassLoader newClassLoader, FileWriter moduleWriter)
-      throws IOException {
+  private void writeModuleCSV(ClassLoader newClassLoader, FileWriter moduleWriter) throws IOException {
     final Log log = getLog();
     final List<AvajeModule> avajeModules = new ArrayList<>();
     ServiceLoader.load(InjectExtension.class, newClassLoader).stream()
