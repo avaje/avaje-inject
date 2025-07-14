@@ -148,10 +148,6 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
 
       final var requires = Arrays.stream(module.requiresBeans()).collect(toList());
       Collections.addAll(requires, module.requiresPackagesFromType());
-      Arrays.stream(module.autoRequiresAspects())
-          .map(Class::getTypeName)
-          .map(AvajeInjectPlugin::wrapAspect)
-          .forEach(requires::add);
       modules.add(new ModuleData(name, provides, requires));
     }
 

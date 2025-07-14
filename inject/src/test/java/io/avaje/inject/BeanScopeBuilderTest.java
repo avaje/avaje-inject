@@ -1,14 +1,15 @@
 package io.avaje.inject;
 
-import static io.avaje.inject.spi.AvajeModule.EMPTY_CLASSES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -20,6 +21,8 @@ import io.avaje.inject.spi.GenericType;
 
 @SuppressWarnings("all")
 class BeanScopeBuilderTest {
+
+  private static Type[] EMPTY_CLASSES = {};
 
   @Test
   void depends_providedByParent() {
@@ -213,28 +216,32 @@ class BeanScopeBuilderTest {
     }
 
     @Override
-    public Type[] provides() {
-      return provides;
-    }
-
-    @Override
     public Class<?>[] classes() {
       return new Class[0];
     }
 
     @Override
-    public Type[] requires() {
-      return requires;
+    public void build(Builder parent) {}
+
+    @Override
+    public String[] providesBeans() {
+      return Arrays.stream(Objects.requireNonNullElse(provides, EMPTY_CLASSES))
+          .map(Type::getTypeName)
+          .toArray(String[]::new);
     }
 
     @Override
-    public Type[] requiresPackages() {
-      return requiresPackages;
+    public String[] requiresBeans() {
+      return Arrays.stream(Objects.requireNonNullElse(requires, EMPTY_CLASSES))
+          .map(Type::getTypeName)
+          .toArray(String[]::new);
     }
 
     @Override
-    public void build(Builder parent) {
-
+    public String[] requiresPackagesFromType() {
+      return Arrays.stream(Objects.requireNonNullElse(requiresPackages, EMPTY_CLASSES))
+          .map(Type::getTypeName)
+          .toArray(String[]::new);
     }
   }
 
