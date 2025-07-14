@@ -405,7 +405,7 @@ final class ScopeInfo {
     }
 
     if (!regularProvides.isEmpty()) {
-      attributeClasses(false, writer, "provides", provides);
+      attributeClasses(false, writer, "provides", regularProvides);
       leadingComma = true;
     }
     if (!genericProvides.isEmpty()) {
