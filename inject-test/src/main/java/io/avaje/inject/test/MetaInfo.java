@@ -1,9 +1,9 @@
 package io.avaje.inject.test;
 
+import java.util.Optional;
+
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.BeanScopeBuilder;
-
-import java.util.Optional;
 
 /**
  * Wraps the underlying metadata (fields with annotations @Mock, @Spy, @Inject, @Captor).
@@ -45,14 +45,17 @@ final class MetaInfo {
   }
 
   private TestBeans buildTestBeans(GlobalTestBeans.Beans parent, Object testInstance) {
-    // wiring profiles
-    String[] profiles = Optional.ofNullable(testInstance)
-      .map(Object::getClass)
-      .map(c -> c.getAnnotation(InjectTest.class))
-      .map(InjectTest::profiles)
-      .orElse(new String[0]);
+    var injectTest =
+        Optional.ofNullable(testInstance)
+            .map(Object::getClass)
+            .map(c -> c.getAnnotation(InjectTest.class));
 
-    if (profiles.length > 0 || reader.hasMocksOrSpies(testInstance)) {
+    // wiring profiles
+    String[] profiles = injectTest.map(InjectTest::profiles).orElse(new String[0]);
+
+    if (profiles.length > 0
+        || injectTest.map(InjectTest::scopePerMethod).orElse(false)
+        || reader.hasMocksOrSpies(testInstance)) {
       // need to build a BeanScope for this using baseBeans() as the parent
       final BeanScopeBuilder builder = BeanScope.builder();
       if (parent != null) {

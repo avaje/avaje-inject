@@ -1,11 +1,11 @@
 package io.avaje.inject.test;
 
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * An avaje-inject test supporting {@code @Inject} along with Mockito annotations -
@@ -20,4 +20,7 @@ public @interface InjectTest {
 
   /** Wiring profiles to use */
   String[] profiles() default {};
+
+  /** Create a new test beanscope for each test methods */
+  boolean scopePerMethod() default false;
 }
