@@ -393,8 +393,8 @@ final class ScopeInfo {
     writer.append(Constants.AT_GENERATED).eol();
     writer.append("@InjectModule(");
     boolean leadingComma = false;
-    List<String> regularProvides = new ArrayList<>();
-    List<String> genericProvides = new ArrayList<>();
+    Set<String> regularProvides = new LinkedHashSet<>();
+    Set<String> genericProvides = new LinkedHashSet<>();
 
     for (var type : provides) {
       if (type.contains("<")) {
@@ -409,12 +409,12 @@ final class ScopeInfo {
       leadingComma = true;
     }
     if (!genericProvides.isEmpty()) {
-      attributeString(false, writer, "providesString", provides);
+      attributeString(false, writer, "providesString", genericProvides);
       leadingComma = true;
     }
 
-    List<String> regularRequires = new ArrayList<>();
-    List<String> genericRequires = new ArrayList<>();
+    Set<String> regularRequires = new LinkedHashSet<>();
+    Set<String> genericRequires = new LinkedHashSet<>();
 
     for (var type : requires) {
       if (type.contains("<")) {
@@ -428,7 +428,7 @@ final class ScopeInfo {
       leadingComma = true;
     }
     if (!genericRequires.isEmpty()) {
-      attributeString(leadingComma, writer, "requiresString", requires);
+      attributeString(leadingComma, writer, "requiresString", genericRequires);
       leadingComma = true;
     }
     if (!requiresPackages.isEmpty()) {
