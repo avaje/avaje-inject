@@ -130,6 +130,8 @@ final class ScopeInfo {
     ignoreSingleton = injectModule.ignoreSingleton();
     injectModule.requires().stream().map(Object::toString).forEach(requires::add);
     injectModule.provides().stream().map(Object::toString).forEach(provides::add);
+    requires.addAll(injectModule.requiresString());
+    provides.addAll(injectModule.providesString());
     injectModule.requiresPackages().stream()
         .map(Object::toString)
         .forEach(
@@ -391,12 +393,42 @@ final class ScopeInfo {
     writer.append(Constants.AT_GENERATED).eol();
     writer.append("@InjectModule(");
     boolean leadingComma = false;
-    if (!provides.isEmpty()) {
-      attributeClasses(false, writer, "provides", provides);
+    Set<String> regularProvides = new LinkedHashSet<>();
+    Set<String> genericProvides = new LinkedHashSet<>();
+
+    for (var type : provides) {
+      if (type.contains("<")) {
+        genericProvides.add(type);
+      } else {
+        regularProvides.add(type);
+      }
+    }
+
+    if (!regularProvides.isEmpty()) {
+      attributeClasses(false, writer, "provides", regularProvides);
       leadingComma = true;
     }
-    if (!requires.isEmpty()) {
-      attributeClasses(leadingComma, writer, "requires", requires);
+    if (!genericProvides.isEmpty()) {
+      attributeString(false, writer, "providesString", genericProvides);
+      leadingComma = true;
+    }
+
+    Set<String> regularRequires = new LinkedHashSet<>();
+    Set<String> genericRequires = new LinkedHashSet<>();
+
+    for (var type : requires) {
+      if (type.contains("<")) {
+        genericRequires.add(type);
+      } else {
+        regularRequires.add(type);
+      }
+    }
+    if (!regularRequires.isEmpty()) {
+      attributeClasses(leadingComma, writer, "requires", regularRequires);
+      leadingComma = true;
+    }
+    if (!genericRequires.isEmpty()) {
+      attributeString(leadingComma, writer, "requiresString", genericRequires);
       leadingComma = true;
     }
     if (!requiresPackages.isEmpty()) {
@@ -412,7 +444,22 @@ final class ScopeInfo {
     writer.append(")").eol();
   }
 
-  private void attributeClasses(boolean leadingComma, Append writer, String prefix, Set<String> classNames) {
+  private void attributeString(boolean leadingComma, Append writer, String prefix, Set<String> classNames) {
+    if (leadingComma) {
+      writer.append(", ");
+    }
+    writer.append("%s = {", prefix);
+    int c = 0;
+    for (final String value : classNames) {
+      if (c++ > 0) {
+        writer.append(",");
+      }
+      writer.append("\"%s\"", value);
+    }
+    writer.append("}");
+  }
+
+  private void attributeClasses(boolean leadingComma, Append writer, String prefix, Collection<String> classNames) {
     if (leadingComma) {
       writer.append(", ");
     }
@@ -427,65 +474,31 @@ final class ScopeInfo {
     writer.append("}");
   }
 
-  void buildProvides(Append writer) {
+  void buildProvides(Append writer, Set<String> provides, Set<String> requires) {
     if (!provides.isEmpty()) {
-      buildProvidesMethod(writer, "provides", provides);
+      buildProvidesMethod(writer, "providesBeans", provides);
     }
     if (!requires.isEmpty()) {
-      buildProvidesMethod(writer, "requires", requires);
+      buildProvidesMethod(writer, "requiresBeans", requires);
     }
     if (!requiresPackages.isEmpty()) {
-      buildProvidesMethod(writer, "requiresPackages", requiresPackages);
+      buildProvidesMethod(writer, "requiresPackagesFromType", requiresPackages);
     }
   }
 
   private void buildProvidesMethod(Append writer, String fieldName, Set<String> types) {
     writer.append("  @Override").eol();
-    final var arrayType = fieldName.contains("Aspects") ? "Class<?>" : "Type";
-    writer.append("  public %s[] %s() {", arrayType, fieldName).eol();
-    writer.append("    return new %s[] {", arrayType).eol();
+    writer.append("  public String[] %s() {", fieldName).eol();
+    writer.append("    return new String[] {").eol();
     for (final String rawType : types) {
 
       if (rawType.contains(":")) {
         continue;
       }
-
-      if (rawType.contains("<")) {
-        writer.append("      new GenericType<%s>(){},", rawType).eol();
-      } else {
-        writer.append("      %s.class,", rawType).eol();
-      }
+      writer.append("      \"%s\",", rawType).eol();
     }
     writer.append("    };").eol();
     writer.append("  }").eol().eol();
-  }
-
-  void buildAutoProvides(Append writer, Set<String> autoProvides) {
-    autoProvides.removeAll(provides);
-    if (!autoProvides.isEmpty()) {
-      buildProvidesMethod(writer, "autoProvides", autoProvides);
-    }
-  }
-
-  void buildAutoProvidesAspects(Append writer, Set<String> autoProvidesAspects) {
-    autoProvidesAspects.removeAll(provides);
-    if (!autoProvidesAspects.isEmpty()) {
-      buildProvidesMethod(writer, "autoProvidesAspects", autoProvidesAspects);
-    }
-  }
-
-  void buildAutoRequires(Append writer, Set<String> autoRequires) {
-    autoRequires.removeAll(requires);
-    if (!autoRequires.isEmpty()) {
-      buildProvidesMethod(writer, "autoRequires", autoRequires);
-    }
-  }
-
-  void buildAutoRequiresAspects(Append writer, Set<String> autoRequires) {
-    autoRequires.removeAll(requires);
-    if (!autoRequires.isEmpty()) {
-      buildProvidesMethod(writer, "autoRequiresAspects", autoRequires);
-    }
   }
 
   void readModuleMetaData(TypeElement moduleType) {
