@@ -24,7 +24,7 @@ public interface AvajeModule extends InjectExtension {
 
   /** Build all the beans. */
   void build(Builder builder);
-  
+
   /**
    * Return the set of types this module explicitly provides to other modules.
    *
