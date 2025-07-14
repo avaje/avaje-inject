@@ -76,23 +76,35 @@ public @interface InjectModule {
   boolean ignoreSingleton() default false;
 
   /**
-   * Explicitly define features that are provided by this module and required by other modules.
-   * <p>
-   * This is used to order wiring across multiple modules. Modules that provide dependencies
+   * Explicitly define beans that are provided by this module and required by other modules.
+   *
+   * <p>This is used to order wiring across multiple modules. Modules that provide dependencies
    * should be wired before modules that require dependencies.
    */
   Class<?>[] provides() default {};
 
   /**
-   * The dependencies that are provided externally or by other modules and that are required
-   * when wiring this module.
-   * <p>
-   * This effectively tells the annotation processor that these types are expected to be
-   * provided and to not treat them as missing dependencies. If we don't do this the annotation
-   * processor thinks the dependency is missing and will error the compilation saying there is
-   * a missing dependency.
+   * Required external beans for wiring this module.
+   *
+   * <p>This tells the annotation processor that these types are expected to be provided and to not
+   * treat them as missing dependencies. If we don't do this the annotation processor thinks the
+   * dependency is missing and will error the compilation saying there is a missing dependency.
    */
   Class<?>[] requires() default {};
+
+  /**
+   * Explicitly define beans provided by this module and required by other modules.
+   *
+   * @see #provides()
+   */
+  String[] providesString() default {};
+
+  /**
+   * Required external beans for wiring this module.
+   *
+   * @see #requires()
+   */
+  String[] requiresString() default {};
 
   /**
    * Dependencies in these packages are expected to be provided by other modules.
