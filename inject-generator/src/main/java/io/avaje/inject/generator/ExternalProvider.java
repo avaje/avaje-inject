@@ -6,10 +6,10 @@ import static java.util.stream.Collectors.toList;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -84,24 +84,22 @@ final class ExternalProvider {
     for (final var module : modules) {
       final var name = module.getClass().getTypeName();
       final var provides = new TreeSet<String>();
-      for (final var provide : module.provides()) {
-        provides.add(provide.getTypeName());
-      }
-      for (final var provide : module.autoProvides()) {
-        provides.add(provide.getTypeName());
-      }
-      for (final var provide : module.autoProvidesAspects()) {
-        final var aspectType = Util.wrapAspect(provide.getTypeName());
+      Collections.addAll(provides, module.providesBeans());
+      Collections.addAll(provides, module.autoProvidesBeans());
+      for (final var provide : module.autoProvidesAspectBeans()) {
+        final var aspectType = Util.wrapAspect(provide);
         provides.add(aspectType);
       }
       registerExternalMetaData(name);
       readMetaDataProvides(provides);
       providedTypes.addAll(provides);
-      final var requires = Arrays.stream(module.requires()).map(Type::getTypeName).collect(toList());
-
-      Arrays.stream(module.autoRequires()).map(Type::getTypeName).forEach(requires::add);
-      Arrays.stream(module.requiresPackages()).map(Type::getTypeName).forEach(requires::add);
-      Arrays.stream(module.autoRequiresAspects()).map(Type::getTypeName).map(Util::wrapAspect).forEach(requires::add);
+      final List<String> requires = new ArrayList<>();
+      Collections.addAll(requires, module.requiresBeans());
+      Collections.addAll(requires, module.autoRequiresBeans());
+      Collections.addAll(requires, module.requiresPackagesFromType());
+      Arrays.stream(module.autoRequiresAspectBeans())
+          .map(Util::wrapAspect)
+          .forEach(requires::add);
 
       ProcessingContext.addModule(new ModuleData(name, List.copyOf(provides), requires));
     }
