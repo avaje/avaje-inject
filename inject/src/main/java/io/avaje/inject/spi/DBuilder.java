@@ -44,7 +44,7 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public void currentModule(Class<? extends AvajeModule> currentModule) {
+  public final void currentModule(Class<? extends AvajeModule> currentModule) {
     beanMap.currentModule(currentModule);
   }
 
@@ -65,7 +65,7 @@ class DBuilder implements Builder {
   }
 
   /**
-   * Return the types without any annotation types.
+   * Return the types without any annotation types or raw generics.
    *
    * <p>For the purposes of supplied beans (typically test doubles) we are not interested in
    * annotation types.
@@ -81,10 +81,14 @@ class DBuilder implements Builder {
   }
 
   private boolean isAnnotationType(Type type) {
-    return type instanceof Class && ((Class<?>) type).isAnnotation();
+    if (type instanceof Class<?>) {
+      var clazz = (Class<?>) type;
+      return clazz.isAnnotation() || clazz.getTypeParameters().length != 0;
+    }
+    return false;
   }
 
-  protected final void next(String name, Type... types) {
+  private void next(String name, Type... types) {
     injectTarget = firstOf(types);
     beanMap.nextBean(name, types);
   }
@@ -350,13 +354,12 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public boolean containsProfiles(List<String> type) {
-
+  public final boolean containsProfiles(List<String> type) {
     return !Collections.disjoint(profiles, type);
   }
 
   @Override
-  public boolean containsAllProfiles(List<String> type) {
+  public final boolean containsAllProfiles(List<String> type) {
     for (final var string : type) {
       if (!profiles.contains(string)) return false;
     }
@@ -364,22 +367,22 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public boolean contains(String type) {
+  public final boolean contains(String type) {
     return beanMap.contains(type);
   }
 
   @Override
-  public boolean contains(Type type) {
+  public final boolean contains(Type type) {
     return beanMap.contains(type);
   }
 
   @Override
-  public boolean containsQualifier(String name) {
+  public final boolean containsQualifier(String name) {
     return beanMap.containsQualifier(name);
   }
 
   @Override
-  public ConfigPropertyPlugin property() {
+  public final ConfigPropertyPlugin property() {
     return propertyPlugin;
   }
 
