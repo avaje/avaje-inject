@@ -65,7 +65,7 @@ class DBuilder implements Builder {
   }
 
   /**
-   * Return the types without any annotation types.
+   * Return the types without any annotation types or raw generics.
    *
    * <p>For the purposes of supplied beans (typically test doubles) we are not interested in
    * annotation types.
@@ -81,7 +81,11 @@ class DBuilder implements Builder {
   }
 
   private boolean isAnnotationType(Type type) {
-    return type instanceof Class && ((Class<?>) type).isAnnotation();
+    if (type instanceof Class<?>) {
+      var clazz = (Class<?>) type;
+      return clazz.isAnnotation() || clazz.getTypeParameters().length != 0;
+    }
+    return false;
   }
 
   protected final void next(String name, Type... types) {
