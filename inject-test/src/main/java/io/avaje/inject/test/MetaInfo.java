@@ -54,7 +54,7 @@ final class MetaInfo {
     String[] profiles = injectTest.map(InjectTest::profiles).orElse(new String[0]);
 
     if (profiles.length > 0
-        || injectTest.map(InjectTest::scopePerMethod).orElse(false)
+        || injectTest.map(InjectTest::refreshScope).orElse(false)
         || reader.hasMocksOrSpies(testInstance)) {
       // need to build a BeanScope for this using baseBeans() as the parent
       final BeanScopeBuilder builder = BeanScope.builder();

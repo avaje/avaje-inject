@@ -21,6 +21,6 @@ public @interface InjectTest {
   /** Wiring profiles to use */
   String[] profiles() default {};
 
-  /** Create a new test beanscope for each test methods */
-  boolean scopePerMethod() default false;
+  /** Create a new test beanscope for each test method */
+  boolean scopePerTest() default false;
 }

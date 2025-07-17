@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import io.avaje.inject.test.InjectTest;
 import jakarta.inject.Inject;
 
-@InjectTest(scopePerMethod = true)
+@InjectTest(scopePerTest = true)
 class ScopePerMethodTest {
   @Inject ƎNA ena;
   static ƎNA ayna;
