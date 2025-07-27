@@ -45,11 +45,6 @@ final class MetaData implements Comparable<MetaData> {
    */
   private List<Dependency> dependsOn;
 
-  /**
-   * Type deemed to be candidate for providing to another external module.
-   */
-  private List<String> autoProvides;
-
   private boolean generateProxy;
   private boolean usesExternalDependency;
   private final Set<String> externalDependencies = new HashSet<>();
@@ -63,7 +58,6 @@ final class MetaData implements Comparable<MetaData> {
     this.providesAspect = meta.providesAspect();
     this.dependsOn = meta.dependsOn().stream().map(Dependency::new).collect(Collectors.toList());
     this.provides = Util.addQualifierSuffix(meta.provides(), name);
-    this.autoProvides = Util.addQualifierSuffix(meta.autoProvides(), name);
     this.importedComponent = meta.importedComponent();
     this.key = createKey();
     this.buildName = createBuildName();
@@ -164,7 +158,6 @@ final class MetaData implements Comparable<MetaData> {
     this.provides = beanReader.provides();
     this.dependsOn = beanReader.dependsOn();
     this.providesAspect = beanReader.providesAspect();
-    this.autoProvides = beanReader.autoProvides();
     this.generateProxy = beanReader.isGenerateProxy();
     this.importedComponent = beanReader.importedComponent();
   }
@@ -183,10 +176,6 @@ final class MetaData implements Comparable<MetaData> {
 
   List<Dependency> dependsOn() {
     return dependsOn;
-  }
-
-  List<String> autoProvides() {
-    return autoProvides;
   }
 
   String providesAspect() {
@@ -235,15 +224,9 @@ final class MetaData implements Comparable<MetaData> {
     final var hasProvidesAspect = !providesAspect.isEmpty();
     final var hasDependsOn = !dependsOn.isEmpty();
     final var hasProvides = !provides.isEmpty();
-    final var hasAutoProvides = autoProvides != null && !autoProvides.isEmpty();
 
     append.append("  @DependencyMeta(");
-    if (hasName
-        || hasMethod
-        || hasProvidesAspect
-        || hasDependsOn
-        || hasProvides
-        || hasAutoProvides) {
+    if (hasName || hasMethod || hasProvidesAspect || hasDependsOn || hasProvides) {
       append.eol().append(INDENT);
     }
 
@@ -264,9 +247,6 @@ final class MetaData implements Comparable<MetaData> {
     }
     if (hasDependsOn) {
       appendProvides(append, "dependsOn", dependsOn.stream().map(Dependency::dependsOn).collect(Collectors.toList()));
-    }
-    if (hasAutoProvides) {
-      appendProvides(append, "autoProvides", autoProvides);
     }
     append.append(")").append(NEWLINE);
     append.append("  private void build_").append(buildName()).append("(Builder builder) {").append(NEWLINE);
@@ -319,10 +299,6 @@ final class MetaData implements Comparable<MetaData> {
 
   void setDependsOn(List<String> dependsOn) {
     this.dependsOn = dependsOn.stream().map(Dependency::new).collect(Collectors.toList());
-  }
-
-  void setAutoProvides(List<String> autoProvides) {
-    this.autoProvides = autoProvides;
   }
 
   void setProvidesAspect(String providesAspect) {

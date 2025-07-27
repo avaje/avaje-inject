@@ -38,7 +38,10 @@ public @interface DependencyMeta {
   String providesAspect() default "";
 
   /**
-   * The interfaces the bean implements.
+   * Types deemed to be reasonable to provide to external module.
+   *
+   * <p>Used to support multiple module wiring automatically (as alternative to using explicit
+   * InjectModule annotation).
    */
   String[] provides() default {};
 
@@ -46,12 +49,5 @@ public @interface DependencyMeta {
    * The list of dependencies this bean requires.
    */
   String[] dependsOn() default {};
-
-  /**
-   * Types deemed to be reasonable to provide to external module.
-   * <p>
-   * Used to support multiple module wiring automatically (as alternative to using explicit InjectModule annotation).
-   */
-  String[] autoProvides() default {};
 
 }

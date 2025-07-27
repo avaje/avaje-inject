@@ -243,10 +243,6 @@ final class BeanReader {
     return Util.addQualifierSuffix(typeReader.provides(), name);
   }
 
-  List<String> autoProvides() {
-    return Util.addQualifierSuffix(typeReader.autoProvides(), name);
-  }
-
   String providesAspect() {
     return typeReader.providesAspect();
   }

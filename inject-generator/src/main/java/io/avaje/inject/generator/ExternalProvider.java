@@ -30,6 +30,7 @@ import javax.lang.model.util.ElementFilter;
 
 import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.InjectPlugin;
+import io.avaje.spi.internal.APContext;
 
 
 /**
@@ -156,12 +157,12 @@ final class ExternalProvider {
   }
 
   static void readMetaDataProvides(Collection<String> providedTypes) {
-    externalMeta.forEach(meta -> {
-      providedTypes.add(meta.key());
-      providedTypes.add(meta.type());
-      providedTypes.addAll(Util.addQualifierSuffix(meta.provides(), meta.name()));
-      providedTypes.addAll(Util.addQualifierSuffix(meta.autoProvides(), meta.name()));
-    });
+    externalMeta.forEach(
+        meta -> {
+          providedTypes.add(meta.key());
+          providedTypes.add(meta.type());
+          providedTypes.addAll(Util.addQualifierSuffix(meta.provides(), meta.name()));
+        });
   }
 
   static void scanAllInjectPlugins(ScopeInfo defaultScope) {
