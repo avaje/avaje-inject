@@ -74,7 +74,7 @@ final class MetaData implements Comparable<MetaData> {
   }
 
   MetaData(String type, String name, String method) {
-    this.type = type;
+    this.type = ProcessorUtils.trimAnnotations(type);
     this.name = trimName(name);
     this.shortType = Util.shortName(type);
     this.provides = new ArrayList<>();

@@ -391,15 +391,24 @@ final class Util {
   }
 
   static void validateBeanTypes(Element origin, List<TypeMirror> beanType) {
-    TypeMirror targetType =
-      origin instanceof TypeElement
-        ? origin.asType()
-        : ((ExecutableElement) origin).getReturnType();
-    beanType.forEach(type -> {
-      if (!APContext.types().isAssignable(targetType, type)) {
-        APContext.logError(origin, "%s does not extend type %s", targetType, beanType);
-      }
-    });
+
+    var uType =
+        UType.parse(
+            origin instanceof TypeElement
+                ? origin.asType()
+                : ((ExecutableElement) origin).getReturnType());
+
+    var targetType =
+        uType.isGeneric() && uType.mainType().startsWith("java.util")
+            ? uType.param0().mirror()
+            : uType.mirror();
+
+    beanType.forEach(
+        type -> {
+          if (!APContext.types().isAssignable(targetType, type)) {
+            APContext.logError(origin, "%s does not extend type %s", targetType, beanType);
+          }
+        });
   }
 
   static TypeElement lazyProxy(Element element) {
