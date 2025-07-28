@@ -7,7 +7,6 @@ import static java.util.stream.Collectors.toList;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -85,21 +84,12 @@ final class ExternalProvider {
       final var name = module.getClass().getTypeName();
       final var provides = new TreeSet<String>();
       Collections.addAll(provides, module.providesBeans());
-      Collections.addAll(provides, module.autoProvidesBeans());
-      for (final var provide : module.autoProvidesAspectBeans()) {
-        final var aspectType = Util.wrapAspect(provide);
-        provides.add(aspectType);
-      }
       registerExternalMetaData(name);
       readMetaDataProvides(provides);
       providedTypes.addAll(provides);
       final List<String> requires = new ArrayList<>();
       Collections.addAll(requires, module.requiresBeans());
-      Collections.addAll(requires, module.autoRequiresBeans());
       Collections.addAll(requires, module.requiresPackagesFromType());
-      Arrays.stream(module.autoRequiresAspectBeans())
-          .map(Util::wrapAspect)
-          .forEach(requires::add);
 
       ProcessingContext.addModule(new ModuleData(name, List.copyOf(provides), requires));
     }

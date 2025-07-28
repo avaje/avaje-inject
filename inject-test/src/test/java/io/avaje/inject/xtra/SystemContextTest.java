@@ -36,7 +36,7 @@ public class SystemContextTest {
   @Test
   public void getBeansByPriority_withAnnotation() {
     try (BeanScope context = BeanScope.builder().build()) {
-      final List<Somei> beans = context.listByPriority(Somei.class, Priority.class);
+      final List<Somei> beans = context.listByPriority(Somei.class);
       assertThat(beans).hasSize(3);
 
       assertThat(beans.get(0)).isInstanceOf(BSomei.class);
