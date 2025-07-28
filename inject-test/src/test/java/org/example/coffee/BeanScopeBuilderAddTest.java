@@ -31,21 +31,6 @@ public class BeanScopeBuilderAddTest {
   public static class SillyModule implements AvajeModule {
 
     @Override
-    public Class<?>[] requires() {
-      return new Class[0];
-    }
-
-    @Override
-    public Class<?>[] requiresPackages() {
-      return new Class[0];
-    }
-
-    @Override
-    public Class<?>[] provides() {
-      return new Class[0];
-    }
-
-    @Override
     public Class<?>[] classes() {
       return new Class[0];
     }

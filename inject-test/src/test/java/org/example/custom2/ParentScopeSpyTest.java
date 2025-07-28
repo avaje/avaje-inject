@@ -66,25 +66,7 @@ class ParentScopeSpyTest {
 
   static class MyTestModule implements AvajeModule.Custom {
 
-    private final Class<?>[] provides = new Class<?>[]{};
-    private final Class<?>[] requires = new Class<?>[]{};
-    private final Class<?>[] requiresPackages = new Class<?>[]{};
     private Builder builder;
-
-    @Override
-    public Class<?>[] provides() {
-      return provides;
-    }
-
-    @Override
-    public Class<?>[] requires() {
-      return requires;
-    }
-
-    @Override
-    public Class<?>[] requiresPackages() {
-      return requiresPackages;
-    }
 
     @Override
     public Class<?>[] classes() {

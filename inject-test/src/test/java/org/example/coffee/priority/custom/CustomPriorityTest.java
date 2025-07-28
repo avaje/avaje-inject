@@ -14,7 +14,7 @@ public class CustomPriorityTest {
   void test() {
     final BeanScope context = ApplicationScope.scope();
 
-    final List<OtherIface> sorted = context.listByPriority(OtherIface.class, CustomPriority.class);
+    final List<OtherIface> sorted = context.listByPriority(OtherIface.class);
 
     assertThat(sorted.get(0)).isInstanceOf(COtheri.class);
     assertThat(sorted.get(1)).isInstanceOf(BOtheri.class);

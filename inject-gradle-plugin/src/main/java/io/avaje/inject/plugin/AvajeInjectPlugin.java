@@ -6,13 +6,13 @@ import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.InjectPlugin;
 import io.avaje.inject.spi.InjectExtension;
 
+import io.avaje.inject.spi.PluginProvides;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.GradleException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -148,10 +148,6 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
 
       final var requires = Arrays.stream(module.requiresBeans()).collect(toList());
       Collections.addAll(requires, module.requiresPackagesFromType());
-      Arrays.stream(module.autoRequiresAspects())
-          .map(Class::getTypeName)
-          .map(AvajeInjectPlugin::wrapAspect)
-          .forEach(requires::add);
       modules.add(new ModuleData(name, provides, requires));
     }
 
