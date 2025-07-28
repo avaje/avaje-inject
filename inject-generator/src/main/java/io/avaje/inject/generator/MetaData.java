@@ -33,7 +33,6 @@ final class MetaData implements Comparable<MetaData> {
   private final String method;
   private final String key;
   private boolean wired;
-  private String providesAspect;
 
   /**
    * The interfaces and class annotations the bean has (to register into lists).
@@ -55,7 +54,6 @@ final class MetaData implements Comparable<MetaData> {
     this.name = trimName(meta.name());
     this.shortType = Util.shortName(type);
     this.method = meta.method();
-    this.providesAspect = meta.providesAspect();
     this.dependsOn = meta.dependsOn().stream().map(Dependency::new).collect(Collectors.toList());
     this.provides = Util.addQualifierSuffix(meta.provides(), name);
     this.importedComponent = meta.importedComponent();
@@ -157,7 +155,6 @@ final class MetaData implements Comparable<MetaData> {
   void update(BeanReader beanReader) {
     this.provides = beanReader.provides();
     this.dependsOn = beanReader.dependsOn();
-    this.providesAspect = beanReader.providesAspect();
     this.generateProxy = beanReader.isGenerateProxy();
     this.importedComponent = beanReader.importedComponent();
   }
@@ -176,10 +173,6 @@ final class MetaData implements Comparable<MetaData> {
 
   List<Dependency> dependsOn() {
     return dependsOn;
-  }
-
-  String providesAspect() {
-    return providesAspect;
   }
 
   /**
@@ -221,12 +214,11 @@ final class MetaData implements Comparable<MetaData> {
 
     final var hasName = name != null;
     final var hasMethod = hasMethod();
-    final var hasProvidesAspect = !providesAspect.isEmpty();
     final var hasDependsOn = !dependsOn.isEmpty();
     final var hasProvides = !provides.isEmpty();
 
     append.append("  @DependencyMeta(");
-    if (hasName || hasMethod || hasProvidesAspect || hasDependsOn || hasProvides) {
+    if (hasName || hasMethod || hasDependsOn || hasProvides) {
       append.eol().append(INDENT);
     }
 
@@ -240,9 +232,7 @@ final class MetaData implements Comparable<MetaData> {
     if (hasMethod) {
       append.append(",").eol().append("      method = \"").append(method).append("\"");
     }
-    if (hasProvidesAspect) {
-      append.append(",").eol().append("      providesAspect = \"").append(providesAspect).append("\"");
-    } else if (hasProvides) {
+    if (hasProvides) {
       appendProvides(append, "provides", provides);
     }
     if (hasDependsOn) {
@@ -299,10 +289,6 @@ final class MetaData implements Comparable<MetaData> {
 
   void setDependsOn(List<String> dependsOn) {
     this.dependsOn = dependsOn.stream().map(Dependency::new).collect(Collectors.toList());
-  }
-
-  void setProvidesAspect(String providesAspect) {
-    this.providesAspect = providesAspect;
   }
 
   /**

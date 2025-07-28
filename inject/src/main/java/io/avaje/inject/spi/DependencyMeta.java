@@ -33,11 +33,6 @@ public @interface DependencyMeta {
   String method() default "";
 
   /**
-   * The aspect this component provides.
-   */
-  String providesAspect() default "";
-
-  /**
    * Types deemed to be reasonable to provide to external module.
    *
    * <p>Used to support multiple module wiring automatically (as alternative to using explicit

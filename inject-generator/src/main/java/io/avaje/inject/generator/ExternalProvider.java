@@ -29,7 +29,6 @@ import javax.lang.model.util.ElementFilter;
 
 import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.InjectPlugin;
-import io.avaje.spi.internal.APContext;
 
 
 /**
@@ -120,9 +119,13 @@ final class ExternalProvider {
         defaultScope.pluginProvided(provide.getTypeName());
       }
       for (final var provide : plugin.providesAspects()) {
-        defaultScope.pluginProvided(Util.wrapAspect(provide.getTypeName()));
+        defaultScope.pluginProvided(wrapAspect(provide.getTypeName()));
       }
     }
+  }
+
+  private static String wrapAspect(String aspect) {
+    return Constants.ASPECT_PROVIDER + "<" + aspect + ">";
   }
 
   private static boolean pluginExists(String relativeName) {
@@ -212,7 +215,7 @@ final class ExternalProvider {
       provides.add(provide);
     }
     for (final var provide : prism.providesAspects()) {
-      final var wrapAspect = Util.wrapAspect(provide.toString());
+      final var wrapAspect = wrapAspect(provide.toString());
       defaultScope.pluginProvided(wrapAspect);
       provides.add(wrapAspect);
     }
@@ -267,7 +270,6 @@ final class ExternalProvider {
       .map(MetaData::new)
       .forEach(m -> {
         externalMeta.add(m);
-        provides.addAll(m.autoProvides());
         provides.addAll(m.provides());
         m.dependsOn().stream()
           .filter(d -> !d.isSoftDependency())
@@ -277,7 +279,6 @@ final class ExternalProvider {
         providedTypes.add(m.key());
         providedTypes.add(m.type());
         providedTypes.addAll(Util.addQualifierSuffix(m.provides(), m.name()));
-        providedTypes.addAll(Util.addQualifierSuffix(m.autoProvides(), m.name()));
       });
 
     final var name = otherModule.getQualifiedName().toString();

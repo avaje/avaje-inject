@@ -20,7 +20,7 @@ final class Dependency {
       this.softDependency = false;
       nameStr = type;
     }
-    this.name = nameStr.replace(", ", ",");
+    this.name = nameStr;
   }
 
   Dependency(String type, String qualifier) {

@@ -243,10 +243,6 @@ final class BeanReader {
     return Util.addQualifierSuffix(typeReader.provides(), name);
   }
 
-  String providesAspect() {
-    return typeReader.providesAspect();
-  }
-
   Set<UType> allGenericTypes() {
     if (allUTypes != null) {
       return allUTypes;

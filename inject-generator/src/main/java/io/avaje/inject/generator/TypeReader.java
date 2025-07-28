@@ -82,10 +82,6 @@ final class TypeReader {
         .collect(toList());
   }
 
-  String providesAspect() {
-    return extendsReader.providesAspect();
-  }
-
   boolean isClosable() {
     return extendsReader.isCloseable();
   }

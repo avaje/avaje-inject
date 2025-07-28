@@ -1,12 +1,12 @@
 package io.avaje.inject.generator;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
 
 class UtilTest {
 
@@ -36,26 +36,6 @@ class UtilTest {
 
     assertEquals(Util.commonParent("org.foo.web", "org.foo.service"), "org.foo");
     assertEquals(Util.commonParent("org.foo.web.foo", "org.foo.service.blah"), "org.foo");
-  }
-
-  @Test
-  void isAspectProvider() {
-    assertTrue(Util.isAspectProvider("io.avaje.inject.aop.AspectProvider<org.Foo>"));
-    assertTrue(Util.isAspectProvider("io.avaje.inject.aop.AspectProvider<org.one.Bar"));
-  }
-
-  @Test
-  void isAspectProvider_not() {
-    assertFalse(Util.isAspectProvider("not.avaje.inject.aop.AspectProvider<org.Foo>"));
-    assertFalse(Util.isAspectProvider("io.avaje.inject.not.AspectProvider<org.one.Bar"));
-    assertFalse(Util.isAspectProvider("io.avaje.inject.aop.NotAspectProvider<org.one.Bar"));
-    assertFalse(Util.isAspectProvider("io.avaje.inject.aop.NotAspectProvider"));
-  }
-
-  @Test
-  void extractAspectType() {
-    assertEquals(Util.extractAspectType("io.avaje.inject.aop.AspectProvider<org.Foo>"), "org.Foo");
-    assertEquals(Util.extractAspectType("io.avaje.inject.aop.AspectProvider<org.one.Bar>"), "org.one.Bar");
   }
 
   @Test

@@ -41,10 +41,6 @@ final class MetaDataOrdering {
       for (String provide : metaData.provides()) {
         providerAdd(provide).add(metaData);
       }
-      final String aspect = metaData.providesAspect();
-      if (aspect != null && !aspect.isEmpty()) {
-        providerAdd(Util.wrapAspect(aspect)).add(metaData);
-      }
     }
     externallyRequiredDependencies();
   }
@@ -69,12 +65,18 @@ final class MetaDataOrdering {
     int count;
     do {
       // first run without external dependencies from other modules
-      count = processQueueRound(false);
+      count = processQueueRound(false, false);
     } while (count > 0);
-    do {
+
+    while (count > 0) {
       // run again including externally provided dependencies from other modules
-      count = processQueueRound(true);
-    } while (count > 0);
+      count = processQueueRound(true, false);
+    }
+
+    while (count > 0) {
+      // Last ditch effort, match any bean available
+      count = processQueueRound(true, true);
+    }
 
     int remaining = queue.size();
     if (remaining != 0) {
@@ -145,7 +147,7 @@ final class MetaDataOrdering {
 
   private void checkMissingDependencies(MetaData metaData) {
     for (Dependency dependency : metaData.dependsOn()) {
-      if (!dependencySatisfied(dependency, true, metaData)) {
+      if (!dependencySatisfied(dependency, true, metaData, true)) {
         TypeElement element = elementMaybe(metaData.type());
         logError(element, "No dependency provided for %s on %s", dependency, metaData.type());
         missingDependencyTypes.add(dependency.name());
@@ -178,13 +180,13 @@ final class MetaDataOrdering {
     }
   }
 
-  private int processQueueRound(boolean includeExternal) {
+  private int processQueueRound(boolean includeExternal, boolean anyWired) {
     // loop queue looking for entry that has all provides marked as included
     int count = 0;
     Iterator<MetaData> iterator = queue.iterator();
     while (iterator.hasNext()) {
       MetaData queuedMeta = iterator.next();
-      if (allDependenciesWired(queuedMeta, includeExternal)) {
+      if (allDependenciesWired(queuedMeta, includeExternal, anyWired)) {
         orderedList.add(queuedMeta);
         queuedMeta.setWired();
         iterator.remove();
@@ -194,22 +196,25 @@ final class MetaDataOrdering {
     return count;
   }
 
-  private boolean allDependenciesWired(MetaData queuedMeta, boolean includeExternal) {
+  private boolean allDependenciesWired(
+      MetaData queuedMeta, boolean includeExternal, boolean anyWired) {
     for (Dependency dependency : queuedMeta.dependsOn()) {
       String dependencyName = dependency.name();
       if (Util.isProvider(dependencyName) || Constants.BEANSCOPE.equals(dependencyName)) {
         continue;
       }
-      if (!dependencySatisfied(dependency, includeExternal, queuedMeta)) {
+      if (!dependencySatisfied(dependency, includeExternal, queuedMeta, anyWired)) {
         return false;
       }
     }
     return true;
   }
 
-  private boolean dependencySatisfied(Dependency dependency, boolean includeExternal, MetaData queuedMeta) {
+  private boolean dependencySatisfied(
+      Dependency dependency, boolean includeExternal, MetaData queuedMeta, boolean anyWired) {
     String dependencyName = dependency.name();
     var providerList = providers.get(dependencyName);
+
     if (providerList == null) {
       if (scopeInfo.providedByOther(dependency)) {
         return true;
@@ -217,7 +222,7 @@ final class MetaDataOrdering {
         return isExternal(dependencyName, includeExternal, queuedMeta);
       }
     } else {
-      return providerList.isAllWired();
+      return providerList.isWired(anyWired);
     }
   }
 
@@ -262,13 +267,26 @@ final class MetaDataOrdering {
       list.add(beanMeta);
     }
 
-    boolean isAllWired() {
+    public boolean isWired(boolean anyWired) {
+      return anyWired ? isAnyWired() : isAllWired();
+    }
+
+    private boolean isAllWired() {
       for (MetaData metaData : list) {
         if (!metaData.isWired()) {
           return false;
         }
       }
       return true;
+    }
+
+    private boolean isAnyWired() {
+      for (MetaData metaData : list) {
+        if (metaData.isWired()) {
+          return true;
+        }
+      }
+      return list.isEmpty();
     }
   }
 
