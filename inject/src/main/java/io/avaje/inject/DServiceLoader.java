@@ -1,6 +1,7 @@
 package io.avaje.inject;
 
 import io.avaje.inject.spi.*;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,10 +15,10 @@ final class DServiceLoader {
 
   private final List<InjectPlugin> plugins = new ArrayList<>();
   private final List<AvajeModule> modules = new ArrayList<>();
-  private ModuleOrdering moduleOrdering;
-  private ConfigPropertyPlugin propertyPlugin;
+  private @Nullable ModuleOrdering moduleOrdering;
+  private @Nullable ConfigPropertyPlugin propertyPlugin;
 
-  DServiceLoader(ClassLoader classLoader) {
+  DServiceLoader(@Nullable ClassLoader classLoader) {
     for (var spi : ServiceLoader.load(InjectExtension.class, classLoader)) {
       if (spi instanceof InjectPlugin) {
         plugins.add((InjectPlugin) spi);

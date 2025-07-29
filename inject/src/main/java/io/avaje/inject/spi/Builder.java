@@ -296,4 +296,6 @@ public interface Builder {
    * Set the current module being wired.
    */
   void currentModule(Class<? extends AvajeModule> currentModule);
+
+  void currentScopes(String[] scopes);
 }

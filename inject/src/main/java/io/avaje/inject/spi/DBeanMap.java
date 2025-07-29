@@ -15,6 +15,7 @@ import java.util.Set;
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
 import jakarta.inject.Provider;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Map of types (class types, interfaces and annotations) to a DContextEntry where the
@@ -27,12 +28,21 @@ final class DBeanMap {
 
   private NextBean nextBean;
   private Class<? extends AvajeModule> currentModule;
+  private Set<String> forScopes = Set.of();
 
   DBeanMap() {
   }
 
   void currentModule(Class<? extends AvajeModule> currentModule) {
     this.currentModule = currentModule;
+  }
+
+  void setCurrentScopes(@Nullable Set<String> scopes) {
+    if (scopes == null) {
+      this.forScopes = Set.of();
+    } else {
+      this.forScopes = scopes;
+    }
   }
 
   @Override
@@ -237,6 +247,13 @@ final class DBeanMap {
    */
   NextBean next() {
     return nextBean;
+  }
+
+  /**
+   * List current scope annotations
+   */
+  Set<String> scopeAnnotations() {
+    return forScopes;
   }
 
   static class NextBean {

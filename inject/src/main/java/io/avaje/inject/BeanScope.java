@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
@@ -238,4 +239,8 @@ public interface BeanScope extends AutoCloseable {
    */
   @Override
   void close();
+
+  default Set<String> customScopeAnnotations() {
+    return Set.of();
+  }
 }

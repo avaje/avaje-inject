@@ -6,10 +6,17 @@ import static java.util.Collections.emptySet;
 
 import java.lang.System.Logger.Level;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import jakarta.inject.Provider;
 import org.jspecify.annotations.Nullable;
 
 import io.avaje.applog.AppLog;
@@ -20,7 +27,6 @@ import io.avaje.inject.spi.ConfigPropertyPlugin;
 import io.avaje.inject.spi.EnrichBean;
 import io.avaje.inject.spi.ModuleOrdering;
 import io.avaje.inject.spi.SuppliedBean;
-import jakarta.inject.Provider;
 
 /** Build a bean scope with options for shutdown hook and supplying test doubles. */
 final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
@@ -34,12 +40,12 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   private final List<Runnable> postConstructList = new ArrayList<>();
   private final List<Consumer<BeanScope>> postConstructConsumerList = new ArrayList<>();
   private final List<ClosePair> preDestroyList = new ArrayList<>();
-  private BeanScope parent;
+  private @Nullable BeanScope parent;
   private boolean parentOverride = true;
   private boolean shutdownHook;
-  private ClassLoader classLoader;
-  private ConfigPropertyPlugin propertyPlugin;
-  private Set<String> profiles;
+  private @Nullable ClassLoader classLoader;
+  private @Nullable ConfigPropertyPlugin propertyPlugin;
+  private @Nullable Set<String> profiles;
 
   /** Create a BeanScopeBuilder to ultimately load and return a new BeanScope. */
   DBeanScopeBuilder() {}
@@ -165,7 +171,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   @Override
-  public BeanScopeBuilder.ForTesting mock(Type type, String name) {
+  public BeanScopeBuilder.ForTesting mock(Type type,  @Nullable String name) {
     suppliedBeans.add(SuppliedBean.ofType(name, type, null));
     return this;
   }
@@ -270,6 +276,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     final var builder = Builder.newBuilder(profiles, propertyPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
     for (final var factory : factoryOrder.factories()) {
       builder.currentModule(factory.getClass());
+      builder.currentScopes(factory.definesScopes());
       factory.build(builder);
     }
 
@@ -303,7 +310,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   /** Helper to order the BeanContextFactory based on dependsOn. */
   static class FactoryOrder implements ModuleOrdering {
 
-    private final BeanScope parent;
+    private final @Nullable BeanScope parent;
     private final boolean suppliedBeans;
     private final Set<String> moduleNames = new LinkedHashSet<>();
     private final List<AvajeModule> factories = new ArrayList<>();
@@ -311,7 +318,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     private final List<FactoryState> queueNoDependencies = new ArrayList<>();
     private final Map<String, FactoryList> providesMap = new HashMap<>();
 
-    FactoryOrder(BeanScope parent, Set<AvajeModule> includeModules, boolean suppliedBeans) {
+    FactoryOrder(@Nullable BeanScope parent, Set<AvajeModule> includeModules, boolean suppliedBeans) {
       this.parent = parent;
       this.suppliedBeans = suppliedBeans;
       for (final AvajeModule includeModule : includeModules) {
@@ -409,7 +416,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
 
     private boolean notProvided(String dependency) {
-      if (parent != null && parent.contains(dependency)) {
+      if (parent != null && (parent.contains(dependency) || parent.customScopeAnnotations().contains(dependency))) {
         return false;
       }
       final var factoryList = providesMap.get(dependency);

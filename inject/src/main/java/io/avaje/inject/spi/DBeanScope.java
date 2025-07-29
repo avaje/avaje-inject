@@ -6,12 +6,7 @@ import static java.lang.System.Logger.Level.TRACE;
 import java.lang.System.Logger.Level;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -33,8 +28,8 @@ final class DBeanScope implements BeanScope {
   private final List<Consumer<BeanScope>> postConstructConsumers;
   private final List<AutoCloseable> preDestroy;
   private final DBeanMap beans;
-  private final ShutdownHook shutdownHook;
-  private final BeanScope parent;
+  private final @Nullable ShutdownHook shutdownHook;
+  private final @Nullable BeanScope parent;
   private boolean shutdown;
   private boolean closed;
 
@@ -44,7 +39,7 @@ final class DBeanScope implements BeanScope {
       List<Runnable> postConstruct,
       List<Consumer<BeanScope>> postConstructConsumers,
       DBeanMap beans,
-      BeanScope parent) {
+      @Nullable BeanScope parent) {
     this.preDestroy = preDestroy;
     this.postConstruct = postConstruct;
     this.postConstructConsumers = postConstructConsumers;
@@ -60,6 +55,9 @@ final class DBeanScope implements BeanScope {
 
   @Override
   public String toString() {
+    if (parent != null) {
+      return "BeanScope{" + beans + ",parent={" + parent + "}}";
+    }
     return "BeanScope{" + beans + '}';
   }
 
@@ -79,12 +77,12 @@ final class DBeanScope implements BeanScope {
 
   @Override
   public boolean contains(String type) {
-    return beans.contains(type);
+    return beans.contains(type) || (parent != null && parent.contains(type));
   }
 
   @Override
   public boolean contains(Type type) {
-    return beans.contains(type);
+    return beans.contains(type) || (parent != null && parent.contains(type));
   }
 
   @Override
@@ -117,7 +115,7 @@ final class DBeanScope implements BeanScope {
    * Get with a strict match on name for the single entry case.
    */
   @Nullable
-  Object getStrict(String name, Type[] types) {
+  Object getStrict(@Nullable String name, Type[] types) {
     for (Type type : types) {
       Object match = beans.getStrict(type, name);
       if (match != null) {
@@ -190,7 +188,11 @@ final class DBeanScope implements BeanScope {
 
   @Override
   public <T> List<T> listByPriority(Type type) {
-    return beans.listByPriority(type);
+    List<T> results = beans.listByPriority(type);
+    if (results.isEmpty() && (parent != null)) {
+      return parent.listByPriority(type);
+    }
+    return results;
   }
 
   @Override
@@ -254,6 +256,17 @@ final class DBeanScope implements BeanScope {
     } finally {
       lock.unlock();
     }
+  }
+
+  @Override
+  public Set<String> customScopeAnnotations() {
+    if (parent != null) {
+      final Set<String> scopes = new HashSet<>();
+      scopes.addAll(beans.scopeAnnotations());
+      scopes.addAll(parent.customScopeAnnotations());
+      return scopes;
+    }
+    return beans.scopeAnnotations();
   }
 
   private static class ShutdownHook extends Thread {

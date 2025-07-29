@@ -95,6 +95,7 @@ final class SimpleModuleWriter {
       writeServicesFile(scopeType);
     } else {
       writeRequiredModules();
+      writeSuppliedScope();
     }
     writeBuildMethod();
     writeProvides();
@@ -102,6 +103,33 @@ final class SimpleModuleWriter {
     writeBuildMethods();
     writeEndClass();
     writer.close();
+  }
+
+  private void writeSuppliedScope() {
+    final String annotationType;
+    try {
+      annotationType = scopeInfo.scopeAnnotationFQN();
+    } catch (Exception e) {
+      // If there's no annotation (which is nullable? = NullPointerException), don't write out the method
+      return;
+    }
+
+    writer.append("  public String[] definesScopes() {")
+      .eol()
+      .append("    return new String[] {").eol()
+      .append("     \"").append(annotationType).append("\",").eol();
+
+    scopeInfo.requires().stream()
+      .map(APContext::typeElement)
+      .filter(Objects::nonNull)
+      .filter(ScopePrism::isPresent)
+      .filter(e -> e.getKind() == ElementKind.ANNOTATION_TYPE)
+      .map(TypeElement::getQualifiedName)
+      .map(Object::toString)
+      .forEach(scope -> writer.append("     \"").append(scope).append("\",").eol());
+
+    writer.append("    };").eol()
+      .append("  }").eol().eol();
   }
 
   private void writeRequiredModules() {
