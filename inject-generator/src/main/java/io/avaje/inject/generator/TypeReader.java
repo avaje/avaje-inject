@@ -60,13 +60,19 @@ final class TypeReader {
   }
 
   List<String> provides() {
+    var provides = providedTypes();
+    provides.addAll(autoProvides());
+    return provides;
+  }
+
+  private List<String> providedTypes() {
     if (!injectsTypes.isEmpty()) {
       return injectsTypes.stream().map(UType::full).collect(toList());
     }
     return extendsReader.provides().stream().map(UType::full).collect(toList());
   }
 
-  List<String> autoProvides() {
+  private List<String> autoProvides() {
     if (!injectsTypes.isEmpty()) {
       return injectsTypes.stream().map(UType::full).collect(toList());
     }
@@ -74,10 +80,6 @@ final class TypeReader {
       .filter(u -> u.componentTypes().stream().noneMatch(p -> p.kind() == TypeKind.TYPEVAR))
       .map(UType::full)
       .collect(toList());
-  }
-
-  String providesAspect() {
-    return extendsReader.providesAspect();
   }
 
   boolean isClosable() {

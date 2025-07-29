@@ -19,12 +19,10 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
 final class Util {
-  static final String ASPECT_PROVIDER_PREFIX = "io.avaje.inject.aop.AspectProvider<";
   static final String PROVIDER_PREFIX = "jakarta.inject.Provider";
   private static final String OPTIONAL_PREFIX = "java.util.Optional<";
   private static final String NULLABLE = "Nullable";
   private static final int PROVIDER_LENGTH = PROVIDER_PREFIX.length() + 1;
-  private static final int ASPECT_PROVIDER_LENGTH = ASPECT_PROVIDER_PREFIX.length();
 
   static boolean notJavaLang(String type) {
     return !type.startsWith("java.lang.") || Character.isLowerCase(type.charAt(10));
@@ -250,24 +248,12 @@ final class Util {
     return rawType;
   }
 
-  static boolean isAspectProvider(String rawType) {
-    return rawType.startsWith(ASPECT_PROVIDER_PREFIX);
-  }
-
   static boolean isProvider(String rawType) {
     return rawType.startsWith(PROVIDER_PREFIX);
   }
 
   private static String extractProviderType(String rawType) {
     return rawType.substring(PROVIDER_LENGTH, rawType.length() - 1);
-  }
-
-  static String extractAspectType(String rawType) {
-    return rawType.substring(ASPECT_PROVIDER_LENGTH, rawType.length() - 1);
-  }
-
-  static String wrapAspect(String aspect) {
-    return Constants.ASPECT_PROVIDER + "<" + aspect + ">";
   }
 
   /**
