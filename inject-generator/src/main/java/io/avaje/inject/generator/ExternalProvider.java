@@ -150,12 +150,11 @@ final class ExternalProvider {
   }
 
   static void readMetaDataProvides(Collection<String> providedTypes) {
-    externalMeta.forEach(
-        meta -> {
-          providedTypes.add(meta.key());
-          providedTypes.add(meta.type());
-          providedTypes.addAll(Util.addQualifierSuffix(meta.provides(), meta.name()));
-        });
+    externalMeta.forEach(meta -> {
+      providedTypes.add(meta.key());
+      providedTypes.add(meta.type());
+      providedTypes.addAll(Util.addQualifierSuffix(meta.provides(), meta.name()));
+    });
   }
 
   static void scanAllInjectPlugins(ScopeInfo defaultScope) {

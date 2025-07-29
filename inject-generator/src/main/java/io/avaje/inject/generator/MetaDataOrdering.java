@@ -196,8 +196,7 @@ final class MetaDataOrdering {
     return count;
   }
 
-  private boolean allDependenciesWired(
-      MetaData queuedMeta, boolean includeExternal, boolean anyWired) {
+  private boolean allDependenciesWired(MetaData queuedMeta, boolean includeExternal, boolean anyWired) {
     for (Dependency dependency : queuedMeta.dependsOn()) {
       String dependencyName = dependency.name();
       if (Util.isProvider(dependencyName) || Constants.BEANSCOPE.equals(dependencyName)) {
@@ -210,11 +209,9 @@ final class MetaDataOrdering {
     return true;
   }
 
-  private boolean dependencySatisfied(
-      Dependency dependency, boolean includeExternal, MetaData queuedMeta, boolean anyWired) {
+  private boolean dependencySatisfied(Dependency dependency, boolean includeExternal, MetaData queuedMeta, boolean anyWired) {
     String dependencyName = dependency.name();
     var providerList = providers.get(dependencyName);
-
     if (providerList == null) {
       if (scopeInfo.providedByOther(dependency)) {
         return true;
@@ -263,11 +260,11 @@ final class MetaDataOrdering {
 
     private final List<MetaData> list = new ArrayList<>();
 
-    void add(MetaData beanMeta) {
+    private void add(MetaData beanMeta) {
       list.add(beanMeta);
     }
 
-    public boolean isWired(boolean anyWired) {
+    private boolean isWired(boolean anyWired) {
       return anyWired ? isAnyWired() : isAllWired();
     }
 

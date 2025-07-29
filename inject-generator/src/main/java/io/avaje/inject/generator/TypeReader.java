@@ -77,9 +77,9 @@ final class TypeReader {
       return injectsTypes.stream().map(UType::full).collect(toList());
     }
     return extendsReader.autoProvides().stream()
-        .filter(u -> u.componentTypes().stream().noneMatch(p -> p.kind() == TypeKind.TYPEVAR))
-        .map(UType::full)
-        .collect(toList());
+      .filter(u -> u.componentTypes().stream().noneMatch(p -> p.kind() == TypeKind.TYPEVAR))
+      .map(UType::full)
+      .collect(toList());
   }
 
   boolean isClosable() {
