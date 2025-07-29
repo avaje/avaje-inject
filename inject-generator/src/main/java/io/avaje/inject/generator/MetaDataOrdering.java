@@ -67,16 +67,15 @@ final class MetaDataOrdering {
       // first run without external dependencies from other modules
       count = processQueueRound(false, false);
     } while (count > 0);
-
-    while (count > 0) {
+    do {
       // run again including externally provided dependencies from other modules
       count = processQueueRound(true, false);
-    }
+    } while (count > 0);
 
-    while (count > 0) {
+    do {
       // Last ditch effort, match any bean available
       count = processQueueRound(true, true);
-    }
+    } while (count > 0);
 
     int remaining = queue.size();
     if (remaining != 0) {
