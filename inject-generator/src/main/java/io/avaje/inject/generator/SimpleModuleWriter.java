@@ -222,16 +222,6 @@ final class SimpleModuleWriter {
       scopeProvides.add(scopeInfo.scopeAnnotationFQN());
       scopeProvides.add(shortName);
     }
-    for (MetaData metaData : ordering.ordered()) {
-      final String aspect = metaData.providesAspect();
-      if (aspect != null && !aspect.isEmpty()) {
-        scopeProvides.add(Util.wrapAspect(aspect));
-      }
-      final var forExternal = metaData.autoProvides();
-      if (forExternal != null && !forExternal.isEmpty()) {
-        scopeProvides.addAll(forExternal);
-      }
-    }
     Set<String> scopeRequires = new TreeSet<>(scopeInfo.requires());
     scopeRequires.addAll(ordering.autoRequires());
     scopeInfo.buildProvides(writer, scopeProvides, scopeRequires);

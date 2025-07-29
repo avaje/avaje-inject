@@ -218,11 +218,6 @@ final class MethodReader {
       typeReader == null
         ? Collections.emptyList()
         : Util.addQualifierSuffix(typeReader.provides(), name));
-    metaData.setAutoProvides(
-      typeReader == null
-        ? List.of()
-        : Util.addQualifierSuffix(typeReader.autoProvides(), name));
-    metaData.setProvidesAspect(typeReader == null ? "" : typeReader.providesAspect());
     return metaData;
   }
 

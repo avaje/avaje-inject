@@ -41,7 +41,6 @@ final class TypeExtendsReader {
    * The implied qualifier name based on naming convention.
    */
   private String qualifierName;
-  private String providesAspect = "";
 
   TypeExtendsReader(UType baseUType, TypeElement baseType, boolean factory, ImportTypeMap importTypes, boolean proxyBean) {
     this.baseUType = baseUType;
@@ -121,10 +120,6 @@ final class TypeExtendsReader {
     return extendsInjection.constructor();
   }
 
-  String providesAspect() {
-    return providesAspect;
-  }
-
   List<UType> autoProvides() {
     if (controller || implementsBeanFactory()) {
       // http controller, or request scoped controller via BeanFactory
@@ -141,7 +136,7 @@ final class TypeExtendsReader {
     }
     var autoProvides = new ArrayList<>(interfaceTypes);
     autoProvides.addAll(extendsTypes);
-    if (!autoProvide || !providesAspect.isEmpty()) {
+    if (!autoProvide) {
       autoProvides.remove(baseUType);
     } else {
       autoProvides.add(Util.unwrapProvider(baseUType));
@@ -190,17 +185,6 @@ final class TypeExtendsReader {
     providesTypes.remove(baseUType);
     // we can't provide a type that is getting injected
     extendsInjection.removeFromProvides(providesTypes);
-    providesAspect = initProvidesAspect();
-  }
-
-  private String initProvidesAspect() {
-    for (final var type : providesTypes) {
-      var providesType = type.full();
-      if (Util.isAspectProvider(providesType)) {
-        return Util.extractAspectType(providesType);
-      }
-    }
-    return "";
   }
 
   private void addSuperType(TypeElement element, TypeMirror mirror, boolean proxyBean) {
