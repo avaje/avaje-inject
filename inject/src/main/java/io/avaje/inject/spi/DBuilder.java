@@ -3,6 +3,7 @@ package io.avaje.inject.spi;
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
 import jakarta.inject.Provider;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -49,14 +50,23 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public boolean isBeanAbsent(String name, Type... types) {
+  public final void currentScopes(String[] scopes) {
+    if(scopes != null) {
+      beanMap.setCurrentScopes(Set.of(scopes));
+    } else {
+      beanMap.setCurrentScopes(Set.of());
+    }
+  }
+
+  @Override
+  public boolean isBeanAbsent(@Nullable String name, Type... types) {
     parentMatch = null;
     next(name, types);
     if (parentOverride || parent == null) {
       return true;
     }
     if (parent instanceof DBeanScope) {
-      // effectively looking for a match in the test scope
+      // effectively looking for a match in the parent scope
       final DBeanScope dParent = (DBeanScope) parent;
       parentMatch = dParent.getStrict(name, removeAnnotations(types));
       return parentMatch == null;

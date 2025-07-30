@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
@@ -206,7 +207,6 @@ public interface BeanScope extends AutoCloseable {
   /** Return the list of beans that implement the type sorting by priority. */
   <T> List<T> listByPriority(Type type);
 
-
   /**
    * Return the beans for this type mapped by their qualifier name.
    * <p>
@@ -238,4 +238,11 @@ public interface BeanScope extends AutoCloseable {
    */
   @Override
   void close();
+
+  /**
+   * Return the custom scope annotations contained in this bean scope.
+   */
+  default Set<String> customScopeAnnotations() {
+    return Set.of();
+  }
 }

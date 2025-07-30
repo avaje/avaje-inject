@@ -23,6 +23,13 @@ public interface AvajeModule extends InjectExtension {
   }
 
   /**
+   * Return the type(s) of scopes that this module provides
+   */
+  default String[] definesScopes() {
+    return EMPTY_STRINGS;
+  }
+
+  /**
    * Return the type names of types this module needs to be provided externally or via other
    * modules.
    */
