@@ -26,7 +26,7 @@ class DBuilder implements Builder {
   /** The beans created and added to the scope during building. */
   protected final DBeanMap beanMap = new DBeanMap();
 
-  protected final BeanScope parent;
+  protected final @Nullable BeanScope parent;
   protected final boolean parentOverride;
   /** Bean provided by the parent scope that we are not overriding. */
   protected Object parentMatch;
@@ -378,12 +378,12 @@ class DBuilder implements Builder {
 
   @Override
   public final boolean contains(String type) {
-    return beanMap.contains(type);
+    return beanMap.contains(type) || (parent != null && parent.contains(type));
   }
 
   @Override
   public final boolean contains(Type type) {
-    return beanMap.contains(type);
+    return beanMap.contains(type) || (parent != null && parent.contains(type));
   }
 
   @Override
