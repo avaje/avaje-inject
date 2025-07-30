@@ -18,7 +18,7 @@ final class DBeanScopeProxy implements BeanScope {
   /**
    * Will use the builder as a delegate until the scope is fully built;
    */
-  public DBeanScopeProxy(Builder builder) {
+  DBeanScopeProxy(Builder builder) {
     this.builder = builder;
   }
 
@@ -116,7 +116,6 @@ final class DBeanScopeProxy implements BeanScope {
 
   @Override
   public <T> Map<String, T> map(Type type) {
-
     if (delegate != null) {
       return delegate.map(type);
     } else {

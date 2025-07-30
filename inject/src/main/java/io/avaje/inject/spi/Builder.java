@@ -297,5 +297,8 @@ public interface Builder {
    */
   void currentModule(Class<? extends AvajeModule> currentModule);
 
+  /**
+   * Set the custom scopes defined by the module being wired.
+   */
   void currentScopes(String[] scopes);
 }
