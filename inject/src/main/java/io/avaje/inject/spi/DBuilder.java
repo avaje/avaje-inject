@@ -378,7 +378,7 @@ class DBuilder implements Builder {
 
   @Override
   public final boolean contains(String type) {
-    return beanMap.contains(type) || (parent != null && parent.contains(type));
+    return beanMap.contains(type)  || (parent != null && parent.contains(type));
   }
 
   @Override
