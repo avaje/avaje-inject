@@ -1,16 +1,24 @@
 package io.avaje.inject.spi;
 
-import io.avaje.inject.BeanEntry;
-import io.avaje.inject.BeanScope;
-import jakarta.inject.Provider;
-import org.jspecify.annotations.Nullable;
+import static io.avaje.inject.spi.DBeanScope.combine;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static io.avaje.inject.spi.DBeanScope.combine;
+import org.jspecify.annotations.Nullable;
+
+import io.avaje.inject.BeanEntry;
+import io.avaje.inject.BeanScope;
+import jakarta.inject.Provider;
 
 class DBuilder implements Builder {
 
@@ -378,12 +386,12 @@ class DBuilder implements Builder {
 
   @Override
   public final boolean contains(String type) {
-    return beanMap.contains(type)  || (parent != null && parent.contains(type));
+    return beanMap.contains(type)  || parent != null && parent.contains(type);
   }
 
   @Override
   public final boolean contains(Type type) {
-    return beanMap.contains(type) || (parent != null && parent.contains(type));
+    return beanMap.contains(type) || parent != null && parent.contains(type);
   }
 
   @Override
@@ -450,13 +458,10 @@ class DBuilder implements Builder {
     return scope.start(start);
   }
 
-  /**
-   * Return the PreDestroy methods in priority order.
-   */
+  /** Return the PreDestroy methods in priority order. */
   private List<AutoCloseable> preDestroy() {
+    Collections.reverse(preDestroy);
     Collections.sort(preDestroy);
-    return preDestroy.stream()
-      .map(ClosePair::closeable)
-      .collect(Collectors.toList());
+    return preDestroy.stream().map(ClosePair::closeable).collect(Collectors.toList());
   }
 }
