@@ -3,9 +3,11 @@ package io.avaje.inject.spi;
 import static io.avaje.inject.spi.DBeanScope.combine;
 
 import java.lang.reflect.Type;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +30,8 @@ class DBuilder implements Builder {
   private final List<Runnable> postConstruct = new ArrayList<>();
 
   private final List<Consumer<BeanScope>> postConstructConsumers = new ArrayList<>();
-  private final List<ClosePair> preDestroy = new ArrayList<>();
+  private final Deque<ClosePair> preDestroy = new ArrayDeque<>();
+
   /** List of field injection closures. */
   private final List<Consumer<Builder>> injectors = new ArrayList<>();
   /** The beans created and added to the scope during building. */
@@ -234,13 +237,13 @@ class DBuilder implements Builder {
 
   @Override
   public final void addPreDestroy(AutoCloseable invoke, int priority) {
-    preDestroy.add(new ClosePair(priority, invoke));
+    preDestroy.push(new ClosePair(priority, invoke));
   }
 
   @Override
   public final void addAutoClosable(Object maybeAutoCloseable) {
     if (maybeAutoCloseable instanceof AutoCloseable) {
-      preDestroy.add(new ClosePair(1000, (AutoCloseable) maybeAutoCloseable));
+      preDestroy.push(new ClosePair(1000, (AutoCloseable) maybeAutoCloseable));
     }
   }
 
@@ -460,8 +463,6 @@ class DBuilder implements Builder {
 
   /** Return the PreDestroy methods in priority order. */
   private List<AutoCloseable> preDestroy() {
-    Collections.reverse(preDestroy);
-    Collections.sort(preDestroy);
-    return preDestroy.stream().map(ClosePair::closeable).collect(Collectors.toList());
+    return preDestroy.stream().sorted().map(ClosePair::closeable).collect(Collectors.toList());
   }
 }
