@@ -1,11 +1,12 @@
 package org.example.myapp;
 
-import io.avaje.inject.BeanScope;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+
+import io.avaje.inject.BeanScope;
 
 class MyDestroyOrderTest {
 
@@ -16,6 +17,13 @@ class MyDestroyOrderTest {
       beanScope.get(HelloService.class);
     }
     List<String> ordering = MyDestroyOrder.ordering();
-    assertThat(ordering).containsExactly("HelloService", "AppConfig", "MyNamed", "MyMetaDataRepo", "ExampleService", "AppHelloData");
+    assertThat(ordering)
+        .containsExactly(
+            "HelloService",
+            "MyNamed",
+            "AppConfig",
+            "MyMetaDataRepo",
+            "ExampleService",
+            "AppHelloData");
   }
 }
