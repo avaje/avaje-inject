@@ -16,4 +16,11 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.METHOD, ElementType.TYPE, ElementType.PACKAGE, ElementType.MODULE})
-public @interface Lazy {}
+public @interface Lazy {
+
+  /**
+   * Ensures that a compile-time proxy is generated, will fail compilation if missing conditions for
+   * generation
+   */
+  boolean forceProxy() default false;
+}
