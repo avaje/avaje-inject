@@ -344,12 +344,7 @@ class DBuilder implements Builder {
       if (bean != null) {
         return bean;
       }
-      final String msg =
-          "Unable to inject an instance for generic type "
-              + type
-              + " usually provided by "
-              + cls
-              + "?";
+      final String msg = "Unable to inject an instance for generic type " + type + " usually provided by " + cls + "?";
       throw new IllegalStateException(msg);
     };
   }
@@ -389,7 +384,7 @@ class DBuilder implements Builder {
 
   @Override
   public final boolean contains(String type) {
-    return beanMap.contains(type)  || parent != null && parent.contains(type);
+    return beanMap.contains(type) || parent != null && parent.contains(type);
   }
 
   @Override
