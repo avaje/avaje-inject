@@ -1,12 +1,9 @@
 package org.example.myapp;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-
+import io.avaje.inject.BeanScope;
 import org.junit.jupiter.api.Test;
 
-import io.avaje.inject.BeanScope;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class MyDestroyOrderTest {
 
@@ -32,7 +29,7 @@ class MyDestroyOrderTest {
     try (BeanScope beanScope = BeanScope.builder().build()) {
       beanScope.get(HelloService.class);
     }
-    assertThat( MyDestroyOrder2.ordering())
+    assertThat(MyDestroyOrder2.ordering())
       .containsExactly(
         "Two",
         "One");
