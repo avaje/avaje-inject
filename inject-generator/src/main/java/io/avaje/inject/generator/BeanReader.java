@@ -107,7 +107,7 @@ final class BeanReader {
     this.lazyProxyType = !lazy || delayed ? null : Util.lazyProxy(actualType);
     this.proxyLazy = lazy && lazyProxyType != null;
     if (lazy && !proxyLazy) {
-      if (lazyPrism != null && lazyPrism.forceProxy()) {
+      if (lazyPrism != null && lazyPrism.enforceProxy()) {
         logError(beanType, "Lazy beans must have an additional no-arg constructor");
       } else {
         logWarn(beanType, "Lazy beans should have an additional no-arg constructor");

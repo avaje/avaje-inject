@@ -22,5 +22,5 @@ public @interface Lazy {
    * Ensures that a compile-time proxy is generated, will fail compilation if missing conditions for
    * generation
    */
-  boolean forceProxy() default false;
+  boolean enforceProxy() default false;
 }
