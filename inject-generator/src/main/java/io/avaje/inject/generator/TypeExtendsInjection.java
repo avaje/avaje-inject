@@ -79,7 +79,13 @@ final class TypeExtendsInjection {
 
   private void readField(Element element) {
     if (InjectPrism.isPresent(element) || AssistedPrism.isPresent(element)) {
-      injectFields.add(new FieldReader(element));
+      if (element.getModifiers().stream()
+          .anyMatch(m -> m == Modifier.PRIVATE || m == Modifier.FINAL || m == Modifier.PROTECTED)) {
+        logError(
+            element, "Injected fields must be non-final and have public or package-private access");
+      } else {
+        injectFields.add(new FieldReader(element));
+      }
     }
   }
 
@@ -122,6 +128,8 @@ final class TypeExtendsInjection {
       if (!injectMethods.containsKey(methodKey) && methodReader.isNotPrivate()) {
         injectMethods.put(methodKey, methodReader);
         checkAspect = false;
+      } else if (!injectMethods.containsKey(methodKey)) {
+        logError(methodElement, "Inject methods must have public or package-private access");
       }
     } else {
       notInjectMethods.add(methodKey);
