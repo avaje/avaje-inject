@@ -17,13 +17,13 @@ class MyDestroyOrderTest {
       beanScope.get(HelloService.class);
     }
     assertThat(MyDestroyOrder.ordering())
-        .containsExactly(
-            "HelloService",
-            "MyNamed",
-            "AppConfig",
-            "MyMetaDataRepo",
-            "ExampleService",
-            "AppHelloData");
+      .containsExactly(
+        "HelloService",
+        "MyNamed",
+        "AppConfig",
+        "MyMetaDataRepo",
+        "ExampleService",
+        "AppHelloData");
   }
 
   @Test

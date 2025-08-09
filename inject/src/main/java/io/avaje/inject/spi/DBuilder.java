@@ -458,6 +458,9 @@ class DBuilder implements Builder {
 
   /** Return the PreDestroy methods in priority order. */
   private List<AutoCloseable> preDestroy() {
-    return preDestroy.stream().sorted().map(ClosePair::closeable).collect(Collectors.toList());
+    return preDestroy.stream()
+      .sorted()
+      .map(ClosePair::closeable)
+      .collect(Collectors.toList());
   }
 }
