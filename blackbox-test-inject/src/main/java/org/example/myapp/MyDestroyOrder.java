@@ -8,7 +8,7 @@ public class MyDestroyOrder {
 
   private static final List<String> ordering = Collections.synchronizedList(new ArrayList<>());
 
-  public static void add(String val){
+  public static void add(String val) {
     ordering.add(val);
   }
 
