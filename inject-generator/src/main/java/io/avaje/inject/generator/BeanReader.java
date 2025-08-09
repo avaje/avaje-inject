@@ -86,10 +86,9 @@ final class BeanReader {
 
     typeReader.process();
     var lazyPrism = Util.isLazy(actualType);
-    this.lazy =
-        !FactoryPrism.isPresent(actualType)
-            && (lazyPrism != null
-                || importedComponent && ProcessingContext.isImportedLazy(actualType));
+    this.lazy = !FactoryPrism.isPresent(actualType)
+      && (lazyPrism != null
+      || importedComponent && ProcessingContext.isImportedLazy(actualType));
 
     this.requestParams = new BeanRequestParams(type);
     this.name = typeReader.name();

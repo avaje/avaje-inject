@@ -447,7 +447,6 @@ final class Util {
     if (element == null) {
       return null;
     }
-
     return LazyPrism.getOptionalOn(element).orElseGet(() -> isLazy(element.getEnclosingElement()));
   }
 }
