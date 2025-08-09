@@ -1,5 +1,6 @@
 package io.avaje.inject.generator;
 
+import static io.avaje.inject.generator.APContext.logError;
 import static io.avaje.inject.generator.APContext.logWarn;
 import static io.avaje.inject.generator.Constants.CONDITIONAL_DEPENDENCY;
 import static io.avaje.inject.generator.ProcessingContext.asElement;
@@ -71,10 +72,18 @@ final class MethodReader {
       primary = PrimaryPrism.isPresent(element);
       secondary = SecondaryPrism.isPresent(element);
       priority = Util.priority(element);
-      lazy = LazyPrism.isPresent(element) || LazyPrism.isPresent(element.getEnclosingElement());
+      var lazyPrism = Util.isLazy(element);
+      lazy = lazyPrism != null;
       conditions.readAll(element);
       this.lazyProxyType = lazy ? Util.lazyProxy(element) : null;
       this.proxyLazy = lazy && lazyProxyType != null;
+      if (lazy && !proxyLazy) {
+        if (lazyPrism.enforceProxy()) {
+          logError(element, "Lazy return type must be abstract or have a no-arg constructor");
+        } else {
+          logWarn(element, "Lazy return type should be abstract or have a no-arg constructor");
+        }
+      }
     } else {
       prototype = false;
       primary = false;
@@ -181,8 +190,6 @@ final class MethodReader {
     observeParameter = params.stream().filter(MethodParam::observeEvent).findFirst().orElse(null);
     if (proxyLazy) {
       SimpleBeanLazyWriter.write(APContext.elements().getPackageOf(element), lazyProxyType);
-    } else if (lazy) {
-      logWarn(element, "Lazy return types should be abstract or have a no-arg constructor");
     }
     return this;
   }

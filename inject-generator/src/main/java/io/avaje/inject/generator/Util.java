@@ -442,4 +442,11 @@ final class Util {
   private static boolean isPriorityAnnotation(AnnotationMirror mirror) {
     return mirror.getAnnotationType().asElement().getSimpleName().toString().contains("Priority");
   }
+
+  static LazyPrism isLazy(Element element) {
+    if (element == null) {
+      return null;
+    }
+    return LazyPrism.getOptionalOn(element).orElseGet(() -> isLazy(element.getEnclosingElement()));
+  }
 }

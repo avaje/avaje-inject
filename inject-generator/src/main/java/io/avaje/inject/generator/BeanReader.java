@@ -85,10 +85,10 @@ final class BeanReader {
         factory);
 
     typeReader.process();
-    this.lazy =
-      !FactoryPrism.isPresent(actualType)
-        && (LazyPrism.isPresent(actualType)
-        || importedComponent && ProcessingContext.isImportedLazy(actualType));
+    var lazyPrism = Util.isLazy(actualType);
+    this.lazy = !FactoryPrism.isPresent(actualType)
+      && (lazyPrism != null
+      || importedComponent && ProcessingContext.isImportedLazy(actualType));
 
     this.requestParams = new BeanRequestParams(type);
     this.name = typeReader.name();
@@ -105,6 +105,14 @@ final class BeanReader {
     this.delayed = shouldDelay();
     this.lazyProxyType = !lazy || delayed ? null : Util.lazyProxy(actualType);
     this.proxyLazy = lazy && lazyProxyType != null;
+    if (lazy && !proxyLazy) {
+      if (lazyPrism != null && lazyPrism.enforceProxy()) {
+        logError(beanType, "Lazy beans must have an additional no-arg constructor");
+      } else {
+        logWarn(beanType, "Lazy beans should have an additional no-arg constructor");
+      }
+    }
+
     conditions.readAll(actualType);
   }
 
@@ -197,8 +205,6 @@ final class BeanReader {
     conditions.addImports(importTypes);
     if (proxyLazy) {
       SimpleBeanLazyWriter.write(APContext.elements().getPackageOf(beanType), lazyProxyType);
-    } else if (lazy) {
-      logWarn(beanType, "Lazy beans should have a no-arg constructor");
     }
     return this;
   }

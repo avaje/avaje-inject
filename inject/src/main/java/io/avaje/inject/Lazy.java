@@ -15,5 +15,12 @@ import java.lang.annotation.Target;
  * constructor, a generated proxy bean will be wired for ultimate laziness.
  */
 @Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.METHOD, ElementType.TYPE})
-public @interface Lazy {}
+@Target({ElementType.METHOD, ElementType.TYPE, ElementType.PACKAGE, ElementType.MODULE})
+public @interface Lazy {
+
+  /**
+   * Ensures that a compile-time proxy is generated, will fail compilation if missing conditions for
+   * generation
+   */
+  boolean enforceProxy() default false;
+}
