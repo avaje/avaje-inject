@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.logError;
+import static io.avaje.inject.generator.APContext.logWarn;
 import static io.avaje.inject.generator.ProcessingContext.getImportedAspect;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -58,6 +59,11 @@ final class TypeExtendsInjection {
         default:
           break;
       }
+    }
+    if (injectConstructor != null
+        && otherConstructors.isEmpty()
+        && InjectPrism.isPresent(injectConstructor.element())) {
+      logWarn(injectConstructor.element(), "Remove Unused @Inject Annotation");
     }
   }
 
