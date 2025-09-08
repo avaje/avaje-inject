@@ -112,7 +112,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-jsonb</artifactId>
-      <version>3.6</version>
+      <version>3.7</version>
       <scope>test</scope>
     </dependency>
 
@@ -126,14 +126,14 @@
     <dependency>
       <groupId>org.jetbrains</groupId>
       <artifactId>annotations</artifactId>
-      <version>26.0.2</version>
+      <version>26.0.2-1</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.38</version>
+      <version>1.18.40</version>
       <scope>test</scope>
     </dependency>
 
