@@ -13,7 +13,7 @@
 
   <properties>
     <jupiter.version>5.13.4</jupiter.version>
-    <mockito.version>5.19.0</mockito.version>
+    <mockito.version>5.20.0</mockito.version>
   </properties>
 
   <dependencies>
@@ -133,7 +133,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.40</version>
+      <version>1.18.42</version>
       <scope>test</scope>
     </dependency>
 
