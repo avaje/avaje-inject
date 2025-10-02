@@ -1,4 +1,4 @@
-package io.avaje.inject.generator.models.valid;
+package io.avaje.inject.generator.models.valid.lazy;
 
 import java.security.SecureRandom;
 

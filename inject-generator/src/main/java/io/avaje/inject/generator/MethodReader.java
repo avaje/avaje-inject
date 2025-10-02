@@ -75,7 +75,7 @@ final class MethodReader {
       var lazyPrism = Util.isLazy(element);
       lazy = lazyPrism != null;
       conditions.readAll(element);
-      this.lazyProxyType = lazy ? Util.lazyProxy(element) : null;
+      this.lazyProxyType = lazy ? Util.lazyProxy(element, beanType) : null;
       this.proxyLazy = lazy && lazyProxyType != null;
       if (lazy && !proxyLazy) {
         if (lazyPrism.enforceProxy()) {

@@ -395,7 +395,11 @@ final class Util {
     });
   }
 
-  static TypeElement lazyProxy(Element element) {
+  static TypeElement lazyProxy(TypeElement element) {
+    return lazyProxy(element, element);
+  }
+
+  static TypeElement lazyProxy(Element element, TypeElement source) {
     TypeElement type =
       element instanceof TypeElement
         ? (TypeElement) element
@@ -403,7 +407,7 @@ final class Util {
 
     if (type.getModifiers().contains(Modifier.FINAL)
         || !type.getKind().isInterface() && !Util.hasNoArgConstructor(type)
-        || Util.hasFinalMethods(type)) {
+        || Util.cantOverride(type, source)) {
 
       return BeanTypesPrism.getOptionalOn(element)
           .map(BeanTypesPrism::value)
@@ -418,11 +422,23 @@ final class Util {
     return type;
   }
 
-  private static boolean hasFinalMethods(TypeElement type) {
+  private static boolean cantOverride(TypeElement type, TypeElement source) {
+
+    var pkgPrivate =
+        source
+            .getEnclosingElement()
+            .getSimpleName()
+            .contentEquals(type.getEnclosingElement().getSimpleName());
+
     return ElementFilter.methodsIn(type.getEnclosedElements()).stream()
         .filter(x -> !x.getModifiers().contains(Modifier.STATIC))
         .filter(x -> !x.getModifiers().contains(Modifier.PRIVATE))
-        .anyMatch(m -> m.getModifiers().contains(Modifier.FINAL));
+        .anyMatch(
+            m ->
+                m.getModifiers().contains(Modifier.FINAL)
+                    || !m.getModifiers().contains(Modifier.PUBLIC)
+                        && !m.getModifiers().contains(Modifier.PROTECTED)
+                        && !pkgPrivate);
   }
 
   static boolean hasNoArgConstructor(TypeElement beanType) {
