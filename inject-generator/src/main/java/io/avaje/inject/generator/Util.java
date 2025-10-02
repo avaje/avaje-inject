@@ -400,10 +400,10 @@ final class Util {
       element instanceof TypeElement
         ? (TypeElement) element
         : APContext.asTypeElement(((ExecutableElement) element).getReturnType());
-
+    var notInterface = !type.getKind().isInterface();
     if (type.getModifiers().contains(Modifier.FINAL)
-        || !type.getKind().isInterface() && !Util.hasNoArgConstructor(type)
-        || Util.hasFinalMethods(type)) {
+        || notInterface && !Util.hasNoArgConstructor(type)
+        || notInterface && Util.hasFinalMethods(type)) {
 
       return BeanTypesPrism.getOptionalOn(element)
           .map(BeanTypesPrism::value)
