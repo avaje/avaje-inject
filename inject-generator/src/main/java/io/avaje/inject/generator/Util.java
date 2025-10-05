@@ -422,6 +422,7 @@ final class Util {
     return ElementFilter.methodsIn(type.getEnclosedElements()).stream()
         .filter(x -> !x.getModifiers().contains(Modifier.STATIC))
         .filter(x -> !x.getModifiers().contains(Modifier.PRIVATE))
+        .filter(x -> !x.getModifiers().contains(Modifier.PROTECTED))
         .anyMatch(m -> m.getModifiers().contains(Modifier.FINAL));
   }
 

@@ -107,13 +107,12 @@ final class SimpleBeanLazyWriter {
       Set<Modifier> modifiers = methodElement.getModifiers();
       if (modifiers.contains(Modifier.PRIVATE)
           || modifiers.contains(Modifier.STATIC)
+          || modifiers.contains(Modifier.PROTECTED)
           || methodElement.getEnclosingElement().getSimpleName().contentEquals("Object")) continue;
       // Access modifiers
       sb.append("  @Override\n");
       if (modifiers.contains(Modifier.PUBLIC)) {
         sb.append("  public ");
-      } else if (modifiers.contains(Modifier.PROTECTED)) {
-        sb.append("  protected ");
       } else {
         sb.append("  ");
       }
