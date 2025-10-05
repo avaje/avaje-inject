@@ -7,7 +7,7 @@ import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
 import io.avaje.inject.Lazy;
 
-@Lazy
+@Lazy(useProxy = false)
 @Factory
 public class RandomFactory {
   @Bean

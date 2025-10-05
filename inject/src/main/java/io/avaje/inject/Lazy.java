@@ -18,6 +18,9 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.TYPE, ElementType.PACKAGE, ElementType.MODULE})
 public @interface Lazy {
 
+  /** Determine whether a compile-time proxy will be attempted. */
+  boolean useProxy() default true;
+
   /**
    * Ensures that a compile-time proxy is generated, will fail compilation if missing conditions for
    * generation

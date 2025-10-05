@@ -75,9 +75,11 @@ final class MethodReader {
       var lazyPrism = Util.isLazy(element);
       lazy = lazyPrism != null;
       conditions.readAll(element);
-      this.lazyProxyType = lazy ? Util.lazyProxy(element) : null;
+      boolean useProxy = lazyPrism != null && lazyPrism.useProxy();
+      this.lazyProxyType = !lazy || !useProxy ? null : Util.lazyProxy(element);
       this.proxyLazy = lazy && lazyProxyType != null;
-      if (lazy && !proxyLazy) {
+
+      if (lazy && !proxyLazy && useProxy) {
         if (lazyPrism.enforceProxy()) {
           logError(element, "Lazy return type must be abstract or have a no-arg constructor");
         } else {
