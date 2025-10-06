@@ -103,12 +103,13 @@ final class BeanReader {
     this.observerMethods = typeReader.observerMethods();
     this.importedComponent = importedComponent && constructor != null && constructor.isPublic();
     this.delayed = shouldDelay();
-    boolean useProxy = lazyPrism != null && lazyPrism.useProxy();
-    this.lazyProxyType = !lazy || delayed || !useProxy ? null : Util.lazyProxy(actualType);
+    String lazyKind = Optional.ofNullable(lazyPrism).map(LazyPrism::value).orElse("");
+    boolean useProxy = !"PROVIDER".equals(lazyKind);
+    this.lazyProxyType = !lazy || !useProxy ? null : Util.lazyProxy(actualType);
     this.proxyLazy = lazy && lazyProxyType != null;
 
     if (lazy && !proxyLazy && useProxy) {
-      if (useProxy && lazyPrism.enforceProxy()) {
+      if ("FORCE_PROXY".equals(lazyKind)) {
         logError(beanType, "Lazy beans must have an additional no-arg constructor");
       } else {
         logWarn(beanType, "Lazy beans should have an additional no-arg constructor");

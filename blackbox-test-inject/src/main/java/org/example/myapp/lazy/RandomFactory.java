@@ -6,8 +6,9 @@ import java.util.Random;
 import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
 import io.avaje.inject.Lazy;
+import io.avaje.inject.Lazy.Kind;
 
-@Lazy(useProxy = false)
+@Lazy(Kind.PROVIDER)
 @Factory
 public class RandomFactory {
   @Bean

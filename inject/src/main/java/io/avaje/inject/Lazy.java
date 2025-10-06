@@ -17,13 +17,32 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.METHOD, ElementType.TYPE, ElementType.PACKAGE, ElementType.MODULE})
 public @interface Lazy {
-
-  /** Determine whether a compile-time proxy will be attempted. */
-  boolean useProxy() default true;
+  /** Determine the kind of lazy initialization. */
+  Kind value() default Kind.AUTO_PROXY;
 
   /**
-   * Ensures that a compile-time proxy is generated, will fail compilation if missing conditions for
-   * generation
+   * Control whether a compile-time proxy is generated to support lazy initialization.
+   *
+   * <p>When using {@link Kind#FORCE_PROXY} a compile-time error will occur if the conditions for
+   * generating a proxy are not met (for example the class is final or has no no-args constructor).
+   * When using {@link Kind#AUTO_PROXY} a warning will be issued and lazy initialization will fall
+   * back to provider based lazy initialization.
+   *
+   * <p>When using {@link Kind#PROVIDER} no proxy is generated and lazy initialization is done via a
+   * provider.
    */
-  boolean enforceProxy() default false;
+  enum Kind {
+    /**
+     * Ensures that a compile-time proxy is generated, will fail compilation if missing conditions
+     * for generation
+     */
+    FORCE_PROXY,
+    /**
+     * Attempt compile-time proxy, will warn and fallback to provider compilation if missing
+     * conditions for generation
+     */
+    AUTO_PROXY,
+    /** No proxy, use a provider based lazy initialization */
+    PROVIDER
+  }
 }

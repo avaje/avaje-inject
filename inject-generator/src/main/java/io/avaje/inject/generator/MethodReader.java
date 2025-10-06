@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -75,12 +76,14 @@ final class MethodReader {
       var lazyPrism = Util.isLazy(element);
       lazy = lazyPrism != null;
       conditions.readAll(element);
-      boolean useProxy = lazyPrism != null && lazyPrism.useProxy();
+
+      String lazyKind = Optional.ofNullable(lazyPrism).map(LazyPrism::value).orElse("");
+      boolean useProxy = !"PROVIDER".equals(lazyKind);
       this.lazyProxyType = !lazy || !useProxy ? null : Util.lazyProxy(element);
       this.proxyLazy = lazy && lazyProxyType != null;
 
       if (lazy && !proxyLazy && useProxy) {
-        if (lazyPrism.enforceProxy()) {
+        if ("FORCE_PROXY".equals(lazyKind)) {
           logError(element, "Lazy return type must be abstract or have a no-arg constructor");
         } else {
           logWarn(element, "Lazy return type should be abstract or have a no-arg constructor");
