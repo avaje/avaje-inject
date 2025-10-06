@@ -12,7 +12,7 @@
   <description>testing support for avaje-inject dependency injection</description>
 
   <properties>
-    <jupiter.version>6.0.0</jupiter.version>
+    <jupiter.version>5.13.4</jupiter.version>
     <mockito.version>5.20.0</mockito.version>
   </properties>
 
@@ -140,7 +140,7 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.5.19</version>
+      <version>1.5.18</version>
       <scope>test</scope>
     </dependency>
 
