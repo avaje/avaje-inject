@@ -27,4 +27,6 @@ public class LazyBean {
   void something() {}
 
   public void other() {}
+
+  protected void other2() {}
 }

@@ -163,19 +163,24 @@ final class SimpleBeanLazyWriter {
       }
 
       sb.append(" {\n    ");
-      if (!"void".equals(returnType.full())) {
-        sb.append("return ");
-      }
-
-      sb.append("onceProvider.get().").append(methodName);
-      sb.append("(");
-      for (int i = 0; i < parameters.size(); i++) {
-        sb.append(parameters.get(i).getSimpleName().toString());
-        if (i < parameters.size() - 1) {
-          sb.append(", ");
+      if (modifiers.contains(Modifier.PROTECTED)) {
+        sb.append("// @Lazy proxy does not support protected methods, instead use @Lazy(useProxy = false)");
+        sb.append("\n    throw new UnsupportedOperationException();\n");
+      } else {
+        if (!"void".equals(returnType.full())) {
+          sb.append("return ");
         }
+
+        sb.append("onceProvider.get().").append(methodName);
+        sb.append("(");
+        for (int i = 0; i < parameters.size(); i++) {
+          sb.append(parameters.get(i).getSimpleName().toString());
+          if (i < parameters.size() - 1) {
+            sb.append(", ");
+          }
+        }
+        sb.append(");\n");
       }
-      sb.append(");\n");
       sb.append("  }\n\n");
     }
     return sb.toString();

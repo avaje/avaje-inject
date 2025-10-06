@@ -400,9 +400,10 @@ final class Util {
       element instanceof TypeElement
         ? (TypeElement) element
         : APContext.asTypeElement(((ExecutableElement) element).getReturnType());
-
+    var notInterface = !type.getKind().isInterface();
     if (type.getModifiers().contains(Modifier.FINAL)
-        || !type.getKind().isInterface() && !Util.hasNoArgConstructor(type)) {
+        || notInterface && !Util.hasNoArgConstructor(type)
+        || notInterface && Util.hasFinalMethods(type)) {
 
       return BeanTypesPrism.getOptionalOn(element)
           .map(BeanTypesPrism::value)
@@ -415,6 +416,14 @@ final class Util {
     }
 
     return type;
+  }
+
+  private static boolean hasFinalMethods(TypeElement type) {
+    return ElementFilter.methodsIn(type.getEnclosedElements()).stream()
+        .filter(x -> !x.getModifiers().contains(Modifier.STATIC))
+        .filter(x -> !x.getModifiers().contains(Modifier.PRIVATE))
+        .filter(x -> !x.getModifiers().contains(Modifier.PROTECTED))
+        .anyMatch(m -> m.getModifiers().contains(Modifier.FINAL));
   }
 
   static boolean hasNoArgConstructor(TypeElement beanType) {

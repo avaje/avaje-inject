@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import io.avaje.inject.BeanScope;
 
-import java.io.Serializable;
-
 class BeanTypesTest {
 
   @Test
@@ -18,7 +16,6 @@ class BeanTypesTest {
       assertFalse(scope.contains(BeanTypeComponent.class));
       assertThat(scope.get(AbstractSuperClass.class)).isNotNull();
       assertThat(scope.get(LimitedInterface.class)).isNotNull();
-      assertThat(scope.get(Serializable.class)).isEqualTo("IAmSerializable");
       assertThat(scope.get(CharSequence.class)).isEqualTo("IAmNullable");
     }
   }
