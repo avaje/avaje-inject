@@ -6,11 +6,19 @@ updates:
       interval: weekly
     open-pull-requests-limit: 10
     ignore:
-       - dependency-name: "jakarta.inject:jakarta.inject-api"
+      - dependency-name: "jakarta.inject:jakarta.inject-api"
+      # --- Configuration to ignore all JUnit dependencies (e.g., 5.x) ---
+      # Ignores all artifacts with Group ID 'org.junit.jupiter' (e.g., api, engine, params)
+      - dependency-name: "org.junit.jupiter:*"
+      # Ignores all artifacts with Group ID 'org.junit.platform' (e.g., launcher, suite)
+      - dependency-name: "org.junit.platform:*"
+      # Ignores the JUnit Vintage Engine
+      - dependency-name: "org.junit.vintage:*"
+      # -----------------------------------------------------------------------
     groups:
       dependencies:
         patterns:
-        - "*"
+          - "*"
     labels:
       - "dependencies"
     target-branch: "master"
