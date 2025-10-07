@@ -430,12 +430,11 @@ final class Util {
     var rte = APContext.typeElement("java.lang.RuntimeException").asType();
 
     return ElementFilter.constructorsIn(beanType.getEnclosedElements()).stream()
-        .anyMatch(
-            e ->
-                e.getParameters().isEmpty()
-                    && !e.getModifiers().contains(Modifier.PRIVATE)
-                    && e.getThrownTypes().stream()
-                        .allMatch(t -> APContext.types().isSubtype(t, rte)));
+      .anyMatch(e ->
+        e.getParameters().isEmpty()
+          && !e.getModifiers().contains(Modifier.PRIVATE)
+          && e.getThrownTypes().stream()
+          .allMatch(t -> APContext.types().isSubtype(t, rte)));
   }
 
   public static String shortNameLazyProxy(TypeElement lazyProxyType) {
