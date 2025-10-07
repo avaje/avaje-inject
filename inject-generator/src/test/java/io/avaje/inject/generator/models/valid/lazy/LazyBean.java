@@ -1,5 +1,7 @@
 package io.avaje.inject.generator.models.valid.lazy;
 
+import java.io.IOException;
+
 import io.avaje.inject.Lazy;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
@@ -18,5 +20,5 @@ public class LazyBean {
 
   public LazyBean() {}
 
-  void something() {}
+  void something() throws IOException {}
 }
