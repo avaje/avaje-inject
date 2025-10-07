@@ -427,8 +427,15 @@ final class Util {
   }
 
   static boolean hasNoArgConstructor(TypeElement beanType) {
+    var rte = APContext.typeElement("java.lang.RuntimeException").asType();
+
     return ElementFilter.constructorsIn(beanType.getEnclosedElements()).stream()
-      .anyMatch(e -> e.getParameters().isEmpty() && !e.getModifiers().contains(Modifier.PRIVATE));
+        .anyMatch(
+            e ->
+                e.getParameters().isEmpty()
+                    && !e.getModifiers().contains(Modifier.PRIVATE)
+                    && e.getThrownTypes().stream()
+                        .allMatch(t -> APContext.types().isSubtype(t, rte)));
   }
 
   public static String shortNameLazyProxy(TypeElement lazyProxyType) {
