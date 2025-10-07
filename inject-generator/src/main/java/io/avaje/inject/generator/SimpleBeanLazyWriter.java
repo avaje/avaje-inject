@@ -129,6 +129,9 @@ final class SimpleBeanLazyWriter {
       }
       var returnType = UType.parse(methodElement.getReturnType());
       importTypes.addAll(returnType.importTypes());
+      methodElement.getThrownTypes().stream()
+          .map(UType::parse)
+          .forEach(t -> importTypes.addAll(t.importTypes()));
       sb.append(returnType.shortType()).append(" ");
 
       // Method name
