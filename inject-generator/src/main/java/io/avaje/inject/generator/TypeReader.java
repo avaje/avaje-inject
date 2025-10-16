@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -28,15 +29,16 @@ final class TypeReader {
       TypeElement beanType,
       ImportTypeMap importTypes,
       boolean factory) {
-    this(injectsTypes, genericType, true, beanType, importTypes, factory);
+    this(injectsTypes, genericType, true, beanType, importTypes, factory, beanType);
   }
 
   TypeReader(
       List<TypeMirror> injectsTypes,
       UType genericType,
       TypeElement returnElement,
-      ImportTypeMap importTypes) {
-    this(injectsTypes, genericType, false, returnElement, importTypes, false);
+      ImportTypeMap importTypes,
+      ExecutableElement source) {
+    this(injectsTypes, genericType, false, returnElement, importTypes, false, source);
   }
 
   private TypeReader(
@@ -45,13 +47,15 @@ final class TypeReader {
       boolean forBean,
       TypeElement beanType,
       ImportTypeMap importTypes,
-      boolean factory) {
+      boolean factory,
+      Element source) {
     this.injectsTypes = injectsTypes.stream().map(UType::parse).collect(toList());
     this.forBean = forBean;
     this.beanType = beanType;
     this.importTypes = importTypes;
     final boolean proxyBean = forBean && ProxyPrism.isPresent(beanType);
-    this.extendsReader = new TypeExtendsReader(genericType, beanType, factory, importTypes, proxyBean);
+    this.extendsReader =
+        new TypeExtendsReader(genericType, beanType, factory, importTypes, proxyBean, source);
     this.annotationReader = new TypeAnnotationReader(beanType);
   }
 
