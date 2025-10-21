@@ -41,8 +41,15 @@ final class TypeExtendsReader {
    * The implied qualifier name based on naming convention.
    */
   private String qualifierName;
+  private Element source;
 
-  TypeExtendsReader(UType baseUType, TypeElement baseType, boolean factory, ImportTypeMap importTypes, boolean proxyBean) {
+  TypeExtendsReader(
+      UType baseUType,
+      TypeElement baseType,
+      boolean factory,
+      ImportTypeMap importTypes,
+      boolean proxyBean,
+      Element source) {
     this.baseUType = baseUType;
     this.baseType = baseType;
     this.extendsInjection = new TypeExtendsInjection(baseType, factory, importTypes);
@@ -54,6 +61,7 @@ final class TypeExtendsReader {
     this.controller = ControllerPrism.isPresent(baseType);
     this.closeable = closeableClient(baseType);
     this.autoProvide = autoProvide();
+    this.source = source;
   }
 
   /**
@@ -255,7 +263,11 @@ final class TypeExtendsReader {
   }
 
   private boolean isPublic(Element element) {
-    return element != null && element.getModifiers().contains(Modifier.PUBLIC);
+    return element != null && element.getModifiers().contains(Modifier.PUBLIC)
+        || source != null
+            && APContext.elements()
+                .getPackageOf(element)
+                .equals(APContext.elements().getPackageOf(source));
   }
 
   void validate() {
