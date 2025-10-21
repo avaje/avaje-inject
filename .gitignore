@@ -9,6 +9,7 @@ build/
 *.project
 *.processors
 */bin/
+.DS_Store
 
 inject-generator/avaje-inject
 inject-generator/avaje-inject-generator
