@@ -14,9 +14,6 @@
   <description>annotation processor generating source code for avaje-inject dependency injection</description>
   <properties>
     <avaje.prisms.version>1.43</avaje.prisms.version>
-    <!-- valhalla-build-start ___
-    <maven.compiler.enablePreview>false</maven.compiler.enablePreview>
-    ____ valhalla-build-end -->
   </properties>
   <dependencies>
 
