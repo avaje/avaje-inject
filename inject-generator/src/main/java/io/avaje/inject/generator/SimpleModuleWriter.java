@@ -224,6 +224,14 @@ final class SimpleModuleWriter {
     }
     Set<String> scopeRequires = new TreeSet<>(scopeInfo.requires());
     scopeRequires.addAll(ordering.autoRequires());
+
+    for (MetaData metaData : ordering.ordered()) {
+      final var forExternal = metaData.provides();
+      if (forExternal != null && !forExternal.isEmpty()) {
+        scopeProvides.addAll(forExternal);
+      }
+    }
+
     scopeInfo.buildProvides(writer, scopeProvides, scopeRequires);
 
     var requires = new ArrayList<>(scopeRequires);
