@@ -6,7 +6,7 @@
   <parent>
     <groupId>io.avaje</groupId>
     <artifactId>avaje-inject-parent</artifactId>
-    <version>12.1-SNAPSHOT</version>
+    <version>12.1-RC1</version>
   </parent>
 
   <artifactId>blackbox-multi-scope</artifactId>
