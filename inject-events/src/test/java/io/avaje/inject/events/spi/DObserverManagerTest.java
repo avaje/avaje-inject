@@ -6,20 +6,20 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import io.avaje.inject.events.ObserverManager;
 import org.junit.jupiter.api.Test;
 
 import io.avaje.inject.events.Observer;
-import io.avaje.inject.events.ObserverManager;
 import io.avaje.inject.events.events.TestEvent;
 import io.avaje.inject.events.events.TestGenericEvent;
 import io.avaje.inject.spi.GenericType;
 
 class DObserverManagerTest {
 
-  ObserverManager manager = new DObserverManager();
+  ObserverManager manager = ObserverManager.builder().build();
 
   @Test
   void test() {
@@ -36,7 +36,7 @@ class DObserverManagerTest {
   }
 
   @Test
-  void testPriority() throws InterruptedException, ExecutionException {
+  void testPriority() {
     var l = new ArrayList<String>();
 
     manager.<String>registerObserver(String.class, new Observer<>(0, false, s -> l.add("1"), ""));
@@ -48,42 +48,57 @@ class DObserverManagerTest {
   }
 
   @Test
-  void testAsync() throws InterruptedException, ExecutionException {
+  void testAsync() {
     AtomicBoolean aBoolean = new AtomicBoolean();
 
     manager.<String>registerObserver(
         String.class, new Observer<>(0, true, s -> aBoolean.set(true), ""));
 
-    new TestEvent(manager).fireAsync("str").toCompletableFuture().get();
+    new TestEvent(manager).fireAsync("str").toCompletableFuture().join();
     assertThat(aBoolean.get()).isTrue();
   }
 
   @Test
-  void testAsyncPriority() throws InterruptedException, ExecutionException {
-    var l = new ArrayList<String>();
+  void testAsyncExecutor() {
+    AtomicBoolean aBoolean = new AtomicBoolean();
+    var exec = Executors.newSingleThreadScheduledExecutor();
+    var manager = ObserverManager.builder()
+      .asyncExecutor(exec)
+      .build();
 
+    assertThat(exec).isSameAs(manager.asyncExecutor());
+    manager.<String>registerObserver(
+        String.class, new Observer<>(0, true, s -> aBoolean.set(true), ""));
+
+    new TestEvent(manager).fireAsync("str").toCompletableFuture().join();
+    assertThat(aBoolean.get()).isTrue();
+  }
+
+  @Test
+  void testAsyncPriority() {
+    var l = new ArrayList<String>();
     manager.<String>registerObserver(String.class, new Observer<>(0, true, s -> l.add("1"), ""));
     manager.<String>registerObserver(String.class, new Observer<>(5, true, s -> l.add("5"), ""));
     manager.<String>registerObserver(String.class, new Observer<>(2, true, s -> l.add("2"), ""));
 
-    new TestEvent(manager).fireAsync("str").toCompletableFuture().get();
+    new TestEvent(manager).fireAsync("str").toCompletableFuture().join();
     assertThat(l).containsExactly("1", "2", "5");
   }
 
   @Test
-  void testGenericAsync() throws InterruptedException, ExecutionException {
+  void testGenericAsync() {
     AtomicBoolean aBoolean = new AtomicBoolean();
 
     manager.<List<String>>registerObserver(
         new GenericType<List<String>>() {}.type(),
         new Observer<>(0, true, s -> aBoolean.set(true), ""));
 
-    new TestGenericEvent(manager).fireAsync(List.of("str")).toCompletableFuture().get();
+    new TestGenericEvent(manager).fireAsync(List.of("str")).toCompletableFuture().join();
     assertThat(aBoolean.get()).isTrue();
   }
 
   @Test
-  void testError() throws InterruptedException {
+  void testError() {
     final var testEvent = new TestEvent(manager);
     testEvent.fire("sus");
 
@@ -102,7 +117,7 @@ class DObserverManagerTest {
   }
 
   @Test
-  void testAsyncError() throws InterruptedException, ExecutionException {
+  void testAsyncError() {
     final var testEvent = new TestEvent(manager);
 
     manager.<String>registerObserver(

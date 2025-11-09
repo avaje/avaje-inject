@@ -15,20 +15,18 @@ import java.util.concurrent.CompletionStage;
  * injected:
  *
  * <pre>{@code
- *
- *   @Inject
- *   Event<LoggedInEvent> loggedInEvent;
+ * @Inject
+ * Event<LoggedInEvent> loggedInEvent;
  *
  * }</pre>
  *
  * <p>The <code>fire()</code> method accepts an event object:
  *
  * <pre>{@code
- *
- *   public void login() {
- *     ...
- *     loggedInEvent.fire(new LoggedInEvent(user));
- *   }
+ * public void login() {
+ *   ...
+ *   loggedInEvent.fire(new LoggedInEvent(user));
+ * }
  *
  * }</pre>
  *
@@ -37,7 +35,7 @@ import java.util.concurrent.CompletionStage;
 public abstract class Event<T> {
 
   private static final Comparator<Observer<?>> PRIORITY = Comparator.comparing(Observer::priority);
-
+  protected final ObserverManager manager;
   protected final List<Observer<T>> observers;
   protected final String defaultQualifier;
 
@@ -46,6 +44,7 @@ public abstract class Event<T> {
   }
 
   protected Event(ObserverManager manager, Type type, String qualifier) {
+    this.manager = manager;
     this.observers = manager.observersByType(type);
     this.defaultQualifier = qualifier;
   }
@@ -72,7 +71,6 @@ public abstract class Event<T> {
    */
   public CompletionStage<T> fireAsync(T event, String qualifier) {
     var exceptionHandler = new CollectingExceptionHandler();
-
     return observers.stream()
       .sorted(PRIORITY)
       .reduce(CompletableFuture.<Void>completedFuture(null), (future, observer) ->
@@ -82,7 +80,7 @@ public abstract class Event<T> {
             } catch (Exception e) {
               exceptionHandler.handle(e);
             }
-          }),
+          }, manager.asyncExecutor()),
         (future1, future2) -> future1)
       .thenApply(v -> {
         handleExceptions(exceptionHandler);
