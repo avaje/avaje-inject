@@ -57,6 +57,7 @@ final class ExternalProvider {
         "io.avaje.validation.Validator",
         "io.avaje.inject.aop.AspectProvider<io.avaje.validation.ValidMethod>")),
     entry("io.avaje.validation.http.HttpValidatorProvider", of("io.avaje.http.api.Validator")));
+  private static final String CLASS_NAME_AVAJE_MODULE = "io.avaje.inject.spi.AvajeModule";
   private static final List<MetaData> externalMeta = new ArrayList<>();
 
   private ExternalProvider() {
@@ -227,7 +228,15 @@ final class ExternalProvider {
       return;
     }
     final var types = APContext.types();
-    final var avajeModuleType = APContext.typeElement("io.avaje.inject.spi.AvajeModule").asType();
+    final var typeElement = APContext.typeElement(CLASS_NAME_AVAJE_MODULE);
+
+    if (typeElement == null) {
+      throw new IllegalStateException(String.format(
+        "Unable to find the type [%s]; ensure that `avaje-inject` dependency is included in your project",
+        CLASS_NAME_AVAJE_MODULE));
+    }
+
+    final var avajeModuleType = typeElement.asType();
     injectExtensions()
       .filter(t -> t.getInterfaces().stream().anyMatch(i -> types.isAssignable(i, avajeModuleType)))
       .distinct()
