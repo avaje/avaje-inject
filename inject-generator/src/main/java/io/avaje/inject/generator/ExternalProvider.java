@@ -232,7 +232,7 @@ final class ExternalProvider {
 
     if (typeElement == null) {
       throw new IllegalStateException(String.format(
-        "Unable to find the type [%s]; ensure that `avaje-inject` dependency is included in your project",
+        "Unable to find the type [%s]; ensure that the `avaje-inject` dependency is included in your project",
         CLASS_NAME_AVAJE_MODULE));
     }
 
