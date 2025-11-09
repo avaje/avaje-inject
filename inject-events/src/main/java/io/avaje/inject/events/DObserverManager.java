@@ -1,4 +1,4 @@
-package io.avaje.inject.events.spi;
+package io.avaje.inject.events;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -6,19 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ForkJoinPool;
-
-import io.avaje.inject.PostConstruct;
-import io.avaje.inject.events.Observer;
-import io.avaje.inject.events.ObserverManager;
 
 final class DObserverManager implements ObserverManager {
 
   private final Map<Type, List<Observer<?>>> observeMap = new HashMap<>();
-  private Executor executor = ForkJoinPool.commonPool();
+  private final Executor executor;
 
-  @PostConstruct
-  void post(Executor executor) {
+  DObserverManager(Executor executor) {
     this.executor = executor;
   }
 

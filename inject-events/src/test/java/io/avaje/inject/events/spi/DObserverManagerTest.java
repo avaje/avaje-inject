@@ -9,6 +9,7 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import io.avaje.inject.events.ObserverManager;
 import org.junit.jupiter.api.Test;
 
 import io.avaje.inject.events.Observer;
@@ -18,7 +19,7 @@ import io.avaje.inject.spi.GenericType;
 
 class DObserverManagerTest {
 
-  DObserverManager manager = new DObserverManager();
+  ObserverManager manager = ObserverManager.builder().build();
 
   @Test
   void test() {
@@ -61,7 +62,10 @@ class DObserverManagerTest {
   void testAsyncExecutor() {
     AtomicBoolean aBoolean = new AtomicBoolean();
     var exec = Executors.newSingleThreadScheduledExecutor();
-    manager.post(exec);
+    var manager = ObserverManager.builder()
+      .asyncExecutor(exec)
+      .build();
+
     assertThat(exec).isSameAs(manager.asyncExecutor());
     manager.<String>registerObserver(
         String.class, new Observer<>(0, true, s -> aBoolean.set(true), ""));
@@ -73,7 +77,6 @@ class DObserverManagerTest {
   @Test
   void testAsyncPriority() {
     var l = new ArrayList<String>();
-
     manager.<String>registerObserver(String.class, new Observer<>(0, true, s -> l.add("1"), ""));
     manager.<String>registerObserver(String.class, new Observer<>(5, true, s -> l.add("5"), ""));
     manager.<String>registerObserver(String.class, new Observer<>(2, true, s -> l.add("2"), ""));

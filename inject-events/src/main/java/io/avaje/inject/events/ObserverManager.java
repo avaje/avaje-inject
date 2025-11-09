@@ -12,6 +12,13 @@ import java.util.concurrent.Executor;
 public interface ObserverManager {
 
   /**
+   * Return a builder for the default ObserverManager implementation.
+   */
+  static Builder builder() {
+    return new ObserverManagerBuilder();
+  }
+
+  /**
    * Registers the given Consumer as an observer.
    *
    * @param <T> the type of the event
@@ -29,6 +36,25 @@ public interface ObserverManager {
    */
   <T> List<Observer<T>> observersByType(Type eventType);
 
-  /** The Executor used for sending async events */
+  /**
+   * The Executor used for sending async events
+   */
   Executor asyncExecutor();
+
+  /**
+   * Builder for the default ObserverManager implementation.
+   */
+  interface Builder {
+
+    /**
+     * Specify an Executor to run asynchronous events. Defaults to using
+     * the Fork join common pool when not specified.
+     */
+    Builder asyncExecutor(Executor executor);
+
+    /**
+     * Build the ObserverManager.
+     */
+    ObserverManager build();
+  }
 }
