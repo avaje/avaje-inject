@@ -1,5 +1,8 @@
 package io.avaje.inject.events.spi;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
+
 import io.avaje.inject.BeanScopeBuilder;
 import io.avaje.inject.spi.InjectPlugin;
 
@@ -14,5 +17,9 @@ public final class ObserverManagerPlugin implements InjectPlugin {
   @Override
   public void apply(BeanScopeBuilder builder) {
     builder.provideDefault(null, DObserverManager.class, DObserverManager::new);
+    builder.addPostConstruct(
+        b ->
+            b.get(DObserverManager.class)
+                .post(b.getOptional(ExecutorService.class).orElse(ForkJoinPool.commonPool())));
   }
 }
