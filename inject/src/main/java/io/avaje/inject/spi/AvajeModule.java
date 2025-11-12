@@ -22,9 +22,7 @@ public interface AvajeModule extends InjectExtension {
     return EMPTY_STRINGS;
   }
 
-  /**
-   * Return the type(s) of scopes that this module provides
-   */
+  /** Return the type(s) of scopes that this module provides. */
   default String[] definesScopes() {
     return EMPTY_STRINGS;
   }
