@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
 
@@ -261,12 +262,21 @@ final class SimpleModuleWriter {
 
         String type = Util.trimGenerics(rawType);
         TypeElement element = typeElement(type);
-        if (element != null && element.getModifiers().contains(Modifier.PUBLIC)) {
+        if (element != null
+            && element.getModifiers().contains(Modifier.PUBLIC)
+            && nestedPublic(element)) {
           publicClasses.add(type);
         }
       }
     }
     return publicClasses;
+  }
+
+  private static boolean nestedPublic(TypeElement element) {
+    var enclosingElement = element.getEnclosingElement();
+    return element.getNestingKind() == NestingKind.TOP_LEVEL
+        || enclosingElement.getModifiers().contains(Modifier.PUBLIC)
+            && nestedPublic((TypeElement) enclosingElement);
   }
 
   private void writeBuildMethod() {
