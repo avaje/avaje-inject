@@ -268,7 +268,7 @@ final class ProcessingContext {
                 return false;
               }
             });
-    if (CTX.get().spiServices.isEmpty()) {
+    if (CTX.get().spiServices.isEmpty() && CTX.get().externalSpi.isEmpty()) {
       // no services to register
       return;
     }
