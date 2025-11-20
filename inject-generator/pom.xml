@@ -13,7 +13,7 @@
   <name>avaje inject generator</name>
   <description>annotation processor generating source code for avaje-inject dependency injection</description>
   <properties>
-    <avaje.prisms.version>1.44-RC1</avaje.prisms.version>
+    <avaje.prisms.version>1.44-RC2</avaje.prisms.version>
   </properties>
   <dependencies>
 
