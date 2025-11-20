@@ -62,7 +62,6 @@ final class ProcessingContext {
 
   static void registerProvidedTypes(Set<String> moduleFileProvided) {
     CTX.get().registerProvidedTypes(moduleFileProvided);
-    addEventSPI();
   }
 
   private static void addEventSPI() {
@@ -251,7 +250,24 @@ final class ProcessingContext {
   }
 
   static void writeSPIServicesFile() {
+    addEventSPI();
     readExistingMetaInfServices();
+    CTX.get()
+        .externalSpi
+        .removeIf(
+            s -> {
+              if (APContext.moduleInfoReader().isPresent()) {
+                return !APContext.moduleInfoReader()
+                    .get()
+                    .containsOnModulePath(
+                        APContext.elements()
+                            .getModuleOf(APContext.typeElement(s))
+                            .getQualifiedName()
+                            .toString());
+              } else {
+                return false;
+              }
+            });
     if (CTX.get().spiServices.isEmpty()) {
       // no services to register
       return;
