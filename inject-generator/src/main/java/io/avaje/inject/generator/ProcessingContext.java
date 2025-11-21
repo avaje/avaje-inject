@@ -38,6 +38,10 @@ final class ProcessingContext {
   private static final String EVENTS_SPI = "io.avaje.inject.events.spi.ObserverManagerPlugin";
   private static final ThreadLocal<Ctx> CTX = ThreadLocal.withInitial(Ctx::new);
   private static boolean processingOver;
+  // the avaje provides maven plugin provides these after compilation when applicable
+  private static final Set<String> AVAJE_PROVIDED_PLUGIN =
+      Set.of("io.avaje.jsonb.plugin", "io.avaje.validation.plugin", "io.avaje.validation.http");
+
   private ProcessingContext() {}
 
   static final class Ctx {
@@ -50,19 +54,28 @@ final class ProcessingContext {
     private final List<TypeElement> delayQueue = new ArrayList<>();
     private final Set<String> spiServices = new TreeSet<>();
     private final Set<String> externalSpi = new TreeSet<>();
+    private final boolean hasProvidesPlugin = hasProvidesPlugin();
     private final AllScopes scopes = new AllScopes();
     private boolean strictWiring;
-    private final boolean mergeServices = APContext.getOption("mergeServices").map(Boolean::valueOf).orElse(true);
+    private final boolean mergeServices =
+        APContext.getOption("mergeServices").map(Boolean::valueOf).orElse(true);
 
     void registerProvidedTypes(Set<String> moduleFileProvided) {
       ExternalProvider.registerModuleProvidedTypes(providedTypes);
       providedTypes.addAll(moduleFileProvided);
     }
+
+    private static boolean hasProvidesPlugin() {
+      try {
+        return APContext.getBuildResource("avaje-plugin-exists.txt").toFile().exists();
+      } catch (Exception e) {
+        return false;
+      }
+    }
   }
 
   static void registerProvidedTypes(Set<String> moduleFileProvided) {
     CTX.get().registerProvidedTypes(moduleFileProvided);
-    addEventSPI();
   }
 
   private static void addEventSPI() {
@@ -251,8 +264,12 @@ final class ProcessingContext {
   }
 
   static void writeSPIServicesFile() {
+    addEventSPI();
     readExistingMetaInfServices();
-    if (CTX.get().spiServices.isEmpty()) {
+    CTX.get()
+        .externalSpi
+        .removeIf(s -> APContext.moduleInfoReader().isPresent() && !isOnModulePath(s));
+    if (CTX.get().spiServices.isEmpty() && CTX.get().externalSpi.isEmpty()) {
       // no services to register
       return;
     }
@@ -269,6 +286,13 @@ final class ProcessingContext {
     } catch (IOException e) {
       logError("Failed to write services file %s", e.getMessage());
     }
+  }
+
+  private static boolean isOnModulePath(String service) {
+    var module = APContext.elements().getModuleOf(APContext.typeElement(service)).getQualifiedName().toString();
+
+    return CTX.get().hasProvidesPlugin && AVAJE_PROVIDED_PLUGIN.contains(module)
+      || APContext.moduleInfoReader().orElseThrow().containsOnModulePath(module);
   }
 
   private static void readExistingMetaInfServices() {
