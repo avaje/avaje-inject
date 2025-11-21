@@ -32,6 +32,7 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
@@ -321,6 +322,9 @@ public final class InjectProcessor extends AbstractProcessor {
     for (final var typeElement : beans) {
       if (typeElement.getKind() == ElementKind.INTERFACE) {
         continue;
+      }
+      if (factory && typeElement.getNestingKind() != NestingKind.TOP_LEVEL) {
+        logError(typeElement, "@Factory Classes cannot be nested");
       }
       final var scope = findScope(typeElement);
       if (!factory) {
