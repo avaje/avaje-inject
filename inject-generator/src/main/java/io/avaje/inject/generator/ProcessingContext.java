@@ -67,7 +67,6 @@ final class ProcessingContext {
 
     private static boolean hasProvidesPlugin() {
       try {
-
         return APContext.getBuildResource("avaje-plugin-exists.txt").toFile().exists();
       } catch (Exception e) {
         return false;
@@ -289,9 +288,8 @@ final class ProcessingContext {
     }
   }
 
-  private static boolean isOnModulePath(String s) {
-    var module =
-        APContext.elements().getModuleOf(APContext.typeElement(s)).getQualifiedName().toString();
+  private static boolean isOnModulePath(String service) {
+    var module = APContext.elements().getModuleOf(APContext.typeElement(service)).getQualifiedName().toString();
 
     return CTX.get().hasProvidesPlugin && AVAJE_PROVIDED_PLUGIN.contains(module)
       || APContext.moduleInfoReader().orElseThrow().containsOnModulePath(module);
