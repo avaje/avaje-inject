@@ -22,7 +22,7 @@ jobs:
         os: [ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Set up Java
       uses: oracle-actions/setup-java@v1
       with:
