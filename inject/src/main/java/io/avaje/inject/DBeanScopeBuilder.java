@@ -222,7 +222,9 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   private boolean detectAvajeConfig() {
-
+    if (ModuleLayer.boot().findModule("io.avaje.config").isPresent()) {
+      return true;
+    }
     try {
       Config.asConfiguration();
       return true;
