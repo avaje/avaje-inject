@@ -16,10 +16,10 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import jakarta.inject.Provider;
 import org.jspecify.annotations.Nullable;
 
 import io.avaje.applog.AppLog;
+import io.avaje.config.Config;
 import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.Builder;
 import io.avaje.inject.spi.ClosePair;
@@ -27,6 +27,7 @@ import io.avaje.inject.spi.ConfigPropertyPlugin;
 import io.avaje.inject.spi.EnrichBean;
 import io.avaje.inject.spi.ModuleOrdering;
 import io.avaje.inject.spi.SuppliedBean;
+import jakarta.inject.Provider;
 
 /** Build a bean scope with options for shutdown hook and supplying test doubles. */
 final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
@@ -221,13 +222,11 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   }
 
   private boolean detectAvajeConfig() {
-    if (ModuleLayer.boot().findModule("io.avaje.config").isPresent()) {
-      return true;
-    }
+
     try {
-      Class.forName("io.avaje.config.Configuration", false, classLoader);
+      Config.asConfiguration();
       return true;
-    } catch (final ClassNotFoundException e) {
+    } catch (final NoClassDefFoundError e) {
       return false;
     }
   }
