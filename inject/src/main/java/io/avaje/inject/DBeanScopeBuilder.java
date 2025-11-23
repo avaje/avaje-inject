@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 import org.jspecify.annotations.Nullable;
 
 import io.avaje.applog.AppLog;
-import io.avaje.config.Config;
+import io.avaje.config.Configuration;
 import io.avaje.inject.spi.AvajeModule;
 import io.avaje.inject.spi.Builder;
 import io.avaje.inject.spi.ClosePair;
@@ -226,7 +226,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       return true;
     }
     try {
-      Config.asConfiguration();
+      var __ = Configuration.class;
       return true;
     } catch (final NoClassDefFoundError e) {
       return false;
