@@ -226,8 +226,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       return true;
     }
     try {
-      var __ = Configuration.class;
-      return true;
+      return Configuration.class != null;
     } catch (final NoClassDefFoundError e) {
       return false;
     }
