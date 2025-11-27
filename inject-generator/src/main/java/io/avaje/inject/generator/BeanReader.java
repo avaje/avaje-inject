@@ -367,6 +367,11 @@ final class BeanReader {
       writer.append("var $bean = ");
     }
     writer.append("builder.");
+    writePriority(writer);
+    writer.append("register(bean);").eol();
+  }
+
+  public void writePriority(Append writer) {
     if (primary) {
       writer.append("asPrimary().");
     } else if (secondary) {
@@ -374,7 +379,6 @@ final class BeanReader {
     } else if (priority != null) {
       writer.append("asPriority(%s).", priority);
     }
-    writer.append("register(bean);").eol();
   }
 
   void addLifecycleCallbacks(Append writer, String indent) {
@@ -599,17 +603,15 @@ final class BeanReader {
   String packageName() {
     if (importedComponent) {
       return beanPackageName() + ".di";
-    } else {
-      return beanPackageName();
     }
+    return beanPackageName();
   }
 
   private String beanPackageName() {
     if (beanType.getNestingKind().isNested()) {
       return Util.nestedPackageOf(beanQualifiedName());
-    } else {
-      return ProcessorUtils.packageOf(beanQualifiedName());
     }
+    return ProcessorUtils.packageOf(beanQualifiedName());
   }
 
   private String beanQualifiedName() {
