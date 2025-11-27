@@ -98,6 +98,14 @@ class LazyTest {
   }
 
   @Test
+  void testLazyPriority() {
+    try (var scope = BeanScope.builder().build()) {
+      var greeter = scope.get(Greeter.class);
+      assertThat(greeter.run()).isEqualTo("Hola");
+    }
+  }
+
+  @Test
   void testOldLazyBehavior() {
     var initialized = new AtomicBoolean();
     try (var scope = BeanScope.builder().beans(initialized).build()) {

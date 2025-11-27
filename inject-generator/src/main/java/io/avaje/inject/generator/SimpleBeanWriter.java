@@ -178,6 +178,7 @@ final class SimpleBeanWriter {
       indent += "  ";
 
       final String registerProvider;
+
       if (beanReader.proxyLazy()) {
         registerProvider = "registerLazy";
       } else if (beanReader.lazy()) {
@@ -186,7 +187,9 @@ final class SimpleBeanWriter {
         registerProvider = "asPrototype().registerProvider";
       }
 
-      writer.append("      builder.%s(() -> {", registerProvider).eol();
+      writer.append("      builder.");
+      beanReader.writePriority(writer);
+      writer.append("%s(() -> {", registerProvider).eol();
     }
     constructor.startTry(writer);
     writeCreateBean(constructor);

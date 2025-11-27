@@ -281,12 +281,10 @@ final class MethodReader {
 
     String indent = "    ";
     writer.indent(indent).append("  builder");
+    writePriority(writer);
+
     if (prototype) {
       writer.append(".asPrototype()");
-    } else if (secondary) {
-      writer.append(".asSecondary()");
-    } else if (priority != null) {
-      writer.append(".asPriority(%s)", priority);
     }
 
     if (proxyLazy) {
@@ -341,13 +339,9 @@ final class MethodReader {
       }
 
       writer.append("builder");
-      if (primary) {
-        writer.append(".asPrimary()");
-      } else if (secondary) {
-        writer.append(".asSecondary()");
-      } else if (priority != null) {
-        writer.append(".asPriority(%s)", priority);
-      } else if (prototype) {
+      writePriority(writer);
+
+      if (prototype) {
         writer.append(".asPrototype()");
       }
 
@@ -409,6 +403,16 @@ final class MethodReader {
       if (optionalType) {
         writer.append("      }").eol();
       }
+    }
+  }
+
+  public void writePriority(Append writer) {
+    if (primary) {
+      writer.append(".asPrimary()");
+    } else if (secondary) {
+      writer.append(".asSecondary()");
+    } else if (priority != null) {
+      writer.append(".asPriority(%s)", priority);
     }
   }
 
