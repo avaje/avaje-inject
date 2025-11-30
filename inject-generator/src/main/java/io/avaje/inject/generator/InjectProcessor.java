@@ -6,6 +6,7 @@ import static io.avaje.inject.generator.ProcessingContext.addImportedAspects;
 import static io.avaje.inject.generator.ProcessingContext.delayedElements;
 import static io.avaje.inject.generator.ProcessingContext.loadMetaInfCustom;
 import static io.avaje.inject.generator.ProcessingContext.loadMetaInfServices;
+import static io.avaje.inject.generator.ProcessingContext.processingOver;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -71,6 +72,8 @@ public final class InjectProcessor extends AbstractProcessor {
   private final Set<String> pluginFileProvided = new HashSet<>();
   private final Set<String> moduleFileProvided = new HashSet<>();
   private final List<ModuleData> moduleData = new ArrayList<>();
+  private int rounds;
+
 
   @Override
   public SourceVersion getSupportedSourceVersion() {
@@ -143,15 +146,13 @@ public final class InjectProcessor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-    if (roundEnv.errorRaised()) {
+    if (processingOver() || roundEnv.errorRaised()) {
       return false;
     }
+    processingOver(rounds++ > 0);
 
     APContext.setProjectModuleElement(annotations, roundEnv);
     readModule(roundEnv);
-
-    final var processingOver = roundEnv.processingOver();
-    ProcessingContext.processingOver(processingOver);
 
     readBeans(delayedElements());
     addImportedAspects(importedAspects(roundEnv));
@@ -192,11 +193,12 @@ public final class InjectProcessor extends AbstractProcessor {
     maybeElements(roundEnv, ServiceProviderPrism.PRISM_TYPE).ifPresent(this::registerSPI);
     maybeElements(roundEnv, PluginProvidesPrism.PRISM_TYPE).ifPresent(this::registerSPI);
     allScopes.readBeans(roundEnv);
-    defaultScope.write(processingOver);
-    allScopes.write(processingOver);
+    final var over = processingOver();
+    defaultScope.write(over);
+    allScopes.write(over);
 
-    if (processingOver) {
-      var order =
+    if (processingOver()) {
+      final var order =
         new FactoryOrder(ProcessingContext.modules(), defaultScope.pluginProvided())
           .orderModules();
 
@@ -234,8 +236,13 @@ public final class InjectProcessor extends AbstractProcessor {
   }
 
   // Optional because these annotations are not guaranteed to exist
-  private static Optional<? extends Set<? extends Element>> maybeElements(RoundEnvironment round, String name) {
-    return Optional.ofNullable(typeElement(name)).map(round::getElementsAnnotatedWith);
+  private Optional<? extends Set<? extends Element>> maybeElements(RoundEnvironment round, String name) {
+    final var op = Optional.ofNullable(typeElement(name))
+      .map(round::getElementsAnnotatedWith);
+
+    // reset processingOver flag if anything needs processing in this round
+    processingOver(processingOver() && op.filter(n -> !n.isEmpty()).isEmpty());
+    return op;
   }
 
   private Set<TypeElement> importedElements(RoundEnvironment roundEnv) {
@@ -264,7 +271,7 @@ public final class InjectProcessor extends AbstractProcessor {
     return !moduleFileProvided.contains(type) && !pluginFileProvided.contains(type);
   }
 
-  private static Map<String, AspectImportPrism> importedAspects(RoundEnvironment roundEnv) {
+  private Map<String, AspectImportPrism> importedAspects(RoundEnvironment roundEnv) {
     return maybeElements(roundEnv, AspectImportPrism.PRISM_TYPE).stream()
       .flatMap(Set::stream)
       .map(AspectImportPrism::getAllInstancesOn)
