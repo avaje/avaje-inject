@@ -232,10 +232,7 @@ final class ProcessingContext {
   }
 
   static boolean delayUntilNextRound(TypeElement element) {
-    if (!processingOver) {
-      CTX.get().delayQueue.add(element);
-    }
-    return !processingOver;
+    return CTX.get().delayQueue.add(element);
   }
 
   static void clear() {
@@ -261,6 +258,10 @@ final class ProcessingContext {
 
   static void processingOver(boolean over) {
     processingOver = over;
+  }
+
+  static boolean processingOver() {
+    return processingOver;
   }
 
   static void writeSPIServicesFile() {

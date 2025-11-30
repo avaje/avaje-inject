@@ -59,19 +59,6 @@ BeanScope beanScope = BeanScope.builder().build()
 Example ex = beanScope.get(Example.class);
 ```
 
-### Java Module Usage
-When working with Java modules you need to add a `provides` statement in your `module-info.java` with the generated class.
-```java
-import io.avaje.inject.spi.InjectExtension;
-
-module org.example {
-
-  requires io.avaje.inject;
-  // you must define the fully qualified class name of the generated classes. if you use an import statement, compilation will fail
-  provides InjectExtension with org.example.ExampleModule;
-}
-```
-
 ### Generated Wiring Class
 The inject annotation processor determines the dependency wiring order and generates an `AvajeModule` class that calls all the generated DI classes.
 
@@ -79,18 +66,6 @@ The inject annotation processor determines the dependency wiring order and gener
 @Generated("io.avaje.inject.generator")
 @InjectModule
 public final class ExampleModule implements AvajeModule {
-
-  private Builder builder;
-
-  @Override
-  public Class<?>[] classes() {
-    return new Class<?>[] {
-      org.example.DependencyClass.class,
-      org.example.DependencyClass2.class,
-      org.example.Example.class,
-      org.example.ExampleFactory.class,
-    };
-  }
 
   /**
    * Creates all the beans in order based on constructor dependencies. The beans are registered
@@ -102,19 +77,19 @@ public final class ExampleModule implements AvajeModule {
     this.builder = builder;
     // create beans in order based on constructor dependencies
     // i.e. "provides" followed by "dependsOn"
-    build_example_ExampleFactory();
-    build_example_DependencyClass();
-    build_example_DependencyClass2();
-    build_example_Example();
+    build_example_ExampleFactory(builder);
+    build_example_DependencyClass(builder);
+    build_example_DependencyClass2(builder);
+    build_example_Example(builder);
   }
 
   @DependencyMeta(type = "org.example.ExampleFactory")
-  private void build_example_ExampleFactory() {
+  private void build_example_ExampleFactory(Builder builder) {
     ExampleFactory$DI.build(builder);
   }
 
   @DependencyMeta(type = "org.example.DependencyClass")
-  private void build_example_DependencyClass() {
+  private void build_example_DependencyClass(Builder builder) {
     DependencyClass$DI.build(builder);
   }
 
@@ -122,14 +97,14 @@ public final class ExampleModule implements AvajeModule {
       type = "org.example.DependencyClass2",
       method = "org.example.ExampleFactory$DI.build_bean", // factory method
       dependsOn = {"org.example.ExampleFactory"}) //factory beans naturally depend on the factory
-  private void build_example_DependencyClass2() {
+  private void build_example_DependencyClass2(Builder builder) {
     ExampleFactory$DI.build_bean(builder);
   }
 
   @DependencyMeta(
       type = "org.example.Example",
       dependsOn = {"org.example.DependencyClass", "org.example.DependencyClass2"})
-  private void build_example_Example() {
+  private void build_example_Example(Builder builder) {
     Example$DI.build(builder);
   }
 }
