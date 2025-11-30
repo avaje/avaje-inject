@@ -154,7 +154,6 @@ public final class InjectProcessor extends AbstractProcessor {
     APContext.setProjectModuleElement(annotations, roundEnv);
     readModule(roundEnv);
 
-
     readBeans(delayedElements());
     addImportedAspects(importedAspects(roundEnv));
     maybeElements(roundEnv, QualifierPrism.PRISM_TYPE).stream()
@@ -237,10 +236,11 @@ public final class InjectProcessor extends AbstractProcessor {
   }
 
   // Optional because these annotations are not guaranteed to exist
-  private Optional<? extends Set<? extends Element>> maybeElements(
-      RoundEnvironment round, String name) {
-    final var op = Optional.ofNullable(typeElement(name)).map(round::getElementsAnnotatedWith);
+  private Optional<? extends Set<? extends Element>> maybeElements(RoundEnvironment round, String name) {
+    final var op = Optional.ofNullable(typeElement(name))
+      .map(round::getElementsAnnotatedWith);
 
+    // reset processingOver flag if anything needs processing in this round
     processingOver(processingOver() && op.filter(n -> !n.isEmpty()).isEmpty());
     return op;
   }
