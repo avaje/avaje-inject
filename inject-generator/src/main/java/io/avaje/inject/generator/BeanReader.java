@@ -371,7 +371,7 @@ final class BeanReader {
     writer.append("register(bean);").eol();
   }
 
-  public void writePriority(Append writer) {
+  void writePriority(Append writer) {
     if (primary) {
       writer.append("asPrimary().");
     } else if (secondary) {

@@ -178,7 +178,6 @@ final class SimpleBeanWriter {
       indent += "  ";
 
       final String registerProvider;
-
       if (beanReader.proxyLazy()) {
         registerProvider = "registerLazy";
       } else if (beanReader.lazy()) {

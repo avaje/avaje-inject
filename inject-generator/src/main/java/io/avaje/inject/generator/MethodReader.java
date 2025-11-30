@@ -282,7 +282,6 @@ final class MethodReader {
     String indent = "    ";
     writer.indent(indent).append("  builder");
     writePriority(writer);
-
     if (prototype) {
       writer.append(".asPrototype()");
     }
@@ -406,7 +405,7 @@ final class MethodReader {
     }
   }
 
-  public void writePriority(Append writer) {
+  void writePriority(Append writer) {
     if (primary) {
       writer.append(".asPrimary()");
     } else if (secondary) {
