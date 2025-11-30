@@ -221,19 +221,19 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     return detectAvajeConfig() ? new DConfigProps() : new DSystemProps();
   }
 
+  @SuppressWarnings("ConstantValue")
   private static boolean detectAvajeConfig() {
     var modules = ModuleLayer.boot();
     return modules
-        .findModule("io.avaje.inject")
-        .map(m -> modules.findModule("io.avaje.config").isPresent())
-        .orElseGet(
-            () -> {
-              try {
-                return Configuration.class != null;
-              } catch (NoClassDefFoundError e) {
-                return false;
-              }
-            });
+      .findModule("io.avaje.inject")
+      .map(m -> modules.findModule("io.avaje.config").isPresent())
+      .orElseGet(() -> {
+        try {
+          return Configuration.class != null;
+        } catch (NoClassDefFoundError e) {
+          return false;
+        }
+      });
   }
 
   private void initProfiles() {
