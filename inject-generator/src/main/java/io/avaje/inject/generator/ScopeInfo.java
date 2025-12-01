@@ -151,7 +151,7 @@ final class ScopeInfo {
   void initialiseName(String topPackage) throws IOException {
     emptyModule = topPackage == null;
     if (!emptyModule) {
-      var defaultPackage = APContext.elements().getPackageElement(topPackage) == null;
+      var defaultPackage = APContext.getProjectModuleElement().isUnnamed() && APContext.elements().getPackageElement(topPackage) == null;
       modulePackage = defaultPackage ? "" : topPackage;
       final String name = defaultPackage ? "Default" : initName(modulePackage);
       moduleShortName = name + "Module";

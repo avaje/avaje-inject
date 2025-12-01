@@ -22,6 +22,6 @@ module blackbox.test.inject {
 
   requires static io.avaje.spi;
 
-  provides InjectExtension with org.example.myapp.CompiledOrder, ConfigPropertiesPlugin, org.example.myapp.MyappModule;
+  provides InjectExtension with org.CompiledOrder, org.MyappModule, org.example.myapp.ConfigPropertiesPlugin;
   provides MyServiceIface with MyServiceImpl;
 }
