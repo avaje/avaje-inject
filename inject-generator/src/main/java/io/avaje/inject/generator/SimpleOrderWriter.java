@@ -17,7 +17,7 @@ final class SimpleOrderWriter {
     this.ordering = orderedModules;
     this.modulePackage = scopeInfo.modulePackage();
     this.shortName = "CompiledOrder";
-    this.fullName = modulePackage + "." + shortName;
+    this.fullName = modulePackage.isBlank() ? shortName : modulePackage + "." + shortName;
   }
 
   void write() throws IOException {
@@ -34,7 +34,9 @@ final class SimpleOrderWriter {
   }
 
   private void writePackage() {
-    writer.append("package %s;", modulePackage).eol().eol();
+    if (!modulePackage.isBlank()) {
+      writer.append("package %s;", modulePackage).eol().eol();
+    }
     writer
       .append(
         "import static java.util.Map.entry;\n"

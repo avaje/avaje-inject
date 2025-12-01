@@ -19,7 +19,7 @@ import javax.lang.model.util.ElementFilter;
 final class SimpleBeanLazyWriter {
   private static final Set<String> GENERATED_PUBLISHERS = new HashSet<>();
   private static final String TEMPLATE =
-      "package {0};\n\n"
+      "{0};\n\n"
           + "{1}"
           + "@Proxy\n"
           + "@Generated(\"avaje-inject-generator\")\n"
@@ -50,7 +50,7 @@ final class SimpleBeanLazyWriter {
     this.isInterface = element.getKind().isInterface();
     this.shortName = Util.shortName(element.getQualifiedName().toString()).replace(".", "_");
     this.packageName = pkg.getQualifiedName().toString();
-    this.originName = packageName + "." + shortName + "$Lazy";
+    this.originName = packageName.isBlank() ? shortName + "$Lazy" : packageName + "." + shortName+ "$Lazy";
 
     if (GENERATED_PUBLISHERS.contains(originName)) {
       return;
@@ -74,7 +74,7 @@ final class SimpleBeanLazyWriter {
       writer.append(
         MessageFormat.format(
           TEMPLATE,
-          packageName,
+          packageName.isBlank() ? packageName : "package " + packageName,
           imports(),
           shortName,
           typeParametersDecl,
@@ -106,8 +106,10 @@ final class SimpleBeanLazyWriter {
 
       Set<Modifier> modifiers = methodElement.getModifiers();
       if (modifiers.contains(Modifier.PRIVATE)
-          || modifiers.contains(Modifier.STATIC)
-          || methodElement.getEnclosingElement().getSimpleName().contentEquals("Object")) continue;
+        || modifiers.contains(Modifier.STATIC)
+        || methodElement.getEnclosingElement().getSimpleName().contentEquals("Object")) {
+        continue;
+      }
       // Access modifiers
       sb.append("  @Override\n");
       if (modifiers.contains(Modifier.PUBLIC)) {
