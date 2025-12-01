@@ -238,6 +238,11 @@ public interface Builder {
   <T> List<T> list(Type type);
 
   /**
+   * Get a list of dependencies for the type and name.
+   */
+  <T> List<T> list(Type type, String name);
+
+  /**
    * Get a set of dependencies for the type.
    */
   <T> Set<T> set(Class<T> type);
@@ -246,6 +251,11 @@ public interface Builder {
    * Get a set of dependencies for the generic type.
    */
   <T> Set<T> set(Type type);
+
+  /**
+   * Get a set of dependencies for the type and name.
+   */
+  <T> Set<T> set(Type type, String name);
 
   /**
    * Return a map of dependencies for the type keyed by qualifier name.

@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import io.avaje.inject.spi.AvajeModule;
@@ -308,6 +309,11 @@ class BeanScopeBuilderTest {
 
     @Override
     public <T> List<T> list(Type type) {
+      return null;
+    }
+
+    @Override
+    public <T> List<T> list(Type type, @Nullable String name) {
       return null;
     }
 

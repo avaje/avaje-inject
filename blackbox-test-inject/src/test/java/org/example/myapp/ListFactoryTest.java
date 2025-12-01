@@ -18,7 +18,9 @@ class ListFactoryTest {
   @Test
   void test() {
 
-    assertThat(list.strings()).contains("test1", "test1", "test3");
+    assertThat(list.strings()).contains("test1", "test1", "test3", "arg0", "arg1");
+    assertThat(list.args()).containsOnly("arg0", "arg1");
+    assertThat(list.argsAsSet()).containsOnly("arg0", "arg1");
 
     List<ListFactory.Some> somes = list.somes();
     assertThat(somes).hasSize(4);

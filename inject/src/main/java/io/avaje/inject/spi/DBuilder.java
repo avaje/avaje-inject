@@ -120,31 +120,41 @@ class DBuilder implements Builder {
 
   @Override
   public final <T> Set<T> set(Class<T> type) {
-    return new LinkedHashSet<>(listOf(type));
+    return new LinkedHashSet<>(listOf(type, null));
   }
 
   @Override
   public final <T> List<T> list(Class<T> type) {
-    return listOf(type);
+    return listOf(type, null);
   }
 
   @Override
   public final <T> Set<T> set(Type type) {
-    return new LinkedHashSet<>(listOf(type));
+    return set(type, null);
+  }
+
+  @Override
+  public final <T> Set<T> set(Type type, String name) {
+    return new LinkedHashSet<>(listOf(type, name));
   }
 
   @Override
   public final <T> List<T> list(Type type) {
-    return listOf(type);
+    return listOf(type, null);
+  }
+
+  @Override
+  public <T> List<T> list(Type type, String name) {
+    return listOf(type, name);
   }
 
   @SuppressWarnings({"unchecked"})
-  private <T> List<T> listOf(Type type) {
-    final List<T> values = (List<T>) beanMap.all(type);
+  private <T> List<T> listOf(Type type, @Nullable String name) {
+    final List<T> values = (List<T>) beanMap.all(type, name);
     if (parent == null) {
       return values;
     }
-    return combine(values, parent.list(type));
+    return combine(values, parent.list(type, name));
   }
 
   @Override

@@ -157,11 +157,11 @@ final class DBeanMap {
   }
 
   /**
-   * Return all bean instances matching the given type.
+   * Return all bean instances matching the given type and name.
    */
-  List<Object> all(Type type) {
+  List<Object> all(Type type, @Nullable String name) {
     DContextEntry entry = beans.get(type.getTypeName());
-    return entry != null ? entry.all() : List.of();
+    return entry != null ? entry.all(name) : List.of();
   }
 
   /**

@@ -199,7 +199,14 @@ public interface BeanScope extends AutoCloseable {
    */
   <T> List<T> list(Type type);
 
-  /** Return the list of beans that implement the class sorting by priority. */
+  /**
+   * Return the list of beans for the given type and name.
+   */
+  <T> List<T> list(Type type, @Nullable String name);
+
+  /**
+   * Return the list of beans that implement the class sorting by priority.
+   */
   default <T> List<T> listByPriority(Class<T> type) {
     return listByPriority((Type) type);
   }
