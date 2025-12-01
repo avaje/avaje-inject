@@ -608,10 +608,7 @@ final class BeanReader {
   }
 
   private String beanPackageName() {
-    if (beanType.getNestingKind().isNested()) {
-      return Util.nestedPackageOf(beanQualifiedName());
-    }
-    return ProcessorUtils.packageOf(beanQualifiedName());
+    return APContext.elements().getPackageOf(beanType).getQualifiedName().toString();
   }
 
   private String beanQualifiedName() {

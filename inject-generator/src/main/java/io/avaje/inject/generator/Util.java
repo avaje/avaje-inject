@@ -40,7 +40,7 @@ final class Util {
   }
 
   private static boolean importDifferentPackage(String type, String packageName) {
-    return type.replace(packageName + '.', "").indexOf('.') > -1;
+    return packageName.isBlank() || type.replace(packageName + '.', "").indexOf('.') > -1;
   }
 
   private static boolean importJavaLangSubpackage(String type) {

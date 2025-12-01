@@ -39,7 +39,7 @@ final class SimpleBeanWriter {
     this.shortName = beanReader.shortName();
     this.suffix = beanReader.suffix();
     this.proxied = beanReader.isGenerateProxy();
-    this.originName = packageName + "." + shortName;
+    this.originName = packageName.isBlank() ? shortName : packageName + "." + shortName;
   }
 
   private Writer createFileWriter() throws IOException {
@@ -395,7 +395,7 @@ final class SimpleBeanWriter {
   }
 
   private void writePackage() {
-    if (packageName != null) {
+    if (packageName != null && !packageName.isBlank()) {
       writer.append("package %s;", packageName).eol().eol();
     }
   }

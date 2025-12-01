@@ -200,11 +200,7 @@ final class AssistBeanReader {
   }
 
   private String beanPackageName() {
-    if (beanType.getNestingKind().isNested()) {
-      return Util.nestedPackageOf(beanQualifiedName());
-    } else {
-      return ProcessorUtils.packageOf(beanQualifiedName());
-    }
+    return APContext.elements().getPackageOf(beanType).getQualifiedName().toString();
   }
 
   private String beanQualifiedName() {

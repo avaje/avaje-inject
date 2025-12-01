@@ -24,7 +24,7 @@ final class SimpleBeanProxyWriter {
     TypeElement origin = beanReader.beanType();
     this.originName = origin.getQualifiedName().toString();
     this.shortName = origin.getSimpleName().toString();
-    this.packageName = ProcessorUtils.packageOf(originName);
+    this.packageName = beanReader.packageName();
     this.suffix = "$Proxy";
     this.aspects = beanReader.aspects();
   }
@@ -85,7 +85,7 @@ final class SimpleBeanProxyWriter {
   }
 
   private void writePackage() {
-    if (packageName != null) {
+    if (packageName != null && !packageName.isEmpty()) {
       writer.append("package %s;", packageName).eol().eol();
     }
   }
