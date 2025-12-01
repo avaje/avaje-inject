@@ -21,12 +21,6 @@ class UtilTest {
   }
 
   @Test
-  void nestedPackageOf() {
-    assertEquals(Util.nestedPackageOf("com.example.Foo.Bar"), "com.example");
-    assertEquals(Util.nestedPackageOf("com.example.other.foo.Bar"), "com.example.other");
-  }
-
-  @Test
   void commonParent() {
     assertEquals(Util.commonParent(null, "org.b"), "org.b");
     assertEquals(Util.commonParent("org.a", null), "org.a");
