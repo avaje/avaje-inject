@@ -107,8 +107,8 @@ final class MetaData implements Comparable<MetaData> {
   private String createBuildName() {
     if (Util.isVoid(type)) {
       return "void_" + Util.trimMethod(method);
-    } else {
-      final String trimType = Util.trimMethod(Util.unwrapProvider(type));
+    }
+    final String trimType = Util.trimMethod(Util.unwrapProvider(type));
 
       if (name != null) {
         return trimType + "_" + name.replaceAll("[^a-zA-Z0-9_$]+", "_");
@@ -116,7 +116,6 @@ final class MetaData implements Comparable<MetaData> {
         return trimType + "__" + Util.trimMethod(method);
       }
       return trimType;
-    }
   }
 
   private boolean buildNameIncludeMethod() {
@@ -191,12 +190,7 @@ final class MetaData implements Comparable<MetaData> {
       importTypes.add(Util.classOfMethod(method));
     } else if (!generateProxy) {
       if (importedComponent) {
-        String packageName;
-        if (typeElement(type).getNestingKind().isNested()) {
-          packageName = Util.nestedPackageOf(type);
-        } else {
-          packageName = ProcessorUtils.packageOf(type);
-        }
+        var packageName = APContext.elements().getPackageOf(typeElement(type)).getQualifiedName();
         importTypes.add(packageName + ".di." + shortType + Constants.DI);
       } else {
         importTypes.add(type + Constants.DI);

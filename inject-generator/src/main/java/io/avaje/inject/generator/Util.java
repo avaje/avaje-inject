@@ -85,15 +85,6 @@ final class Util {
     return type.replaceAll("[^\\n\\r\\t $;\\w.]", "");
   }
 
-  static String nestedPackageOf(String cls) {
-    int pos = cls.lastIndexOf('.');
-    if (pos < 0) {
-      return "";
-    }
-    pos = cls.lastIndexOf('.', pos - 1);
-    return pos == -1 ? "" : cls.substring(0, pos);
-  }
-
   static String unwrapProvider(String maybeProvider) {
     if (isProvider(maybeProvider)) {
       return extractProviderType(maybeProvider);
