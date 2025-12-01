@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import io.avaje.inject.BeanEntry;
 import io.avaje.inject.BeanScope;
+import org.jspecify.annotations.Nullable;
 
 /** Proxy used when injecting the BeanScope. */
 final class DBeanScopeProxy implements BeanScope {
@@ -88,7 +89,6 @@ final class DBeanScopeProxy implements BeanScope {
 
   @Override
   public <T> List<T> list(Class<T> type) {
-
     if (delegate != null) {
       return delegate.list(type);
     } else {
@@ -102,6 +102,15 @@ final class DBeanScopeProxy implements BeanScope {
       return delegate.list(type);
     } else {
       return builder.list(type);
+    }
+  }
+
+  @Override
+  public <T> List<T> list(Type type, @Nullable String name) {
+    if (delegate != null) {
+      return delegate.list(type, name);
+    } else {
+      return builder.list(type, name);
     }
   }
 

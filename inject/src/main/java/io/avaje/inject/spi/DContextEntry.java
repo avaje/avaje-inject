@@ -7,6 +7,7 @@ import java.util.Map;
 
 import io.avaje.inject.BeanEntry;
 import jakarta.inject.Provider;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Entry for a given key (bean class, interface class or annotation class).
@@ -55,12 +56,14 @@ final class DContextEntry {
   }
 
   /**
-   * Return all the beans.
+   * Return all the beans matching the name qualifier (if passed).
    */
-  List<Object> all() {
+  List<Object> all(@Nullable String name) {
     List<Object> list = new ArrayList<>(entries.size());
     for (DContextEntryBean entry : entries) {
-      list.add(entry.bean());
+      if (entry.isNameMatch(name)) {
+        list.add(entry.bean());
+      }
     }
     return list;
   }

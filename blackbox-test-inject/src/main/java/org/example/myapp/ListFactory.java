@@ -12,6 +12,12 @@ import jakarta.inject.Named;
 public class ListFactory {
 
   @Bean
+  @Named("args")
+  List<String> someNamedStrings() {
+    return List.of("arg0", "arg1");
+  }
+
+  @Bean
   List<String> test(List<Cloneable> emptyList) {
     return List.of("test1", "test2");
   }

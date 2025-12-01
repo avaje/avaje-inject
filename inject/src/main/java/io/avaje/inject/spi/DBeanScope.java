@@ -158,21 +158,26 @@ final class DBeanScope implements BeanScope {
 
   @Override
   public <T> List<T> list(Class<T> type) {
-    return listOf(type);
+    return listOf(type, null);
   }
 
   @Override
   public <T> List<T> list(Type type) {
-    return listOf(type);
+    return listOf(type, null);
+  }
+
+  @Override
+  public <T> List<T> list(Type type, @Nullable String name) {
+    return listOf(type, name);
   }
 
   @SuppressWarnings("unchecked")
-  private <T> List<T> listOf(Type type) {
-    List<T> values = (List<T>) beans.all(type);
+  private <T> List<T> listOf(Type type, @Nullable String name) {
+    List<T> values = (List<T>) beans.all(type, name);
     if (parent == null) {
       return values;
     }
-    return combine(values, parent.list(type));
+    return combine(values, parent.list(type, name));
   }
 
   static <T> List<T> combine(List<T> values, List<T> parentValues) {
