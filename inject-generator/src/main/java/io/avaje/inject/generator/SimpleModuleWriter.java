@@ -304,7 +304,9 @@ final class SimpleModuleWriter {
   }
 
   private void writePackage() {
-    writer.append("package %s;", modulePackage).eol().eol();
+    if (!modulePackage.isBlank()) {
+      writer.append("package %s;", modulePackage).eol().eol();
+    }
     for (String type : factoryImportTypes()) {
       writer.append("import %s;", type).eol();
     }

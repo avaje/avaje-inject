@@ -34,7 +34,7 @@ final class SimpleAssistWriter {
     this.shortName = beanReader.shortName();
     this.suffix = "$AssistFactory";
     this.assistedElements = beanReader.assistElements();
-    this.originName = packageName + "." + shortName;
+    this.originName = packageName.isBlank() ? shortName : packageName + "." + shortName;
     this.hasNoConstructorParams =
       beanReader.constructor().params().stream()
         .filter(not(MethodParam::assisted))

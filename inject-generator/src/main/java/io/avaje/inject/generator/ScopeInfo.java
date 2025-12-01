@@ -151,10 +151,11 @@ final class ScopeInfo {
   void initialiseName(String topPackage) throws IOException {
     emptyModule = topPackage == null;
     if (!emptyModule) {
-      modulePackage = topPackage;
-      final String name = initName(modulePackage);
+      var defaultPackage = APContext.elements().getPackageElement(topPackage) == null;
+      modulePackage = defaultPackage ? "" : topPackage;
+      final String name = defaultPackage ? "Default" : initName(modulePackage);
       moduleShortName = name + "Module";
-      moduleFullName = modulePackage + "." + moduleShortName;
+      moduleFullName = defaultPackage ? moduleShortName : modulePackage + "." + moduleShortName;
       moduleFile = createSourceFile(moduleFullName);
     }
   }

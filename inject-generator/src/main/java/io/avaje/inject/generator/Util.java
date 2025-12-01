@@ -40,7 +40,7 @@ final class Util {
   }
 
   private static boolean importDifferentPackage(String type, String packageName) {
-    return type.replace(packageName + '.', "").indexOf('.') > -1;
+    return packageName.isBlank() || type.replace(packageName + '.', "").indexOf('.') > -1;
   }
 
   private static boolean importJavaLangSubpackage(String type) {
@@ -83,15 +83,6 @@ final class Util {
 
   private static String trimArrayBrackets(String type) {
     return type.replaceAll("[^\\n\\r\\t $;\\w.]", "");
-  }
-
-  static String nestedPackageOf(String cls) {
-    int pos = cls.lastIndexOf('.');
-    if (pos < 0) {
-      return "";
-    }
-    pos = cls.lastIndexOf('.', pos - 1);
-    return pos == -1 ? "" : cls.substring(0, pos);
   }
 
   static String unwrapProvider(String maybeProvider) {
