@@ -109,13 +109,12 @@ final class MetaData implements Comparable<MetaData> {
       return "void_" + Util.trimMethod(method);
     }
     final String trimType = Util.trimMethod(Util.unwrapProvider(type));
-
-      if (name != null) {
-        return trimType + "_" + name.replaceAll("[^a-zA-Z0-9_$]+", "_");
-      } else if (buildNameIncludeMethod() || hasMethod() && FACTORY_FREQUENCY.get(type) > 0) {
-        return trimType + "__" + Util.trimMethod(method);
-      }
-      return trimType;
+    if (name != null) {
+      return trimType + "_" + name.replaceAll("[^a-zA-Z0-9_$]+", "_");
+    } else if (buildNameIncludeMethod() || hasMethod() && FACTORY_FREQUENCY.get(type) > 0) {
+      return trimType + "__" + Util.trimMethod(method);
+    }
+    return trimType;
   }
 
   private boolean buildNameIncludeMethod() {

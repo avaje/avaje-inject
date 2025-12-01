@@ -106,9 +106,9 @@ final class SimpleBeanLazyWriter {
 
       Set<Modifier> modifiers = methodElement.getModifiers();
       if (modifiers.contains(Modifier.PRIVATE)
-          || modifiers.contains(Modifier.STATIC)
-          || methodElement.getEnclosingElement().getSimpleName().contentEquals("Object")){
-      continue;
+        || modifiers.contains(Modifier.STATIC)
+        || methodElement.getEnclosingElement().getSimpleName().contentEquals("Object")) {
+        continue;
       }
       // Access modifiers
       sb.append("  @Override\n");
