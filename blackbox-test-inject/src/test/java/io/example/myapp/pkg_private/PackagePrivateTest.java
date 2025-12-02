@@ -1,4 +1,4 @@
-package org.example.myapp.pkg_private;
+package io.example.myapp.pkg_private;
 
 import io.avaje.inject.BeanScope;
 import org.junit.jupiter.api.Test;

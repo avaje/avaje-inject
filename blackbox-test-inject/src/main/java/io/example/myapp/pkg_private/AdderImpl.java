@@ -1,4 +1,4 @@
-package org.example.myapp.pkg_private;
+package io.example.myapp.pkg_private;
 
 import jakarta.inject.Singleton;
 

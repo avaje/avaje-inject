@@ -1,12 +1,13 @@
 package org.example.myapp.supplier;
 
-import io.avaje.inject.BeanScope;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.example.external.aspect.sub.ExampleExternalAspectModule;
-import org.example.myapp.MyappModule;
+import org.MyappModule;
 import org.junit.jupiter.api.Test;
 import org.other.one.OneModule;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import io.avaje.inject.BeanScope;
 
 class MySupFactoryTest {
 
