@@ -39,12 +39,10 @@ import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 
 import io.avaje.prism.GenerateAPContext;
-import io.avaje.prism.GenerateModuleInfoReader;
 import io.avaje.prism.GenerateUtils;
 
 @GenerateUtils
 @GenerateAPContext
-@GenerateModuleInfoReader
 @SupportedOptions({"mergeServices", "buildPlugin"})
 @SupportedAnnotationTypes({
   AspectImportPrism.PRISM_TYPE,
@@ -147,6 +145,11 @@ public final class InjectProcessor extends AbstractProcessor {
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
     if (processingOver() || roundEnv.errorRaised()) {
+      if (roundEnv.processingOver()) {
+        ProcessingContext.writeSPIServicesFile();
+        ProcessingContext.validateModule();
+        ProcessingContext.clear();
+      }
       return false;
     }
     processingOver(rounds++ > 0);
@@ -209,9 +212,6 @@ public final class InjectProcessor extends AbstractProcessor {
           logError("FilerException trying to write wiring order class %s", e.getMessage());
         }
       }
-      ProcessingContext.writeSPIServicesFile();
-      ProcessingContext.validateModule();
-      ProcessingContext.clear();
     }
     return false;
   }
