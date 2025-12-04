@@ -230,7 +230,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       .orElseGet(() -> {
         try {
           return Configuration.class != null;
-        } catch (NoClassDefFoundError e) {
+        } catch (Throwable e) {
           return false;
         }
       });
