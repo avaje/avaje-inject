@@ -77,9 +77,9 @@ class DBuilder implements Builder {
       return true;
     }
     if (parent instanceof DBeanScope) {
-      // effectively looking for a match in the parent scope
+      // look for a match in the parent scope
       final DBeanScope dParent = (DBeanScope) parent;
-      parentMatch = dParent.getStrict(name, removeAnnotations(types));
+      parentMatch = dParent.nonDefaultEntry(name, removeAnnotations(types));
       return parentMatch == null;
     }
     return true;
