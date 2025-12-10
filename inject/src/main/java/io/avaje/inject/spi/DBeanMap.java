@@ -102,15 +102,13 @@ final class DBeanMap {
     }
   }
 
-  /**
-   * Get with a strict match on name for the single entry case.
-   */
-  Object getStrict(Type type, String name) {
+  /** Check if a non secondary entry exists */
+  Object nonDefaultEntry(Type type, String name) {
     DContextEntry entry = beans.get(type.getTypeName());
     if (entry == null) {
       return null;
     }
-    return entry.getStrict(name);
+    return entry.nonDefaultEntry(name);
   }
 
   boolean contains(String type) {
@@ -175,7 +173,8 @@ final class DBeanMap {
     Map<String, Object> localMap = map(type);
     if (parentMap.isEmpty()) {
       return localMap;
-    } else if (localMap.isEmpty()) {
+    }
+    if (localMap.isEmpty()) {
       return parentMap;
     }
     Map<String, Object> result = new LinkedHashMap<>(parentMap);

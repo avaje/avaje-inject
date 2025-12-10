@@ -111,20 +111,17 @@ final class DBeanScope implements BeanScope {
     return parent.get(type, name);
   }
 
-  /**
-   * Get with a strict match on name for the single entry case.
-   */
-  @Nullable
-  Object getStrict(@Nullable String name, Type[] types) {
+  /** Check if a non secondary entry exists */
+  Object nonDefaultEntry(@Nullable String name, Type[] types) {
     for (Type type : types) {
-      Object match = beans.getStrict(type, name);
+      var match = beans.nonDefaultEntry(type, name);
       if (match != null) {
         return match;
       }
     }
     if (parent instanceof DBeanScope) {
       DBeanScope dParent = (DBeanScope) parent;
-      return dParent.getStrict(name, types);
+      return dParent.nonDefaultEntry(name, types);
     }
     return null;
   }
@@ -181,14 +178,14 @@ final class DBeanScope implements BeanScope {
   }
 
   static <T> List<T> combine(List<T> values, List<T> parentValues) {
-    if (values.isEmpty()) {
+    if (values.isEmpty()){
       return parentValues;
-    } else if (parentValues.isEmpty()) {
-      return values;
-    } else {
-      values.addAll(parentValues);
+    }
+    if (parentValues.isEmpty()){
       return values;
     }
+    values.addAll(parentValues);
+    return values;
   }
 
   @Override
@@ -266,8 +263,7 @@ final class DBeanScope implements BeanScope {
   @Override
   public Set<String> customScopeAnnotations() {
     if (parent != null) {
-      final Set<String> scopes = new HashSet<>();
-      scopes.addAll(beans.scopeAnnotations());
+      final Set<String> scopes = new HashSet<>(beans.scopeAnnotations());
       scopes.addAll(parent.customScopeAnnotations());
       return scopes;
     }

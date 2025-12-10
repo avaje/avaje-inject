@@ -38,14 +38,18 @@ final class DContextEntry {
     return new EntryMatcher(name, currentModule).provider(entries);
   }
 
-  /**
-   * Get with strict name match for the single entry case.
-   */
-  Object getStrict(String name) {
+  /** Check if a non secondary entry exists */
+  Object nonDefaultEntry(String name) {
+    DContextEntryBean entry;
     if (entries.size() == 1) {
-      return entries.get(0).beanIfNameMatch(name);
+      entry = entries.get(0);
+      return entry.isNameMatch(name) && entry.priority() != BeanEntry.SECONDARY
+          ? entry.bean()
+          : null;
     }
-    return new EntryMatcher(name, null).match(entries);
+    entry = new EntryMatcher(name, null).findMatch(entries);
+
+    return entry != null && entry.priority() != BeanEntry.SECONDARY ? entry.bean() : null;
   }
 
   Object get(String name, Class<? extends AvajeModule> currentModule) {
@@ -156,7 +160,8 @@ final class DContextEntry {
       if (match.priority() < entry.priority()) {
         // existing supplied match always wins
         return;
-      } else if (match.priority() > entry.priority()) {
+      }
+      if (match.priority() > entry.priority()) {
         // new supplied wins
         match = entry;
         return;
@@ -171,13 +176,9 @@ final class DContextEntry {
         }
         // leave as is, current primary wins
         return;
-      } else if (impliedName) {
-        ignoredSecondaryMatch = entry;
-        return;
       }
-
       // try to resolve match using qualifier name (including null)
-      if (match.isNameEqual(name) && !entry.isNameEqual(name)) {
+      if (impliedName || (match.isNameEqual(name) && !entry.isNameEqual(name))) {
         ignoredSecondaryMatch = entry;
         return;
       } else if (!match.isNameEqual(name) && entry.isNameEqual(name)) {
