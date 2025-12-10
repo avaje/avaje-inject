@@ -21,28 +21,33 @@ final class TypeReader {
   private final TypeAnnotationReader annotationReader;
   private Set<UType> genericTypes;
   private String typesRegister;
+  private String extraTypesRegister;
   private final List<UType> injectsTypes;
+  private final List<UType> extraTypes;
 
   TypeReader(
       List<TypeMirror> injectsTypes,
+      List<TypeMirror> extraTypes,
       UType genericType,
       TypeElement beanType,
       ImportTypeMap importTypes,
       boolean factory) {
-    this(injectsTypes, genericType, true, beanType, importTypes, factory, beanType);
+    this(injectsTypes, extraTypes, genericType, true, beanType, importTypes, factory, beanType);
   }
 
   TypeReader(
       List<TypeMirror> injectsTypes,
+      List<TypeMirror> extraTypes,
       UType genericType,
       TypeElement returnElement,
       ImportTypeMap importTypes,
       ExecutableElement source) {
-    this(injectsTypes, genericType, false, returnElement, importTypes, false, source);
+    this(injectsTypes, extraTypes, genericType, false, returnElement, importTypes, false, source);
   }
 
   private TypeReader(
       List<TypeMirror> injectsTypes,
+      List<TypeMirror> extraTypes,
       UType genericType,
       boolean forBean,
       TypeElement beanType,
@@ -50,6 +55,7 @@ final class TypeReader {
       boolean factory,
       Element source) {
     this.injectsTypes = injectsTypes.stream().map(UType::parse).collect(toList());
+    this.extraTypes = extraTypes.stream().map(UType::parse).collect(toList());
     this.forBean = forBean;
     this.beanType = beanType;
     this.importTypes = importTypes;
@@ -61,6 +67,10 @@ final class TypeReader {
 
   String typesRegister() {
     return typesRegister;
+  }
+
+  String extraTypesRegister() {
+    return extraTypesRegister;
   }
 
   List<String> provides() {
@@ -156,6 +166,12 @@ final class TypeReader {
       appender.add(extendsReader.provides());
     } else {
       appender.add(injectsTypes);
+      if (!extraTypes.isEmpty()) {
+        this.extraTypesRegister =
+          new TypeAppender(importTypes)
+            .add(extraTypes)
+            .asString();
+      }
     }
     this.genericTypes = appender.genericTypes();
     this.typesRegister = appender.asString();

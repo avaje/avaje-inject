@@ -58,6 +58,11 @@ public interface Builder {
   }
 
   /**
+   * Register extra types that the next registered bean implements and provides.
+   */
+  void registerTypes(Type... types);
+
+  /**
    * Register the next bean as having Primary priority.
    * Highest priority, wired over any other matching beans.
    */

@@ -85,6 +85,11 @@ class DBuilder implements Builder {
     return true;
   }
 
+  @Override
+  public void registerTypes(Type... types) {
+    beanMap.nextBeanRegisterTypes(types);
+  }
+
   /**
    * Return the types without any annotation types or raw generics.
    *

@@ -141,9 +141,14 @@ final class MethodReader {
     } else {
       var beanTypes = BeanTypesPrism.getOptionalOn(element).map(BeanTypesPrism::value);
       beanTypes.ifPresent(t -> Util.validateBeanTypes(element, t));
+
+      var extraTypes = BeanTypesPrism.getOptionalOn(element)
+        .map(BeanTypesPrism::registerTypes)
+        .orElse(List.of());
+
       this.typeReader =
           new TypeReader(
-              beanTypes.orElse(List.of()), genericType, returnElement, importTypes, element);
+              beanTypes.orElse(List.of()), extraTypes, genericType, returnElement, importTypes, element);
       typeReader.process();
       MethodLifecycleReader lifecycleReader = new MethodLifecycleReader(returnElement, initMethod, destroyMethod);
       this.initMethod = lifecycleReader.initMethod();
@@ -475,6 +480,12 @@ final class MethodReader {
       }
     }
     writer.append(")) {").eol();
+    if (typeReader != null) {
+      String extraTypesRegister = typeReader.extraTypesRegister();
+      if (extraTypesRegister != null) {
+        writer.append("      builder.registerTypes(%s);", extraTypesRegister).eol();
+      }
+    }
   }
 
   boolean methodThrows() {

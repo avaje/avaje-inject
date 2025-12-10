@@ -7,6 +7,7 @@ import jakarta.inject.Named;
 import org.jspecify.annotations.Nullable;
 
 import java.io.Serializable;
+import java.util.GregorianCalendar;
 import java.util.Optional;
 
 @Factory
@@ -14,7 +15,7 @@ public class LimitedFactory {
 
   @Bean
   @Named("factory")
-  @BeanTypes(LimitedInterface.class)
+  @BeanTypes(value = LimitedInterface.class, registerTypes = GregorianCalendar.class)
   BeanTypeComponent bean() {
     return new BeanTypeComponent();
   }

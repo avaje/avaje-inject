@@ -46,8 +46,9 @@ final class TypeAppender {
         Stream.of(u), componentTypes.stream().flatMap(TypeAppender::allComponentTypes));
   }
 
-  void add(List<UType> sourceTypes) {
+  TypeAppender add(List<UType> sourceTypes) {
     sourceTypes.forEach(this::add);
+    return this;
   }
 
   void addSimpleType(String classType) {

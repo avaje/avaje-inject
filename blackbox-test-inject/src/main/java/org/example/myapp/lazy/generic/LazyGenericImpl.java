@@ -1,5 +1,6 @@
 package org.example.myapp.lazy.generic;
 
+import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.avaje.inject.BeanScope;
@@ -13,7 +14,7 @@ import jakarta.inject.Singleton;
 @Lazy
 @Singleton
 @Named("single")
-@BeanTypes(LazyGenericInterface.class)
+@BeanTypes(value = LazyGenericInterface.class, registerTypes = Calendar.class)
 public class LazyGenericImpl implements LazyGenericInterface<String> {
 
   AtomicBoolean initialized;

@@ -89,16 +89,24 @@ final class DBeanMap {
     var name = nextBean.name;
     qualifiers.add(name);
     var entryBean = DContextEntryBean.of(bean, name, nextBean.priority, currentModule);
-    for (Type type : nextBean.types) {
-      beans.computeIfAbsent(type.getTypeName(), s -> new DContextEntry()).add(entryBean);
-    }
+    registerTypes(entryBean);
   }
 
   void register(Provider<?> provider) {
     qualifiers.add(nextBean.name);
     var entryBean = DContextEntryBean.provider(nextBean.prototype, provider, nextBean.name, nextBean.priority, currentModule);
+    registerTypes(entryBean);
+  }
+
+  private void registerTypes(DContextEntryBean entryBean) {
     for (Type type : nextBean.types) {
       beans.computeIfAbsent(type.getTypeName(), s -> new DContextEntry()).add(entryBean);
+    }
+    Type[] extraTypes = nextBean.extraTypes;
+    if (extraTypes != null) {
+      for (Type type : extraTypes) {
+        beans.computeIfAbsent(type.getTypeName(), s -> new DContextEntry()).add(entryBean);
+      }
     }
   }
 
@@ -132,8 +140,8 @@ final class DBeanMap {
     return (T) entry.get(name, currentModule);
   }
 
-  public <T> List<T> listByPriority(Type type) {
-
+  @SuppressWarnings("unchecked")
+  <T> List<T> listByPriority(Type type) {
     DContextEntry entry = beans.get(type.getTypeName());
     if (entry == null) {
       return List.of();
@@ -255,15 +263,24 @@ final class DBeanMap {
     return forScopes;
   }
 
-  static class NextBean {
+  void nextBeanRegisterTypes(Type[] types) {
+    nextBean.registerTypes(types);
+  }
+
+  static final class NextBean {
     final String name;
     final Type[] types;
+    Type[] extraTypes;
     int priority = BeanEntry.NORMAL;
     boolean prototype;
 
     NextBean(String name, Type[] types) {
       this.name = name;
       this.types = types;
+    }
+
+    private void registerTypes(Type[] extraTypes) {
+      this.extraTypes = extraTypes;
     }
   }
 }

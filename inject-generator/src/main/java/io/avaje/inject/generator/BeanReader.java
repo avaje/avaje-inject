@@ -71,14 +71,22 @@ final class BeanReader {
     this.primary = PrimaryPrism.isPresent(actualType);
     this.secondary = !primary && SecondaryPrism.isPresent(actualType);
     this.priority = Util.priority(actualType);
+
     var beanTypes =
       BeanTypesPrism.getOptionalOn(actualType)
         .map(BeanTypesPrism::value)
         .or(() -> proxy ? Optional.of(List.of(actualType.asType())) : Optional.empty());
     beanTypes.ifPresent(t -> Util.validateBeanTypes(actualType, t));
+
+    var extraTypes =
+      BeanTypesPrism.getOptionalOn(actualType)
+        .map(BeanTypesPrism::registerTypes)
+        .orElse(List.of());
+
     this.typeReader =
       new TypeReader(
         beanTypes.orElse(List.of()),
+        extraTypes,
         UType.parse(beanType.asType()),
         beanType,
         importTypes,
@@ -149,7 +157,12 @@ final class BeanReader {
       .stream()
       .flatMap(List::stream);
 
-    return Stream.of(constructors, fields, methods, interfaces, superClass, beanTypes)
+    var beanRegisterTypes = BeanTypesPrism.getOptionalOn(beanType)
+      .map(BeanTypesPrism::registerTypes)
+      .stream()
+      .flatMap(List::stream);
+
+    return Stream.of(constructors, fields, methods, interfaces, superClass, beanTypes, beanRegisterTypes)
       .flatMap(s -> s)
       .map(TypeMirror::getKind)
       .anyMatch(TypeKind.ERROR::equals);
@@ -356,6 +369,10 @@ final class BeanReader {
     }
     writer.append(typeReader.typesRegister());
     writer.append(")) {").eol();
+    String extraTypesRegister = typeReader.extraTypesRegister();
+    if (extraTypesRegister != null) {
+      writer.append("      builder.registerTypes(%s);", extraTypesRegister).eol();
+    }
   }
 
   void buildRegister(Append writer) {
