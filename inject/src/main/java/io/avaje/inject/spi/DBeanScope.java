@@ -112,6 +112,7 @@ final class DBeanScope implements BeanScope {
   }
 
   /** Check if a non secondary entry exists */
+  @Nullable
   Object nonDefaultEntry(@Nullable String name, Type[] types) {
     for (Type type : types) {
       var match = beans.nonDefaultEntry(type, name);
