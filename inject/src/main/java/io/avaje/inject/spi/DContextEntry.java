@@ -40,16 +40,11 @@ final class DContextEntry {
 
   /** Check if a non secondary entry exists */
   Object nonDefaultEntry(String name) {
-    DContextEntryBean entry;
     if (entries.size() == 1) {
-      entry = entries.get(0);
-      return entry.isNameMatch(name) && entry.priority() != BeanEntry.SECONDARY
-          ? entry.bean()
-          : null;
+      return entries.get(0).nonDefaultMatch(name);
     }
-    entry = new EntryMatcher(name, null).findMatch(entries);
-
-    return entry != null && entry.priority() != BeanEntry.SECONDARY ? entry.bean() : null;
+    var entry = new EntryMatcher(name, null).findMatch(entries);
+    return entry != null ? entry.nonDefaultMatch(null) : null;
   }
 
   Object get(String name, Class<? extends AvajeModule> currentModule) {

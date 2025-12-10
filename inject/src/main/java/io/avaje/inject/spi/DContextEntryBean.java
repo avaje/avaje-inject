@@ -109,6 +109,10 @@ class DContextEntryBean {
     return priority == BeanEntry.SUPPLIED && (qualifierName == null || qualifierName.equals(name));
   }
 
+  final Object nonDefaultMatch(String name) {
+    return isNameMatch(name) && priority != BeanEntry.SECONDARY ? bean() : null;
+  }
+
   /**
    * Prototype scope Provider based entry.
    */

@@ -179,10 +179,10 @@ final class DBeanScope implements BeanScope {
   }
 
   static <T> List<T> combine(List<T> values, List<T> parentValues) {
-    if (values.isEmpty()){
+    if (values.isEmpty()) {
       return parentValues;
     }
-    if (parentValues.isEmpty()){
+    if (parentValues.isEmpty()) {
       return values;
     }
     values.addAll(parentValues);
