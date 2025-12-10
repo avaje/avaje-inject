@@ -38,6 +38,7 @@
     <module>inject-test</module>
     <module>inject-aop</module>
     <module>inject-maven-plugin</module>
+    <module>inject-bom</module>
   </modules>
 
   <profiles>
