@@ -176,7 +176,8 @@ final class DContextEntry {
       if (impliedName || (match.isNameEqual(name) && !entry.isNameEqual(name))) {
         ignoredSecondaryMatch = entry;
         return;
-      } else if (!match.isNameEqual(name) && entry.isNameEqual(name)) {
+      }
+      if (!match.isNameEqual(name) && entry.isNameEqual(name)) {
         match = entry;
         return;
       }
@@ -184,7 +185,8 @@ final class DContextEntry {
       if (entry.sourceModule() != currentModule) {
         ignoredSecondaryMatch = entry;
         return;
-      } else if (entry.sourceModule() == currentModule && match.sourceModule() != currentModule) {
+      }
+      if (entry.sourceModule() == currentModule && match.sourceModule() != currentModule) {
         // match on module
         match = entry;
         return;

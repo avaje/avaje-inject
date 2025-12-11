@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.annotation.processing.FilerException;
+import javax.lang.model.element.ModuleElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.FileObject;
@@ -154,9 +155,8 @@ final class ProcessingContext {
   static TypeElement elementMaybe(String rawType) {
     if (rawType == null) {
       return null;
-    } else {
-      return elements().getTypeElement(rawType);
     }
+    return elements().getTypeElement(rawType);
   }
 
   static TypeElement asElement(TypeMirror returnType) {
@@ -290,10 +290,17 @@ final class ProcessingContext {
   }
 
   private static boolean isOnModulePath(String service) {
-    var module = APContext.elements().getModuleOf(APContext.typeElement(service)).getQualifiedName().toString();
+    var module =
+        Optional.ofNullable(APContext.typeElement(service))
+            .map(APContext.elements()::getModuleOf)
+            .map(ModuleElement::getQualifiedName)
+            .map(Object::toString);
 
-    return CTX.get().hasProvidesPlugin && AVAJE_PROVIDED_PLUGIN.contains(module)
-      || APContext.moduleInfoReader().orElseThrow().containsOnModulePath(module);
+    return module.isPresent()
+        && (CTX.get().hasProvidesPlugin && AVAJE_PROVIDED_PLUGIN.contains(module.orElseThrow())
+            || module
+                .map(APContext.moduleInfoReader().orElseThrow()::containsOnModulePath)
+                .orElseThrow());
   }
 
   private static void readExistingMetaInfServices() {

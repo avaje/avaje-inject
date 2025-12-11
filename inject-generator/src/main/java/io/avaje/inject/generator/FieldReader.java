@@ -1,8 +1,10 @@
 package io.avaje.inject.generator;
 
-import javax.lang.model.element.Element;
 import java.util.List;
 import java.util.Set;
+
+import javax.lang.model.element.Element;
+import javax.lang.model.type.TypeKind;
 
 final class FieldReader {
 
@@ -54,18 +56,25 @@ final class FieldReader {
 
   String builderGetDependency(String builder) {
     final var sb = new StringBuilder();
-    sb.append(builder).append(".").append(utype.getMethod(nullable, isBeanMap));
-    if (isGenericParam()) {
+    final boolean wildcard = isWildcard();
+    final var wildParam = wildcard ? String.format("<%s>", type.shortWithoutAnnotations()) : "";
+    sb.append(builder).append(".").append(wildParam).append(utype.getMethod(nullable, isBeanMap));
+    if (!wildcard && isGenericParam()) {
       sb.append("TYPE_").append(Util.shortName(type).replace(".", "_"));
     } else {
-      var trimmed = ProcessorUtils.trimAnnotations(fieldType);
-      sb.append(Util.shortName(trimmed)).append(".class");
+      sb.append(Util.shortName(type.mainType())).append(".class");
     }
     if (name != null) {
       sb.append(",\"").append(name).append("\"");
     }
     sb.append(")");
     return sb.toString();
+  }
+
+
+  private boolean isWildcard() {
+    return type.isGeneric()
+      && type.componentTypes().stream().allMatch(g -> g.kind() == TypeKind.WILDCARD);
   }
 
   void removeFromProvides(List<UType> provides) {
