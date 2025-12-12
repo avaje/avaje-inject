@@ -291,16 +291,16 @@ final class ProcessingContext {
 
   private static boolean isOnModulePath(String service) {
     var module =
-        Optional.ofNullable(APContext.typeElement(service))
-            .map(APContext.elements()::getModuleOf)
-            .map(ModuleElement::getQualifiedName)
-            .map(Object::toString);
+      Optional.ofNullable(APContext.typeElement(service))
+        .map(APContext.elements()::getModuleOf)
+        .map(ModuleElement::getQualifiedName)
+        .map(Object::toString);
 
     return module.isPresent()
-        && (CTX.get().hasProvidesPlugin && AVAJE_PROVIDED_PLUGIN.contains(module.orElseThrow())
-            || module
-                .map(APContext.moduleInfoReader().orElseThrow()::containsOnModulePath)
-                .orElseThrow());
+      && (CTX.get().hasProvidesPlugin && AVAJE_PROVIDED_PLUGIN.contains(module.orElseThrow())
+      || module
+      .map(APContext.moduleInfoReader().orElseThrow()::containsOnModulePath)
+      .orElseThrow());
   }
 
   private static void readExistingMetaInfServices() {
