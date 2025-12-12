@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.example.coffee.grind.AMusher;
 
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 /**
@@ -19,6 +20,8 @@ class MultiGenericConsumer {
   private final AMusher aMusher;
 
   private List<SomeGeneric<?>> list;
+
+  @Inject List<SomeGeneric<?>> list2;
 
   MultiGenericConsumer(
       Repository<Haz, Long> hazRepo,
