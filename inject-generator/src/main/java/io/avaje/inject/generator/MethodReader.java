@@ -293,8 +293,8 @@ final class MethodReader {
     }
 
     startTry(writer, "  ");
-    writer.indent(indent).append("  return ");
-    writer.append("factory.%s(", methodName);
+
+    writer.indent(indent).append("  var $bean = factory.%s(", methodName);
     for (int i = 0; i < params.size(); i++) {
       if (i > 0) {
         writer.append(", ");
@@ -302,6 +302,30 @@ final class MethodReader {
       params.get(i).builderGetDependency(writer, "builder");
     }
     writer.append(");").eol();
+    //
+    if (notEmpty(initMethod)) {
+      writer.indent(indent).append(" $bean.%s();", initMethod).eol();
+    }
+    final var isCloseable = typeReader != null && typeReader.isClosable();
+
+    var priority = priority(destroyPriority);
+    if (notEmpty(destroyMethod)) {
+      writer.indent(indent).append("builder.addPreDestroy(%s%s);", addPreDestroy(destroyMethod), priority).eol();
+    } else if (isCloseable && !priority.isBlank()) {
+      writer.indent(indent).append("builder.addPreDestroy($bean::close%s);", priority).eol();
+    } else if (isCloseable || beanCloseable) {
+      writer.indent(indent).append("builder.addAutoClosable($bean);").eol();
+    }
+
+    var matchedPreDestroyMethod = factory.matchPreDestroy(returnTypeRaw);
+    if (matchedPreDestroyMethod != null) {
+      // PreDestroy method on the factory
+      var methodPriority = priority(matchedPreDestroyMethod.priority());
+      var method = String.format("() -> factory.%s($bean)", matchedPreDestroyMethod.method());
+      writer.indent(indent).append("builder.addPreDestroy(%s%s);", method, methodPriority).eol();
+    }
+//
+    writer.indent(indent).append("  return $bean;").eol();
     endTry(writer, "  ");
     writer.indent(indent);
     if (proxyLazy) {

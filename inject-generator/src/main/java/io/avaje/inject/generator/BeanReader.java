@@ -387,7 +387,6 @@ final class BeanReader {
     }
 
     if (preDestroyMethod != null) {
-      lifeCycleNotSupported("@PreDestroy");
       var priority = preDestroyPriority == null || preDestroyPriority == 1000 ? "" : ", " + preDestroyPriority;
       writer.indent(indent).append(" builder.addPreDestroy($bean::%s%s);", preDestroyMethod.getSimpleName(), priority).eol();
     } else if (typeReader.isClosable() && !prototype) {
@@ -408,7 +407,7 @@ final class BeanReader {
     }
   }
 
-  void prototypePostConstruct(Append writer, String indent) {
+  void providerLifeCycle(Append writer, String indent) {
     postConstructMethod.ifPresent(m -> {
       writer.indent(indent).append(" bean.%s(", m.name());
       if (m.params().isEmpty()) {
@@ -419,6 +418,13 @@ final class BeanReader {
       }
       writer.eol();
     });
+
+    if (preDestroyMethod != null) {
+      writer
+          .indent(indent)
+          .append(" builder.addPreDestroy(bean::%s);", preDestroyMethod.getSimpleName())
+          .eol();
+    }
   }
 
   private void writeLifeCycleGet(Append writer, List<MethodParam> params, String builderName, String beanScopeString) {
@@ -435,16 +441,6 @@ final class BeanReader {
       }
     }
     writer.append(")");
-  }
-
-  private void lifeCycleNotSupported(String lifecycle) {
-    if (registerProvider()) {
-      logError(
-        beanType,
-        "%s scoped bean does not support the %s lifecycle method",
-        prototype ? "@Prototype" : "@Lazy",
-        lifecycle);
-    }
   }
 
   private Set<String> importTypes() {

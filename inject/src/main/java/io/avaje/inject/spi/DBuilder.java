@@ -14,8 +14,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
 import org.jspecify.annotations.Nullable;
 
 import io.avaje.inject.BeanEntry;
@@ -467,10 +465,7 @@ class DBuilder implements Builder {
   }
 
   /** Return the PreDestroy methods in priority order. */
-  private List<AutoCloseable> preDestroy() {
-    return preDestroy.stream()
-      .sorted()
-      .map(ClosePair::closeable)
-      .collect(Collectors.toList());
+  private Deque<ClosePair> preDestroy() {
+    return preDestroy;
   }
 }
