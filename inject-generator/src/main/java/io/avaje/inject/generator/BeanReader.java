@@ -386,7 +386,7 @@ final class BeanReader {
       writePostConstruct(writer, indent, postConstructMethod.get());
     }
 
-    if (preDestroyMethod != null) {
+    if (preDestroyMethod != null && !registerProvider()) {
       var priority = preDestroyPriority == null || preDestroyPriority == 1000 ? "" : ", " + preDestroyPriority;
       writer.indent(indent).append(" builder.addPreDestroy($bean::%s%s);", preDestroyMethod.getSimpleName(), priority).eol();
     } else if (typeReader.isClosable() && !prototype) {
@@ -416,7 +416,6 @@ final class BeanReader {
         writeLifeCycleGet(writer, m.params(), "builder", "builder.get(io.avaje.inject.BeanScope.class)");
         writer.append(";").eol();
       }
-      writer.eol();
     });
 
     if (preDestroyMethod != null) {
@@ -427,7 +426,7 @@ final class BeanReader {
     }
   }
 
-  private void writeLifeCycleGet(Append writer, List<MethodParam> params, String builderName, String beanScopeString) {
+  static void writeLifeCycleGet(Append writer, List<MethodParam> params, String builderName, String beanScopeString) {
     final var size = params.size();
     for (int i = 0; i < size; i++) {
       if (i > 0) {

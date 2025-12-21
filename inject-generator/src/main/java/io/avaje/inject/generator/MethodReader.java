@@ -60,6 +60,7 @@ final class MethodReader {
   private final boolean multiRegister;
   private final BeanConditions conditions = new BeanConditions();
   private MethodParam observeParameter;
+  private MethodReader initMethodReader;
 
   MethodReader(ExecutableElement element, TypeElement beanType, ImportTypeMap importTypes) {
     this(null, element, beanType, null, null, importTypes);
@@ -145,8 +146,10 @@ final class MethodReader {
           new TypeReader(
               beanTypes.orElse(List.of()), genericType, returnElement, importTypes, element);
       typeReader.process();
-      MethodLifecycleReader lifecycleReader = new MethodLifecycleReader(returnElement, initMethod, destroyMethod);
+      MethodLifecycleReader lifecycleReader =
+          new MethodLifecycleReader(returnElement, initMethod, destroyMethod, importTypes);
       this.initMethod = lifecycleReader.initMethod();
+      this.initMethodReader = lifecycleReader.initMethodReader();
       this.destroyMethod = lifecycleReader.destroyMethod();
     }
     if (lazy && prototype) {
@@ -304,7 +307,15 @@ final class MethodReader {
     writer.append(");").eol();
     //
     if (notEmpty(initMethod)) {
-      writer.indent(indent).append(" $bean.%s();", initMethod).eol();
+      writer.indent(indent).append(" $bean.%s(", initMethod);
+      initMethodReader.read();
+      BeanReader.writeLifeCycleGet(
+          writer,
+          initMethodReader.params(),
+          "builder",
+          "builder.get(io.avaje.inject.BeanScope.class)");
+
+      writer.append(";").eol();
     }
     final var isCloseable = typeReader != null && typeReader.isClosable();
 

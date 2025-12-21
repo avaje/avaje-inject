@@ -12,10 +12,11 @@ class LazyTest {
 
   @Test
   void test() {
+    LazyBean lazy;
     var initialized = new AtomicBoolean();
     try (var scope = BeanScope.builder().beans(initialized).build()) {
       assertThat(initialized).isFalse();
-      var lazy = scope.get(LazyBean.class, "single");
+      lazy = scope.get(LazyBean.class, "single");
       assertThat(lazy).isNotNull();
       assertThat(initialized).isFalse();
       lazy.something();
@@ -24,6 +25,7 @@ class LazyTest {
       var lazyAgain = scope.get(LazyBean.class, "single");
       assertThat(lazyAgain).isSameAs(lazy);
     }
+    assertThat(lazy.isDestroyed()).isTrue();
   }
 
   @Test
@@ -71,14 +73,16 @@ class LazyTest {
   @Test
   void factoryBeanType() {
     var initialized = new AtomicBoolean();
+    LazyInterface prov;
     try (var scope = BeanScope.builder().beans(initialized).build()) {
       assertThat(initialized).isFalse();
-      var prov = scope.get(LazyInterface.class, "factoryBeanType");
+       prov = scope.get(LazyInterface.class, "factoryBeanType");
       assertThat(initialized).isFalse();
       prov.something();
       assertThat(initialized).isTrue();
       assertThat(prov).isNotNull();
     }
+    assertThat(prov.isDestroyed()).isTrue();
   }
 
   @Test

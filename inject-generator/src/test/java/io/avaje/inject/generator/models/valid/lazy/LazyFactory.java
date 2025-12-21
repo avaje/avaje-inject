@@ -4,6 +4,7 @@ import io.avaje.inject.Bean;
 import io.avaje.inject.Factory;
 import io.avaje.inject.Lazy;
 import io.avaje.inject.Primary;
+import jakarta.inject.Named;
 
 @Lazy
 @Factory
@@ -17,6 +18,13 @@ public class LazyFactory {
   @Primary
   @Bean
   LazyInterface lazyInterface() {
+    return null;
+  }
+
+
+  @Bean
+  @Named("other")
+  LazyBean lazy2() {
     return null;
   }
 }
