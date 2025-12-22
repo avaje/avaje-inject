@@ -35,7 +35,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-config</artifactId>
-      <version>4.4</version>
+      <version>5.0</version>
     </dependency>
 
     <dependency>
@@ -82,7 +82,7 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.5.22</version>
+      <version>1.5.23</version>
       <scope>test</scope>
     </dependency>
 
