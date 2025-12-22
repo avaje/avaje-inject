@@ -1,0 +1,56 @@
+name: Close Milestone on Release
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      milestone_tag:
+        description: 'Specify Release Tag (e.g., v1.2.3). Leave empty for LATEST.'
+        required: false
+        default: ''
+jobs:
+  close_milestone:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - name: Determine Target Release Tag
+        id: determine_tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            RELEASE_TAG="${{ github.event.release.tag_name }}"
+          elif [[ -n "${{ github.event.inputs.milestone_tag }}" ]]; then
+            RELEASE_TAG="${{ github.event.inputs.milestone_tag }}"
+          else
+            RELEASE_TAG=$(gh api repos/${{ github.repository }}/releases/latest --jq '.tag_name')
+          fi
+          # Strip 'v' prefix
+          MILESTONE_TITLE="${RELEASE_TAG#v}"
+          echo "MILESTONE_TITLE=$MILESTONE_TITLE" >> $GITHUB_OUTPUT
+          echo "Targeting Milestone: $MILESTONE_TITLE"
+      - name: Close Corresponding Milestone
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITLE="${{ steps.determine_tag.outputs.MILESTONE_TITLE }}"
+          
+          # Find the milestone by title
+          MILESTONE_NUMBER=$(gh api repos/${{ github.repository }}/milestones \
+            --jq ".[] | select(.title == \"$TITLE\") | .number")
+          
+          if [[ -z "$MILESTONE_NUMBER" ]]; then
+            echo "❌ Milestone '$TITLE' not found"
+            exit 1
+          fi
+          
+          echo "Found milestone #$MILESTONE_NUMBER with title '$TITLE'"
+          
+          # Close the milestone
+          gh api repos/${{ github.repository }}/milestones/$MILESTONE_NUMBER \
+            -X PATCH \
+            -f state=closed
+          
+          echo "✅ Successfully closed milestone '$TITLE'"
