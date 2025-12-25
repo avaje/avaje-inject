@@ -180,6 +180,10 @@ final class BeanReader {
     return proxyLazy;
   }
 
+  boolean prototype() {
+    return prototype;
+  }
+
   boolean importedComponent() {
     return importedComponent;
   }

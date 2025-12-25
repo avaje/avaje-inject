@@ -95,7 +95,7 @@ final class SimpleBeanProxyWriter {
     writer.append("import %s;", Constants.INVOCATION).eol();
     writer.append("import %s;", Constants.INVOCATION_EXCEPTION).eol();
     writer.append("import %s;", Constants.METHOD_INTERCEPTOR).eol();
-    writer.append("import %s;", Constants.COMPONENT).eol();
+    writer.append("import %s;", beanReader.prototype() ? Constants.PROTOTYPE : Constants.COMPONENT).eol();
     writer.append("import %s;", Constants.INJECT).eol();
     writer.append("import %s;", Constants.PROXY).eol();
     beanReader.writeImports(writer, packageName);
@@ -107,7 +107,7 @@ final class SimpleBeanProxyWriter {
 
   private void writeClassStart() {
     writer.append(Constants.AT_PROXY).eol();
-    writer.append("@Component").eol();
+    writer.append(beanReader.prototype() ? "@Prototype" : "@Component").eol();
     writer.append(Constants.AT_GENERATED).eol();
     writer.append("public final class %s%s extends %s {", shortName, suffix, shortName).eol().eol();
   }
