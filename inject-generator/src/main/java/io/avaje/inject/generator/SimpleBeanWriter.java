@@ -198,7 +198,7 @@ final class SimpleBeanWriter {
       writeExtraInjection();
     }
     if (beanReader.registerProvider()) {
-      beanReader.prototypePostConstruct(writer, indent);
+      beanReader.providerLifeCycle(writer, indent);
       writer.indent("        return bean;").eol();
       if (!constructor.methodThrows()) {
         writer.append("     }");
