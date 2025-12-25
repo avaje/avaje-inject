@@ -419,6 +419,7 @@ final class BeanReader {
     });
 
     if (preDestroyMethod != null) {
+      lifeCycleNotSupported();
       writer
           .indent(indent)
           .append(" builder.addPreDestroy(bean::%s);", preDestroyMethod.getSimpleName())
@@ -440,6 +441,12 @@ final class BeanReader {
       }
     }
     writer.append(")");
+  }
+
+  private void lifeCycleNotSupported() {
+    if (prototype) {
+      logError(beanType, "@Prototype scoped beans do not support the @PreDestroy lifecycle");
+    }
   }
 
   private Set<String> importTypes() {

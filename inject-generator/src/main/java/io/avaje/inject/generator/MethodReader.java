@@ -305,7 +305,7 @@ final class MethodReader {
       params.get(i).builderGetDependency(writer, "builder");
     }
     writer.append(");").eol();
-    //
+
     if (notEmpty(initMethod)) {
       writer.indent(indent).append(" $bean.%s(", initMethod);
       initMethodReader.read();
@@ -317,15 +317,20 @@ final class MethodReader {
 
       writer.append(";").eol();
     }
-    final var isCloseable = typeReader != null && typeReader.isClosable();
+
+    final var isCloseable = !prototype && typeReader != null && typeReader.isClosable();
 
     var priority = priority(destroyPriority);
     if (notEmpty(destroyMethod)) {
       writer.indent(indent).append("builder.addPreDestroy(%s%s);", addPreDestroy(destroyMethod), priority).eol();
+      lifeCycleNotSupported();
     } else if (isCloseable && !priority.isBlank()) {
       writer.indent(indent).append("builder.addPreDestroy($bean::close%s);", priority).eol();
     } else if (isCloseable || beanCloseable) {
       writer.indent(indent).append("builder.addAutoClosable($bean);").eol();
+      if (beanCloseable) {
+        lifeCycleNotSupported();
+      }
     }
 
     var matchedPreDestroyMethod = factory.matchPreDestroy(returnTypeRaw);
@@ -335,7 +340,7 @@ final class MethodReader {
       var method = String.format("() -> factory.%s($bean)", matchedPreDestroyMethod.method());
       writer.indent(indent).append("builder.addPreDestroy(%s%s);", method, methodPriority).eol();
     }
-//
+
     writer.indent(indent).append("  return $bean;").eol();
     endTry(writer, "  ");
     writer.indent(indent);
@@ -352,6 +357,12 @@ final class MethodReader {
       writer.indent(indent).append("  });").eol();
     }
     writer.indent(indent).append("}").eol();
+  }
+
+  private void lifeCycleNotSupported() {
+    if (prototype) {
+      logError(element, "@Prototype scoped beans do not support the PreDestroy lifecycle");
+    }
   }
 
   void builderBuildAddBean(Append writer) {
