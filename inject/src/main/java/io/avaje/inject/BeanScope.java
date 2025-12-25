@@ -164,6 +164,25 @@ public interface BeanScope extends AutoCloseable {
   <T> Optional<T> getOptional(Type type, @Nullable String name);
 
   /**
+   * Return a single bean given the type and null if it is not found.
+   *
+   * @param type an interface or bean type
+   */
+  default @Nullable <T> T getNullable(Class<T> type) {
+    return getOptional(type).orElse(null);
+  }
+
+  /**
+   * Return a single bean given the type and name and null if it is not found.
+   *
+   * @param type an interface or bean type
+   * @param name the name qualifier of a specific bean
+   */
+  default @Nullable <T> T getNullable(Type type, @Nullable String name) {
+    return this.<T>getOptional(type, name).orElse(null);
+  }
+
+  /**
    * Return the list of beans that have an annotation. The annotation must have a @Retention policy of RUNTIME
    *
    * <pre>{@code

@@ -408,15 +408,20 @@ final class BeanReader {
   }
 
   void providerLifeCycle(Append writer, String indent) {
-    postConstructMethod.ifPresent(m -> {
-      writer.indent(indent).append(" bean.%s(", m.name());
-      if (m.params().isEmpty()) {
-        writer.append(");").eol();
-      } else {
-        writeLifeCycleGet(writer, m.params(), "builder", "builder.get(io.avaje.inject.BeanScope.class)");
-        writer.append(";").eol();
-      }
-    });
+    postConstructMethod.ifPresent(
+        m -> {
+          writer.indent(indent).append(" bean.%s(", m.name());
+          if (m.params().isEmpty()) {
+            writer.append(");").eol();
+          } else {
+            writeLifeCycleGet(
+                writer,
+                m.params(),
+                registerProvider() ? "beanScope" : "builder",
+                registerProvider() ? "beanScope" : "builder.get(BeanScope.class)");
+            writer.append(";").eol();
+          }
+        });
 
     if (preDestroyMethod != null) {
       lifeCycleNotSupported();
