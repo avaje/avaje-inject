@@ -165,18 +165,18 @@ public final class InjectProcessor extends AbstractProcessor {
       .forEach(this::validateQualifier);
 
     maybeElements(roundEnv, ScopePrism.PRISM_TYPE).ifPresent(this::readScopes);
-    maybeElements(roundEnv, FactoryPrism.PRISM_TYPE).ifPresent(this::readFactories);
+    maybeBeanElements(roundEnv, FactoryPrism.PRISM_TYPE).ifPresent(this::readFactories);
 
     if (defaultScope.includeSingleton()) {
-      maybeElements(roundEnv, SingletonPrism.PRISM_TYPE).ifPresent(this::readBeans);
+    	maybeBeanElements(roundEnv, SingletonPrism.PRISM_TYPE).ifPresent(this::readBeans);
     }
-    maybeElements(roundEnv, ComponentPrism.PRISM_TYPE).ifPresent(this::readBeans);
-    maybeElements(roundEnv, PrototypePrism.PRISM_TYPE).ifPresent(this::readBeans);
+    maybeBeanElements(roundEnv, ComponentPrism.PRISM_TYPE).ifPresent(this::readBeans);
+    maybeBeanElements(roundEnv, PrototypePrism.PRISM_TYPE).ifPresent(this::readBeans);
 
     readImported(importedElements(roundEnv));
 
-    maybeElements(roundEnv, ControllerPrism.PRISM_TYPE).ifPresent(this::readBeans);
-    maybeElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
+    maybeBeanElements(roundEnv, ControllerPrism.PRISM_TYPE).ifPresent(this::readBeans);
+    maybeBeanElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
 
     maybeElements(roundEnv, ExternalPrism.PRISM_TYPE).stream()
       .flatMap(Set::stream)
@@ -237,8 +237,12 @@ public final class InjectProcessor extends AbstractProcessor {
 
   // Optional because these annotations are not guaranteed to exist
   private Optional<? extends Set<? extends Element>> maybeElements(RoundEnvironment round, String name) {
-    final var op = Optional.ofNullable(typeElement(name))
-      .map(round::getElementsAnnotatedWith);
+    return Optional.ofNullable(typeElement(name)).map(round::getElementsAnnotatedWith);
+  }
+
+  // reset processingOver flag if anything needs processing in this round
+  private Optional<? extends Set<? extends Element>> maybeBeanElements(RoundEnvironment round, String name) {
+    final var op = Optional.ofNullable(typeElement(name)).map(round::getElementsAnnotatedWith);
 
     // reset processingOver flag if anything needs processing in this round
     processingOver(processingOver() && op.filter(n -> !n.isEmpty()).isEmpty());
@@ -246,7 +250,7 @@ public final class InjectProcessor extends AbstractProcessor {
   }
 
   private Set<TypeElement> importedElements(RoundEnvironment roundEnv) {
-    return maybeElements(roundEnv, ImportPrism.PRISM_TYPE).stream()
+    return maybeBeanElements(roundEnv, ImportPrism.PRISM_TYPE).stream()
       .flatMap(Set::stream)
       .map(ImportPrism::getInstanceOn)
       .flatMap(p -> {
