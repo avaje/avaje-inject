@@ -16,7 +16,8 @@ import jakarta.inject.Singleton;
 @BeanTypes(LazyInterface.class)
 public class LazyImpl implements LazyInterface {
 
-  AtomicBoolean initialized;
+  private AtomicBoolean initialized;
+  private AtomicBoolean destroyed = new AtomicBoolean(false);
 
   public LazyImpl(@Nullable AtomicBoolean initialized) {
     this.initialized = initialized;
@@ -26,6 +27,15 @@ public class LazyImpl implements LazyInterface {
   void init(BeanScope scope) {
     // note that nested test scopes will not be lazy
     if (initialized != null) initialized.set(true);
+  }
+
+  void shutdown() {
+    destroyed.set(true);
+  }
+
+  @Override
+  public boolean isDestroyed() {
+    return destroyed.get();
   }
 
   @Override

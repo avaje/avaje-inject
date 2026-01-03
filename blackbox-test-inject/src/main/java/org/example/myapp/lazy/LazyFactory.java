@@ -32,7 +32,7 @@ public class LazyFactory {
     return new LazyImpl(initialized);
   }
 
-  @Bean
+  @Bean(destroyMethod = "shutdown")
   @BeanTypes(LazyInterface.class)
   @Named("factoryBeanType")
   LazyImpl factoryBeanType(@Nullable AtomicBoolean initialized) throws Exception {
