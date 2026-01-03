@@ -236,14 +236,12 @@ public final class InjectProcessor extends AbstractProcessor {
   }
 
   // Optional because these annotations are not guaranteed to exist
-  private Optional<? extends Set<? extends Element>> maybeElements(
-      RoundEnvironment round, String name) {
+  private Optional<? extends Set<? extends Element>> maybeElements(RoundEnvironment round, String name) {
     return Optional.ofNullable(typeElement(name)).map(round::getElementsAnnotatedWith);
   }
 
   // reset processingOver flag if anything needs processing in this round
-  private Optional<? extends Set<? extends Element>> maybeBeanElements(
-      RoundEnvironment round, String name) {
+  private Optional<? extends Set<? extends Element>> maybeBeanElements(RoundEnvironment round, String name) {
     final var op = Optional.ofNullable(typeElement(name)).map(round::getElementsAnnotatedWith);
 
     // reset processingOver flag if anything needs processing in this round
