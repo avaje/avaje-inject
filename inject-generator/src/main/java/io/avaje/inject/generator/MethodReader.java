@@ -142,12 +142,9 @@ final class MethodReader {
     } else {
       var beanTypes = BeanTypesPrism.getOptionalOn(element).map(BeanTypesPrism::value);
       beanTypes.ifPresent(t -> Util.validateBeanTypes(element, t));
-      this.typeReader =
-          new TypeReader(
-              beanTypes.orElse(List.of()), genericType, returnElement, importTypes, element);
+      this.typeReader = new TypeReader(beanTypes.orElse(List.of()), genericType, returnElement, importTypes, element);
       typeReader.process();
-      MethodLifecycleReader lifecycleReader =
-          new MethodLifecycleReader(returnElement, initMethod, destroyMethod, importTypes);
+      var lifecycleReader = new MethodLifecycleReader(returnElement, initMethod, destroyMethod, importTypes);
       this.initMethod = lifecycleReader.initMethod();
       this.initMethodReader = lifecycleReader.initMethodReader();
       this.destroyMethod = lifecycleReader.destroyMethod();
@@ -296,7 +293,6 @@ final class MethodReader {
     }
 
     startTry(writer, "  ");
-
     writer.indent(indent).append("  var $bean = factory.%s(", methodName);
     for (int i = 0; i < params.size(); i++) {
       if (i > 0) {
@@ -305,15 +301,14 @@ final class MethodReader {
       params.get(i).builderGetDependency(writer, "builder");
     }
     writer.append(");").eol();
-
     if (notEmpty(initMethod)) {
       writer.indent(indent).append(" $bean.%s(", initMethod);
       initMethodReader.read();
       BeanReader.writeLifeCycleGet(
-          writer,
-          initMethodReader.params(),
-          "builder",
-          "builder.get(io.avaje.inject.BeanScope.class)");
+        writer,
+        initMethodReader.params(),
+        "builder",
+        "builder.get(io.avaje.inject.BeanScope.class)");
 
       writer.append(";").eol();
     }
