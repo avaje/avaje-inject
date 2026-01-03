@@ -1,42 +1,41 @@
 package io.avaje.inject.generator;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.ElementFilter;
 
-/**
- * Looks for lifecycle annotations on methods.
- */
+/** Looks for lifecycle annotations on methods. */
 final class MethodLifecycleReader {
 
   private final String initMethod;
   private final String destroyMethod;
   private Element postConstructMethod;
   private Element preDestroyMethod;
+  private MethodReader initMethodReader;
 
-
-  MethodLifecycleReader(TypeElement type, String initMethod, String destroyMethod) {
+  MethodLifecycleReader(
+      TypeElement type, String initMethod, String destroyMethod, ImportTypeMap imports) {
     this.initMethod = initMethod;
     this.destroyMethod = destroyMethod;
-    for (Element element : type.getEnclosedElements()) {
-      ElementKind kind = element.getKind();
-      if (kind == ElementKind.METHOD) {
-        readMethod(element);
+    for (var element : ElementFilter.methodsIn(type.getEnclosedElements())) {
+      if (element.getSimpleName().toString().equals(initMethod)
+          || AnnotationUtil.hasAnnotationWithName(element, "PostConstruct")) {
+        postConstructMethod = element;
+      this.initMethodReader=  new MethodReader(element, type, imports);
       }
-    }
-  }
-
-  private void readMethod(Element element) {
-    if (AnnotationUtil.hasAnnotationWithName(element, "PostConstruct")) {
-      postConstructMethod = element;
-    }
-    if (AnnotationUtil.hasAnnotationWithName(element, "PreDestroy")) {
-      preDestroyMethod = element;
+      if (element.getSimpleName().toString().equals(destroyMethod)
+          || AnnotationUtil.hasAnnotationWithName(element, "PreDestroy")) {
+        preDestroyMethod = element;
+      }
     }
   }
 
   String initMethod() {
     return deriveFromBoth(initMethod, postConstructMethod);
+  }
+
+  MethodReader initMethodReader() {
+    return initMethodReader;
   }
 
   String destroyMethod() {
