@@ -412,32 +412,27 @@ final class BeanReader {
   }
 
   void providerLifeCycle(Append writer, String indent) {
-    postConstructMethod.ifPresent(
-        m -> {
-          writer.indent(indent).append(" bean.%s(", m.name());
-          if (m.params().isEmpty()) {
-            writer.append(");").eol();
-          } else {
-            writeLifeCycleGet(
-                writer,
-                m.params(),
-                registerProvider() ? "beanScope" : "builder",
-                registerProvider() ? "beanScope" : "builder.get(BeanScope.class)");
-            writer.append(";").eol();
-          }
-        });
+    postConstructMethod.ifPresent(m -> {
+      writer.indent(indent).append(" bean.%s(", m.name());
+      if (m.params().isEmpty()) {
+        writer.append(");").eol();
+      } else {
+        writeLifeCycleGet(
+          writer,
+          m.params(),
+          registerProvider() ? "beanScope" : "builder",
+          registerProvider() ? "beanScope" : "builder.get(BeanScope.class)");
+        writer.append(";").eol();
+      }
+    });
 
     if (preDestroyMethod != null) {
       lifeCycleNotSupported();
-
-      var priority =
-          preDestroyPriority == null || preDestroyPriority == 1000 ? "" : ", " + preDestroyPriority;
+      var priority = preDestroyPriority == null || preDestroyPriority == 1000 ? "" : ", " + preDestroyPriority;
       writer
-          .indent(indent)
-          .append(
-              " builder.providerPreDestroy(bean::%s%s);",
-              preDestroyMethod.getSimpleName(), priority)
-          .eol();
+        .indent(indent)
+        .append(" builder.providerPreDestroy(bean::%s%s);", preDestroyMethod.getSimpleName(), priority)
+        .eol();
 
     } else if (typeReader.isClosable() && !prototype) {
       writer.indent(indent).append(" builder.providerAutoClosable(bean);").eol();

@@ -239,16 +239,15 @@ final class DBeanScope implements BeanScope {
         closed = true;
         log.log(TRACE, "firing preDestroy");
         preDestroy.stream()
-            .sorted()
-            .map(ClosePair::closeable)
-            .forEach(
-                closeable -> {
-                  try {
-                    closeable.close();
-                  } catch (final Exception e) {
-                    log.log(Level.ERROR, "Error during PreDestroy lifecycle method", e);
-                  }
-                });
+          .sorted()
+          .map(ClosePair::closeable)
+          .forEach(closeable -> {
+            try {
+              closeable.close();
+            } catch (final Exception e) {
+              log.log(Level.ERROR, "Error during PreDestroy lifecycle method", e);
+            }
+          });
       }
     } finally {
       lock.unlock();

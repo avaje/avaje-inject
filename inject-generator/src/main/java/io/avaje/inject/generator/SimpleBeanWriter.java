@@ -269,7 +269,7 @@ final class SimpleBeanWriter {
       var observeUtype = observeEvent.getFullUType();
       final var shortWithoutAnnotations = observeUtype.shortWithoutAnnotations();
       var injectParams = methodReader.params().stream().skip(1).collect(toList());
-      if (!beanScopeAvailable&&!injectParams.isEmpty()) {
+      if (!beanScopeAvailable && !injectParams.isEmpty()) {
         writer.indent("var beanScope = builder.get(io.avaje.inject.BeanScope.class);").eol();
         beanScopeAvailable = true;
         scope = "beanScope";
