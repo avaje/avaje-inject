@@ -20,7 +20,7 @@ final class MethodLifecycleReader {
       if (element.getSimpleName().toString().equals(initMethod)
           || AnnotationUtil.hasAnnotationWithName(element, "PostConstruct")) {
         this.postConstructMethod = element;
-        this.initMethodReader=  new MethodReader(element, type, imports);
+        this.initMethodReader = new MethodReader(element, type, imports);
       }
       if (element.getSimpleName().toString().equals(destroyMethod)
           || AnnotationUtil.hasAnnotationWithName(element, "PreDestroy")) {

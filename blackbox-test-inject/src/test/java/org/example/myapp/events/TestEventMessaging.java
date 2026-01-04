@@ -14,6 +14,7 @@ class TestEventMessaging {
 
   @Inject ExternalObserver observer;
   @Inject ExternalEventPublisher event;
+  @Inject LazyObserver lazyObserver;
 
   @BeforeEach
   void before() {
@@ -29,5 +30,9 @@ class TestEventMessaging {
 
     assertThat(observer.invoked).isTrue();
     assertThat(observer.recievedEvent).isSameAs(message);
+    assertThat(lazyObserver.recievedEvent()).isNull();
+
+    event.fire(message);
+    assertThat(lazyObserver.recievedEvent()).isSameAs(message);
   }
 }
