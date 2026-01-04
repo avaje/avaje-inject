@@ -32,6 +32,7 @@ final class SimpleBeanWriter {
   private final String suffix;
   private final boolean proxied;
   private Append writer;
+  private boolean beanScopeAvailable;
 
   SimpleBeanWriter(BeanReader beanReader) {
     this.beanReader = beanReader;
@@ -185,11 +186,13 @@ final class SimpleBeanWriter {
       } else {
         registerProvider = "asPrototype().registerProvider";
       }
-
+        writer.append(indent).append("var beanScope = builder.get(io.avaje.inject.BeanScope.class);").eol();
+      this.beanScopeAvailable = true;
       writer.append("      builder.");
       beanReader.writePriority(writer);
       writer.append("%s(() -> {", registerProvider).eol();
     }
+
     constructor.startTry(writer);
     writeCreateBean(constructor);
     beanReader.buildRegister(writer);
@@ -198,15 +201,17 @@ final class SimpleBeanWriter {
       writeExtraInjection();
     }
     if (beanReader.registerProvider()) {
-      beanReader.prototypePostConstruct(writer, indent);
+      beanReader.providerLifeCycle(writer, indent);
+      writeObserveMethods();
       writer.indent("        return bean;").eol();
       if (!constructor.methodThrows()) {
         writer.append("     }");
         writeLazyRegister();
         writer.append(");").eol();
       }
+    } else {
+      writeObserveMethods();
     }
-    writeObserveMethods();
     constructor.endTry(writer);
 
     if (beanReader.registerProvider() && constructor.methodThrows()) {
@@ -257,24 +262,24 @@ final class SimpleBeanWriter {
 
   private void writeObserveMethods() {
     final var bean = "bean";
-    final var builder = "builder";
-    final var scope = "beanScope";
+    var scope = beanScopeAvailable ? "beanScope" : "builder";
 
-    final var indent = "      ";
     for (MethodReader methodReader : beanReader.observerMethods()) {
       var observeEvent = methodReader.observeParam();
       var observeUtype = observeEvent.getFullUType();
       final var shortWithoutAnnotations = observeUtype.shortWithoutAnnotations();
       var injectParams = methodReader.params().stream().skip(1).collect(toList());
-
-      if (!injectParams.isEmpty()) {
-        writer.indent(indent).append("var %s = %s.get(BeanScope.class);", scope, builder).eol();
+      if (!beanScopeAvailable && !injectParams.isEmpty()) {
+        writer.indent("var beanScope = builder.get(io.avaje.inject.BeanScope.class);").eol();
+        beanScopeAvailable = true;
+        scope = "beanScope";
       }
 
       for (MethodParam param : injectParams) {
         if (Constants.BEANSCOPE.equals(param.getFullUType().fullWithoutAnnotations())) {
           continue;
         }
+
         writer.indent(indent).append("Supplier<%s> %s = () -> ",
           param.getFullUType().shortType(),
           methodReader.name() + "$" + param.simpleName());
@@ -292,10 +297,11 @@ final class SimpleBeanWriter {
       if (methodReader.params().size() == 1) {
         writer.append("%s::%s;", bean, methodReader.name());
       } else {
+        var finalScope = scope;
         var injectParamNames = injectParams.stream()
           .map(p ->
             Constants.BEANSCOPE.equals(p.getFullUType().fullWithoutAnnotations())
-              ? scope
+              ? finalScope
               : methodReader.name() + "$" + p.simpleName() + ".get()")
           .collect(joining(", "));
         writer.append("e -> bean.%s(e, %s);", methodReader.name(), injectParamNames);
@@ -304,7 +310,7 @@ final class SimpleBeanWriter {
       writer
           .eol()
           .indent(indent)
-          .append(builder)
+          .append(scope)
           .eol()
           .indent(indent)
           .append("    .get(ObserverManager.class)")
@@ -326,7 +332,7 @@ final class SimpleBeanWriter {
 
   private void injectFields() {
     String bean = beanReader.registerProvider() ? "bean" : "$bean";
-    String builder = beanReader.registerProvider() ? "builder" : "b";
+    String builder = beanReader.registerProvider() ? "beanScope" : "b";
     for (FieldReader fieldReader : beanReader.injectFields()) {
       String fieldName = fieldReader.fieldName();
       String getDependency = fieldReader.builderGetDependency(builder);
@@ -337,7 +343,7 @@ final class SimpleBeanWriter {
   private void injectMethods() {
     final var needsTry = beanReader.needsTryForMethodInjection();
     final var bean = beanReader.registerProvider() ? "bean" : "$bean";
-    final var builder = beanReader.registerProvider() ? "builder" : "b";
+    final var builder = beanReader.registerProvider() ? "beanScope" : "b";
     if (needsTry) {
       writer.indent("        try {").eol();
     }

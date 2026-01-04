@@ -60,6 +60,7 @@ final class MethodReader {
   private final boolean multiRegister;
   private final BeanConditions conditions = new BeanConditions();
   private MethodParam observeParameter;
+  private MethodReader initMethodReader;
 
   MethodReader(ExecutableElement element, TypeElement beanType, ImportTypeMap importTypes) {
     this(null, element, beanType, null, null, importTypes);
@@ -141,12 +142,11 @@ final class MethodReader {
     } else {
       var beanTypes = BeanTypesPrism.getOptionalOn(element).map(BeanTypesPrism::value);
       beanTypes.ifPresent(t -> Util.validateBeanTypes(element, t));
-      this.typeReader =
-          new TypeReader(
-              beanTypes.orElse(List.of()), genericType, returnElement, importTypes, element);
+      this.typeReader = new TypeReader(beanTypes.orElse(List.of()), genericType, returnElement, importTypes, element);
       typeReader.process();
-      MethodLifecycleReader lifecycleReader = new MethodLifecycleReader(returnElement, initMethod, destroyMethod);
+      var lifecycleReader = new MethodLifecycleReader(returnElement, initMethod, destroyMethod, importTypes);
       this.initMethod = lifecycleReader.initMethod();
+      this.initMethodReader = lifecycleReader.initMethodReader();
       this.destroyMethod = lifecycleReader.destroyMethod();
     }
     if (lazy && prototype) {
@@ -293,8 +293,7 @@ final class MethodReader {
     }
 
     startTry(writer, "  ");
-    writer.indent(indent).append("  return ");
-    writer.append("factory.%s(", methodName);
+    writer.indent(indent).append("  var $bean = factory.%s(", methodName);
     for (int i = 0; i < params.size(); i++) {
       if (i > 0) {
         writer.append(", ");
@@ -302,6 +301,42 @@ final class MethodReader {
       params.get(i).builderGetDependency(writer, "builder");
     }
     writer.append(");").eol();
+    if (notEmpty(initMethod)) {
+      writer.indent(indent).append(" $bean.%s(", initMethod);
+      initMethodReader.read();
+      BeanReader.writeLifeCycleGet(
+        writer,
+        initMethodReader.params(),
+        "builder",
+        "builder.get(io.avaje.inject.BeanScope.class)");
+
+      writer.append(";").eol();
+    }
+
+    final var isCloseable = !prototype && typeReader != null && typeReader.isClosable();
+
+    var priority = priority(destroyPriority);
+    if (notEmpty(destroyMethod)) {
+      writer.indent(indent).append("builder.providerPreDestroy(%s%s);", addPreDestroy(destroyMethod), priority).eol();
+      lifeCycleNotSupported();
+    } else if (isCloseable && !priority.isBlank()) {
+      writer.indent(indent).append("builder.providerPreDestroy($bean::close%s);", priority).eol();
+    } else if (isCloseable || beanCloseable) {
+      writer.indent(indent).append("builder.providerAutoClosable($bean);").eol();
+      if (beanCloseable) {
+        lifeCycleNotSupported();
+      }
+    }
+
+    var matchedPreDestroyMethod = factory.matchPreDestroy(returnTypeRaw);
+    if (matchedPreDestroyMethod != null) {
+      // PreDestroy method on the factory
+      var methodPriority = priority(matchedPreDestroyMethod.priority());
+      var method = String.format("() -> factory.%s($bean)", matchedPreDestroyMethod.method());
+      writer.indent(indent).append("builder.addPreDestroy(%s%s);", method, methodPriority).eol();
+    }
+
+    writer.indent(indent).append("  return $bean;").eol();
     endTry(writer, "  ");
     writer.indent(indent);
     if (proxyLazy) {
@@ -317,6 +352,12 @@ final class MethodReader {
       writer.indent(indent).append("  });").eol();
     }
     writer.indent(indent).append("}").eol();
+  }
+
+  private void lifeCycleNotSupported() {
+    if (prototype) {
+      logError(element, "@Prototype scoped beans do not support the PreDestroy lifecycle");
+    }
   }
 
   void builderBuildAddBean(Append writer) {

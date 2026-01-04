@@ -26,7 +26,7 @@ final class DBeanScope implements BeanScope {
   private final ReentrantLock lock = new ReentrantLock();
   private final List<Runnable> postConstruct;
   private final List<Consumer<BeanScope>> postConstructConsumers;
-  private final List<AutoCloseable> preDestroy;
+  private final Deque<ClosePair> preDestroy;
   private final DBeanMap beans;
   private final @Nullable ShutdownHook shutdownHook;
   private final @Nullable BeanScope parent;
@@ -35,12 +35,12 @@ final class DBeanScope implements BeanScope {
 
   DBeanScope(
       boolean withShutdownHook,
-      List<AutoCloseable> preDestroy,
+      Deque<ClosePair> deque,
       List<Runnable> postConstruct,
       List<Consumer<BeanScope>> postConstructConsumers,
       DBeanMap beans,
       @Nullable BeanScope parent) {
-    this.preDestroy = preDestroy;
+    this.preDestroy = deque;
     this.postConstruct = postConstruct;
     this.postConstructConsumers = postConstructConsumers;
     this.beans = beans;
@@ -238,13 +238,16 @@ final class DBeanScope implements BeanScope {
         // we only allow one call to preDestroy
         closed = true;
         log.log(TRACE, "firing preDestroy");
-        for (final AutoCloseable closeable : preDestroy) {
-          try {
-            closeable.close();
-          } catch (final Exception e) {
-            log.log(Level.ERROR, "Error during PreDestroy lifecycle method", e);
-          }
-        }
+        preDestroy.stream()
+          .sorted()
+          .map(ClosePair::closeable)
+          .forEach(closeable -> {
+            try {
+              closeable.close();
+            } catch (final Exception e) {
+              log.log(Level.ERROR, "Error during PreDestroy lifecycle method", e);
+            }
+          });
       }
     } finally {
       lock.unlock();

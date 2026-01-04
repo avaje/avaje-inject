@@ -117,10 +117,10 @@ public interface Builder {
    */
   void addPostConstruct(Consumer<BeanScope> consumer);
 
-  /**
-   * Add lifecycle PreDestroy method.
-   */
-  void addPreDestroy(AutoCloseable closeable);
+  /** Add lifecycle PreDestroy method. */
+  default void addPreDestroy(AutoCloseable invoke) {
+    addPreDestroy(invoke, 1000);
+  }
 
   /**
    * Add lifecycle PreDestroy method with a given priority.
@@ -132,7 +132,30 @@ public interface Builder {
    *
    * @param maybeAutoCloseable An instance that might be AutoCloseable
    */
-  void addAutoClosable(Object maybeAutoCloseable);
+  default void addAutoClosable(Object maybeCloseable) {
+    if (maybeCloseable instanceof AutoCloseable) {
+      addPreDestroy((AutoCloseable) maybeCloseable);
+    }
+  }
+
+  /** Add lifecycle PreDestroy method for providers. */
+  default void providerPreDestroy(AutoCloseable invoke) {
+    providerPreDestroy(invoke, 1000);
+  }
+
+  /** Add lifecycle PreDestroy method for providers with a given priority. */
+  void providerPreDestroy(AutoCloseable closeable, int priority);
+
+  /**
+   * Check if the instance is AutoCloseable and if so register it with PreDestroy.
+   *
+   * @param maybeAutoCloseable An instance that might be AutoCloseable
+   */
+  default void providerAutoClosable(Object maybeCloseable) {
+    if (maybeCloseable instanceof AutoCloseable) {
+      providerPreDestroy((AutoCloseable) maybeCloseable);
+    }
+  }
 
   /**
    * Add field and method injection.
