@@ -317,12 +317,12 @@ final class MethodReader {
 
     var priority = priority(destroyPriority);
     if (notEmpty(destroyMethod)) {
-      writer.indent(indent).append("builder.addPreDestroy(%s%s);", addPreDestroy(destroyMethod), priority).eol();
+      writer.indent(indent).append("builder.providerPreDestroy(%s%s);", addPreDestroy(destroyMethod), priority).eol();
       lifeCycleNotSupported();
     } else if (isCloseable && !priority.isBlank()) {
-      writer.indent(indent).append("builder.addPreDestroy($bean::close%s);", priority).eol();
+      writer.indent(indent).append("builder.providerPreDestroy($bean::close%s);", priority).eol();
     } else if (isCloseable || beanCloseable) {
-      writer.indent(indent).append("builder.addAutoClosable($bean);").eol();
+      writer.indent(indent).append("builder.providerAutoClosable($bean);").eol();
       if (beanCloseable) {
         lifeCycleNotSupported();
       }

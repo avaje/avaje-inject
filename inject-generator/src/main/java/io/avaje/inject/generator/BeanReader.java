@@ -424,10 +424,18 @@ final class BeanReader {
 
     if (preDestroyMethod != null) {
       lifeCycleNotSupported();
+
+      var priority =
+          preDestroyPriority == null || preDestroyPriority == 1000 ? "" : ", " + preDestroyPriority;
       writer
           .indent(indent)
-          .append(" builder.addPreDestroy(bean::%s);", preDestroyMethod.getSimpleName())
+          .append(
+              " builder.providerPreDestroy(bean::%s%s);",
+              preDestroyMethod.getSimpleName(), priority)
           .eol();
+
+    } else if (typeReader.isClosable() && !prototype) {
+      writer.indent(indent).append(" builder.providerAutoClosable(bean);").eol();
     }
   }
 

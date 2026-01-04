@@ -239,20 +239,13 @@ class DBuilder implements Builder {
   }
 
   @Override
-  public final void addPreDestroy(AutoCloseable invoke) {
-    addPreDestroy(invoke, 1000);
-  }
-
-  @Override
   public final void addPreDestroy(AutoCloseable invoke, int priority) {
     preDestroy.addFirst(new ClosePair(priority, invoke));
   }
 
   @Override
-  public final void addAutoClosable(Object maybeAutoCloseable) {
-    if (maybeAutoCloseable instanceof AutoCloseable) {
-      preDestroy.addFirst(new ClosePair(1000, (AutoCloseable) maybeAutoCloseable));
-    }
+  public final synchronized void providerPreDestroy(AutoCloseable invoke, int priority) {
+    addPreDestroy(invoke, priority);
   }
 
   @Override
