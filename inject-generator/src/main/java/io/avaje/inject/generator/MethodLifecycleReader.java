@@ -13,19 +13,18 @@ final class MethodLifecycleReader {
   private Element preDestroyMethod;
   private MethodReader initMethodReader;
 
-  MethodLifecycleReader(
-      TypeElement type, String initMethod, String destroyMethod, ImportTypeMap imports) {
+  MethodLifecycleReader(TypeElement type, String initMethod, String destroyMethod, ImportTypeMap imports) {
     this.initMethod = initMethod;
     this.destroyMethod = destroyMethod;
     for (var element : ElementFilter.methodsIn(type.getEnclosedElements())) {
       if (element.getSimpleName().toString().equals(initMethod)
           || AnnotationUtil.hasAnnotationWithName(element, "PostConstruct")) {
-        postConstructMethod = element;
-      this.initMethodReader=  new MethodReader(element, type, imports);
+        this.postConstructMethod = element;
+        this.initMethodReader=  new MethodReader(element, type, imports);
       }
       if (element.getSimpleName().toString().equals(destroyMethod)
           || AnnotationUtil.hasAnnotationWithName(element, "PreDestroy")) {
-        preDestroyMethod = element;
+        this.preDestroyMethod = element;
       }
     }
   }
