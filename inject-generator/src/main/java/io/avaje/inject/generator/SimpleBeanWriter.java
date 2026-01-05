@@ -176,8 +176,6 @@ final class SimpleBeanWriter {
     beanReader.buildConditional(writer);
     beanReader.buildBeanAbsent(writer);
     if (beanReader.registerProvider()) {
-      indent += "  ";
-
       final String registerProvider;
       if (beanReader.proxyLazy()) {
         registerProvider = "registerLazy";
@@ -186,26 +184,28 @@ final class SimpleBeanWriter {
       } else {
         registerProvider = "asPrototype().registerProvider";
       }
-        writer.append(indent).append("var beanScope = builder.get(io.avaje.inject.BeanScope.class);").eol();
+      writer.start("var beanScope = builder.get(io.avaje.inject.BeanScope.class);").eol();
       this.beanScopeAvailable = true;
-      writer.append("      builder.");
+      writer.start("builder.");
       beanReader.writePriority(writer);
       writer.append("%s(() -> {", registerProvider).eol();
+      writer.incIndent(); // indent for provider register
     }
 
     constructor.startTry(writer);
     writeCreateBean(constructor);
     beanReader.buildRegister(writer);
-    beanReader.addLifecycleCallbacks(writer, indent);
+    beanReader.addLifecycleCallbacks(writer);
     if (beanReader.isExtraInjectionRequired()) {
       writeExtraInjection();
     }
     if (beanReader.registerProvider()) {
-      beanReader.providerLifeCycle(writer, indent);
+      beanReader.providerLifeCycle(writer);
       writeObserveMethods();
-      writer.indent("        return bean;").eol();
+      writer.start("return bean;").eol();
+      writer.decIndent(); // indent for provider register
       if (!constructor.methodThrows()) {
-        writer.append("     }");
+        writer.start("}");
         writeLazyRegister();
         writer.append(");").eol();
       }
@@ -215,13 +215,12 @@ final class SimpleBeanWriter {
     constructor.endTry(writer);
 
     if (beanReader.registerProvider() && constructor.methodThrows()) {
-      writer.append("     }");
+      writer.start("}");
       writeLazyRegister();
       writer.append(");").eol();
     }
 
-    writer.append("    }");
-    writer.eol();
+    writer.append("    }").eol();
   }
 
   private void writeLazyRegister() {
@@ -240,23 +239,23 @@ final class SimpleBeanWriter {
     writer.append("  public static void build(%s builder) {", beanReader.builderType()).eol();
   }
 
-  private String indent = "     ";
-
   private void writeCreateBean(MethodReader constructor) {
-    writer.indent(indent).append(" var bean = new %s(", shortName);
+    writer.start("var bean = new %s(", shortName);
     // add constructor dependencies
     writeMethodParams("builder", constructor);
   }
 
   private void writeExtraInjection() {
     if (!beanReader.registerProvider()) {
-      writer.indent(indent).append(" builder.addInjector(b -> {").eol();
-      writer.indent(indent).append("   // field and method injection").eol();
+      writer.start(" builder.addInjector(b -> {").eol();
+      writer.start("   // field and method injection").eol();
+      writer.incIndent();
     }
     injectFields();
     injectMethods();
     if (!beanReader.registerProvider()) {
-      writer.indent(indent).append(" });").eol();
+      writer.decIndent();
+      writer.start("});").eol();
     }
   }
 
@@ -270,7 +269,7 @@ final class SimpleBeanWriter {
       final var shortWithoutAnnotations = observeUtype.shortWithoutAnnotations();
       var injectParams = methodReader.params().stream().skip(1).collect(toList());
       if (!beanScopeAvailable && !injectParams.isEmpty()) {
-        writer.indent("var beanScope = builder.get(io.avaje.inject.BeanScope.class);").eol();
+        writer.start("var beanScope = builder.get(io.avaje.inject.BeanScope.class);").eol();
         beanScopeAvailable = true;
         scope = "beanScope";
       }
@@ -280,14 +279,14 @@ final class SimpleBeanWriter {
           continue;
         }
 
-        writer.indent(indent).append("Supplier<%s> %s = () -> ",
+        writer.start("Supplier<%s> %s = () -> ",
           param.getFullUType().shortType(),
           methodReader.name() + "$" + param.simpleName());
         param.builderGetDependency(writer, scope);
         writer.append(";").eol();
       }
 
-      writer.indent(indent).append("Consumer<%s> %s = ", shortWithoutAnnotations, methodReader.name());
+      writer.start("Consumer<%s> %s = ", shortWithoutAnnotations, methodReader.name());
 
       var observeTypeString =
         !observeUtype.isGeneric() || observeUtype.param0().kind() == TypeKind.WILDCARD
@@ -309,17 +308,13 @@ final class SimpleBeanWriter {
       final var observesPrism = ObservesPrism.getInstanceOn(observeEvent.element());
       writer
           .eol()
-          .indent(indent)
-          .append(scope)
+          .start(scope)
           .eol()
-          .indent(indent)
-          .append("    .get(ObserverManager.class)")
+          .start("    .get(ObserverManager.class)")
           .eol()
-          .indent(indent)
-          .append("    .<%s>registerObserver(", shortWithoutAnnotations)
+          .start("    .<%s>registerObserver(", shortWithoutAnnotations)
           .eol()
-          .indent(indent)
-          .append(
+          .start(
               "        %s, new Observer<>(%s, %s, %s, \"%s\"));",
               observeTypeString,
               observesPrism.priority(),
@@ -336,7 +331,7 @@ final class SimpleBeanWriter {
     for (FieldReader fieldReader : beanReader.injectFields()) {
       String fieldName = fieldReader.fieldName();
       String getDependency = fieldReader.builderGetDependency(builder);
-      writer.indent("        ").append("%s.%s = %s;", bean, fieldName, getDependency).eol();
+      writer.start("%s.%s = %s;", bean, fieldName, getDependency).eol();
     }
   }
 
@@ -345,17 +340,17 @@ final class SimpleBeanWriter {
     final var bean = beanReader.registerProvider() ? "bean" : "$bean";
     final var builder = beanReader.registerProvider() ? "beanScope" : "b";
     if (needsTry) {
-      writer.indent("        try {").eol();
+      writer.start("try {").eol().incIndent();
     }
-    final var indent = needsTry ? "          " : "        ";
     for (MethodReader methodReader : beanReader.injectMethods()) {
-      writer.indent(indent).append("%s.%s(", bean, methodReader.name());
+      writer.start("%s.%s(", bean, methodReader.name());
       writeMethodParams(builder, methodReader);
     }
     if (needsTry) {
-      writer.indent("        } catch (Throwable e) {").eol();
-      writer.indent("          throw new RuntimeException(\"Error wiring method\", e);").eol();
-      writer.indent("        }").eol();
+      writer.decIndent();
+      writer.start("} catch (Throwable e) {").eol();
+      writer.start("  throw new RuntimeException(\"Error wiring method\", e);").eol();
+      writer.start("}").eol();
     }
   }
 
