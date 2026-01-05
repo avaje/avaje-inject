@@ -14,10 +14,10 @@ final class ConditionalWriter {
   }
 
   public void write() {
-
     if (conditions.isEmpty()) return;
 
-    writer.append("    if (");
+    writer.decIndent(); // adjust for the method start indent
+    writer.start("if (").incIndent();
 
     if (!conditions.orProfiles.isEmpty()) {
       prefix();
@@ -67,14 +67,14 @@ final class ConditionalWriter {
       prefix();
       writer.append("builder.property().equalTo(\"%s\", \"%s\")", props.getKey(), props.getValue());
     }
-    writer.append(") {").eol().append("      return;").eol().append("    }").eol().eol();
+    writer.append(") {").eol().start("return;").eol().append("    }").eol().eol();
   }
 
   private void prefix() {
     if (first) {
       first = false;
     } else {
-      writer.eol().append("      || ");
+      writer.eol().start("  || ");
     }
   }
 }

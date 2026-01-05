@@ -225,8 +225,7 @@ final class SimpleAssistWriter {
   }
 
   private void writeCreateBean(MethodReader constructor) {
-    String indent = "   ";
-    writer.indent(indent).append(" var bean = new %s(", shortName);
+    writer.start("var bean = new %s(", shortName);
     // add constructor dependencies
     writeMethodParams(constructor, true);
   }
@@ -234,7 +233,7 @@ final class SimpleAssistWriter {
   private void writeExtraInjection() {
     injectFields();
     injectMethods();
-    writer.indent("    return bean;");
+    writer.start("return bean;");
   }
 
   private void injectFields() {
@@ -247,32 +246,31 @@ final class SimpleAssistWriter {
       }
       String fieldName = fieldReader.fieldName();
       String getDependency = fieldName + "$field";
-      writer.indent("    ").append("bean.%s = %s;", fieldName, getDependency).eol();
+      writer.start("bean.%s = %s;", fieldName, getDependency).eol();
     }
 
     assistedElements.stream()
       .filter(e -> e.getKind() == ElementKind.FIELD)
       .forEach(field ->
         writer
-          .indent("    ")
-          .append("bean.%s = %s;", field.getSimpleName(), field.getSimpleName())
+          .start("bean.%s = %s;", field.getSimpleName(), field.getSimpleName())
           .eol());
   }
 
   private void injectMethods() {
     final var needsTry = beanReader.needsTryForMethodInjection();
     if (needsTry) {
-      writer.indent("    try {").eol();
+      writer.start("try {").eol().incIndent();
     }
-    final var indent = needsTry ? "      " : "    ";
     for (MethodReader methodReader : beanReader.injectMethods()) {
-      writer.indent(indent).append("bean.%s(", methodReader.name());
+      writer.start("bean.%s(", methodReader.name());
       writeMethodParams(methodReader, false);
     }
     if (needsTry) {
-      writer.indent("    } catch (Throwable e) {").eol();
-      writer.indent("      throw new RuntimeException(\"Error wiring method\", e);").eol();
-      writer.indent("    }").eol();
+      writer.decIndent();
+      writer.start("} catch (Throwable e) {").eol();
+      writer.start("  throw new RuntimeException(\"Error wiring method\", e);").eol();
+      writer.start("}").eol();
     }
   }
 

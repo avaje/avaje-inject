@@ -248,12 +248,11 @@ final class MethodReader {
   }
 
   void builderBuildBean(Append writer) {
-    writer.indent("      ");
     if (isVoid) {
-      writer.append("factory.%s(", methodName);
+      writer.start("factory.%s(", methodName);
     } else {
       String beanName = optionalType ? "optionalBean" : "bean";
-      writer.append("var %s = factory.%s(", beanName, methodName);
+      writer.start("var %s = factory.%s(", beanName, methodName);
     }
     for (int i = 0; i < params.size(); i++) {
       if (i > 0) {
@@ -279,21 +278,20 @@ final class MethodReader {
       return;
     }
 
-    String indent = "    ";
-    writer.indent(indent).append("  builder");
+    writer.start("builder");
     writePriority(writer);
     if (prototype) {
       writer.append(".asPrototype()");
     }
 
     if (proxyLazy) {
-      writer.indent(".registerLazy(() -> {").eol();
+      writer.append(".registerLazy(() -> {").eol();
     } else {
-      writer.indent(".registerProvider(() -> {").eol();
+      writer.append(".registerProvider(() -> {").eol();
     }
-
-    startTry(writer, "  ");
-    writer.indent(indent).append("  var $bean = factory.%s(", methodName);
+    writer.incIndent(); // lazy or provider start
+    startTry(writer);
+    writer.start("var $bean = factory.%s(", methodName);
     for (int i = 0; i < params.size(); i++) {
       if (i > 0) {
         writer.append(", ");
@@ -302,7 +300,7 @@ final class MethodReader {
     }
     writer.append(");").eol();
     if (notEmpty(initMethod)) {
-      writer.indent(indent).append(" $bean.%s(", initMethod);
+      writer.start("$bean.%s(", initMethod);
       initMethodReader.read();
       BeanReader.writeLifeCycleGet(
         writer,
@@ -317,12 +315,12 @@ final class MethodReader {
 
     var priority = priority(destroyPriority);
     if (notEmpty(destroyMethod)) {
-      writer.indent(indent).append("builder.providerPreDestroy(%s%s);", addPreDestroy(destroyMethod), priority).eol();
+      writer.start("builder.providerPreDestroy(%s%s);", addPreDestroy(destroyMethod), priority).eol();
       lifeCycleNotSupported();
     } else if (isCloseable && !priority.isBlank()) {
-      writer.indent(indent).append("builder.providerPreDestroy($bean::close%s);", priority).eol();
+      writer.start("builder.providerPreDestroy($bean::close%s);", priority).eol();
     } else if (isCloseable || beanCloseable) {
-      writer.indent(indent).append("builder.providerAutoClosable($bean);").eol();
+      writer.start("builder.providerAutoClosable($bean);").eol();
       if (beanCloseable) {
         lifeCycleNotSupported();
       }
@@ -333,25 +331,25 @@ final class MethodReader {
       // PreDestroy method on the factory
       var methodPriority = priority(matchedPreDestroyMethod.priority());
       var method = String.format("() -> factory.%s($bean)", matchedPreDestroyMethod.method());
-      writer.indent(indent).append("builder.addPreDestroy(%s%s);", method, methodPriority).eol();
+      writer.start("builder.addPreDestroy(%s%s);", method, methodPriority).eol();
     }
 
-    writer.indent(indent).append("  return $bean;").eol();
-    endTry(writer, "  ");
-    writer.indent(indent);
+    writer.start("return $bean;").eol();
+    endTry(writer);
+    writer.decIndent(); // lazy or provider end
     if (proxyLazy) {
       String shortNameLazyProxy = Util.shortNameLazyProxy(lazyProxyType) + "$Lazy";
-      writer.append("  }, ");
+      writer.start("}, ");
       if (lazyProxyType.getTypeParameters().isEmpty()) {
         writer.append("%s::new", shortNameLazyProxy);
       } else {
         writer.append("p -> new %s<>(p)", shortNameLazyProxy);
       }
-      writer.append(");");
+      writer.append(");").eol();
     } else {
-      writer.indent(indent).append("  });").eol();
+      writer.start("});").eol();
     }
-    writer.indent(indent).append("}").eol();
+    writer.append("    }").eol();
   }
 
   private void lifeCycleNotSupported() {
@@ -363,19 +361,22 @@ final class MethodReader {
   void builderBuildAddBean(Append writer) {
     if (!isVoid) {
       if (optionalType) {
-        writer.append("      if (optionalBean.isPresent()) {").eol();
-        writer.append("        var bean = optionalBean.get();").eol();
+        writer.start("if (optionalBean.isPresent()) {").eol();
+        writer.start("  var bean = optionalBean.get();").eol();
+        writer.incIndent();
       }
-      String indent = optionalType ? "        " : "      ";
-      writer.indent(indent);
+      boolean indentStream = false;
       var matchedPreDestroyMethod = factory.matchPreDestroy(returnTypeRaw);
       var hasLifecycleMethods = matchedPreDestroyMethod != null || hasLifecycleMethods();
       if (hasLifecycleMethods && multiRegister) {
-        writer.append("bean.stream()").eol().indent(indent).append("    .map(");
+        writer.start("bean.stream()").eol().incIndent().incIndent().start(".map(");
+        indentStream = true;
       } else if (hasLifecycleMethods) {
-        writer.append("var $bean = ");
+        writer.start("var $bean = ");
       } else if (multiRegister) {
-        writer.append("bean.forEach(");
+        writer.start("bean.forEach(");
+      } else {
+        writer.start("");
       }
 
       writer.append("builder");
@@ -398,9 +399,9 @@ final class MethodReader {
       if (hasInitMethod) {
         var addPostConstruct =
           multiRegister
-            ? "    .peek($bean -> builder.addPostConstruct($bean::%s))"
+            ? ".peek($bean -> builder.addPostConstruct($bean::%s))"
             : "builder.addPostConstruct($bean::%s);";
-        writer.indent(indent).append(addPostConstruct, initMethod).eol();
+        writer.start(addPostConstruct, initMethod).eol();
       }
       final var isCloseable = typeReader != null && typeReader.isClosable();
 
@@ -408,40 +409,43 @@ final class MethodReader {
       if (notEmpty(destroyMethod)) {
         var addPreDestroy =
           multiRegister
-            ? "    .forEach($bean -> builder.addPreDestroy(%s%s));"
+            ? ".forEach($bean -> builder.addPreDestroy(%s%s));"
             : "builder.addPreDestroy(%s%s);";
-        writer.indent(indent).append(addPreDestroy, addPreDestroy(destroyMethod), priority).eol();
+        writer.start(addPreDestroy, addPreDestroy(destroyMethod), priority).eol();
 
       } else if (isCloseable && !priority.isBlank()) {
         var addPreDestroy =
           multiRegister
-            ? "    .forEach($bean -> builder.addPreDestroy($bean::close%s));"
+            ? ".forEach($bean -> builder.addPreDestroy($bean::close%s));"
             : "builder.addPreDestroy($bean::close%s);";
-        writer.indent(indent).append(addPreDestroy, priority).eol();
+        writer.start(addPreDestroy, priority).eol();
 
       } else if (isCloseable || beanCloseable) {
         var addAutoClosable =
           multiRegister
-            ? "    .forEach(builder::addAutoClosable);"
+            ? ".forEach(builder::addAutoClosable);"
             : "builder.addAutoClosable(bean);";
-        writer.indent(indent).append(addAutoClosable).eol();
+        writer.start(addAutoClosable).eol();
 
       } else if (multiRegister && hasInitMethod) {
-        writer.indent(indent).append("    .forEach(x -> {});").eol();
+        writer.start(".forEach(x -> {});").eol();
       }
       if (matchedPreDestroyMethod != null) {
         // PreDestroy method on the factory
         var addPreDestroy =
           multiRegister
-            ? "    .forEach($bean -> builder.addPreDestroy(%s%s));"
+            ? ".forEach($bean -> builder.addPreDestroy(%s%s));"
             : "builder.addPreDestroy(%s%s);";
         var methodPriority = priority(matchedPreDestroyMethod.priority());
         var method = String.format("() -> factory.%s($bean)", matchedPreDestroyMethod.method());
-        writer.indent(indent).append(addPreDestroy, method, methodPriority).eol();
+        writer.start(addPreDestroy, method, methodPriority).eol();
       }
 
+      if (indentStream) {
+        writer.decIndent().decIndent();
+      }
       if (optionalType) {
-        writer.append("      }").eol();
+        writer.decIndent().start("}").eol();
       }
     }
   }
@@ -523,26 +527,18 @@ final class MethodReader {
   }
 
   void startTry(Append writer) {
-    startTry(writer, "");
-  }
-
-  void startTry(Append writer, String indent) {
     if (methodThrows()) {
-      writer.append(indent).append("      try {").eol();
-      writer.setExtraIndent("  " + indent);
+      writer.start("try {").eol();
+      writer.incIndent();
     }
   }
 
   void endTry(Append writer) {
-    endTry(writer, "");
-  }
-
-  void endTry(Append writer, String indent) {
     if (methodThrows()) {
-      writer.setExtraIndent(null);
-      writer.append(indent).append("      } catch (Throwable e) {").eol();
-      writer.append(indent).append("        throw new RuntimeException(\"Error during wiring\", e);").eol();
-      writer.append(indent).append("      }").eol();
+      writer.decIndent();
+      writer.start("} catch (Throwable e) {").eol();
+      writer.start("  throw new RuntimeException(\"Error during wiring\", e);").eol();
+      writer.start("}").eol();
     }
   }
 

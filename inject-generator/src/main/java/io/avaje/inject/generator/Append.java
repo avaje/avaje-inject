@@ -15,26 +15,33 @@ final class Append {
   private final StringBuilder stringBuilder = new StringBuilder();
   private int nameIndex;
   private boolean comma;
-  private String extraIndent;
+  private String indent = "      ";
 
   Append(Writer writer) {
     this.writer = writer;
   }
 
-  Append setExtraIndent(String extraIndent) {
-    this.extraIndent = extraIndent;
+  /** Increase the current indentation */
+  Append incIndent() {
+    this.indent += "  ";
     return this;
   }
 
-  Append indent(String content) {
+  /** Reduce the current indentation */
+  Append decIndent() {
+    this.indent = indent.substring(0, indent.length() - 2);
+    return this;
+  }
+
+  /** start a NEW line of content using the current indentation */
+  Append start(String format, Object... args) {
+    return start(String.format(format, args));
+  }
+
+  /** start a NEW line of content using the current indentation */
+  Append start(String content) {
     try {
-      if (extraIndent != null) {
-        writer.append(extraIndent);
-        if (debug) {
-          stringBuilder.append(extraIndent);
-        }
-      }
-      writer.append(content);
+      writer.append(indent).append(content);
       if (debug) {
         stringBuilder.append(content);
       }

@@ -146,7 +146,7 @@ final class AssistBeanReader {
 
   void buildRegister(Append writer) {
     if (!isExtraInjectionRequired()) {
-      writer.indent("    return bean;");
+      writer.start("return bean;");
     }
   }
 

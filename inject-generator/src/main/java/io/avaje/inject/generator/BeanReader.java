@@ -366,7 +366,7 @@ final class BeanReader {
     if (prototype || lazy) {
       return;
     }
-    writer.indent("      ");
+    writer.start("");
     if (isExtraInjectionRequired() || hasLifecycleMethods()) {
       writer.append("var $bean = ");
     }
@@ -385,21 +385,21 @@ final class BeanReader {
     }
   }
 
-  void addLifecycleCallbacks(Append writer, String indent) {
+  void addLifecycleCallbacks(Append writer) {
     if (postConstructMethod.isPresent() && !registerProvider()) {
-      writePostConstruct(writer, indent, postConstructMethod.get());
+      writePostConstruct(writer, postConstructMethod.get());
     }
 
     if (preDestroyMethod != null && !registerProvider()) {
       var priority = preDestroyPriority == null || preDestroyPriority == 1000 ? "" : ", " + preDestroyPriority;
-      writer.indent(indent).append(" builder.addPreDestroy($bean::%s%s);", preDestroyMethod.getSimpleName(), priority).eol();
+      writer.start("builder.addPreDestroy($bean::%s%s);", preDestroyMethod.getSimpleName(), priority).eol();
     } else if (typeReader.isClosable() && !prototype) {
-      writer.indent(indent).append(" builder.addAutoClosable($bean);").eol();
+      writer.start("builder.addAutoClosable($bean);").eol();
     }
   }
 
-  private void writePostConstruct(Append writer, String indent, MethodReader postConstruct) {
-    writer.indent(indent).append(" builder.addPostConstruct(");
+  private void writePostConstruct(Append writer, MethodReader postConstruct) {
+    writer.start("builder.addPostConstruct(");
     final var methodName = postConstruct.name();
     final var params = postConstruct.params();
     if (params.isEmpty() || Constants.BEANSCOPE.equals(params.get(0).getFullUType().shortType())) {
@@ -411,9 +411,9 @@ final class BeanReader {
     }
   }
 
-  void providerLifeCycle(Append writer, String indent) {
+  void providerLifeCycle(Append writer) {
     postConstructMethod.ifPresent(m -> {
-      writer.indent(indent).append(" bean.%s(", m.name());
+      writer.start("bean.%s(", m.name());
       if (m.params().isEmpty()) {
         writer.append(");").eol();
       } else {
@@ -430,12 +430,11 @@ final class BeanReader {
       lifeCycleNotSupported();
       var priority = preDestroyPriority == null || preDestroyPriority == 1000 ? "" : ", " + preDestroyPriority;
       writer
-        .indent(indent)
-        .append(" builder.providerPreDestroy(bean::%s%s);", preDestroyMethod.getSimpleName(), priority)
+        .start("builder.providerPreDestroy(bean::%s%s);", preDestroyMethod.getSimpleName(), priority)
         .eol();
 
     } else if (typeReader.isClosable() && !prototype) {
-      writer.indent(indent).append(" builder.providerAutoClosable(bean);").eol();
+      writer.start("builder.providerAutoClosable(bean);").eol();
     }
   }
 
