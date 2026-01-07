@@ -427,13 +427,12 @@ final class BeanReader {
     });
 
     if (preDestroyMethod != null) {
-      lifeCycleNotSupported();
       var priority = preDestroyPriority == null || preDestroyPriority == 1000 ? "" : ", " + preDestroyPriority;
       writer
         .start("builder.providerPreDestroy(bean::%s%s);", preDestroyMethod.getSimpleName(), priority)
         .eol();
 
-    } else if (typeReader.isClosable() && !prototype) {
+    } else if (typeReader.isClosable()) {
       writer.start("builder.providerAutoClosable(bean);").eol();
     }
   }
@@ -452,12 +451,6 @@ final class BeanReader {
       }
     }
     writer.append(")");
-  }
-
-  private void lifeCycleNotSupported() {
-    if (prototype) {
-      logError(beanType, "@Prototype scoped beans do not support the @PreDestroy lifecycle");
-    }
   }
 
   private Set<String> importTypes() {
