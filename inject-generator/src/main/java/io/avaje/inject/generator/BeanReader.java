@@ -615,7 +615,7 @@ final class BeanReader {
 
   String packageName() {
     if (importedComponent) {
-      return beanPackageName() + ".di";
+      return ProcessingContext.importedPkg(type);
     }
     return beanPackageName();
   }

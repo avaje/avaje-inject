@@ -1,7 +1,5 @@
 package io.avaje.inject.generator;
 
-import static io.avaje.inject.generator.APContext.typeElement;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -189,8 +187,7 @@ final class MetaData implements Comparable<MetaData> {
       importTypes.add(Util.classOfMethod(method));
     } else if (!generateProxy) {
       if (importedComponent) {
-        var packageName = APContext.elements().getPackageOf(typeElement(type)).getQualifiedName();
-        importTypes.add(packageName + ".di." + shortType + Constants.DI);
+        importTypes.add(ProcessingContext.importedPkg(type) + "." + shortType + Constants.DI);
       } else {
         importTypes.add(type + Constants.DI);
       }

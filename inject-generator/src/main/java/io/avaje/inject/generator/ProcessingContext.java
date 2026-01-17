@@ -28,7 +28,9 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.annotation.processing.FilerException;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ModuleElement;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.FileObject;
@@ -55,6 +57,7 @@ final class ProcessingContext {
     private final List<TypeElement> delayQueue = new ArrayList<>();
     private final Set<String> spiServices = new TreeSet<>();
     private final Set<String> externalSpi = new TreeSet<>();
+    private final Map<String, String> importedComponentPkg = new HashMap<>();
     private final boolean hasProvidesPlugin = hasProvidesPlugin();
     private final AllScopes scopes = new AllScopes();
     private boolean strictWiring;
@@ -327,5 +330,21 @@ final class ProcessingContext {
   static void registerExternalProvidedTypes(ScopeInfo scopeInfo) {
     ExternalProvider.scanAllInjectPlugins(scopeInfo);
     ExternalProvider.scanAllAvajeModules(CTX.get().providedTypes);
+  }
+
+  static void addComponentImportPkg(String type, Element element) {
+    final String pkg;
+    if (element instanceof ModuleElement) {
+      pkg = element.getEnclosedElements().get(0).getSimpleName().toString();
+    } else if (element instanceof PackageElement) {
+      pkg = ((PackageElement) element).getQualifiedName().toString();
+    } else {
+      pkg = APContext.elements().getPackageOf(element).getQualifiedName().toString();
+    }
+    CTX.get().importedComponentPkg.put(type, pkg);
+  }
+
+  static String importedPkg(String type) {
+    return CTX.get().importedComponentPkg.get(type);
   }
 }
