@@ -59,12 +59,12 @@
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy</artifactId>
-      <version>1.18.3</version>
+      <version>1.18.4</version>
     </dependency>
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy-agent</artifactId>
-      <version>1.18.3</version>
+      <version>1.18.4</version>
     </dependency>
 
     <dependency>
@@ -91,14 +91,14 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-http-api</artifactId>
-      <version>3.6</version>
+      <version>3.7</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-http-client</artifactId>
-      <version>3.6</version>
+      <version>3.7</version>
       <scope>test</scope>
     </dependency>
 
@@ -140,7 +140,7 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.5.24</version>
+      <version>1.5.25</version>
       <scope>test</scope>
     </dependency>
 
