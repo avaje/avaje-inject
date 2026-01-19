@@ -81,7 +81,7 @@ class CustomScopeTest {
 
       // includes the 2 supplied beans
       final List<BeanEntry> all = beanScope.all();
-      assertThat(all).hasSize(9);
+      assertThat(all).hasSize(7);
 
       final CustomBean customBean = beanScope.get(CustomBean.class);
 
