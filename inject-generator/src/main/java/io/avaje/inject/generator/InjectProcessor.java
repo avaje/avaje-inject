@@ -252,13 +252,17 @@ public final class InjectProcessor extends AbstractProcessor {
   private Set<TypeElement> importedElements(RoundEnvironment roundEnv) {
     return maybeBeanElements(roundEnv, ImportPrism.PRISM_TYPE).stream()
       .flatMap(Set::stream)
-      .map(ImportPrism::getInstanceOn)
-      .flatMap(p -> {
+      .flatMap(base -> {
+        var p = ImportPrism.getInstanceOn(base);
         var kind = p.kind();
         return p.value().stream()
           .map(ProcessingContext::asElement)
           .filter(this::notAlreadyProvided)
-          .map(e -> registerImportedKind(e, kind));
+          .map(e -> {
+            ProcessingContext.addComponentImportPkg(
+              e.getQualifiedName().toString(), base);
+            return registerImportedKind(e, kind);
+          });
       })
       .collect(Collectors.toSet());
   }
