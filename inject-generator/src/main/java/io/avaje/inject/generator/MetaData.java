@@ -76,7 +76,7 @@ final class MetaData implements Comparable<MetaData> {
 
   @Override
   public String toString() {
-    return name == null ? type : type + ":" + name;
+    return name == null ? type : type + ':' + name;
   }
 
   boolean importedComponent() {
@@ -108,7 +108,7 @@ final class MetaData implements Comparable<MetaData> {
     }
     final String trimType = Util.trimMethod(Util.unwrapProvider(type));
     if (name != null) {
-      return trimType + "_" + name.replaceAll("[^a-zA-Z0-9_$]+", "_");
+      return trimType + '_' + name.replaceAll("[^a-zA-Z0-9_$]+", "_");
     } else if (buildNameIncludeMethod() || hasMethod() && FACTORY_FREQUENCY.get(type) > 0) {
       return trimType + "__" + Util.trimMethod(method);
     }
@@ -187,7 +187,7 @@ final class MetaData implements Comparable<MetaData> {
       importTypes.add(Util.classOfMethod(method));
     } else if (!generateProxy) {
       if (importedComponent) {
-        importTypes.add(ProcessingContext.importedPkg(type) + "." + shortType + Constants.DI);
+        importTypes.add(ProcessingContext.importedPkg(type) + '.' + shortType + Constants.DI);
       } else {
         importTypes.add(type + Constants.DI);
       }
