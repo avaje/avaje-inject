@@ -55,6 +55,7 @@ final class BeanReader {
   private Set<UType> allUTypes;
   private final boolean delayed;
   private final Integer priority;
+  private final boolean prototypePredestroy;
 
   BeanReader(TypeElement beanType, boolean factory, boolean importedComponent) {
     this.beanType = beanType;
@@ -68,6 +69,7 @@ final class BeanReader {
     this.prototype =
       PrototypePrism.isPresent(actualType)
         || importedComponent && ProcessingContext.isImportedPrototype(actualType);
+    this.prototypePredestroy = prototype && PrototypePrism.getInstanceOn(actualType).enablePreDestroy();
     this.primary = PrimaryPrism.isPresent(actualType);
     this.secondary = !primary && SecondaryPrism.isPresent(actualType);
     this.priority = Util.priority(actualType);
@@ -427,6 +429,7 @@ final class BeanReader {
     });
 
     if (preDestroyMethod != null) {
+      lifeCycleNotSupported();
       var priority = preDestroyPriority == null || preDestroyPriority == 1000 ? "" : ", " + preDestroyPriority;
       writer
         .start("builder.providerPreDestroy(bean::%s%s);", preDestroyMethod.getSimpleName(), priority)
@@ -451,6 +454,14 @@ final class BeanReader {
       }
     }
     writer.append(")");
+  }
+
+  private void lifeCycleNotSupported() {
+    if (prototype && !prototypePredestroy) {
+      logError(
+          beanType,
+          "@Prototype scoped beans do not naturally support the @PreDestroy lifecycle, use @Prototype(enablePreDestroy=true) to enable this at your own peril");
+    }
   }
 
   private Set<String> importTypes() {

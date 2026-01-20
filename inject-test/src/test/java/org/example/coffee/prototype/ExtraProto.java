@@ -8,7 +8,7 @@ import jakarta.inject.Inject;
 import java.io.Closeable;
 import java.io.IOException;
 
-@Prototype
+@Prototype(enablePreDestroy = true)
 public class ExtraProto implements Closeable {
 
   boolean initRun;

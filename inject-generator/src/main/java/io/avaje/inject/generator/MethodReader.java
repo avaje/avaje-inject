@@ -38,6 +38,7 @@ final class MethodReader {
   private final String factoryType;
   private final String methodName;
   private final boolean prototype;
+  private final boolean prototypePredestroy;
   private final boolean primary;
   private final boolean secondary;
   private final Integer priority;
@@ -62,6 +63,7 @@ final class MethodReader {
   private MethodParam observeParameter;
   private MethodReader initMethodReader;
 
+
   MethodReader(ExecutableElement element, TypeElement beanType, ImportTypeMap importTypes) {
     this(null, element, beanType, null, null, importTypes);
   }
@@ -71,6 +73,7 @@ final class MethodReader {
     this.element = element;
     if (bean != null) {
       prototype = PrototypePrism.isPresent(element);
+      this.prototypePredestroy = prototype && PrototypePrism.getInstanceOn(element).enablePreDestroy();
       primary = PrimaryPrism.isPresent(element);
       secondary = SecondaryPrism.isPresent(element);
       priority = Util.priority(element);
@@ -310,11 +313,14 @@ final class MethodReader {
 
       writer.append(";").eol();
     }
-    final var isCloseable = typeReader != null && typeReader.isClosable();
+
+    final var isCloseable =
+        (!prototype || prototypePredestroy) && typeReader != null && typeReader.isClosable();
 
     var priority = priority(destroyPriority);
     if (notEmpty(destroyMethod)) {
       writer.start("builder.providerPreDestroy(%s%s);", addPreDestroy(destroyMethod), priority).eol();
+      lifeCycleNotSupported();
     } else if (isCloseable && !priority.isBlank()) {
       writer.start("builder.providerPreDestroy($bean::close%s);", priority).eol();
     } else if (isCloseable || beanCloseable) {
@@ -345,6 +351,14 @@ final class MethodReader {
       writer.start("});").eol();
     }
     writer.append("    }").eol();
+  }
+
+  private void lifeCycleNotSupported() {
+    if (prototype && !prototypePredestroy) {
+      logError(
+          element,
+          "@Prototype scoped beans do not naturally support the @PreDestroy lifecycle, use @Prototype(enablePreDestroy=true) to enable this at your own peril");
+    }
   }
 
   void builderBuildAddBean(Append writer) {
