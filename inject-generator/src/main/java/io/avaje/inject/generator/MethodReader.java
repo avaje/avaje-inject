@@ -73,7 +73,7 @@ final class MethodReader {
     this.element = element;
     if (bean != null) {
       prototype = PrototypePrism.isPresent(element);
-      this.prototypePredestroy = prototype && PrototypePrism.getInstanceOn(element).enablePreDestroy();
+      prototypePredestroy = prototype && PrototypePrism.getInstanceOn(element).enablePreDestroy();
       primary = PrimaryPrism.isPresent(element);
       secondary = SecondaryPrism.isPresent(element);
       priority = Util.priority(element);
@@ -95,6 +95,7 @@ final class MethodReader {
       }
     } else {
       prototype = false;
+      prototypePredestroy = false;
       primary = false;
       secondary = false;
       priority = null;
