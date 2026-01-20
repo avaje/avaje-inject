@@ -35,4 +35,4 @@ jobs:
     - name: Build with Maven
       run: mvn clean install
     - name: Build with Maven (javax)
-      run: ./jakarta-to-javax.sh && mvn clean install && ./javax-to-jakarta.sh
+      run: java Jakarta2Javax.java && mvn clean install && java Javax2Jakarta.java
