@@ -55,6 +55,7 @@ final class BeanReader {
   private Set<UType> allUTypes;
   private final boolean delayed;
   private final Integer priority;
+  private final boolean prototypePreDestroy;
 
   BeanReader(TypeElement beanType, boolean factory, boolean importedComponent) {
     this.beanType = beanType;
@@ -66,8 +67,13 @@ final class BeanReader {
     TypeElement actualType = proxy ? APContext.asTypeElement(beanType.getSuperclass()) : beanType;
 
     this.prototype =
-      PrototypePrism.isPresent(actualType)
-        || importedComponent && ProcessingContext.isImportedPrototype(actualType);
+        PrototypePrism.isPresent(actualType)
+            || importedComponent && ProcessingContext.isImportedPrototype(actualType);
+    this.prototypePreDestroy =
+        prototype
+            && PrototypePrism.getOptionalOn(actualType)
+                .map(PrototypePrism::enablePreDestroy)
+                .orElse(false);
     this.primary = PrimaryPrism.isPresent(actualType);
     this.secondary = !primary && SecondaryPrism.isPresent(actualType);
     this.priority = Util.priority(actualType);
@@ -433,7 +439,7 @@ final class BeanReader {
         .start("builder.providerPreDestroy(bean::%s%s);", preDestroyMethod.getSimpleName(), priority)
         .eol();
 
-    } else if (typeReader.isClosable() && !prototype) {
+    } else if (typeReader.isClosable()) {
       writer.start("builder.providerAutoClosable(bean);").eol();
     }
   }
@@ -455,8 +461,10 @@ final class BeanReader {
   }
 
   private void lifeCycleNotSupported() {
-    if (prototype) {
-      logError(beanType, "@Prototype scoped beans do not support the @PreDestroy lifecycle");
+    if (prototype && !prototypePreDestroy) {
+      logError(
+          beanType,
+          "@Prototype scoped beans do not naturally support the @PreDestroy lifecycle, use @Prototype(enablePreDestroy=true) to enable this at your own peril");
     }
   }
 

@@ -9,14 +9,16 @@ class ExtraProtoTest {
 
   @Test
   void fieldMethodInjection() {
-    try (BeanScope scope = BeanScope.builder()
-      .build()) {
+    ExtraProto extra;
+    try (BeanScope scope = BeanScope.builder().build()) {
 
-      ExtraProto extra = scope.get(ExtraProto.class);
+      extra = scope.get(ExtraProto.class);
 
       assertThat(extra.fieldInjected()).isNotNull();
       assertThat(extra.methodInjected()).isNotNull();
       assertThat(extra.initRun()).isTrue();
+      assertThat(extra.destroyed()).isFalse();
     }
+    assertThat(extra.destroyed()).isTrue();
   }
 }
