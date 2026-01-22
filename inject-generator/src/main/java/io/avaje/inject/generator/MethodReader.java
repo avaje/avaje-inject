@@ -38,7 +38,7 @@ final class MethodReader {
   private final String factoryType;
   private final String methodName;
   private final boolean prototype;
-  private final boolean prototypePredestroy;
+  private final boolean prototypePreDestroy;
   private final boolean primary;
   private final boolean secondary;
   private final Integer priority;
@@ -73,7 +73,7 @@ final class MethodReader {
     this.element = element;
     if (bean != null) {
       prototype = PrototypePrism.isPresent(element);
-      prototypePredestroy = prototype && PrototypePrism.getInstanceOn(element).enablePreDestroy();
+      prototypePreDestroy = prototype && PrototypePrism.getInstanceOn(element).enablePreDestroy();
       primary = PrimaryPrism.isPresent(element);
       secondary = SecondaryPrism.isPresent(element);
       priority = Util.priority(element);
@@ -95,7 +95,7 @@ final class MethodReader {
       }
     } else {
       prototype = false;
-      prototypePredestroy = false;
+      prototypePreDestroy = false;
       primary = false;
       secondary = false;
       priority = null;
@@ -316,7 +316,7 @@ final class MethodReader {
     }
 
     final var isCloseable =
-        (!prototype || prototypePredestroy) && typeReader != null && typeReader.isClosable();
+        (!prototype || prototypePreDestroy) && typeReader != null && typeReader.isClosable();
 
     var priority = priority(destroyPriority);
     if (notEmpty(destroyMethod)) {
@@ -355,7 +355,7 @@ final class MethodReader {
   }
 
   private void lifeCycleNotSupported() {
-    if (prototype && !prototypePredestroy) {
+    if (prototype && !prototypePreDestroy) {
       logError(
           element,
           "@Prototype scoped beans do not naturally support the @PreDestroy lifecycle, use @Prototype(enablePreDestroy=true) to enable this at your own peril");

@@ -17,6 +17,7 @@ class ExtraProtoTest {
       assertThat(extra.fieldInjected()).isNotNull();
       assertThat(extra.methodInjected()).isNotNull();
       assertThat(extra.initRun()).isTrue();
+      assertThat(extra.destroyed()).isFalse();
     }
     assertThat(extra.destroyed()).isTrue();
   }

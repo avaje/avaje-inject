@@ -23,10 +23,13 @@ import java.lang.annotation.Target;
 public @interface Prototype {
 
   /**
-   * Enable @{@link PreDestroy} methods. When enabled, the container will hold a reference to this
-   * bean in order to call any @PreDestroy annotated methods when the container is shutdown. Be
-   * aware that continuously creating prototype beans without closing the scope may lead to memory
-   * leaks when this flag is enabled.
+   * Enable @{@link PreDestroy} methods. When enabled, the BeanScope that creates the prototype
+   * will hold a reference to this bean in order to call any @PreDestroy annotated methods when
+   * the BeanScope is shutdown. Be aware that creating prototype beans without closing the scope
+   * may lead to memory leaks when this flag is enabled.
+   *
+   * <p>Use {@link BeanScope#close()} on the containing BeanScope, to fire the PreDestroy
+   * methods and release any associated resources.
    */
   boolean enablePreDestroy() default false;
 }

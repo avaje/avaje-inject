@@ -55,7 +55,7 @@ final class BeanReader {
   private Set<UType> allUTypes;
   private final boolean delayed;
   private final Integer priority;
-  private final boolean prototypePredestroy;
+  private final boolean prototypePreDestroy;
 
   BeanReader(TypeElement beanType, boolean factory, boolean importedComponent) {
     this.beanType = beanType;
@@ -69,7 +69,7 @@ final class BeanReader {
     this.prototype =
         PrototypePrism.isPresent(actualType)
             || importedComponent && ProcessingContext.isImportedPrototype(actualType);
-    this.prototypePredestroy =
+    this.prototypePreDestroy =
         prototype
             && PrototypePrism.getOptionalOn(actualType)
                 .map(PrototypePrism::enablePreDestroy)
@@ -461,7 +461,7 @@ final class BeanReader {
   }
 
   private void lifeCycleNotSupported() {
-    if (prototype && !prototypePredestroy) {
+    if (prototype && !prototypePreDestroy) {
       logError(
           beanType,
           "@Prototype scoped beans do not naturally support the @PreDestroy lifecycle, use @Prototype(enablePreDestroy=true) to enable this at your own peril");
