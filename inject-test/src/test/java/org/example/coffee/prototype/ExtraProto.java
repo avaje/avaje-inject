@@ -1,16 +1,18 @@
 package org.example.coffee.prototype;
 
 import io.avaje.inject.PostConstruct;
+import io.avaje.inject.PreDestroy;
 import io.avaje.inject.Prototype;
 import jakarta.inject.Inject;
 
 import java.io.Closeable;
 import java.io.IOException;
 
-@Prototype
+@Prototype(enablePreDestroy = true)
 public class ExtraProto implements Closeable {
 
   boolean initRun;
+  boolean destroyed;
 
   @Inject
   MyProto fieldInjected;
@@ -27,6 +29,11 @@ public class ExtraProto implements Closeable {
     initRun = true;
   }
 
+  @PreDestroy
+  void destroy() {
+    destroyed = true;
+  }
+
   public MyProto fieldInjected() {
     return fieldInjected;
   }
@@ -39,12 +46,12 @@ public class ExtraProto implements Closeable {
     return initRun;
   }
 
+  public boolean destroyed() {
+    return destroyed;
+  }
+
   @Override
   public void close() throws IOException {
 
   }
-
-  // Compilation error expected with PreDestroy
-  // @PreDestroy
-  // void foo() { }
 }

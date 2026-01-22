@@ -38,6 +38,7 @@ final class MethodReader {
   private final String factoryType;
   private final String methodName;
   private final boolean prototype;
+  private final boolean prototypePreDestroy;
   private final boolean primary;
   private final boolean secondary;
   private final Integer priority;
@@ -62,6 +63,7 @@ final class MethodReader {
   private MethodParam observeParameter;
   private MethodReader initMethodReader;
 
+
   MethodReader(ExecutableElement element, TypeElement beanType, ImportTypeMap importTypes) {
     this(null, element, beanType, null, null, importTypes);
   }
@@ -71,6 +73,7 @@ final class MethodReader {
     this.element = element;
     if (bean != null) {
       prototype = PrototypePrism.isPresent(element);
+      prototypePreDestroy = prototype && PrototypePrism.getInstanceOn(element).enablePreDestroy();
       primary = PrimaryPrism.isPresent(element);
       secondary = SecondaryPrism.isPresent(element);
       priority = Util.priority(element);
@@ -92,6 +95,7 @@ final class MethodReader {
       }
     } else {
       prototype = false;
+      prototypePreDestroy = false;
       primary = false;
       secondary = false;
       priority = null;
@@ -311,7 +315,8 @@ final class MethodReader {
       writer.append(";").eol();
     }
 
-    final var isCloseable = !prototype && typeReader != null && typeReader.isClosable();
+    final var isCloseable =
+        (!prototype || prototypePreDestroy) && typeReader != null && typeReader.isClosable();
 
     var priority = priority(destroyPriority);
     if (notEmpty(destroyMethod)) {
@@ -321,9 +326,6 @@ final class MethodReader {
       writer.start("builder.providerPreDestroy($bean::close%s);", priority).eol();
     } else if (isCloseable || beanCloseable) {
       writer.start("builder.providerAutoClosable($bean);").eol();
-      if (beanCloseable) {
-        lifeCycleNotSupported();
-      }
     }
 
     var matchedPreDestroyMethod = factory.matchPreDestroy(returnTypeRaw);
@@ -353,8 +355,10 @@ final class MethodReader {
   }
 
   private void lifeCycleNotSupported() {
-    if (prototype) {
-      logError(element, "@Prototype scoped beans do not support the PreDestroy lifecycle");
+    if (prototype && !prototypePreDestroy) {
+      logError(
+          element,
+          "@Prototype scoped beans do not naturally support the @PreDestroy lifecycle, use @Prototype(enablePreDestroy=true) to enable this at your own peril");
     }
   }
 
