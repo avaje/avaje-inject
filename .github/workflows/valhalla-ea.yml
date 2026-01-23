@@ -39,7 +39,7 @@ jobs:
     - name: Maven version
       run: mvn --version
     - name: Prepare
-      run: ./jakarta-to-valhalla.sh
+      run: java Jakarta2Valhalla.java
     - name: Build with Maven
       run: mvn package
 
