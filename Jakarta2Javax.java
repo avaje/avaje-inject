@@ -33,6 +33,9 @@ public class Jakarta2Javax {
           "<version>2.0.1</version> <!-- jakarta -->",
           "<version>1.0.5</version> <!-- javax -->");
 
+      // Update inject BOM pom file - add -javax to all version tags
+      updateInjectBomVersions("inject-bom/pom.xml");
+
       // Update module-info.java
       replaceInFile("inject/src/main/java/module-info.java", " jakarta.inject", " java.inject");
 
@@ -77,6 +80,37 @@ public class Jakarta2Javax {
 
       Files.write(path, content.getBytes());
     }
+  }
+
+  private static void updateInjectBomVersions(String filePath) throws IOException {
+    Path path = Paths.get(filePath);
+
+    String content = new String(Files.readAllBytes(path));
+    
+    // Pattern to match all <version>...</version> tags
+    // Matches versions like: 12.3, 1.0.5, 2.0.1, etc.
+    Pattern pattern = Pattern.compile("<version>([0-9]+\\.[0-9]+(?:\\.[0-9]+)?)(?:-javax)?(?:-([^<]+))?</version>");
+    StringBuffer result = new StringBuffer();
+    Matcher matcher = pattern.matcher(content);
+    
+    while (matcher.find()) {
+      String version = matcher.group(1);
+      String suffix = matcher.group(2);
+      
+      // Build replacement - add -javax, preserve any additional suffix
+      String replacement;
+      if (suffix != null && !suffix.isEmpty()) {
+        replacement = "<version>" + version + "-javax-" + suffix + "</version>";
+      } else {
+        replacement = "<version>" + version + "-javax</version>";
+      }
+      
+      matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
+    }
+    matcher.appendTail(result);
+    
+    Files.write(path, result.toString().getBytes());
+    System.out.println("Updated inject BOM file: " + filePath);
   }
 
   private static void replaceVersion(String filePath, String search, String replace)

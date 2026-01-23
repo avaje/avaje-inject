@@ -19,7 +19,8 @@ public class Javax2Jakarta {
         "blackbox-aspect/pom.xml",
         "blackbox-other/pom.xml",
         "blackbox-test-inject/pom.xml",
-        "blackbox-multi-scope/pom.xml"
+        "blackbox-multi-scope/pom.xml",
+        "inject-bom/pom.xml"
       };
 
       // Remove -javax from version tags in pom files
