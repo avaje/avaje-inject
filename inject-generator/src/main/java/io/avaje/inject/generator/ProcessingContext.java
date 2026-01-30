@@ -40,7 +40,6 @@ final class ProcessingContext {
 
   private static final String EVENTS_SPI = "io.avaje.inject.events.spi.ObserverManagerPlugin";
   private static final ThreadLocal<Ctx> CTX = ThreadLocal.withInitial(Ctx::new);
-  private static boolean processingOver;
   // the avaje provides maven plugin provides these after compilation when applicable
   private static final Set<String> AVAJE_PROVIDED_PLUGIN =
       Set.of("io.avaje.jsonb.plugin", "io.avaje.validation.plugin", "io.avaje.validation.http");
@@ -60,6 +59,7 @@ final class ProcessingContext {
     private final Map<String, String> importedComponentPkg = new HashMap<>();
     private final boolean hasProvidesPlugin = hasProvidesPlugin();
     private final AllScopes scopes = new AllScopes();
+    private boolean processingOver;
     private boolean strictWiring;
     private final boolean mergeServices =
         APContext.getOption("mergeServices").map(Boolean::valueOf).orElse(true);
@@ -260,11 +260,11 @@ final class ProcessingContext {
   }
 
   static void processingOver(boolean over) {
-    processingOver = over;
+    CTX.get().processingOver = over;
   }
 
   static boolean processingOver() {
-    return processingOver;
+    return CTX.get().processingOver;
   }
 
   static void writeSPIServicesFile() {
