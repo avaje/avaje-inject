@@ -128,10 +128,13 @@ final class Util {
   }
 
   static String shortName(String fullType) {
-    var element = APContext.typeElement(fullType);
-
-    if (element != null && !element.getNestingKind().isNested()) {
-      return element.getSimpleName().toString();
+    try {
+      var element = APContext.typeElement(fullType);
+      if (element != null && !element.getNestingKind().isNested()) {
+        return element.getSimpleName().toString();
+      }
+    } catch (Exception e) {
+      // fallback
     }
 
     final int p = fullType.lastIndexOf('.');
