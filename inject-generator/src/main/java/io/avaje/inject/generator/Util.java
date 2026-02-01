@@ -128,6 +128,15 @@ final class Util {
   }
 
   static String shortName(String fullType) {
+    try {
+      var element = APContext.typeElement(fullType);
+      if (element != null && !element.getNestingKind().isNested()) {
+        return element.getSimpleName().toString();
+      }
+    } catch (Exception e) {
+      // fallback
+    }
+
     final int p = fullType.lastIndexOf('.');
     if (p == -1) {
       return fullType;
@@ -222,9 +231,8 @@ final class Util {
   static String trimWildcard(String rawType) {
     if (rawType.endsWith("<?>")) {
       return rawType.substring(0, rawType.length() - 3);
-    } else {
-      return trimGenericParams(rawType);
     }
+    return trimGenericParams(rawType);
   }
 
   /**
