@@ -4,7 +4,6 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/avaje/avaje-inject/blob/master/LICENSE)
 [![Maven Central](https://img.shields.io/maven-central/v/io.avaje/avaje-inject.svg?label=Maven%20Central)](https://mvnrepository.com/artifact/io.avaje/avaje-inject)
 [![javadoc](https://javadoc.io/badge2/io.avaje/avaje-inject/javadoc.svg?color=purple)](https://javadoc.io/doc/io.avaje/avaje-inject)
-[![Reproducible Builds](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jvm-repo-rebuild/reproducible-central/master/content/io/avaje/inject/badge.json)](https://github.com/jvm-repo-rebuild/reproducible-central/blob/master/content/io/avaje/inject/README.md)
 
 # [Avaje-Inject](https://avaje.io/inject)
 APT-based dependency injection for server-side developers - https://avaje.io/inject
