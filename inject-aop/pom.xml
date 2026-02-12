@@ -5,7 +5,7 @@
   <parent>
     <groupId>io.avaje</groupId>
     <artifactId>avaje-inject-parent</artifactId>
-    <version>12.4-RC1</version>
+    <version>12.4</version>
   </parent>
   <artifactId>avaje-inject-aop</artifactId>
   <name>avaje inject aspect orient programming</name>
