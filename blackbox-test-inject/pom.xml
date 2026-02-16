@@ -29,7 +29,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-jsonb</artifactId>
-      <version>3.10</version>
+      <version>3.11</version>
     </dependency>
 
     <dependency>
@@ -82,7 +82,7 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.5.28</version>
+      <version>1.5.31</version>
       <scope>test</scope>
     </dependency>
 
