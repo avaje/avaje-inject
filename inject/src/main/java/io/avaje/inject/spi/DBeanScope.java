@@ -185,8 +185,14 @@ final class DBeanScope implements BeanScope {
     if (parentValues.isEmpty()) {
       return values;
     }
-    values.addAll(parentValues);
-    return values;
+    if (values instanceof ArrayList<?>) {
+      values.addAll(parentValues);
+      return values;
+    }
+    final List<T> combined = new ArrayList<>(values.size() + parentValues.size());
+    combined.addAll(values);
+    combined.addAll(parentValues);
+    return combined;
   }
 
   @Override

@@ -33,6 +33,9 @@ import jakarta.inject.Provider;
 final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   private static final System.Logger log = AppLog.getLogger("io.avaje.inject");
+  private static final boolean avajeConfigPresent = detectAvajeConfig();
+  private static final ConfigPropertyPlugin defaultConfigPlugin =
+    avajeConfigPresent ? new DConfigProps() : new DSystemProps();
 
   private final List<SuppliedBean> suppliedBeans = new ArrayList<>();
   @SuppressWarnings("rawtypes")
@@ -218,7 +221,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
   }
   private ConfigPropertyPlugin defaultPropertyPlugin() {
-    return detectAvajeConfig() ? new DConfigProps() : new DSystemProps();
+    return defaultConfigPlugin;
   }
 
   @SuppressWarnings("ConstantValue")

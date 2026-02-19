@@ -3,6 +3,8 @@ package io.avaje.inject.spi;
 import io.avaje.inject.BeanEntry;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("all")
@@ -175,6 +177,25 @@ class DContextEntryTest {
 
     assertEquals(entry.get("myName", AvajeModule.class), "N2");
     assertEquals(entry.get(null, AvajeModule.class), "N1");
+  }
+
+  @Test
+  void singleEntry_allAndMap() {
+
+    DContextEntry entry = new DContextEntry();
+    entry.add(DContextEntryBean.of("N1", "myName", BeanEntry.NORMAL, null));
+
+    assertEquals(entry.all("myName"), List.of("N1"));
+    assertEquals(entry.map().get("myName"), "N1");
+  }
+
+  @Test
+  void singleEntry_supplied() {
+
+    DContextEntry entry = new DContextEntry();
+    entry.add(DContextEntryBean.of("N1", "myName", BeanEntry.SUPPLIED, null));
+
+    assertNotNull(entry.supplied("myName"));
   }
 
   class OtherModule implements AvajeModule {
