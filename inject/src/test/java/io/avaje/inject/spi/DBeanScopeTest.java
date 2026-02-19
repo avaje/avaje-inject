@@ -27,6 +27,11 @@ class DBeanScopeTest {
     assertThat(result).containsExactly("A", "B", "C");
   }
 
+  @Test
+  void combine_bothImmutable() {
+    final List<Object> result = DBeanScope.combine(List.<Object>of("A", "B"), List.<Object>of("C"));
+    assertThat(result).containsExactly("A", "B", "C");
+  }
 
   List<Object> list(String... vals) {
     return Arrays.asList(vals);

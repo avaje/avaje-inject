@@ -16,40 +16,55 @@ import org.jspecify.annotations.Nullable;
  */
 final class DContextEntry {
 
-  private final List<DContextEntryBean> entries = new ArrayList<>(5);
+  private @Nullable DContextEntryBean single;
+  private @Nullable List<DContextEntryBean> entries;
 
   @Override
   public String toString() {
-    return String.valueOf(entries);
+    return String.valueOf(entries());
   }
 
   List<DContextEntryBean> entries() {
-    return entries;
+    if (entries != null) {
+      return entries;
+    }
+    return single == null ? List.of() : List.of(single);
   }
 
   void add(DContextEntryBean entryBean) {
+    if (entries != null) {
+      entries.add(entryBean);
+      return;
+    }
+    if (single == null) {
+      single = entryBean;
+      return;
+    }
+    entries = new ArrayList<>(5);
+    entries.add(single);
     entries.add(entryBean);
+    single = null;
   }
 
   Provider<?> provider(String name, Class<? extends AvajeModule> currentModule) {
-    if (entries.size() == 1) {
-      return entries.get(0).provider();
+    if (entries == null) {
+      return single == null ? null : single.provider();
     }
     return new EntryMatcher(name, currentModule).provider(entries);
   }
 
   /** Check if a non secondary entry exists */
   Object nonDefaultEntry(String name) {
-    if (entries.size() == 1) {
-      return entries.get(0).nonDefaultMatch(name);
+    if (entries == null) {
+      return single == null ? null : single.nonDefaultMatch(name);
     }
     var entry = new EntryMatcher(name, null).findMatch(entries);
     return entry != null ? entry.nonDefaultMatch(null) : null;
   }
 
   Object get(String name, Class<? extends AvajeModule> currentModule) {
-    if (entries.size() == 1) {
-      return entries.get(0).bean();
+    if (entries == null) {
+      return single == null ? null : single.bean();
     }
     return new EntryMatcher(name, currentModule).match(entries);
   }
@@ -58,6 +73,19 @@ final class DContextEntry {
    * Return all the beans matching the name qualifier (if passed).
    */
   List<Object> all(@Nullable String name) {
+    if (entries == null) {
+      if (single == null || !single.isNameMatch(name)) {
+        return List.of();
+      }
+      return List.of(single.bean());
+    }
+    if (name == null) {
+      List<Object> list = new ArrayList<>(entries.size());
+      for (DContextEntryBean entry : entries) {
+        list.add(entry.bean());
+      }
+      return list;
+    }
     List<Object> list = new ArrayList<>(entries.size());
     for (DContextEntryBean entry : entries) {
       if (entry.isNameMatch(name)) {
@@ -71,6 +99,12 @@ final class DContextEntry {
    * Return a map of beans keyed by qualifier name.
    */
   Map<String, Object> map() {
+    if (entries == null) {
+      if (single == null) {
+        return Map.of();
+      }
+      return toMap(single);
+    }
     Map<String, Object> map = new LinkedHashMap<>();
     for (DContextEntryBean entry : entries) {
       Object bean = entry.bean();
@@ -87,12 +121,26 @@ final class DContextEntry {
    * Return a supplied bean is one of the entries.
    */
   DContextEntryBean supplied(String qualifierName) {
+    if (entries == null) {
+      return single != null && single.isSupplied(qualifierName) ? single : null;
+    }
     for (DContextEntryBean entry : entries) {
       if (entry.isSupplied(qualifierName)) {
         return entry;
       }
     }
     return null;
+  }
+
+  private static Map<String, Object> toMap(DContextEntryBean entry) {
+    Map<String, Object> map = new LinkedHashMap<>(1);
+    Object bean = entry.bean();
+    String nm = entry.name();
+    if (nm == null) {
+      nm = "$Unnamed-" + System.identityHashCode(bean) + "-" + bean;
+    }
+    map.put(nm, bean);
+    return map;
   }
 
   static final class EntryMatcher {
