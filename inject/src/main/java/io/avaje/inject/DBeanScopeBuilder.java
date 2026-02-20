@@ -33,9 +33,8 @@ import jakarta.inject.Provider;
 final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
   private static final System.Logger log = AppLog.getLogger("io.avaje.inject");
-  private static final boolean avajeConfigPresent = detectAvajeConfig();
   private static final ConfigPropertyPlugin defaultConfigPlugin =
-    avajeConfigPresent ? new DConfigProps() : new DSystemProps();
+      detectAvajeConfig() ? new DConfigProps() : new DSystemProps();
 
   private final List<SuppliedBean> suppliedBeans = new ArrayList<>();
   @SuppressWarnings("rawtypes")
@@ -79,7 +78,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
   @Override
   public ConfigPropertyPlugin configPlugin() {
     if (propertyPlugin == null) {
-      propertyPlugin = defaultPropertyPlugin();
+      propertyPlugin = defaultConfigPlugin;
     }
     return propertyPlugin;
   }
@@ -220,9 +219,6 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       classLoader = Thread.currentThread().getContextClassLoader();
     }
   }
-  private ConfigPropertyPlugin defaultPropertyPlugin() {
-    return defaultConfigPlugin;
-  }
 
   @SuppressWarnings("ConstantValue")
   private static boolean detectAvajeConfig() {
@@ -257,7 +253,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
     var serviceLoader = new DServiceLoader(classLoader);
     if (propertyPlugin == null) {
-      propertyPlugin = serviceLoader.propertyPlugin().orElseGet(this::defaultPropertyPlugin);
+      propertyPlugin = serviceLoader.propertyPlugin().orElse(defaultConfigPlugin);
     }
 
     serviceLoader.plugins().forEach(plugin -> plugin.apply(this));
