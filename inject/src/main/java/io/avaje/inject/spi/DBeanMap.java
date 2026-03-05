@@ -5,8 +5,8 @@ import static java.util.stream.Collectors.toList;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,7 +23,7 @@ import org.jspecify.annotations.Nullable;
  */
 final class DBeanMap {
   private static final Optional<Object> EMPTY = Optional.empty();
-  private final Map<String, DContextEntry> beans = new LinkedHashMap<>();
+  private final Map<String, DContextEntry> beans = new HashMap<>();
   private final Set<String> qualifiers = new HashSet<>();
 
   private NextBean nextBean;
@@ -177,7 +177,7 @@ final class DBeanMap {
     if (localMap.isEmpty()) {
       return parentMap;
     }
-    Map<String, Object> result = new LinkedHashMap<>(parentMap);
+    Map<String, Object> result = new HashMap<>(parentMap);
     result.putAll(localMap);
     return result;
   }
@@ -255,7 +255,7 @@ final class DBeanMap {
     return forScopes;
   }
 
-  static class NextBean {
+  static final class NextBean {
     final String name;
     final Type[] types;
     int priority = BeanEntry.NORMAL;
