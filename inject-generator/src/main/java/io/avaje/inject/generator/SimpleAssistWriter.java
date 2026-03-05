@@ -87,7 +87,7 @@ final class SimpleAssistWriter {
     if (qualifierName != null) {
       writer.append("@Named(\"%s\")", qualifierName).eol();
     }
-    writer.append("@Component").eol();
+    writer.append("@io.avaje.inject.Component").eol();
     if (!beanReader.hasTargetFactory()) {
       writer.append("public ");
     }

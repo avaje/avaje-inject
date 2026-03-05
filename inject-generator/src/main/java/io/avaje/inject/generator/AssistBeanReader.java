@@ -167,7 +167,6 @@ final class AssistBeanReader {
   }
 
   void writeImports(Append writer, String pkgName) {
-    importTypes.add(Constants.COMPONENT);
     if (!injectFields().isEmpty()) {
       importTypes.add(Constants.TYPE);
     }
