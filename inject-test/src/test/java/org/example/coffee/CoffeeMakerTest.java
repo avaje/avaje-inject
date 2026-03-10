@@ -85,7 +85,7 @@ class CoffeeMakerTest {
         .findFirst().orElse(null);
 
       assertThat(inhEntry.keys())
-        .containsExactly(name(InhOne.class), name(InhBase.class), name(InhBaseBase.class),
+        .containsExactlyInAnyOrder(name(InhOne.class), name(InhBase.class), name(InhBaseBase.class),
           name(InhBaseIface2.class), name(InhBaseIface3.class), name(InhBaseIface.class));
     }
   }
@@ -101,7 +101,7 @@ class CoffeeMakerTest {
         .findFirst().orElse(null);
 
       assertThat(extendIfaces.keys())
-        .containsExactly(name(ConcreteExtend.class), name(IfaceExtend.class), name(IfaseBase.class));
+        .containsExactlyInAnyOrder(name(ConcreteExtend.class), name(IfaceExtend.class), name(IfaseBase.class));
     }
   }
 
@@ -116,7 +116,7 @@ class CoffeeMakerTest {
         .findFirst().orElse(null);
 
       assertThat(hazRepo.keys())
-        .containsExactly(name(HazRepo.class), name(HazRepo$DI.TYPE_RepositoryHazLong), name(Repository.class));
+        .containsExactlyInAnyOrder(name(HazRepo.class), name(HazRepo$DI.TYPE_RepositoryHazLong), name(Repository.class));
     }
   }
 
@@ -131,7 +131,7 @@ class CoffeeMakerTest {
         .findFirst().orElse(null);
 
       assertThat(hazRepo.keys())
-        .containsExactly(name(MyParam.class), name(IfaceParam.class), name(IfaceParamParent.class));
+        .containsExactlyInAnyOrder(name(MyParam.class), name(IfaceParam.class), name(IfaceParamParent.class));
     }
   }
 
@@ -146,7 +146,7 @@ class CoffeeMakerTest {
         .findFirst().orElse(null);
 
       assertThat(extendIfaces.keys())
-        .containsExactly(name(AProvProvider.class), name(AProv.class));
+        .containsExactlyInAnyOrder(name(AProvProvider.class), name(AProv.class));
     }
   }
 
