@@ -174,8 +174,7 @@ final class DContextEntry {
 
     private DContextEntryBean findMatch(List<DContextEntryBean> entries) {
       for (DContextEntryBean entry : entries) {
-        final var entryNameEqual = entry.isNameEqual(name);
-        if (entryNameEqual) {
+        if (entry.isNameEqual(name)) {
           checkMatch(entry);
         }
       }
