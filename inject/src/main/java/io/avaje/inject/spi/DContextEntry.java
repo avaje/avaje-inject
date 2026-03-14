@@ -174,7 +174,8 @@ final class DContextEntry {
 
     private DContextEntryBean findMatch(List<DContextEntryBean> entries) {
       for (DContextEntryBean entry : entries) {
-        if (entry.isNameEqual(name)) {
+        final var entryNameEqual = entry.isNameEqual(name);
+        if (entryNameEqual) {
           checkMatch(entry);
         }
       }
@@ -221,24 +222,36 @@ final class DContextEntry {
         return;
       }
       // try to resolve match using qualifier name (including null)
-      if (impliedName || (match.isNameEqual(name) && !entry.isNameEqual(name))) {
+      final var entryNameEqual = entry.isNameEqual(name);
+      final var matchNameEqual = match.isNameEqual(name);
+
+      if (matchNameEqual && !entryNameEqual) {
         ignoredSecondaryMatch = entry;
         return;
       }
-      if (!match.isNameEqual(name) && entry.isNameEqual(name)) {
+      if (!matchNameEqual && entryNameEqual) {
         match = entry;
         return;
       }
+
       // if all else fails use the one provided by the current module
-      if (entry.sourceModule() != currentModule) {
+      final var external = entry.sourceModule() != currentModule;
+      if (external) {
         ignoredSecondaryMatch = entry;
         return;
       }
-      if (entry.sourceModule() == currentModule && match.sourceModule() != currentModule) {
+      final var matchExternal = match.sourceModule() != currentModule;
+      if (!external && matchExternal) {
         // match on module
         match = entry;
         return;
       }
+
+      if (impliedName && (external || matchExternal)) {
+        ignoredSecondaryMatch = entry;
+        return;
+      }
+
       throw new IllegalStateException(
           "Expecting only 1 bean match but have multiple matching beans "
               + match.bean()
