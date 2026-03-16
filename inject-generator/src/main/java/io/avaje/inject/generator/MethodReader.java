@@ -148,10 +148,15 @@ final class MethodReader {
       beanTypes.ifPresent(t -> Util.validateBeanTypes(element, t));
       this.typeReader = new TypeReader(beanTypes.orElse(List.of()), genericType, returnElement, importTypes, element);
       typeReader.process();
-      var lifecycleReader = new MethodLifecycleReader(returnElement, initMethod, destroyMethod, importTypes);
-      this.initMethod = lifecycleReader.initMethod();
-      this.initMethodReader = lifecycleReader.initMethodReader();
-      this.destroyMethod = lifecycleReader.destroyMethod();
+      if (bean != null) {
+        var lifecycleReader = new MethodLifecycleReader(returnElement, initMethod, destroyMethod, importTypes);
+        this.initMethod = lifecycleReader.initMethod();
+        this.initMethodReader = lifecycleReader.initMethodReader();
+        this.destroyMethod = lifecycleReader.destroyMethod();
+      } else {
+        this.initMethod = initMethod;
+        this.destroyMethod = destroyMethod;
+      }
     }
     if (lazy && prototype) {
       APContext.logError("Cannot use both @Lazy and @Prototype");
