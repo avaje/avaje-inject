@@ -21,6 +21,7 @@ final class Constants {
   static final String AT_SINGLETON = "@Singleton";
   static final String AT_PROXY = "@Proxy";
   static final String AT_GENERATED = "@Generated(\"io.avaje.inject.generator\")";
+  static final String AT_SUPPRESS_WARNINGS = "@SuppressWarnings(\"all\")";
   static final String AT_GENERATED_COMMENT = "(\"io.avaje.inject.generator\")";
   static final String META_INF_SPI = "META-INF/services/io.avaje.inject.spi.InjectExtension";
   static final String META_INF_TESTMODULE = "META-INF/services/io.avaje.inject.test.TestModule";

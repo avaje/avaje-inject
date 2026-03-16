@@ -77,6 +77,7 @@ final class SimpleAssistWriter {
 
   private void writeClassStart() {
     writer.append(CODE_COMMENT, shortName).eol();
+    writer.append(Constants.AT_SUPPRESS_WARNINGS).eol();
     writer.append(Constants.AT_GENERATED).eol();
 
     String name = this.shortName;

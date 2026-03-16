@@ -337,6 +337,7 @@ final class SimpleModuleWriter {
     scopeInfo.buildAtInjectModule(writer);
 
     String interfaceType = scopeInfo.type().type();
+    writer.append(Constants.AT_SUPPRESS_WARNINGS).eol();
     writer.append("public final %sclass %s implements %s {", Util.valhalla(), shortName, interfaceType).eol().eol();
     if (scopeInfo.addModuleConstructor()) {
       writeConstructor();
