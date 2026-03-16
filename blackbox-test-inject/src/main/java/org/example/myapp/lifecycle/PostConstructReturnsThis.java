@@ -1,4 +1,4 @@
-package io.avaje.inject.generator.models.valid.lifecycle;
+package org.example.myapp.lifecycle;
 
 import io.avaje.inject.PostConstruct;
 import jakarta.inject.Singleton;

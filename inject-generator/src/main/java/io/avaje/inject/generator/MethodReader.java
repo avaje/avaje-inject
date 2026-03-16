@@ -149,13 +149,14 @@ final class MethodReader {
       this.typeReader = new TypeReader(beanTypes.orElse(List.of()), genericType, returnElement, importTypes, element);
       typeReader.process();
       if (bean != null) {
+        // factory @Bean method, read lifecycle methods from the return type
         var lifecycleReader = new MethodLifecycleReader(returnElement, initMethod, destroyMethod, importTypes);
         this.initMethod = lifecycleReader.initMethod();
         this.initMethodReader = lifecycleReader.initMethodReader();
         this.destroyMethod = lifecycleReader.destroyMethod();
       } else {
-        this.initMethod = initMethod;
-        this.destroyMethod = destroyMethod;
+        this.initMethod = null;
+        this.destroyMethod = null;
       }
     }
     if (lazy && prototype) {
