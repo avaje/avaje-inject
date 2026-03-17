@@ -22,6 +22,7 @@ final class SimpleBeanLazyWriter {
       "{0};\n\n"
           + "{1}"
           + "@Proxy\n"
+          + "@SuppressWarnings(\"all\")\n"
           + "@Generated(\"avaje-inject-generator\")\n"
           + "public final class {2}$Lazy{3} {4} {2}{3} '{'\n"
           + "\n"

@@ -25,6 +25,7 @@ final class EventPublisherWriter {
           + "{1}"
           + "@Component\n"
           + "{2}"
+          + "@SuppressWarnings(\"all\")\n"
           + "@Generated(\"avaje-inject-generator\")\n"
           + "public class {3} extends Event<{4}> '{'\n"
           + "\n"

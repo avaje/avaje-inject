@@ -375,6 +375,7 @@ final class SimpleBeanWriter {
 
   private void writeClassStart() {
     final var requestScopedController = beanReader.isRequestScopedController();
+    writer.append(Constants.AT_SUPPRESS_WARNINGS).eol();
     writer.append(beanReader.generatedType()).append(Constants.AT_GENERATED_COMMENT).eol();
     if (requestScopedController) {
       writer.append(Constants.AT_SINGLETON).eol();

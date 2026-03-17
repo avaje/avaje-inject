@@ -59,6 +59,7 @@ final class SimpleOrderWriter {
         " * Refer to target/avaje-module-dependencies.csv for details.\n" +
         " */\n"
     );
+    writer.append(Constants.AT_SUPPRESS_WARNINGS).eol();
     writer.append(Constants.AT_GENERATED).eol();
     writer.append("public final %sclass %s implements ModuleOrdering {", Util.valhalla(), shortName).eol().eol();
 

@@ -108,6 +108,7 @@ final class SimpleBeanProxyWriter {
   private void writeClassStart() {
     writer.append(Constants.AT_PROXY).eol();
     writer.append(beanReader.prototype() ? "@Prototype" : "@Component").eol();
+    writer.append(Constants.AT_SUPPRESS_WARNINGS).eol();
     writer.append(Constants.AT_GENERATED).eol();
     writer.append("public final class %s%s extends %s {", shortName, suffix, shortName).eol().eol();
   }
