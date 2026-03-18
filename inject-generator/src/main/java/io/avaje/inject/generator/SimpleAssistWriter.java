@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import static io.avaje.inject.generator.APContext.createSourceFile;
 import static java.util.function.Predicate.not;
 
@@ -196,12 +195,35 @@ final class SimpleAssistWriter {
     }
   }
 
+  private String formatTypeParam(TypeParameterElement tp) {
+    var bounds =
+        tp.getBounds().stream()
+            .filter(b -> !"java.lang.Object".equals(b.toString()))
+            .collect(Collectors.toList());
+    if (bounds.isEmpty()) {
+      return tp.getSimpleName().toString();
+    }
+    return tp.getSimpleName()
+        + " extends "
+        + bounds.stream().map(b -> UType.parse(b).shortType()).collect(Collectors.joining(" & "));
+  }
+
   private void writeFactoryMethod() {
     writer.append(CODE_COMMENT_BUILD, shortName).eol();
     if (beanReader.hasTargetFactory()) {
       writer.append("  @Override").eol();
     }
-    writer.append("  public %s %s(", shortName, beanReader.factoryMethodName());
+    var methodTypeParams = beanReader.factoryMethodTypeParams();
+    String returnType;
+    String typeParamStr;
+    if (methodTypeParams.isEmpty()) {
+      typeParamStr = "";
+      returnType = shortName;
+    } else {
+      typeParamStr = "<" + methodTypeParams.stream().map(this::formatTypeParam).collect(Collectors.joining(", ")) + "> ";
+      returnType = beanReader.factoryMethodReturnType();
+    }
+    writer.append("  public %s%s %s(", typeParamStr, returnType, beanReader.factoryMethodName());
     List<? extends VariableElement> params = beanReader.factoryMethodParams();
     for (var iterator = params.iterator(); iterator.hasNext(); ) {
       var element = iterator.next();
