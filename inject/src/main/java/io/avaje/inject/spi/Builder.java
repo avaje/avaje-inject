@@ -130,7 +130,7 @@ public interface Builder {
   /**
    * Check if the instance is AutoCloseable and if so register it with PreDestroy.
    *
-   * @param maybeCloseable An instance that might be AutoCloseable
+   * @param maybeAutoCloseable An instance that might be AutoCloseable
    */
   default void addAutoClosable(Object maybeCloseable) {
     if (maybeCloseable instanceof AutoCloseable) {
@@ -149,7 +149,7 @@ public interface Builder {
   /**
    * Check if the instance is AutoCloseable and if so register it with PreDestroy.
    *
-   * @param maybeCloseable An instance that might be AutoCloseable
+   * @param maybeAutoCloseable An instance that might be AutoCloseable
    */
   default void providerAutoClosable(Object maybeCloseable) {
     if (maybeCloseable instanceof AutoCloseable) {
