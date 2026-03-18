@@ -5,12 +5,12 @@ import io.avaje.inject.Assisted;
 import jakarta.inject.Inject;
 
 @AssistFactory(RelicFactory.class)
-public class Relic<T> {
+public class Relic<T, T2> {
 
   private final Class<T> type;
 
   @Inject
-  Relic(@Assisted Class<T> type) {
+  Relic(@Assisted Class<T> type, @Assisted Class<T2> type2) {
     this.type = type;
   }
 
