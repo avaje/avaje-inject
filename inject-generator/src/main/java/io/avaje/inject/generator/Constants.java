@@ -53,6 +53,8 @@ final class Constants {
   static final String MODULE = "io.avaje.inject.spi.AvajeModule";
   static final String GENERICTYPE = "io.avaje.inject.spi.GenericType";
 
+  static final String THROWABLE_UTIL = "io.avaje.inject.spi.ThrowableUtil";
+
   static final String CONDITIONAL_DEPENDENCY = "con:";
   static final String SOFT_DEPENDENCY = "soft:";
 }

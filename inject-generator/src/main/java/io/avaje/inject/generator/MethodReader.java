@@ -409,8 +409,8 @@ final class MethodReader {
       if (hasInitMethod) {
         var addPostConstruct =
           multiRegister
-            ? ".peek($bean -> builder.addPostConstruct($bean::%s))"
-            : "builder.addPostConstruct($bean::%s);";
+            ? ".peek($bean -> builder.addPostConstruct(ThrowableUtil.guard($bean::%s)))"
+            : "builder.addPostConstruct(ThrowableUtil.guard($bean::%s));";
         writer.start(addPostConstruct, initMethod).eol();
       }
       final var isCloseable = typeReader != null && typeReader.isClosable();

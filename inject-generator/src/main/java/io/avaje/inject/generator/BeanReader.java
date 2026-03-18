@@ -405,15 +405,15 @@ final class BeanReader {
   }
 
   private void writePostConstruct(Append writer, MethodReader postConstruct) {
-    writer.start("builder.addPostConstruct(");
+    writer.start("builder.addPostConstruct(ThrowableUtil.guard(");
     final var methodName = postConstruct.name();
     final var params = postConstruct.params();
     if (params.isEmpty() || Constants.BEANSCOPE.equals(params.get(0).getFullUType().shortType())) {
-      writer.append("$bean::%s);", methodName).eol();
+      writer.append("$bean::%s));", methodName).eol();
     } else {
       writer.append("beanScope -> $bean.%s(", methodName);
       writeLifeCycleGet(writer, params, "beanScope", "beanScope");
-      writer.append(");").eol();
+      writer.append("));").eol();
     }
   }
 
@@ -489,6 +489,7 @@ final class BeanReader {
     if (!suppressBuilderImport && !isGenerateProxy()) {
       importTypes.add(Constants.BUILDER);
     }
+    importTypes.add(Constants.THROWABLE_UTIL);
     return importTypes.forImport();
   }
 
