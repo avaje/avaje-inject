@@ -197,15 +197,15 @@ final class SimpleAssistWriter {
 
   private String formatTypeParam(TypeParameterElement tp) {
     var bounds =
-        tp.getBounds().stream()
-            .filter(b -> !"java.lang.Object".equals(b.toString()))
-            .collect(Collectors.toList());
+      tp.getBounds().stream()
+        .filter(b -> !"java.lang.Object".equals(b.toString()))
+        .collect(Collectors.toList());
     if (bounds.isEmpty()) {
       return tp.getSimpleName().toString();
     }
     return tp.getSimpleName()
-        + " extends "
-        + bounds.stream().map(b -> UType.parse(b).shortType()).collect(Collectors.joining(" & "));
+      + " extends "
+      + bounds.stream().map(b -> UType.parse(b).shortType()).collect(Collectors.joining(" & "));
   }
 
   private void writeFactoryMethod() {
