@@ -405,15 +405,35 @@ final class BeanReader {
   }
 
   private void writePostConstruct(Append writer, MethodReader postConstruct) {
-    writer.start("builder.addPostConstruct(");
     final var methodName = postConstruct.name();
     final var params = postConstruct.params();
-    if (params.isEmpty() || Constants.BEANSCOPE.equals(params.get(0).getFullUType().shortType())) {
-      writer.append("$bean::%s);", methodName).eol();
+    final boolean hasBeanScope = !params.isEmpty() && Constants.BEANSCOPE.equals(params.get(0).getFullUType().shortType());
+    if (!postConstruct.methodThrows()) {
+      writer.start("builder.addPostConstruct(");
+      if (params.isEmpty() || hasBeanScope) {
+        writer.append("$bean::%s);", methodName).eol();
+      } else {
+        writer.append("beanScope -> $bean.%s(", methodName);
+        writeLifeCycleGet(writer, params, "beanScope", "beanScope");
+        writer.append(");").eol();
+      }
     } else {
-      writer.append("beanScope -> $bean.%s(", methodName);
-      writeLifeCycleGet(writer, params, "beanScope", "beanScope");
-      writer.append(");").eol();
+      final var lambdaPrefix = params.isEmpty() ? "()" : "beanScope";
+      writer.start("builder.addPostConstruct(%s -> {", lambdaPrefix).eol();
+      writer.start("  try {").eol();
+      if (params.isEmpty()) {
+        writer.start("    $bean.%s();", methodName).eol();
+      } else if (hasBeanScope) {
+        writer.start("    $bean.%s(beanScope);", methodName).eol();
+      } else {
+        writer.start("    $bean.%s(", methodName);
+        writeLifeCycleGet(writer, params, "beanScope", "beanScope");
+        writer.append(";").eol();
+      }
+      writer.start("  } catch (Exception e) {").eol();
+      writer.start("    throw new RuntimeException(e);").eol();
+      writer.start("  }").eol();
+      writer.start("});").eol();
     }
   }
 

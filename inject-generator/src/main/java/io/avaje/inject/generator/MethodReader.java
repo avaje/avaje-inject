@@ -407,11 +407,37 @@ final class MethodReader {
 
       final var hasInitMethod = notEmpty(initMethod);
       if (hasInitMethod) {
-        var addPostConstruct =
-          multiRegister
-            ? ".peek($bean -> builder.addPostConstruct($bean::%s))"
-            : "builder.addPostConstruct($bean::%s);";
-        writer.start(addPostConstruct, initMethod).eol();
+        if (initMethodReader == null || !initMethodReader.methodThrows()) {
+          var addPostConstruct =
+            multiRegister
+              ? ".peek($bean -> builder.addPostConstruct($bean::%s))"
+              : "builder.addPostConstruct($bean::%s);";
+          writer.start(addPostConstruct, initMethod).eol();
+        } else {
+          final var hasBeanScopeParam = initMethodReader.params().stream()
+            .anyMatch(p -> Constants.BEANSCOPE.equals(p.getFullUType().shortType()));
+          final var lambdaPrefix = hasBeanScopeParam ? "beanScope" : "()";
+          final var methodCall = hasBeanScopeParam
+            ? String.format("$bean.%s(beanScope);", initMethod)
+            : String.format("$bean.%s();", initMethod);
+          if (multiRegister) {
+            writer.start(".peek($bean -> {").eol();
+            writer.start("  builder.addPostConstruct(%s -> {", lambdaPrefix).eol();
+          } else {
+            writer.start("builder.addPostConstruct(%s -> {", lambdaPrefix).eol();
+          }
+          writer.start("  try {").eol();
+          writer.start("    %s", methodCall).eol();
+          writer.start("  } catch (Exception e) {").eol();
+          writer.start("    throw new RuntimeException(e);").eol();
+          writer.start("  }").eol();
+          if (multiRegister) {
+            writer.start("  });").eol();
+            writer.start("})").eol();
+          } else {
+            writer.start("});").eol();
+          }
+        }
       }
       final var isCloseable = typeReader != null && typeReader.isClosable();
 
