@@ -2,7 +2,6 @@ package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.logError;
 import static io.avaje.inject.generator.APContext.logWarn;
-import static io.avaje.inject.generator.APContext.types;
 import static io.avaje.inject.generator.Constants.CONDITIONAL_DEPENDENCY;
 import static io.avaje.inject.generator.ProcessingContext.asElement;
 
@@ -560,11 +559,7 @@ final class MethodReader {
   }
 
   boolean methodThrows() {
-    final var typeUtils = types();
-    final var runtimeException = APContext.typeElement("java.lang.RuntimeException").asType();
-    final var error = APContext.typeElement("java.lang.Error").asType();
-    return element.getThrownTypes().stream()
-      .anyMatch(t -> !typeUtils.isSubtype(t, runtimeException) && !typeUtils.isSubtype(t, error));
+    return !element.getThrownTypes().isEmpty();
   }
 
   void startTry(Append writer) {
