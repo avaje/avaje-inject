@@ -37,17 +37,13 @@ public class GenericLazyFactory {
   LazySubType subType(@Nullable AtomicBoolean initialized) {
     if (initialized != null) initialized.set(true);
     return new LazySubType() {
-
       @Override
       public void something() {
         // TODO Auto-generated method stub
-
       }
-
       @Override
       public void otherThing() {
         // TODO Auto-generated method stub
-
       }
     };
   }
