@@ -12,7 +12,8 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
@@ -103,6 +104,7 @@ final class SimpleBeanLazyWriter {
 
   private String methods() {
     var sb = new StringBuilder();
+    var declaredType = (DeclaredType) element.asType();
     for (var methodElement : ElementFilter.methodsIn(APContext.elements().getAllMembers(element))) {
 
       Set<Modifier> modifiers = methodElement.getModifiers();
@@ -111,6 +113,9 @@ final class SimpleBeanLazyWriter {
         || methodElement.getEnclosingElement().getSimpleName().contentEquals("Object")) {
         continue;
       }
+      // Resolve type variables (e.g. T) to their actual types in this context
+      var methodType = (ExecutableType) APContext.types().asMemberOf(declaredType, methodElement);
+
       // Access modifiers
       sb.append("  @Override\n");
       if (modifiers.contains(Modifier.PUBLIC)) {
@@ -130,7 +135,7 @@ final class SimpleBeanLazyWriter {
             .collect(Collectors.joining(", ")));
         sb.append("> ");
       }
-      var returnType = UType.parse(methodElement.getReturnType());
+      var returnType = UType.parse(methodType.getReturnType());
       importTypes.addAll(returnType.importTypes());
       methodElement.getThrownTypes().stream()
           .map(UType::parse)
@@ -144,14 +149,13 @@ final class SimpleBeanLazyWriter {
       // Parameters
       sb.append("(");
       var parameters = methodElement.getParameters();
+      var paramTypes = methodType.getParameterTypes();
       for (int i = 0; i < parameters.size(); i++) {
-        VariableElement param = parameters.get(i);
-
-        var type = UType.parse(param.asType());
+        var type = UType.parse(paramTypes.get(i));
         importTypes.addAll(type.importTypes());
         sb.append(type.shortType());
         sb.append(" ");
-        sb.append(param.getSimpleName().toString());
+        sb.append(parameters.get(i).getSimpleName().toString());
         if (i < parameters.size() - 1) {
           sb.append(", ");
         }
