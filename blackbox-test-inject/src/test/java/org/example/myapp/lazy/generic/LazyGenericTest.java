@@ -46,4 +46,17 @@ class LazyGenericTest {
       assertThat(initialized).isTrue();
     }
   }
+
+  @Test
+  void genericSubtype() {
+    var initialized = new AtomicBoolean();
+    try (var scope = BeanScope.builder().beans(initialized).build()) {
+      assertThat(initialized.get()).isFalse();
+      var lazy = scope.get(LazySubType.class);
+      assertThat(lazy).isNotNull();
+      assertThat(initialized.get()).isFalse();
+      lazy.something();
+      assertThat(initialized.get()).isTrue();
+    }
+  }
 }

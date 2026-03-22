@@ -32,4 +32,19 @@ public class GenericLazyFactory {
     if (initialized != null) initialized.set(true);
     return new LazyGenericImpl(initialized);
   }
+
+  @Bean
+  LazySubType subType(@Nullable AtomicBoolean initialized) {
+    if (initialized != null) initialized.set(true);
+    return new LazySubType() {
+      @Override
+      public void something() {
+        // TODO Auto-generated method stub
+      }
+      @Override
+      public void otherThing() {
+        // TODO Auto-generated method stub
+      }
+    };
+  }
 }
