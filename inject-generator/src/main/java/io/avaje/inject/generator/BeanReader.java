@@ -9,6 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
@@ -234,12 +235,16 @@ final class BeanReader {
       }
     }
 
+    Set<String> ownFactoryTypes = factoryMethods.stream()
+      .map(m -> Util.addQualifierSuffixTrim(m.qualifierName(), m.returnType()))
+      .collect(Collectors.toSet());
     observerMethods.stream()
       .flatMap(m -> m.params().stream().skip(1))
       .forEach(param -> {
         Dependency dependsOn = param.dependsOn();
         // BeanScope is always injectable with no impact on injection ordering
-        if (!Constants.BEANSCOPE.equals(dependsOn.dependsOn())) {
+        if (!Constants.BEANSCOPE.equals(dependsOn.dependsOn())
+            && !ownFactoryTypes.contains(dependsOn.name())) {
           list.add(dependsOn);
         }
       });
