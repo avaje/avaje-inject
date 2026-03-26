@@ -59,4 +59,4 @@ jobs:
         title: "Release: Version ${{ github.event.inputs.new_version }}"
         body: |
           Release version `${{ github.event.inputs.new_version }}` to be deployed.
-        base: main
+        base: master
