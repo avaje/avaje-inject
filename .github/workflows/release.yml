@@ -1,0 +1,62 @@
+name: Release Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      new_version:
+        description: 'New version to set (e.g., 1.0-RC1, 1.0)'
+        default: 12.0
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    # Protection rules for this environment are set in the repository settings.
+    environment: maven
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Maven cache
+      uses: actions/cache@v5
+      env:
+        cache-name: maven-cache
+      with:
+        path: ~/.m2
+        key: build-${{ env.cache-name }}
+    - name: Set up Java and Maven
+      uses: actions/setup-java@v5
+      with:
+        java-version: '26'
+        distribution: 'zulu'
+        server-id: central
+        server-username: MAVEN_USERNAME
+        server-password: MAVEN_PASSWORD
+        # GPG Key setup for signing artifacts
+        gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+        gpg-passphrase: GPG_PASSPHRASE
+
+    - name: Bump version in pom.xml
+      run: mvn versions:set -DnewVersion=${{ github.event.inputs.new_version }} -DgenerateBackupPoms=false
+
+    - name: Deploy JAR to Maven Central
+      run: java Jakarta2Javax.java && mvn clean deploy -Pcentral && java Javax2Jakarta.java && mvn clean deploy -Pcentral
+      env:
+        MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+        MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+        MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+    - name: Create Pull Request for Version Bump
+      uses: peter-evans/create-pull-request@v8
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "Version ${{ github.event.inputs.new_version }}"
+        branch: "release/${{ github.event.inputs.new_version }}"
+        title: "Release: Version ${{ github.event.inputs.new_version }}"
+        body: |
+          Release version `${{ github.event.inputs.new_version }}` to be deployed.
+        base: main
