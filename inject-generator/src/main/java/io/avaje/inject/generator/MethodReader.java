@@ -214,6 +214,14 @@ final class MethodReader {
     return methodName;
   }
 
+  String returnType() {
+    return returnTypeRaw;
+  }
+
+  String qualifierName() {
+    return name;
+  }
+
   List<MethodParam> params() {
     return params;
   }
