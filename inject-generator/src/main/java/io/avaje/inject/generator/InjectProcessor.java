@@ -147,6 +147,7 @@ public final class InjectProcessor extends AbstractProcessor {
     if (processingOver() || roundEnv.errorRaised()) {
       if (roundEnv.processingOver()) {
         ProcessingContext.writeSPIServicesFile();
+        ProcessingContext.writeNativeImageReflectConfig();
         ProcessingContext.validateModule();
         ProcessingContext.clear();
       }

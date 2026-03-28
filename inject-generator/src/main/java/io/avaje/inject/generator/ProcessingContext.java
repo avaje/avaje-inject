@@ -56,6 +56,7 @@ final class ProcessingContext {
     private final List<TypeElement> delayQueue = new ArrayList<>();
     private final Set<String> spiServices = new TreeSet<>();
     private final Set<String> externalSpi = new TreeSet<>();
+    private final Set<String> aspectClasses = new TreeSet<>();
     private final Map<String, String> importedComponentPkg = new HashMap<>();
     private final boolean hasProvidesPlugin = hasProvidesPlugin();
     private final AllScopes scopes = new AllScopes();
@@ -139,6 +140,10 @@ final class ProcessingContext {
 
   static AllScopes allScopes() {
     return CTX.get().scopes;
+  }
+
+  static void addAspectClass(String typeName) {
+    CTX.get().aspectClasses.add(typeName);
   }
 
   static void addInjectSPI(String type) {
@@ -289,6 +294,32 @@ final class ProcessingContext {
       }
     } catch (IOException e) {
       logError("Failed to write services file %s", e.getMessage());
+    }
+  }
+
+  static void writeNativeImageReflectConfig() {
+    final var aspectClasses = CTX.get().aspectClasses;
+    if (aspectClasses.isEmpty()) {
+      return;
+    }
+    try {
+      final FileObject fo = createMetaInfWriterFor(Constants.META_INF_NATIVE_IMAGE);
+      if (fo != null) {
+        final var writer = new Append(fo.openWriter());
+        writer.append("[").eol();
+        boolean first = true;
+        for (String cls : aspectClasses) {
+          if (!first) {
+            writer.append(",").eol();
+          }
+          writer.append("  {\"name\": \"%s\", \"allDeclaredMethods\": true}", cls);
+          first = false;
+        }
+        writer.eol().append("]").eol();
+        writer.close();
+      }
+    } catch (IOException e) {
+      logError("Failed to write reflect-config.json %s", e.getMessage());
     }
   }
 
