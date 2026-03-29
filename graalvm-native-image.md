@@ -27,6 +27,9 @@ generation is involved.
 ### AOP proxies
 
 When avaje-inject generates AOP proxies (e.g. for `@Aspect` beans),
-these are also generated as plain source code by the annotation processor. The result is a
-concrete subclass compiled into the application — fully visible to the native image compiler.
+these are also generated as plain source code by the annotation processor but they
+use reflection to obtain the Method which is include in the `io.avaje.inject.aop.Invocation`.
 
+The generator additionally produces a `reflect-config.json` resource file which can be found
+in `META-INF/native-image` which tells the native image compiler to include the necessary reflection
+metadata for the AOP proxy to work at runtime.
