@@ -30,6 +30,10 @@ final class SimpleBeanProxyWriter {
   }
 
   void write() throws IOException {
+    if (!aspects.methods().isEmpty()) {
+      ProcessingContext.addAspectClass(beanReader.beanType().getQualifiedName().toString());
+    }
+
     writer = new Append(createFileWriter());
     writePackage();
     writeImports();
