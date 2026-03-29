@@ -147,7 +147,6 @@ public final class InjectProcessor extends AbstractProcessor {
     if (processingOver() || roundEnv.errorRaised()) {
       if (roundEnv.processingOver()) {
         ProcessingContext.writeSPIServicesFile();
-        ProcessingContext.writeNativeImageReflectConfig();
         ProcessingContext.validateModule();
         ProcessingContext.clear();
       }
@@ -202,6 +201,8 @@ public final class InjectProcessor extends AbstractProcessor {
     allScopes.write(over);
 
     if (processingOver()) {
+      ProcessingContext.writeNativeImageReflectConfig(defaultScope.modulePackage());
+
       final var order =
         new FactoryOrder(ProcessingContext.modules(), defaultScope.pluginProvided())
           .orderModules();

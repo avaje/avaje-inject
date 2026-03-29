@@ -297,13 +297,17 @@ final class ProcessingContext {
     }
   }
 
-  static void writeNativeImageReflectConfig() {
+  static void writeNativeImageReflectConfig(String modulePackage) {
     final var aspectClasses = CTX.get().aspectClasses;
     if (aspectClasses.isEmpty()) {
       return;
     }
+    if (modulePackage == null || modulePackage.isEmpty()) {
+      modulePackage = "io.avaje.inject.native";
+    }
     try {
-      final FileObject fo = createMetaInfWriterFor(Constants.META_INF_NATIVE_IMAGE);
+      String reflectConfigPath = Constants.META_INF_NATIVE_IMAGE.replace("${package}", modulePackage);
+      final FileObject fo = createMetaInfWriterFor(reflectConfigPath);
       if (fo != null) {
         final var writer = new Append(fo.openWriter());
         writer.append("[").eol();
