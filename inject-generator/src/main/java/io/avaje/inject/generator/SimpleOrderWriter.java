@@ -10,6 +10,7 @@ final class SimpleOrderWriter {
   private final String shortName;
   private final String fullName;
   private final Set<String> ordering;
+  private final String aggregatedModule;
 
   private Append writer;
 
@@ -18,6 +19,7 @@ final class SimpleOrderWriter {
     this.modulePackage = scopeInfo.modulePackage();
     this.shortName = "CompiledOrder";
     this.fullName = modulePackage.isBlank() ? shortName : modulePackage + "." + shortName;
+    this.aggregatedModule = scopeInfo.moduleFullName();
   }
 
   void write() throws IOException {
@@ -63,6 +65,7 @@ final class SimpleOrderWriter {
     writer.append(Constants.AT_GENERATED).eol();
     writer.append("public final %sclass %s implements ModuleOrdering {", Util.valhalla(), shortName).eol().eol();
 
+    writer.append("  private static final String AGGREGATED_MODULE = \"%s\";", aggregatedModule).eol();
     writer.append("  private final AvajeModule[] sortedModules = new AvajeModule[%s];", ordering.size()).eol();
     writer.append("  private static final Map<String, Integer> INDEXES = Map.ofEntries(").eol();
     var size = ordering.size();
@@ -92,7 +95,8 @@ final class SimpleOrderWriter {
         + "\n"
         + "  @Override\n"
         + "  public List<AvajeModule> factories() {\n"
-        + "    return List.of(sortedModules);\n"
+        + "    final var module = sortedModules[INDEXES.get(AGGREGATED_MODULE)];\n"
+        + "    return module != null ? List.of(module) : List.of();\n"
         + "  }\n"
         + "\n"
         + "  @Override\n"

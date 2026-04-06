@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -59,6 +60,7 @@ final class ExternalProvider {
     entry("io.avaje.validation.http.HttpValidatorProvider", of("io.avaje.http.api.Validator")));
   private static final String CLASS_NAME_AVAJE_MODULE = "io.avaje.inject.spi.AvajeModule";
   private static final List<MetaData> externalMeta = new ArrayList<>();
+  private static final Map<String, List<MetaData>> externalModuleBeans = new LinkedHashMap<>();
 
   private ExternalProvider() {
   }
@@ -139,7 +141,7 @@ final class ExternalProvider {
 
   static void registerExternalMetaData(String name) {
     ProcessingContext.addExternalInjectSPI(name);
-    Optional.ofNullable(APContext.typeElement(name))
+    var beans = Optional.ofNullable(APContext.typeElement(name))
       .map(TypeElement::getEnclosedElements)
       .map(ElementFilter::methodsIn)
       .stream()
@@ -147,7 +149,13 @@ final class ExternalProvider {
       .map(DependencyMetaPrism::getInstanceOn)
       .filter(Objects::nonNull)
       .map(MetaData::new)
-      .forEach(externalMeta::add);
+      .collect(toList());
+    externalMeta.addAll(beans);
+    externalModuleBeans.computeIfAbsent(name, k -> new ArrayList<>()).addAll(beans);
+  }
+
+  static Map<String, List<MetaData>> externalModuleBeans() {
+    return externalModuleBeans;
   }
 
   static void readMetaDataProvides(Collection<String> providedTypes) {
@@ -271,6 +279,7 @@ final class ExternalProvider {
   private static void addOtherModuleProvides(Collection<String> providedTypes, TypeElement otherModule) {
     final var provides = new HashSet<String>();
     final var requires = new HashSet<String>();
+    final var name = otherModule.getQualifiedName().toString();
 
     ElementFilter.methodsIn(otherModule.getEnclosedElements()).stream()
       .map(DependencyMetaPrism::getInstanceOn)
@@ -278,6 +287,7 @@ final class ExternalProvider {
       .map(MetaData::new)
       .forEach(m -> {
         externalMeta.add(m);
+        externalModuleBeans.computeIfAbsent(name, k -> new ArrayList<>()).add(m);
         provides.addAll(m.provides());
         m.dependsOn().stream()
           .filter(d -> !d.isSoftDependency())
@@ -289,7 +299,6 @@ final class ExternalProvider {
         providedTypes.addAll(Util.addQualifierSuffix(m.provides(), m.name()));
       });
 
-    final var name = otherModule.getQualifiedName().toString();
     APContext.logNote("Detected Module: %s", name);
     ProcessingContext.addModule(new ModuleData(name, List.copyOf(provides), List.copyOf(requires)));
   }

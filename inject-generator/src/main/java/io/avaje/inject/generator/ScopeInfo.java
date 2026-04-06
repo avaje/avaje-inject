@@ -261,7 +261,15 @@ final class ScopeInfo {
     if (moduleWritten) {
       return;
     }
-    final Collection<MetaData> meta = metaData.values().stream().sorted().collect(Collectors.toList());
+    final List<MetaData> meta = metaData.values().stream().sorted().collect(Collectors.toList());
+    if (ProcessingContext.strictWiring()) {
+      ExternalProvider.externalModuleBeans().forEach((moduleClass, beans) -> {
+        for (MetaData bean : beans) {
+          bean.markExternalModule(moduleClass);
+          meta.add(bean);
+        }
+      });
+    }
     if (emptyModule) {
       // typically nothing in the default scope, only custom scopes
       if (!meta.isEmpty()) {
