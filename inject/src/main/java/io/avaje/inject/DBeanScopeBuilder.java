@@ -439,7 +439,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       final var it = queue.iterator();
       while (it.hasNext()) {
         final FactoryState factory = it.next();
-        if (satisfiedDependencies(factory)) {
+        if (factory.factory.strictWiring() || satisfiedDependencies(factory)) {
           // push the factory onto the build order
           it.remove();
           push(factory);

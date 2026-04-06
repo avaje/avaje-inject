@@ -405,6 +405,14 @@ final class SimpleModuleWriter {
   }
 
   private void writeEndClass() {
+
+    if (ProcessingContext.strictWiring()) {
+      writer.append("  @Override").eol();
+      writer.append("  public boolean strictWiring() {").eol();
+      writer.append("    return true;").eol();
+      writer.append("  }").eol().eol();
+    }
+
     writer.append("}").eol();
   }
 

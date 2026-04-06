@@ -40,6 +40,11 @@ public interface AvajeModule extends InjectExtension {
     return EMPTY_STRINGS;
   }
 
+  /** Whether The Module is strict */
+  default boolean strictWiring() {
+    return false;
+  }
+
   /** Marker for custom scoped modules. */
   interface Custom extends AvajeModule {}
 }
