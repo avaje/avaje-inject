@@ -10,7 +10,6 @@ final class SimpleOrderWriter {
   private final String shortName;
   private final String fullName;
   private final Set<String> ordering;
-  private final String aggregatedModule;
 
   private Append writer;
 
@@ -19,7 +18,6 @@ final class SimpleOrderWriter {
     this.modulePackage = scopeInfo.modulePackage();
     this.shortName = "CompiledOrder";
     this.fullName = modulePackage.isBlank() ? shortName : modulePackage + "." + shortName;
-    this.aggregatedModule = scopeInfo.moduleFullName();
   }
 
   void write() throws IOException {
@@ -41,10 +39,7 @@ final class SimpleOrderWriter {
     }
     writer
       .append(
-        "import static java.util.Map.entry;\n"
-          + "\n"
-          + "import java.util.List;\n"
-          + "import java.util.Map;\n"
+        "import java.util.List;\n"
           + "import java.util.Set;\n"
           + "import io.avaje.inject.spi.Generated;\n"
           + "import io.avaje.inject.spi.ModuleOrdering;\n"
@@ -65,19 +60,18 @@ final class SimpleOrderWriter {
     writer.append(Constants.AT_GENERATED).eol();
     writer.append("public final %sclass %s implements ModuleOrdering {", Util.valhalla(), shortName).eol().eol();
 
-    writer.append("  private static final String AGGREGATED_MODULE = \"%s\";", aggregatedModule).eol();
-    writer.append("  private final AvajeModule[] sortedModules = new AvajeModule[%s];", ordering.size()).eol();
-    writer.append("  private static final Map<String, Integer> INDEXES = Map.ofEntries(").eol();
+    writer.append("  private static final Set<String> MODULE_NAMES = Set.of(").eol();
     var size = ordering.size();
     var count = 0;
     for (String moduleName : ordering) {
-      writer.append("    entry(\"%s\", %s)", moduleName, count);
+      writer.append("    \"%s\"", moduleName);
       if (++count < size) {
         writer.append(",").eol();
       } else {
         writer.append(");").eol();
       }
     }
+    writer.append("  private AvajeModule aggregatedModule;").eol();
   }
 
   private void writeBuildMethods() {
@@ -85,36 +79,34 @@ final class SimpleOrderWriter {
         "\n"
         + "  @Override\n"
         + "  public boolean supportsExpected(List<AvajeModule> modules) {\n"
-        + "    if (modules.size() != sortedModules.length) {\n"
+        + "    if (modules.size() != MODULE_NAMES.size()) {\n"
         + "      return false;\n"
         + "    }\n"
         + "    return modules.stream()\n"
         + "            .map(m -> m.getClass().getTypeName())\n"
-        + "            .allMatch(k -> INDEXES.containsKey(k));\n"
+        + "            .allMatch(MODULE_NAMES::contains);\n"
         + "  }\n"
         + "\n"
         + "  @Override\n"
         + "  public List<AvajeModule> factories() {\n"
-        + "    final var module = sortedModules[INDEXES.get(AGGREGATED_MODULE)];\n"
-        + "    return module != null ? List.of(module) : List.of();\n"
+        + "    return aggregatedModule != null ? List.of(aggregatedModule) : List.of();\n"
         + "  }\n"
         + "\n"
         + "  @Override\n"
         + "  public Set<String> orderModules() {\n"
-        + "    return INDEXES.keySet();\n"
+        + "    return MODULE_NAMES;\n"
         + "  }\n"
         + "\n"
         + "  @Override\n"
         + "  public void add(AvajeModule module) {\n"
-        + "    final var index = INDEXES.get(module.getClass().getTypeName());\n"
-        + "    if (index != null) {\n"
-        + "      sortedModules[index] = module;\n"
+        + "    if (module.strictWiring()) {\n"
+        + "      aggregatedModule = module;\n"
         + "    }\n"
         + "  }\n"
         + "\n"
         + "  @Override\n"
         + "  public boolean isEmpty() {\n"
-        + "    return sortedModules.length == 0;\n"
+        + "    return MODULE_NAMES.isEmpty();\n"
         + "  }\n"
         + "}");
   }
