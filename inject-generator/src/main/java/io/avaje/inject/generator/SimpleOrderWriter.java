@@ -12,6 +12,7 @@ final class SimpleOrderWriter {
   private final Set<String> ordering;
 
   private Append writer;
+  private int numberOfModules;
 
   SimpleOrderWriter(Set<String> orderedModules, ScopeInfo scopeInfo) {
     this.ordering = orderedModules;
@@ -62,10 +63,10 @@ final class SimpleOrderWriter {
 
     writer.append("  private static final Set<String> MODULE_NAMES = Set.of(").eol();
     var size = ordering.size();
-    var count = 0;
+    this.numberOfModules = 0;
     for (String moduleName : ordering) {
       writer.append("    \"%s\"", moduleName);
-      if (++count < size) {
+      if (++numberOfModules < size) {
         writer.append(",").eol();
       } else {
         writer.append(");").eol();
@@ -79,7 +80,7 @@ final class SimpleOrderWriter {
         "\n"
         + "  @Override\n"
         + "  public boolean supportsExpected(List<AvajeModule> modules) {\n"
-        + "    if (modules.size() != MODULE_NAMES.size()) {\n"
+        + "    if (modules.size() != %s) {\n"
         + "      return false;\n"
         + "    }\n"
         + "    for (AvajeModule module : modules) {\n"
@@ -111,6 +112,6 @@ final class SimpleOrderWriter {
         + "  public boolean isEmpty() {\n"
         + "    return MODULE_NAMES.isEmpty();\n"
         + "  }\n"
-        + "}");
+        + "}", numberOfModules);
   }
 }
