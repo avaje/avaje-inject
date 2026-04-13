@@ -7,9 +7,9 @@ Initialize and cleanup beans.
 Run code after bean is created:
 
 ```java
-@Bean
+@Singleton
 public class Service {
-  
+
   @PostConstruct
   public void init() {
     System.out.println("Service initialized");
@@ -22,9 +22,9 @@ public class Service {
 Run code before bean is destroyed:
 
 ```java
-@Bean
+@Singleton
 public class Service {
-  
+
   @PreDestroy
   public void shutdown() {
     System.out.println("Service shutting down");

@@ -7,11 +7,11 @@ How to inject dependencies into beans.
 Inject through constructor (recommended):
 
 ```java
-@Bean
+@Singleton
 public class OrderService {
   private final UserService userService;
   private final PaymentService paymentService;
-  
+
   public OrderService(UserService userService, PaymentService paymentService) {
     this.userService = userService;
     this.paymentService = paymentService;
@@ -26,18 +26,18 @@ Use `@Named` qualifier:
 ```java
 public interface Logger { }
 
-@Bean
+@Singleton
 @Named("file")
 public class FileLogger implements Logger { }
 
-@Bean
-@Named("console")  
+@Singleton
+@Named("console")
 public class ConsoleLogger implements Logger { }
 
-@Bean
+@Singleton
 public class Service {
   private final Logger fileLogger;
-  
+
   public Service(@Named("file") Logger logger) {
     this.fileLogger = logger;
   }

@@ -5,18 +5,18 @@ Handle multiple bean implementations.
 ## Named Qualifier
 
 ```java
-@Bean
+@Singleton
 @Named("primary")
 public class PrimaryService implements Service { }
 
-@Bean
+@Singleton
 @Named("secondary")
 public class SecondaryService implements Service { }
 
-@Bean
+@Singleton
 public class Client {
   private final Service primary;
-  
+
   public Client(@Named("primary") Service service) {
     this.primary = service;
   }

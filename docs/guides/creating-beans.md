@@ -7,9 +7,9 @@ How to create and annotate beans with avaje-inject.
 Mark a class as a singleton bean:
 
 ```java
-import io.avaje.inject.Bean;
+import jakarta.inject.Singleton;
 
-@Bean
+@Singleton
 public class UserService {
   public User findById(long id) {
     return new User(id, "John");
@@ -17,18 +17,18 @@ public class UserService {
 }
 ```
 
-The `@Bean` annotation makes it a singleton - one instance for the application.
+The `@Singleton` annotation makes it a singleton - one instance for the application.
 
 ## Implementing Interfaces
 
-Beans typically implement interfaces:
+Beans can implement interfaces if desired:
 
 ```java
 public interface UserService {
   User findById(long id);
 }
 
-@Bean
+@Singleton
 public class UserServiceImpl implements UserService {
   @Override
   public User findById(long id) {
@@ -47,9 +47,6 @@ public class Single { }
 
 @Prototype          // New instance each time
 public class Multi { }
-
-@ApplicationScoped  // Application lifetime
-public class AppBeans { }
 ```
 
 ## Next Steps

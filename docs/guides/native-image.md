@@ -10,7 +10,7 @@ Add native image plugin to `pom.xml`:
 <plugin>
   <groupId>org.graalvm.buildtools</groupId>
   <artifactId>native-maven-plugin</artifactId>
-  <version>0.10.0</version>
+  <version>1.0.0</version>
 </plugin>
 ```
 
