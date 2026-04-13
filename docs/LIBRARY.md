@@ -177,15 +177,15 @@ public class Main {
 
 | Task | Difficulty | Guide |
 |------|-----------|-------|
-| Create your first bean | Beginner | [guides/creating-beans.md](../guides/creating-beans.md) |
-| Inject dependencies into beans | Beginner | [guides/dependency-injection.md](../guides/dependency-injection.md) |
-| Use factory methods to create beans | Beginner | [guides/factory-methods.md](../guides/factory-methods.md) |
-| Configure initialization and cleanup | Intermediate | [guides/lifecycle-hooks.md](../guides/lifecycle-hooks.md) |
-| Handle multiple implementations | Intermediate | [guides/qualifiers.md](../guides/qualifiers.md) |
-| Write integration tests | Intermediate | [guides/testing.md](../guides/testing.md) |
-| Build GraalVM native images | Advanced | [guides/native-image.md](../guides/native-image.md) |
+| Create your first bean | Beginner | [guides/creating-beans.md](guides/creating-beans.md) |
+| Inject dependencies into beans | Beginner | [guides/dependency-injection.md](guides/dependency-injection.md) |
+| Use factory methods to create beans | Beginner | [guides/factory-methods.md](guides/factory-methods.md) |
+| Configure initialization and cleanup | Intermediate | [guides/lifecycle-hooks.md](guides/lifecycle-hooks.md) |
+| Handle multiple implementations | Intermediate | [guides/qualifiers.md](guides/qualifiers.md) |
+| Write integration tests | Intermediate | [guides/testing.md](guides/testing.md) |
+| Build GraalVM native images | Advanced | [guides/native-image.md](guides/native-image.md) |
 
-**Full Guides Index**: See [guides/README.md](../guides/README.md)
+**Full Guides Index**: See [guides/README.md](guides/README.md)
 
 ## API Quick Reference
 
@@ -295,7 +295,7 @@ public class UserServiceIntegrationTest {
 }
 ```
 
-**See**: [guides/testing.md](../guides/testing.md)
+**See**: [guides/testing.md](guides/testing.md)
 
 ## Performance Characteristics
 
@@ -317,7 +317,7 @@ public class UserServiceIntegrationTest {
 mvn clean package -Pnative
 ```
 
-**See**: [guides/native-image.md](../guides/native-image.md)
+**See**: [guides/native-image.md](guides/native-image.md)
 
 ## Troubleshooting
 
