@@ -262,7 +262,7 @@ final class ScopeInfo {
       return;
     }
     final List<MetaData> meta = metaData.values().stream().sorted().collect(Collectors.toList());
-    if (ProcessingContext.strictWiring()) {
+    if (ProcessingContext.strictWiring() && type() == Type.DEFAULT) {
       ExternalProvider.externalModuleBeans().forEach((moduleClass, beans) -> {
         for (MetaData bean : beans) {
           bean.markExternalModule(moduleClass);

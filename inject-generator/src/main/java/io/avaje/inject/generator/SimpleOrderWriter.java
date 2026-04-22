@@ -61,15 +61,19 @@ final class SimpleOrderWriter {
     writer.append(Constants.AT_GENERATED).eol();
     writer.append("public final %sclass %s implements ModuleOrdering {", Util.valhalla(), shortName).eol().eol();
 
-    writer.append("  private static final Set<String> MODULE_NAMES = Set.of(").eol();
     var size = ordering.size();
     this.numberOfModules = 0;
-    for (String moduleName : ordering) {
-      writer.append("    \"%s\"", moduleName);
-      if (++numberOfModules < size) {
-        writer.append(",").eol();
-      } else {
-        writer.append(");").eol();
+    if (size == 0) {
+      writer.append("  private static final Set<String> MODULE_NAMES = Set.of();").eol();
+    } else {
+      writer.append("  private static final Set<String> MODULE_NAMES = Set.of(").eol();
+      for (String moduleName : ordering) {
+        writer.append("    \"%s\"", moduleName);
+        if (++numberOfModules < size) {
+          writer.append(",").eol();
+        } else {
+          writer.append(");").eol();
+        }
       }
     }
     writer.append("  private AvajeModule aggregatedModule;").eol();

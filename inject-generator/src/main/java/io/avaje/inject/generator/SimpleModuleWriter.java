@@ -406,7 +406,7 @@ final class SimpleModuleWriter {
 
   private void writeEndClass() {
 
-    if (ProcessingContext.strictWiring()) {
+    if (ProcessingContext.strictWiring() && scopeType == ScopeInfo.Type.DEFAULT) {
       writer.append("  @Override").eol();
       writer.append("  public boolean strictWiring() {").eol();
       writer.append("    return true;").eol();
