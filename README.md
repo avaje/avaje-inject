@@ -7,9 +7,18 @@
 [![GraalVM Native Image](https://img.shields.io/badge/GraalVM-Native%20Image%20Ready-darkgreen?logo=graalvm)](graalvm-native-image.md)
 
 # [Avaje-Inject](https://avaje.io/inject)
-APT-based dependency injection for server-side developers - https://avaje.io/inject
+Annotation-processor-based dependency injection for server-side developers - https://avaje.io/inject
+
+## Documentation
+
+- [docs/README.md](docs/README.md) — Documentation index
+- [docs/LIBRARY.md](docs/LIBRARY.md) — Full library reference (API, annotations, use cases, agent instructions)
+- [avaje.io/inject](https://avaje.io/inject/) — Website documentation
+
 ## Quick Start
 #### 1. Add avaje-inject as a dependency.
+
+**Maven**
 ```xml
 <dependency>
   <groupId>io.avaje</groupId>
@@ -17,7 +26,13 @@ APT-based dependency injection for server-side developers - https://avaje.io/inj
   <version>${avaje.inject.version}</version>
 </dependency>
 ```
+**Gradle**
+```gradle
+implementation 'io.avaje:avaje-inject:${avaje.inject.version}'
+```
 #### 2. Add avaje-inject-generator annotation processor as a dependency with provided scope.
+
+**Maven**
 ```xml
 <dependency>
   <groupId>io.avaje</groupId>
@@ -26,8 +41,27 @@ APT-based dependency injection for server-side developers - https://avaje.io/inj
   <scope>provided</scope>
 </dependency>
 ```
+**Gradle**
+```gradle
+annotationProcessor 'io.avaje:avaje-inject-generator:${avaje.inject.version}'
+```
+#### 3. Optionally add avaje-inject-test for integration testing.
 
-#### 3. Create a Bean Class annotated with @Singleton
+**Maven**
+```xml
+<dependency>
+  <groupId>io.avaje</groupId>
+  <artifactId>avaje-inject-test</artifactId>
+  <version>${avaje.inject.version}</version>
+  <scope>test</scope>
+</dependency>
+```
+**Gradle**
+```gradle
+testImplementation 'io.avaje:avaje-inject-test:${avaje.inject.version}'
+```
+
+#### 4. Create a Bean Class annotated with @Singleton
 ```java
 @Singleton
 public class Example {
@@ -54,7 +88,7 @@ public class ExampleFactory {
 }
 ```
 
-#### 4. Use BeanScope to wire and retrieve the beans and use them however you wish.
+#### 5. Use BeanScope to wire and retrieve the beans and use them however you wish.
 ```java
 BeanScope beanScope = BeanScope.builder().build()
 Example ex = beanScope.get(Example.class);
