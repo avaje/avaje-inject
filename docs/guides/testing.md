@@ -1,60 +1,63 @@
 # Testing with Avaje Inject
 
-How to test beans and dependency injection.
+How to test beans and dependency injection with unit and component/integration tests.
 
 ## Unit Testing
 
-Create beans manually for unit tests:
+Unit tests manually construct beans and use mocks for dependencies. This is fast, isolated,
+and does not use the DI container.
 
+**Example:**
 ```java
 @Test
-public void testService() {
+void testService() {
   UserRepository mockRepo = mock(UserRepository.class);
   UserService service = new UserService(mockRepo);
-
   when(mockRepo.findById(1)).thenReturn(new User(1, "John"));
-
   User user = service.findById(1);
   assertEquals("John", user.name);
 }
 ```
+**Best practices:**
+- Use for pure logic, no DI needed.
+- Mock only direct dependencies.
 
-## Integration Testing (also known as Component testing)
+## Component/Integration Testing with @InjectTest
 
-Use the actual container:
+Component tests use the DI container to wire real beans. This is similar to Spring’s `@SpringBootTest`.
 
+**Example:**
 ```java
-@Test
 @InjectTest
-public class IntegrationTest {
-  @Inject
-  UserService userService;
+class UserServiceTest {
+  @Inject UserService userService;
 
   @Test
-  public void testWithRealBeans() {
+  void findsUser() {
     User user = userService.findById(1);
     assertNotNull(user);
   }
 }
 ```
+**Best practices:**
+- Use for service/business logic.
+- Avoid mocking unless necessary for external systems.
 
 ## Providing Test Doubles (Mocks)
 
-When a field annotated with `@Inject` has an initialized value, it's wired INTO the DI BeanScope as a test double:
+We can initialize `@Inject` fields with mocks to override real beans. This lets us control specific dependencies
+and give them test specific behavior while using the real DI graph.
 
+**Example:**
 ```java
 @InjectTest
-public class ServiceWithMockTest {
-  @Inject
-  UserRepository userRepository = mock(UserRepository.class);
-
-  @Inject
-  UserService userService;
+class ServiceWithMockTest {
+  @Inject UserRepository userRepository = mock(UserRepository.class);
+  @Inject UserService userService;
 
   @Test
-  public void testServiceWithMock() {
+  void testServiceWithMock() {
     when(userRepository.findById(1)).thenReturn(new User(1, "Jane"));
-
     User user = userService.findById(1);
     assertEquals("Jane", user.name);
   }
@@ -64,46 +67,46 @@ public class ServiceWithMockTest {
 The DI container will use the initialized mock instead of creating a real `UserRepository` bean. This allows you to:
 - Control external dependencies without manually constructing the service
 - Leverage the full dependency graph while mocking specific beans
-- Keep integration test logic closer to production bean structure
+- Use mocks to invoke error conditions and simulate specific edge cases
 
 ## Using Mockito Annotations
 
-Mockito provides `@Mock` and `@Spy` annotations for cleaner test setup:
+Use `@Mock`/`@Spy` for cleaner setup. Mocks/spies are auto-wired into the test DI container.
 
+**Example:**
 ```java
 @InjectTest
-public class ServiceWithMockitoTest {
-  @Mock
-  UserRepository userRepository;
-
-  @Spy
-  Logger logger;
-
-  @Inject
-  UserService userService;
+class ServiceWithMockitoTest {
+  @Mock UserRepository userRepository;
+  @Spy Logger logger;
+  @Inject UserService userService;
 
   @Test
-  public void testWithMockito() {
+  void testWithMockito() {
     when(userRepository.findById(1)).thenReturn(new User(1, "Alex"));
-
     User user = userService.findById(1);
     assertEquals("Alex", user.name);
-
     verify(userRepository).findById(1);
   }
 }
 ```
-
 **Annotations explained:**
 - `@Mock` — Creates a complete mock that returns default values (null, empty collections, etc.)
 - `@Spy` — Wraps a real object and allows selective method mocking while preserving real behavior
 
-The mocks/spies are automatically wired into the DI container used for the test.
+**Best practices:**
+- Use `@Mock` for pure mocks, `@Spy` to partially mock real objects.
 
-## Next Steps
+## Troubleshooting & Tips
 
-- See [native image](native-image.md)
+- If a bean isn’t injected, check for missing `@Inject` or `@InjectTest`.
+- Use try-with-resources for manual `TestScope` (advanced).
 
-## Next Steps
+## More Examples
 
-- See [native image](native-image.md)
+- See [inject-test module](../../inject-test/src/test/java/) for real-world tests.
+- For advanced scenarios (e.g., Postgres/Ebean, LocalStack), see dedicated guides: `testing-postgres-ebean.md`, `testing-localstack.md` (coming soon).
+
+---
+
+For more, see the [full library reference](../LIBRARY.md) and [avaje.io/inject](https://avaje.io/inject/).
