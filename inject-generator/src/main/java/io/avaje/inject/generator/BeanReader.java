@@ -80,8 +80,7 @@ final class BeanReader {
     this.priority = Util.priority(actualType);
     var beanTypes =
       BeanTypesPrism.getOptionalOn(actualType)
-        .map(BeanTypesPrism::value)
-        .or(() -> proxy ? Optional.of(List.of(actualType.asType())) : Optional.empty());
+        .map(BeanTypesPrism::value);
     beanTypes.ifPresent(t -> Util.validateBeanTypes(actualType, t));
     this.typeReader =
       new TypeReader(
