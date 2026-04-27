@@ -112,7 +112,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-jsonb</artifactId>
-      <version>3.12</version>
+      <version>3.13</version>
       <scope>test</scope>
     </dependency>
 
@@ -133,7 +133,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.44</version>
+      <version>1.18.46</version>
       <scope>test</scope>
     </dependency>
 
