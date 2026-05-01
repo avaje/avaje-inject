@@ -88,6 +88,10 @@ final class TypeExtendsReader {
     return baseUType;
   }
 
+  boolean isProxyBean() {
+    return proxyBean;
+  }
+
   String qualifierName() {
     return qualifierName;
   }
