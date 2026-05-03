@@ -10,6 +10,7 @@ import javax.lang.model.element.TypeElement;
 import static java.util.stream.Collectors.toList;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 final class MetaDataOrdering {
 
@@ -22,7 +23,7 @@ final class MetaDataOrdering {
   private final List<MetaData> orderedList = new ArrayList<>();
   private final List<MetaData> queue = new ArrayList<>();
   private final Map<String, ProviderList> providers = new HashMap<>();
-  private final List<DependencyLink> circularDependencies = new ArrayList<>();
+  private final List<List<MetaData>> cyclePaths = new ArrayList<>();
   private final Set<String> missingDependencyTypes = new LinkedHashSet<>();
   private final Set<String> autoRequires = new TreeSet<>();
 
@@ -86,61 +87,17 @@ final class MetaDataOrdering {
   }
 
   /**
-   * Try to detect circular dependency given the remaining beans
-   * in the queue with unsatisfied dependencies.
-   */
-  private void detectCircularDependency(List<MetaData> remainder) {
-    final List<DependencyLink> dependencyLinks = new ArrayList<>();
-    for (MetaData metaData : remainder) {
-      final List<Dependency> dependsOn = metaData.dependsOn();
-      if (dependsOn != null) {
-        for (Dependency dependency : dependsOn) {
-          final MetaData provider = findCircularDependency(remainder, dependency);
-          if (provider != null) {
-            dependencyLinks.add(new DependencyLink(metaData, provider, dependency.name()));
-          }
-        }
-      }
-    }
-    if (dependencyLinks.size() > 1) {
-      // need minimum of 2 to form circular dependency
-      circularDependencies.addAll(dependencyLinks);
-    }
-  }
-
-  private MetaData findCircularDependency(List<MetaData> remainder, Dependency dependency) {
-    for (MetaData metaData : remainder) {
-      if (metaData.toString().contains(dependency.name())) {
-        return metaData;
-      }
-      final List<String> provides = metaData.provides();
-      if (provides != null && provides.contains(dependency.name())) {
-        return metaData;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Log a reasonable compile error for detected circular dependencies.
-   */
-  private void errorOnCircularDependencies() {
-    logError("Circular dependencies detected with beans %s  %s", circularDependencies, CIRC_ERR_MSG);
-    for (DependencyLink link : circularDependencies) {
-      logError("Circular dependency - %s dependsOn %s for %s", link.metaData, link.provider, link.dependency);
-    }
-  }
-
-  /**
-   * Build list of specific dependencies that are missing.
+   * Build list of specific dependencies that are missing. Runs cycle detection first so that a
+   * clear circular-dependency error is shown instead of misleading "No dependency provided" errors
+   * for each bean in the cycle.
    */
   void missingDependencies() {
+    detectCircularDependency(queue);
+    if (!cyclePaths.isEmpty()) {
+      return;
+    }
     for (MetaData metaData : queue) {
       checkMissingDependencies(metaData);
-    }
-    if (missingDependencyTypes.isEmpty()) {
-      // only look for circular dependencies if there are no missing dependencies
-      detectCircularDependency(queue);
     }
   }
 
@@ -211,15 +168,13 @@ final class MetaDataOrdering {
   private boolean dependencySatisfied(Dependency dependency, boolean includeExternal, MetaData queuedMeta, boolean anyWired) {
     String dependencyName = dependency.name();
     var providerList = providers.get(dependencyName);
-    if (providerList == null) {
-      if (scopeInfo.providedByOther(dependency)) {
-        return true;
-      } else {
-        return isExternal(dependencyName, includeExternal, queuedMeta);
-      }
-    } else {
+    if (providerList != null) {
       return providerList.isWired(anyWired);
     }
+    if (scopeInfo.providedByOther(dependency)) {
+      return true;
+    }
+    return isExternal(dependencyName, includeExternal, queuedMeta);
   }
 
   private boolean isExternal(String dependencyName, boolean includeExternal, MetaData queuedMeta) {
@@ -248,11 +203,101 @@ final class MetaDataOrdering {
   }
 
   /**
-   * Return true if the beans with unsatisfied dependencies seem
-   * to form a circular dependency.
+   * Return true if a circular dependency was detected among the remaining beans.
    */
   private boolean hasCircularDependencies() {
-    return !circularDependencies.isEmpty();
+    return !cyclePaths.isEmpty();
+  }
+
+
+  /**
+   * Try to detect circular dependency given the remaining beans in the queue. Uses DFS to find
+   * cycles, including those routed through interface implementations or factory-produced beans.
+   */
+  private void detectCircularDependency(List<MetaData> remainder) {
+    if (remainder.isEmpty()) return;
+    final Set<MetaData> remainderSet = new HashSet<>(remainder);
+    // Build adjacency: each bean -> the beans it depends on that are also in the remainder
+    final Map<MetaData, List<MetaData>> graph = new LinkedHashMap<>();
+    for (MetaData bean : remainder) {
+      graph.put(bean, resolveQueuedDeps(bean, remainderSet));
+    }
+    final Set<MetaData> visited = new HashSet<>();
+    final LinkedHashSet<MetaData> inStack = new LinkedHashSet<>();
+    for (MetaData bean : remainder) {
+      if (!visited.contains(bean)) {
+        dfsCycle(bean, graph, visited, inStack);
+      }
+    }
+  }
+
+  /** Resolve which beans (from the remainder) a given bean depends on. */
+  private List<MetaData> resolveQueuedDeps(MetaData bean, Set<MetaData> remainderSet) {
+    if (bean.dependsOn() == null) return Collections.emptyList();
+    final List<MetaData> result = new ArrayList<>();
+    for (Dependency dep : bean.dependsOn()) {
+      String depName = dep.name();
+      if (Util.isProvider(depName)) {
+        // Unwrap Provider<T> -> T so we can detect cycles through Provider injection
+        depName = Util.unwrapProvider(depName);
+      }
+      if (Constants.BEANSCOPE.equals(depName)) continue;
+      final ProviderList pl = providers.get(depName.replace(", ", ","));
+      if (pl != null) {
+        for (MetaData provider : pl.all()) {
+          if (remainderSet.contains(provider)) {
+            result.add(provider);
+          }
+        }
+      }
+    }
+    return result;
+  }
+
+  private void dfsCycle(
+      MetaData current,
+      Map<MetaData, List<MetaData>> graph,
+      Set<MetaData> visited,
+      LinkedHashSet<MetaData> stack) {
+    visited.add(current);
+    stack.add(current);
+    for (var neighbor : graph.getOrDefault(current, List.of())) {
+      if (!visited.contains(neighbor)) {
+        dfsCycle(neighbor, graph, visited, stack);
+      } else if (stack.contains(neighbor)) {
+        final var cycle = new ArrayList<MetaData>();
+        boolean collecting = false;
+        for (MetaData m : stack) {
+          if (m == neighbor) collecting = true;
+          if (collecting) cycle.add(m);
+        }
+        if (!isDuplicateCycle(cycle)) {
+          cyclePaths.add(cycle);
+        }
+      }
+    }
+    stack.remove(current);
+  }
+
+  private boolean isDuplicateCycle(List<MetaData> candidate) {
+    for (var existing : cyclePaths) {
+      if (existing.size() == candidate.size() && existing.containsAll(candidate)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Log a clear compile error for each detected circular dependency, showing the full cycle path.
+   */
+  private void errorOnCircularDependencies() {
+    for (var cycle : cyclePaths) {
+      final var path = cycle.stream().map(MetaData::type).collect(Collectors.joining(" -> "));
+      logError(
+          "Circular dependency detected: %s -> %s (cycle)  %s",
+          path, cycle.get(0).type(), CIRC_ERR_MSG);
+    }
   }
 
   private static class ProviderList {
@@ -261,6 +306,10 @@ final class MetaDataOrdering {
 
     private void add(MetaData beanMeta) {
       list.add(beanMeta);
+    }
+
+    private List<MetaData> all() {
+      return list;
     }
 
     private boolean isWired(boolean anyWired) {
@@ -283,24 +332,6 @@ final class MetaDataOrdering {
         }
       }
       return list.isEmpty();
-    }
-  }
-
-  private static class DependencyLink {
-
-    final MetaData metaData;
-    final MetaData provider;
-    final String dependency;
-
-    DependencyLink(MetaData metaData, MetaData provider, String dependency) {
-      this.metaData = metaData;
-      this.provider = provider;
-      this.dependency = dependency;
-    }
-
-    @Override
-    public String toString() {
-      return metaData.toString();
     }
   }
 }
