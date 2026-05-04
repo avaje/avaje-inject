@@ -209,13 +209,14 @@ final class MetaDataOrdering {
     return !cyclePaths.isEmpty();
   }
 
-
   /**
    * Try to detect circular dependency given the remaining beans in the queue. Uses DFS to find
    * cycles, including those routed through interface implementations or factory-produced beans.
    */
   private void detectCircularDependency(List<MetaData> remainder) {
-    if (remainder.isEmpty()) return;
+    if (remainder.isEmpty()) {
+      return;
+    }
     final Set<MetaData> remainderSet = new HashSet<>(remainder);
     // Build adjacency: each bean -> the beans it depends on that are also in the remainder
     final Map<MetaData, List<MetaData>> graph = new LinkedHashMap<>();
@@ -233,7 +234,9 @@ final class MetaDataOrdering {
 
   /** Resolve which beans (from the remainder) a given bean depends on. */
   private List<MetaData> resolveQueuedDeps(MetaData bean, Set<MetaData> remainderSet) {
-    if (bean.dependsOn() == null) return Collections.emptyList();
+    if (bean.dependsOn() == null) {
+      return Collections.emptyList();
+    }
     final List<MetaData> result = new ArrayList<>();
     for (Dependency dep : bean.dependsOn()) {
       String depName = dep.name();
@@ -241,7 +244,9 @@ final class MetaDataOrdering {
         // Unwrap Provider<T> -> T so we can detect cycles through Provider injection
         depName = Util.unwrapProvider(depName);
       }
-      if (Constants.BEANSCOPE.equals(depName)) continue;
+      if (Constants.BEANSCOPE.equals(depName)) {
+        continue;
+      }
       final ProviderList pl = providers.get(depName.replace(", ", ","));
       if (pl != null) {
         for (MetaData provider : pl.all()) {
@@ -254,11 +259,7 @@ final class MetaDataOrdering {
     return result;
   }
 
-  private void dfsCycle(
-      MetaData current,
-      Map<MetaData, List<MetaData>> graph,
-      Set<MetaData> visited,
-      LinkedHashSet<MetaData> stack) {
+  private void dfsCycle(MetaData current, Map<MetaData, List<MetaData>> graph, Set<MetaData> visited, LinkedHashSet<MetaData> stack) {
     visited.add(current);
     stack.add(current);
     for (var neighbor : graph.getOrDefault(current, List.of())) {
@@ -268,8 +269,12 @@ final class MetaDataOrdering {
         final var cycle = new ArrayList<MetaData>();
         boolean collecting = false;
         for (MetaData m : stack) {
-          if (m == neighbor) collecting = true;
-          if (collecting) cycle.add(m);
+          if (m == neighbor) {
+            collecting = true;
+          }
+          if (collecting) {
+            cycle.add(m);
+          }
         }
         if (!isDuplicateCycle(cycle)) {
           cyclePaths.add(cycle);
@@ -294,9 +299,7 @@ final class MetaDataOrdering {
   private void errorOnCircularDependencies() {
     for (var cycle : cyclePaths) {
       final var path = cycle.stream().map(MetaData::type).collect(Collectors.joining(" -> "));
-      logError(
-          "Circular dependency detected: %s -> %s (cycle)  %s",
-          path, cycle.get(0).type(), CIRC_ERR_MSG);
+      logError("Circular dependency detected: %s -> %s (cycle)  %s", path, cycle.get(0).type(), CIRC_ERR_MSG);
     }
   }
 
