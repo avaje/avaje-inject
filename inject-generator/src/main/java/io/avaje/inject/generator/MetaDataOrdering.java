@@ -214,26 +214,35 @@ final class MetaDataOrdering {
    * cycles, including those routed through interface implementations or factory-produced beans.
    */
   private void detectCircularDependency(List<MetaData> remainder) {
+    cyclePaths.addAll(detectCycles(remainder, providers));
+  }
+
+  /**
+   * Detect cycles in the given remainder using the providers map. Package-private for testing.
+   */
+  static List<List<MetaData>> detectCycles(List<MetaData> remainder, Map<String, ProviderList> providers) {
     if (remainder.isEmpty()) {
-      return;
+      return Collections.emptyList();
     }
+    final List<List<MetaData>> cycles = new ArrayList<>();
     final Set<MetaData> remainderSet = new HashSet<>(remainder);
     // Build adjacency: each bean -> the beans it depends on that are also in the remainder
     final Map<MetaData, List<MetaData>> graph = new LinkedHashMap<>();
     for (MetaData bean : remainder) {
-      graph.put(bean, resolveQueuedDeps(bean, remainderSet));
+      graph.put(bean, resolveQueuedDeps(bean, remainderSet, providers));
     }
     final Set<MetaData> visited = new HashSet<>();
     final LinkedHashSet<MetaData> inStack = new LinkedHashSet<>();
     for (MetaData bean : remainder) {
       if (!visited.contains(bean)) {
-        dfsCycle(bean, graph, visited, inStack);
+        dfsCycle(bean, graph, visited, inStack, cycles);
       }
     }
+    return cycles;
   }
 
   /** Resolve which beans (from the remainder) a given bean depends on. */
-  private List<MetaData> resolveQueuedDeps(MetaData bean, Set<MetaData> remainderSet) {
+  private static List<MetaData> resolveQueuedDeps(MetaData bean, Set<MetaData> remainderSet, Map<String, ProviderList> providers) {
     if (bean.dependsOn() == null) {
       return Collections.emptyList();
     }
@@ -259,12 +268,12 @@ final class MetaDataOrdering {
     return result;
   }
 
-  private void dfsCycle(MetaData current, Map<MetaData, List<MetaData>> graph, Set<MetaData> visited, LinkedHashSet<MetaData> stack) {
+  private static void dfsCycle(MetaData current, Map<MetaData, List<MetaData>> graph, Set<MetaData> visited, LinkedHashSet<MetaData> stack, List<List<MetaData>> cycles) {
     visited.add(current);
     stack.add(current);
     for (var neighbor : graph.getOrDefault(current, List.of())) {
       if (!visited.contains(neighbor)) {
-        dfsCycle(neighbor, graph, visited, stack);
+        dfsCycle(neighbor, graph, visited, stack, cycles);
       } else if (stack.contains(neighbor)) {
         final var cycle = new ArrayList<MetaData>();
         boolean collecting = false;
@@ -276,16 +285,16 @@ final class MetaDataOrdering {
             cycle.add(m);
           }
         }
-        if (!isDuplicateCycle(cycle)) {
-          cyclePaths.add(cycle);
+        if (!isDuplicateCycle(cycle, cycles)) {
+          cycles.add(cycle);
         }
       }
     }
     stack.remove(current);
   }
 
-  private boolean isDuplicateCycle(List<MetaData> candidate) {
-    for (var existing : cyclePaths) {
+  private static boolean isDuplicateCycle(List<MetaData> candidate, List<List<MetaData>> cycles) {
+    for (var existing : cycles) {
       if (existing.size() == candidate.size() && existing.containsAll(candidate)) {
         return true;
       }
@@ -303,15 +312,15 @@ final class MetaDataOrdering {
     }
   }
 
-  private static class ProviderList {
+  static class ProviderList {
 
     private final List<MetaData> list = new ArrayList<>();
 
-    private void add(MetaData beanMeta) {
+    void add(MetaData beanMeta) {
       list.add(beanMeta);
     }
 
-    private List<MetaData> all() {
+    List<MetaData> all() {
       return list;
     }
 
