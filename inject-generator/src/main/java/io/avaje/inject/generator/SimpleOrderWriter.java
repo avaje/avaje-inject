@@ -10,6 +10,7 @@ final class SimpleOrderWriter {
   private final String shortName;
   private final String fullName;
   private final Set<String> ordering;
+  private final boolean interweave;
 
   private Append writer;
   private int numberOfModules;
@@ -19,6 +20,7 @@ final class SimpleOrderWriter {
     this.modulePackage = scopeInfo.modulePackage();
     this.shortName = "CompiledOrder";
     this.fullName = modulePackage.isBlank() ? shortName : modulePackage + "." + shortName;
+    this.interweave = ProcessingContext.interweave();
   }
 
   void write() throws IOException {
@@ -38,15 +40,28 @@ final class SimpleOrderWriter {
     if (!modulePackage.isBlank()) {
       writer.append("package %s;", modulePackage).eol().eol();
     }
-    writer
-      .append(
-        "import java.util.List;\n"
-          + "import java.util.Set;\n"
-          + "import io.avaje.inject.spi.Generated;\n"
-          + "import io.avaje.inject.spi.ModuleOrdering;\n"
-          + "import io.avaje.inject.spi.AvajeModule;")
-      .eol();
-
+    if (interweave) {
+      writer
+        .append(
+          "import java.util.List;\n"
+            + "import java.util.Set;\n"
+            + "import io.avaje.inject.spi.Generated;\n"
+            + "import io.avaje.inject.spi.ModuleOrdering;\n"
+            + "import io.avaje.inject.spi.AvajeModule;")
+        .eol();
+    } else {
+      writer
+        .append(
+          "import static java.util.Map.entry;\n"
+            + "\n"
+            + "import java.util.List;\n"
+            + "import java.util.Map;\n"
+            + "import java.util.Set;\n"
+            + "import io.avaje.inject.spi.Generated;\n"
+            + "import io.avaje.inject.spi.ModuleOrdering;\n"
+            + "import io.avaje.inject.spi.AvajeModule;")
+        .eol();
+    }
     writer.eol();
   }
 
@@ -63,23 +78,46 @@ final class SimpleOrderWriter {
 
     var size = ordering.size();
     this.numberOfModules = 0;
-    if (size == 0) {
-      writer.append("  private static final Set<String> MODULE_NAMES = Set.of();").eol();
+
+    if (interweave) {
+      if (size == 0) {
+        writer.append("  private static final Set<String> MODULE_NAMES = Set.of();").eol();
+      } else {
+        writer.append("  private static final Set<String> MODULE_NAMES = Set.of(").eol();
+        for (String moduleName : ordering) {
+          writer.append("    \"%s\"", moduleName);
+          if (++numberOfModules < size) {
+            writer.append(",").eol();
+          } else {
+            writer.append(");").eol();
+          }
+        }
+      }
+      writer.append("  private AvajeModule aggregatedModule;").eol();
     } else {
-      writer.append("  private static final Set<String> MODULE_NAMES = Set.of(").eol();
+      writer.append("  private final AvajeModule[] sortedModules = new AvajeModule[%s];", size).eol();
+      writer.append("  private static final Map<String, Integer> INDEXES = Map.ofEntries(").eol();
+      var count = 0;
       for (String moduleName : ordering) {
-        writer.append("    \"%s\"", moduleName);
-        if (++numberOfModules < size) {
+        writer.append("    entry(\"%s\", %s)", moduleName, count);
+        if (++count < size) {
           writer.append(",").eol();
         } else {
           writer.append(");").eol();
         }
       }
     }
-    writer.append("  private AvajeModule aggregatedModule;").eol();
   }
 
   private void writeBuildMethods() {
+    if (interweave) {
+      writeInterweaveBuildMethods();
+    } else {
+      writeClassicBuildMethods();
+    }
+  }
+
+  private void writeInterweaveBuildMethods() {
     writer.append(
         "\n"
         + "  @Override\n"
@@ -123,5 +161,43 @@ final class SimpleOrderWriter {
         + "    return MODULE_NAMES.isEmpty();\n"
         + "  }\n"
         + "}", numberOfModules);
+  }
+
+  private void writeClassicBuildMethods() {
+    writer.append(
+        "\n"
+        + "  @Override\n"
+        + "  public boolean supportsExpected(List<AvajeModule> modules) {\n"
+        + "    if (modules.size() != sortedModules.length) {\n"
+        + "      return false;\n"
+        + "    }\n"
+        + "    return modules.stream()\n"
+        + "            .map(m -> m.getClass().getTypeName())\n"
+        + "            .allMatch(k -> INDEXES.containsKey(k));\n"
+        + "  }\n"
+        + "\n"
+        + "  @Override\n"
+        + "  public List<AvajeModule> factories() {\n"
+        + "    return List.of(sortedModules);\n"
+        + "  }\n"
+        + "\n"
+        + "  @Override\n"
+        + "  public Set<String> orderModules() {\n"
+        + "    return INDEXES.keySet();\n"
+        + "  }\n"
+        + "\n"
+        + "  @Override\n"
+        + "  public void add(AvajeModule module) {\n"
+        + "    final var index = INDEXES.get(module.getClass().getTypeName());\n"
+        + "    if (index != null) {\n"
+        + "      sortedModules[index] = module;\n"
+        + "    }\n"
+        + "  }\n"
+        + "\n"
+        + "  @Override\n"
+        + "  public boolean isEmpty() {\n"
+        + "    return sortedModules.length == 0;\n"
+        + "  }\n"
+        + "}");
   }
 }

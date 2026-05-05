@@ -24,6 +24,8 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.ModuleElement;
+import javax.lang.model.element.ModuleElement.DirectiveKind;
+import javax.lang.model.element.ModuleElement.ExportsDirective;
 import javax.lang.model.element.ModuleElement.ProvidesDirective;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
@@ -156,6 +158,54 @@ final class ExternalProvider {
 
   static Map<String, List<MetaData>> externalModuleBeans() {
     return externalModuleBeans;
+  }
+
+  static void validateForInterweave(String moduleClass) {
+    var typeElement = APContext.typeElement(moduleClass);
+    if (typeElement == null) {
+      APContext.logError(
+          "External module '%s' is not visible - cannot interweave its beans", moduleClass);
+      return;
+    }
+
+    var externalMod = APContext.elements().getModuleOf(typeElement);
+    var projectMod = APContext.getProjectModuleElement();
+    if (externalMod != null
+        && !externalMod.isUnnamed()
+        && projectMod != null
+        && !projectMod.isUnnamed()) {
+      String pkg = APContext.elements().getPackageOf(typeElement).getQualifiedName().toString();
+      var exported =
+          externalMod.getDirectives().stream()
+              .filter(d -> d.getKind() == DirectiveKind.EXPORTS)
+              .map(ExportsDirective.class::cast)
+              .filter(d -> d.getPackage().getQualifiedName().toString().equals(pkg))
+              .anyMatch(
+                  d -> {
+                    var targets = d.getTargetModules();
+                    return targets == null || targets.isEmpty() || targets.contains(projectMod);
+                  });
+      if (!exported) {
+        APContext.logError(
+            "External module '%s' does not export package '%s' - cannot interweave its beans. "
+                + "Add 'exports %s;' to the external module's module-info.java",
+            moduleClass, pkg, pkg);
+        return;
+      }
+    }
+
+    boolean hasStaticBuildMethods =
+        ElementFilter.methodsIn(typeElement.getEnclosedElements()).stream()
+            .anyMatch(
+                m ->
+                    m.getSimpleName().toString().startsWith("build_")
+                        && m.getModifiers().contains(Modifier.PUBLIC)
+                        && m.getModifiers().contains(Modifier.STATIC));
+    if (!hasStaticBuildMethods) {
+      APContext.logError(
+          "External module '%s' compiled with an older version of inject that doesn't support interweaving.",
+          moduleClass);
+    }
   }
 
   static void readMetaDataProvides(Collection<String> providedTypes) {
