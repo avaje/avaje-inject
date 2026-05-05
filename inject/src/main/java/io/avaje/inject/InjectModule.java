@@ -61,6 +61,17 @@ public @interface InjectModule {
   boolean strictWiring() default false;
 
   /**
+   * An advanced form of {@link #strictWiring()} that interweaves all beans from external modules
+   * directly into this module's generated wiring class, allowing faster wiring and bidirectional cross-module
+   * dependency resolution.
+   *
+   * <p><strong>Note:</strong> because external bean wiring is inlined at compile time, any
+   * change to the bean makeup of an external module (adding, removing beans) requires
+   * a recompile of this module to pick up the updated wiring.
+   */
+  boolean interweave() default false;
+
+  /**
    * Explicitly specify the name of the module.
    */
   String name() default "";

@@ -197,7 +197,9 @@ final class MetaDataOrdering {
   Set<String> importTypes() {
     Set<String> importTypes = new TreeSet<>();
     for (MetaData metaData : orderedList) {
-      metaData.addImportTypes(importTypes);
+      if (!metaData.isExternal()) {
+        metaData.addImportTypes(importTypes);
+      }
     }
     return importTypes;
   }

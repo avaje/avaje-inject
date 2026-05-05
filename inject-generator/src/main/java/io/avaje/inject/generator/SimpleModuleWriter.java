@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.ElementKind;
@@ -81,6 +82,7 @@ final class SimpleModuleWriter {
     final Set<String> seen = new HashSet<>();
     this.duplicateTypes =
       ordering.ordered().stream()
+        .filter(m -> !m.isExternal())
         .map(MetaData::type)
         .filter(t -> !seen.add(ProcessorUtils.shortType(t)))
         .flatMap(t -> Stream.of(t, t + "$DI"))
@@ -227,9 +229,11 @@ final class SimpleModuleWriter {
     scopeRequires.addAll(ordering.autoRequires());
 
     for (MetaData metaData : ordering.ordered()) {
-      final var forExternal = metaData.provides();
-      if (forExternal != null && !forExternal.isEmpty()) {
-        scopeProvides.addAll(forExternal);
+      if (!metaData.isExternal()) {
+        final var forExternal = metaData.provides();
+        if (forExternal != null && !forExternal.isEmpty()) {
+          scopeProvides.addAll(forExternal);
+        }
       }
     }
 
@@ -257,6 +261,7 @@ final class SimpleModuleWriter {
   private Set<String> distinctPublicClasses() {
     Set<String> publicClasses = new LinkedHashSet<>();
     for (MetaData metaData : ordering.ordered()) {
+      if (metaData.isExternal()) continue;
       String rawType = metaData.type();
       if (!"void".equals(rawType) && !ProcessorUtils.isPrimitive(rawType)) {
 
@@ -290,7 +295,12 @@ final class SimpleModuleWriter {
     writer.append("    // i.e. \"provides\" followed by \"dependsOn\"").eol();
     for (MetaData metaData : ordering.ordered()) {
       if (!metaData.isGenerateProxy()) {
-        writer.append("    build_%s(builder);", metaData.buildName()).eol();
+        if (metaData.isExternal()) {
+          final String moduleShort = ProcessorUtils.shortType(metaData.sourceModule());
+          writer.append("    %s.build_%s(builder);", moduleShort, metaData.buildName()).eol();
+        } else {
+          writer.append("    build_%s(builder);", metaData.buildName()).eol();
+        }
       }
     }
     writer.append("  }").eol();
@@ -299,7 +309,9 @@ final class SimpleModuleWriter {
 
   private void writeBuildMethods() {
     for (MetaData metaData : ordering.ordered()) {
-      metaData.buildMethod(writer, duplicateTypes.contains(metaData.type()));
+      if (!metaData.isExternal()) {
+        metaData.buildMethod(writer, duplicateTypes.contains(metaData.type()));
+      }
     }
   }
 
@@ -316,7 +328,20 @@ final class SimpleModuleWriter {
         writer.append("import %s;", type).eol();
       }
     }
+    for (String externalModuleClass : externalModuleClassesInOrder()) {
+      if (Util.validImportType(externalModuleClass, modulePackage)) {
+        writer.append("import %s;", externalModuleClass).eol();
+      }
+    }
     writer.eol();
+  }
+
+  /** Collect the distinct external module class FQNs that appear in the ordered bean list. */
+  private Set<String> externalModuleClassesInOrder() {
+    return ordering.ordered().stream()
+      .filter(MetaData::isExternal)
+      .map(MetaData::sourceModule)
+      .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   private Set<String> factoryImportTypes() {
@@ -380,6 +405,14 @@ final class SimpleModuleWriter {
   }
 
   private void writeEndClass() {
+
+    if (ProcessingContext.interweave() && scopeType == ScopeInfo.Type.DEFAULT) {
+      writer.append("  @Override").eol();
+      writer.append("  public boolean interweaved() {").eol();
+      writer.append("    return true;").eol();
+      writer.append("  }").eol().eol();
+    }
+
     writer.append("}").eol();
   }
 

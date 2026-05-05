@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -23,6 +24,8 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.ModuleElement;
+import javax.lang.model.element.ModuleElement.DirectiveKind;
+import javax.lang.model.element.ModuleElement.ExportsDirective;
 import javax.lang.model.element.ModuleElement.ProvidesDirective;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
@@ -59,6 +62,7 @@ final class ExternalProvider {
     entry("io.avaje.validation.http.HttpValidatorProvider", of("io.avaje.http.api.Validator")));
   private static final String CLASS_NAME_AVAJE_MODULE = "io.avaje.inject.spi.AvajeModule";
   private static final List<MetaData> externalMeta = new ArrayList<>();
+  private static final Map<String, List<MetaData>> externalModuleBeans = new LinkedHashMap<>();
 
   private ExternalProvider() {
   }
@@ -139,7 +143,7 @@ final class ExternalProvider {
 
   static void registerExternalMetaData(String name) {
     ProcessingContext.addExternalInjectSPI(name);
-    Optional.ofNullable(APContext.typeElement(name))
+    var beans = Optional.ofNullable(APContext.typeElement(name))
       .map(TypeElement::getEnclosedElements)
       .map(ElementFilter::methodsIn)
       .stream()
@@ -147,7 +151,61 @@ final class ExternalProvider {
       .map(DependencyMetaPrism::getInstanceOn)
       .filter(Objects::nonNull)
       .map(MetaData::new)
-      .forEach(externalMeta::add);
+      .collect(toList());
+    externalMeta.addAll(beans);
+    externalModuleBeans.computeIfAbsent(name, k -> new ArrayList<>()).addAll(beans);
+  }
+
+  static Map<String, List<MetaData>> externalModuleBeans() {
+    return externalModuleBeans;
+  }
+
+  static void validateForInterweave(String moduleClass) {
+    var typeElement = APContext.typeElement(moduleClass);
+    if (typeElement == null) {
+      APContext.logError(
+          "External module '%s' is not visible - cannot interweave its beans", moduleClass);
+      return;
+    }
+
+    var externalMod = APContext.elements().getModuleOf(typeElement);
+    var projectMod = APContext.getProjectModuleElement();
+    if (externalMod != null
+        && !externalMod.isUnnamed()
+        && projectMod != null
+        && !projectMod.isUnnamed()) {
+      String pkg = APContext.elements().getPackageOf(typeElement).getQualifiedName().toString();
+      var exported =
+          externalMod.getDirectives().stream()
+              .filter(d -> d.getKind() == DirectiveKind.EXPORTS)
+              .map(ExportsDirective.class::cast)
+              .filter(d -> d.getPackage().getQualifiedName().toString().equals(pkg))
+              .anyMatch(
+                  d -> {
+                    var targets = d.getTargetModules();
+                    return targets == null || targets.isEmpty() || targets.contains(projectMod);
+                  });
+      if (!exported) {
+        APContext.logError(
+            "External module '%s' does not export package '%s' - cannot interweave its beans. "
+                + "Add 'exports %s;' to the external module's module-info.java",
+            moduleClass, pkg, pkg);
+        return;
+      }
+    }
+
+    boolean hasStaticBuildMethods =
+        ElementFilter.methodsIn(typeElement.getEnclosedElements()).stream()
+            .anyMatch(
+                m ->
+                    m.getSimpleName().toString().startsWith("build_")
+                        && m.getModifiers().contains(Modifier.PUBLIC)
+                        && m.getModifiers().contains(Modifier.STATIC));
+    if (!hasStaticBuildMethods) {
+      APContext.logError(
+          "External module '%s' compiled with an older version of inject that doesn't support interweaving.",
+          moduleClass);
+    }
   }
 
   static void readMetaDataProvides(Collection<String> providedTypes) {
@@ -271,6 +329,7 @@ final class ExternalProvider {
   private static void addOtherModuleProvides(Collection<String> providedTypes, TypeElement otherModule) {
     final var provides = new HashSet<String>();
     final var requires = new HashSet<String>();
+    final var name = otherModule.getQualifiedName().toString();
 
     ElementFilter.methodsIn(otherModule.getEnclosedElements()).stream()
       .map(DependencyMetaPrism::getInstanceOn)
@@ -278,6 +337,7 @@ final class ExternalProvider {
       .map(MetaData::new)
       .forEach(m -> {
         externalMeta.add(m);
+        externalModuleBeans.computeIfAbsent(name, k -> new ArrayList<>()).add(m);
         provides.addAll(m.provides());
         m.dependsOn().stream()
           .filter(d -> !d.isSoftDependency())
@@ -289,7 +349,6 @@ final class ExternalProvider {
         providedTypes.addAll(Util.addQualifierSuffix(m.provides(), m.name()));
       });
 
-    final var name = otherModule.getQualifiedName().toString();
     APContext.logNote("Detected Module: %s", name);
     ProcessingContext.addModule(new ModuleData(name, List.copyOf(provides), List.copyOf(requires)));
   }

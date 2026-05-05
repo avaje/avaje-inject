@@ -26,7 +26,7 @@
     <project.build.outputTimestamp>2026-05-01T02:52:48Z</project.build.outputTimestamp>
     <!-- default-build-end -->
     <!-- valhalla-build-start ___
-    <maven.compiler.release>26</maven.compiler.release>
+    <maven.compiler.release>27</maven.compiler.release>
     <maven.compiler.enablePreview>true</maven.compiler.enablePreview>
     ____ valhalla-build-end -->
   </properties>
