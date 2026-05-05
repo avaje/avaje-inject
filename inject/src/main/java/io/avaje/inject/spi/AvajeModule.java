@@ -1,5 +1,7 @@
 package io.avaje.inject.spi;
 
+import io.avaje.inject.InjectModule;
+
 /** A Module containing dependencies that will be included in BeanScope. */
 public interface AvajeModule extends InjectExtension {
 
@@ -40,8 +42,8 @@ public interface AvajeModule extends InjectExtension {
     return EMPTY_STRINGS;
   }
 
-  /** Whether The Module is strict */
-  default boolean strictWiring() {
+  /** Whether The Module is an {@link InjectModule#interweave} module */
+  default boolean interweaved() {
     return false;
   }
 

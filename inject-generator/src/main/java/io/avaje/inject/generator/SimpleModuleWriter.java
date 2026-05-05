@@ -408,7 +408,7 @@ final class SimpleModuleWriter {
 
     if (ProcessingContext.interweave() && scopeType == ScopeInfo.Type.DEFAULT) {
       writer.append("  @Override").eol();
-      writer.append("  public boolean strictWiring() {").eol();
+      writer.append("  public boolean interweaved() {").eol();
       writer.append("    return true;").eol();
       writer.append("  }").eol().eol();
     }
