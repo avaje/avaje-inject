@@ -152,8 +152,12 @@ final class TypeReader {
   private void initRegistrationTypes() {
     TypeAppender appender = new TypeAppender(importTypes);
     if (injectsTypes.isEmpty()) {
-      appender.add(extendsReader.baseType());
-      appender.add(extendsReader.provides());
+      if (extendsReader.isProxyBean()) {
+        appender.add(extendsReader.provides());
+      } else {
+        appender.add(extendsReader.baseType());
+        appender.add(extendsReader.provides());
+      }
     } else {
       appender.add(injectsTypes);
     }

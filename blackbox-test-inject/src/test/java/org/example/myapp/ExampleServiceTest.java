@@ -21,4 +21,18 @@ class ExampleServiceTest {
       exampleService.withListString(List.of("a", "b"));
     }
   }
+
+  @Test
+  void exerciseAspect() {
+    try (BeanScope beanScope = BeanScope.builder().build()) {
+      ExampleService exampleService = (ExampleService) beanScope.get(ExampleServiceInterface.class);
+
+      exampleService.other("foo", 42);
+      exampleService.runOnly("foo");
+      exampleService.withParamAtomic(new AtomicLong(42));
+      exampleService.withParamImport(new ConcurrentHashMap<>());
+      exampleService.withListString(List.of("a", "b"));
+    }
+  }
+
 }

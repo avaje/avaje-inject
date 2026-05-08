@@ -201,6 +201,8 @@ public final class InjectProcessor extends AbstractProcessor {
     allScopes.write(over);
 
     if (processingOver()) {
+      ProcessingContext.writeNativeImageReflectConfig(defaultScope.modulePackage());
+
       final var order =
         new FactoryOrder(ProcessingContext.modules(), defaultScope.pluginProvided())
           .orderModules();
@@ -413,7 +415,9 @@ public final class InjectProcessor extends AbstractProcessor {
           final var annotation = InjectModulePrism.getInstanceOn(element);
           if (annotation != null) {
             defaultScope.details(annotation.name(), element);
-            ProcessingContext.strictWiring(annotation.strictWiring());
+            final boolean interweave = annotation.interweave();
+            ProcessingContext.interweave(interweave);
+            ProcessingContext.strictWiring(interweave || annotation.strictWiring());
           }
         }
       });

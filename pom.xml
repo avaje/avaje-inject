@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.avaje</groupId>
   <artifactId>avaje-inject-parent</artifactId>
-  <version>12.5-RC4</version>
+  <version>12.6-RC1</version>
   <packaging>pom</packaging>
   <name>avaje inject parent</name>
   <description>parent pom for avaje inject library</description>
@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.avaje</groupId>
     <artifactId>java11-oss</artifactId>
-    <version>5.1</version>
+    <version>5.2</version>
   </parent>
   <scm>
     <developerConnection>scm:git:git@github.com:avaje/avaje-inject.git</developerConnection>
@@ -23,10 +23,10 @@
     <surefire.useModulePath>false</surefire.useModulePath>
     <argLine>-Dnet.bytebuddy.experimental=true</argLine>
     <!-- default-build-start -->
-    <project.build.outputTimestamp>2026-03-18T09:25:04Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2026-05-01T02:52:48Z</project.build.outputTimestamp>
     <!-- default-build-end -->
     <!-- valhalla-build-start ___
-    <maven.compiler.release>26</maven.compiler.release>
+    <maven.compiler.release>27</maven.compiler.release>
     <maven.compiler.enablePreview>true</maven.compiler.enablePreview>
     ____ valhalla-build-end -->
   </properties>
@@ -63,13 +63,13 @@
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy</artifactId>
-      <version>1.18.7</version>
+      <version>1.18.8</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy-agent</artifactId>
-      <version>1.18.7</version>
+      <version>1.18.8</version>
       <scope>test</scope>
     </dependency>
     <dependency>

@@ -9,6 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
@@ -79,8 +80,7 @@ final class BeanReader {
     this.priority = Util.priority(actualType);
     var beanTypes =
       BeanTypesPrism.getOptionalOn(actualType)
-        .map(BeanTypesPrism::value)
-        .or(() -> proxy ? Optional.of(List.of(actualType.asType())) : Optional.empty());
+        .map(BeanTypesPrism::value);
     beanTypes.ifPresent(t -> Util.validateBeanTypes(actualType, t));
     this.typeReader =
       new TypeReader(
@@ -234,12 +234,16 @@ final class BeanReader {
       }
     }
 
+    Set<String> ownFactoryTypes = factoryMethods.stream()
+      .map(m -> Util.addQualifierSuffixTrim(m.qualifierName(), m.returnType()))
+      .collect(Collectors.toSet());
     observerMethods.stream()
       .flatMap(m -> m.params().stream().skip(1))
       .forEach(param -> {
         Dependency dependsOn = param.dependsOn();
         // BeanScope is always injectable with no impact on injection ordering
-        if (!Constants.BEANSCOPE.equals(dependsOn.dependsOn())) {
+        if (!Constants.BEANSCOPE.equals(dependsOn.dependsOn())
+            && !ownFactoryTypes.contains(dependsOn.name())) {
           list.add(dependsOn);
         }
       });
@@ -405,15 +409,35 @@ final class BeanReader {
   }
 
   private void writePostConstruct(Append writer, MethodReader postConstruct) {
-    writer.start("builder.addPostConstruct(");
     final var methodName = postConstruct.name();
     final var params = postConstruct.params();
-    if (params.isEmpty() || Constants.BEANSCOPE.equals(params.get(0).getFullUType().shortType())) {
-      writer.append("$bean::%s);", methodName).eol();
+    final boolean hasBeanScope = !params.isEmpty() && Constants.BEANSCOPE.equals(params.get(0).getFullUType().shortType());
+    if (!postConstruct.methodThrows()) {
+      writer.start("builder.addPostConstruct(");
+      if (params.isEmpty() || hasBeanScope) {
+        writer.append("$bean::%s);", methodName).eol();
+      } else {
+        writer.append("beanScope -> $bean.%s(", methodName);
+        writeLifeCycleGet(writer, params, "beanScope", "beanScope");
+        writer.append(");").eol();
+      }
     } else {
-      writer.append("beanScope -> $bean.%s(", methodName);
-      writeLifeCycleGet(writer, params, "beanScope", "beanScope");
-      writer.append(");").eol();
+      final var lambdaPrefix = params.isEmpty() ? "()" : "beanScope";
+      writer.start("builder.addPostConstruct(%s -> {", lambdaPrefix).eol();
+      writer.start("  try {").eol();
+      if (params.isEmpty()) {
+        writer.start("    $bean.%s();", methodName).eol();
+      } else if (hasBeanScope) {
+        writer.start("    $bean.%s(beanScope);", methodName).eol();
+      } else {
+        writer.start("    $bean.%s(", methodName);
+        writeLifeCycleGet(writer, params, "beanScope", "beanScope");
+        writer.append(";").eol();
+      }
+      writer.start("  } catch (Exception e) {").eol();
+      writer.start("    throw new RuntimeException(e);").eol();
+      writer.start("  }").eol();
+      writer.start("});").eol();
     }
   }
 

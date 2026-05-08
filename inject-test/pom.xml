@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.avaje</groupId>
     <artifactId>avaje-inject-parent</artifactId>
-    <version>12.5-RC4</version>
+    <version>12.6-RC1</version>
   </parent>
 
   <artifactId>avaje-inject-test</artifactId>
@@ -59,12 +59,12 @@
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy</artifactId>
-      <version>1.18.7</version>
+      <version>1.18.8</version>
     </dependency>
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy-agent</artifactId>
-      <version>1.18.7</version>
+      <version>1.18.8</version>
     </dependency>
 
     <dependency>
@@ -91,28 +91,28 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-http-api</artifactId>
-      <version>3.7</version>
+      <version>3.8</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-http-client</artifactId>
-      <version>3.7</version>
+      <version>3.8</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-jex</artifactId>
-      <version>3.4</version>
+      <version>3.5</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-jsonb</artifactId>
-      <version>3.11</version>
+      <version>3.13</version>
       <scope>test</scope>
     </dependency>
 
@@ -133,7 +133,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.44</version>
+      <version>1.18.46</version>
       <scope>test</scope>
     </dependency>
 

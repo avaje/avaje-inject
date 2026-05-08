@@ -1,5 +1,7 @@
 package io.avaje.inject.spi;
 
+import io.avaje.inject.InjectModule;
+
 /** A Module containing dependencies that will be included in BeanScope. */
 public interface AvajeModule extends InjectExtension {
 
@@ -38,6 +40,11 @@ public interface AvajeModule extends InjectExtension {
   /** Return the type names of packages this module needs to be provided via other modules. */
   default String[] requiresPackagesFromType() {
     return EMPTY_STRINGS;
+  }
+
+  /** Whether The Module is an {@link InjectModule#interweave} module */
+  default boolean interweaved() {
+    return false;
   }
 
   /** Marker for custom scoped modules. */

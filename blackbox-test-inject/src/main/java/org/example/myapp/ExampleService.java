@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @MyTimed
 @Singleton
-public class ExampleService {
+public class ExampleService implements ExampleServiceInterface {
 
   final HelloService helloService;
 

@@ -4,6 +4,7 @@ import io.avaje.applog.AppLog;
 import io.avaje.inject.BeanScope;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
+import java.io.Closeable;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static java.lang.System.Logger.Level.DEBUG;
@@ -12,7 +13,7 @@ import static java.lang.System.Logger.Level.TRACE;
 /**
  * Holds the global BeanScope used for all tests.
  */
-final class GlobalTestBeans implements ExtensionContext.Store.CloseableResource {
+final class GlobalTestBeans implements Closeable {
 
   private static final System.Logger log = AppLog.getLogger("io.avaje.inject");
 

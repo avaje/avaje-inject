@@ -248,7 +248,8 @@ final class SimpleAssistWriter {
   }
 
   private void writeCreateBean(MethodReader constructor) {
-    writer.start("var bean = new %s(", shortName);
+    var diamond = beanReader.beanType().getTypeParameters().isEmpty() ? "" : "<>";
+    writer.start("var bean = new %s%s(", shortName, diamond);
     // add constructor dependencies
     writeMethodParams(constructor, true);
   }
