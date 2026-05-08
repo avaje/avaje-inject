@@ -46,6 +46,7 @@ final class MetaData implements Comparable<MetaData> {
   private boolean usesExternalDependency;
   private final Set<String> externalDependencies = new HashSet<>();
   private boolean importedComponent;
+  private String sourceModule;
 
   MetaData(DependencyMetaPrism meta) {
     this.type = meta.type();
@@ -89,6 +90,20 @@ final class MetaData implements Comparable<MetaData> {
    */
   boolean isGenerateProxy() {
     return generateProxy;
+  }
+
+  /** Mark this bean as coming from an external module (used when strict wiring interweaves external beans). */
+  void markExternalModule(String moduleClass) {
+    this.sourceModule = moduleClass;
+  }
+
+  /** Return the FQN of the external module class this bean belongs to, or null if it is a local bean. */
+  String sourceModule() {
+    return sourceModule;
+  }
+
+  boolean isExternal() {
+    return sourceModule != null;
   }
 
   private String trimName(String name) {
@@ -229,7 +244,7 @@ final class MetaData implements Comparable<MetaData> {
       appendProvides(append, "dependsOn", dependsOn.stream().map(Dependency::dependsOn).collect(Collectors.toList()));
     }
     append.append(")").append(NEWLINE);
-    append.append("  private void build_").append(buildName()).append("(Builder builder) {").append(NEWLINE);
+    append.append("  public static void build_").append(buildName()).append("(Builder builder) {").append(NEWLINE);
     if (hasMethod()) {
       append.append("    ").append(Util.shortMethod(method)).append("(builder");
     } else {

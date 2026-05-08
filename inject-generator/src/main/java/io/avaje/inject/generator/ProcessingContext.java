@@ -62,6 +62,7 @@ final class ProcessingContext {
     private final AllScopes scopes = new AllScopes();
     private boolean processingOver;
     private boolean strictWiring;
+    private boolean interweave;
     private final boolean mergeServices =
         APContext.getOption("mergeServices").map(Boolean::valueOf).orElse(true);
 
@@ -262,6 +263,14 @@ final class ProcessingContext {
 
   static boolean strictWiring() {
     return CTX.get().strictWiring;
+  }
+
+  static void interweave(boolean interweave) {
+    CTX.get().interweave = interweave;
+  }
+
+  static boolean interweave() {
+    return CTX.get().interweave;
   }
 
   static void processingOver(boolean over) {
