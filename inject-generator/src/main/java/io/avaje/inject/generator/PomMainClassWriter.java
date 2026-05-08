@@ -45,17 +45,49 @@ final class PomMainClassWriter {
   }
 
   private static String updateExistingJarPlugin(String pomContent, String mainClass) {
-
-    if (pomContent.contains("<mainClass>") && pomContent.contains("</mainClass>")) {
-      return pomContent.replaceAll(
-          "<mainClass>.*?</mainClass>", "<mainClass>" + mainClass + "</mainClass>");
-    }
-    // maven-jar-plugin exists but no <mainClass> - insert configuration
     int jarPluginIndex = pomContent.indexOf("maven-jar-plugin");
     int closingPlugin = pomContent.indexOf("</plugin>", jarPluginIndex);
     if (closingPlugin == -1) {
       return null;
     }
+
+    String before = pomContent.substring(0, jarPluginIndex);
+    String pluginBody = pomContent.substring(jarPluginIndex, closingPlugin);
+    String after = pomContent.substring(closingPlugin);
+
+    if (pomContent.contains("<mainClass>")) {
+      return pomContent.replaceAll("<mainClass>.*?</mainClass>", "<mainClass>" + mainClass + "</mainClass>");
+    }
+
+    // insert mainClass at the deepest existing nesting point
+    int manifestClose = pluginBody.indexOf("</manifest>");
+    if (manifestClose != -1) {
+      String entry = "              <mainClass>" + mainClass + "</mainClass>\n              ";
+      return before + new StringBuilder(pluginBody).insert(manifestClose, entry) + after;
+    }
+
+    int archiveClose = pluginBody.indexOf("</archive>");
+    if (archiveClose != -1) {
+      String manifestBlock =
+          "            <manifest>\n"
+              + "              <mainClass>" + mainClass + "</mainClass>\n"
+              + "            </manifest>\n"
+              + "          ";
+      return before + new StringBuilder(pluginBody).insert(archiveClose, manifestBlock) + after;
+    }
+
+    int configClose = pluginBody.indexOf("</configuration>");
+    if (configClose != -1) {
+      String archiveBlock =
+          "          <archive>\n"
+              + "            <manifest>\n"
+              + "              <mainClass>" + mainClass + "</mainClass>\n"
+              + "            </manifest>\n"
+              + "          </archive>\n"
+              + "        ";
+      return before + new StringBuilder(pluginBody).insert(configClose, archiveBlock) + after;
+    }
+
     String configBlock =
         "  <configuration>\n"
             + "          <archive>\n"
@@ -67,12 +99,12 @@ final class PomMainClassWriter {
             + "          </archive>\n"
             + "        </configuration>\n"
             + "      ";
-    return new StringBuilder(pomContent).insert(closingPlugin, configBlock).toString();
+    return before + pluginBody + configBlock + after;
   }
 
   private static String insertNewJarPlugin(String pomContent, String mainClass) {
     String pluginBlock = String.format(JAR_PLUGIN_BLOCK, mainClass);
-    int pluginsIndex = pomContent.indexOf("</plugins>");
+    int pluginsIndex = findBuildPluginsClose(pomContent);
     if (pluginsIndex != -1) {
       return new StringBuilder(pomContent).insert(pluginsIndex, pluginBlock).toString();
     }
@@ -89,5 +121,21 @@ final class PomMainClassWriter {
     }
     String buildWrap = "<build>\n    <plugins>\n    " + pluginBlock + "</plugins>\n  </build>\n";
     return new StringBuilder(pomContent).insert(projectCloseIndex, buildWrap).toString();
+  }
+  private static int findBuildPluginsClose(String pomContent) {
+    int mgmtStart = pomContent.indexOf("<pluginManagement>");
+    int mgmtEnd = mgmtStart != -1 ? pomContent.indexOf("</pluginManagement>", mgmtStart) : -1;
+    int searchFrom = 0;
+    while (true) {
+      int idx = pomContent.indexOf("</plugins>", searchFrom);
+      if (idx == -1) {
+        return -1;
+      }
+      if (mgmtStart != -1 && idx > mgmtStart && idx < mgmtEnd) {
+        searchFrom = idx + "</plugins>".length();
+        continue;
+      }
+      return idx;
+    }
   }
 }
