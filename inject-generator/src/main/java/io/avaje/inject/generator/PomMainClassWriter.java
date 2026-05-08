@@ -45,9 +45,10 @@ final class PomMainClassWriter {
   }
 
   private static String updateExistingJarPlugin(String pomContent, String mainClass) {
+
     if (pomContent.contains("<mainClass>") && pomContent.contains("</mainClass>")) {
-      return pomContent.replace(
-          "<mainClass>[^<]*</mainClass>", "<mainClass>" + mainClass + "</mainClass>");
+      return pomContent.replaceAll(
+          "<mainClass>.*?</mainClass>", "<mainClass>" + mainClass + "</mainClass>");
     }
     // maven-jar-plugin exists but no <mainClass> - insert configuration
     int jarPluginIndex = pomContent.indexOf("maven-jar-plugin");
