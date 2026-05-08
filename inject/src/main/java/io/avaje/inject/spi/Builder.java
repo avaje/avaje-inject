@@ -326,6 +326,21 @@ public interface Builder {
   BeanScope build(boolean withShutdownHook, long start);
 
   /**
+   * Close any AutoCloseables that were registered before the build aborted.
+   * <p>
+   * Called by the scope builder when {@link AvajeModule#build(Builder)} throws,
+   * so that beans which were already constructed do not leak their resources.
+   * Best-effort: failures from individual {@link AutoCloseable#close()} calls
+   * are attached to {@code cause} as suppressed exceptions, never thrown.
+   *
+   * @param cause the build failure that triggered cleanup, used to collect
+   *              suppressed exceptions raised during close
+   */
+  default void closeOnFailure(Throwable cause) {
+    // default no-op for custom Builder implementations
+  }
+
+  /**
    * Set the current module being wired.
    */
   void currentModule(Class<? extends AvajeModule> currentModule);

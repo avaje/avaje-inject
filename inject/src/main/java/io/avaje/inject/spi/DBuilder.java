@@ -457,6 +457,27 @@ class DBuilder implements Builder {
     return scope.start(start);
   }
 
+  @Override
+  public final void closeOnFailure(Throwable cause) {
+    if (preDestroy.isEmpty()) {
+      return;
+    }
+    // close in priority order, mirroring the normal shutdown path, then drain
+    // the deque so a subsequent BeanScope.close() is a no-op for these hooks.
+    final var pending = new ArrayList<>(preDestroy);
+    preDestroy.clear();
+    pending.stream()
+        .sorted()
+        .map(ClosePair::closeable)
+        .forEach(closeable -> {
+          try {
+            closeable.close();
+          } catch (Exception closeError) {
+            cause.addSuppressed(closeError);
+          }
+        });
+  }
+
   /** Return the PreDestroy methods in priority order. */
   private Deque<ClosePair> preDestroy() {
     return preDestroy;

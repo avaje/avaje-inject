@@ -277,10 +277,15 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     log.log(level, "building with avaje modules {0} profiles {1}", moduleNames, profiles);
 
     final var builder = Builder.newBuilder(profiles, propertyPlugin, suppliedBeans, enrichBeans, parent, parentOverride);
-    for (final var factory : factoryOrder.factories()) {
-      builder.currentModule(factory.getClass());
-      builder.currentScopes(factory.definesScopes());
-      factory.build(builder);
+    try {
+      for (final var factory : factoryOrder.factories()) {
+        builder.currentModule(factory.getClass());
+        builder.currentScopes(factory.definesScopes());
+        factory.build(builder);
+      }
+    } catch (Throwable t) {
+      builder.closeOnFailure(t);
+      throw t;
     }
 
     if (moduleNames.isEmpty()) {
