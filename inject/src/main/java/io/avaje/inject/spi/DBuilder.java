@@ -454,7 +454,16 @@ class DBuilder implements Builder {
     if (beanScopeProxy != null) {
       beanScopeProxy.inject(scope);
     }
-    return scope.start(start);
+    try {
+      return scope.start(start);
+    } catch (Throwable t) {
+      try {
+        scope.close();
+      } catch (Exception closeError) {
+        t.addSuppressed(closeError);
+      }
+      throw t;
+    }
   }
 
   @Override
