@@ -468,23 +468,20 @@ class DBuilder implements Builder {
 
   @Override
   public final void closeOnFailure(Throwable cause) {
-    if (preDestroy.isEmpty()) {
-      return;
-    }
     // close in priority order, mirroring the normal shutdown path, then drain
     // the deque so a subsequent BeanScope.close() is a no-op for these hooks.
-    final var pending = new ArrayList<>(preDestroy);
-    preDestroy.clear();
-    pending.stream()
+    preDestroy.stream()
         .sorted()
         .map(ClosePair::closeable)
-        .forEach(closeable -> {
-          try {
-            closeable.close();
-          } catch (Exception closeError) {
-            cause.addSuppressed(closeError);
-          }
-        });
+        .forEach(
+            closeable -> {
+              try {
+                closeable.close();
+              } catch (Exception closeError) {
+                cause.addSuppressed(closeError);
+              }
+            });
+    preDestroy.clear();
   }
 
   /** Return the PreDestroy methods in priority order. */
