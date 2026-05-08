@@ -388,12 +388,21 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     private void processQueue() {
       int count;
       do {
-        count = processQueuedFactories();
+        count = processQueuedFactories(false);
       } while (count > 0);
 
-      if (suppliedBeans) {
-        // just push everything left assuming supplied beans
-        // will satisfy the required dependencies
+      if (suppliedBeans && !queue.isEmpty()) {
+        // Relaxed pass: when supplied beans may satisfy unknown dependencies,
+        // treat a required type with no module-level provider as externally
+        // supplied, and treat a required type with at least one provider already
+        // pushed as satisfied. This preserves topological order between modules
+        // whose only unsatisfied dependency is supplied via BeanScopeBuilder.bean()
+        // or comes from a partial multi-provider chain.
+        do {
+          count = processQueuedFactories(true);
+        } while (count > 0);
+        // Anything still queued has an in-module provider that was never pushed
+        // (a cycle or otherwise unresolvable case); emit in insertion order.
         for (final FactoryState factoryState : queue) {
           push(factoryState);
         }
@@ -422,24 +431,38 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
 
     private boolean notProvided(String dependency) {
+      return notProvided(dependency, false);
+    }
+
+    private boolean notProvided(String dependency, boolean relaxed) {
       if (parent != null && (parent.contains(dependency) || parent.customScopeAnnotations().contains(dependency))) {
         return false;
       }
       final var factoryList = providesMap.get(dependency);
-      return factoryList == null || !factoryList.allPushed();
+      if (factoryList == null) {
+        // No module on the list provides this type. In strict mode that's a
+        // missing dependency; in relaxed mode (supplied beans in play) we assume
+        // the bean was supplied externally via BeanScopeBuilder.bean().
+        return !relaxed;
+      }
+      return relaxed ? !factoryList.anyPushed() : !factoryList.allPushed();
     }
 
     /**
      * Process the queued factories pushing them when all their (module) dependencies are satisfied.
      *
      * <p>This returns the number of factories added so once this returns 0 it is done.
+     *
+     * @param relaxed when true, a requirement is satisfied if at least one of its
+     *     providers has been pushed, and a requirement with no module-level provider
+     *     is assumed to be supplied externally.
      */
-    private int processQueuedFactories() {
+    private int processQueuedFactories(boolean relaxed) {
       int count = 0;
       final var it = queue.iterator();
       while (it.hasNext()) {
         final FactoryState factory = it.next();
-        if (factory.factory.interweaved() || satisfiedDependencies(factory)) {
+        if (factory.factory.interweaved() || satisfiedDependencies(factory, relaxed)) {
           // push the factory onto the build order
           it.remove();
           push(factory);
@@ -450,14 +473,14 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
 
     /** Return true if the (module) requires dependencies are satisfied for this factory. */
-    private boolean satisfiedDependencies(FactoryState factory) {
-      return satisfiedDependencies(factory.requires())
-          && satisfiedDependencies(factory.requiresPackages());
+    private boolean satisfiedDependencies(FactoryState factory, boolean relaxed) {
+      return satisfiedDependencies(factory.requires(), relaxed)
+          && satisfiedDependencies(factory.requiresPackages(), relaxed);
     }
 
-    private boolean satisfiedDependencies(String[] requires) {
+    private boolean satisfiedDependencies(String[] requires, boolean relaxed) {
       for (final var dependency : requires) {
-        if (notProvided(dependency)) {
+        if (notProvided(dependency, relaxed)) {
           return false;
         }
       }
@@ -536,6 +559,16 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         }
       }
       return true;
+    }
+
+    /** Return true if at least one factory here has been pushed onto the build order. */
+    boolean anyPushed() {
+      for (final FactoryState factory : factories) {
+        if (factory.isPushed()) {
+          return true;
+        }
+      }
+      return false;
     }
   }
 }

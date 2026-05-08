@@ -160,6 +160,24 @@ class BeanScopeBuilderTest {
   }
 
   @Test
+  void supplied_externalRequires_orderPreservedForChain() {
+    // When BeanScopeBuilder.bean() is in play (suppliedBeans=true) and a module chain
+    // B<-A has A's requires satisfied externally, modules added in order [B, A] must
+    // still be wired in dependency order. The strict pass stalls because B's TypeX is
+    // only provided by A (not yet pushed) and A's external requires are not in the
+    // providesMap. Without a relaxed fallback that treats absent providesMap entries
+    // as externally supplied, the queue is dumped in insertion order and B is wired
+    // before A, leaving TypeX null at injection time.
+    DBeanScopeBuilder.FactoryOrder factoryOrder =
+      new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), true);
+    factoryOrder.add(bc("B", EMPTY_CLASSES, of(MyFeature.class)));
+    factoryOrder.add(bc("A", of(MyFeature.class), of(FeatureA.class)));
+    factoryOrder.orderModules();
+
+    assertThat(names(factoryOrder.factories())).containsExactly("A", "B");
+  }
+
+  @Test
   void missingRequiresPackage_expect_unsatisfiedRequiresPackages() {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), false);
     factoryOrder.add(bc("1", EMPTY_CLASSES, new Class[0], of(Mod3.class)));
