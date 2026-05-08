@@ -2,7 +2,6 @@ package io.avaje.inject.generator;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 
 import javax.lang.model.element.ModuleElement;
 
@@ -53,8 +52,7 @@ final class PomPluginWriter {
           pluginsIndex,
           String.format(PLUGIN, PomPluginWriter.class.getPackage().getImplementationVersion()));
 
-      Files.writeString(
-          pomPath, builder.toString(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+      Files.writeString(pomPath, builder.toString());
     }
   }
 

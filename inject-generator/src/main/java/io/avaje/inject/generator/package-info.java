@@ -14,6 +14,7 @@
 @GeneratePrism(InjectModule.class)
 @GeneratePrism(BeanTypes.class)
 @GeneratePrism(Lazy.class)
+@GeneratePrism(MainClass.class)
 @GeneratePrism(Named.class)
 @GeneratePrism(PluginProvides.class)
 @GeneratePrism(PreDestroy.class)
