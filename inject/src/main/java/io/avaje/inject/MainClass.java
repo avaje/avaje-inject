@@ -7,7 +7,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Marks a class as the application's main class.
+ * Marks a class as the application's main class and entrypoint.
  *
  * <p>When present, the annotation processor will:
  *
