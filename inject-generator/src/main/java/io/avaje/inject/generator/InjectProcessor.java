@@ -474,7 +474,9 @@ public final class InjectProcessor extends AbstractProcessor {
 
     checkGradlePlugin(mainElement);
     wroteMainClass = true;
-    ProcessingContext.interweave(true);
+    ProcessingContext.strictWiring(true);
+    ProcessingContext.interweave(MainClassPrism.getInstanceOn(mainElement).interweave());
+
     var qualifiedName = mainElement.getQualifiedName().toString();
     try {
       PomMainClassWriter.writeMainClass(qualifiedName);

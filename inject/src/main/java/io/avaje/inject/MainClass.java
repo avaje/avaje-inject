@@ -6,14 +6,12 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-//TODO Better Name? @AppMainClass or @ApplicationMainClass or @InjectMainClass?
 /**
  * Marks a class as the application's main class.
  *
  * <p>When present, the annotation processor will:
  *
  * <ul>
- *   <li>Enable interweave wiring mode, optimizing multi-module wiring
  *   <li>Enable strict wiring, ensuring all dependencies are satisfied at compile time
  *   <li>Write an {@code avaje-main-class.txt} resource file for the avaje inject gradle plugin
  *   <li>Update the project's {@code pom.xml} to configure the {@code maven-jar-plugin} with this
@@ -37,4 +35,7 @@ import java.lang.annotation.Target;
  */
 @Target(TYPE)
 @Retention(SOURCE)
-public @interface MainClass {}
+public @interface MainClass {
+  /** Enable {@link InjectModule#interweave} wiring mode, optimizing multi-module wiring */
+  boolean interweave() default false;
+}
