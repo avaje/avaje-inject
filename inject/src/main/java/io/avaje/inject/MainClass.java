@@ -36,6 +36,16 @@ import java.lang.annotation.Target;
 @Target(TYPE)
 @Retention(SOURCE)
 public @interface MainClass {
-  /** Enable {@link InjectModule#interweave} wiring mode, optimizing multi-module wiring */
+
+  /**
+   * Enable {@link InjectModule#interweave} wiring mode, optimizing multi-module wiring beyond
+   * regular strict wiring.
+   */
   boolean interweave() default false;
+
+  /**
+   * Enable {@link InjectModule#strictWiring()} mode, enforcing compile timemulti-module wiring
+   * checks
+   */
+  boolean strictWiring() default true;
 }

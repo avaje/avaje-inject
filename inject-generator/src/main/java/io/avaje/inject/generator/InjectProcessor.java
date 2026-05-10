@@ -474,8 +474,9 @@ public final class InjectProcessor extends AbstractProcessor {
 
     checkGradlePlugin(mainElement);
     wroteMainClass = true;
-    ProcessingContext.strictWiring(true);
-    ProcessingContext.interweave(MainClassPrism.getInstanceOn(mainElement).interweave());
+    final var prism = MainClassPrism.getInstanceOn(mainElement);
+    ProcessingContext.strictWiring(prism.strictWiring());
+    ProcessingContext.interweave(prism.interweave());
 
     var qualifiedName = mainElement.getQualifiedName().toString();
     try {
