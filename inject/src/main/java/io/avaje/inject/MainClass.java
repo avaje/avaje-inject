@@ -38,14 +38,14 @@ import java.lang.annotation.Target;
 public @interface MainClass {
 
   /**
+   * Enable {@link InjectModule#strictWiring()} mode, enforcing compile time multi-module wiring
+   * checks.
+   */
+  boolean strictWiring() default true;
+  
+  /**
    * Enable {@link InjectModule#interweave} wiring mode, optimizing multi-module wiring beyond
    * regular strict wiring.
    */
   boolean interweave() default false;
-
-  /**
-   * Enable {@link InjectModule#strictWiring()} mode, enforcing compile timemulti-module wiring
-   * checks
-   */
-  boolean strictWiring() default true;
 }
