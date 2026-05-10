@@ -51,19 +51,19 @@ final class PomMainClassWriter {
       return null;
     }
 
-    String before = pomContent.substring(0, jarPluginIndex);
-    String pluginBody = pomContent.substring(jarPluginIndex, closingPlugin);
-    String after = pomContent.substring(closingPlugin);
-
     if (pomContent.contains("<mainClass>")) {
-      return pomContent.replaceAll("<mainClass>.*?</mainClass>", "<mainClass>" + mainClass + "</mainClass>");
+      return pomContent.replaceAll(
+          "<mainClass>.*?</mainClass>", "<mainClass>" + mainClass + "</mainClass>");
     }
 
     // insert mainClass at the deepest existing nesting point
+    String pluginBody = pomContent.substring(jarPluginIndex, closingPlugin);
+    var sb = new StringBuilder(pomContent);
+
     int manifestClose = pluginBody.indexOf("</manifest>");
     if (manifestClose != -1) {
       String entry = "              <mainClass>" + mainClass + "</mainClass>\n              ";
-      return before + new StringBuilder(pluginBody).insert(manifestClose, entry) + after;
+      return sb.insert(jarPluginIndex + manifestClose, entry).toString();
     }
 
     int archiveClose = pluginBody.indexOf("</archive>");
@@ -73,7 +73,7 @@ final class PomMainClassWriter {
               + "              <mainClass>" + mainClass + "</mainClass>\n"
               + "            </manifest>\n"
               + "          ";
-      return before + new StringBuilder(pluginBody).insert(archiveClose, manifestBlock) + after;
+      return sb.insert(jarPluginIndex + archiveClose, manifestBlock).toString();
     }
 
     int configClose = pluginBody.indexOf("</configuration>");
@@ -85,21 +85,19 @@ final class PomMainClassWriter {
               + "            </manifest>\n"
               + "          </archive>\n"
               + "        ";
-      return before + new StringBuilder(pluginBody).insert(configClose, archiveBlock) + after;
+      return sb.insert(jarPluginIndex + configClose, archiveBlock).toString();
     }
 
     String configBlock =
         "  <configuration>\n"
             + "          <archive>\n"
             + "            <manifest>\n"
-            + "              <mainClass>"
-            + mainClass
-            + "</mainClass>\n"
+            + "              <mainClass>" + mainClass + "</mainClass>\n"
             + "            </manifest>\n"
             + "          </archive>\n"
             + "        </configuration>\n"
             + "      ";
-    return before + pluginBody + configBlock + after;
+    return sb.insert(closingPlugin, configBlock).toString();
   }
 
   private static String insertNewJarPlugin(String pomContent, String mainClass) {
@@ -122,6 +120,7 @@ final class PomMainClassWriter {
     String buildWrap = "<build>\n    <plugins>\n    " + pluginBlock + "</plugins>\n  </build>\n";
     return new StringBuilder(pomContent).insert(projectCloseIndex, buildWrap).toString();
   }
+
   private static int findBuildPluginsClose(String pomContent) {
     int mgmtStart = pomContent.indexOf("<pluginManagement>");
     int mgmtEnd = mgmtStart != -1 ? pomContent.indexOf("</pluginManagement>", mgmtStart) : -1;
