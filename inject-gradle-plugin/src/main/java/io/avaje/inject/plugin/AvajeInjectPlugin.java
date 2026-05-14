@@ -10,12 +10,14 @@ import io.avaje.inject.spi.PluginProvides;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.GradleException;
+import org.gradle.api.tasks.bundling.Jar;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.ServiceLoader.Provider;
 
@@ -33,9 +35,28 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
           // run it automatically before build
           Task buildTask = prj.getTasks().getByName("compileJava");
           buildTask.doFirst(it -> writeProvides(project));
+          buildTask.doLast(it -> configureMainClass(project));
         });
     // register a task to run it manually
     project.task("discoverModules").doLast(task -> writeProvides(project));
+  }
+
+  private void configureMainClass(Project project) {
+    var mainClassFile = new File(project.getBuildDir(), "avaje-main-class.txt");
+    if (!mainClassFile.exists()) {
+      return;
+    }
+    try {
+      var mainClass = Files.readString(mainClassFile.toPath()).trim();
+      if (mainClass.isEmpty()) {
+        return;
+      }
+      project.getTasks().withType(Jar.class).configureEach(jar ->
+        jar.getManifest().getAttributes().put("Main-Class", mainClass));
+      System.out.println("Configured JAR Main-Class: " + mainClass);
+    } catch (IOException e) {
+      System.err.println("Unable to read avaje-main-class.txt: " + e.getMessage());
+    }
   }
 
   private void writeProvides(Project project) {

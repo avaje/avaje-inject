@@ -33,8 +33,10 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 
@@ -54,6 +56,7 @@ import io.avaje.prism.GenerateUtils;
   FactoryPrism.PRISM_TYPE,
   ImportPrism.PRISM_TYPE,
   InjectModulePrism.PRISM_TYPE,
+  MainClassPrism.PRISM_TYPE,
   PluginProvidesPrism.PRISM_TYPE,
   PrototypePrism.PRISM_TYPE,
   QualifierPrism.PRISM_TYPE,
@@ -71,6 +74,7 @@ public final class InjectProcessor extends AbstractProcessor {
   private final Set<String> moduleFileProvided = new HashSet<>();
   private final List<ModuleData> moduleData = new ArrayList<>();
   private int rounds;
+  private boolean wroteMainClass;
 
 
   @Override
@@ -153,6 +157,7 @@ public final class InjectProcessor extends AbstractProcessor {
       return false;
     }
     processingOver(rounds++ > 0);
+    maybeElements(roundEnv, MainClassPrism.PRISM_TYPE).ifPresent(this::processMainClass);
 
     APContext.setProjectModuleElement(annotations, roundEnv);
     readModule(roundEnv);
@@ -446,4 +451,71 @@ public final class InjectProcessor extends AbstractProcessor {
     return APContext.isAssignable(te, "io.avaje.inject.spi.InjectExtension");
   }
 
+  private void processMainClass(Set<? extends Element> elements) {
+    if (wroteMainClass) {
+      return;
+    }
+    var mainClasses = ElementFilter.typesIn(elements);
+    if (mainClasses.isEmpty()) {
+      return;
+    }
+    if (mainClasses.size() > 1) {
+      for (var element : mainClasses) {
+        logError(element, "Only one class should be annotated with @MainClass");
+      }
+      return;
+    }
+
+    var mainElement = mainClasses.iterator().next();
+    if (!hasMainMethod(mainElement)) {
+      logError(mainElement, "@MainClass annotated class must have a main method");
+      return;
+    }
+
+    checkGradlePlugin(mainElement);
+    wroteMainClass = true;
+    final var prism = MainClassPrism.getInstanceOn(mainElement);
+    ProcessingContext.strictWiring(prism.strictWiring());
+    ProcessingContext.interweave(prism.interweave());
+
+    var qualifiedName = mainElement.getQualifiedName().toString();
+    try {
+      PomMainClassWriter.writeMainClass(qualifiedName);
+    } catch (IOException e) {
+      // not an issue worth failing over
+      APContext.logNote("Unable to update pom.xml with mainClass: %s", e.getMessage());
+    }
+  }
+
+  private void checkGradlePlugin(TypeElement mainElement) {
+    try {
+      var buildResourcePath = APContext.getBuildResource("").getParent();
+      var pomPath = buildResourcePath.resolve("pom.xml");
+      if (!pomPath.toFile().exists()) {
+        var pluginExists = buildResourcePath.resolve("avaje-plugins.csv").toFile().exists();
+        if (!pluginExists) {
+          logError(mainElement, "@MainClass requires the avaje-inject Gradle plugin - add 'io.avaje.inject' to your build.gradle plugins block");
+        }
+      }
+    } catch (Exception e) {
+      // unable to check, skip
+    }
+  }
+
+  private boolean hasMainMethod(TypeElement typeElement) {
+    return ElementFilter.methodsIn(typeElement.getEnclosedElements()).stream()
+      .anyMatch(method ->
+        "main".equals(method.getSimpleName().toString())
+          && !method.getModifiers().contains(Modifier.PRIVATE)
+          && method.getReturnType().getKind() == TypeKind.VOID
+          && (method.getModifiers().contains(Modifier.STATIC)
+          || APContext.jdkVersion() >= 25)
+          && isValidMainParams(method));
+  }
+
+  private boolean isValidMainParams(ExecutableElement method) {
+    var params = method.getParameters();
+    return params.isEmpty() && APContext.jdkVersion() >= 25
+        || (params.size() == 1 && params.get(0).asType().toString().contains("String[]"));
+  }
 }
