@@ -504,14 +504,13 @@ public final class InjectProcessor extends AbstractProcessor {
 
   private boolean hasMainMethod(TypeElement typeElement) {
     return ElementFilter.methodsIn(typeElement.getEnclosedElements()).stream()
-        .anyMatch(
-            method ->
-                "main".equals(method.getSimpleName().toString())
-                    && !method.getModifiers().contains(Modifier.PRIVATE)
-                    && method.getReturnType().getKind() == TypeKind.VOID
-                    && (method.getModifiers().contains(Modifier.STATIC)
-                        || APContext.jdkVersion() >= 25)
-                    && isValidMainParams(method));
+      .anyMatch(method ->
+        "main".equals(method.getSimpleName().toString())
+          && !method.getModifiers().contains(Modifier.PRIVATE)
+          && method.getReturnType().getKind() == TypeKind.VOID
+          && (method.getModifiers().contains(Modifier.STATIC)
+          || APContext.jdkVersion() >= 25)
+          && isValidMainParams(method));
   }
 
   private boolean isValidMainParams(ExecutableElement method) {
