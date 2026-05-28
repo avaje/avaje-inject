@@ -109,8 +109,11 @@ class FactoryOrder {
 
   private boolean notProvided(String dependency) {
     final FactoryList factoryList = providesMap.get(dependency);
-    return (factoryList == null || !factoryList.allPushed())
-      && !pluginProvided.contains(dependency)
+    if (factoryList != null) {
+      // dependency is owned by a known module, only satisfied once that module is pushed
+      return !factoryList.allPushed();
+    }
+    return !pluginProvided.contains(dependency)
       && !ProcessingContext.externallyProvided(dependency);
   }
 
