@@ -19,6 +19,25 @@ public class OrderService {
 }
 ```
 
+If a bean class has more than one constructor, annotate the constructor Avaje
+Inject should use with `@Inject`. This is common when a class has a package-private
+test constructor in addition to the normal DI constructor.
+
+```java
+@Singleton
+class MetricsReporter {
+
+  @Inject
+  MetricsReporter(Configuration config, Optional<GraphiteReporter> reporter) {
+    this(config, reporter.map(MetricsReporter::scheduledTask).orElse(null));
+  }
+
+  MetricsReporter(Configuration config, ScheduledTask task) {
+    // test-friendly constructor
+  }
+}
+```
+
 ## Multiple Implementations
 
 Use `@Named` qualifier:
