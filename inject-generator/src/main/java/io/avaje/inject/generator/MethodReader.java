@@ -838,7 +838,12 @@ final class MethodReader {
     }
 
     void writeMethodParamTypeAspect(Append writer) {
-      writer.append(Util.shortName(fullUType.mainType()));
+      if (element.asType().getKind() == TypeKind.TYPEVAR) {
+        TypeMirror erased = APContext.types().erasure(element.asType());
+        writer.append(Util.shortName(erased.toString()));
+      } else {
+        writer.append(Util.shortName(fullUType.mainType()));
+      }
     }
 
     void writeConstructorInit(Append writer) {

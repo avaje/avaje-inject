@@ -107,6 +107,15 @@ class HelloServiceTest {
   }
 
   @Test
+  void aspect_methodOwnGenericTypeParameter() {
+    BeanScope beanScope = BeanScope.builder().build();
+
+    HelloService helloService = beanScope.get(HelloService.class);
+    assertEquals("generic-value", helloService.identity("generic-value"));
+    assertEquals(42, helloService.identity(42));
+  }
+
+  @Test
   void aspect_appCodeThrowingDeclared_expect_declaredException() {
     BeanScope beanScope = BeanScope.builder().build();
 
