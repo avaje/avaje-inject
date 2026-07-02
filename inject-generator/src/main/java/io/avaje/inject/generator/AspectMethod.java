@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -119,7 +120,8 @@ final class AspectMethod {
 
   void writeMethod(Append writer) {
     writer.eol().append("  @Override").eol();
-    writer.append("  public %s %s(", returnUtype.shortType(), simpleName);
+    String typeParams = buildTypeParametersDeclaration(method.getTypeParameters());
+    writer.append("  public %s%s %s(", typeParams.isEmpty() ? "" : typeParams + " ", returnUtype.shortType(), simpleName);
     for (int i = 0, size = params.size(); i < size; i++) {
       if (i > 0) {
         writer.append(", ");
@@ -138,6 +140,33 @@ final class AspectMethod {
     writer.append(")").eol();
     writeArgs(writer);
     writer.append("  }").eol();
+  }
+
+  private String buildTypeParametersDeclaration(List<? extends TypeParameterElement> typeParameters) {
+    if (typeParameters.isEmpty()) {
+      return "";
+    }
+    StringBuilder sb = new StringBuilder("<");
+    for (int i = 0; i < typeParameters.size(); i++) {
+      if (i > 0) {
+        sb.append(", ");
+      }
+      TypeParameterElement param = typeParameters.get(i);
+      sb.append(param.getSimpleName());
+
+      List<? extends TypeMirror> bounds = param.getBounds();
+      if (!bounds.isEmpty() && !"java.lang.Object".equals(bounds.get(0).toString())) {
+        sb.append(" extends ");
+        for (int j = 0; j < bounds.size(); j++) {
+          if (j > 0) {
+            sb.append(" & ");
+          }
+          sb.append(bounds.get(j).toString());
+        }
+      }
+    }
+    sb.append(">");
+    return sb.toString();
   }
 
   private void writeThrowsClause(Append writer) {
