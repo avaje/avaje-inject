@@ -81,6 +81,11 @@ public class HelloService {
 
   }
 
+  @MyTimed
+  public <T> T identity(T value) {
+    return value;
+  }
+
 
   public String justRunResult() {
     return justRunResult;
