@@ -1,4 +1,5 @@
 [
+  {"name": "io.avaje.inject.generator.models.valid.aspect.GenericMethodImpl", "allDeclaredMethods": true},
   {"name": "io.avaje.inject.generator.models.valid.aspect.MethodTest", "allDeclaredMethods": true},
   {"name": "io.avaje.inject.generator.models.valid.aspect.MethodTestConditional", "allDeclaredMethods": true},
   {"name": "io.avaje.inject.generator.models.valid.aspect.MyProtoAOP", "allDeclaredMethods": true},
