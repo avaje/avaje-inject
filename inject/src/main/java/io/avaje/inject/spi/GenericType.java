@@ -12,12 +12,14 @@ import java.lang.reflect.Type;
 public class GenericType<T> implements Type {
 
   private final Type type;
+  private final String typeName;
 
   /**
    * Constructs a new generic type, deriving the generic type and class from type parameter.
    */
   protected GenericType() throws IllegalArgumentException {
     this.type = GenericTypeUtil.typeArgument(getClass());
+    this.typeName = type.getTypeName();
   }
 
   /**
@@ -29,7 +31,7 @@ public class GenericType<T> implements Type {
 
   @Override
   public String getTypeName() {
-    return type.getTypeName();
+    return typeName;
   }
 
   @Override
