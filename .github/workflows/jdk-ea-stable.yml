@@ -8,6 +8,10 @@ on:
   schedule:
     - cron: '39 1 * * 1,3,5'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
 
@@ -34,9 +38,12 @@ jobs:
       env:
         cache-name: maven-cache
       with:
-        path:
-          ~/.m2
-        key: build-${{ env.cache-name }}
+        path: |
+          ~/.m2/repository
+          !~/.m2/repository/io/avaje
+        key: ea-stable-${{ env.cache-name }}-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ea-stable-${{ env.cache-name }}-
     - name: Maven version
       run: mvn --version
     - name: Build with Maven
