@@ -5,8 +5,12 @@ on:
   workflow_dispatch:
 #  push:
 #  pull_request:
- # schedule:
- #   - cron: '39 1 * * 1,3,5'
+  schedule:
+    - cron: '39 1 * * 1,3,5'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -18,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java_version: [valhalla]
+        java_version: [EA] ## value classes ship as a preview feature in mainline EA
         os: [ubuntu-latest]
 
     steps:
@@ -45,4 +49,3 @@ jobs:
       run: java Jakarta2Valhalla.java
     - name: Build with Maven
       run: mvn package
-
