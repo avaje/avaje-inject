@@ -26,8 +26,12 @@ jobs:
       env:
         cache-name: maven-cache
       with:
-        path: ~/.m2
-        key: build-${{ env.cache-name }}
+        path: |
+          ~/.m2/repository
+          !~/.m2/repository/io/avaje
+        key: release-${{ env.cache-name }}-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          release-${{ env.cache-name }}-
     - name: Set up Java and Maven
       uses: actions/setup-java@v5
       with:
