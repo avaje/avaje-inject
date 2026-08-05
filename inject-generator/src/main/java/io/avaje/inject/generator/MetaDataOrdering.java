@@ -137,12 +137,15 @@ final class MetaDataOrdering {
   }
 
   private int processQueueRound(boolean includeExternal, boolean anyWired) {
+    if (anyWired) {
+      return processLastDitchRound();
+    }
     // loop queue looking for entry that has all provides marked as included
     int count = 0;
-    Iterator<MetaData> iterator = queue.iterator();
+    final var iterator = queue.iterator();
     while (iterator.hasNext()) {
-      MetaData queuedMeta = iterator.next();
-      if (allDependenciesWired(queuedMeta, includeExternal, anyWired)) {
+      final var queuedMeta = iterator.next();
+      if (allDependenciesWired(queuedMeta, includeExternal, false)) {
         orderedList.add(queuedMeta);
         queuedMeta.setWired();
         iterator.remove();
@@ -150,6 +153,57 @@ final class MetaDataOrdering {
       }
     }
     return count;
+  }
+
+  /**
+   * The last ditch round treats a dependency as satisfied once any one of the beans providing it is
+   * wired. Collect everything the round makes ready and order the providers ahead of their
+   * consumers.
+   */
+  private int processLastDitchRound() {
+    final var ready = new ArrayList<MetaData>();
+    final var iterator = queue.iterator();
+    while (iterator.hasNext()) {
+      final var queuedMeta = iterator.next();
+      if (allDependenciesWired(queuedMeta, true, true)) {
+        ready.add(queuedMeta);
+        iterator.remove();
+      }
+    }
+    for (var metaData : providersFirst(ready)) {
+      orderedList.add(metaData);
+      metaData.setWired();
+    }
+    return ready.size();
+  }
+
+  /**
+   * Return the given beans ordered such that any bean providing a dependency of another one in the
+   * list comes first. Beans that are part of a cycle keep their original relative order.
+   */
+  private List<MetaData> providersFirst(List<MetaData> ready) {
+    if (ready.size() < 2) {
+      return ready;
+    }
+    final var readySet = new HashSet<>(ready);
+    final var visiting = new HashSet<MetaData>();
+    final var result = new LinkedHashSet<MetaData>();
+    for (var bean : ready) {
+      addProvidersFirst(bean, readySet, visiting, result);
+    }
+    return new ArrayList<>(result);
+  }
+
+  private void addProvidersFirst(MetaData bean, Set<MetaData> readySet, Set<MetaData> visiting, Set<MetaData> result) {
+    if (result.contains(bean) || !visiting.add(bean)) {
+      // already ordered, or part of a cycle
+      return;
+    }
+    for (var provider : resolveQueuedDeps(bean, readySet, providers)) {
+      addProvidersFirst(provider, readySet, visiting, result);
+    }
+    visiting.remove(bean);
+    result.add(bean);
   }
 
   private boolean allDependenciesWired(MetaData queuedMeta, boolean includeExternal, boolean anyWired) {
