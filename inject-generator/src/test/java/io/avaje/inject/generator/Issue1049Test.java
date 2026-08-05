@@ -1,6 +1,5 @@
 package io.avaje.inject.generator;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -35,22 +34,16 @@ import static org.assertj.core.api.Assertions.assertThat;
  * (LocalService) had not been wired yet - producing the reported wrong order: CloudService,
  * Consumer, LocalService.
  *
- * <p>Fix: {@link MetaDataOrdering.ProviderList#isAllWired} / {@code isAnyWired} now exclude the
- * bean being checked from its own "provides" requirement, so a decorator/wrapper bean resolves
- * correctly in the normal strict rounds without ever needing the blanket last-ditch relaxation.
+ * <p>Fix, in two parts: {@link MetaDataOrdering.ProviderList#isAllWired} / {@code isAnyWired} now
+ * exclude the bean being checked from its own "provides" requirement, so a decorator/wrapper bean
+ * resolves correctly in the normal strict rounds without ever needing the blanket last-ditch
+ * relaxation. Additionally the last-ditch round now orders the beans it makes eligible such that
+ * providers come before their consumers, so any other bean that forces that round can no longer
+ * leak leniency into the ordering of an unrelated multi-implementation interface.
  */
 class Issue1049Test {
 
   @Test
-  @Disabled(
-      "Known separate/broader edge case NOT fixed by the self-exclusion change: a genuinely "
-          + "unresolvable OTHER bean (unrelated to any decorator/self-reference) still forces the "
-          + "blanket last-ditch (anyWired) round for the entire remaining queue, which can still "
-          + "leak leniency into unrelated multi-implementation interfaces. This differs from the "
-          + "actual #1049 trigger (a decorator bean depending on the interface it implements),"
-          + " which IS fixed - see realWorldDecoratorBeanTrigger below. Left here to document the"
-          + " remaining, more invasive fix needed (targeted per-provider-list relaxation instead"
-          + " of a blanket per-round flag) as potential follow-up work.")
   void consumerOrderedBeforeAllInterfaceImplementations_whenUnrelatedBeanForcesLastDitchRound() {
     // CloudService: no deps, provides MyService -- wired immediately (round 0 / noDepends)
     var cloud = new MetaData("my.CloudService", null);
