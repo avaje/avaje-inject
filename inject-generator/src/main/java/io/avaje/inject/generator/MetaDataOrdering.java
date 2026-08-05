@@ -169,7 +169,7 @@ final class MetaDataOrdering {
     String dependencyName = dependency.name();
     var providerList = providers.get(dependencyName);
     if (providerList != null) {
-      return providerList.isWired(anyWired);
+      return providerList.isWired(anyWired, queuedMeta);
     }
     if (scopeInfo.providedByOther(dependency)) {
       return true;
@@ -326,26 +326,36 @@ final class MetaDataOrdering {
       return list;
     }
 
-    private boolean isWired(boolean anyWired) {
-      return anyWired ? isAnyWired() : isAllWired();
+    private boolean isWired(boolean anyWired, MetaData self) {
+      return anyWired ? isAnyWired(self) : isAllWired(self);
     }
 
-    private boolean isAllWired() {
+    private boolean isAllWired(MetaData self) {
+      boolean hasOther = false;
       for (MetaData metaData : list) {
+        if (metaData == self) {
+          continue;
+        }
+        hasOther = true;
         if (!metaData.isWired()) {
           return false;
         }
       }
-      return true;
+      return hasOther || list.isEmpty() || self.isWired();
     }
 
-    private boolean isAnyWired() {
+    private boolean isAnyWired(MetaData self) {
+      boolean hasOther = false;
       for (MetaData metaData : list) {
+        if (metaData == self) {
+          continue;
+        }
+        hasOther = true;
         if (metaData.isWired()) {
           return true;
         }
       }
-      return list.isEmpty();
+      return !hasOther && (list.isEmpty() || self.isWired());
     }
   }
 }
