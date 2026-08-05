@@ -27,6 +27,45 @@ class MetaDataOrderingTest {
     return providers.computeIfAbsent(key.replace(", ", ","), s -> new MetaDataOrdering.ProviderList());
   }
 
+  /**
+   * A bean that depends on a type it also provides (e.g. a connection pool that takes a connection
+   * factory and is itself a connection factory) must not block ordering. Prior to excluding the
+   * bean itself from the provider check it could only be wired via the last ditch "any wired"
+   * round, which allowed consumers of an interface to be ordered before other beans providing that
+   * interface. See https://github.com/avaje/avaje-inject/issues/1049
+   */
+  @Test
+  void ordering_beanProvidingTypeItDependsOn() {
+    var conn = new MetaData("my.Conn", null);
+
+    var pool = new MetaData("my.Pool", null);
+    pool.setProvides(List.of("my.Conn"));
+    pool.setDependsOn(List.of("my.Conn"));
+
+    var dbService = new MetaData("my.DbService", null);
+    dbService.setProvides(List.of("my.MyService"));
+    dbService.setDependsOn(List.of("my.Pool"));
+
+    var fileService = new MetaData("my.FileService", null);
+    fileService.setProvides(List.of("my.MyService"));
+
+    var consumer = new MetaData("my.Consumer", null);
+    consumer.setDependsOn(List.of("my.MyService"));
+
+    // consumer declared before dbService - the ordering must still delay it
+    var beans = List.of(conn, pool, fileService, consumer, dbService);
+    var ordering = new MetaDataOrdering(beans, new ScopeInfo());
+
+    assertThat(ordering.processQueue()).isZero();
+
+    var ordered = ordering.ordered();
+    assertThat(ordered.indexOf(conn)).isLessThan(ordered.indexOf(pool));
+    assertThat(ordered.indexOf(pool)).isLessThan(ordered.indexOf(dbService));
+    // every bean providing my.MyService is ordered before the consumer of my.MyService
+    assertThat(ordered.indexOf(dbService)).isLessThan(ordered.indexOf(consumer));
+    assertThat(ordered.indexOf(fileService)).isLessThan(ordered.indexOf(consumer));
+  }
+
   @Test
   void detectCycles_simple2NodeCycle() {
     // A depends on B, B depends on A

@@ -169,7 +169,7 @@ final class MetaDataOrdering {
     String dependencyName = dependency.name();
     var providerList = providers.get(dependencyName);
     if (providerList != null) {
-      return providerList.isWired(anyWired);
+      return providerList.isWired(anyWired, queuedMeta);
     }
     if (scopeInfo.providedByOther(dependency)) {
       return true;
@@ -326,22 +326,39 @@ final class MetaDataOrdering {
       return list;
     }
 
-    private boolean isWired(boolean anyWired) {
-      return anyWired ? isAnyWired() : isAllWired();
+    /**
+     * Return true when this dependency is considered satisfied for the given bean.
+     *
+     * <p>The bean itself is excluded from the check as a bean can provide the same type it depends
+     * on - for example a connection pool that takes a connection factory and is itself a connection
+     * factory. Without excluding it that bean can never be wired, which pushes it (and everything
+     * that depends on it) into the last ditch "any wired" round where consumers can be ordered
+     * before other beans providing the type.
+     */
+    private boolean isWired(boolean anyWired, MetaData self) {
+      if (containsOnly(self)) {
+        // the only provider is the bean itself - a genuine self reference
+        return false;
+      }
+      return anyWired ? isAnyWired(self) : isAllWired(self);
     }
 
-    private boolean isAllWired() {
+    private boolean containsOnly(MetaData self) {
+      return list.size() == 1 && list.get(0) == self;
+    }
+
+    private boolean isAllWired(MetaData self) {
       for (MetaData metaData : list) {
-        if (!metaData.isWired()) {
+        if (metaData != self && !metaData.isWired()) {
           return false;
         }
       }
       return true;
     }
 
-    private boolean isAnyWired() {
+    private boolean isAnyWired(MetaData self) {
       for (MetaData metaData : list) {
-        if (metaData.isWired()) {
+        if (metaData != self && metaData.isWired()) {
           return true;
         }
       }
