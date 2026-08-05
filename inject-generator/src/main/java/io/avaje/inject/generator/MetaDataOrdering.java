@@ -138,7 +138,7 @@ final class MetaDataOrdering {
 
   private int processQueueRound(boolean includeExternal, boolean anyWired) {
     if (anyWired) {
-      return processLastDitchRound(includeExternal);
+      return processLastDitchRound();
     }
     // loop queue looking for entry that has all provides marked as included
     int count = 0;
@@ -160,12 +160,12 @@ final class MetaDataOrdering {
    * wired. Collect everything the round makes ready and order the providers ahead of their
    * consumers.
    */
-  private int processLastDitchRound(boolean includeExternal) {
+  private int processLastDitchRound() {
     final var ready = new ArrayList<MetaData>();
     final var iterator = queue.iterator();
     while (iterator.hasNext()) {
       final var queuedMeta = iterator.next();
-      if (allDependenciesWired(queuedMeta, includeExternal, true)) {
+      if (allDependenciesWired(queuedMeta, true, true)) {
         ready.add(queuedMeta);
         iterator.remove();
       }
