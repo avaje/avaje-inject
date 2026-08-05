@@ -326,43 +326,36 @@ final class MetaDataOrdering {
       return list;
     }
 
-    /**
-     * Return true when this dependency is considered satisfied for the given bean.
-     *
-     * <p>The bean itself is excluded from the check as a bean can provide the same type it depends
-     * on - for example a connection pool that takes a connection factory and is itself a connection
-     * factory. Without excluding it that bean can never be wired, which pushes it (and everything
-     * that depends on it) into the last ditch "any wired" round where consumers can be ordered
-     * before other beans providing the type.
-     */
     private boolean isWired(boolean anyWired, MetaData self) {
-      if (containsOnly(self)) {
-        // the only provider is the bean itself - a genuine self reference
-        return false;
-      }
       return anyWired ? isAnyWired(self) : isAllWired(self);
     }
 
-    private boolean containsOnly(MetaData self) {
-      return list.size() == 1 && list.get(0) == self;
-    }
-
     private boolean isAllWired(MetaData self) {
+      boolean hasOther = false;
       for (MetaData metaData : list) {
-        if (metaData != self && !metaData.isWired()) {
+        if (metaData == self) {
+          continue;
+        }
+        hasOther = true;
+        if (!metaData.isWired()) {
           return false;
         }
       }
-      return true;
+      return hasOther || list.isEmpty() || self.isWired();
     }
 
     private boolean isAnyWired(MetaData self) {
+      boolean hasOther = false;
       for (MetaData metaData : list) {
-        if (metaData != self && metaData.isWired()) {
+        if (metaData == self) {
+          continue;
+        }
+        hasOther = true;
+        if (metaData.isWired()) {
           return true;
         }
       }
-      return list.isEmpty();
+      return !hasOther && (list.isEmpty() || self.isWired());
     }
   }
 }

@@ -67,6 +67,20 @@ class MetaDataOrderingTest {
   }
 
   @Test
+  void detectCycles_directSelfDependency() {
+    // a bean depending on its own type is reported as a circular dependency rather than
+    // the misleading "No dependency provided"
+    var a = new MetaData("my.A", null);
+    a.setDependsOn(List.of("my.A"));
+
+    var providers = buildProviders(a);
+    var cycles = MetaDataOrdering.detectCycles(List.of(a), providers);
+
+    assertThat(cycles).hasSize(1);
+    assertThat(cycles.get(0)).containsExactly(a);
+  }
+
+  @Test
   void detectCycles_simple2NodeCycle() {
     // A depends on B, B depends on A
     var a = new MetaData("my.A", null);
