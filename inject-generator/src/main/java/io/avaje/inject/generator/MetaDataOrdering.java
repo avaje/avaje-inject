@@ -169,7 +169,10 @@ final class MetaDataOrdering {
     String dependencyName = dependency.name();
     var providerList = providers.get(dependencyName);
     if (providerList != null) {
-      return providerList.isWired(anyWired);
+      // exclude queuedMeta itself - a bean that both depends on and provides (e.g. implements)
+      // the same type (a "decorator"/wrapper style bean) can never be wired before itself, so
+      // it must not count against its own "all providers wired" requirement
+      return providerList.isWired(anyWired, queuedMeta);
     }
     if (scopeInfo.providedByOther(dependency)) {
       return true;
@@ -326,26 +329,47 @@ final class MetaDataOrdering {
       return list;
     }
 
-    private boolean isWired(boolean anyWired) {
-      return anyWired ? isAnyWired() : isAllWired();
+    private boolean isWired(boolean anyWired, MetaData self) {
+      return anyWired ? isAnyWired(self) : isAllWired(self);
     }
 
-    private boolean isAllWired() {
+    /**
+     * Return true when all OTHER providers (excluding self) are wired. A bean that both depends
+     * on and provides the same type (e.g. a decorator/wrapper implementing the interface it
+     * wraps) can never be wired before itself, so it must not count against its own requirement.
+     * If self is the only provider (no other implementation exists) fall back to requiring self
+     * to be wired too, preserving detection of a genuine direct self/circular dependency.
+     */
+    private boolean isAllWired(MetaData self) {
+      boolean hasOther = false;
       for (MetaData metaData : list) {
+        if (metaData == self) {
+          continue;
+        }
+        hasOther = true;
         if (!metaData.isWired()) {
           return false;
         }
       }
-      return true;
+      return hasOther || list.stream().allMatch(MetaData::isWired);
     }
 
-    private boolean isAnyWired() {
+    /**
+     * Return true when any OTHER provider (excluding self) is wired. Same self-exclusion
+     * reasoning as {@link #isAllWired(MetaData)}.
+     */
+    private boolean isAnyWired(MetaData self) {
+      boolean hasOther = false;
       for (MetaData metaData : list) {
+        if (metaData == self) {
+          continue;
+        }
+        hasOther = true;
         if (metaData.isWired()) {
           return true;
         }
       }
-      return list.isEmpty();
+      return !hasOther && (list.isEmpty() || list.stream().anyMatch(MetaData::isWired));
     }
   }
 }
