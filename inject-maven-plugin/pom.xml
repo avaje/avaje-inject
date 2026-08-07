@@ -10,10 +10,6 @@
   <artifactId>avaje-inject-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>avaje inject maven plugin</name>
-  <properties>
-    <maven.compiler.release>11</maven.compiler.release>
-    <maven.compiler.enablePreview>false</maven.compiler.enablePreview>
-  </properties>
 
   <dependencies>
     <dependency>
