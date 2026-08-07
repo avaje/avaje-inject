@@ -45,7 +45,12 @@ jobs:
           valhalla-${{ env.cache-name }}-${{ matrix.os }}-${{ matrix.java_version }}-
     - name: Maven version
       run: mvn --version
+    # Build the maven plugin before the valhalla prep: with --release set to the EA JDK its
+    # classes are major 72, and maven-plugin-plugin:descriptor scans them with ASM, which has
+    # no release supporting that version yet.
+    - name: Install maven plugin
+      run: mvn install -pl inject-maven-plugin -am -DskipTests
     - name: Prepare
       run: java Jakarta2Valhalla.java
     - name: Build with Maven
-      run: mvn package
+      run: mvn package -pl '!inject-maven-plugin'
