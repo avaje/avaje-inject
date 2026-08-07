@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.avaje</groupId>
     <artifactId>avaje-inject-parent</artifactId>
-    <version>12.7-RC1</version>
+    <version>12.7-RC2</version>
   </parent>
 
   <artifactId>avaje-inject-test</artifactId>
@@ -140,7 +140,7 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.6.0</version>
+      <version>1.6.1</version>
       <scope>test</scope>
     </dependency>
 
