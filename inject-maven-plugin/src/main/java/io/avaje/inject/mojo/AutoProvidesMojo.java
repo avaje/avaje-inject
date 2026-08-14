@@ -35,8 +35,8 @@ import io.avaje.inject.spi.InjectPlugin;
 import io.avaje.inject.spi.PluginProvides;
 
 /**
- * Plugin that generates <code>target/avaje-module-provides.txt</code> and <code>
- * target/avaje-plugin-provides.txt</code> based on the avaje-inject modules and plugins in the
+ * Plugin that generates <code>target/avaje-module-dependencies.csv</code> and <code>
+ * target/avaje-plugins.csv</code> based on the avaje-inject modules and plugins in the
  * classpath.
  *
  * <p>This allows the avaje-inject-generator annotation processor to be aware of all the components

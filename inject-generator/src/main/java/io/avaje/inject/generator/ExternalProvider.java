@@ -96,7 +96,14 @@ final class ExternalProvider {
       Collections.addAll(requires, module.requiresBeans());
       Collections.addAll(requires, module.requiresPackagesFromType());
 
-      ProcessingContext.addModule(new ModuleData(name, List.copyOf(provides), requires));
+      final List<String> softRequires = new ArrayList<>();
+      for (final var softRequire : module.softRequiresBeans()) {
+        if (!requires.contains(softRequire)) {
+          softRequires.add(softRequire);
+        }
+      }
+
+      ProcessingContext.addModule(new ModuleData(name, List.copyOf(provides), requires, softRequires));
     }
   }
 

@@ -390,17 +390,11 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       final var it = queue.iterator();
       while (it.hasNext()) {
         final FactoryState factory = it.next();
-        if (factory.resolveSoftRequires(providesMap)
-            && isEmpty(factory.requires())
-            && isEmpty(factory.requiresPackages())) {
+        if (factory.resolveSoftRequires(providesMap) && factory.isHardRequiresEmpty()) {
           it.remove();
           queueNoDependencies.add(factory);
         }
       }
-    }
-
-    private static boolean isEmpty(@Nullable String[] values) {
-      return values == null || values.length == 0;
     }
 
     @Override
@@ -526,7 +520,6 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
           && satisfiedDependencies(factory.requiresPackages(), relaxed);
     }
 
-
     private boolean satisfiedDependencies(String[] requires, boolean relaxed) {
       for (final var dependency : requires) {
         if (notProvided(dependency, relaxed)) {
@@ -613,9 +606,11 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
 
     boolean isRequiresEmpty() {
-      return isEmpty(factory.requiresBeans())
-        && isEmpty(factory.requiresPackagesFromType())
-        && isEmpty(factory.softRequiresBeans());
+      return isHardRequiresEmpty() && isEmpty(factory.softRequiresBeans());
+    }
+
+    boolean isHardRequiresEmpty() {
+      return isEmpty(factory.requiresBeans()) && isEmpty(factory.requiresPackagesFromType());
     }
 
     boolean explicitlyProvides() {
