@@ -2,21 +2,27 @@ package io.avaje.inject.mojo;
 
 import static java.util.stream.Collectors.toList;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
-import java.util.ServiceLoader.Provider;
+import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
@@ -49,6 +55,8 @@ import io.avaje.inject.spi.PluginProvides;
     threadSafe = true)
 public class AutoProvidesMojo extends AbstractMojo {
 
+  private static final int MAX_SKIPPED = 10_000;
+
   @Parameter(defaultValue = "${project}", readonly = true, required = true)
   private MavenProject project;
 
@@ -65,12 +73,99 @@ public class AutoProvidesMojo extends AbstractMojo {
         var pluginWriter = createFileWriter("avaje-plugins.csv");
         var moduleCSV = createFileWriter("avaje-module-dependencies.csv")) {
 
-      writeProvidedPlugins(newClassLoader, pluginWriter);
-      writeModuleCSV(newClassLoader, moduleCSV);
+      final var extensions = loadExtensions(newClassLoader);
+      writeProvidedPlugins(extensions, pluginWriter);
+      writeModuleCSV(extensions, moduleCSV);
 
     } catch (final IOException e) {
       throw new MojoExecutionException("Failed to write spi classes", e);
     }
+  }
+
+  List<InjectExtension> loadExtensions(URLClassLoader classLoader) throws IOException {
+    final Set<String> loadedNames = new HashSet<>();
+    final List<InjectExtension> extensions = new ArrayList<>();
+    final List<ServiceConfigurationError> skipped = new ArrayList<>();
+    // a services entry can name a class from a dependency that is not resolvable at compile
+    // scope (test-scoped, optional, or excluded); such a module is not a compile-time concern
+    // for this project, so skip it rather than failing the build. The JDK iterator does not
+    // retry an entry that failed, so catching the per-element error resumes with the next
+    // entry. A provider class that is present but broken still fails the build.
+    final var providers = ServiceLoader.load(InjectExtension.class, classLoader).stream().iterator();
+    while (true) {
+      try {
+        if (!providers.hasNext()) {
+          break;
+        }
+        final var provider = providers.next();
+        extensions.add(provider.get());
+        loadedNames.add(provider.type().getTypeName());
+      } catch (final ServiceConfigurationError e) {
+        if (!missingClass(e) || skipped.size() >= MAX_SKIPPED) {
+          throw e;
+        }
+        skipped.add(e);
+      }
+    }
+    if (!skipped.isEmpty()) {
+      warnSkipped(classLoader, loadedNames, skipped);
+    }
+    return extensions;
+  }
+
+  /**
+   * True when the entry failed because its class is missing rather than present but broken.
+   */
+  private static boolean missingClass(ServiceConfigurationError error) {
+    for (Throwable cause = error.getCause(); cause != null; cause = cause.getCause()) {
+      if (cause instanceof ClassNotFoundException || cause instanceof NoClassDefFoundError) {
+        return true;
+      }
+    }
+    // the JDK reports an unresolvable provider class without a cause
+    return error.getCause() == null && String.valueOf(error.getMessage()).endsWith(" not found");
+  }
+
+  private void warnSkipped(URLClassLoader classLoader, Set<String> loadedNames, List<ServiceConfigurationError> skipped) throws IOException {
+    for (final var declared : declaredExtensions(classLoader).entrySet()) {
+      final String className = declared.getKey();
+      if (loadedNames.contains(className)) {
+        continue;
+      }
+      final String message = "Skipped InjectExtension " + className + " declared in " + declared.getValue()
+        + " - not loadable from the compile-scope classpath";
+      final var error = skipped.stream()
+        .filter(e -> String.valueOf(e.getMessage()).contains(className))
+        .findFirst();
+      final Throwable cause = error.map(Throwable::getCause).orElse(null);
+      if (cause != null && !(cause instanceof ClassNotFoundException)) {
+        getLog().warn(message, error.get());
+      } else {
+        getLog().warn(error.map(e -> message + ": " + e).orElse(message));
+      }
+    }
+  }
+
+  private Map<String, List<URL>> declaredExtensions(URLClassLoader classLoader) throws IOException {
+    final Map<String, List<URL>> declared = new LinkedHashMap<>();
+    final var resources = classLoader.getResources("META-INF/services/" + InjectExtension.class.getName());
+    while (resources.hasMoreElements()) {
+      final URL resource = resources.nextElement();
+      try (var reader = new BufferedReader(new InputStreamReader(resource.openStream(), StandardCharsets.UTF_8))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+          final int comment = line.indexOf('#');
+          if (comment >= 0) {
+            line = line.substring(0, comment);
+          }
+          line = line.trim();
+          if (!line.isEmpty()) {
+            declared.computeIfAbsent(line, key -> new ArrayList<>()).add(resource);
+          }
+        }
+      }
+    }
+    return declared;
   }
 
   private List<URL> compileDependencies() throws MojoExecutionException {
@@ -94,12 +189,11 @@ public class AutoProvidesMojo extends AbstractMojo {
     return new FileWriter(new File(project.getBuild().getDirectory(), string));
   }
 
-  private void writeProvidedPlugins(URLClassLoader newClassLoader, FileWriter pluginWriter) throws IOException {
+  private void writeProvidedPlugins(List<InjectExtension> extensions, FileWriter pluginWriter) throws IOException {
     final Log log = getLog();
 
     final List<InjectPlugin> plugins = new ArrayList<>();
-    ServiceLoader.load(InjectExtension.class, newClassLoader).stream()
-        .map(Provider::get)
+    extensions.stream()
         .filter(InjectPlugin.class::isInstance)
         .map(InjectPlugin.class::cast)
         .forEach(plugins::add);
@@ -139,11 +233,10 @@ public class AutoProvidesMojo extends AbstractMojo {
     }
   }
 
-  private void writeModuleCSV(ClassLoader newClassLoader, FileWriter moduleWriter) throws IOException {
+  private void writeModuleCSV(List<InjectExtension> extensions, FileWriter moduleWriter) throws IOException {
     final Log log = getLog();
     final List<AvajeModule> avajeModules = new ArrayList<>();
-    ServiceLoader.load(InjectExtension.class, newClassLoader).stream()
-        .map(Provider::get)
+    extensions.stream()
         .filter(AvajeModule.class::isInstance)
         .map(AvajeModule.class::cast)
         .forEach(avajeModules::add);
