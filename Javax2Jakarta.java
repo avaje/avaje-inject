@@ -20,6 +20,11 @@ public class Javax2Jakarta {
         "blackbox-other/pom.xml",
         "blackbox-test-inject/pom.xml",
         "blackbox-multi-scope/pom.xml",
+        "blackbox-collection-module-order/pom.xml",
+        "blackbox-collection-module-order/api/pom.xml",
+        "blackbox-collection-module-order/m1/pom.xml",
+        "blackbox-collection-module-order/m2/pom.xml",
+        "blackbox-collection-module-order/tests/pom.xml",
         "inject-bom/pom.xml"
       };
 
