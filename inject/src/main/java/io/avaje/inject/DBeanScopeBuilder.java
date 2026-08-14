@@ -375,6 +375,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
     @Override
     public Set<String> orderModules() {
+      resolveSoftRequires();
       // push the 'no dependency' modules after the 'provides only' ones
       // as this is more intuitive for the simple (only provides modules case)
       for (final FactoryState factoryState : queueNoDependencies) {
@@ -382,6 +383,24 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       }
       processQueue();
       return moduleNames;
+    }
+
+    /** Resolve the soft requires beans for ordering. */
+    private void resolveSoftRequires() {
+      final var it = queue.iterator();
+      while (it.hasNext()) {
+        final FactoryState factory = it.next();
+        if (factory.resolveSoftRequires(providesMap)
+            && isEmpty(factory.requires())
+            && isEmpty(factory.requiresPackages())) {
+          it.remove();
+          queueNoDependencies.add(factory);
+        }
+      }
+    }
+
+    private static boolean isEmpty(@Nullable String[] values) {
+      return values == null || values.length == 0;
     }
 
     @Override
@@ -394,6 +413,9 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       int count;
       do {
         count = processQueuedFactories(false);
+        if (count == 0) {
+          count = pushSoftBlocked(false);
+        }
       } while (count > 0);
 
       if (suppliedBeans && !queue.isEmpty()) {
@@ -405,6 +427,9 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         // or comes from a partial multi-provider chain.
         do {
           count = processQueuedFactories(true);
+          if (count == 0) {
+            count = pushSoftBlocked(true);
+          }
         } while (count > 0);
         // Anything still queued has an in-module provider that was never pushed
         // (a cycle or otherwise unresolvable case); emit in insertion order.
@@ -477,11 +502,30 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       return count;
     }
 
+    /** Push a single module whose only unsatisfied requirements are soft ones. */
+    private int pushSoftBlocked(boolean relaxed) {
+      final var it = queue.iterator();
+      while (it.hasNext()) {
+        final FactoryState factory = it.next();
+        if (satisfiedRequires(factory, relaxed)) {
+          it.remove();
+          push(factory);
+          return 1;
+        }
+      }
+      return 0;
+    }
+
     /** Return true if the (module) requires dependencies are satisfied for this factory. */
     private boolean satisfiedDependencies(FactoryState factory, boolean relaxed) {
+      return satisfiedRequires(factory, relaxed) && factory.softRequiresSatisfied();
+    }
+
+    private boolean satisfiedRequires(FactoryState factory, boolean relaxed) {
       return satisfiedDependencies(factory.requires(), relaxed)
           && satisfiedDependencies(factory.requiresPackages(), relaxed);
     }
+
 
     private boolean satisfiedDependencies(String[] requires, boolean relaxed) {
       for (final var dependency : requires) {
@@ -503,9 +547,43 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
 
     private final AvajeModule factory;
     private boolean pushed;
+    @Nullable
+    private List<FactoryList> softRequires;
 
     private FactoryState(AvajeModule factory) {
       this.factory = factory;
+    }
+
+    /**
+     * Keep only the soft requires another module actually provides. Return true when nothing is
+     * left to wait for.
+     */
+    boolean resolveSoftRequires(Map<String, FactoryList> providesMap) {
+      List<FactoryList> resolved = null;
+      for (final var dependency : factory.softRequiresBeans()) {
+        final var factoryList = providesMap.get(dependency);
+        if (factoryList != null && !factoryList.onlyContains(this)) {
+          if (resolved == null) {
+            resolved = new ArrayList<>(2);
+          }
+          resolved.add(factoryList);
+        }
+      }
+      softRequires = resolved;
+      return resolved == null;
+    }
+
+    /** Return true when every module contributing to our soft requires has been pushed. */
+    boolean softRequiresSatisfied() {
+      if (softRequires == null) {
+        return true;
+      }
+      for (final var factoryList : softRequires) {
+        if (!factoryList.allOtherPushed(this)) {
+          return false;
+        }
+      }
+      return true;
     }
 
     /** Set when factory is pushed onto the build/wiring order. */
@@ -535,7 +613,9 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
     }
 
     boolean isRequiresEmpty() {
-      return isEmpty(factory.requiresBeans()) && isEmpty(factory.requiresPackagesFromType());
+      return isEmpty(factory.requiresBeans())
+        && isEmpty(factory.requiresPackagesFromType())
+        && isEmpty(factory.softRequiresBeans());
     }
 
     boolean explicitlyProvides() {
@@ -574,6 +654,26 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
         }
       }
       return false;
+    }
+
+    /** Return true if all factories other than the given one have been pushed. */
+    boolean allOtherPushed(FactoryState self) {
+      for (final FactoryState factory : factories) {
+        if (factory != self && !factory.isPushed()) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    /** Return true if this holds nothing other than the given factory. */
+    boolean onlyContains(FactoryState self) {
+      for (final FactoryState factory : factories) {
+        if (factory != self) {
+          return false;
+        }
+      }
+      return true;
     }
   }
 }

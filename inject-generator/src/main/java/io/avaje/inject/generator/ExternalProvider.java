@@ -309,7 +309,7 @@ final class ExternalProvider {
   private static void writeModuleDependencies() {
     // write detected modules to a csv for test compilation
     try (final var moduleWriter = new FileWriter(APContext.getBuildResource("avaje-module-dependencies.csv").toFile())) {
-      moduleWriter.write("External Module Type|Provides|Requires");
+      moduleWriter.write("External Module Type|Provides|Requires|SoftRequires");
       for (ModuleData avajeModule : ProcessingContext.modules()) {
         moduleWriter.write("\n");
         moduleWriter.write(avajeModule.name());
@@ -319,6 +319,9 @@ final class ExternalProvider {
         moduleWriter.write("|");
         var requires = String.join(",", avajeModule.requires());
         moduleWriter.write(requires.isEmpty() ? " " : requires);
+        moduleWriter.write("|");
+        var softRequires = String.join(",", avajeModule.softRequires());
+        moduleWriter.write(softRequires.isEmpty() ? " " : softRequires);
       }
 
     } catch (IOException e) {
@@ -329,6 +332,7 @@ final class ExternalProvider {
   private static void addOtherModuleProvides(Collection<String> providedTypes, TypeElement otherModule) {
     final var provides = new HashSet<String>();
     final var requires = new HashSet<String>();
+    final var softRequires = new HashSet<String>();
     final var name = otherModule.getQualifiedName().toString();
 
     ElementFilter.methodsIn(otherModule.getEnclosedElements()).stream()
@@ -339,18 +343,23 @@ final class ExternalProvider {
         externalMeta.add(m);
         externalModuleBeans.computeIfAbsent(name, k -> new ArrayList<>()).add(m);
         provides.addAll(m.provides());
-        m.dependsOn().stream()
-          .filter(d -> !d.isSoftDependency())
-          .map(Dependency::name)
-          .forEach(requires::add);
+        for (Dependency dependency : m.dependsOn()) {
+          if (dependency.isSoftDependency()) {
+            softRequires.add(Util.trimQualifierSuffix(dependency.name()));
+          } else {
+            requires.add(dependency.name());
+          }
+        }
 
         providedTypes.add(m.key());
         providedTypes.add(m.type());
         providedTypes.addAll(Util.addQualifierSuffix(m.provides(), m.name()));
       });
 
+    softRequires.removeAll(requires);
     APContext.logNote("Detected Module: %s", name);
-    ProcessingContext.addModule(new ModuleData(name, List.copyOf(provides), List.copyOf(requires)));
+    ProcessingContext.addModule(
+      new ModuleData(name, List.copyOf(provides), List.copyOf(requires), List.copyOf(softRequires)));
   }
 
   private static Stream<TypeElement> injectExtensions() {
