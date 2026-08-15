@@ -54,7 +54,15 @@ final class GlobalInitialise {
   }
 
   private static GlobalTestBeans.Beans createScopes(boolean shutdownHook) {
+    // the application scope is wired lazily so that it can be closed and re-created
+    // when a test class needs to wire its own copy of the application
     return new GlobalTestBeans.Beans(createTestBaseScope(shutdownHook));
+  }
+
+  static BeanScope createTestAllScope(@Nullable BeanScope testBaseScope) {
+      return BeanScope.builder()
+        .parent(testBaseScope, false)
+        .build();
   }
 
   @Nullable

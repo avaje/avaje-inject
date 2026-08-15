@@ -54,6 +54,22 @@
         </configuration>
       </plugin>
 
+      <!--
+        The org.multi.globalscope tests cover global test scope teardown: a test class that
+        wires its own copy of the application (mocks, scopePerTest, explicit modules) must not
+        run the lifecycle of every singleton a second time beside the live global scope.
+        They assert JVM global state so they need alphabetical class order in a single fork -
+        T1 (global), T2 (mock), T3 (global again), T4 (scopePerTest), T5 (global again),
+        T6/T7 (bounded modules), T8 (global again).
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <runOrder>alphabetical</runOrder>
+        </configuration>
+      </plugin>
+
       <plugin>
         <groupId>io.avaje</groupId>
         <artifactId>avaje-inject-maven-plugin</artifactId>
