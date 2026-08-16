@@ -92,7 +92,7 @@ final class SimpleAssistWriter {
       writer.append("public ");
     }
     var valhallaStr = Util.valhalla();
-    if (!valhallaStr.isBlank() && hasAssistedFieldsOrParams()) {
+    if (!valhallaStr.isBlank() && hasMutableFields()) {
       valhallaStr = "";
     }
 
@@ -101,11 +101,8 @@ final class SimpleAssistWriter {
     writer.append(" {").eol().eol();
   }
 
-  private boolean hasAssistedFieldsOrParams() {
-    return beanReader.injectFields().stream().anyMatch(FieldReader::assisted)
-      || beanReader.injectMethods().stream()
-      .flatMap(m -> m.params().stream())
-      .anyMatch(MethodParam::assisted);
+  private boolean hasMutableFields() {
+    return !beanReader.injectFields().isEmpty() || !beanReader.injectMethods().isEmpty();
   }
 
   private void writeImplementsOrExtends() {
