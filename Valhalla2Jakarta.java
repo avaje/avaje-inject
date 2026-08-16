@@ -23,6 +23,7 @@ public class Valhalla2Jakarta {
           .filter(Files::isRegularFile)
           .filter(p -> p.toString().endsWith(".java"))
           .filter(p -> !p.getFileName().toString().equals("Valhalla2Jakarta.java"))
+          .filter(p -> !p.getFileName().toString().equals("Jakarta2Valhalla.java"))
           .forEach(
               path -> {
                 try {
@@ -61,8 +62,20 @@ public class Valhalla2Jakarta {
                   String original = content;
 
                   content = content.replace("--enable-preview -Dnet.bytebuddy", "-Dnet.bytebuddy");
-                  content = content.replace("<!-- VALHALLA-START -->", "<!-- VALHALLA-START ___");
-                  content = content.replace("<!-- VALHALLA-END -->", "____ VALHALLA-END -->");
+                  content =
+                      content.replaceAll(
+                          "<maven\\.compiler\\.release>\\d+</maven\\.compiler\\.release>",
+                          "<maven.compiler.release>VALHALLA_JDK</maven.compiler.release>");
+                  content =
+                      content.replace(
+                          "<!-- valhalla-build-start -->", "<!-- valhalla-build-start ___");
+                  content =
+                      content.replace("<!-- valhalla-build-end -->", "____ valhalla-build-end -->");
+                  content =
+                      content.replace(
+                          "<!-- default-build-start ___", "<!-- default-build-start -->");
+                  content =
+                      content.replace("____ default-build-end -->", "<!-- default-build-end -->");
                   content =
                       content.replace(
                           "<additionalOptions>--enable-preview</additionalOptions> <!-- Valhalla -->",
@@ -88,7 +101,8 @@ public class Valhalla2Jakarta {
     }
 
     String content = new String(Files.readAllBytes(testFile), "UTF-8");
-    String updated = content.replace("@Disabled", "//@Disabled");
+    String updated =
+        content.replace("@org.junit.jupiter.api.Disabled // Valhalla", "//@Disabled");
 
     if (!content.equals(updated)) {
       Files.write(testFile, updated.getBytes("UTF-8"));
