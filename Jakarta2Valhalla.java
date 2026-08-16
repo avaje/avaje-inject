@@ -23,6 +23,7 @@ public class Jakarta2Valhalla {
           .filter(Files::isRegularFile)
           .filter(p -> p.toString().endsWith(".java"))
           .filter(p -> !p.getFileName().toString().equals("Jakarta2Valhalla.java"))
+          .filter(p -> !p.getFileName().toString().equals("Valhalla2Jakarta.java"))
           .forEach(
               path -> {
                 try {
@@ -61,6 +62,13 @@ public class Jakarta2Valhalla {
                   String original = content;
 
                   content = content.replace("-Dnet.bytebuddy", "--enable-preview -Dnet.bytebuddy");
+                  // preview features require --release to match the running JDK
+                  content =
+                      content.replace(
+                          "<maven.compiler.release>VALHALLA_JDK</maven.compiler.release>",
+                          "<maven.compiler.release>"
+                              + Runtime.version().feature()
+                              + "</maven.compiler.release>");
                   content =
                       content.replace(
                           "<!-- default-build-start -->", "<!-- default-build-start ___");

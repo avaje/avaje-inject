@@ -74,7 +74,9 @@ final class SimpleOrderWriter {
     );
     writer.append(Constants.AT_SUPPRESS_WARNINGS).eol();
     writer.append(Constants.AT_GENERATED).eol();
-    writer.append("public final %sclass %s implements ModuleOrdering {", Util.valhalla(), shortName).eol().eol();
+    // the interweave variant adds a non-final field for the aggregated module, so can't be a value class
+    var valhallaStr = interweave ? "" : Util.valhalla();
+    writer.append("public final %sclass %s implements ModuleOrdering {", valhallaStr, shortName).eol().eol();
 
     var size = ordering.size();
     this.numberOfModules = 0;
