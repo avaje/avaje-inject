@@ -61,20 +61,29 @@ final class GlobalTestBeans implements Closeable {
    */
   static final class Beans {
 
-    private final Plugin.Scope plugin;
+    private final ReentrantLock allBeansLock = new ReentrantLock();
+
+    private Plugin.Scope plugin;
 
     /**
      * Entire application wired (with testScope as parent replacing those beans).
      * This can be used when a test only injects beans and there are no mocks,
      * spies, or setup methods.
+     * <p>
+     * Wired lazily on first use as a test using {@code @InjectTest(modules = ...)}
+     * only wires the modules it selects and never uses this.
      */
-    private final BeanScope allBeans;
+    private BeanScope allBeans;
 
     /**
      * The TestScope beans, used as the parent scope when a new BeanScope
      * needs to be wired for a test (due to mocks, spies or setup methods).
      */
     private final BeanScope baseBeans;
+
+    Beans(BeanScope baseBeans) {
+      this.baseBeans = baseBeans;
+    }
 
     Beans(Plugin.Scope plugin, BeanScope allBeans, BeanScope baseBeans) {
       this.plugin = plugin;
@@ -95,11 +104,30 @@ final class GlobalTestBeans implements Closeable {
     }
 
     Plugin.Scope allPlugin() {
+      initAllBeans();
       return plugin;
     }
 
     BeanScope allBeans() {
+      initAllBeans();
       return allBeans;
+    }
+
+    private void initAllBeans() {
+      if (allBeans == null) {
+        allBeansLock.lock();
+        try {
+          if (allBeans == null) {
+            log.log(DEBUG, "Wiring all beans for the test BeanScope");
+            allBeans = BeanScope.builder()
+              .parent(baseBeans, false)
+              .build();
+            plugin = PluginMgr.scope(allBeans);
+          }
+        } finally {
+          allBeansLock.unlock();
+        }
+      }
     }
 
     BeanScope baseBeans() {

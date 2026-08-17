@@ -4,16 +4,25 @@ import java.util.Optional;
 
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.BeanScopeBuilder;
+import io.avaje.inject.spi.AvajeModule;
 
 /**
  * Wraps the underlying metadata (fields with annotations @Mock, @Spy, @Inject, @Captor).
  */
 final class MetaInfo {
 
+  @SuppressWarnings("unchecked")
+  private static final Class<? extends AvajeModule>[] NO_MODULES = new Class[0];
+
   private final MetaReader reader;
+  private final Class<? extends AvajeModule>[] modules;
 
   MetaInfo(Class<?> testClass, Plugin plugin) {
     this.reader = new MetaReader(testClass, plugin);
+    final InjectTest injectTest = testClass.getAnnotation(InjectTest.class);
+    // read from the test class rather than the instance so that the selected modules also
+    // bound the class level scope of a test that only has static injection
+    this.modules = injectTest == null ? NO_MODULES : injectTest.modules();
   }
 
   boolean hasStaticInjection() {
@@ -54,6 +63,7 @@ final class MetaInfo {
     String[] profiles = injectTest.map(InjectTest::profiles).orElse(new String[0]);
 
     if (profiles.length > 0
+        || modules.length > 0
         || injectTest.map(InjectTest::scopePerTest).orElse(false)
         || reader.hasMocksOrSpies(testInstance)) {
       // need to build a BeanScope for this using baseBeans() as the parent
@@ -63,6 +73,9 @@ final class MetaInfo {
         if (profiles.length > 0) {
           builder.profiles(profiles);
         }
+      }
+      if (modules.length > 0) {
+        builder.modules(SelectedModules.instances(modules));
       }
       // register mocks and spies local to this test
       reader.build(builder, testInstance);
