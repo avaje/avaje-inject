@@ -1,22 +1,26 @@
 package io.avaje.inject.mojo;
 
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.ServiceLoader;
-import java.util.ServiceLoader.Provider;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
@@ -49,6 +53,8 @@ import io.avaje.inject.spi.PluginProvides;
     threadSafe = true)
 public class AutoProvidesMojo extends AbstractMojo {
 
+  private static final String SERVICES_FILE = "META-INF/services/" + InjectExtension.class.getName();
+
   @Parameter(defaultValue = "${project}", readonly = true, required = true)
   private MavenProject project;
 
@@ -65,12 +71,77 @@ public class AutoProvidesMojo extends AbstractMojo {
         var pluginWriter = createFileWriter("avaje-plugins.csv");
         var moduleCSV = createFileWriter("avaje-module-dependencies.csv")) {
 
-      writeProvidedPlugins(newClassLoader, pluginWriter);
-      writeModuleCSV(newClassLoader, moduleCSV);
+      final var extensions = loadExtensions(newClassLoader);
+      writeProvidedPlugins(extensions, pluginWriter);
+      writeModuleCSV(extensions, moduleCSV);
 
     } catch (final IOException e) {
       throw new MojoExecutionException("Failed to write spi classes", e);
     }
+  }
+
+  /**
+   * Load the {@link InjectExtension} services declared on the given classloader, skipping any entry
+   * whose class is not resolvable.
+   */
+  List<InjectExtension> loadExtensions(ClassLoader classLoader) throws IOException {
+    return declaredExtensions(classLoader).entrySet().stream()
+        .map(declared -> loadExtension(declared.getKey(), declared.getValue(), classLoader))
+        .flatMap(Optional::stream)
+        .collect(toList());
+  }
+
+  private Optional<InjectExtension> loadExtension(
+      String className, String declaredIn, ClassLoader classLoader) {
+    try {
+      return Optional.of(
+          Class.forName(className, false, classLoader)
+              .asSubclass(InjectExtension.class)
+              .getDeclaredConstructor()
+              .newInstance());
+    } catch (final Throwable e) {
+      getLog()
+          .warn(
+              "Skipping InjectExtension "
+                  + className
+                  + " declared in "
+                  + declaredIn
+                  + " - not loadable from the compile-scope classpath: "
+                  + e);
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Declared service entries, in classpath order, mapped to the services file(s) declaring them.
+   */
+  private static Map<String, String> declaredExtensions(ClassLoader classLoader)
+      throws IOException {
+    final Map<String, String> declared = new LinkedHashMap<>();
+    for (final URL resource : Collections.list(classLoader.getResources(SERVICES_FILE))) {
+      for (final String className : readServiceEntries(resource)) {
+        declared.merge(className, resource.toString(), (first, next) -> first + ", " + next);
+      }
+    }
+    return declared;
+  }
+
+  private static List<String> readServiceEntries(URL resource) throws IOException {
+    try (var reader =
+        new BufferedReader(new InputStreamReader(resource.openStream(), StandardCharsets.UTF_8))) {
+      return reader
+          .lines()
+          .map(AutoProvidesMojo::stripComment)
+          .filter(not(String::isEmpty))
+          .collect(toList());
+    } catch (final UncheckedIOException e) {
+      throw e.getCause();
+    }
+  }
+
+  private static String stripComment(String line) {
+    final int comment = line.indexOf('#');
+    return (comment < 0 ? line : line.substring(0, comment)).trim();
   }
 
   private List<URL> compileDependencies() throws MojoExecutionException {
@@ -94,15 +165,13 @@ public class AutoProvidesMojo extends AbstractMojo {
     return new FileWriter(new File(project.getBuild().getDirectory(), string));
   }
 
-  private void writeProvidedPlugins(URLClassLoader newClassLoader, FileWriter pluginWriter) throws IOException {
+  private void writeProvidedPlugins(List<InjectExtension> extensions, FileWriter pluginWriter) throws IOException {
     final Log log = getLog();
 
-    final List<InjectPlugin> plugins = new ArrayList<>();
-    ServiceLoader.load(InjectExtension.class, newClassLoader).stream()
-        .map(Provider::get)
+    final List<InjectPlugin> plugins = extensions.stream()
         .filter(InjectPlugin.class::isInstance)
         .map(InjectPlugin.class::cast)
-        .forEach(plugins::add);
+        .collect(toList());
 
     final Map<String, List<String>> pluginEntries = new HashMap<>();
     for (final var plugin : plugins) {
@@ -139,14 +208,12 @@ public class AutoProvidesMojo extends AbstractMojo {
     }
   }
 
-  private void writeModuleCSV(ClassLoader newClassLoader, FileWriter moduleWriter) throws IOException {
+  private void writeModuleCSV(List<InjectExtension> extensions, FileWriter moduleWriter) throws IOException {
     final Log log = getLog();
-    final List<AvajeModule> avajeModules = new ArrayList<>();
-    ServiceLoader.load(InjectExtension.class, newClassLoader).stream()
-        .map(Provider::get)
+    final List<AvajeModule> avajeModules = extensions.stream()
         .filter(AvajeModule.class::isInstance)
         .map(AvajeModule.class::cast)
-        .forEach(avajeModules::add);
+        .collect(toList());
 
     List<ModuleData> modules = new ArrayList<>();
     for (final var module : avajeModules) {
