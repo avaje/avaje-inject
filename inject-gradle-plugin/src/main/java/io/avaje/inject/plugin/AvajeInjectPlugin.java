@@ -1,5 +1,6 @@
 package io.avaje.inject.plugin;
 
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 
 import io.avaje.inject.spi.AvajeModule;
@@ -11,20 +12,25 @@ import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.GradleException;
 import org.gradle.api.tasks.bundling.Jar;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
-import java.util.ServiceLoader.Provider;
 
 /**
  * Plugin that discovers external avaje inject modules and plugins.
  */
 public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
+
+  private static final String SERVICES_FILE = "META-INF/services/" + InjectExtension.class.getName();
 
   private final List<ModuleData> modules = new ArrayList<>();
 
@@ -70,24 +76,74 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
     try (var classLoader = classLoader(project);
         var pluginWriter = createFileWriter(outputDir.getPath(), "avaje-plugins.csv");
         var moduleCSV = createFileWriter(outputDir.getPath(), "avaje-module-dependencies.csv")) {
-      writeProvidedPlugins(classLoader, pluginWriter);
-      writeModuleCSV(classLoader, moduleCSV);
+      final var extensions = loadExtensions(classLoader);
+      writeProvidedPlugins(extensions, pluginWriter);
+      writeModuleCSV(extensions, moduleCSV);
     } catch (IOException e) {
       throw new GradleException("Failed to write avaje-module-provides", e);
     }
+  }
+
+  /**
+   * Load the {@link InjectExtension} services declared on the given classloader, skipping any entry
+   * whose class is not resolvable.
+   */
+  static List<InjectExtension> loadExtensions(ClassLoader classLoader) throws IOException {
+    return declaredExtensions(classLoader).entrySet().stream()
+        .map(declared -> loadExtension(declared.getKey(), declared.getValue(), classLoader))
+        .flatMap(Optional::stream)
+        .collect(toList());
+  }
+
+  private static Optional<InjectExtension> loadExtension(String className, String declaredIn, ClassLoader classLoader) {
+    try {
+      return Optional.of(Class.forName(className, false, classLoader)
+          .asSubclass(InjectExtension.class)
+          .getDeclaredConstructor()
+          .newInstance());
+    } catch (Throwable e) {
+      System.err.println("Skipping InjectExtension " + className + " declared in " + declaredIn
+          + " - not loadable from the compile classpath: " + e);
+      return Optional.empty();
+    }
+  }
+
+  /** Declared service entries, in classpath order, mapped to the services file(s) declaring them. */
+  private static Map<String, String> declaredExtensions(ClassLoader classLoader) throws IOException {
+    final Map<String, String> declared = new LinkedHashMap<>();
+    for (final URL resource : Collections.list(classLoader.getResources(SERVICES_FILE))) {
+      for (final String className : readServiceEntries(resource)) {
+        declared.merge(className, resource.toString(), (first, next) -> first + ", " + next);
+      }
+    }
+    return declared;
+  }
+
+  private static List<String> readServiceEntries(URL resource) throws IOException {
+    try (var reader = new BufferedReader(new InputStreamReader(resource.openStream(), StandardCharsets.UTF_8))) {
+      return reader.lines()
+          .map(AvajeInjectPlugin::stripComment)
+          .filter(not(String::isEmpty))
+          .collect(toList());
+    } catch (UncheckedIOException e) {
+      throw e.getCause();
+    }
+  }
+
+  private static String stripComment(String line) {
+    final int comment = line.indexOf('#');
+    return (comment < 0 ? line : line.substring(0, comment)).trim();
   }
 
   private FileWriter createFileWriter(String dir, String file) throws IOException {
     return new FileWriter(new File(dir, file));
   }
 
-  private void writeProvidedPlugins(ClassLoader classLoader, FileWriter pluginWriter) throws IOException {
-    final List<InjectPlugin> plugins = new ArrayList<>();
-    ServiceLoader.load(InjectExtension.class, classLoader).stream()
-        .map(Provider::get)
+  private void writeProvidedPlugins(List<InjectExtension> extensions, FileWriter pluginWriter) throws IOException {
+    final List<InjectPlugin> plugins = extensions.stream()
         .filter(InjectPlugin.class::isInstance)
         .map(InjectPlugin.class::cast)
-        .forEach(plugins::add);
+        .collect(toList());
 
     final Map<String, List<String>> pluginEntries = new HashMap<>();
     for (final var plugin : plugins) {
@@ -148,14 +204,12 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
     }
   }
 
-  private void writeModuleCSV(ClassLoader classLoader, FileWriter moduleWriter) throws IOException {
+  private void writeModuleCSV(List<InjectExtension> extensions, FileWriter moduleWriter) throws IOException {
 
-    final List<AvajeModule> avajeModules = new ArrayList<>();
-    ServiceLoader.load(InjectExtension.class, classLoader).stream()
-        .map(Provider::get)
+    final List<AvajeModule> avajeModules = extensions.stream()
         .filter(AvajeModule.class::isInstance)
         .map(AvajeModule.class::cast)
-        .forEach(avajeModules::add);
+        .collect(toList());
 
     for (final var module : avajeModules) {
       final var name = module.getClass().getTypeName();
