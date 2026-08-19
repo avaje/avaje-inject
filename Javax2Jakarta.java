@@ -26,6 +26,10 @@ public class Javax2Jakarta {
         "blackbox-collection-module-order/m2/pom.xml",
         "blackbox-collection-module-order/tests/pom.xml",
         "blackbox-conditional-provider-order/pom.xml",
+        "blackbox-conditional-provider-order/api/pom.xml",
+        "blackbox-conditional-provider-order/m1/pom.xml",
+        "blackbox-conditional-provider-order/m2/pom.xml",
+        "blackbox-conditional-provider-order/tests/pom.xml",
         "inject-bom/pom.xml"
       };
 
