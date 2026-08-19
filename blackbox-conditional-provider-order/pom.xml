@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>avaje-inject-parent</artifactId>
+    <groupId>io.avaje</groupId>
+    <version>12.7-RC2</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>blackbox-conditional-provider-order</artifactId>
+  <packaging>pom</packaging>
+
+  <description>
+    Reproduces silent bean loss when a conditional bean is the only in-module provider of a
+    type another bean in the same module consumes. m1's AppGreeting (@RequiresProperty
+    greet.mode=app) provides Greeting, so m1's Reader (which injects Greeting) is satisfied
+    in-module at compile time: M1Module emits no requiresBeans/softRequiresBeans entry for
+    Greeting, while its providesBeans claims Greeting unconditionally. At runtime with
+    greet.mode=alt the claim is false and the real provider is m2's AltGreeting, but no
+    ordering edge exists between m1 and m2, so with m1 first (explicit module list or
+    classpath order) Reader fails with "Injecting null for Greeting". Reversing the order
+    wires correctly. A consumer in a separate module with a declared
+    @InjectModule(requires = Greeting.class) orders correctly past multiple conditional
+    claimants, so the defect is specifically the suppressed requirement, not conditional
+    multi-provider resolution.
+  </description>
+
+  <modules>
+    <module>api</module>
+    <module>m1</module>
+    <module>m2</module>
+    <module>tests</module>
+  </modules>
+</project>
