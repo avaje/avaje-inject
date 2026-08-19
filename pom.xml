@@ -55,6 +55,7 @@
         <module>blackbox-aspect</module>
         <module>blackbox-test-inject</module>
         <module>blackbox-multi-scope</module>
+        <module>blackbox-global-scope-teardown</module>
       </modules>
     </profile>
   </profiles>
