@@ -55,6 +55,8 @@
         <module>blackbox-aspect</module>
         <module>blackbox-test-inject</module>
         <module>blackbox-multi-scope</module>
+        <module>blackbox-collection-module-order</module>
+        <module>blackbox-conditional-provider-order</module>
       </modules>
     </profile>
   </profiles>

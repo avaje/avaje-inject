@@ -63,6 +63,7 @@ class FactoryOrder {
   }
 
   Set<String> orderModules() {
+    resolveSoftRequires();
     // push the 'no dependency' modules after the 'provides only' ones
     // as this is more intuitive for the simple (only provides modules case)
     for (final FactoryState factoryState : queueNoDependencies) {
@@ -72,11 +73,28 @@ class FactoryOrder {
     return moduleNames;
   }
 
+  /**
+   * Resolve the soft requires now that all the modules have been added and providesMap is complete.
+   */
+  private void resolveSoftRequires() {
+    final Iterator<FactoryState> it = queue.iterator();
+    while (it.hasNext()) {
+      final FactoryState factory = it.next();
+      if (factory.resolveSoftRequires(providesMap) && factory.requires().isEmpty()) {
+        it.remove();
+        queueNoDependencies.add(factory);
+      }
+    }
+  }
+
   /** Process the queue pushing the factories in order to satisfy dependencies. */
   private void processQueue() {
     int count;
     do {
       count = processQueuedFactories();
+      if (count == 0) {
+        count = pushSoftBlocked();
+      }
     } while (count > 0);
 
     if (!queue.isEmpty()) {
@@ -127,7 +145,7 @@ class FactoryOrder {
     final Iterator<FactoryState> it = queue.iterator();
     while (it.hasNext()) {
       final FactoryState factory = it.next();
-      if (satisfiedDependencies(factory.requires())) {
+      if (satisfiedDependencies(factory.requires()) && factory.softRequiresSatisfied()) {
         // push the factory onto the build order
         it.remove();
         push(factory);
@@ -135,6 +153,20 @@ class FactoryOrder {
       }
     }
     return count;
+  }
+
+  /** Push a single module whose only unsatisfied requirements are soft ones. */
+  private int pushSoftBlocked() {
+    final Iterator<FactoryState> it = queue.iterator();
+    while (it.hasNext()) {
+      final FactoryState factory = it.next();
+      if (satisfiedDependencies(factory.requires())) {
+        it.remove();
+        push(factory);
+        return 1;
+      }
+    }
+    return 0;
   }
 
   /** Return true if the (module) requires dependencies are satisfied for this factory. */
@@ -169,6 +201,26 @@ class FactoryOrder {
       }
       return true;
     }
+
+    /** Return true if all factories other than the given one have been pushed. */
+    boolean allOtherPushed(FactoryState self) {
+      for (final FactoryState factory : factories) {
+        if (factory != self && !factory.isPushed()) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    /** Return true if this holds nothing other than the given factory. */
+    boolean onlyContains(FactoryState self) {
+      for (final FactoryState factory : factories) {
+        if (factory != self) {
+          return false;
+        }
+      }
+      return true;
+    }
   }
 
   /** Wrapper on Factory holding the pushed state. */
@@ -176,9 +228,39 @@ class FactoryOrder {
 
     private final ModuleData factory;
     private boolean pushed;
+    private List<FactoryList> softRequires;
 
     FactoryState(ModuleData factory) {
       this.factory = factory;
+    }
+
+    /** Keep only the soft requires another module actually provides */
+    boolean resolveSoftRequires(Map<String, FactoryList> providesMap) {
+      List<FactoryList> resolved = null;
+      for (final var dependency : factory.softRequires()) {
+        final FactoryList factoryList = providesMap.get(dependency);
+        if (factoryList != null && !factoryList.onlyContains(this)) {
+          if (resolved == null) {
+            resolved = new ArrayList<>(2);
+          }
+          resolved.add(factoryList);
+        }
+      }
+      softRequires = resolved;
+      return resolved == null;
+    }
+
+    /** Return true when every module contributing to our soft requires has been pushed. */
+    boolean softRequiresSatisfied() {
+      if (softRequires == null) {
+        return true;
+      }
+      for (final FactoryList factoryList : softRequires) {
+        if (!factoryList.allOtherPushed(this)) {
+          return false;
+        }
+      }
+      return true;
     }
 
     /** Set when factory is pushed onto the build/wiring order. */
@@ -204,7 +286,7 @@ class FactoryOrder {
     }
 
     boolean isRequiresEmpty() {
-      return factory.requires().isEmpty();
+      return factory.requires().isEmpty() && factory.softRequires().isEmpty();
     }
 
     boolean explicitlyProvides() {
