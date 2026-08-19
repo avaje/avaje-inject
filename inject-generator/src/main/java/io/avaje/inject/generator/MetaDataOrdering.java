@@ -46,6 +46,9 @@ final class MetaDataOrdering {
       softRequires(metaData);
     }
     externallyRequiredDependencies();
+    for (MetaData metaData : values) {
+      conditionallySatisfiedRequires(metaData);
+    }
   }
 
   /** Collect the soft dependencies (collection elements, conditional wiring). */
@@ -62,6 +65,30 @@ final class MetaDataOrdering {
         continue;
       }
       autoSoftRequires.add(name);
+    }
+  }
+
+  /**
+   * Collect the dependencies that are only satisfied within the module by conditional bean(s).
+   * These are added as soft requires such that modules able to provide the type wire first for
+   * the case where the conditions are not met at runtime.
+   */
+  private void conditionallySatisfiedRequires(MetaData metaData) {
+    if (metaData.dependsOn() == null) {
+      return;
+    }
+    for (Dependency dependency : metaData.dependsOn()) {
+      if (dependency.isSoftDependency()) {
+        continue;
+      }
+      final String name = Util.trimQualifierSuffix(dependency.name());
+      if (name.isEmpty() || Util.isProvider(name) || Constants.BEANSCOPE.equals(name)) {
+        continue;
+      }
+      var providerList = providers.get(dependency.name());
+      if (providerList != null && providerList.allConditional()) {
+        autoSoftRequires.add(name);
+      }
     }
   }
 
@@ -401,6 +428,21 @@ final class MetaDataOrdering {
 
     List<MetaData> all() {
       return list;
+    }
+
+    /**
+     * Return true if the type is provided by conditional bean(s) only.
+     */
+    private boolean allConditional() {
+      if (list.isEmpty()) {
+        return false;
+      }
+      for (MetaData metaData : list) {
+        if (!metaData.isConditional()) {
+          return false;
+        }
+      }
+      return true;
     }
 
     private boolean isWired(boolean anyWired, MetaData self) {
