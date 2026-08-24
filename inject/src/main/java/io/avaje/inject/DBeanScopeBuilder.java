@@ -407,7 +407,7 @@ final class DBeanScopeBuilder implements BeanScopeBuilder.ForTesting {
       int count;
       do {
         count = processQueuedFactories(false);
-        if (count == 0) {
+        if (count == 0 && !suppliedBeans) {
           count = pushSoftBlocked(false);
         }
       } while (count > 0);

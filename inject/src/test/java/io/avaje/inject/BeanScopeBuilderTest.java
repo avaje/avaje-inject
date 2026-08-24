@@ -191,6 +191,20 @@ class BeanScopeBuilderTest {
   }
 
   @Test
+  void suppliedBeans_softRequires_waitsForProviderWithExternalDependency() {
+    // A consumes MyFeature softly, while B provides it but requires an externally supplied type.
+    // B must be relaxed before A's strict soft fallback can run.
+    boolean suppliedBeans = true;
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), suppliedBeans);
+    factoryOrder.add(bcSoft("one", EMPTY_CLASSES, of(MyFeature.class)));
+    factoryOrder.add(bc("two", of(MyFeature.class), of(FeatureA.class)));
+
+    factoryOrder.orderModules();
+
+    assertThat(names(factoryOrder.factories())).containsExactly("two", "one");
+  }
+
+  @Test
   void softRequires_noContributingModule_expect_ignored() {
     DBeanScopeBuilder.FactoryOrder factoryOrder =
       new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), false);
