@@ -45,4 +45,10 @@ public @interface DependencyMeta {
    */
   String[] dependsOn() default {};
 
+  /**
+   * True when the bean is conditional such that it only registers when its
+   * conditions are satisfied at wiring time.
+   */
+  boolean conditional() default false;
+
 }

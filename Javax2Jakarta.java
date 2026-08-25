@@ -1,5 +1,6 @@
 import java.io.*;
 import java.nio.file.*;
+import java.util.*;
 import java.util.regex.*;
 import java.util.stream.*;
 
@@ -7,24 +8,8 @@ public class Javax2Jakarta {
 
   public static void main(String[] args) {
     try {
-      // List of pom.xml files to update
-      String[] pomFiles = {
-        "pom.xml",
-        "inject/pom.xml",
-        "inject-aop/pom.xml",
-        "inject-events/pom.xml",
-        "inject-generator/pom.xml",
-        "inject-maven-plugin/pom.xml",
-        "inject-test/pom.xml",
-        "blackbox-aspect/pom.xml",
-        "blackbox-other/pom.xml",
-        "blackbox-test-inject/pom.xml",
-        "blackbox-multi-scope/pom.xml",
-        "inject-bom/pom.xml"
-      };
-
-      // Remove -javax from version tags in pom files
-      for (String pomFile : pomFiles) {
+      // Remove -javax from version tags in every pom
+      for (Path pomFile : findPomFiles()) {
         removeJavaxFromVersion(pomFile);
       }
 
@@ -46,8 +31,30 @@ public class Javax2Jakarta {
     }
   }
 
-  private static void removeJavaxFromVersion(String filePath) throws IOException {
-    Path path = Paths.get(filePath);
+  private static List<Path> findPomFiles() throws IOException {
+    Path currentDir = Paths.get(".").toAbsolutePath().normalize();
+    try (Stream<Path> paths = Files.walk(currentDir)) {
+      return paths
+          .filter(Files::isRegularFile)
+          .filter(p -> p.getFileName().toString().equals("pom.xml"))
+          .filter(Javax2Jakarta::notBuildOutput)
+          .sorted()
+          .collect(Collectors.toList());
+    }
+  }
+
+  /** Skip build output directories, which can hold stale copies of pom and java files. */
+  private static boolean notBuildOutput(Path path) {
+    for (Path part : path) {
+      String name = part.toString();
+      if (name.equals("target") || name.equals("bin")) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private static void removeJavaxFromVersion(Path path) throws IOException {
     if (!Files.exists(path)) {
       return;
     }
@@ -113,6 +120,7 @@ public class Javax2Jakarta {
       paths
           .filter(Files::isRegularFile)
           .filter(p -> p.toString().endsWith(".java"))
+          .filter(Javax2Jakarta::notBuildOutput)
           .filter(
               p ->
                   !p.getFileName().toString().equals("IncludeAnnotations.java")

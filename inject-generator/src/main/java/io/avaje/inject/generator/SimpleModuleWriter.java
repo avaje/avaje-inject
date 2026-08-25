@@ -237,12 +237,16 @@ final class SimpleModuleWriter {
       }
     }
 
-    scopeInfo.buildProvides(writer, scopeProvides, scopeRequires);
+    Set<String> scopeSoftRequires = new TreeSet<>(ordering.autoSoftRequires());
+    scopeSoftRequires.removeAll(scopeRequires);
+
+    scopeInfo.buildProvides(writer, scopeProvides, scopeRequires, scopeSoftRequires);
 
     var requires = new ArrayList<>(scopeRequires);
     var provides = new ArrayList<>(scopeProvides);
+    var softRequires = new ArrayList<>(scopeSoftRequires);
 
-    ProcessingContext.addModule(new ModuleData(fullName, provides, requires));
+    ProcessingContext.addModule(new ModuleData(fullName, provides, requires, softRequires));
   }
 
   private void writeClassesMethod() {

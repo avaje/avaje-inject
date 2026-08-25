@@ -338,9 +338,18 @@ final class BeanReader {
     }
     List<MetaData> metaList = new ArrayList<>(factoryMethods.size());
     for (MethodReader factoryMethod : factoryMethods) {
-      metaList.add(factoryMethod.createMeta());
+      final MetaData methodMeta = factoryMethod.createMeta();
+      if (isConditional()) {
+        // beans built by a conditional factory are themselves conditional
+        methodMeta.setConditional(true);
+      }
+      metaList.add(methodMeta);
     }
     return metaList;
+  }
+
+  boolean isConditional() {
+    return !conditions.isEmpty();
   }
 
   MetaData createMeta() {

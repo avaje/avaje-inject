@@ -148,8 +148,9 @@ public final class InjectProcessor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-    if (processingOver() || roundEnv.errorRaised()) {
-      if (roundEnv.processingOver()) {
+    var itsOver = roundEnv.processingOver();
+    if (itsOver || processingOver() || roundEnv.errorRaised()) {
+      if (itsOver) {
         ProcessingContext.writeSPIServicesFile();
         ProcessingContext.validateModule();
         ProcessingContext.clear();

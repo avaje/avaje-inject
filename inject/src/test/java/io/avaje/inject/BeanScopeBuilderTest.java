@@ -178,6 +178,77 @@ class BeanScopeBuilderTest {
   }
 
   @Test
+  void softRequires_orderedAfterContributingModule() {
+    // "one" injects List<MyFeature>, "two" contributes a MyFeature implementation.
+    // Wiring order must not depend on the ServiceLoader (classpath) order.
+    DBeanScopeBuilder.FactoryOrder factoryOrder =
+      new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), false);
+    factoryOrder.add(bcSoft("one", of(FeatureA.class), of(MyFeature.class)));
+    factoryOrder.add(bc("two", of(MyFeature.class), EMPTY_CLASSES));
+    factoryOrder.orderModules();
+
+    assertThat(names(factoryOrder.factories())).containsExactly("two", "one");
+  }
+
+  @Test
+  void suppliedBeans_softRequires_waitsForProviderWithExternalDependency() {
+    // A consumes MyFeature softly, while B provides it but requires an externally supplied type.
+    // B must be relaxed before A's strict soft fallback can run.
+    boolean suppliedBeans = true;
+    DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), suppliedBeans);
+    factoryOrder.add(bcSoft("one", EMPTY_CLASSES, of(MyFeature.class)));
+    factoryOrder.add(bc("two", of(MyFeature.class), of(FeatureA.class)));
+
+    factoryOrder.orderModules();
+
+    assertThat(names(factoryOrder.factories())).containsExactly("two", "one");
+  }
+
+  @Test
+  void softRequires_noContributingModule_expect_ignored() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder =
+      new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), false);
+    factoryOrder.add(bcSoft("one", of(FeatureA.class), of(MyFeature.class)));
+    factoryOrder.add(bc("two", of(Mod3.class), EMPTY_CLASSES));
+    factoryOrder.orderModules();
+
+    assertThat(names(factoryOrder.factories())).containsExactlyInAnyOrder("one", "two");
+  }
+
+  @Test
+  void softRequires_selfContributed_expect_notBlocked() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder =
+      new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), false);
+    factoryOrder.add(bcSoft("one", of(MyFeature.class), of(MyFeature.class)));
+    factoryOrder.orderModules();
+
+    assertThat(names(factoryOrder.factories())).containsExactly("one");
+  }
+
+  @Test
+  void softRequires_cycle_expect_noStall() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder =
+      new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), false);
+    factoryOrder.add(bcSoft("one", of(FeatureA.class), of(MyFeature.class)));
+    factoryOrder.add(bcSoft("two", of(MyFeature.class), of(FeatureA.class)));
+    factoryOrder.orderModules();
+
+    assertThat(names(factoryOrder.factories())).containsExactlyInAnyOrder("one", "two");
+  }
+
+  @Test
+  void softRequires_afterHardRequires() {
+    DBeanScopeBuilder.FactoryOrder factoryOrder =
+      new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), false);
+    factoryOrder.add(bcSoft("A", EMPTY_CLASSES, of(MyFeature.class)));
+    factoryOrder.add(bc("B", of(MyFeature.class), of(Mod4.class)));
+    factoryOrder.add(bc("C", of(Mod4.class), EMPTY_CLASSES));
+    factoryOrder.orderModules();
+
+    assertThat(names(factoryOrder.factories())).containsExactly("C", "B", "A");
+  }
+
+  @Test
   void missingRequiresPackage_expect_unsatisfiedRequiresPackages() {
     DBeanScopeBuilder.FactoryOrder factoryOrder = new DBeanScopeBuilder.FactoryOrder(null, Collections.emptySet(), false);
     factoryOrder.add(bc("1", EMPTY_CLASSES, new Class[0], of(Mod3.class)));
@@ -212,7 +283,11 @@ class BeanScopeBuilderTest {
   }
 
   private TDModule bc(String name, Type[] provides, Type[] requires, Type[] requiresPkg) {
-    return new TDModule(name, provides, requires, requiresPkg);
+    return new TDModule(name, provides, requires, requiresPkg, new Class[0]);
+  }
+
+  private TDModule bcSoft(String name, Type[] provides, Type[] softRequires) {
+    return new TDModule(name, provides, new Class[0], new Class[0], softRequires);
   }
 
   private static class TDModule implements AvajeModule {
@@ -221,12 +296,14 @@ class BeanScopeBuilderTest {
     final Type[] provides;
     final Type[] requires;
     final Type[] requiresPackages;
+    final Type[] softRequires;
 
-    private TDModule(String name, Type[] provides, Type[] requires, Type[] requiresPackages) {
+    private TDModule(String name, Type[] provides, Type[] requires, Type[] requiresPackages, Type[] softRequires) {
       this.name = name;
       this.provides = provides;
       this.requires = requires;
       this.requiresPackages = requiresPackages;
+      this.softRequires = softRequires;
     }
 
     @Override
@@ -259,6 +336,13 @@ class BeanScopeBuilderTest {
     @Override
     public String[] requiresPackagesFromType() {
       return Arrays.stream(Objects.requireNonNullElse(requiresPackages, EMPTY_CLASSES))
+          .map(Type::getTypeName)
+          .toArray(String[]::new);
+    }
+
+    @Override
+    public String[] softRequiresBeans() {
+      return Arrays.stream(Objects.requireNonNullElse(softRequires, EMPTY_CLASSES))
           .map(Type::getTypeName)
           .toArray(String[]::new);
     }

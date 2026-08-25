@@ -42,6 +42,18 @@ public interface AvajeModule extends InjectExtension {
     return EMPTY_STRINGS;
   }
 
+  /**
+   * Return the type names of types this module consumes "softly". That is, types injected as
+   * collection elements ({@code List<T>}, {@code Set<T>}) or used in conditional wiring.
+   *
+   * <p>When another module provides the type this module is wired after it, so all the contributed
+   * beans are visible. When no module provides the type the requirement is simply ignored (the
+   * collection is injected empty) rather than failing.
+   */
+  default String[] softRequiresBeans() {
+    return EMPTY_STRINGS;
+  }
+
   /** Whether The Module is an {@link InjectModule#interweave} module */
   default boolean interweaved() {
     return false;
