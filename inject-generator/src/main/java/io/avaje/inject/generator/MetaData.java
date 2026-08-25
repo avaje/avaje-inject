@@ -46,6 +46,7 @@ final class MetaData implements Comparable<MetaData> {
   private boolean usesExternalDependency;
   private final Set<String> externalDependencies = new HashSet<>();
   private boolean importedComponent;
+  private boolean conditional;
   private String sourceModule;
 
   MetaData(DependencyMetaPrism meta) {
@@ -56,6 +57,7 @@ final class MetaData implements Comparable<MetaData> {
     this.dependsOn = meta.dependsOn().stream().map(Dependency::new).collect(Collectors.toList());
     this.provides = Util.addQualifierSuffix(meta.provides(), name);
     this.importedComponent = meta.importedComponent();
+    this.conditional = meta.conditional();
     this.key = createKey();
     this.buildName = createBuildName();
   }
@@ -168,6 +170,15 @@ final class MetaData implements Comparable<MetaData> {
     this.dependsOn = beanReader.dependsOn();
     this.generateProxy = beanReader.isGenerateProxy();
     this.importedComponent = beanReader.importedComponent();
+    this.conditional = beanReader.isConditional();
+  }
+
+  boolean isConditional() {
+    return conditional;
+  }
+
+  void setConditional(boolean conditional) {
+    this.conditional = conditional;
   }
 
   String name() {
@@ -233,6 +244,9 @@ final class MetaData implements Comparable<MetaData> {
     }
     if (importedComponent) {
       append.append(",").eol().append("      importedComponent = true");
+    }
+    if (conditional) {
+      append.append(",").eol().append("      conditional = true");
     }
     if (hasMethod) {
       append.append(",").eol().append("      method = \"").append(method).append("\"");

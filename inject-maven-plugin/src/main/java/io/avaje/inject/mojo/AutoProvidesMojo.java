@@ -39,8 +39,8 @@ import io.avaje.inject.spi.InjectPlugin;
 import io.avaje.inject.spi.PluginProvides;
 
 /**
- * Plugin that generates <code>target/avaje-module-provides.txt</code> and <code>
- * target/avaje-plugin-provides.txt</code> based on the avaje-inject modules and plugins in the
+ * Plugin that generates <code>target/avaje-module-dependencies.csv</code> and <code>
+ * target/avaje-plugins.csv</code> based on the avaje-inject modules and plugins in the
  * classpath.
  *
  * <p>This allows the avaje-inject-generator annotation processor to be aware of all the components
@@ -229,10 +229,15 @@ public class AutoProvidesMojo extends AbstractMojo {
       final var requires = Arrays.stream(module.requiresBeans()).collect(toList());
 
       Collections.addAll(requires, module.requiresPackagesFromType());
-      modules.add(new ModuleData(name.getTypeName(), provides, requires));
+
+      final var softRequires = Arrays.stream(module.softRequiresBeans())
+        .filter(s -> !requires.contains(s))
+        .collect(toList());
+
+      modules.add(new ModuleData(name.getTypeName(), provides, requires, softRequires));
     }
 
-    moduleWriter.write("External Module Type|Provides|Requires");
+    moduleWriter.write("External Module Type|Provides|Requires|SoftRequires");
     for (ModuleData avajeModule : modules) {
       moduleWriter.write("\n");
       moduleWriter.write(avajeModule.name());
@@ -242,6 +247,9 @@ public class AutoProvidesMojo extends AbstractMojo {
       moduleWriter.write("|");
       var requires = String.join(",", avajeModule.requires());
       moduleWriter.write(requires.isEmpty() ? " " : requires);
+      moduleWriter.write("|");
+      var softRequires = String.join(",", avajeModule.softRequires());
+      moduleWriter.write(softRequires.isEmpty() ? " " : softRequires);
     }
   }
 

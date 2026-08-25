@@ -358,6 +358,12 @@ final class Util {
         .orElse("");
   }
 
+  /** Remove the {@code :qualifier} suffix added by {@link #addQualifierSuffix(String, String)}. */
+  static String trimQualifierSuffix(String type) {
+    final int pos = type.indexOf(':');
+    return pos == -1 ? type : type.substring(0, pos);
+  }
+
   static List<String> addQualifierSuffix(List<String> provides, String name) {
     return Stream.concat(
         provides.stream().map(s -> Util.addQualifierSuffix(name, s)),

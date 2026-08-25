@@ -1,5 +1,6 @@
 import java.io.*;
 import java.nio.file.*;
+import java.util.*;
 import java.util.regex.*;
 import java.util.stream.*;
 
@@ -7,24 +8,13 @@ public class Jakarta2Javax {
 
   public static void main(String[] args) {
     try {
-      // List of pom.xml files to update
-      String[] pomFiles = {
-        "pom.xml",
-        "inject/pom.xml",
-        "inject-aop/pom.xml",
-        "inject-events/pom.xml",
-        "inject-generator/pom.xml",
-        "inject-maven-plugin/pom.xml",
-        "inject-test/pom.xml",
-        "blackbox-aspect/pom.xml",
-        "blackbox-other/pom.xml",
-        "blackbox-test-inject/pom.xml",
-        "blackbox-multi-scope/pom.xml"
-      };
-
-      // Update version in pom files
-      for (String pomFile : pomFiles) {
-        updateFirstVersionTag(pomFile);
+      // Update version in every pom.
+      // inject-bom is handled separately below because every version tag in it needs updating.
+      Path bomPom = Paths.get("inject-bom/pom.xml").toAbsolutePath().normalize();
+      for (Path pomFile : findPomFiles()) {
+        if (!pomFile.equals(bomPom)) {
+          updateFirstVersionTag(pomFile);
+        }
       }
 
       // Replace specific version in inject/pom.xml
@@ -49,8 +39,30 @@ public class Jakarta2Javax {
     }
   }
 
-  private static void updateFirstVersionTag(String filePath) throws IOException {
-    Path path = Paths.get(filePath);
+  private static List<Path> findPomFiles() throws IOException {
+    Path currentDir = Paths.get(".").toAbsolutePath().normalize();
+    try (Stream<Path> paths = Files.walk(currentDir)) {
+      return paths
+          .filter(Files::isRegularFile)
+          .filter(p -> p.getFileName().toString().equals("pom.xml"))
+          .filter(Jakarta2Javax::notBuildOutput)
+          .sorted()
+          .collect(Collectors.toList());
+    }
+  }
+
+  /** Skip build output directories, which can hold stale copies of pom and java files. */
+  private static boolean notBuildOutput(Path path) {
+    for (Path part : path) {
+      String name = part.toString();
+      if (name.equals("target") || name.equals("bin")) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private static void updateFirstVersionTag(Path path) throws IOException {
     if (!Files.exists(path)) {
       return;
     }
@@ -84,6 +96,9 @@ public class Jakarta2Javax {
 
   private static void updateInjectBomVersions(String filePath) throws IOException {
     Path path = Paths.get(filePath);
+    if (!Files.exists(path)) {
+      return;
+    }
 
     String content = new String(Files.readAllBytes(path));
     
@@ -144,12 +159,14 @@ public class Jakarta2Javax {
   }
 
   private static int updateJavaFiles() throws IOException {
-    Path currentDir = Paths.get(".");
+    Path currentDir = Paths.get(".").toAbsolutePath().normalize();
     int[] count = {0};
 
     try (Stream<Path> paths = Files.walk(currentDir)) {
       paths
+          .filter(Files::isRegularFile)
           .filter(p -> p.toString().endsWith(".java"))
+          .filter(Jakarta2Javax::notBuildOutput)
           .filter(
               p ->
                   !p.getFileName().toString().equals("IncludeAnnotations.java")

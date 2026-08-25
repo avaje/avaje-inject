@@ -228,6 +228,7 @@ final class MethodReader {
 
   MetaData createMeta() {
     MetaData metaData = new MetaData(returnTypeRaw, name, fullBuildMethod());
+    metaData.setConditional(!conditions.isEmpty());
 
     List<String> dependsOn = new ArrayList<>(params.size() + 1);
     dependsOn.add(factoryType);

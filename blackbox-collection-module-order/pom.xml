@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>avaje-inject-parent</artifactId>
+    <groupId>io.avaje</groupId>
+    <version>12.7-RC2</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>blackbox-collection-module-order</artifactId>
+  <packaging>pom</packaging>
+
+  <description>
+    Reproduces silent loss of cross-module collection contributions. m1's factory injects
+    List&lt;Contrib&gt; with no provider visible at compile time, a soft dependency that emits
+    no requiresBeans entry, so module wiring has no edge between m1 and m2 (which provides a
+    Contrib bean) and they wire in classpath order. The tests module depends on m1 before m2,
+    m1 wires first, and builder.list(Contrib.class) misses m2's bean with no error or warning.
+    Reversing the dependency order, or @InjectModule(requires = Contrib.class) on m1, wires
+    correctly. A bean supplied via BeanScope.builder().bean(...) always appears, masking the
+    dropped module contribution.
+  </description>
+
+  <modules>
+    <module>api</module>
+    <module>m1</module>
+    <module>m2</module>
+    <module>tests</module>
+  </modules>
+</project>
