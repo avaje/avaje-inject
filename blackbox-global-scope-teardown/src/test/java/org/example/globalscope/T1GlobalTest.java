@@ -4,14 +4,20 @@ import io.avaje.inject.test.InjectTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import javax.management.ObjectName;
+import java.lang.management.ManagementFactory;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @InjectTest
 class T1GlobalTest {
-  @Inject RegistryBean bean;
+
+  @Inject ServerStatus serverStatus;
 
   @Test
-  void resourcePresent() {
-    assertNotNull(bean.lookup());
+  void mbeanIsRegistered() throws Exception {
+    Object status = ManagementFactory.getPlatformMBeanServer()
+      .getAttribute(new ObjectName(ServerStatus.OBJECT_NAME), "Status");
+    assertEquals("OK", status);
   }
 }

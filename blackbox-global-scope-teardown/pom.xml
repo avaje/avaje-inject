@@ -12,11 +12,15 @@
   <artifactId>blackbox-global-scope-teardown</artifactId>
 
   <description>
-    Reproduces global test scope corruption: a test class using mocks rebuilds the entire
-    application beside the live global scope; closing that rebuilt scope tears down JVM-global
-    state that later global-scope test classes still depend on. Requires alphabetical class
-    order in a single fork (configured below): T1 (global) passes, T2 (mock) passes,
-    T3 (global again) fails.
+    Reproduces global test scope corruption with real JVM-global state: ServerStatus is a
+    singleton that registers itself on the platform MBeanServer in PostConstruct and
+    unregisters in PreDestroy, the standard JMX pattern. T1 (plain InjectTest) passes.
+    T2 adds one Mockito mock of an unrelated interface and never references ServerStatus;
+    wiring its test scope rebuilds the entire application beside the live global scope,
+    constructs ServerStatus a second time, and fails with InstanceAlreadyExistsException.
+    Closing that failed scope runs the duplicate's PreDestroy, which unregisters (by
+    ObjectName) the MBean the live global scope owns, so T3 (identical to T1) then fails
+    with InstanceNotFoundException. T1 and T3 pass in isolation; T2 fails even alone.
   </description>
 
   <dependencies>
