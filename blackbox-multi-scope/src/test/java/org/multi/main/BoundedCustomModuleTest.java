@@ -15,8 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @InjectTest(modules = Mod1Module.class)
 class BoundedCustomModuleTest {
 
-  static int constructedBefore;
-
   @Inject BeanIn1 beanIn1;
 
   @Test

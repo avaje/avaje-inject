@@ -104,29 +104,32 @@ final class GlobalTestBeans implements Closeable {
     }
 
     Plugin.Scope allPlugin() {
-      initAllBeans();
-      return plugin;
+      allBeansLock.lock();
+      try {
+        initAllBeans();
+        return plugin;
+      } finally {
+        allBeansLock.unlock();
+      }
     }
 
     BeanScope allBeans() {
-      initAllBeans();
-      return allBeans;
+      allBeansLock.lock();
+      try {
+        initAllBeans();
+        return allBeans;
+      } finally {
+        allBeansLock.unlock();
+      }
     }
 
     private void initAllBeans() {
       if (allBeans == null) {
-        allBeansLock.lock();
-        try {
-          if (allBeans == null) {
-            log.log(DEBUG, "Wiring all beans for the test BeanScope");
-            allBeans = BeanScope.builder()
-              .parent(baseBeans, false)
-              .build();
-            plugin = PluginMgr.scope(allBeans);
-          }
-        } finally {
-          allBeansLock.unlock();
-        }
+        log.log(DEBUG, "Wiring all beans for the test BeanScope");
+        allBeans = BeanScope.builder()
+          .parent(baseBeans, false)
+          .build();
+        plugin = PluginMgr.scope(allBeans);
       }
     }
 
