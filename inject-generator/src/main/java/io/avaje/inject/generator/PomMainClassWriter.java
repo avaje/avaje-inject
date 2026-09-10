@@ -32,38 +32,106 @@ final class PomMainClassWriter {
 
     var pomContent = Files.readString(pomPath);
     String updatedContent;
-    if (pomContent.contains("maven-jar-plugin")) {
-      updatedContent = updateExistingJarPlugin(pomContent, qualifiedMainClass);
+    String pluginName;
+    if (pomContent.contains("maven-shade-plugin")) {
+      pluginName = "maven-shade-plugin";
+      updatedContent = updateExistingShadePlugin(pomContent, qualifiedMainClass);
+    } else if (pomContent.contains("maven-assembly-plugin")) {
+      pluginName = "maven-assembly-plugin";
+      updatedContent =
+          updateExistingArchivePlugin(pomContent, "maven-assembly-plugin", qualifiedMainClass);
+    } else if (pomContent.contains("maven-jar-plugin")) {
+      pluginName = "maven-jar-plugin";
+      updatedContent =
+          updateExistingArchivePlugin(pomContent, "maven-jar-plugin", qualifiedMainClass);
     } else {
+      pluginName = "maven-jar-plugin";
       updatedContent = insertNewJarPlugin(pomContent, qualifiedMainClass);
     }
 
     if (updatedContent != null && !updatedContent.equals(pomContent)) {
       Files.writeString(pomPath, updatedContent);
-      APContext.logNote("Updated maven-jar-plugin mainClass to %s in pom.xml", qualifiedMainClass);
+      APContext.logNote("Updated %s mainClass to %s in pom.xml", pluginName, qualifiedMainClass);
     }
   }
 
-  private static String updateExistingJarPlugin(String pomContent, String mainClass) {
-    int jarPluginIndex = pomContent.indexOf("maven-jar-plugin");
-    int closingPlugin = pomContent.indexOf("</plugin>", jarPluginIndex);
+  private static String updateExistingShadePlugin(String pomContent, String mainClass) {
+    int shadeIndex = pomContent.indexOf("maven-shade-plugin");
+    int closingPlugin = pomContent.indexOf("</plugin>", shadeIndex);
     if (closingPlugin == -1) {
       return null;
     }
 
-    if (pomContent.contains("<mainClass>")) {
-      return pomContent.replaceAll(
-          "<mainClass>.*?</mainClass>", "<mainClass>" + mainClass + "</mainClass>");
+    String pluginBody = pomContent.substring(shadeIndex, closingPlugin);
+
+    if (pluginBody.contains("<mainClass>")) {
+      String updatedBody =
+          pluginBody.replaceFirst(
+              "<mainClass>.*?</mainClass>", "<mainClass>" + mainClass + "</mainClass>");
+      return pomContent.substring(0, shadeIndex) + updatedBody + pomContent.substring(closingPlugin);
+    }
+
+    int transformersClose = pluginBody.indexOf("</transformers>");
+    if (transformersClose != -1) {
+      String transformerBlock =
+          "<transformer implementation=\"org.apache.maven.plugins.shade.resource.ManifestResourceTransformer\">\n"
+              + "                <mainClass>" + mainClass + "</mainClass>\n"
+              + "              </transformer>\n            ";
+      return new StringBuilder(pomContent)
+          .insert(shadeIndex + transformersClose, transformerBlock)
+          .toString();
+    }
+
+    int configClose = pluginBody.indexOf("</configuration>");
+    if (configClose != -1) {
+      String transformersBlock =
+          "<transformers>\n"
+              + "              <transformer implementation=\"org.apache.maven.plugins.shade.resource.ManifestResourceTransformer\">\n"
+              + "                <mainClass>" + mainClass + "</mainClass>\n"
+              + "              </transformer>\n"
+              + "            </transformers>\n          ";
+      return new StringBuilder(pomContent)
+          .insert(shadeIndex + configClose, transformersBlock)
+          .toString();
+    }
+
+    // no <configuration> in the shade plugin at all
+    String configBlock =
+        "  <configuration>\n"
+            + "          <transformers>\n"
+            + "            <transformer implementation=\"org.apache.maven.plugins.shade.resource.ManifestResourceTransformer\">\n"
+            + "              <mainClass>" + mainClass + "</mainClass>\n"
+            + "            </transformer>\n"
+            + "          </transformers>\n"
+            + "        </configuration>\n"
+            + "      ";
+    return new StringBuilder(pomContent).insert(closingPlugin, configBlock).toString();
+  }
+
+  private static String updateExistingArchivePlugin(
+      String pomContent, String artifactId, String mainClass) {
+    int pluginIndex = pomContent.indexOf(artifactId);
+    int closingPlugin = pomContent.indexOf("</plugin>", pluginIndex);
+    if (closingPlugin == -1) {
+      return null;
+    }
+
+    String pluginBody = pomContent.substring(pluginIndex, closingPlugin);
+
+    if (pluginBody.contains("<mainClass>")) {
+      String updatedBody =
+          pluginBody.replaceFirst(
+              "<mainClass>.*?</mainClass>", "<mainClass>" + mainClass + "</mainClass>");
+      return pomContent.substring(0, pluginIndex) + updatedBody + pomContent.substring(closingPlugin);
     }
 
     // insert mainClass at the deepest existing nesting point
-    String pluginBody = pomContent.substring(jarPluginIndex, closingPlugin);
     var sb = new StringBuilder(pomContent);
 
     int manifestClose = pluginBody.indexOf("</manifest>");
     if (manifestClose != -1) {
       String entry = "              <mainClass>" + mainClass + "</mainClass>\n              ";
-      return sb.insert(jarPluginIndex + manifestClose, entry).toString();
+      return sb.insert(pluginIndex + manifestClose, entry).toString();
     }
 
     int archiveClose = pluginBody.indexOf("</archive>");
@@ -73,7 +141,7 @@ final class PomMainClassWriter {
               + "              <mainClass>" + mainClass + "</mainClass>\n"
               + "            </manifest>\n"
               + "          ";
-      return sb.insert(jarPluginIndex + archiveClose, manifestBlock).toString();
+      return sb.insert(pluginIndex + archiveClose, manifestBlock).toString();
     }
 
     int configClose = pluginBody.indexOf("</configuration>");
@@ -85,7 +153,7 @@ final class PomMainClassWriter {
               + "            </manifest>\n"
               + "          </archive>\n"
               + "        ";
-      return sb.insert(jarPluginIndex + configClose, archiveBlock).toString();
+      return sb.insert(pluginIndex + configClose, archiveBlock).toString();
     }
 
     String configBlock =
