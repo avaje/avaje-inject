@@ -38,12 +38,10 @@ final class PomMainClassWriter {
       updatedContent = updateExistingShadePlugin(pomContent, qualifiedMainClass);
     } else if (pomContent.contains("maven-assembly-plugin")) {
       pluginName = "maven-assembly-plugin";
-      updatedContent =
-          updateExistingArchivePlugin(pomContent, "maven-assembly-plugin", qualifiedMainClass);
+      updatedContent = updateExistingArchivePlugin(pomContent, "maven-assembly-plugin", qualifiedMainClass);
     } else if (pomContent.contains("maven-jar-plugin")) {
       pluginName = "maven-jar-plugin";
-      updatedContent =
-          updateExistingArchivePlugin(pomContent, "maven-jar-plugin", qualifiedMainClass);
+      updatedContent = updateExistingArchivePlugin(pomContent, "maven-jar-plugin", qualifiedMainClass);
     } else {
       pluginName = "maven-jar-plugin";
       updatedContent = insertNewJarPlugin(pomContent, qualifiedMainClass);
@@ -108,8 +106,7 @@ final class PomMainClassWriter {
     return new StringBuilder(pomContent).insert(closingPlugin, configBlock).toString();
   }
 
-  private static String updateExistingArchivePlugin(
-      String pomContent, String artifactId, String mainClass) {
+  private static String updateExistingArchivePlugin(String pomContent, String artifactId, String mainClass) {
     int pluginIndex = pomContent.indexOf(artifactId);
     int closingPlugin = pomContent.indexOf("</plugin>", pluginIndex);
     if (closingPlugin == -1) {
@@ -117,7 +114,6 @@ final class PomMainClassWriter {
     }
 
     String pluginBody = pomContent.substring(pluginIndex, closingPlugin);
-
     if (pluginBody.contains("<mainClass>")) {
       String updatedBody =
           pluginBody.replaceFirst(
