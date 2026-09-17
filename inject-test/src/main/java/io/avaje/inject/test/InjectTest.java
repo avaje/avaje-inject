@@ -7,6 +7,8 @@ import java.lang.annotation.Target;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import io.avaje.inject.spi.AvajeModule;
+
 /**
  * An avaje-inject test supporting {@code @Inject} along with Mockito annotations -
  * {@code @Mock, @Spy, @Captor}.
@@ -23,4 +25,12 @@ public @interface InjectTest {
 
   /** Create a new test beanscope for each test method */
   boolean scopePerTest() default false;
+
+  /**
+   * Limit the wiring to only these modules, rather than every {@code AvajeModule} found on the test
+   * classpath.
+   *
+   * <p>This is the equivalent of {@code BeanScope.builder().modules(...)}
+   */
+  Class<? extends AvajeModule>[] modules() default {};
 }
