@@ -3,8 +3,15 @@
 - Release the Jakarta version
 
 ```shell
+#set the next version
+mvs
+
 mvn clean verify
 mvn clean deploy -Pcentral
+
+git commit -am 'Version 12.7'
+git tag 12.7
+git push --tags
 ```
 
 ## release gradle plugin
@@ -22,4 +29,7 @@ cd ..
 java Jakarta2Javax.java
 mvn clean verify
 mvn clean deploy -Pcentral
+
+#undo the javax mods
+git checkout .
 ```
