@@ -54,16 +54,7 @@ final class GlobalInitialise {
   }
 
   private static GlobalTestBeans.Beans createScopes(boolean shutdownHook) {
-    BeanScope testBaseScope = createTestBaseScope(shutdownHook);
-    BeanScope testAllScope = createTestAllScope(testBaseScope);
-    Plugin.Scope pluginAll = PluginMgr.scope(testAllScope);
-    return new GlobalTestBeans.Beans(pluginAll, testAllScope, testBaseScope);
-  }
-
-  private static BeanScope createTestAllScope(BeanScope testBaseScope) {
-      return BeanScope.builder()
-        .parent(testBaseScope, false)
-        .build();
+    return new GlobalTestBeans.Beans(createTestBaseScope(shutdownHook));
   }
 
   @Nullable
