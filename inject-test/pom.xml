@@ -13,7 +13,7 @@
 
   <properties>
     <jupiter.version>5.13.4</jupiter.version>
-    <mockito.version>5.23.0</mockito.version>
+    <mockito.version>5.24.0</mockito.version>
   </properties>
 
   <dependencies>
@@ -91,14 +91,14 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-http-api</artifactId>
-      <version>3.12</version>
+      <version>3.12.1</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-http-client</artifactId>
-      <version>3.12</version>
+      <version>3.12.1</version>
       <scope>test</scope>
     </dependency>
 
@@ -140,7 +140,7 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.6.3</version>
+      <version>1.6.4</version>
       <scope>test</scope>
     </dependency>
 
