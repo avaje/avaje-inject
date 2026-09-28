@@ -12,6 +12,7 @@
 @GeneratePrism(Generated.class)
 @GeneratePrism(Inject.class)
 @GeneratePrism(InjectModule.class)
+@GeneratePrism(InjectorTarget.class)
 @GeneratePrism(BeanTypes.class)
 @GeneratePrism(Lazy.class)
 @GeneratePrism(MainClass.class)
