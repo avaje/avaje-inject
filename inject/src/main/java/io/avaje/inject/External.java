@@ -1,10 +1,11 @@
 package io.avaje.inject;
 
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
-import static java.lang.annotation.RetentionPolicy.SOURCE;
+import static java.lang.annotation.RetentionPolicy.CLASS;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -16,9 +17,12 @@ import java.lang.annotation.Target;
  *
  * <p>When placed on a constructor or method this applies to all of its parameters.
  *
- * <p>Use {@code @External} for a mandatory dependency that this module can't see at compile.
+ * <p>Use {@code @External} for a mandatory dependency that this module can't see at compile-time.
+ *
+ * <p>This can also be used as a meta-annotation, where an annotation annotated with
+ * {@code @External} has the same effect as {@code @External}.
  */
 @Documented
-@Retention(SOURCE)
-@Target({FIELD, PARAMETER, CONSTRUCTOR, METHOD})
+@Retention(CLASS)
+@Target({FIELD, PARAMETER, CONSTRUCTOR, METHOD, ANNOTATION_TYPE})
 public @interface External {}

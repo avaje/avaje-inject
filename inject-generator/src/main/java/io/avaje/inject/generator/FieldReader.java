@@ -31,6 +31,9 @@ final class FieldReader {
     if (nullable || element.asType().toString().startsWith("java.util.Optional<")) {
       ProcessingContext.addOptionalType(fieldType, name);
     }
+    if (Util.isExternal(element)) {
+      ProcessingContext.addExternalType(element);
+    }
     if (type.fullWithoutAnnotations().startsWith("io.avaje.inject.events.Event")) {
       EventPublisherWriter.write(element);
     }
