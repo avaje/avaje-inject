@@ -188,14 +188,9 @@ public final class InjectProcessor extends AbstractProcessor {
       .flatMap(Set::stream)
       .forEach(e -> {
         if (e instanceof ExecutableElement) {
-          ExecutableElement method = (ExecutableElement) e;
-          method.getParameters().forEach(p -> {
-            var type = UType.parse(p.asType());
-            addExternalType(p, type);
-          });
+          ((ExecutableElement) e).getParameters().forEach(ProcessingContext::addExternalType);
         } else {
-          var type = UType.parse(e.asType());
-          addExternalType(e, type);
+          ProcessingContext.addExternalType(e);
         }
       });
 
@@ -224,11 +219,6 @@ public final class InjectProcessor extends AbstractProcessor {
     return false;
   }
 
-  private void addExternalType(Element e, UType type) {
-    type = "java.util.List".equals(type.mainType()) ? type.param0() : type;
-    ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), Util.named(e));
-    ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), null);
-  }
 
   private void validateQualifier(ExecutableElement method) {
     var type = APContext.asTypeElement(method.getReturnType());
