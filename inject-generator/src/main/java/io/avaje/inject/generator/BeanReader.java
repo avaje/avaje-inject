@@ -123,12 +123,6 @@ final class BeanReader {
     }
 
     conditions.readAll(actualType);
-    if (!conditions.isEmpty()) {
-      // the parameters of a conditional factory's bean methods are treated as @External
-      for (MethodReader factoryMethod : factoryMethods) {
-        factoryMethod.element().getParameters().forEach(ProcessingContext::addExternalType);
-      }
-    }
   }
 
   /**

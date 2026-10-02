@@ -192,13 +192,6 @@ final class ProcessingContext {
     return CTX.get().providedTypes.contains(type) || CTX.get().optionalTypes.contains(type);
   }
 
-  static void addExternalType(Element e) {
-    var type = UType.parse(e.asType());
-    type = "java.util.List".equals(type.mainType()) ? type.param0() : type;
-    addOptionalType(type.fullWithoutAnnotations(), Util.named(e));
-    addOptionalType(type.fullWithoutAnnotations(), null);
-  }
-
   static void addOptionalType(String paramType, String name) {
     if (!CTX.get().providedTypes.contains(paramType)) {
       CTX.get().optionalTypes.add(Util.addQualifierSuffixTrim(name, ProcessorUtils.trimAnnotations(paramType)));
