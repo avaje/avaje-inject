@@ -56,6 +56,7 @@ import io.avaje.prism.GenerateUtils;
   FactoryPrism.PRISM_TYPE,
   ImportPrism.PRISM_TYPE,
   InjectModulePrism.PRISM_TYPE,
+  InjectorTargetPrism.PRISM_TYPE,
   MainClassPrism.PRISM_TYPE,
   PluginProvidesPrism.PRISM_TYPE,
   PrototypePrism.PRISM_TYPE,
@@ -183,6 +184,7 @@ public final class InjectProcessor extends AbstractProcessor {
 
     maybeBeanElements(roundEnv, ControllerPrism.PRISM_TYPE).ifPresent(this::readBeans);
     maybeBeanElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
+    maybeBeanElements(roundEnv, InjectorTargetPrism.PRISM_TYPE).ifPresent(this::readInjectors);
 
     maybeElements(roundEnv, ExternalPrism.PRISM_TYPE).stream()
       .flatMap(Set::stream)
@@ -324,6 +326,17 @@ public final class InjectProcessor extends AbstractProcessor {
       var reader = new AssistBeanReader(t);
       try {
         new SimpleAssistWriter(reader).write();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    });
+  }
+
+  private void readInjectors(Set<? extends Element> beans) {
+    ElementFilter.typesIn(beans).forEach(t -> {
+      var reader = new InjectorBeanReader(t);
+      try {
+        new SimpleInjectorWriter(reader).write();
       } catch (IOException e) {
         e.printStackTrace();
       }
