@@ -60,6 +60,7 @@ final class MethodReader {
   private final boolean optionalType;
   private final boolean multiRegister;
   private final BeanConditions conditions = new BeanConditions();
+  private final BeanConditions factoryConditions = new BeanConditions();
   private MethodParam observeParameter;
   private MethodReader initMethodReader;
 
@@ -80,6 +81,7 @@ final class MethodReader {
       var lazyPrism = Util.isLazy(element);
       lazy = lazyPrism != null;
       conditions.readAll(element);
+      factoryConditions.readAll(beanType);
 
       String lazyKind = Optional.ofNullable(lazyPrism).map(LazyPrism::value).orElse("");
       boolean useProxy = !"PROVIDER".equals(lazyKind);
@@ -243,6 +245,10 @@ final class MethodReader {
 
     for (final MethodParam param : params) {
       var dep = Util.addQualifierSuffix(param.named, Util.trimWildcard(param.paramType));
+      if (conditions.requireTypes.contains(dep) || factoryConditions.requireTypes.contains(dep)) {
+        // the @RequiresBean check runs before this bean is built, and the con: dependency keeps the ordering
+        continue;
+      }
       dependsOn.add(param.utilType.isCollection() ? Constants.SOFT_DEPENDENCY + dep : dep);
     }
     metaData.setDependsOn(dependsOn);

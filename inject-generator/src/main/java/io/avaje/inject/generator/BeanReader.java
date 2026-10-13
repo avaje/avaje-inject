@@ -228,7 +228,9 @@ final class BeanReader {
       for (MethodReader.MethodParam param : constructor.params()) {
         Dependency dependsOn = param.dependsOn();
         // BeanScope is always injectable with no impact on injection ordering
-        if (!Constants.BEANSCOPE.equals(dependsOn.dependsOn())) {
+        // the @RequiresBean check runs before this bean is built, and the con: dependency keeps the ordering
+        if (!Constants.BEANSCOPE.equals(dependsOn.dependsOn())
+            && !conditions.requireTypes.contains(dependsOn.name())) {
           list.add(dependsOn);
         }
       }
