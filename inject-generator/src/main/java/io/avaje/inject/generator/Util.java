@@ -304,7 +304,15 @@ final class Util {
     }
     return null;
   }
-
+  
+  /**
+   * Return true if the element is annotated with {@code @External} directly or via a
+   * meta-annotation.
+   */
+  static boolean isExternal(Element element) {
+    return ExternalPrism.isPresent(element)
+      || !ExternalPrism.getAllOnMetaAnnotations(element).isEmpty();
+  }
   /**
    * Return true if the element has a Nullable annotation.
    */
