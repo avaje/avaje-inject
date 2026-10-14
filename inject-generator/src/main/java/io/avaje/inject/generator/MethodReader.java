@@ -715,6 +715,9 @@ final class MethodReader {
       if (nullable || param.asType().toString().startsWith("java.util.Optional<")) {
         ProcessingContext.addOptionalType(paramType, named);
       }
+      if (Util.isExternal(param) || Util.isExternal(param.getEnclosingElement())) {
+        ProcessingContext.addExternalType(param);
+      }
 
       if (fullUType.fullWithoutAnnotations().startsWith("io.avaje.inject.events.Event")) {
         EventPublisherWriter.write(param);

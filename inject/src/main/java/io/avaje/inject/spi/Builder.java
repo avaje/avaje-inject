@@ -108,6 +108,14 @@ public interface Builder {
   <T> void withBean(Class<T> type, T bean);
 
   /**
+   * Register the externally provided bean using a (typically generic) type.
+   *
+   * @param type The type of the provided bean.
+   * @param bean The bean instance
+   */
+  <T> void withBean(Type type, T bean);
+
+  /**
    * Add lifecycle PostConstruct method.
    */
   void addPostConstruct(Runnable runnable);
