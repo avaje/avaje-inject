@@ -287,6 +287,7 @@ final class ProcessingContext {
     CTX.get()
         .externalSpi
         .removeIf(s -> APContext.moduleInfoReader().isPresent() && !isOnModulePath(s));
+    CTX.get().externalSpi.removeAll(CTX.get().uniqueModuleNames);
     if (CTX.get().spiServices.isEmpty() && CTX.get().externalSpi.isEmpty()) {
       // no services to register
       return;
