@@ -53,6 +53,7 @@ final class ProcessingContext {
     private final Set<String> optionalTypes = new LinkedHashSet<>();
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
     private final List<ModuleData> modules = new ArrayList<>();
+    private final List<ModuleData> externalModules = new ArrayList<>();
     private final List<TypeElement> delayQueue = new ArrayList<>();
     private final Set<String> spiServices = new TreeSet<>();
     private final Set<String> externalSpi = new TreeSet<>();
@@ -261,6 +262,15 @@ final class ProcessingContext {
 
   static void addModule(ModuleData module) {
     CTX.get().modules.add(module);
+  }
+
+  static void addExternalModule(ModuleData module) {
+    CTX.get().externalModules.add(module);
+    CTX.get().modules.add(module);
+  }
+
+  static List<ModuleData> externalModules() {
+    return CTX.get().externalModules;
   }
 
   static List<ModuleData> modules() {
