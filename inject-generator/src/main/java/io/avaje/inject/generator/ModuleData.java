@@ -3,6 +3,7 @@ package io.avaje.inject.generator;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -45,9 +46,46 @@ final class ModuleData {
     if (index >= moduleCsv.length) {
       return List.of();
     }
-    return Arrays.stream(moduleCsv[index].split(","))
+    return splitTopLevel(moduleCsv[index]).stream()
       .filter(not(String::isBlank))
       .collect(toList());
+  }
+
+  /**
+   * Split on commas that are not nested inside generic type arguments or qualifier annotation
+   * values, e.g. {@code java.util.Map<java.lang.String, java.lang.Long>}.
+   */
+  static List<String> splitTopLevel(String value) {
+    final List<String> result = new ArrayList<>();
+    int depth = 0;
+    int start = 0;
+    for (int i = 0; i < value.length(); i++) {
+      final char ch = value.charAt(i);
+      switch (ch) {
+        case '<':
+        case '(':
+        case '{':
+        case '[':
+          depth++;
+          break;
+        case '>':
+        case ')':
+        case '}':
+        case ']':
+          depth = Math.max(0, depth - 1);
+          break;
+        case ',':
+          if (depth == 0) {
+            result.add(value.substring(start, i));
+            start = i + 1;
+          }
+          break;
+        default:
+          break;
+      }
+    }
+    result.add(value.substring(start));
+    return result;
   }
 
   List<String> provides() {

@@ -53,6 +53,7 @@ final class ProcessingContext {
     private final Set<String> optionalTypes = new LinkedHashSet<>();
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
     private final List<ModuleData> modules = new ArrayList<>();
+    private final List<ModuleData> externalModules = new ArrayList<>();
     private final List<TypeElement> delayQueue = new ArrayList<>();
     private final Set<String> spiServices = new TreeSet<>();
     private final Set<String> externalSpi = new TreeSet<>();
@@ -263,6 +264,15 @@ final class ProcessingContext {
     CTX.get().modules.add(module);
   }
 
+  static void addExternalModule(ModuleData module) {
+    CTX.get().externalModules.add(module);
+    CTX.get().modules.add(module);
+  }
+
+  static List<ModuleData> externalModules() {
+    return CTX.get().externalModules;
+  }
+
   static List<ModuleData> modules() {
     return CTX.get().modules;
   }
@@ -297,6 +307,7 @@ final class ProcessingContext {
     CTX.get()
         .externalSpi
         .removeIf(s -> APContext.moduleInfoReader().isPresent() && !isOnModulePath(s));
+    CTX.get().externalSpi.removeAll(CTX.get().uniqueModuleNames);
     if (CTX.get().spiServices.isEmpty() && CTX.get().externalSpi.isEmpty()) {
       // no services to register
       return;

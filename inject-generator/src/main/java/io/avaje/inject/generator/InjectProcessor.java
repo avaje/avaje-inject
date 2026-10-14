@@ -7,6 +7,7 @@ import static io.avaje.inject.generator.ProcessingContext.delayedElements;
 import static io.avaje.inject.generator.ProcessingContext.loadMetaInfCustom;
 import static io.avaje.inject.generator.ProcessingContext.loadMetaInfServices;
 import static io.avaje.inject.generator.ProcessingContext.processingOver;
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -135,6 +136,8 @@ public final class InjectProcessor extends AbstractProcessor {
       .filter(s -> s.contains("|") && !s.startsWith("External Plugin Type"))
       .distinct()
       .map(l -> l.split("\\|")[1])
+      .flatMap(provides -> ModuleData.splitTopLevel(provides).stream())
+      .filter(not(String::isBlank))
       .forEach(pluginFileProvided::add);
   }
 
