@@ -625,7 +625,7 @@ final class ScopeInfo {
     return importTypes;
   }
 
-  private static String genericVarName(String genericType) {
+  static String genericVarName(String genericType) {
     final var sb = new StringBuilder();
     for (String part : genericType.split("[<>,\\s?&\\[\\]]+")) {
       if (!part.isEmpty() && !"extends".equals(part) && !"super".equals(part)) {
