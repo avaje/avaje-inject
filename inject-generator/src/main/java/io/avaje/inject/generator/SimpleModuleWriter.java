@@ -139,6 +139,7 @@ final class SimpleModuleWriter {
     var directScopes =
       scopeInfo.requires().stream()
         .map(APContext::typeElement)
+        .filter(Objects::nonNull)
         .filter(ScopePrism::isPresent)
         .filter(e -> e.getKind() == ElementKind.ANNOTATION_TYPE)
         .map(TypeElement::getQualifiedName)
@@ -377,7 +378,11 @@ final class SimpleModuleWriter {
     writer.append("    // register external dependencies").eol();
     final Map<String, String> dependencies = scopeInfo.constructorDependencies();
     for (Map.Entry<String, String> entry : dependencies.entrySet()) {
-      writer.append("    builder.withBean(%s.class, %s);", entry.getKey(), entry.getValue()).eol();
+      if (entry.getKey().contains("<")) {
+        writer.append("    builder.withBean(new GenericType<%s>(){}.type(), %s);", entry.getKey(), entry.getValue()).eol();
+      } else {
+        writer.append("    builder.withBean(%s.class, %s);", entry.getKey(), entry.getValue()).eol();
+      }
     }
   }
 

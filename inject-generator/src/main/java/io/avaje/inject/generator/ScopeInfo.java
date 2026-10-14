@@ -203,6 +203,7 @@ final class ScopeInfo {
     final List<ScopeInfo> depScopes = new ArrayList<>();
     requires().stream()
       .map(APContext::typeElement)
+      .filter(Objects::nonNull)
       .filter(e -> e.getKind() == ElementKind.ANNOTATION_TYPE)
       .filter(ScopePrism::isPresent)
       .map(TypeElement::getQualifiedName)
@@ -611,7 +612,10 @@ final class ScopeInfo {
       return importTypes;
     }
     for (String require : requires) {
-      if (!ScopePrism.isPresent(APContext.typeElement(require))) {
+      if (require.contains("<")) {
+        // generic type, use fully qualified type rather than imports
+        constructorDependencies.put(require, genericVarName(require));
+      } else if (!ScopePrism.isPresent(APContext.typeElement(require))) {
         importTypes.add(require);
         final String type = Util.shortName(require);
         final String var = Util.initLower(type);
@@ -619,6 +623,17 @@ final class ScopeInfo {
       }
     }
     return importTypes;
+  }
+
+  private static String genericVarName(String genericType) {
+    final var sb = new StringBuilder();
+    for (String part : genericType.split("[<>,\\s?&\\[\\]]+")) {
+      if (!part.isEmpty() && !"extends".equals(part) && !"super".equals(part)) {
+        final String simple = part.substring(part.lastIndexOf('.') + 1);
+        sb.append(Character.toUpperCase(simple.charAt(0))).append(simple.substring(1));
+      }
+    }
+    return Util.initLower(sb.toString());
   }
 
   boolean addModuleConstructor() {
