@@ -3,14 +3,12 @@ package io.avaje.inject.test;
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.BeanScopeBuilder;
 import io.avaje.inject.spi.AvajeModule;
+import org.junit.platform.commons.support.AnnotationSupport;
 
 /**
  * Wraps the underlying metadata (fields with annotations @Mock, @Spy, @Inject, @Captor).
  */
 final class MetaInfo {
-
-  @SuppressWarnings("unchecked")
-  private static final Class<? extends AvajeModule>[] NO_MODULES = new Class[0];
 
   private final MetaReader reader;
   private final Class<? extends AvajeModule>[] modules;
@@ -23,16 +21,17 @@ final class MetaInfo {
     // the instance so that the selected modules also bound the class level scope of a test
     // that only has static injection
     final InjectTest injectTest = injectTestAnnotation(testClass);
-    this.modules = injectTest == null ? NO_MODULES : injectTest.modules();
+    this.modules = injectTest == null ? SelectedModules.NONE : injectTest.modules();
     this.profiles = injectTest == null ? new String[0] : injectTest.profiles();
     this.scopePerTest = injectTest != null && injectTest.scopePerTest();
   }
 
   private static InjectTest injectTestAnnotation(Class<?> testClass) {
     for (Class<?> c = testClass; c != null; c = c.getEnclosingClass()) {
-      final InjectTest injectTest = c.getAnnotation(InjectTest.class);
-      if (injectTest != null) {
-        return injectTest;
+      // find meta-annotations too, so a composed annotation can share the modules across tests
+      final var injectTest = AnnotationSupport.findAnnotation(c, InjectTest.class);
+      if (injectTest.isPresent()) {
+        return injectTest.get();
       }
     }
     return null;
@@ -79,8 +78,9 @@ final class MetaInfo {
           builder.profiles(profiles);
         }
       }
-      if (modules.length > 0) {
-        builder.modules(SelectedModules.instances(modules));
+      final var selected = modules.length > 0 || parent == null ? modules : parent.defaultModules();
+      if (selected.length > 0) {
+        builder.modules(SelectedModules.instances(selected));
       }
       // register mocks and spies local to this test
       reader.build(builder, testInstance);

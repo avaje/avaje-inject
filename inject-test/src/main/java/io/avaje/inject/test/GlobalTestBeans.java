@@ -2,6 +2,7 @@ package io.avaje.inject.test;
 
 import io.avaje.applog.AppLog;
 import io.avaje.inject.BeanScope;
+import io.avaje.inject.spi.AvajeModule;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.io.Closeable;
@@ -72,6 +73,8 @@ final class GlobalTestBeans implements Closeable {
      * <p>
      * Wired lazily on first use as a test using {@code @InjectTest(modules = ...)}
      * only wires the modules it selects and never uses this.
+     * <p>
+     * When {@code @TestModules} is specified, only those modules are wired.
      */
     private BeanScope allBeans;
 
@@ -81,14 +84,22 @@ final class GlobalTestBeans implements Closeable {
      */
     private final BeanScope baseBeans;
 
-    Beans(BeanScope baseBeans) {
+    /**
+     * The default modules to wire as specified via {@code @TestModules}. When empty,
+     * all the modules on the classpath are wired.
+     */
+    private final Class<? extends AvajeModule>[] defaultModules;
+
+    Beans(BeanScope baseBeans, Class<? extends AvajeModule>[] defaultModules) {
       this.baseBeans = baseBeans;
+      this.defaultModules = defaultModules;
     }
 
-    Beans(Plugin.Scope plugin, BeanScope allBeans, BeanScope baseBeans) {
+    Beans(Plugin.Scope plugin, BeanScope allBeans, BeanScope baseBeans, Class<? extends AvajeModule>[] defaultModules) {
       this.plugin = plugin;
       this.allBeans = allBeans;
       this.baseBeans = baseBeans;
+      this.defaultModules = defaultModules;
     }
 
     void close() {
@@ -126,9 +137,11 @@ final class GlobalTestBeans implements Closeable {
     private void initAllBeans() {
       if (allBeans == null) {
         log.log(DEBUG, "Wiring all beans for the test BeanScope");
-        allBeans = BeanScope.builder()
-          .parent(baseBeans, false)
-          .build();
+        var builder = BeanScope.builder().parent(baseBeans, false);
+        if (defaultModules.length > 0) {
+          builder.modules(SelectedModules.instances(defaultModules));
+        }
+        allBeans = builder.build();
         plugin = PluginMgr.scope(allBeans);
       }
     }
@@ -137,8 +150,12 @@ final class GlobalTestBeans implements Closeable {
       return baseBeans;
     }
 
+    Class<? extends AvajeModule>[] defaultModules() {
+      return defaultModules;
+    }
+
     Beans withBeans(TestBeans otherBeans) {
-      return new Beans(otherBeans.plugin(), otherBeans.beanScope(), baseBeans);
+      return new Beans(otherBeans.plugin(), otherBeans.beanScope(), baseBeans, defaultModules);
     }
 
     @Override

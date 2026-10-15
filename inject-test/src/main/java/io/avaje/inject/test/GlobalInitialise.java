@@ -24,6 +24,7 @@ final class GlobalInitialise {
   private static GlobalTestBeans.Beans SCOPE;
 
   private final boolean shutdownHook;
+  private final Set<Class<? extends AvajeModule>> defaultModules = new LinkedHashSet<>();
 
   /**
    * Create and return the test BeanScope. A BeanScope is created each
@@ -54,7 +55,14 @@ final class GlobalInitialise {
   }
 
   private static GlobalTestBeans.Beans createScopes(boolean shutdownHook) {
-    return new GlobalTestBeans.Beans(createTestBaseScope(shutdownHook));
+    var initialise = new GlobalInitialise(shutdownHook);
+    BeanScope testBaseScope = initialise.build();
+    return new GlobalTestBeans.Beans(testBaseScope, initialise.defaultModules());
+  }
+
+  @SuppressWarnings("unchecked")
+  private Class<? extends AvajeModule>[] defaultModules() {
+    return defaultModules.toArray(new Class[0]);
   }
 
   @Nullable
@@ -71,6 +79,9 @@ final class GlobalInitialise {
   }
 
   private BeanScope buildFromModules(List<TestModule> testModules) {
+    for (TestModule testModule : testModules) {
+      defaultModules.addAll(List.of(testModule.testModules()));
+    }
     return BeanScope.builder()
       .modules(testModules.toArray(AvajeModule[]::new))
       .shutdownHook(shutdownHook)

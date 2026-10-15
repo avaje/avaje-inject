@@ -12,6 +12,9 @@ final class SelectedModules {
 
   private static final AvajeModule[] EMPTY = {};
 
+  @SuppressWarnings("unchecked")
+  static final Class<? extends AvajeModule>[] NONE = new Class[0];
+
   private SelectedModules() {}
 
   /** Return the module instances for the given module classes. */
