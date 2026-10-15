@@ -5,7 +5,7 @@
   <parent>
     <artifactId>avaje-inject-parent</artifactId>
     <groupId>io.avaje</groupId>
-    <version>12.7-RC2</version>
+    <version>12.7</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -29,7 +29,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-jsonb</artifactId>
-      <version>3.15</version>
+      <version>3.16</version>
     </dependency>
 
     <dependency>
@@ -82,7 +82,7 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.6.3</version>
+      <version>1.6.5</version>
       <scope>test</scope>
     </dependency>
 

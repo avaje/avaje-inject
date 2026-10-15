@@ -53,6 +53,7 @@ final class ProcessingContext {
     private final Set<String> optionalTypes = new LinkedHashSet<>();
     private final Map<String, AspectImportPrism> aspectImportPrisms = new HashMap<>();
     private final List<ModuleData> modules = new ArrayList<>();
+    private final List<ModuleData> externalModules = new ArrayList<>();
     private final List<TypeElement> delayQueue = new ArrayList<>();
     private final Set<String> spiServices = new TreeSet<>();
     private final Set<String> externalSpi = new TreeSet<>();
@@ -193,6 +194,16 @@ final class ProcessingContext {
     return CTX.get().providedTypes.contains(type) || CTX.get().optionalTypes.contains(type);
   }
 
+  /**
+   * Register the type of the element as externally provided (as per {@code @External}).
+   */
+  static void addExternalType(Element e) {
+    var type = UType.parse(e.asType());
+    type = "java.util.List".equals(type.mainType()) ? type.param0() : type;
+    addOptionalType(type.fullWithoutAnnotations(), Util.named(e));
+    addOptionalType(type.fullWithoutAnnotations(), null);
+  }
+
   static void addOptionalType(String paramType, String name) {
     if (!CTX.get().providedTypes.contains(paramType)) {
       CTX.get().optionalTypes.add(Util.addQualifierSuffixTrim(name, ProcessorUtils.trimAnnotations(paramType)));
@@ -262,6 +273,15 @@ final class ProcessingContext {
     CTX.get().modules.add(module);
   }
 
+  static void addExternalModule(ModuleData module) {
+    CTX.get().externalModules.add(module);
+    CTX.get().modules.add(module);
+  }
+
+  static List<ModuleData> externalModules() {
+    return CTX.get().externalModules;
+  }
+
   static List<ModuleData> modules() {
     return CTX.get().modules;
   }
@@ -296,6 +316,7 @@ final class ProcessingContext {
     CTX.get()
         .externalSpi
         .removeIf(s -> APContext.moduleInfoReader().isPresent() && !isOnModulePath(s));
+    CTX.get().externalSpi.removeAll(CTX.get().uniqueModuleNames);
     if (CTX.get().spiServices.isEmpty() && CTX.get().externalSpi.isEmpty()) {
       // no services to register
       return;

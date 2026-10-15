@@ -177,7 +177,9 @@ final class SimpleBeanWriter {
     beanReader.buildBeanAbsent(writer);
     if (beanReader.registerProvider()) {
       final String registerProvider;
-      if (beanReader.proxyLazy()) {
+      if (beanReader.prototype()) { // prototype trumps lazy
+        registerProvider = "asPrototype().registerProvider";
+      } else if (beanReader.proxyLazy()) {
         registerProvider = "registerLazy";
       } else if (beanReader.lazy()) {
         registerProvider = "registerProvider";

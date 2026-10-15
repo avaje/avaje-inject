@@ -109,7 +109,17 @@ class DContextEntryBean {
     return priority == BeanEntry.SUPPLIED && (qualifierName == null || qualifierName.equals(name));
   }
 
+  /**
+   * Return the bean if this entry is a non-secondary match for the given qualifier name,
+   * used when checking if a bean is already present on a parent scope (see
+   * {@code Builder#isBeanAbsent}). Prototype entries are excluded as a match here as
+   * each request for a prototype bean creates a new instance, so a prototype entry on a
+   * parent scope should never be treated as already satisfying a bean in a child scope.
+   */
   final Object nonDefaultMatch(String name) {
+    if (this instanceof ProtoProvider) {
+      return null;
+    }
     return isNameMatch(name) && priority != BeanEntry.SECONDARY ? bean() : null;
   }
 

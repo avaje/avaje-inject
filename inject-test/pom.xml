@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.avaje</groupId>
     <artifactId>avaje-inject-parent</artifactId>
-    <version>12.7-RC2</version>
+    <version>12.7</version>
   </parent>
 
   <artifactId>avaje-inject-test</artifactId>
@@ -13,7 +13,7 @@
 
   <properties>
     <jupiter.version>5.13.4</jupiter.version>
-    <mockito.version>5.23.0</mockito.version>
+    <mockito.version>5.24.0</mockito.version>
   </properties>
 
   <dependencies>
@@ -59,12 +59,12 @@
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy</artifactId>
-      <version>1.18.13</version>
+      <version>1.18.14</version>
     </dependency>
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy-agent</artifactId>
-      <version>1.18.13</version>
+      <version>1.18.14</version>
     </dependency>
 
     <dependency>
@@ -91,14 +91,14 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-http-api</artifactId>
-      <version>3.11</version>
+      <version>3.12.1</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-http-client</artifactId>
-      <version>3.11</version>
+      <version>3.12.1</version>
       <scope>test</scope>
     </dependency>
 
@@ -112,7 +112,7 @@
     <dependency>
       <groupId>io.avaje</groupId>
       <artifactId>avaje-jsonb</artifactId>
-      <version>3.15</version>
+      <version>3.16</version>
       <scope>test</scope>
     </dependency>
 
@@ -140,7 +140,7 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.6.3</version>
+      <version>1.6.5</version>
       <scope>test</scope>
     </dependency>
 

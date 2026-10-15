@@ -7,6 +7,7 @@ import static io.avaje.inject.generator.ProcessingContext.delayedElements;
 import static io.avaje.inject.generator.ProcessingContext.loadMetaInfCustom;
 import static io.avaje.inject.generator.ProcessingContext.loadMetaInfServices;
 import static io.avaje.inject.generator.ProcessingContext.processingOver;
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -136,6 +137,8 @@ public final class InjectProcessor extends AbstractProcessor {
       .filter(s -> s.contains("|") && !s.startsWith("External Plugin Type"))
       .distinct()
       .map(l -> l.split("\\|")[1])
+      .flatMap(provides -> ModuleData.splitTopLevel(provides).stream())
+      .filter(not(String::isBlank))
       .forEach(pluginFileProvided::add);
   }
 
@@ -188,21 +191,6 @@ public final class InjectProcessor extends AbstractProcessor {
     maybeBeanElements(roundEnv, ControllerPrism.PRISM_TYPE).ifPresent(this::readBeans);
     maybeBeanElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
 
-    maybeElements(roundEnv, ExternalPrism.PRISM_TYPE).stream()
-      .flatMap(Set::stream)
-      .forEach(e -> {
-        if (e instanceof ExecutableElement) {
-          ExecutableElement method = (ExecutableElement) e;
-          method.getParameters().forEach(p -> {
-            var type = UType.parse(p.asType());
-            addExternalType(p, type);
-          });
-        } else {
-          var type = UType.parse(e.asType());
-          addExternalType(e, type);
-        }
-      });
-
     maybeElements(roundEnv, ServiceProviderPrism.PRISM_TYPE).ifPresent(this::registerSPI);
     maybeElements(roundEnv, PluginProvidesPrism.PRISM_TYPE).ifPresent(this::registerSPI);
     allScopes.readBeans(roundEnv);
@@ -226,12 +214,6 @@ public final class InjectProcessor extends AbstractProcessor {
       }
     }
     return false;
-  }
-
-  private void addExternalType(Element e, UType type) {
-    type = "java.util.List".equals(type.mainType()) ? type.param0() : type;
-    ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), Util.named(e));
-    ProcessingContext.addOptionalType(type.fullWithoutAnnotations(), null);
   }
 
   private void validateQualifier(ExecutableElement method) {
