@@ -263,6 +263,9 @@ final class ScopeInfo {
       return;
     }
     final List<MetaData> meta = metaData.values().stream().sorted().collect(Collectors.toList());
+    if (!emptyModule && overlapsExternalModule(meta)) {
+      return;
+    }
     if (ProcessingContext.interweave() && type() == Type.DEFAULT) {
       ExternalProvider.externalModuleBeans().forEach((moduleClass, beans) -> {
         ExternalProvider.validateForInterweave(moduleClass);
@@ -297,6 +300,44 @@ final class ScopeInfo {
     } catch (IOException e) {
       logError("Failed to write factory %s", e.getMessage());
     }
+  }
+
+  private boolean overlapsExternalModule(List<MetaData> meta) {
+    final var externalBeans = new HashMap<String, String>();
+    ExternalProvider.externalModuleBeans()
+        .forEach(
+            (moduleClass, beans) -> {
+              if (!moduleClass.equals(moduleFullName)) {
+                beans.forEach(bean -> externalBeans.putIfAbsent(beanIdentity(bean), moduleClass));
+              }
+            });
+    if (externalBeans.isEmpty()) {
+      return false;
+    }
+    final var overlaps = new LinkedHashMap<String, Set<String>>();
+    for (var bean : meta) {
+      if (bean.importedComponent()) {
+        continue;
+      }
+      final var otherModule = externalBeans.get(beanIdentity(bean));
+      if (otherModule != null) {
+        overlaps.computeIfAbsent(otherModule, k -> new LinkedHashSet<>()).add(bean.toString());
+      }
+    }
+    overlaps.forEach(
+        (otherModule, beans) ->
+            logError(
+                "Module %s would provide beans %s that are already provided by module %s on the classpath. "
+                    + "This can occur when sources from multiple modules are compiled together in a single "
+                    + "compilation (e.g. an IDE build), which merges them into one module at their common parent "
+                    + "package and registers the beans twice at runtime. Compile each module separately, or "
+                    + "perform a clean build if %s is a stale class",
+                moduleFullName, beans, otherModule, otherModule));
+    return !overlaps.isEmpty();
+  }
+
+  private static String beanIdentity(MetaData bean) {
+    return bean.type() + '|' + bean.name() + '|' + Objects.toString(bean.method(), "");
   }
 
   /**
