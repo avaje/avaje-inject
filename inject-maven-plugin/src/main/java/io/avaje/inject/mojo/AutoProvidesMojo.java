@@ -18,9 +18,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
@@ -39,9 +41,9 @@ import io.avaje.inject.spi.InjectPlugin;
 import io.avaje.inject.spi.PluginProvides;
 
 /**
- * Plugin that generates <code>target/avaje-module-dependencies.csv</code> and <code>
- * target/avaje-plugins.csv</code> based on the avaje-inject modules and plugins in the
- * classpath.
+ * Plugin that generates <code>target/avaje-module-dependencies.csv</code>, <code>
+ * target/avaje-plugins.csv</code> and <code>target/avaje-bean-annotations.csv</code> based on the
+ * avaje-inject modules, plugins and custom bean annotations in the classpath.
  *
  * <p>This allows the avaje-inject-generator annotation processor to be aware of all the components
  * and plugins provided by other modules in the classpath at compile time.
@@ -54,6 +56,7 @@ import io.avaje.inject.spi.PluginProvides;
 public class AutoProvidesMojo extends AbstractMojo {
 
   private static final String SERVICES_FILE = "META-INF/services/" + InjectExtension.class.getName();
+  private static final String BEAN_ANNOTATIONS_FILE = "META-INF/avaje/inject-bean-annotations";
 
   @Parameter(defaultValue = "${project}", readonly = true, required = true)
   private MavenProject project;
@@ -69,11 +72,13 @@ public class AutoProvidesMojo extends AbstractMojo {
 
     try (var newClassLoader = createClassLoader(listUrl);
         var pluginWriter = createFileWriter("avaje-plugins.csv");
-        var moduleCSV = createFileWriter("avaje-module-dependencies.csv")) {
+        var moduleCSV = createFileWriter("avaje-module-dependencies.csv");
+        var beanAnnotationWriter = createFileWriter("avaje-bean-annotations.csv")) {
 
       final var extensions = loadExtensions(newClassLoader);
       writeProvidedPlugins(extensions, pluginWriter);
       writeModuleCSV(extensions, moduleCSV);
+      writeBeanAnnotations(newClassLoader, beanAnnotationWriter);
 
     } catch (final IOException e) {
       throw new MojoExecutionException("Failed to write spi classes", e);
@@ -124,6 +129,18 @@ public class AutoProvidesMojo extends AbstractMojo {
       }
     }
     return declared;
+  }
+
+  private void writeBeanAnnotations(ClassLoader classLoader, FileWriter writer) throws IOException {
+    final Set<String> annotations = new LinkedHashSet<>();
+    for (final URL resource : Collections.list(classLoader.getResources(BEAN_ANNOTATIONS_FILE))) {
+      annotations.addAll(readServiceEntries(resource));
+    }
+    for (final String annotation : annotations) {
+      getLog().info("Detected Custom Bean Annotation: " + annotation);
+      writer.write(annotation);
+      writer.write("\n");
+    }
   }
 
   private static List<String> readServiceEntries(URL resource) throws IOException {

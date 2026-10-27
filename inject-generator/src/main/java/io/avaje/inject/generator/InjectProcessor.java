@@ -11,7 +11,10 @@ import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
@@ -21,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -40,6 +44,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
+import javax.tools.StandardLocation;
 
 import io.avaje.prism.GenerateAPContext;
 import io.avaje.prism.GenerateUtils;
@@ -77,6 +82,7 @@ public final class InjectProcessor extends AbstractProcessor {
   private int rounds;
   private boolean wroteMainClass;
   private final Set<String> customBeanAnnotations = new HashSet<>();
+  private final Set<String> declaredBeanAnnotations = new TreeSet<>();
 
 
   @Override
@@ -85,10 +91,21 @@ public final class InjectProcessor extends AbstractProcessor {
   }
 
   @Override
+  public Set<String> getSupportedAnnotationTypes() {
+    if (customBeanAnnotations.isEmpty()) {
+      return super.getSupportedAnnotationTypes();
+    }
+    var types = new HashSet<>(super.getSupportedAnnotationTypes());
+    types.addAll(customBeanAnnotations);
+    return types;
+  }
+
+  @Override
   public synchronized void init(ProcessingEnvironment processingEnv) {
     super.init(processingEnv);
     APContext.init(processingEnv);
     loadProvidedFiles();
+    loadExternalBeanAnnotations();
     ProcessingContext.registerProvidedTypes(moduleFileProvided);
     moduleData.forEach(ProcessingContext::addModule);
     this.elementUtils = processingEnv.getElementUtils();
@@ -142,6 +159,53 @@ public final class InjectProcessor extends AbstractProcessor {
       .forEach(pluginFileProvided::add);
   }
 
+  private void loadExternalBeanAnnotations() {
+    lines("avaje-bean-annotations.csv").stream()
+      .map(String::trim)
+      .filter(not(String::isBlank))
+      .forEach(customBeanAnnotations::add);
+    try {
+      var resources = InjectProcessor.class.getClassLoader().getResources(Constants.META_INF_BEAN_ANNOTATIONS);
+      while (resources.hasMoreElements()) {
+        try (var reader = new BufferedReader(new InputStreamReader(resources.nextElement().openStream(), StandardCharsets.UTF_8))) {
+          reader.lines()
+            .map(String::trim)
+            .filter(not(String::isBlank))
+            .forEach(customBeanAnnotations::add);
+        }
+      }
+    } catch (IOException e) {
+    }
+  }
+
+  private void writeBeanAnnotations() {
+    try (var file = APContext.filer().getResource(StandardLocation.CLASS_OUTPUT, "", Constants.META_INF_BEAN_ANNOTATIONS).openReader(true);
+         var reader = new BufferedReader(file)) {
+      reader.lines()
+        .map(String::trim)
+        .filter(not(String::isBlank))
+        .filter(name -> {
+          var type = typeElement(name);
+          return type != null && isCustomBeanAnnotation(type);
+        })
+        .forEach(declaredBeanAnnotations::add);
+    } catch (Exception e) {
+    }
+    if (declaredBeanAnnotations.isEmpty()) {
+      return;
+    }
+    try {
+      var jfo = ProcessingContext.createMetaInfWriterFor(Constants.META_INF_BEAN_ANNOTATIONS);
+      var writer = new Append(jfo.openWriter());
+      for (var annotation : declaredBeanAnnotations) {
+        writer.append(annotation).eol();
+      }
+      writer.close();
+    } catch (IOException e) {
+      logError("Failed to write %s %s", Constants.META_INF_BEAN_ANNOTATIONS, e.getMessage());
+    }
+  }
+
   private List<String> lines(String relativeName) {
     try {
       return Files.readAllLines(APContext.getBuildResource(relativeName));
@@ -155,6 +219,7 @@ public final class InjectProcessor extends AbstractProcessor {
     var itsOver = roundEnv.processingOver();
     if (itsOver || processingOver() || roundEnv.errorRaised()) {
       if (itsOver) {
+        writeBeanAnnotations();
         ProcessingContext.writeSPIServicesFile();
         ProcessingContext.validateModule();
         ProcessingContext.clear();
@@ -251,7 +316,11 @@ public final class InjectProcessor extends AbstractProcessor {
         .flatMap(name -> maybeElements(roundEnv, name).stream())
         .flatMap(Set::stream)
         .filter(e -> e.getKind() == ElementKind.ANNOTATION_TYPE)
-        .forEach(e -> customBeanAnnotations.add(((TypeElement) e).getQualifiedName().toString()));
+        .map(e -> ((TypeElement) e).getQualifiedName().toString())
+        .forEach(name -> {
+          customBeanAnnotations.add(name);
+          declaredBeanAnnotations.add(name);
+        });
 
     ElementFilter.typesIn(roundEnv.getRootElements()).forEach(this::registerCustomBeanAnnotations);
 
@@ -268,11 +337,15 @@ public final class InjectProcessor extends AbstractProcessor {
   private void registerCustomBeanAnnotations(TypeElement type) {
     for (var mirror : type.getAnnotationMirrors()) {
       var annotationType = (TypeElement) mirror.getAnnotationType().asElement();
-      if (SingletonPrism.isPresent(annotationType) || isCustomComponentOrPrototype(annotationType)) {
+      if (isCustomBeanAnnotation(annotationType)) {
         customBeanAnnotations.add(annotationType.getQualifiedName().toString());
       }
     }
     ElementFilter.typesIn(type.getEnclosedElements()).forEach(this::registerCustomBeanAnnotations);
+  }
+
+  private static boolean isCustomBeanAnnotation(TypeElement annotationType) {
+    return SingletonPrism.isPresent(annotationType) || isCustomComponentOrPrototype(annotationType);
   }
 
   private static boolean isCustomComponentOrPrototype(TypeElement annotationType) {

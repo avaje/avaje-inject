@@ -25,6 +25,7 @@ final class Constants {
   static final String AT_GENERATED_COMMENT = "(\"io.avaje.inject.generator\")";
   static final String META_INF_SPI = "META-INF/services/io.avaje.inject.spi.InjectExtension";
   static final String META_INF_TESTMODULE = "META-INF/services/io.avaje.inject.test.TestModule";
+  static final String META_INF_BEAN_ANNOTATIONS = "META-INF/avaje/inject-bean-annotations";
   static final String META_INF_CUSTOM = "META-INF/services/io.avaje.inject.spi.AvajeModule.Custom";
   static final String META_INF_NATIVE_IMAGE = "META-INF/native-image/${package}/avaje-inject/reflect-config.json";
 
