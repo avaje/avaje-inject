@@ -76,6 +76,7 @@ public final class InjectProcessor extends AbstractProcessor {
   private final List<ModuleData> moduleData = new ArrayList<>();
   private int rounds;
   private boolean wroteMainClass;
+  private final Set<String> customBeanAnnotations = new HashSet<>();
 
 
   @Override
@@ -181,6 +182,7 @@ public final class InjectProcessor extends AbstractProcessor {
     }
     maybeBeanElements(roundEnv, ComponentPrism.PRISM_TYPE).ifPresent(this::readBeans);
     maybeBeanElements(roundEnv, PrototypePrism.PRISM_TYPE).ifPresent(this::readBeans);
+    readCustomBeanAnnotations(roundEnv);
 
     readImported(importedElements(roundEnv));
 
@@ -237,6 +239,44 @@ public final class InjectProcessor extends AbstractProcessor {
     // reset processingOver flag if anything needs processing in this round
     processingOver(processingOver() && op.filter(n -> !n.isEmpty()).isEmpty());
     return op;
+  }
+
+  /**
+   * Read beans annotated with custom annotations that are themselves meta-annotated with
+   * {@code @Singleton}, {@code @Component} or {@code @Prototype}.
+   */
+  private void readCustomBeanAnnotations(RoundEnvironment roundEnv) {
+    // custom annotations declared in this compilation
+    Stream.of(SingletonPrism.PRISM_TYPE, ComponentPrism.PRISM_TYPE, PrototypePrism.PRISM_TYPE)
+        .flatMap(name -> maybeElements(roundEnv, name).stream())
+        .flatMap(Set::stream)
+        .filter(e -> e.getKind() == ElementKind.ANNOTATION_TYPE)
+        .forEach(e -> customBeanAnnotations.add(((TypeElement) e).getQualifiedName().toString()));
+
+    ElementFilter.typesIn(roundEnv.getRootElements()).forEach(this::registerCustomBeanAnnotations);
+
+    for (var annotation : customBeanAnnotations) {
+      var annotationType = typeElement(annotation);
+      if (annotationType == null
+          || !defaultScope.includeSingleton() && !isCustomComponentOrPrototype(annotationType)) {
+        continue;
+      }
+      maybeBeanElements(roundEnv, annotation).ifPresent(this::readBeans);
+    }
+  }
+
+  private void registerCustomBeanAnnotations(TypeElement type) {
+    for (var mirror : type.getAnnotationMirrors()) {
+      var annotationType = (TypeElement) mirror.getAnnotationType().asElement();
+      if (SingletonPrism.isPresent(annotationType) || isCustomComponentOrPrototype(annotationType)) {
+        customBeanAnnotations.add(annotationType.getQualifiedName().toString());
+      }
+    }
+    ElementFilter.typesIn(type.getEnclosedElements()).forEach(this::registerCustomBeanAnnotations);
+  }
+
+  private static boolean isCustomComponentOrPrototype(TypeElement annotationType) {
+    return ComponentPrism.isPresent(annotationType) || PrototypePrism.isPresent(annotationType);
   }
 
   private Set<TypeElement> importedElements(RoundEnvironment roundEnv) {
@@ -325,7 +365,8 @@ public final class InjectProcessor extends AbstractProcessor {
    */
   private void readChangedBeans(Set<TypeElement> beans, boolean factory, boolean importedComponent) {
     for (final var typeElement : beans) {
-      if (typeElement.getKind() == ElementKind.INTERFACE) {
+      if (typeElement.getKind() == ElementKind.INTERFACE
+          || typeElement.getKind() == ElementKind.ANNOTATION_TYPE) {
         continue;
       }
       if (factory && typeElement.getNestingKind() != NestingKind.TOP_LEVEL) {

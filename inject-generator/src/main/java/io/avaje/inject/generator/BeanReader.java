@@ -67,12 +67,13 @@ final class BeanReader {
     // if proxy read annotations from actual type
     TypeElement actualType = proxy ? APContext.asTypeElement(beanType.getSuperclass()) : beanType;
 
+    var prototypePrism = Util.prototype(actualType);
     this.prototype =
-        PrototypePrism.isPresent(actualType)
+        prototypePrism.isPresent()
             || importedComponent && ProcessingContext.isImportedPrototype(actualType);
     this.prototypePreDestroy =
         prototype
-            && PrototypePrism.getOptionalOn(actualType)
+            && prototypePrism
                 .map(PrototypePrism::enablePreDestroy)
                 .orElse(false);
     this.primary = PrimaryPrism.isPresent(actualType);
