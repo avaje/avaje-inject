@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>avaje-inject-parent</artifactId>
+    <groupId>io.avaje</groupId>
+    <version>12.7</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>blackbox-custom-annotation</artifactId>
+  <packaging>pom</packaging>
+
+  <description>
+    Custom bean annotations (meta-annotated with @Singleton/@Prototype) declared in one jar (api)
+    and used by other modules that have no other avaje-inject annotations. app-plugin has the
+    generator on the annotationProcessorPaths and relies on avaje-inject-maven-plugin to detect
+    the custom annotations, app-classpath has the generator on the compile classpath.
+  </description>
+
+  <modules>
+    <module>api</module>
+    <module>app-plugin</module>
+    <module>app-classpath</module>
+  </modules>
+</project>

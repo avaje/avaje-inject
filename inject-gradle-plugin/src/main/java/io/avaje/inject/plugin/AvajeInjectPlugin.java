@@ -31,6 +31,7 @@ import java.util.*;
 public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
 
   private static final String SERVICES_FILE = "META-INF/services/" + InjectExtension.class.getName();
+  private static final String BEAN_ANNOTATIONS_FILE = "META-INF/avaje/inject-bean-annotations";
 
   private final List<ModuleData> modules = new ArrayList<>();
 
@@ -75,10 +76,12 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
 
     try (var classLoader = classLoader(project);
         var pluginWriter = createFileWriter(outputDir.getPath(), "avaje-plugins.csv");
-        var moduleCSV = createFileWriter(outputDir.getPath(), "avaje-module-dependencies.csv")) {
+        var moduleCSV = createFileWriter(outputDir.getPath(), "avaje-module-dependencies.csv");
+        var beanAnnotationWriter = createFileWriter(outputDir.getPath(), "avaje-bean-annotations.csv")) {
       final var extensions = loadExtensions(classLoader);
       writeProvidedPlugins(extensions, pluginWriter);
       writeModuleCSV(extensions, moduleCSV);
+      writeBeanAnnotations(classLoader, beanAnnotationWriter);
     } catch (IOException e) {
       throw new GradleException("Failed to write avaje-module-provides", e);
     }
@@ -117,6 +120,18 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
       }
     }
     return declared;
+  }
+
+  private static void writeBeanAnnotations(ClassLoader classLoader, FileWriter writer) throws IOException {
+    final Set<String> annotations = new LinkedHashSet<>();
+    for (final URL resource : Collections.list(classLoader.getResources(BEAN_ANNOTATIONS_FILE))) {
+      annotations.addAll(readServiceEntries(resource));
+    }
+    for (final String annotation : annotations) {
+      System.out.println("Detected Custom Bean Annotation: " + annotation);
+      writer.write(annotation);
+      writer.write("\n");
+    }
   }
 
   private static List<String> readServiceEntries(URL resource) throws IOException {
