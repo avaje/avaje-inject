@@ -39,4 +39,17 @@ import io.avaje.inject.spi.Injector;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
-public @interface InjectorTarget {}
+public @interface InjectorTarget {
+
+  /**
+   * Generate an {@link Injector} for types that can't be annotated with {@code @InjectorTarget},
+   * like those in an external project / dependency.
+   */
+  @Retention(RetentionPolicy.SOURCE)
+  @Target({ElementType.TYPE, ElementType.PACKAGE, ElementType.MODULE})
+  @interface Import {
+
+    /** Types to generate injectors for. */
+    Class<?>[] value();
+  }
+}

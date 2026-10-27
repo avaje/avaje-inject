@@ -15,9 +15,15 @@ final class InjectorBeanReader {
   private final ImportTypeMap importTypes = new ImportTypeMap();
   private final TypeReader typeReader;
   private final Element preDestroyMethod;
+  private final String importedPkg;
 
   InjectorBeanReader(TypeElement beanType) {
+    this(beanType, null);
+  }
+
+  InjectorBeanReader(TypeElement beanType, String importedPkg) {
     this.beanType = beanType;
+    this.importedPkg = importedPkg;
     this.type = beanType.getQualifiedName().toString();
     this.typeReader =
         new TypeReader(List.of(), UType.parse(beanType.asType()), beanType, importTypes, false);
@@ -63,6 +69,9 @@ final class InjectorBeanReader {
   }
 
   String packageName() {
+    if (importedPkg != null) {
+      return importedPkg;
+    }
     return APContext.elements().getPackageOf(beanType).getQualifiedName().toString();
   }
 
