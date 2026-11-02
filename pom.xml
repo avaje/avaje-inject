@@ -57,6 +57,7 @@
         <module>blackbox-multi-scope</module>
         <module>blackbox-collection-module-order</module>
         <module>blackbox-conditional-provider-order</module>
+        <module>blackbox-custom-annotation</module>
       </modules>
     </profile>
   </profiles>
