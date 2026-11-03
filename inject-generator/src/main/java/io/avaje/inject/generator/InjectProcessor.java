@@ -57,6 +57,8 @@ import io.avaje.prism.GenerateUtils;
   FactoryPrism.PRISM_TYPE,
   ImportPrism.PRISM_TYPE,
   InjectModulePrism.PRISM_TYPE,
+  InjectorTargetPrism.PRISM_TYPE,
+  InjectorImportPrism.PRISM_TYPE,
   MainClassPrism.PRISM_TYPE,
   PluginProvidesPrism.PRISM_TYPE,
   PrototypePrism.PRISM_TYPE,
@@ -186,6 +188,8 @@ public final class InjectProcessor extends AbstractProcessor {
 
     maybeBeanElements(roundEnv, ControllerPrism.PRISM_TYPE).ifPresent(this::readBeans);
     maybeBeanElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
+    maybeBeanElements(roundEnv, InjectorTargetPrism.PRISM_TYPE).ifPresent(this::readInjectors);
+    maybeBeanElements(roundEnv, InjectorImportPrism.PRISM_TYPE).ifPresent(this::readImportedInjectors);
 
     maybeElements(roundEnv, ServiceProviderPrism.PRISM_TYPE).ifPresent(this::registerSPI);
     maybeElements(roundEnv, PluginProvidesPrism.PRISM_TYPE).ifPresent(this::registerSPI);
@@ -310,6 +314,27 @@ public final class InjectProcessor extends AbstractProcessor {
         e.printStackTrace();
       }
     });
+  }
+
+  private void readInjectors(Set<? extends Element> beans) {
+    ElementFilter.typesIn(beans).forEach(t -> writeInjector(new InjectorBeanReader(t)));
+  }
+
+  private void readImportedInjectors(Set<? extends Element> bases) {
+    for (final Element base : bases) {
+      final String pkg = ProcessingContext.importPkg(base);
+      InjectorImportPrism.getInstanceOn(base).value().stream()
+        .map(ProcessingContext::asElement)
+        .forEach(t -> writeInjector(new InjectorBeanReader(t, pkg)));
+    }
+  }
+
+  private void writeInjector(InjectorBeanReader reader) {
+    try {
+      new SimpleInjectorWriter(reader).write();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   private void readBeans(Set<? extends Element> beans) {

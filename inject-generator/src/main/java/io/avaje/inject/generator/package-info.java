@@ -12,6 +12,8 @@
 @GeneratePrism(Generated.class)
 @GeneratePrism(Inject.class)
 @GeneratePrism(InjectModule.class)
+@GeneratePrism(InjectorTarget.class)
+@GeneratePrism(value = InjectorTarget.Import.class, name = "InjectorImportPrism")
 @GeneratePrism(BeanTypes.class)
 @GeneratePrism(Lazy.class)
 @GeneratePrism(MainClass.class)
