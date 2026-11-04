@@ -58,6 +58,7 @@ final class ProcessingContext {
     private final Set<String> spiServices = new TreeSet<>();
     private final Set<String> externalSpi = new TreeSet<>();
     private final Set<String> aspectClasses = new TreeSet<>();
+    private final Set<Element> testModulesElements = new LinkedHashSet<>();
     private final Map<String, String> importedComponentPkg = new HashMap<>();
     private final boolean hasProvidesPlugin = hasProvidesPlugin();
     private final AllScopes scopes = new AllScopes();
@@ -253,6 +254,14 @@ final class ProcessingContext {
 
   static boolean delayUntilNextRound(TypeElement element) {
     return CTX.get().delayQueue.add(element);
+  }
+
+  static void addTestModulesElement(Element element) {
+    CTX.get().testModulesElements.add(element);
+  }
+
+  static Set<Element> testModulesElements() {
+    return CTX.get().testModulesElements;
   }
 
   static void clear() {
