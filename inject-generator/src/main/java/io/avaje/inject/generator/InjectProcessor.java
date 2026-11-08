@@ -13,6 +13,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -472,17 +473,22 @@ public final class InjectProcessor extends AbstractProcessor {
 
   private void checkGradlePlugin(TypeElement mainElement) {
     try {
-      var buildResourcePath = APContext.getBuildResource("").getParent();
-      var pomPath = buildResourcePath.resolve("pom.xml");
-      if (!pomPath.toFile().exists()) {
-        var pluginExists = buildResourcePath.resolve("avaje-plugins.csv").toFile().exists();
-        if (!pluginExists) {
-          logError(mainElement, "@MainClass requires the avaje-inject Gradle plugin - add 'io.avaje.inject' to your build.gradle plugins block");
-        }
+      if (!hasBuildPlugin(APContext.getBuildResource(""))) {
+        logError(mainElement, "@MainClass requires the avaje-inject Gradle plugin - add 'io.avaje.inject' to your build.gradle plugins block");
       }
     } catch (Exception e) {
       // unable to check, skip
     }
+  }
+
+  /**
+   * Return true if the build is Maven (pom.xml in the project root, the parent of the build
+   * directory) or the avaje-inject Gradle plugin has run (avaje-plugins.csv written into the
+   * build directory itself).
+   */
+  static boolean hasBuildPlugin(Path buildDir) {
+    return buildDir.resolve("avaje-plugins.csv").toFile().exists()
+      || buildDir.getParent().resolve("pom.xml").toFile().exists();
   }
 
   private boolean hasMainMethod(TypeElement typeElement) {
