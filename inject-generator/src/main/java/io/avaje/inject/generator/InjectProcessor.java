@@ -51,6 +51,9 @@ import io.avaje.prism.GenerateUtils;
 @SupportedAnnotationTypes({
   AspectImportPrism.PRISM_TYPE,
   AssistFactoryPrism.PRISM_TYPE,
+  AutoFactoryPrism.PRISM_TYPE,
+  AutoFactoryImportPrism.PRISM_TYPE,
+  AutoFactoryImportsPrism.PRISM_TYPE,
   ComponentPrism.PRISM_TYPE,
   Constants.TESTSCOPE,
   ControllerPrism.PRISM_TYPE,
@@ -187,6 +190,8 @@ public final class InjectProcessor extends AbstractProcessor {
 
     maybeBeanElements(roundEnv, ControllerPrism.PRISM_TYPE).ifPresent(this::readBeans);
     maybeBeanElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
+    maybeBeanElements(roundEnv, AutoFactoryPrism.PRISM_TYPE).ifPresent(this::readAutoFactories);
+    readAutoFactoryImports(roundEnv);
 
     maybeElements(roundEnv, ServiceProviderPrism.PRISM_TYPE).ifPresent(this::registerSPI);
     maybeElements(roundEnv, PluginProvidesPrism.PRISM_TYPE).ifPresent(this::registerSPI);
@@ -311,6 +316,30 @@ public final class InjectProcessor extends AbstractProcessor {
         e.printStackTrace();
       }
     });
+  }
+
+  private void readAutoFactories(Set<? extends Element> beans) {
+    ElementFilter.typesIn(beans).forEach(AutoFactoryWriter::write);
+  }
+
+  private void readAutoFactoryImports(RoundEnvironment roundEnv) {
+    var single = maybeBeanElements(roundEnv, AutoFactoryImportPrism.PRISM_TYPE).stream().flatMap(Set::stream);
+    var repeated = maybeBeanElements(roundEnv, AutoFactoryImportsPrism.PRISM_TYPE).stream().flatMap(Set::stream);
+    Stream.concat(single, repeated)
+      .distinct()
+      .forEach(base -> autoFactoryImports(base).forEach(p -> {
+        var creator = APContext.asTypeElement(p.creator());
+        p.value().stream()
+          .map(APContext::asTypeElement)
+          .filter(this::notAlreadyProvided)
+          .forEach(type -> AutoFactoryWriter.writeImport(type, creator, base));
+      }));
+  }
+
+  private static Stream<AutoFactoryImportPrism> autoFactoryImports(Element base) {
+    return Stream.concat(
+      AutoFactoryImportPrism.getAllInstancesOn(base).stream(),
+      AutoFactoryImportsPrism.getOptionalOn(base).stream().flatMap(c -> c.value().stream()));
   }
 
   private void readBeans(Set<? extends Element> beans) {
