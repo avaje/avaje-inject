@@ -135,9 +135,9 @@ final class AutoFactoryWriter {
     writer.append("/**").eol();
     writer.append(" * Generated source - Factory for @AutoFactory %s.", beanType).eol();
     writer.append(" */").eol();
+    writer.append("@Factory").eol();
     writer.append(Constants.AT_SUPPRESS_WARNINGS).eol();
     writer.append(Constants.AT_GENERATED).eol();
-    writer.append("@Factory").eol();
     writer.append("final %sclass %s {", Util.valhalla(), factoryShortName).eol().eol();
 
     writer.append("  /**").eol();
