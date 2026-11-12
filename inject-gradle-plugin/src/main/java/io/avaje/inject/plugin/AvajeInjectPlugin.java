@@ -9,7 +9,7 @@ import io.avaje.inject.spi.InjectExtension;
 
 import io.avaje.inject.spi.PluginProvides;
 import org.gradle.api.Project;
-import org.gradle.api.Task;
+import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.GradleException;
 import org.gradle.api.tasks.bundling.Jar;
 import java.io.BufferedReader;
@@ -36,15 +36,14 @@ public class AvajeInjectPlugin implements org.gradle.api.Plugin<Project> {
 
   @Override
   public void apply(Project project) {
-    project.afterEvaluate(
-        prj -> {
-          // run it automatically before build
-          Task buildTask = prj.getTasks().getByName("compileJava");
-          buildTask.doFirst(it -> writeProvides(project));
-          buildTask.doLast(it -> configureMainClass(project));
-        });
+    // run it automatically before build, whenever (and however) the java plugin is applied
+    project.getPlugins().withType(JavaPlugin.class, javaPlugin ->
+        project.getTasks().named(JavaPlugin.COMPILE_JAVA_TASK_NAME, compileJava -> {
+          compileJava.doFirst(it -> writeProvides(project));
+          compileJava.doLast(it -> configureMainClass(project));
+        }));
     // register a task to run it manually
-    project.task("discoverModules").doLast(task -> writeProvides(project));
+    project.getTasks().register("discoverModules", task -> task.doLast(it -> writeProvides(project)));
   }
 
   private void configureMainClass(Project project) {
