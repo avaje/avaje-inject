@@ -138,7 +138,7 @@ final class AutoFactoryWriter {
     writer.append(Constants.AT_SUPPRESS_WARNINGS).eol();
     writer.append(Constants.AT_GENERATED).eol();
     writer.append("@Factory").eol();
-    writer.append("public final class %s {", factoryShortName).eol().eol();
+    writer.append("final %sclass %s {", Util.valhalla(), factoryShortName).eol().eol();
 
     writer.append("  /**").eol();
     writer.append("   * Create %s using the %s creator.", beanType, creatorType).eol();
@@ -147,7 +147,7 @@ final class AutoFactoryWriter {
     for (final String annotation : annotations) {
       writer.append("  %s", annotation).eol();
     }
-    writer.append("  public %s build(%s creator) {", beanShortType, creatorShortType).eol();
+    writer.append("  %s build(%s creator) {", beanShortType, creatorShortType).eol();
     writer.append("    return creator.create(%s.class);", beanShortType).eol();
     writer.append("  }").eol();
     writer.append("}").eol();
