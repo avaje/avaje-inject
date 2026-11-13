@@ -18,6 +18,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,6 +52,9 @@ import io.avaje.prism.GenerateUtils;
 @SupportedAnnotationTypes({
   AspectImportPrism.PRISM_TYPE,
   AssistFactoryPrism.PRISM_TYPE,
+  AutoFactoryPrism.PRISM_TYPE,
+  AutoFactoryImportPrism.PRISM_TYPE,
+  AutoFactoryImportsPrism.PRISM_TYPE,
   ComponentPrism.PRISM_TYPE,
   Constants.TESTSCOPE,
   ControllerPrism.PRISM_TYPE,
@@ -187,6 +191,8 @@ public final class InjectProcessor extends AbstractProcessor {
 
     maybeBeanElements(roundEnv, ControllerPrism.PRISM_TYPE).ifPresent(this::readBeans);
     maybeBeanElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
+    maybeBeanElements(roundEnv, AutoFactoryPrism.PRISM_TYPE).ifPresent(this::readAutoFactories);
+    readAutoFactoryImports(roundEnv);
 
     maybeElements(roundEnv, ServiceProviderPrism.PRISM_TYPE).ifPresent(this::registerSPI);
     maybeElements(roundEnv, PluginProvidesPrism.PRISM_TYPE).ifPresent(this::registerSPI);
@@ -311,6 +317,40 @@ public final class InjectProcessor extends AbstractProcessor {
         e.printStackTrace();
       }
     });
+  }
+
+  private void readAutoFactories(Set<? extends Element> beans) {
+    ElementFilter.typesIn(beans).forEach(AutoFactoryWriter::write);
+    ElementFilter.packagesIn(beans).forEach(AutoFactoryWriter::writePackage);
+  }
+
+  private void readAutoFactoryImports(RoundEnvironment roundEnv) {
+    var single = maybeBeanElements(roundEnv, AutoFactoryImportPrism.PRISM_TYPE).stream().flatMap(Set::stream);
+    var repeated = maybeBeanElements(roundEnv, AutoFactoryImportsPrism.PRISM_TYPE).stream().flatMap(Set::stream);
+    Stream.concat(single, repeated)
+      .distinct()
+      .forEach(base -> {
+        final Map<TypeElement, TypeElement> typeCreators = new LinkedHashMap<>();
+        autoFactoryImports(base).forEach(p -> {
+          var creator = APContext.asTypeElement(p.creator());
+          p.value().stream()
+            .map(APContext::asTypeElement)
+            .filter(this::notAlreadyProvided)
+            .forEach(type -> {
+              var existing = typeCreators.putIfAbsent(type, creator);
+              if (existing != null && !existing.equals(creator)) {
+                logError(base, "@AutoFactory.Import type %s is imported with different creators", type);
+              }
+            });
+        });
+        AutoFactoryWriter.writeImports(base, typeCreators);
+      });
+  }
+
+  private static Stream<AutoFactoryImportPrism> autoFactoryImports(Element base) {
+    return Stream.concat(
+      AutoFactoryImportPrism.getAllInstancesOn(base).stream(),
+      AutoFactoryImportsPrism.getOptionalOn(base).stream().flatMap(c -> c.value().stream()));
   }
 
   private void readBeans(Set<? extends Element> beans) {
