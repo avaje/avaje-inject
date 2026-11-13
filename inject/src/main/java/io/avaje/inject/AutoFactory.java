@@ -50,8 +50,21 @@ import java.lang.annotation.Target;
  * }</pre>
  *
  * <p>With the above, {@code UserMapper} can be injected like any other bean.
+ *
+ * <h3>Package</h3>
+ *
+ * <p>When placed on a package (package-info.java) all the interfaces and abstract classes in
+ * that package (including nested ones) are treated as if they were annotated, and a single
+ * factory is generated for them all. Types that have their own {@code @AutoFactory} or have
+ * type parameters are skipped.
+ *
+ * <pre>{@code
+ * @AutoFactory(MapperCreator.class)
+ * package org.example.mappers;
+ *
+ * }</pre>
  */
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.PACKAGE})
 @Retention(RetentionPolicy.SOURCE)
 public @interface AutoFactory {
 

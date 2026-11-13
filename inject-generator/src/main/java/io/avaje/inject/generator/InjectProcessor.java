@@ -18,6 +18,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -320,6 +321,7 @@ public final class InjectProcessor extends AbstractProcessor {
 
   private void readAutoFactories(Set<? extends Element> beans) {
     ElementFilter.typesIn(beans).forEach(AutoFactoryWriter::write);
+    ElementFilter.packagesIn(beans).forEach(AutoFactoryWriter::writePackage);
   }
 
   private void readAutoFactoryImports(RoundEnvironment roundEnv) {
@@ -327,13 +329,22 @@ public final class InjectProcessor extends AbstractProcessor {
     var repeated = maybeBeanElements(roundEnv, AutoFactoryImportsPrism.PRISM_TYPE).stream().flatMap(Set::stream);
     Stream.concat(single, repeated)
       .distinct()
-      .forEach(base -> autoFactoryImports(base).forEach(p -> {
-        var creator = APContext.asTypeElement(p.creator());
-        p.value().stream()
-          .map(APContext::asTypeElement)
-          .filter(this::notAlreadyProvided)
-          .forEach(type -> AutoFactoryWriter.writeImport(type, creator, base));
-      }));
+      .forEach(base -> {
+        final Map<TypeElement, TypeElement> typeCreators = new LinkedHashMap<>();
+        autoFactoryImports(base).forEach(p -> {
+          var creator = APContext.asTypeElement(p.creator());
+          p.value().stream()
+            .map(APContext::asTypeElement)
+            .filter(this::notAlreadyProvided)
+            .forEach(type -> {
+              var existing = typeCreators.putIfAbsent(type, creator);
+              if (existing != null && !existing.equals(creator)) {
+                logError(base, "@AutoFactory.Import type %s is imported with different creators", type);
+              }
+            });
+        });
+        AutoFactoryWriter.writeImports(base, typeCreators);
+      });
   }
 
   private static Stream<AutoFactoryImportPrism> autoFactoryImports(Element base) {
