@@ -189,6 +189,10 @@ final class MetaData implements Comparable<MetaData> {
     return type;
   }
 
+  String method() {
+    return method;
+  }
+
   List<String> provides() {
     return provides;
   }
