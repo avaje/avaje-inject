@@ -64,6 +64,7 @@ import io.avaje.prism.GenerateUtils;
   QualifierPrism.PRISM_TYPE,
   ScopePrism.PRISM_TYPE,
   SingletonPrism.PRISM_TYPE,
+  TestModulesPrism.PRISM_TYPE,
   ServiceProviderPrism.PRISM_TYPE
 })
 public final class InjectProcessor extends AbstractProcessor {
@@ -175,6 +176,9 @@ public final class InjectProcessor extends AbstractProcessor {
       .forEach(this::validateQualifier);
 
     maybeElements(roundEnv, ScopePrism.PRISM_TYPE).ifPresent(this::readScopes);
+    maybeElements(roundEnv, TestModulesPrism.PRISM_TYPE).stream()
+      .flatMap(Set::stream)
+      .forEach(ProcessingContext::addTestModulesElement);
     maybeBeanElements(roundEnv, FactoryPrism.PRISM_TYPE).ifPresent(this::readFactories);
 
     if (defaultScope.includeSingleton()) {

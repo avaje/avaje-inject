@@ -14,6 +14,7 @@ module io.avaje.inject.test {
   requires static io.avaje.inject.aop;
   requires static io.avaje.inject.events;
 
+  uses io.avaje.inject.spi.InjectExtension;
   uses io.avaje.inject.test.TestModule;
   uses io.avaje.inject.test.Plugin;
   uses io.avaje.inject.test.LookupProvider;

@@ -22,6 +22,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.NestingKind;
@@ -103,6 +104,9 @@ final class SimpleModuleWriter {
     writeBuildMethod();
     writeProvides();
     writeClassesMethod();
+    if (scopeType == Type.TEST) {
+      writeTestModules();
+    }
     writeBuildMethods();
     writeEndClass();
     writer.close();
@@ -257,6 +261,35 @@ final class SimpleModuleWriter {
     writer.append("    return new Class<?>[] {").eol();
     for (String rawType : new TreeSet<>(allClasses)) {
       writer.append("      %s.class,", rawType).eol();
+    }
+    writer.append("    };").eol();
+    writer.append("  }").eol().eol();
+  }
+
+  private void writeTestModules() {
+    Set<Element> annotated = new LinkedHashSet<>(ProcessingContext.testModulesElements());
+    for (MetaData metaData : ordering.ordered()) {
+      if (metaData.isExternal()) continue;
+      TypeElement element = typeElement(Util.trimGenerics(metaData.type()));
+      if (element == null) continue;
+      annotated.add(element);
+      annotated.add(APContext.elements().getPackageOf(element));
+    }
+    Set<String> modules = new LinkedHashSet<>();
+    for (Element element : annotated) {
+      TestModulesPrism.getOptionalOn(element)
+          .ifPresent(prism -> prism.value().forEach(module -> modules.add(module.toString())));
+    }
+    if (modules.isEmpty()) {
+      return;
+    }
+    writer.append("  @Override").eol();
+    writer
+        .append("  public Class<? extends AvajeModule>[] testModules() {")
+        .eol();
+    writer.append("    return new Class[] {").eol();
+    for (String module : modules) {
+      writer.append("      %s.class,", module).eol();
     }
     writer.append("    };").eol();
     writer.append("  }").eol().eol();
