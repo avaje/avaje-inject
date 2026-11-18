@@ -471,6 +471,17 @@ final class Util {
     return mirror.getAnnotationType().asElement().getSimpleName().toString().contains("Priority");
   }
 
+  static Optional<PrototypePrism> prototype(Element element) {
+    var direct = PrototypePrism.getOptionalOn(element);
+    if (direct.isPresent()) {
+      return direct;
+    }
+    return element.getAnnotationMirrors().stream()
+      .map(m -> m.getAnnotationType().asElement())
+      .flatMap(a -> PrototypePrism.getOptionalOn(a).stream())
+      .findFirst();
+  }
+
   static LazyPrism isLazy(Element element) {
     if (element == null) {
       return null;
