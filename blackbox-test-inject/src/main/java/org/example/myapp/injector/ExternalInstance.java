@@ -1,0 +1,46 @@
+package org.example.myapp.injector;
+
+import io.avaje.inject.BeanScope;
+import io.avaje.inject.InjectorTarget;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.inject.Inject;
+
+import java.util.List;
+
+@InjectorTarget
+public class ExternalInstance {
+
+  @Inject InjectedThing fieldDependency;
+  @Inject List<InjectedThing> dependencies;
+  InjectedThing methodDependency;
+  BeanScope injectedScope;
+  BeanScope initializedScope;
+  boolean initialized;
+  int destroyCount;
+
+  public ExternalInstance(InjectedThing fieldDependency) {
+    this.fieldDependency = fieldDependency;
+  }
+
+  @Inject
+  void setMethodDependency(InjectedThing methodDependency) {
+    this.methodDependency = methodDependency;
+  }
+
+  @Inject
+  void setScope(BeanScope scope) {
+    this.injectedScope = scope;
+  }
+
+  @PostConstruct
+  void initialize(BeanScope scope) {
+    initialized = true;
+    initializedScope = scope;
+  }
+
+  @PreDestroy
+  void destroy() {
+    destroyCount++;
+  }
+}

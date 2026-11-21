@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -101,6 +102,7 @@ final class SimpleModuleWriter {
       writeSuppliedScope();
     }
     writeBuildMethod();
+    writeInstanceInjectorMethod();
     writeProvides();
     writeClassesMethod();
     writeBuildMethods();
@@ -293,6 +295,9 @@ final class SimpleModuleWriter {
     writer.append(CODE_COMMENT_CREATE_CONTEXT).eol();
     writer.append("  @Override").eol();
     writer.append("  public void build(Builder builder) {").eol();
+    if (!scopeInfo.instanceInjectorMeta().isEmpty()) {
+      writer.append("    registerInstanceInjectors(builder);").eol();
+    }
     if (scopeInfo.addWithBeans()) {
       writeWithBeans();
     }
@@ -310,6 +315,18 @@ final class SimpleModuleWriter {
     }
     writer.append("  }").eol();
     writer.eol();
+  }
+
+  private void writeInstanceInjectorMethod() {
+    final Map<String, InstanceInjectorMetaData> injectors = new TreeMap<>(scopeInfo.instanceInjectorMeta());
+    if (injectors.isEmpty()) {
+      return;
+    }
+
+    injectors.values().forEach(meta -> meta.writeAnnotation(writer));
+    writer.append("  private static void registerInstanceInjectors(Builder builder) {").eol();
+    injectors.values().forEach(meta -> writer.append("    %s.register(builder);", meta.injector()).eol());
+    writer.append("  }").eol().eol();
   }
 
   private void writeBuildMethods() {
@@ -357,6 +374,7 @@ final class SimpleModuleWriter {
     importTypes.add(Constants.BEANSCOPE);
     importTypes.add(Constants.INJECTMODULE);
     importTypes.add(Constants.DEPENDENCYMETA);
+    importTypes.add(Constants.INSTANCEINJECTORMETA);
     importTypes.add(Constants.MODULE);
     importTypes.add(Constants.BUILDER);
     return importTypes;

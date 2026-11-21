@@ -49,6 +49,13 @@ final class FieldReader {
     }
   }
 
+  Dependency dependsOn() {
+    return new Dependency(
+        isWildcard() ? type.mainType() : utype.rawType(isBeanMap),
+        name,
+        nullable || isBeanMap || utype.isCollection() || utype.isOptional());
+  }
+
   String fieldName() {
     return element.getSimpleName().toString();
   }

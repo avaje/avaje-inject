@@ -789,6 +789,13 @@ final class MethodReader {
       return new Dependency(isWildcard() ? genericType.mainType() : paramType, named, utilType.isCollection());
     }
 
+    Dependency injectorDependsOn() {
+      return new Dependency(
+          isWildcard() ? genericType.mainType() : paramType,
+          named,
+          nullable || isBeanMap || utilType.isCollection() || utilType.isOptional());
+    }
+
     void addImports(ImportTypeMap importTypes) {
       if (isObserveEvent) {
         importTypes.add("java.util.function.Consumer");

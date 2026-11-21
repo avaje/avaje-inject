@@ -99,6 +99,16 @@ public interface BeanScope extends AutoCloseable {
   }
 
   /**
+   * Inject dependencies into the given instance. Injected fields are assigned and injection
+   * methods are invoked on each call.
+   *
+   * @param instance the instance to inject dependencies into
+   * @param <T> the type of the instance
+   * @return the instance with dependencies injected
+   */
+  <T> T inject(T instance);
+
+  /**
    * Return a single bean given the type.
    *
    * <pre>{@code

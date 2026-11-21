@@ -13,6 +13,7 @@ module blackbox.test.inject {
   requires io.avaje.inject.aop;
   requires io.avaje.inject.events;
   requires io.avaje.jsonb;
+  requires jakarta.annotation;
   requires io.github.resilience4j.annotations;
   requires io.github.resilience4j.core;
   requires io.github.resilience4j.retry;

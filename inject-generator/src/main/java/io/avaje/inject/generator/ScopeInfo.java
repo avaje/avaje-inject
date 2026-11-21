@@ -53,13 +53,28 @@ final class ScopeInfo {
     }
   }
 
+  void addInstanceInjector(InstanceInjectorReader reader) {
+    if (readInstanceInjectors.add(reader.targetName())) {
+      instanceInjectorReaders.add(reader);
+      instanceInjectorMeta.put(reader.targetName(), new InstanceInjectorMetaData(reader));
+    }
+  }
+
+  Map<String, InstanceInjectorMetaData> instanceInjectorMeta() {
+    return instanceInjectorMeta;
+  }
+
   /**
    * Map to merge the existing meta data with partially compiled code. Keyed by type and qualifier/name.
    */
   private final Map<String, MetaData> metaData = new HashMap<>();
+  /** Existing and current instance injectors, keyed by target type. */
+  private final Map<String, InstanceInjectorMetaData> instanceInjectorMeta = new LinkedHashMap<>();
   private final Map<String, String> constructorDependencies = new LinkedHashMap<>();
   private final List<BeanReader> beanReaders = new ArrayList<>();
+  private final List<InstanceInjectorReader> instanceInjectorReaders = new ArrayList<>();
   private final Set<String> readBeans = new HashSet<>();
+  private final Set<String> readInstanceInjectors = new HashSet<>();
   private final Set<String> pluginProvided = new HashSet<>();
   private final Set<String> requires = new LinkedHashSet<>();
   private final Set<String> provides = new LinkedHashSet<>();
@@ -236,12 +251,28 @@ final class ScopeInfo {
         logError(beanReader.beanType(), "Failed to write $DI class %s", e);
       }
     }
+    for (InstanceInjectorReader reader : instanceInjectorReaders) {
+      if (!reader.isWritten()) {
+        try {
+          new SimpleInstanceInjectorWriter(reader).write();
+          reader.markWritten();
+        } catch (FilerException e) {
+          logWarn("FilerException to write instance injector %s %s", reader.targetName(), e.getMessage());
+        } catch (IOException e) {
+          logError(reader.targetType(), "Failed to write instance injector %s", e);
+        }
+      }
+    }
   }
 
   private void initialiseModule() {
     if (!moduleInitialised) {
       try {
-        initialiseName(MetaTopPackage.of(metaData.values()));
+        String topPackage = MetaTopPackage.of(metaData.values());
+        for (InstanceInjectorMetaData meta : instanceInjectorMeta.values()) {
+          topPackage = Util.commonParent(topPackage, meta.packageName());
+        }
+        initialiseName(topPackage);
         addModule(moduleFullName);
         moduleInitialised = true;
       } catch (IOException e) {
@@ -284,8 +315,9 @@ final class ScopeInfo {
     }
     final MetaDataOrdering ordering = new MetaDataOrdering(meta, this);
     final int remaining = ordering.processQueue();
+    ordering.validateInstanceInjectors(instanceInjectorMeta.values());
 
-    if (remaining > 0) {
+    if (remaining > 0 || ordering.hasMissingDependencies()) {
       ordering.logWarnings();
     }
     try {
@@ -397,7 +429,7 @@ final class ScopeInfo {
     mergeMetaData();
     writeBeanHelpers();
     initialiseModule();
-    if (processingOver && !metaData.isEmpty()) {
+    if (processingOver && (!metaData.isEmpty() || !instanceInjectorMeta.isEmpty())) {
       ProcessingContext.registerExternalProvidedTypes(this);
       writeModule();
     }
@@ -531,9 +563,20 @@ final class ScopeInfo {
       for (Element element : elements) {
         if (ElementKind.METHOD == element.getKind()) {
           readBuildMethodDependencyMeta(element);
+          readInstanceInjectorMeta(element);
         }
       }
     }
+  }
+
+  private void readInstanceInjectorMeta(Element element) {
+    InstanceInjectorMetaPrism.getAllInstancesOn(element).forEach(this::putRetainedInjectorMeta);
+    InstanceInjectorMetaContainerPrism.getOptionalOn(element)
+        .ifPresent(container -> container.value().forEach(this::putRetainedInjectorMeta));
+  }
+
+  private void putRetainedInjectorMeta(InstanceInjectorMetaPrism prism) {
+    instanceInjectorMeta.putIfAbsent(prism.target(), new InstanceInjectorMetaData(prism));
   }
 
   /**

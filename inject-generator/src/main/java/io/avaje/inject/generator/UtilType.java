@@ -52,6 +52,10 @@ final class UtilType {
     return type == Type.LIST || type == Type.SET;
   }
 
+  boolean isOptional() {
+    return type == Type.OPTIONAL;
+  }
+
   String full() {
     return rawType;
   }

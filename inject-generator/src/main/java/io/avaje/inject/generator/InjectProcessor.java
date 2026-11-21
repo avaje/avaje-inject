@@ -58,6 +58,8 @@ import io.avaje.prism.GenerateUtils;
   FactoryPrism.PRISM_TYPE,
   ImportPrism.PRISM_TYPE,
   InjectModulePrism.PRISM_TYPE,
+  InjectorTargetPrism.PRISM_TYPE,
+  InjectorTargetImportPrism.PRISM_TYPE,
   MainClassPrism.PRISM_TYPE,
   PluginProvidesPrism.PRISM_TYPE,
   PrototypePrism.PRISM_TYPE,
@@ -187,6 +189,8 @@ public final class InjectProcessor extends AbstractProcessor {
 
     maybeBeanElements(roundEnv, ControllerPrism.PRISM_TYPE).ifPresent(this::readBeans);
     maybeBeanElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
+    maybeElements(roundEnv, InjectorTargetPrism.PRISM_TYPE).ifPresent(this::readInjectorTargets);
+    maybeElements(roundEnv, InjectorTargetImportPrism.PRISM_TYPE).ifPresent(this::readImportedInjectorTargets);
 
     maybeElements(roundEnv, ServiceProviderPrism.PRISM_TYPE).ifPresent(this::registerSPI);
     maybeElements(roundEnv, PluginProvidesPrism.PRISM_TYPE).ifPresent(this::registerSPI);
@@ -311,6 +315,46 @@ public final class InjectProcessor extends AbstractProcessor {
         e.printStackTrace();
       }
     });
+  }
+
+  private void readInjectorTargets(Set<? extends Element> elements) {
+    ElementFilter.typesIn(elements)
+        .forEach(type -> addInstanceInjector(type, null));
+  }
+
+  private void readImportedInjectorTargets(Set<? extends Element> elements) {
+    for (Element element : elements) {
+      final String packageName = importPackage(element);
+      InjectorTargetImportPrism.getInstanceOn(element)
+          .value()
+          .stream()
+          .map(ProcessingContext::asElement)
+          .filter(java.util.Objects::nonNull)
+          .forEach(type -> addInstanceInjector(type, packageName));
+    }
+  }
+
+  private String importPackage(Element element) {
+    if (element instanceof javax.lang.model.element.PackageElement) {
+      return ((javax.lang.model.element.PackageElement) element).getQualifiedName().toString();
+    }
+    if (element instanceof TypeElement) {
+      return elementUtils.getPackageOf(element).getQualifiedName().toString();
+    }
+    if (element instanceof javax.lang.model.element.ModuleElement) {
+      return element.getEnclosedElements().stream()
+          .filter(javax.lang.model.element.PackageElement.class::isInstance)
+          .map(javax.lang.model.element.PackageElement.class::cast)
+          .map(packageElement -> packageElement.getQualifiedName().toString())
+          .findFirst()
+          .orElse("");
+    }
+    return "";
+  }
+
+  private void addInstanceInjector(TypeElement type, String importedPackage) {
+    final var reader = new InstanceInjectorReader(type, importedPackage);
+    defaultScope.addInstanceInjector(reader);
   }
 
   private void readBeans(Set<? extends Element> beans) {
