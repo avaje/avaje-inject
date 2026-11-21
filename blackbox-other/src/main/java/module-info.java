@@ -8,7 +8,6 @@ module blackbox.other {
 
   requires io.avaje.inject;
   requires io.avaje.inject.events;
-  requires jakarta.inject;
 
   provides io.avaje.inject.spi.InjectExtension with org.other.one.OneModule;
 }
