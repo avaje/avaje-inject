@@ -132,7 +132,7 @@ final class SimpleInstanceInjectorWriter {
   }
 
   private boolean isBeanScope(String type) {
-    return io.avaje.inject.BeanScope.class.getName().equals(type);
+    return Constants.BEANSCOPE.equals(type);
   }
 
   private void writePreDestroy() {
