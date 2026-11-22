@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  * }</pre>
  *
  * <pre>{@code
- * LegacyServlet servlet = ExternalFramework.create();
+ * MyFrameworkServlet servlet = ExternalFramework.create();
  * scope.inject(servlet);
  * }</pre>
  */
