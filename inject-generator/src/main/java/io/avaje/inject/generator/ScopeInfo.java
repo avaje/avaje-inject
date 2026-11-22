@@ -53,17 +53,6 @@ final class ScopeInfo {
     }
   }
 
-  void addInstanceInjector(InstanceInjectorReader reader) {
-    if (readInstanceInjectors.add(reader.targetName())) {
-      instanceInjectorReaders.add(reader);
-      instanceInjectorMeta.put(reader.targetName(), new InstanceInjectorMetaData(reader));
-    }
-  }
-
-  Map<String, InstanceInjectorMetaData> instanceInjectorMeta() {
-    return instanceInjectorMeta;
-  }
-
   /**
    * Map to merge the existing meta data with partially compiled code. Keyed by type and qualifier/name.
    */
@@ -117,6 +106,17 @@ final class ScopeInfo {
       "name=" + name +
       ", metaData=" + metaData +
       '}';
+  }
+
+  void addInstanceInjector(InstanceInjectorReader reader) {
+    if (readInstanceInjectors.add(reader.targetName())) {
+      instanceInjectorReaders.add(reader);
+      instanceInjectorMeta.put(reader.targetName(), new InstanceInjectorMetaData(reader));
+    }
+  }
+
+  Map<String, InstanceInjectorMetaData> instanceInjectorMeta() {
+    return instanceInjectorMeta;
   }
 
   void pluginProvided(String pluginProvides) {
