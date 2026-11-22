@@ -2,8 +2,8 @@ package org.example.myapp.injector;
 
 import io.avaje.inject.BeanScope;
 import io.avaje.inject.InjectorTarget;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
+import io.avaje.inject.PostConstruct;
+import io.avaje.inject.PreDestroy;
 import jakarta.inject.Inject;
 
 import java.util.List;
