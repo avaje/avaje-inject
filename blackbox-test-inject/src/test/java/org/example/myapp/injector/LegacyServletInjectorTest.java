@@ -45,4 +45,21 @@ class LegacyServletInjectorTest {
           .hasMessageContaining("java.lang.Object");
     }
   }
+
+  @Test
+  void scopeClose_preDestroysAllInjectedInstances() {
+    LegacyServlet servlet1 = new LegacyServlet();
+    LegacyServlet servlet2 = new LegacyServlet();
+
+    try (BeanScope scope = BeanScope.builder().build()) {
+      scope.inject(servlet1);
+      scope.inject(servlet2);
+
+      assertThat(servlet1.destroyed()).isFalse();
+      assertThat(servlet2.destroyed()).isFalse();
+    }
+
+    assertThat(servlet1.destroyed()).isTrue();
+    assertThat(servlet2.destroyed()).isTrue();
+  }
 }

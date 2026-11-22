@@ -189,7 +189,7 @@ public interface BeanScope extends AutoCloseable {
    *
    * <p>The instance type (or one of its supertypes) must be annotated with
    * {@link InjectorTarget @InjectorTarget} (or imported via {@link InjectorTarget.Import}) such
-   * that a generated {@link io.avaje.inject.spi.Injector} exists in this scope (or a parent scope).
+   * that a generated {@link Injector} exists in this scope (or a parent scope).
    * The most specific match is used, searching the instance class first, then its superclasses and
    * then its interfaces.
    *

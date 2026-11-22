@@ -46,6 +46,17 @@ import io.avaje.inject.spi.Injector;
 public @interface InjectorTarget {
 
   /**
+   * Set to true to have the type's {@link PreDestroy @PreDestroy} method invoked on every injected
+   * instance when the scope closes.
+   *
+   * <p>When enabled, the generated injector holds a strong reference to every instance passed to
+   * {@link Injector#inject(Object)} until the scope closes, so only enable this when the number of
+   * injected instances is bounded. It is a compile error to enable this when the type has no
+   * {@code @PreDestroy} method.
+   */
+  boolean preDestroy() default false;
+
+  /**
    * Generate an {@link Injector} for types that can't be annotated with {@code @InjectorTarget},
    * like those in an external project / dependency.
    */
@@ -55,5 +66,13 @@ public @interface InjectorTarget {
 
     /** Types to generate injectors for. */
     Class<?>[] value();
+
+    /**
+     * Set to true to have the {@link PreDestroy @PreDestroy} method invoked on every injected
+     * instance when the scope closes.
+     *
+     * @see InjectorTarget#preDestroy()
+     */
+    boolean preDestroy() default false;
   }
 }

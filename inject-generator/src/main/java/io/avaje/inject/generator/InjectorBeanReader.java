@@ -3,7 +3,9 @@ package io.avaje.inject.generator;
 import java.util.List;
 import java.util.Set;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+
 
 final class InjectorBeanReader {
 
@@ -13,13 +15,10 @@ final class InjectorBeanReader {
   private final List<MethodReader> injectMethods;
   private final ImportTypeMap importTypes = new ImportTypeMap();
   private final TypeReader typeReader;
+  private final Element preDestroyMethod;
   private final String importedPkg;
 
-  InjectorBeanReader(TypeElement beanType) {
-    this(beanType, null);
-  }
-
-  InjectorBeanReader(TypeElement beanType, String importedPkg) {
+  InjectorBeanReader(TypeElement beanType, String importedPkg, boolean preDestroy) {
     this.beanType = beanType;
     this.importedPkg = importedPkg;
     this.type = beanType.getQualifiedName().toString();
@@ -28,6 +27,13 @@ final class InjectorBeanReader {
     typeReader.process();
     this.injectFields = typeReader.injectFields();
     this.injectMethods = typeReader.injectMethods();
+    this.preDestroyMethod = preDestroy ? typeReader.preDestroyMethod() : null;
+    if (preDestroy && preDestroyMethod == null) {
+      APContext.logError(
+          beanType,
+          "@InjectorTarget preDestroy = true but type %s has no @PreDestroy method",
+          type);
+    }
     if (injectFields.isEmpty() && injectMethods.isEmpty()) {
       APContext.logError(
           beanType,
@@ -46,6 +52,10 @@ final class InjectorBeanReader {
 
   List<MethodReader> injectMethods() {
     return injectMethods;
+  }
+
+  Element preDestroyMethod() {
+    return preDestroyMethod;
   }
 
   boolean needsTryForMethodInjection() {
@@ -75,6 +85,12 @@ final class InjectorBeanReader {
     injectMethods.forEach(r -> r.addImports(importTypes));
     importTypes.add(Constants.GENERATED);
     importTypes.add("io.avaje.inject.spi.Injector");
+    if (preDestroyMethod != null) {
+      importTypes.add("java.util.Set");
+      importTypes.add("java.util.Collections");
+      importTypes.add("java.util.IdentityHashMap");
+      importTypes.add("io.avaje.inject.PreDestroy");
+    }
     return importTypes.forImport();
   }
 
