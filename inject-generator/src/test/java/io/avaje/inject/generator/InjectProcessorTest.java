@@ -263,7 +263,7 @@ class InjectProcessorTest {
               new PrintWriter(System.out),
               manager,
               diagnostics,
-              List.of("--release=11"),
+              List.of("--release=" + Integer.getInteger("java.specification.version")),
               null,
               manager.getJavaFileObjectsFromPaths(sources));
       task.setProcessors(List.of(new InjectProcessor()));
