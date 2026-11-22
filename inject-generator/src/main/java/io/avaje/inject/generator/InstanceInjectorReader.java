@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.logError;
+import static javax.lang.model.type.TypeKind.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -99,15 +100,15 @@ final class InstanceInjectorReader {
     typeReader.extraImports(importTypes);
 
     if (!genericTypes.isEmpty()) {
-      importTypes.add("java.lang.reflect.Type");
-      importTypes.add("io.avaje.inject.spi.GenericType");
+      importTypes.add(Constants.TYPE);
+      importTypes.add(Constants.GENERICTYPE);
       genericTypes.forEach(type -> importTypes.addAll(type.importTypes()));
     }
     importTypes.add(targetName);
-    importTypes.add(BeanScope.class.getName());
-    importTypes.add(Builder.class.getName());
-    importTypes.add(InstanceInjector.class.getName());
-    importTypes.add("io.avaje.inject.spi.Generated");
+    importTypes.add(Constants.BEANSCOPE);
+    importTypes.add(Constants.BUILDER);
+    importTypes.add(Constants.INSTANCEINJECTOR);
+    importTypes.add(Constants.GENERATED);
   }
 
   private void validateDependencyType(Element element, UType type) {
@@ -117,7 +118,7 @@ final class InstanceInjectorReader {
   }
 
   private boolean containsTypeVariable(UType type) {
-    return type.kind() == javax.lang.model.type.TypeKind.TYPEVAR
+    return type.kind() == TYPEVAR
         || type.componentTypes().stream().anyMatch(this::containsTypeVariable);
   }
 
