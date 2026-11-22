@@ -37,6 +37,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.NestingKind;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.ElementFilter;
@@ -335,16 +336,16 @@ public final class InjectProcessor extends AbstractProcessor {
   }
 
   private String importPackage(Element element) {
-    if (element instanceof javax.lang.model.element.PackageElement) {
-      return ((javax.lang.model.element.PackageElement) element).getQualifiedName().toString();
+    if (element instanceof PackageElement) {
+      return ((PackageElement) element).getQualifiedName().toString();
     }
     if (element instanceof TypeElement) {
       return elementUtils.getPackageOf(element).getQualifiedName().toString();
     }
     if (element instanceof javax.lang.model.element.ModuleElement) {
       return element.getEnclosedElements().stream()
-          .filter(javax.lang.model.element.PackageElement.class::isInstance)
-          .map(javax.lang.model.element.PackageElement.class::cast)
+          .filter(PackageElement.class::isInstance)
+          .map(PackageElement.class::cast)
           .map(packageElement -> packageElement.getQualifiedName().toString())
           .findFirst()
           .orElse("");
