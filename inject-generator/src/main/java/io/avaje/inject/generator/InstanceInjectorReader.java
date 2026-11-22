@@ -76,8 +76,7 @@ final class InstanceInjectorReader {
     for (FieldReader field : injectFields) {
       field.addImports(importTypes);
       validateMemberAccess(field.element(), importedPackage != null);
-      final UType type = UType.parse(field.element().asType());
-      validateDependencyType(field.element(), type);
+      validateDependencyType(field.element(), field.type());
       field.addDependsOnGeneric(genericTypes);
     }
     for (MethodReader method : injectMethods) {

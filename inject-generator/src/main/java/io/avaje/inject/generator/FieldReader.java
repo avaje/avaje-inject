@@ -128,4 +128,8 @@ final class FieldReader {
   boolean assisted() {
     return assisted;
   }
+
+  UType type() {
+    return type;
+  }
 }
