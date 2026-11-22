@@ -115,6 +115,10 @@ final class ScopeInfo {
     }
   }
 
+  boolean hasInstanceInjectors() {
+    return !instanceInjectorMeta.isEmpty();
+  }
+
   Map<String, InstanceInjectorMetaData> instanceInjectorMeta() {
     return instanceInjectorMeta;
   }

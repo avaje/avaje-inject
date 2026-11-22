@@ -295,7 +295,7 @@ final class SimpleModuleWriter {
     writer.append(CODE_COMMENT_CREATE_CONTEXT).eol();
     writer.append("  @Override").eol();
     writer.append("  public void build(Builder builder) {").eol();
-    if (!scopeInfo.instanceInjectorMeta().isEmpty()) {
+    if (scopeInfo.hasInstanceInjectors()) {
       writer.append("    registerInstanceInjectors(builder);").eol();
     }
     if (scopeInfo.addWithBeans()) {
@@ -318,11 +318,11 @@ final class SimpleModuleWriter {
   }
 
   private void writeInstanceInjectorMethod() {
-    final Map<String, InstanceInjectorMetaData> injectors = new TreeMap<>(scopeInfo.instanceInjectorMeta());
-    if (injectors.isEmpty()) {
+    if (!scopeInfo.hasInstanceInjectors()) {
       return;
     }
 
+    final Map<String, InstanceInjectorMetaData> injectors = new TreeMap<>(scopeInfo.instanceInjectorMeta());
     injectors.values().forEach(meta -> meta.writeAnnotation(writer));
     writer.append("  private static void registerInstanceInjectors(Builder builder) {").eol();
     injectors.values().forEach(meta -> writer.append("    %s.register(builder);", meta.injector()).eol());
@@ -374,9 +374,11 @@ final class SimpleModuleWriter {
     importTypes.add(Constants.BEANSCOPE);
     importTypes.add(Constants.INJECTMODULE);
     importTypes.add(Constants.DEPENDENCYMETA);
-    importTypes.add(Constants.INSTANCEINJECTORMETA);
     importTypes.add(Constants.MODULE);
     importTypes.add(Constants.BUILDER);
+    if (scopeInfo.hasInstanceInjectors()) {
+      importTypes.add(Constants.INSTANCEINJECTORMETA);
+    }
     return importTypes;
   }
 
