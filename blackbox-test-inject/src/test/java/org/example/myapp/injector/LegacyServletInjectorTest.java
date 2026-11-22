@@ -1,6 +1,9 @@
 package org.example.myapp.injector;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Test;
 
@@ -26,20 +29,20 @@ class LegacyServletInjectorTest {
   }
 
   @Test
-  void scopeClose_preDestroysAllInjectedInstances() {
-    LegacyServlet servlet1 = new LegacyServlet();
-    LegacyServlet servlet2 = new LegacyServlet();
-
+  void beanScopeInject() {
     try (BeanScope scope = BeanScope.builder().build()) {
-      Injector<LegacyServlet> injector = scope.get(new GenericType<Injector<LegacyServlet>>() {});
-      injector.inject(servlet1);
-      injector.inject(servlet2);
-
-      assertThat(servlet1.destroyed()).isFalse();
-      assertThat(servlet2.destroyed()).isFalse();
+      LegacyServlet servlet = scope.inject(new LegacyServlet());
+      assertThat(servlet.dep1()).isNotNull();
+      assertThat(servlet.dep2()).isNotNull();
     }
+  }
 
-    assertThat(servlet1.destroyed()).isTrue();
-    assertThat(servlet2.destroyed()).isTrue();
+  @Test
+  void beanScopeInject_noInjector_throws() {
+    try (BeanScope scope = BeanScope.builder().build()) {
+      assertThatThrownBy(() -> scope.inject(new Object()))
+          .isInstanceOf(NoSuchElementException.class)
+          .hasMessageContaining("java.lang.Object");
+    }
   }
 }

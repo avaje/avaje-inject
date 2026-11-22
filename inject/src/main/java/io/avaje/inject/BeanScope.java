@@ -9,6 +9,8 @@ import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
+import io.avaje.inject.spi.Injector;
+
 /**
  * Holds beans created by dependency injection.
  * <p>
@@ -180,6 +182,31 @@ public interface BeanScope extends AutoCloseable {
    */
   default @Nullable <T> T getNullable(Type type, @Nullable String name) {
     return this.<T>getOptional(type, name).orElse(null);
+  }
+
+  /**
+   * Inject dependencies into an instance that avaje-inject did not construct itself.
+   *
+   * <p>The instance type (or one of its supertypes) must be annotated with
+   * {@link InjectorTarget @InjectorTarget} (or imported via {@link InjectorTarget.Import}) such
+   * that a generated {@link io.avaje.inject.spi.Injector} exists in this scope (or a parent scope).
+   * The most specific match is used, searching the instance class first, then its superclasses and
+   * then its interfaces.
+   *
+   * <pre>{@code
+   *
+   *   LegacyServlet servlet = scope.inject(new LegacyServlet());
+   *
+   * }</pre>
+   *
+   * @param instance the externally created instance to inject into
+   * @return the same instance, with its dependencies injected
+   * @throws java.util.NoSuchElementException When no injector is found for the instance type
+   */
+  default <T> T inject(T instance) {
+    Injector<T> injector = InjectorType.find(this, instance.getClass());
+    injector.inject(instance);
+    return instance;
   }
 
   /**

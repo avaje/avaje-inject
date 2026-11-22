@@ -25,4 +25,13 @@ class ImportedInjectorTest {
       assertThat(controller.dep2()).isNotNull();
     }
   }
+
+  @Test
+  void beanScopeInject_importedType() {
+    try (BeanScope scope = BeanScope.builder().build()) {
+      ExternalController controller = scope.inject(new ExternalController());
+      assertThat(controller.dep1).isNotNull();
+      assertThat(controller.dep2()).isNotNull();
+    }
+  }
 }

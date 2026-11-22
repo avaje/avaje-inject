@@ -12,7 +12,8 @@ import io.avaje.inject.spi.Injector;
  *
  * <p>Place this on the externally created type and annotate the fields or setter methods that need
  * injecting with {@code @Inject} as normal. A generated bean is registered into the scope
- * implementing {@code Injector<Type>}; resolve it with {@link BeanScope#get(java.lang.reflect.Type)}.
+ * implementing {@code Injector<Type>}. Use {@link BeanScope#inject(Object)} to inject an instance,
+ * or resolve the injector itself with {@link BeanScope#get(java.lang.reflect.Type)}.
  *
  * <h3>Example</h3>
  *
@@ -31,6 +32,9 @@ import io.avaje.inject.spi.Injector;
  *
  * <pre>{@code
  * LegacyServlet servlet = ExternalFramework.create();
+ * scope.inject(servlet);
+ *
+ * // or obtain the injector directly
  * Injector<LegacyServlet> injector = scope.get(new GenericType<Injector<LegacyServlet>>() {});
  * injector.inject(servlet);
  * }</pre>

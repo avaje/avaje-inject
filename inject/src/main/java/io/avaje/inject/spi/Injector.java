@@ -7,9 +7,7 @@ package io.avaje.inject.spi;
  *
  * <p>A generated implementation of this interface is registered into the
  * scope for any type annotated with {@code @io.avaje.inject.InjectorTarget}.
- * If the type has a {@code @PreDestroy} method, the generated injector
- * remembers every instance passed to {@link #inject(Object)} and invokes it
- * on each of them automatically when the scope closes.
+ * Typically use {@code BeanScope.inject(instance)} rather than this directly.
  *
  * <h3>Example</h3>
  *

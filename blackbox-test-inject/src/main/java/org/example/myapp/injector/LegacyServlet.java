@@ -1,7 +1,6 @@
 package org.example.myapp.injector;
 
 import io.avaje.inject.InjectorTarget;
-import io.avaje.inject.PreDestroy;
 import jakarta.inject.Inject;
 
 /**
@@ -14,7 +13,6 @@ public class LegacyServlet {
 
   private Dep1 dep1;
   private Dep2 dep2;
-  private boolean destroyed;
 
   @Inject
   void setDep1(Dep1 dep1) {
@@ -32,14 +30,5 @@ public class LegacyServlet {
 
   public Dep2 dep2() {
     return dep2;
-  }
-
-  @PreDestroy
-  void shutdown() {
-    this.destroyed = true;
-  }
-
-  public boolean destroyed() {
-    return destroyed;
   }
 }

@@ -33,4 +33,20 @@ class LegacyBaseAndIfaceInjectorTest {
       assertThat(bean.dep2()).isNotNull();
     }
   }
+
+  @Test
+  void beanScopeInject_viaAbstractSuperclass() {
+    try (BeanScope scope = BeanScope.builder().build()) {
+      LegacyBaseImpl bean = scope.inject(new LegacyBaseImpl());
+      assertThat(bean.dep1()).isNotNull();
+    }
+  }
+
+  @Test
+  void beanScopeInject_viaInterface() {
+    try (BeanScope scope = BeanScope.builder().build()) {
+      LegacyIfaceImpl bean = scope.inject(new LegacyIfaceImpl());
+      assertThat(bean.dep2()).isNotNull();
+    }
+  }
 }
