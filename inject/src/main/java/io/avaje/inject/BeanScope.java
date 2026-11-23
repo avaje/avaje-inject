@@ -174,6 +174,15 @@ public interface BeanScope extends AutoCloseable {
   <T> Optional<T> getOptional(Class<T> type);
 
   /**
+   * Optionally return a single bean given the full generic type and empty if it is not found.
+   *
+   * @param type the generic type
+   */
+  default <T> Optional<T> getOptional(Type type) {
+    return getOptional(type, null);
+  }
+
+  /**
    * Optionally return a single bean given the type and name and empty if it is not found.
    *
    * @param type an interface or bean type
@@ -188,6 +197,15 @@ public interface BeanScope extends AutoCloseable {
    */
   default @Nullable <T> T getNullable(Class<T> type) {
     return getOptional(type).orElse(null);
+  }
+
+  /**
+   * Return a single bean given the full generic type and null if it is not found.
+   *
+   * @param type the generic type
+   */
+  default @Nullable <T> T getNullable(Type type) {
+    return this.<T>getOptional(type, null).orElse(null);
   }
 
   /**
