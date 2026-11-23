@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import javax.tools.JavaCompiler;
 import javax.tools.JavaCompiler.CompilationTask;
+import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaFileObject;
 import javax.tools.JavaFileObject.Kind;
@@ -33,6 +34,7 @@ class InjectProcessorTest {
 
   @AfterEach
   void deleteGeneratedFiles() {
+    ProcessingContext.clear();
     try {
       Stream.of(
               Files.walk(Paths.get("io").toAbsolutePath()),
@@ -223,6 +225,153 @@ class InjectProcessorTest {
             "@InjectorTarget cannot access injected member parent.Base.inherited from generated package child");
   }
 
+  @Test
+  void warnsWithoutFailingWhenPreDestroyNotEnabled(@TempDir Path tempDir) throws Exception {
+    final Path externalClasses = Files.createDirectories(tempDir.resolve("external-classes"));
+    final Path externalGenerated = Files.createDirectories(tempDir.resolve("external-generated"));
+    final Path preDestroyAnnotation =
+        writeSource(
+            tempDir,
+            "ext/PreDestroy.java",
+            "package ext;\n"
+                + "import java.lang.annotation.Retention;\n"
+                + "import java.lang.annotation.RetentionPolicy;\n"
+                + "@Retention(RetentionPolicy.CLASS)\n"
+                + "public @interface PreDestroy {}\n");
+    final Path externalTarget =
+        writeSource(
+            tempDir,
+            "ext/ExternalServlet.java",
+            "package ext;\n"
+                + "import jakarta.inject.Inject;\n"
+                + "public class ExternalServlet {\n"
+                + "  @Inject public ExternalDep dep;\n"
+                + "  @PreDestroy public void shutdown() {}\n"
+                + "}\n");
+    final Path externalBase =
+        writeSource(
+            tempDir,
+            "ext/FrameworkBase.java",
+            "package ext;\n"
+                + "public class FrameworkBase {\n"
+                + "  @PreDestroy public void destroyBase() {}\n"
+                + "}\n");
+    final Path externalDep =
+        writeSource(
+            tempDir,
+            "ext/ExternalDep.java",
+            "package ext;\n"
+                + "public class ExternalDep {}\n");
+    assertThat(
+            compile(
+                List.of(preDestroyAnnotation, externalDep, externalTarget, externalBase),
+                externalClasses,
+                externalGenerated,
+                null,
+                null,
+                false))
+        .isTrue();
+
+    final Path appClasses = Files.createDirectories(tempDir.resolve("app-classes"));
+    final Path appGenerated = Files.createDirectories(tempDir.resolve("app-generated"));
+    final Path appFactory =
+        writeSource(
+            tempDir,
+            "app/AppFactory.java",
+            "package app;\n"
+                + "import io.avaje.inject.Bean;\n"
+                + "import io.avaje.inject.Factory;\n"
+                + "@Factory\n"
+                + "public class AppFactory {\n"
+                + "  @Bean ext.ExternalDep dep() { return new ext.ExternalDep(); }\n"
+                + "}\n");
+    final Path importConfig =
+        writeSource(
+            tempDir,
+            "app/ImportConfig.java",
+            "package app;\n"
+                + "import io.avaje.inject.InjectorTarget;\n"
+                + "@InjectorTarget.Import(ext.ExternalServlet.class)\n"
+                + "class ImportConfig {}\n");
+    final Path subclassTarget =
+        writeSource(
+            tempDir,
+            "app/MyServlet.java",
+            "package app;\n"
+                + "import io.avaje.inject.InjectorTarget;\n"
+                + "import jakarta.inject.Inject;\n"
+                + "@InjectorTarget\n"
+                + "public class MyServlet extends ext.FrameworkBase {\n"
+                + "  @Inject ext.ExternalDep dep;\n"
+                + "}\n");
+    final DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+
+    assertThat(
+            compile(
+                List.of(appFactory, importConfig, subclassTarget),
+                appClasses,
+                appGenerated,
+                externalClasses,
+                diagnostics))
+        .isTrue();
+
+    final List<Diagnostic<? extends JavaFileObject>> warnings =
+        diagnostics.getDiagnostics().stream()
+            .filter(
+                d ->
+                    d.getKind() == Diagnostic.Kind.WARNING
+                        || d.getKind() == Diagnostic.Kind.MANDATORY_WARNING)
+            .filter(d -> d.getMessage(null).contains("enablePreDestroy = true"))
+            .collect(Collectors.toList());
+    assertThat(warnings).hasSize(2);
+    assertThat(warnings)
+        .extracting(d -> d.getSource() == null ? null : Path.of(d.getSource().toUri()).getFileName().toString())
+        .containsExactlyInAnyOrder("ImportConfig.java", "MyServlet.java");
+    assertThat(Files.readString(appGenerated.resolve("app/MyServlet$InstanceInjector.java")))
+        .doesNotContain("hasPreDestroy");
+    assertThat(
+            Files.readString(
+                appGenerated.resolve("app/ext_ExternalServlet$InstanceInjector.java")))
+        .doesNotContain("hasPreDestroy");
+  }
+
+  @Test
+  void reportsErrorWhenDirectAvajePreDestroyNotEnabled(@TempDir Path tempDir) throws Exception {
+    final Path classOutput = Files.createDirectories(tempDir.resolve("classes"));
+    final Path sourceOutput = Files.createDirectories(tempDir.resolve("generated"));
+    final Path depSource =
+        writeSource(
+            tempDir,
+            "local/Dep.java",
+            "package local;\n"
+                + "import jakarta.inject.Singleton;\n"
+                + "@Singleton\n"
+                + "public class Dep {}\n");
+    final Path targetSource =
+        writeSource(
+            tempDir,
+            "local/Target.java",
+            "package local;\n"
+                + "import io.avaje.inject.InjectorTarget;\n"
+                + "import io.avaje.inject.PreDestroy;\n"
+                + "import jakarta.inject.Inject;\n"
+                + "@InjectorTarget\n"
+                + "public class Target {\n"
+                + "  @Inject Dep dep;\n"
+                + "  @PreDestroy void destroy() {}\n"
+                + "}\n");
+    final DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+
+    assertThat(compile(List.of(depSource, targetSource), classOutput, sourceOutput, null, diagnostics))
+        .isFalse();
+    assertThat(
+            diagnostics.getDiagnostics().stream()
+                .filter(d -> d.getKind() == Diagnostic.Kind.ERROR)
+                .map(d -> d.getMessage(null))
+                .collect(Collectors.joining("\n")))
+        .contains("use @InjectorTarget(enablePreDestroy = true)");
+  }
+
   private Path writeSource(Path tempDir, String relativePath, String source) throws Exception {
     final Path path = tempDir.resolve(relativePath);
     Files.createDirectories(path.getParent());
@@ -242,6 +391,17 @@ class InjectProcessorTest {
       Path sourceOutput,
       Path previousOutput,
       DiagnosticCollector<JavaFileObject> diagnostics)
+      throws Exception {
+    return compile(sources, classOutput, sourceOutput, previousOutput, diagnostics, true);
+  }
+
+  private boolean compile(
+      List<Path> sources,
+      Path classOutput,
+      Path sourceOutput,
+      Path previousOutput,
+      DiagnosticCollector<JavaFileObject> diagnostics,
+      boolean withProcessor)
       throws Exception {
     final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
     final StandardJavaFileManager manager = compiler.getStandardFileManager(null, null, null);
@@ -266,7 +426,9 @@ class InjectProcessorTest {
               List.of("--release=" + Integer.getInteger("java.specification.version")),
               null,
               manager.getJavaFileObjectsFromPaths(sources));
-      task.setProcessors(List.of(new InjectProcessor()));
+      if (withProcessor) {
+        task.setProcessors(List.of(new InjectProcessor()));
+      }
       return task.call();
     } finally {
       manager.close();

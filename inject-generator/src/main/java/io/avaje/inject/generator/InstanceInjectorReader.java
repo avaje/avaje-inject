@@ -1,6 +1,7 @@
 package io.avaje.inject.generator;
 
 import static io.avaje.inject.generator.APContext.logError;
+import static io.avaje.inject.generator.APContext.logWarn;
 import static javax.lang.model.type.TypeKind.TYPEVAR;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import io.avaje.inject.generator.MethodReader.MethodParam;
 final class InstanceInjectorReader {
 
   private final TypeElement targetType;
+  private final Element importElement;
   private final String targetName;
   private final String packageName;
   private final String generatedName;
@@ -34,25 +36,27 @@ final class InstanceInjectorReader {
   private final Set<UType> genericTypes = new LinkedHashSet<>();
   private boolean written;
 
-  InstanceInjectorReader(TypeElement targetType, String importedPackage, boolean enablePreDestroy) {
-    final boolean imported = importedPackage != null;
+  InstanceInjectorReader(TypeElement targetType, Element importElement, boolean enablePreDestroy) {
+    final boolean imported = importElement != null;
     this.targetType = targetType;
+    this.importElement = importElement;
     this.targetName = targetType.getQualifiedName().toString();
     this.packageName =
         imported
-            ? importedPackage
+            ? ProcessingContext.importPkg(importElement)
             : APContext.elements().getPackageOf(targetType).getQualifiedName().toString();
     this.generatedName = generatedName(targetType, imported);
     this.enablePreDestroy = enablePreDestroy;
 
+    final Element typeDiagnosticElement = imported ? importElement : targetType;
     if (targetType.getKind() != ElementKind.CLASS) {
-      logError(targetType, "@InjectorTarget can only be used on classes");
+      logError(typeDiagnosticElement, "@InjectorTarget can only be used on classes");
     }
     if (!targetType.getTypeParameters().isEmpty()) {
-      logError(targetType, "@InjectorTarget classes cannot declare type parameters");
+      logError(typeDiagnosticElement, "@InjectorTarget classes cannot declare type parameters");
     }
     if (imported && !targetType.getModifiers().contains(Modifier.PUBLIC)) {
-      logError(targetType, "Imported @InjectorTarget class %s must be public", targetName);
+      logError(importElement, "Imported @InjectorTarget class %s must be public", targetName);
     }
 
     typeReader =
@@ -65,7 +69,7 @@ final class InstanceInjectorReader {
 
     if (injectFields.isEmpty() && injectMethods.isEmpty()) {
       logError(
-          targetType,
+          typeDiagnosticElement,
           "@InjectorTarget type %s must have at least one @Inject field or method",
           targetName);
     }
@@ -73,10 +77,11 @@ final class InstanceInjectorReader {
     for (FieldReader field : injectFields) {
       field.addImports(importTypes);
       validateMemberAccess(field.element(), imported);
-      validateDependencyType(field.element(), field.type());
+      validateDependencyType(diagnosticElement(field.element()), field.type());
       if (field.isNamedQualifiedMap()) {
         logError(
-            field.element(), "@InjectorTarget does not support a named @QualifiedMap dependency");
+            diagnosticElement(field.element()),
+            "@InjectorTarget does not support a named @QualifiedMap dependency");
       }
       usesSet |= field.isSet();
       field.addDependsOnGeneric(genericTypes);
@@ -98,11 +103,7 @@ final class InstanceInjectorReader {
       if (enablePreDestroy) {
         validateMemberAccess(preDestroyMethod, imported);
       } else {
-        logError(
-            preDestroyMethod,
-            "@InjectorTarget types do not support the @PreDestroy lifecycle by default, use %s(enablePreDestroy = true) to enable this."
-                + " The BeanScope then holds a reference to each injected instance until the BeanScope is closed",
-            imported ? "@InjectorTarget.Import" : "@InjectorTarget");
+        validateDisabledPreDestroy(imported);
       }
     }
     if (usesSet) {
@@ -123,13 +124,46 @@ final class InstanceInjectorReader {
     importTypes.add(Constants.GENERATED);
   }
 
+  private Element diagnosticElement(Element member) {
+    if (importElement != null) {
+      return importElement;
+    }
+    return member.getEnclosingElement().equals(targetType) ? member : targetType;
+  }
+
+  private void validateDisabledPreDestroy(boolean imported) {
+    final String msg =
+        "@InjectorTarget types do not support the @PreDestroy lifecycle (%s.%s) by default, use %s(enablePreDestroy = true) to enable this."
+            + " The BeanScope then holds a reference to each injected instance until the BeanScope is closed";
+    final Element element = diagnosticElement(preDestroyMethod);
+    final String annotationName = imported ? "@InjectorTarget.Import" : "@InjectorTarget";
+    if (!imported
+        && preDestroyMethod.getEnclosingElement().equals(targetType)
+        && PreDestroyPrism.isPresent(preDestroyMethod)) {
+      logError(
+          element,
+          msg,
+          preDestroyMethod.getEnclosingElement(),
+          preDestroyMethod.getSimpleName(),
+          annotationName);
+    } else {
+      logWarn(
+          element,
+          msg,
+          preDestroyMethod.getEnclosingElement(),
+          preDestroyMethod.getSimpleName(),
+          annotationName);
+    }
+  }
+
   private boolean validateParams(MethodReader method) {
     boolean usesSet = false;
     for (MethodParam param : method.params()) {
-      validateDependencyType(param.element(), param.getFullUType());
+      final Element diagElement = diagnosticElement(param.element());
+      validateDependencyType(diagElement, param.getFullUType());
       if (param.isNamedQualifiedMap()) {
         logError(
-            param.element(), "@InjectorTarget does not support a named @QualifiedMap dependency");
+            diagElement, "@InjectorTarget does not support a named @QualifiedMap dependency");
       }
       usesSet |= param.isSet();
     }
@@ -154,8 +188,10 @@ final class InstanceInjectorReader {
     if (imported) {
       if (!element.getModifiers().contains(Modifier.PUBLIC)) {
         logError(
-            element,
-            "Imported @InjectorTarget classes require public @Inject and lifecycle members");
+            importElement,
+            "Imported @InjectorTarget class %s requires public @Inject and lifecycle members (%s)",
+            targetName,
+            element.getSimpleName());
       }
       return;
     }
@@ -168,7 +204,7 @@ final class InstanceInjectorReader {
       return;
     }
     logError(
-        element,
+        diagnosticElement(element),
         "@InjectorTarget cannot access injected member %s.%s from generated package %s; make the member public",
         element.getEnclosingElement(),
         element.getSimpleName(),
@@ -187,6 +223,10 @@ final class InstanceInjectorReader {
 
   TypeElement targetType() {
     return targetType;
+  }
+
+  Element diagnosticSourceElement() {
+    return importElement != null ? importElement : targetType;
   }
 
   String targetName() {

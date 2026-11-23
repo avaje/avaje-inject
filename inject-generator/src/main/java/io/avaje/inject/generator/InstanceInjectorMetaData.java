@@ -17,7 +17,7 @@ final class InstanceInjectorMetaData {
     this.target = reader.targetName();
     this.injector = reader.generatedTypeName();
     this.dependsOn = reader.dependsOn();
-    this.sourceElement = reader.targetType();
+    this.sourceElement = reader.diagnosticSourceElement();
   }
 
   InstanceInjectorMetaData(InstanceInjectorMetaPrism prism) {
