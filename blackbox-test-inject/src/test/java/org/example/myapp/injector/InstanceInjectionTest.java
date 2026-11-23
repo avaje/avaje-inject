@@ -89,8 +89,14 @@ class InstanceInjectionTest {
       assertThat(instance.provider.get()).isSameAs(thing);
       assertThat(instance.set).containsExactly(thing);
       assertThat(instance.optional).containsSame(thing);
+      assertThat(instance.optionalGeneric).isPresent();
+      assertThat(instance.absentOptionalGeneric).isEmpty();
+      assertThat(instance.nullableGeneric).isSameAs(instance.optionalGeneric.orElseThrow());
+      assertThat(instance.absentNullableGeneric).isNull();
       assertThat(instance.methodSet).containsExactly(thing);
       assertThat(instance.methodProvider.get()).isSameAs(thing);
+      assertThat(instance.methodOptionalGeneric).containsSame(instance.nullableGeneric);
+      assertThat(instance.methodAbsentNullableGeneric).isNull();
 
       // prototype dependencies are resolved from the scope on each inject() and Provider.get()
       InjectedPrototype firstPrototype = instance.prototype;
