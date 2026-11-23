@@ -423,7 +423,7 @@ class InjectProcessorTest {
               new PrintWriter(System.out),
               manager,
               diagnostics,
-              List.of("--release=" + Integer.getInteger("java.specification.version")),
+              List.of("--release=" + Integer.getInteger("java.specification.version"), withProcessor ? "-proc:full" : "-proc:none" ),
               null,
               manager.getJavaFileObjectsFromPaths(sources));
       if (withProcessor) {
