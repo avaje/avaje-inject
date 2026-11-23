@@ -327,17 +327,16 @@ public final class InjectProcessor extends AbstractProcessor {
 
   private void readImportedInjectorTargets(Set<? extends Element> elements) {
     for (var element : elements) {
-      final var packageName = ProcessingContext.importPkg(element);
       final var prism = InjectorTargetImportPrism.getInstanceOn(element);
       prism.value().stream()
           .map(ProcessingContext::asElement)
           .filter(Objects::nonNull)
-          .forEach(type -> addInstanceInjector(type, packageName, prism.enablePreDestroy()));
+          .forEach(type -> addInstanceInjector(type, element, prism.enablePreDestroy()));
     }
   }
 
-  private void addInstanceInjector(TypeElement type, String importedPackage, boolean enablePreDestroy) {
-    defaultScope.addInstanceInjector(new InstanceInjectorReader(type, importedPackage, enablePreDestroy));
+  private void addInstanceInjector(TypeElement type, Element importElement, boolean enablePreDestroy) {
+    defaultScope.addInstanceInjector(new InstanceInjectorReader(type, importElement, enablePreDestroy));
   }
 
   private void readBeans(Set<? extends Element> beans) {
