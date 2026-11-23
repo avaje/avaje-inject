@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,7 +38,6 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.NestingKind;
-import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.ElementFilter;
@@ -319,43 +319,25 @@ public final class InjectProcessor extends AbstractProcessor {
   }
 
   private void readInjectorTargets(Set<? extends Element> elements) {
-    ElementFilter.typesIn(elements)
-        .forEach(type -> addInstanceInjector(type, null));
+    for (var type : ElementFilter.typesIn(elements)) {
+      final boolean enablePreDestroy = InjectorTargetPrism.getInstanceOn(type).enablePreDestroy();
+      addInstanceInjector(type, null, enablePreDestroy);
+    }
   }
 
   private void readImportedInjectorTargets(Set<? extends Element> elements) {
-    for (Element element : elements) {
-      final String packageName = importPackage(element);
-      InjectorTargetImportPrism.getInstanceOn(element)
-          .value()
-          .stream()
+    for (var element : elements) {
+      final var packageName = ProcessingContext.importPkg(element);
+      final var prism = InjectorTargetImportPrism.getInstanceOn(element);
+      prism.value().stream()
           .map(ProcessingContext::asElement)
-          .filter(java.util.Objects::nonNull)
-          .forEach(type -> addInstanceInjector(type, packageName));
+          .filter(Objects::nonNull)
+          .forEach(type -> addInstanceInjector(type, packageName, prism.enablePreDestroy()));
     }
   }
 
-  private String importPackage(Element element) {
-    if (element instanceof PackageElement) {
-      return ((PackageElement) element).getQualifiedName().toString();
-    }
-    if (element instanceof TypeElement) {
-      return elementUtils.getPackageOf(element).getQualifiedName().toString();
-    }
-    if (element instanceof javax.lang.model.element.ModuleElement) {
-      return element.getEnclosedElements().stream()
-          .filter(PackageElement.class::isInstance)
-          .map(PackageElement.class::cast)
-          .map(packageElement -> packageElement.getQualifiedName().toString())
-          .findFirst()
-          .orElse("");
-    }
-    return "";
-  }
-
-  private void addInstanceInjector(TypeElement type, String importedPackage) {
-    final var reader = new InstanceInjectorReader(type, importedPackage);
-    defaultScope.addInstanceInjector(reader);
+  private void addInstanceInjector(TypeElement type, String importedPackage, boolean enablePreDestroy) {
+    defaultScope.addInstanceInjector(new InstanceInjectorReader(type, importedPackage, enablePreDestroy));
   }
 
   private void readBeans(Set<? extends Element> beans) {

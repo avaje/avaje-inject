@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 
+import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 
 import io.avaje.inject.generator.MethodReader.MethodParam;
@@ -85,7 +86,7 @@ final class SimpleInstanceInjectorWriter {
     for (MethodReader method : reader.injectMethods()) {
       writeMethodInjection(method);
     }
-    reader.postConstructMethod().ifPresent(this::writePostConstruct);
+    reader.postConstructMethod().ifPresent(this::writeMethodInjection);
 
     if (needsTry) {
       writer.decIndent();
@@ -97,24 +98,25 @@ final class SimpleInstanceInjectorWriter {
   }
 
   private void writeFieldInjection(FieldReader field) {
-    final String name = field.fieldName();
     final String value =
-        isBeanScope(UType.parse(field.element().asType()).fullWithoutAnnotations())
+        isBeanScope(field.type().fullWithoutAnnotations())
         ? "scope"
-        : field.builderGetDependency("scope");
-    writer.start("instance.%s = %s;", name, value).eol();
+        : field.scopeGetDependency("scope");
+    writer.start("%s.%s = %s;", fieldOwner(field), field.fieldName(), value).eol();
+  }
+
+  private String fieldOwner(FieldReader field) {
+    final var declaringType = (TypeElement) field.element().getEnclosingElement();
+    if (declaringType.equals(reader.targetType())) {
+      return "instance";
+    }
+    return String.format("((%s) instance)", declaringType.getQualifiedName());
   }
 
   private void writeMethodInjection(MethodReader method) {
     writer.start("instance.%s(", method.name());
     writeMethodParams(method.params());
     writer.append(");").eol();
-  }
-
-  private void writePostConstruct(MethodReader method) {
-    writer.start("instance.%s(", method.name());
-    BeanReader.writeLifeCycleGet(writer, method.params(), "scope", "scope");
-    writer.append(";").eol();
   }
 
   private void writeMethodParams(List<MethodParam> params) {
@@ -126,7 +128,7 @@ final class SimpleInstanceInjectorWriter {
       if (isBeanScope(param.getFullUType().fullWithoutAnnotations())) {
         writer.append("scope");
       } else {
-        param.builderGetDependency(writer, "scope");
+        param.scopeGetDependency(writer, "scope");
       }
     }
   }

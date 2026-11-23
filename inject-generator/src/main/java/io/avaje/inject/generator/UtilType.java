@@ -103,4 +103,34 @@ final class UtilType {
     return nullable ? "getNullable(" : "get(";
   }
 
+  boolean isSet() {
+    return type == Type.SET;
+  }
+
+  String scopeMethod(boolean nullable, boolean beanMap) {
+    switch (type) {
+      case SET:
+        return "list(";
+      case PROVIDER:
+        return nullable ? "getNullable(" : "get(";
+      default:
+        return getMethod(nullable, beanMap);
+    }
+  }
+
+  String scopePrefix() {
+    switch (type) {
+      case SET:
+        return "new LinkedHashSet<>(";
+      case PROVIDER:
+        // a lazy Provider that resolves from the BeanScope on each get()
+        return "() -> ";
+      default:
+        return "";
+    }
+  }
+
+  String scopeSuffix() {
+    return type == Type.SET ? ")" : "";
+  }
 }

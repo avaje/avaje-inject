@@ -8,7 +8,7 @@ import jakarta.inject.Inject;
 
 import java.util.List;
 
-@InjectorTarget
+@InjectorTarget(enablePreDestroy = true)
 public class ExternalInstance {
 
   @Inject InjectedThing fieldDependency;
@@ -17,6 +17,7 @@ public class ExternalInstance {
   BeanScope injectedScope;
   BeanScope initializedScope;
   boolean initialized;
+  int initializeCount;
   int destroyCount;
 
   public ExternalInstance(InjectedThing fieldDependency) {
@@ -36,6 +37,7 @@ public class ExternalInstance {
   @PostConstruct
   void initialize(BeanScope scope) {
     initialized = true;
+    initializeCount++;
     initializedScope = scope;
   }
 

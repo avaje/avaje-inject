@@ -398,15 +398,21 @@ final class ProcessingContext {
   }
 
   static void addComponentImportPkg(String type, Element element) {
-    final String pkg;
+    CTX.get().importedComponentPkg.put(type, importPkg(element));
+  }
+
+  static String importPkg(Element element) {
     if (element instanceof ModuleElement) {
-      pkg = element.getEnclosedElements().get(0).getSimpleName().toString();
+      return element.getEnclosedElements().stream()
+        .filter(PackageElement.class::isInstance)
+        .map(e -> ((PackageElement) e).getQualifiedName().toString())
+        .findFirst()
+        .orElse("");
     } else if (element instanceof PackageElement) {
-      pkg = ((PackageElement) element).getQualifiedName().toString();
+      return ((PackageElement) element).getQualifiedName().toString();
     } else {
-      pkg = APContext.elements().getPackageOf(element).getQualifiedName().toString();
+      return APContext.elements().getPackageOf(element).getQualifiedName().toString();
     }
-    CTX.get().importedComponentPkg.put(type, pkg);
   }
 
   static String importedPkg(String type) {
