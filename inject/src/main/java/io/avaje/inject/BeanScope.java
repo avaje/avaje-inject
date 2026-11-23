@@ -101,9 +101,14 @@ public interface BeanScope extends AutoCloseable {
   /**
    * Inject dependencies into the given instance.
    *
-   * <p>Injected fields are assigned, injection methods are invoked, and any {@code @PostConstruct}
-   * method runs on each call. Any {@code @PreDestroy} or {@link AutoCloseable} cleanup is
-   * registered at most once per instance and invoked once when the scope closes.
+   * <p>The type of the instance (or one of its superclasses) must be annotated with {@link
+   * InjectorTarget}. Injection fields are assigned, injection methods are invoked, and any
+   * {@code @PostConstruct} method runs on each call.
+   *
+   * <p>When the target enables it via {@link InjectorTarget#enablePreDestroy()}, the
+   * {@code @PreDestroy} or {@link AutoCloseable} cleanup is registered at most once per instance
+   * and invoked when this scope closes. This scope then holds a reference to the instance until it
+   * is closed.
    *
    * @param instance the instance to inject dependencies into
    * @param <T> the type of the instance

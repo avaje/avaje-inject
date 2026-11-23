@@ -49,7 +49,8 @@ final class FieldReader {
     }
   }
 
-  Dependency dependsOn() {
+  /** Return the dependency for instance injection, where only plain types are hard dependencies. */
+  Dependency injectorDependsOn() {
     return new Dependency(
         isWildcard() ? type.mainType() : utype.rawType(isBeanMap),
         name,
@@ -64,11 +65,28 @@ final class FieldReader {
     importTypes.addAll(type.importTypes());
   }
 
+  boolean isSet() {
+    return utype.isSet();
+  }
+
+  boolean isNamedQualifiedMap() {
+    return isBeanMap && name != null;
+  }
+
   String builderGetDependency(String builder) {
+    return getDependency(builder, utype.getMethod(nullable, isBeanMap));
+  }
+
+  /** Return the code to obtain the dependency from a BeanScope (for instance injection). */
+  String scopeGetDependency(String scope) {
+    return utype.scopePrefix() + getDependency(scope, utype.scopeMethod(nullable, isBeanMap)) + utype.scopeSuffix();
+  }
+
+  private String getDependency(String target, String method) {
     final var sb = new StringBuilder();
     final boolean wildcard = isWildcard();
     final var wildParam = wildcard ? String.format("<%s>", type.shortWithoutAnnotations()) : "";
-    sb.append(builder).append(".").append(wildParam).append(utype.getMethod(nullable, isBeanMap));
+    sb.append(target).append(".").append(wildParam).append(method);
     if (!wildcard && isGenericParam()) {
       sb.append("TYPE_").append(Util.shortName(type).replace(".", "_"));
     } else {
