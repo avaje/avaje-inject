@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -58,6 +59,8 @@ import io.avaje.prism.GenerateUtils;
   FactoryPrism.PRISM_TYPE,
   ImportPrism.PRISM_TYPE,
   InjectModulePrism.PRISM_TYPE,
+  InjectorTargetPrism.PRISM_TYPE,
+  InjectorTargetImportPrism.PRISM_TYPE,
   MainClassPrism.PRISM_TYPE,
   PluginProvidesPrism.PRISM_TYPE,
   PrototypePrism.PRISM_TYPE,
@@ -187,6 +190,8 @@ public final class InjectProcessor extends AbstractProcessor {
 
     maybeBeanElements(roundEnv, ControllerPrism.PRISM_TYPE).ifPresent(this::readBeans);
     maybeBeanElements(roundEnv, AssistFactoryPrism.PRISM_TYPE).ifPresent(this::readAssisted);
+    maybeElements(roundEnv, InjectorTargetPrism.PRISM_TYPE).ifPresent(this::readInjectorTargets);
+    maybeElements(roundEnv, InjectorTargetImportPrism.PRISM_TYPE).ifPresent(this::readImportedInjectorTargets);
 
     maybeElements(roundEnv, ServiceProviderPrism.PRISM_TYPE).ifPresent(this::registerSPI);
     maybeElements(roundEnv, PluginProvidesPrism.PRISM_TYPE).ifPresent(this::registerSPI);
@@ -311,6 +316,27 @@ public final class InjectProcessor extends AbstractProcessor {
         e.printStackTrace();
       }
     });
+  }
+
+  private void readInjectorTargets(Set<? extends Element> elements) {
+    for (var type : ElementFilter.typesIn(elements)) {
+      final boolean enablePreDestroy = InjectorTargetPrism.getInstanceOn(type).enablePreDestroy();
+      addInstanceInjector(type, null, enablePreDestroy);
+    }
+  }
+
+  private void readImportedInjectorTargets(Set<? extends Element> elements) {
+    for (var element : elements) {
+      final var prism = InjectorTargetImportPrism.getInstanceOn(element);
+      prism.value().stream()
+          .map(ProcessingContext::asElement)
+          .filter(Objects::nonNull)
+          .forEach(type -> addInstanceInjector(type, element, prism.enablePreDestroy()));
+    }
+  }
+
+  private void addInstanceInjector(TypeElement type, Element importElement, boolean enablePreDestroy) {
+    defaultScope.addInstanceInjector(new InstanceInjectorReader(type, importElement, enablePreDestroy));
   }
 
   private void readBeans(Set<? extends Element> beans) {

@@ -1,4 +1,3 @@
-import org.example.myapp.ConfigPropertiesPlugin;
 import org.example.myapp.MyServiceIface;
 import org.example.myapp.MyServiceImpl;
 
