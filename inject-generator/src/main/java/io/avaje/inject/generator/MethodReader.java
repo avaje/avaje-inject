@@ -72,8 +72,9 @@ final class MethodReader {
     this.factory = factory;
     this.element = element;
     if (bean != null) {
-      prototype = PrototypePrism.isPresent(element);
-      prototypePreDestroy = prototype && PrototypePrism.getInstanceOn(element).enablePreDestroy();
+      var prototypePrism = Util.prototype(element);
+      prototype = prototypePrism.isPresent();
+      prototypePreDestroy = prototypePrism.map(PrototypePrism::enablePreDestroy).orElse(false);
       primary = PrimaryPrism.isPresent(element);
       secondary = SecondaryPrism.isPresent(element);
       priority = Util.priority(element);
