@@ -43,6 +43,14 @@ final class DBeanScopeProxy implements BeanScope {
   }
 
   @Override
+  public <T> T inject(T instance) {
+    if (delegate != null) {
+      return delegate.inject(instance);
+    }
+    throw illegal("inject");
+  }
+
+  @Override
   public <T> T get(Class<T> type, String name) {
     if (delegate != null) {
       return delegate.get(type, name);

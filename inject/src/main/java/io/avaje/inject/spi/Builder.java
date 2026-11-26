@@ -171,6 +171,14 @@ public interface Builder {
   void addInjector(Consumer<Builder> injector);
 
   /**
+   * Register an injector for instances of the given type.
+   *
+   * @param type the target type
+   * @param injector the generated injector
+   */
+  <T> void addInstanceInjector(Class<T> type, InstanceInjector<T> injector);
+
+  /**
    * Get a dependency.
    */
   <T> T get(Class<T> cls);

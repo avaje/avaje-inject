@@ -51,6 +51,8 @@ final class Constants {
   static final String BEAN_FACTORY2 = "io.avaje.inject.spi.BeanFactory2";
   static final String BUILDER = "io.avaje.inject.spi.Builder";
   static final String DEPENDENCYMETA = "io.avaje.inject.spi.DependencyMeta";
+  static final String INSTANCEINJECTOR = "io.avaje.inject.spi.InstanceInjector";
+  static final String INSTANCEINJECTORMETA = "io.avaje.inject.spi.InstanceInjectorMeta";
   static final String MODULE = "io.avaje.inject.spi.AvajeModule";
   static final String GENERICTYPE = "io.avaje.inject.spi.GenericType";
 
