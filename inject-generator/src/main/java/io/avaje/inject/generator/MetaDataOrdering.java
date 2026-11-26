@@ -5,6 +5,7 @@ import static io.avaje.inject.generator.APContext.logWarn;
 import static io.avaje.inject.generator.ProcessingContext.elementMaybe;
 import static io.avaje.inject.generator.ProcessingContext.externallyProvided;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
 import static java.util.stream.Collectors.toList;
@@ -153,6 +154,50 @@ final class MetaDataOrdering {
         TypeElement element = elementMaybe(metaData.type());
         logError(element, "No dependency provided for %s on %s", dependency, metaData.type());
         missingDependencyTypes.add(dependency.name());
+      }
+    }
+  }
+
+  boolean hasMissingDependencies() {
+    return !missingDependencyTypes.isEmpty();
+  }
+
+  void validateInstanceInjectors(Collection<InstanceInjectorMetaData> injectors) {
+    for (InstanceInjectorMetaData injector : injectors) {
+      for (Dependency dependency : injector.dependsOn()) {
+        final String rawName = dependency.name();
+        final String softName = Util.trimQualifierSuffix(rawName);
+        if (dependency.isSoftDependency()) {
+          if (!softName.isEmpty() && !Util.isProvider(softName) && !Constants.BEANSCOPE.equals(softName)) {
+            autoSoftRequires.add(softName);
+          }
+          continue;
+        }
+        final String depName = Util.isProvider(rawName) ? Util.unwrapProvider(rawName) : rawName;
+        if (Constants.BEANSCOPE.equals(depName)) {
+          continue;
+        }
+        final ProviderList providerList = providers.get(depName.replace(", ", ","));
+        if (providerList != null) {
+          if (providerList.allConditional() && !softName.isEmpty()) {
+            autoSoftRequires.add(Util.trimQualifierSuffix(depName));
+          }
+          continue;
+        }
+        if (scopeInfo.providedByOther(dependency)) {
+          continue;
+        }
+        if (externallyProvided(depName)) {
+          autoRequires.add(depName);
+          injector.markWithExternalDependency(rawName);
+          continue;
+        }
+        final Element element =
+            injector.sourceElement() != null
+                ? injector.sourceElement()
+                : elementMaybe(injector.target());
+        logError(element, "No dependency provided for %s on %s", dependency, injector.target());
+        missingDependencyTypes.add(depName);
       }
     }
   }

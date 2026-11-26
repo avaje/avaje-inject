@@ -380,6 +380,11 @@ class BeanScopeBuilderTest {
     }
 
     @Override
+    public <T> T inject(T instance) {
+      return instance;
+    }
+
+    @Override
     public <T> T get(Class<T> type, String name) {
       return null;
     }

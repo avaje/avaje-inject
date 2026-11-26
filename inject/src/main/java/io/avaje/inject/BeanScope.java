@@ -99,6 +99,24 @@ public interface BeanScope extends AutoCloseable {
   }
 
   /**
+   * Inject dependencies into the given instance.
+   *
+   * <p>The type of the instance (or one of its superclasses) must be annotated with {@link
+   * InjectorTarget}. Injection fields are assigned, injection methods are invoked, and any
+   * {@code @PostConstruct} method runs on each call.
+   *
+   * <p>When the target enables it via {@link InjectorTarget#enablePreDestroy()}, the
+   * {@code @PreDestroy} or {@link AutoCloseable} cleanup is registered at most once per instance
+   * and invoked when this scope closes. This scope then holds a reference to the instance until it
+   * is closed.
+   *
+   * @param instance the instance to inject dependencies into
+   * @param <T> the type of the instance
+   * @return the instance with dependencies injected
+   */
+  <T> T inject(T instance);
+
+  /**
    * Return a single bean given the type.
    *
    * <pre>{@code
@@ -156,6 +174,15 @@ public interface BeanScope extends AutoCloseable {
   <T> Optional<T> getOptional(Class<T> type);
 
   /**
+   * Optionally return a single bean given the full generic type and empty if it is not found.
+   *
+   * @param type the generic type
+   */
+  default <T> Optional<T> getOptional(Type type) {
+    return getOptional(type, null);
+  }
+
+  /**
    * Optionally return a single bean given the type and name and empty if it is not found.
    *
    * @param type an interface or bean type
@@ -170,6 +197,15 @@ public interface BeanScope extends AutoCloseable {
    */
   default @Nullable <T> T getNullable(Class<T> type) {
     return getOptional(type).orElse(null);
+  }
+
+  /**
+   * Return a single bean given the full generic type and null if it is not found.
+   *
+   * @param type the generic type
+   */
+  default @Nullable <T> T getNullable(Type type) {
+    return this.<T>getOptional(type, null).orElse(null);
   }
 
   /**
