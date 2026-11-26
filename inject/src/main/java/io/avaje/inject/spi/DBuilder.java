@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ class DBuilder implements Builder {
 
   /** List of field injection closures. */
   private final List<Consumer<Builder>> injectors = new ArrayList<>();
+  private final Map<Class<?>, InstanceInjector<?>> instanceInjectors = new HashMap<>();
   /** The beans created and added to the scope during building. */
   protected final DBeanMap beanMap = new DBeanMap();
 
@@ -261,6 +263,14 @@ class DBuilder implements Builder {
   }
 
   @Override
+  public final <T> void addInstanceInjector(Class<T> type, InstanceInjector<T> injector) {
+    var existing = instanceInjectors.putIfAbsent(type, injector);
+    if (existing != null) {
+      throw new IllegalStateException("Duplicate InstanceInjector for " + type.getName());
+    }
+  }
+
+  @Override
   public final <T> Optional<T> getOptional(Class<T> type) {
     return optional(type, null);
   }
@@ -457,7 +467,15 @@ class DBuilder implements Builder {
   @Override
   public final BeanScope build(boolean withShutdownHook, long start) {
     runInjectors();
-    final var scope = new DBeanScope(withShutdownHook, preDestroy(), postConstruct, postConstructConsumers, beanMap, parent);
+    final var scope =
+        new DBeanScope(
+            withShutdownHook,
+            preDestroy(),
+            postConstruct,
+            postConstructConsumers,
+            beanMap,
+            instanceInjectors,
+            parent);
     if (beanScopeProxy != null) {
       beanScopeProxy.inject(scope);
     }

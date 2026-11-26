@@ -737,13 +737,31 @@ final class MethodReader {
     }
 
     void builderGetDependency(Append writer, String builderName) {
+      writeGetDependency(writer, builderName, utilType.getMethod(nullable, isBeanMap));
+    }
+
+    void scopeGetDependency(Append writer, String scopeName) {
+      writer.append(utilType.scopePrefix());
+      writeGetDependency(writer, scopeName, utilType.scopeMethod(nullable, isBeanMap));
+      writer.append(utilType.scopeSuffix());
+    }
+
+    boolean isSet() {
+      return utilType.isSet();
+    }
+
+    boolean isNamedQualifiedMap() {
+      return isBeanMap && named != null && !named.isEmpty();
+    }
+
+    private void writeGetDependency(Append writer, String target, String method) {
       final boolean wildcard = isWildcard();
       final var wildParam = wildcard ? String.format("<%s>", genericType.shortWithoutAnnotations()) : "";
       writer
-        .append(builderName)
+        .append(target)
         .append(".")
         .append(wildParam)
-        .append(utilType.getMethod(nullable, isBeanMap));
+        .append(method);
       if (!genericType.isGeneric() || wildcard) {
         writer.append(Util.shortName(genericType.mainType())).append(".class");
       } else {
@@ -788,6 +806,13 @@ final class MethodReader {
 
     Dependency dependsOn() {
       return new Dependency(isWildcard() ? genericType.mainType() : paramType, named, utilType.isCollection());
+    }
+
+    Dependency injectorDependsOn() {
+      return new Dependency(
+          isWildcard() ? genericType.mainType() : paramType,
+          named,
+          nullable || isBeanMap || utilType.isCollection() || utilType.isOptional());
     }
 
     void addImports(ImportTypeMap importTypes) {
