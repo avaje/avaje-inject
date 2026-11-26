@@ -2,6 +2,7 @@ package io.avaje.inject.test;
 
 import io.avaje.applog.AppLog;
 import io.avaje.inject.BeanScope;
+import io.avaje.inject.spi.AvajeModule;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.io.Closeable;
@@ -61,14 +62,21 @@ final class GlobalTestBeans implements Closeable {
    */
   static final class Beans {
 
-    private final Plugin.Scope plugin;
+    private final ReentrantLock allBeansLock = new ReentrantLock();
+
+    private Plugin.Scope plugin;
 
     /**
      * Entire application wired (with testScope as parent replacing those beans).
      * This can be used when a test only injects beans and there are no mocks,
      * spies, or setup methods.
+     * <p>
+     * Wired lazily on first use as a test using {@code @InjectTest(modules = ...)}
+     * only wires the modules it selects and never uses this.
+     * <p>
+     * When {@code @TestModules} is specified, only those modules are wired.
      */
-    private final BeanScope allBeans;
+    private BeanScope allBeans;
 
     /**
      * The TestScope beans, used as the parent scope when a new BeanScope
@@ -76,10 +84,22 @@ final class GlobalTestBeans implements Closeable {
      */
     private final BeanScope baseBeans;
 
-    Beans(Plugin.Scope plugin, BeanScope allBeans, BeanScope baseBeans) {
+    /**
+     * The default modules to wire as specified via {@code @TestModules}. When empty,
+     * all the modules on the classpath are wired.
+     */
+    private final Class<? extends AvajeModule>[] defaultModules;
+
+    Beans(BeanScope baseBeans, Class<? extends AvajeModule>[] defaultModules) {
+      this.baseBeans = baseBeans;
+      this.defaultModules = defaultModules;
+    }
+
+    Beans(Plugin.Scope plugin, BeanScope allBeans, BeanScope baseBeans, Class<? extends AvajeModule>[] defaultModules) {
       this.plugin = plugin;
       this.allBeans = allBeans;
       this.baseBeans = baseBeans;
+      this.defaultModules = defaultModules;
     }
 
     void close() {
@@ -95,19 +115,47 @@ final class GlobalTestBeans implements Closeable {
     }
 
     Plugin.Scope allPlugin() {
-      return plugin;
+      allBeansLock.lock();
+      try {
+        initAllBeans();
+        return plugin;
+      } finally {
+        allBeansLock.unlock();
+      }
     }
 
     BeanScope allBeans() {
-      return allBeans;
+      allBeansLock.lock();
+      try {
+        initAllBeans();
+        return allBeans;
+      } finally {
+        allBeansLock.unlock();
+      }
+    }
+
+    private void initAllBeans() {
+      if (allBeans == null) {
+        log.log(DEBUG, "Wiring all beans for the test BeanScope");
+        var builder = BeanScope.builder().parent(baseBeans, false);
+        if (defaultModules.length > 0) {
+          builder.modules(SelectedModules.instances(defaultModules));
+        }
+        allBeans = builder.build();
+        plugin = PluginMgr.scope(allBeans);
+      }
     }
 
     BeanScope baseBeans() {
       return baseBeans;
     }
 
+    Class<? extends AvajeModule>[] defaultModules() {
+      return defaultModules;
+    }
+
     Beans withBeans(TestBeans otherBeans) {
-      return new Beans(otherBeans.plugin(), otherBeans.beanScope(), baseBeans);
+      return new Beans(otherBeans.plugin(), otherBeans.beanScope(), baseBeans, defaultModules);
     }
 
     @Override
