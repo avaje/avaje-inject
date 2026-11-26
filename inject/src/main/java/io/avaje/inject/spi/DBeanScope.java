@@ -28,6 +28,8 @@ final class DBeanScope implements BeanScope {
   private final List<Consumer<BeanScope>> postConstructConsumers;
   private final Deque<ClosePair> preDestroy;
   private final DBeanMap beans;
+  private final Map<Class<?>, InstanceInjector<?>> instanceInjectors;
+  private final Set<Object> injectedInstances = Collections.newSetFromMap(new IdentityHashMap<>());
   private final @Nullable ShutdownHook shutdownHook;
   private final @Nullable BeanScope parent;
   private boolean shutdown;
@@ -39,11 +41,13 @@ final class DBeanScope implements BeanScope {
       List<Runnable> postConstruct,
       List<Consumer<BeanScope>> postConstructConsumers,
       DBeanMap beans,
+      Map<Class<?>, InstanceInjector<?>> instanceInjectors,
       @Nullable BeanScope parent) {
     this.preDestroy = deque;
     this.postConstruct = postConstruct;
     this.postConstructConsumers = postConstructConsumers;
     this.beans = beans;
+    this.instanceInjectors = Map.copyOf(instanceInjectors);
     this.parent = parent;
     if (withShutdownHook) {
       this.shutdownHook = new ShutdownHook(this);
@@ -88,6 +92,57 @@ final class DBeanScope implements BeanScope {
   @Override
   public <T> T get(Class<T> type) {
     return getByType(type, null);
+  }
+
+  @Override
+  public <T> T inject(T instance) {
+    Objects.requireNonNull(instance, "instance");
+    lock.lock();
+    try {
+      if (closed) {
+        throw new IllegalStateException("BeanScope is closed");
+      }
+
+      final var injector = findInstanceInjector(instance.getClass());
+      if (injector == null) {
+        if (parent != null && !(parent instanceof DBeanScope)) {
+          return parent.inject(instance);
+        }
+        throw new NoSuchElementException("No InstanceInjector found for type: " + instance.getClass().getName());
+      }
+      injectInstance(injector, instance);
+      if (injector.hasPreDestroy() && injectedInstances.add(instance)) {
+        addInstancePreDestroy(injector, instance);
+      }
+      return instance;
+    } finally {
+      lock.unlock();
+    }
+  }
+
+  private @Nullable InstanceInjector<?> findInstanceInjector(Class<?> type) {
+    for (Class<?> candidate = type; candidate != null && candidate != Object.class;
+        candidate = candidate.getSuperclass()) {
+      final var injector = instanceInjectors.get(candidate);
+      if (injector != null) {
+        return injector;
+      }
+    }
+    if (parent instanceof DBeanScope) {
+      return ((DBeanScope) parent).findInstanceInjector(type);
+    }
+    return null;
+  }
+
+  @SuppressWarnings("unchecked")
+  private <T> void injectInstance(InstanceInjector<?> injector, T instance) {
+    ((InstanceInjector<T>) injector).inject(instance, this);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <T> void addInstancePreDestroy(InstanceInjector<?> injector, T instance) {
+    final var typedInjector = (InstanceInjector<T>) injector;
+    preDestroy.addFirst(new ClosePair(typedInjector.preDestroyPriority(), () -> typedInjector.preDestroy(instance)));
   }
 
   @Override
